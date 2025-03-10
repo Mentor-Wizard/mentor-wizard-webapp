@@ -27,5 +27,10 @@
     "packageManager": "yarn@4.6.0",
     "engines": {
         "yarn": ">= 4.6.0"
+    },
+    "dependencies": {
+        "@headlessui/vue": "^1.7.23",
+        "@heroicons/vue": "^2.2.0",
+        "ziggy-js": "^2.5.2"
     }
 }

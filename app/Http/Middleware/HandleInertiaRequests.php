@@ -39,6 +39,8 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            "navigation"=>config("websitesettings.navigationSections"),
+            "userNavigation"=>config("websitesettings.userNavigationSections")
         ];
     }
 }
