@@ -1071,7 +1071,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.0, axios@npm:^1.8.1":
+"axios@npm:^1.6.0":
   version: 1.8.1
   resolution: "axios@npm:1.8.1"
   dependencies:
@@ -1079,6 +1079,17 @@ __metadata:
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10c0/b2e1d5a61264502deee4b50f0a6df0aa3b174c546ccf68c0dff714a2b8863232e0bd8cb5b84f853303e97f242a98260f9bb9beabeafe451ad5af538e9eb7ac22
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.8.2":
+  version: 1.8.3
+  resolution: "axios@npm:1.8.3"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.0"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/de75da9859adf0a6481d4af2b687db357a054d20f0d69b99d502b71dae3578326b1fdc0951dabaef769827484941cda93d3f89150bf9e04f05f6615fb8316780
   languageName: node
   linkType: hard
 
@@ -2767,7 +2778,7 @@ __metadata:
     "@tailwindcss/vite": "npm:^4.0.9"
     "@vitejs/plugin-vue": "npm:^5.2.1"
     "@vue/server-renderer": "npm:^3.5.13"
-    axios: "npm:^1.8.1"
+    axios: "npm:^1.8.2"
     chokidar: "npm:^4.0.3"
     commitlint: "npm:^19.7.1"
     concurrently: "npm:^9.1.2"
