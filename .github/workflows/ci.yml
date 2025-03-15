@@ -108,7 +108,7 @@ jobs:
         command:
           - {
             name: '🧬 Pest',
-            command: ./vendor/bin/pest --coverage --parallel --coverage-cobertura=coverage/coverage.xml --coverage-clover=coverage/coverage-clover.xml --coverage-html=coverage
+            command: ./vendor/bin/pest --coverage --parallel --coverage-clover coverage/coverage-clover.xml
           }
           - {
             name: '🦠 Mutation',
@@ -140,6 +140,7 @@ jobs:
           slug: AratKruglik/mentor-wizard-webapp
           flags: ${{ matrix.command.name }}
           directory: ./coverage
+          files: ./coverage/coverage-clover.xml
 
       - name: '☂️ Upload test results to Codecov'
         if: ${{ !cancelled() }}
@@ -148,3 +149,4 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.command.name }}
           directory: ./coverage
+          fail_ci_if_error: true
