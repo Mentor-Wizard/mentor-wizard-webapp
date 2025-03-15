@@ -32,10 +32,10 @@
         <env name="TELESCOPE_ENABLED" value="true"/>
         <env name="LOG_CHANNEL" value="stderr"/>
     </php>
-     <coverage processUncoveredFiles="true">
+     <coverage>
         <report>
             <html outputDirectory="coverage"/>
-            <clover outputFile="coverage/coverage.xml"/>
+            <clover outputFile="coverage/coverage-clover.xml"/>
         </report>
      </coverage>
 </phpunit>
