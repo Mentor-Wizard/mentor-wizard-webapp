@@ -141,6 +141,9 @@ jobs:
           flags: ${{ matrix.command.name }}
           directory: ./coverage
           files: ./coverage/coverage-clover.xml
+          verbose: true
+          name: codecov-report
+          commit_parent: ${{ github.event.pull_request.base.sha }}
 
       - name: '☂️ Upload test results to Codecov'
         if: ${{ !cancelled() }}
