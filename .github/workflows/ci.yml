@@ -59,7 +59,7 @@ jobs:
         command:
           - {
             name: '🔍 PHPStan',
-            command: './vendor/bin/phpstan analyse --memory-limit=2G --error-format=json > phpstan.json || true',
+            command: './vendor/bin/phpstan analyse --error-format=github --memory-limit=2G || true',
             php: true,
             node: false,
           }
