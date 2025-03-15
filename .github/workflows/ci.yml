@@ -17,6 +17,8 @@ on:
     paths-ignore:
       - README.md
 
+  workflow_dispatch:
+
 jobs:
   cleanup:
     name: '🧹 Clean up GitHub repo'
