@@ -25,10 +25,10 @@ coverage:
       default:
         informational: true
 
-#flags:
-#  pest:
-#    paths:
-#      - tests/
-#    carryforward: false
-#
-#codecov_yml_version: 2.1
+flags:
+  pest:
+    paths:
+      - tests/
+    carryforward: false
+
+codecov_yml_version: 2.1
