@@ -59,13 +59,13 @@ jobs:
         command:
           - {
             name: '🔍 PHPStan',
-            command: './vendor/bin/phpstan analyse --error-format=github --memory-limit=2G || true',
+            command: ./vendor/bin/phpstan analyse --error-format=github --memory-limit=2G || true,
             php: true,
             node: false,
           }
           - {
             name: '🧽 Laravel Pint',
-            command: ./vendor/bin/pint,
+            command: ./vendor/bin/pint --test --format=checkstyle | tail -n +2 | cs2pr,
             php: true,
             node: false,
           }

@@ -32,6 +32,7 @@ runs:
         php-version: ${{ inputs.php }}
         coverage: pcov
         extensions: pdo, pdo_pgsql
+        tools: cs2pr
 
     - name: '🗃 Get composer cache directory'
       id: composer-cache
