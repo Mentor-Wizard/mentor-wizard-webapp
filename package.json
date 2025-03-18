@@ -22,6 +22,7 @@
         "husky": "^9.1.7",
         "laravel-echo": "^2.0.2",
         "laravel-vite-plugin": "^1.2.0",
+        "pinia": "^3.0.1",
         "postcss": "^8.5.3",
         "pusher-js": "^8.4.0",
         "tailwindcss": "^4.0.9",

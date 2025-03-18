@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
+import MainPageText from "@/Components/MainPageText.vue";
 </script>
 
 <template>
@@ -8,7 +9,7 @@ import { Head } from "@inertiajs/vue3";
 
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="text-xl font-semibold leading-tight text-gray-800">Dashboard</h2>
+      <MainPageText title="Dashboard"/>
     </template>
 
     <div class="py-12">
