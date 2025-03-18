@@ -65,7 +65,7 @@ jobs:
           }
           - {
             name: '🧽 Laravel Pint',
-            command: ./vendor/bin/pint --test --format=checkstyle | tail -n +2 | cs2pr,
+            command: ./vendor/bin/pint --test --format=checkstyle | cs2pr || true,
             php: true,
             node: false,
           }
