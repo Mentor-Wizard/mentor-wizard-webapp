@@ -1,5 +1,5 @@
 <template>
-    <footer class="bg-gray-900 dark:bg-gray-700 dark:text-white'
+    <footer class="bg-gray-800 dark:bg-gray-700 dark:text-white'
 ">
         <div class="mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8">
             <nav class="-mb-6 flex flex-wrap justify-center gap-x-12 gap-y-3 text-sm/6" aria-label="Footer">
