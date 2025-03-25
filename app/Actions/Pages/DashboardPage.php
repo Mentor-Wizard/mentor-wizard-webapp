@@ -16,5 +16,4 @@ class DashboardPage
     {
         return Inertia::render('Dashboard');
     }
-
 }
