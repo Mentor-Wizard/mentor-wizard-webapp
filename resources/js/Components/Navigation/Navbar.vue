@@ -152,7 +152,6 @@ import {Link} from "@inertiajs/vue3"
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import {usePage, router} from '@inertiajs/vue3';
 import {reactive} from 'vue';
-import {route} from 'ziggy-js';
 
 const page = usePage();
 
