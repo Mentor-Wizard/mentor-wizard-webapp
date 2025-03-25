@@ -24,8 +24,6 @@ import Footer from "@/Components/Navigation/Footer.vue";
                 <slot />
             </main>
                 <Footer></Footer>
-        </div>
-      </main>
     </div>
   </div>
 </template>
