@@ -42,7 +42,7 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             "navigation" => config("websitesettings.navigationSections"),
-            "userNavigation" => config("websitesettings.userNavigationSections")
+            "userNavigation" => config("websitesettings.userNavigationSections"),
             'project' => [
                 'name' => config('app.name'),
             ],
