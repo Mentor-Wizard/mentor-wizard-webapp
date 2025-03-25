@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Socialite\SocialiteCallback;
 use App\Enums\SocialiteDriver;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
-use Symfony\Component\HttpFoundation\Response;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use Symfony\Component\HttpFoundation\Response;
 
 mutates(SocialiteCallback::class);
 
 describe('Socialite Authentication', function () {
 
-    beforeEach(function() {
+    beforeEach(function () {
         $this->seed(RoleSeeder::class);
     });
 
@@ -50,7 +52,7 @@ describe('Socialite Authentication', function () {
             ->once()
             ->andReturn($socialiteUser);
 
-       $this->get(route('auth.socialite.callback', ['driver' => $driver->value]))
+        $this->get(route('auth.socialite.callback', ['driver' => $driver->value]))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $this->assertDatabaseMissing('users', [

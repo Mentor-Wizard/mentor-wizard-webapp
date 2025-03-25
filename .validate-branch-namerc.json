@@ -1,4 +1,4 @@
 {
-    "pattern": "^main$|^develop$|^(feature|fix|hotfix|epic)/#[a-zA-Z0-9]+-[a-zA-Z0-9\\-_.]+$|^release/[0-9]+\\.[0-9]+\\.[0-9]+$",
+    "pattern": "^main$|^develop$|^(feature|fix|hotfix|epic)/[a-zA-Z0-9]+-[a-zA-Z0-9\\-_.]+$|^release/[0-9]+\\.[0-9]+\\.[0-9]+$",
     "errorMsg": "Branch name validate failed please rename your current branch"
 }

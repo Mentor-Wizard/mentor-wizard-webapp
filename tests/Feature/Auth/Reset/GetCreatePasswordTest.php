@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Register\GetRegistrationPage;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -31,7 +33,7 @@ describe('Password Reset Flow', function () {
 
         $response->assertSessionHas('status', trans(Password::RESET_LINK_SENT));
 
-        Notification::assertSentTo($user,ResetPassword::class);
+        Notification::assertSentTo($user, ResetPassword::class);
     });
 
     it('fails to send reset link for non-existent email', function () {
@@ -77,7 +79,7 @@ describe('Password Reset Flow', function () {
         $this->assertTrue(
             auth()->attempt([
                 'email' => $user->email,
-                'password' => 'new-password-123'
+                'password' => 'new-password-123',
             ])
         );
     });

@@ -7,14 +7,18 @@ database:
 php_version: '8.4'
 host_db_port: '33371'
 nodejs_version: '22'
-webserver_type: nginx-fpm
+webserver_type: generic
 xdebug_enabled: false
 corepack_enable: true
+ddev_version_constraint: '>= v1.24.3'
 webimage_extra_packages:
   - 'php${DDEV_PHP_VERSION}-swoole'
 web_extra_daemons:
   - name: 'octane'
-    command: 'php artisan octane:start --watch --host=0.0.0.0 --port=8000'
+    command: 'php artisan octane:start --host=0.0.0.0 --port=8000 --watch -q'
+    directory: /var/www/html
+  - name: 'reverb'
+    command: 'php artisan reverb:start --host=0.0.0.0 --port=8080 --debug'
     directory: /var/www/html
   - name: 'vite'
     command: 'yarn install && yarn dev'
@@ -22,8 +26,12 @@ web_extra_daemons:
 web_extra_exposed_ports:
   - name: 'octane'
     container_port: 8000
-    http_port: 8001
-    https_port: 8000
+    http_port: 80
+    https_port: 443
+  - name: 'reverb'
+    container_port: 8080
+    http_port: 8080
+    https_port: 8443
   - name: 'vite'
     container_port: 5173
     http_port: 5172

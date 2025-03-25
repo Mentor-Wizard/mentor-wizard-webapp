@@ -15,14 +15,14 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 /**
  * @mixin IdeHelperUserProfile
  */
-
 class UserProfile extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory;
+    use InteractsWithMedia;
 
-    const int PREVIEW_HEIGHT = 300;
+    public const int PREVIEW_HEIGHT = 300;
 
-    const int PREVIEW_WIDTH = 300;
+    public const int PREVIEW_WIDTH = 300;
 
     protected $fillable = [
         'user_id',

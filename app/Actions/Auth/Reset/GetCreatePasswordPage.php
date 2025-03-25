@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Auth\Reset;
 
 use Illuminate\Http\Request;

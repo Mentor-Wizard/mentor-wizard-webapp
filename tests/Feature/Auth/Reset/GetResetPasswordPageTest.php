@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 
 describe('Password Reset Feature Test', function () {
     beforeEach(function () {
@@ -14,11 +16,11 @@ describe('Password Reset Feature Test', function () {
 
     it('sends a password reset email', function () {
         $user = User::factory()->create([
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         $this->post(route('password.email'), [
-            'email' => $user->email
+            'email' => $user->email,
         ])->assertSessionHas('status');
 
         Notification::assertSentTo($user, ResetPassword::class);
@@ -26,7 +28,7 @@ describe('Password Reset Feature Test', function () {
 
     it('does not send an email for a non-existent email', function () {
         $this->post(route('password.email'), [
-            'email' => 'nonexistent@example.com'
+            'email' => 'nonexistent@example.com',
         ])->assertSessionHasErrors('email');
 
         Notification::assertNothingSent();
@@ -35,7 +37,7 @@ describe('Password Reset Feature Test', function () {
     it('resets the password successfully', function () {
         $user = User::factory()->create([
             'email' => 'reset@example.com',
-            'password' => bcrypt('oldpassword')
+            'password' => bcrypt('oldpassword'),
         ]);
         $token = Password::broker()->createToken($user);
 
@@ -43,12 +45,12 @@ describe('Password Reset Feature Test', function () {
             'token' => $token,
             'email' => $user->email,
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ])->assertRedirect(route('login'));
 
         expect(Auth::attempt([
             'email' => $user->email,
-            'password' => 'newpassword123'
+            'password' => 'newpassword123',
         ]))->toBeTrue();
     });
 });

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\Profile\DestroyProfilePage;
 use App\Actions\Pages\Profile\GetProfilePage;

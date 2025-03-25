@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\VerificationEmailPrompt;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -18,7 +20,7 @@ describe('VerificationEmailPrompt Unit Test', function () {
         session(['status' => $status]);
 
         $user = User::factory()->create([
-            'email_verified_at' => null
+            'email_verified_at' => null,
         ]);
 
         $request = Mockery::mock(Request::class);
@@ -26,7 +28,7 @@ describe('VerificationEmailPrompt Unit Test', function () {
             ->once()
             ->andReturn($user);
 
-        $action = new VerificationEmailPrompt();
+        $action = new VerificationEmailPrompt;
         $result = $action->handle($request);
         $resultData = $result->toResponse(request())->getOriginalContent();
 
@@ -40,7 +42,7 @@ describe('VerificationEmailPrompt Unit Test', function () {
 
     it('renders verify email page with null status when no status in session', function () {
         $user = User::factory()->create([
-            'email_verified_at' => null
+            'email_verified_at' => null,
         ]);
 
         $request = Mockery::mock(Request::class);
@@ -48,7 +50,7 @@ describe('VerificationEmailPrompt Unit Test', function () {
             ->once()
             ->andReturn($user);
 
-        $action = new VerificationEmailPrompt();
+        $action = new VerificationEmailPrompt;
         $result = $action->handle($request);
         $resultData = $result->toResponse(request())->getOriginalContent();
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Database\Factories\MentorSessionFactory;
@@ -57,7 +59,7 @@ class MentorSession extends Model
     {
         return $this->hasOne(Payment::class);
     }
-    
+
     public function mentorSessionNote(): HasOne
     {
         return $this->hasOne(MentorSessionNote::class);

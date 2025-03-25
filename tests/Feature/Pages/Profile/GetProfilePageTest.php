@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -11,7 +13,7 @@ describe('Profile Page', function () {
 
         $this->actingAs($user)
             ->get(route('profile.edit'))
-            ->assertInertia(fn(Assert $page) => $page
+            ->assertInertia(fn (Assert $page) => $page
                 ->component('Profile/Edit')
                 ->has('mustVerifyEmail')
                 ->where('status', null)

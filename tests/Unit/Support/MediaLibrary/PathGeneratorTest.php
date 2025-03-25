@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\UserProfile;
 use App\Support\MediaLibrary\PathGenerator;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -13,7 +15,7 @@ describe('MediaLibrary PathGenerator', function () {
 
         config()->set('media-library.prefix', 'uploads');
 
-        $pathGenerator = new PathGenerator();
+        $pathGenerator = new PathGenerator;
         $basePath = $pathGenerator->getPath($media);
 
         expect($basePath)->toBe('uploads/UserProfile/123/');
@@ -24,7 +26,7 @@ describe('MediaLibrary PathGenerator', function () {
 
         config()->set('media-library.prefix', 'media');
 
-        $pathGenerator = new PathGenerator();
+        $pathGenerator = new PathGenerator;
         $conversionPath = $pathGenerator->getPathForConversions($media);
 
         expect($conversionPath)->toBe('media/UserProfile/456/conversions/');
@@ -35,7 +37,7 @@ describe('MediaLibrary PathGenerator', function () {
 
         config()->set('media-library.prefix', 'storage');
 
-        $pathGenerator = new PathGenerator();
+        $pathGenerator = new PathGenerator;
         $responsivePath = $pathGenerator->getPathForResponsiveImages($media);
 
         expect($responsivePath)->toBe('storage/UserProfile/789/responsive-images/');
@@ -46,13 +48,14 @@ describe('MediaLibrary PathGenerator', function () {
 
         config()->set('media-library.prefix', '');
 
-        $pathGenerator = new PathGenerator();
+        $pathGenerator = new PathGenerator;
         $basePath = $pathGenerator->getPath($media);
 
         expect($basePath)->toBe('UserProfile/100/');
     });
 
-    function createMediaMock(int $id, string $modelType): Media {
+    function createMediaMock(int $id, string $modelType): Media
+    {
         $media = Mockery::mock(Media::class)
             ->makePartial()
             ->shouldAllowMockingProtectedMethods();

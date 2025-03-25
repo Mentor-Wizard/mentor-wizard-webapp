@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Pages\WelcomePage;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\RouteCollection;
@@ -24,7 +26,7 @@ describe('WelcomePage Action', function () {
 
         Route::shouldReceive('getRoutes')->andReturn($mockRouteCollection);
 
-        $action = new WelcomePage();
+        $action = new WelcomePage;
         $result = $action->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();
 

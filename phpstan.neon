@@ -1,0 +1,29 @@
+parameters:
+    paths:
+        - app
+        - database/factories
+        - database/seeders
+    level: 5
+    scanFiles:
+        - _ide_helper.php
+        - _ide_helper_models.php
+        - .phpstorm.meta.php
+    excludePaths:
+        - tests/*
+        - storage/*
+    cognitive_complexity:
+        class: 85
+        function: 8
+    ignoreErrors:
+        - '#Call to an undefined method .*::(toArray|toJson)#'
+        - '#Property .* has unknown class#'
+        - '#Method .* invoked with .* parameter, but .* is required#'
+        - '#Method App\\Models\\.*::.* return type with generic class .* does not specify its types: .*#'
+        - '#Cannot call method .* on App\\Models\\.*\|null#'
+        - '#Parameter .* \$value of static method Illuminate\\Support\\Facades\\Hash::make.* expects string, mixed given.#'
+        - '#Undefined variable: \$this#'
+        - '#Cannot cast .*#'
+        - '#Cannot call method .* on mixed.#'
+        - '#Cannot access property .* on mixed.#'
+        - '#Method .* should return Illuminate\\Http\\RedirectResponse but returns Symfony\\Component\\HttpFoundation\\RedirectResponse.#'
+

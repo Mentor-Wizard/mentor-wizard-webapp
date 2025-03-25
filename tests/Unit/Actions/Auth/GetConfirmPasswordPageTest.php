@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\GetConfirmPasswordPage;
 use Inertia\Response;
 
@@ -7,7 +9,7 @@ mutates(GetConfirmPasswordPage::class);
 
 describe('GetConfirmPasswordPage Unit Test', function () {
     it('should render the ConfirmPassword page', function () {
-        $result = new GetConfirmPasswordPage();
+        $result = new GetConfirmPasswordPage;
 
         $result = $result->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();

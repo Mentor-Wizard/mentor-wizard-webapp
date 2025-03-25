@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support\MediaLibrary;
 
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -12,7 +14,7 @@ class PathGenerator implements BasePathGenerator
      */
     public function getPath(Media $media): string
     {
-        return $this->getBasePath($media) . '/';
+        return $this->getBasePath($media).'/';
     }
 
     /*
@@ -20,7 +22,7 @@ class PathGenerator implements BasePathGenerator
      */
     public function getPathForConversions(Media $media): string
     {
-        return $this->getBasePath($media) . '/conversions/';
+        return $this->getBasePath($media).'/conversions/';
     }
 
     /*
@@ -28,7 +30,7 @@ class PathGenerator implements BasePathGenerator
      */
     public function getPathForResponsiveImages(Media $media): string
     {
-        return $this->getBasePath($media) . '/responsive-images/';
+        return $this->getBasePath($media).'/responsive-images/';
     }
 
     /*
@@ -41,5 +43,4 @@ class PathGenerator implements BasePathGenerator
 
         return ltrim("{$prefix}/{$className}/{$media->getKey()}", '/');
     }
-
 }

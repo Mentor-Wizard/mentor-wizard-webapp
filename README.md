@@ -1,5 +1,7 @@
-[![coverage report](https://gitlab.com/mentor-wizard/mentor-wizard-webapp/badges/develop/coverage.svg)](https://gitlab.com/mentor-wizard/mentor-wizard-webapp/-/commits/develop)
-[![pipeline status](https://gitlab.com/mentor-wizard/mentor-wizard-webapp/badges/develop/pipeline.svg)](https://gitlab.com/mentor-wizard/mentor-wizard-webapp/-/commits/develop) [![Latest Release](https://gitlab.com/mentor-wizard/mentor-wizard-webapp/-/badges/release.svg)](https://gitlab.com/mentor-wizard/mentor-wizard-webapp/-/releases)
+![Release](https://img.shields.io/github/v/release/Mentor-Wizard/mentor-wizard-webapp)
+![Build](https://github.com/Mentor-Wizard/mentor-wizard-webapp/actions/workflows/ci.yml/badge.svg?branch=develop)
+![Contributors](https://img.shields.io/github/contributors/Mentor-Wizard/mentor-wizard-webapp?branch=develop)
+
 
 # Mentor Wizard
 
@@ -8,7 +10,7 @@ Mentor Wizard - це сучасний веб-застосунок, розроб�
 ## Вимоги
 
 Для розгортання проєкту локально на вашому комп'ютері необхідно мати:
-- PHP v8.3 або новішу версію
+- PHP v8.4 або новішу версію
 - Composer
 - PostgreSQL
 - Redis
@@ -23,7 +25,7 @@ Mentor Wizard - це сучасний веб-застосунок, розроб�
 Склонуйте репозиторій проєкту:
 
 ```bash
-git clone git@gitlab.com:mentor-wizard/mentor-wizard-webapp.git
+git clone git@github.com:Mentor-Wizard/mentor-wizard-webapp.git
 cd mentor-wizard-webapp
 ```
 
@@ -165,7 +167,7 @@ docker compose exec app php artisan test --mutate --covered-only --min=100 --par
 ### Інсталяція
 
 - Запуск DDEV. Це збілдить всі неодхідні конетйнери згідно налаштувань у
-  `.ddev/config.yaml`
+  [`.ddev/config.yaml`](.ddev/config.yaml)
 
     ```sh
     ddev start
@@ -177,19 +179,25 @@ docker compose exec app php artisan test --mutate --covered-only --min=100 --par
     ddev artisan key:generate; ddev artisan migrate
     ```
 
-- Встановлення `Node.js` залежностей:
+- Для коректної роботи `octane` та `reverb` налаштуйте наступні змінні у [`.env`](.env):
 
-    ```sh
-    ddev yarn install
+    ```dotenv
+    OCTANE_HTTPS=true
+
+    REVERB_HOST=${DDEV_HOSTNAME}
+    REVERB_PORT=8443
+    REVERB_SCHEME=https
     ```
 
 ### Тестування
 
-- Для запуску тестування потрбіно увімкнути XDebug (він вимкнений за замовчуванням):
+- Для запуску тестування потрбіно увімкнути `Xdebug` (він вимкнений за замовчуванням):
 
     ```sh
     ddev xdebug on
     ```
+
+## Найменування
 
 ### Назви гілок
 Вимоги описані у файлі
@@ -198,8 +206,7 @@ docker compose exec app php artisan test --mutate --covered-only --min=100 --par
 .validate-branch-namerc.json
 ```
 Автовалідація імен гілок Git перед пушем їх у віддалений репозиторій
-[validate-branch-name](https://www.npmjs.com/package/validate-branch-name
-) package
+[validate-branch-name](https://www.npmjs.com/package/validate-branch-name) package
 
 ### Конвенція для комітів
 Кожне повідомлення коміту має відповідати [конвенції комітів](https://www.conventionalcommits.org/).

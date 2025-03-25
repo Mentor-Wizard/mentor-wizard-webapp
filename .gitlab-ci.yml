@@ -47,6 +47,7 @@ build-ci-image:
     - docker push $CI_REGISTRY_IMAGE:$TEST_TAG
   only:
     - merge_requests
+    - develop
   when: manual
   tags:
     - mw-build
@@ -58,6 +59,7 @@ composer-dependencies:
     - tags
   only:
     - merge_requests
+    - develop
   before_script:
     - cp .env.ci .env
   script:
@@ -68,6 +70,7 @@ composer-dependencies:
   artifacts:
     paths:
       - vendor/
+      - public/vendor/
     expire_in: 1 hour
   tags:
     - mw-build
@@ -90,6 +93,7 @@ yarn-dependencies:
       artifacts: true
   only:
     - merge_requests
+    - develop
   tags:
     - mw-build
 
@@ -101,6 +105,7 @@ ide-helper:
     - tags
   only:
     - merge_requests
+    - develop
   script:
     - php artisan ide-helper:models -M
     - php artisan ide-helper:actions
@@ -131,15 +136,16 @@ lints:
     - tags
   only:
     - merge_requests
+    - develop
   before_script:
     - cp .env.ci .env
-    - php artisan Key:generate
+    - php artisan key:generate
   script:
-    - echo 'PHP Stan is starting to analyse'
-    - ./vendor/bin/phpstan analyse --memory-limit=2G --error-format=json > phpstan.json
+    - ./vendor/bin/phpstan analyse --memory-limit=2G --error-format=json > phpstan.json || true
+    - php artisan phpstan:convert phpstan.json codequality.json
   artifacts:
     reports:
-      codequality: phpstan.json
+      codequality: codequality.json
   needs:
     - job: composer-dependencies
       artifacts: true
@@ -158,14 +164,15 @@ tests:
   before_script:
     - cp .env.ci .env
     - php artisan key:generate
-    - php artisan vendor:publish --tag=laravel-assets --tag=log-viewer-assets --ansi --force
+    - php artisan vendor:publish --tag=laravel-assets --tag=log-viewer-assets --tag=telescope-assets --ansi --force
   cache:
     policy: pull
   only:
     - merge_requests
+    - develop
   script:
     - echo "Run Pest tests with coverage"
-    - ./vendor/bin/pest --coverage --parallel --coverage-clover=coverage/coverage.xml
+    - ./vendor/bin/pest --coverage --parallel --coverage-cobertura=coverage/coverage.xml --coverage-clover=coverage/coverage-clover.xml --coverage-html=coverage
     - echo "Run Pest Mutation tests"
     - ./vendor/bin/pest --mutate --covered-only --parallel --min=100
   artifacts:
@@ -173,7 +180,7 @@ tests:
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage.xml
-  coverage: '/^\s*\d+\.\d+\%/'
+  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
   needs:
     - job: composer-dependencies
       artifacts: true

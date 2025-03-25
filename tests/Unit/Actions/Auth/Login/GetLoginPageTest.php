@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Login\GetLoginPage;
 use Illuminate\Routing\RouteCollection;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Inertia\Response;
-use Illuminate\Support\Arr;
 
 mutates(GetLoginPage::class);
 
@@ -22,7 +24,7 @@ describe('GetLoginPage Action', function () {
 
         session(['status' => 'test_message']);
 
-        $action = new GetLoginPage();
+        $action = new GetLoginPage;
         $result = $action->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();
 
@@ -46,7 +48,7 @@ describe('GetLoginPage Action', function () {
 
         session(['status' => 'test_message']);
 
-        $action = new GetLoginPage();
+        $action = new GetLoginPage;
         $result = $action->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();
 

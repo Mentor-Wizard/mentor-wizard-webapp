@@ -1,7 +1,7 @@
 <?php
 
-use App\Actions\Auth\Register\GetRegistrationPage;
-use App\Actions\Auth\Register\Registration;
+declare(strict_types=1);
+
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Symfony\Component\HttpFoundation\Response;

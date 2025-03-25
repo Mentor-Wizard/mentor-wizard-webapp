@@ -90,6 +90,18 @@ services:
             timeout: 10s
             retries: 2
 
+    websockets:
+        <<: *app
+        container_name: mw-websockets
+        environment:
+            COMMAND: php artisan reverb:start --host="0.0.0.0" --port=8080 --hostname="localhost" --debug
+            PROCESS: reverb
+        ports:
+            - "8080:8080"
+        networks:
+            - mw-db-network
+            - mw-redis-network
+
     webserver:
         image: nginx:1.26.0-alpine
         container_name: mw-webserver

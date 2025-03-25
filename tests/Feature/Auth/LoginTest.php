@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,4 +53,3 @@ describe('Get Login Page', function () {
         expect(Auth::check())->toBeFalse();
     });
 });
-

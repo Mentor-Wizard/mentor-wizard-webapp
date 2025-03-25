@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Currency;
@@ -20,7 +22,7 @@ class PaymentFactory extends Factory
     {
         return [
             'order_reference' => fake()->sentence(20),
-            'amount' => fake()->numberBetween(1,100),
+            'amount' => fake()->numberBetween(1, 100),
             'currency' => Currency::factory(),
             'transaction_status' => fake()->sentence(20),
             'reason' => fake()->sentence(20),

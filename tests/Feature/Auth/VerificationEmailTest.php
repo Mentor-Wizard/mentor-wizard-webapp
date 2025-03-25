@@ -1,14 +1,13 @@
 <?php
 
-use App\Actions\Auth\VerificationEmailNotification;
-use App\Actions\Auth\VerificationEmailPrompt;
-use App\Actions\Auth\VerifyEmail;
+declare(strict_types=1);
+
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Auth\Notifications\VerifyEmail as IlluminateVerifyEmail;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\Response;
+
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
@@ -53,11 +52,11 @@ describe('Failure Scenarios', function () {
 
         Notification::assertSentTo($user, IlluminateVerifyEmail::class, function (IlluminateVerifyEmail $notification) use ($user) {
             $verificationUrl = $notification->toMail($user)->actionUrl;
-            $response = $this->get($verificationUrl . hash('md2', 'test_wrong'));
+            $response = $this->get($verificationUrl.hash('md2', 'test_wrong'));
             $response->assertStatus(Response::HTTP_FORBIDDEN);
             $user->refresh();
 
-            return !$user->hasVerifiedEmail();
+            return ! $user->hasVerifiedEmail();
         });
     });
 });

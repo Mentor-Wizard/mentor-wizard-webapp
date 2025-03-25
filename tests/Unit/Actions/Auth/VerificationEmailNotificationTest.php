@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\VerificationEmailNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ describe('VerificationEmailNotification', function () {
         $request = Mockery::mock(Request::class);
         $request->shouldReceive('user')->once()->andReturn($user);
 
-        $action = new VerificationEmailNotification();
+        $action = new VerificationEmailNotification;
 
         $response = $action->handle($request);
 
@@ -30,7 +32,7 @@ describe('VerificationEmailNotification', function () {
         $request = Mockery::mock(Request::class);
         $request->shouldReceive('user')->twice()->andReturn($user);
 
-        $action = new VerificationEmailNotification();
+        $action = new VerificationEmailNotification;
 
         $response = $action->handle($request);
 

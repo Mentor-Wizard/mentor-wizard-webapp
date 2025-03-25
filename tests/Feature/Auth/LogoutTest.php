@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use Database\Seeders\RoleSeeder;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 

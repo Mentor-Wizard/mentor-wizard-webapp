@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
@@ -41,6 +43,9 @@ class HandleInertiaRequests extends Middleware
             ],
             "navigation" => config("websitesettings.navigationSections"),
             "userNavigation" => config("websitesettings.userNavigationSections")
+            'project' => [
+                'name' => config('app.name'),
+            ],
         ];
     }
 }
