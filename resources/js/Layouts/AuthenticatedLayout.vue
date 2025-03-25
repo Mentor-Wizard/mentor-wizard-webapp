@@ -1,12 +1,7 @@
 <script setup>
-import { ref } from 'vue';
-
 import Navbar from "@/Components/Navigation/Navbar.vue";
 import Footer from "@/Components/Navigation/Footer.vue";
-
-const showingNavigationDropdown = ref(false);
 </script>
-
 <template>
     <div>
         <div class="min-h-screen bg-gray-100">
@@ -24,12 +19,10 @@ const showingNavigationDropdown = ref(false);
                     <slot name="header" />
                 </div>
             </header>
-
             <!-- Page Content -->
             <main>
                 <slot />
             </main>
-
                 <Footer></Footer>
         </div>
     </div>

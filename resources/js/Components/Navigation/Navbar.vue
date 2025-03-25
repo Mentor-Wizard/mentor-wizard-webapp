@@ -14,7 +14,6 @@
                         <ApplicationLogo></ApplicationLogo>
                     </div>
 
-
                     <div class="flex items-center px-6 py-4 md:mx-auto md:max-w-3xl lg:mx-0 lg:max-w-none xl:px-0">
                         <nav v-if="isAuthenticated"
                              class="hidden lg:flex lg:space-x-4 lg:py-2 md:flex md:space-x-2 md:ml-2 md:py-1"
@@ -69,8 +68,6 @@
                             <span class="sr-only">View notifications</span>
                             <BellIcon class="size-6" aria-hidden="true"/>
                         </button>
-
-
                         <!-- Profile dropdown -->
                         <Menu v-if="isAuthenticated" as="div" class="relative ml-5 shrink-0">
                             <div>
@@ -81,7 +78,6 @@
                                     <img class="size-8 rounded-full" :src="user.imageUrl" alt=""/>
                                 </MenuButton>
                             </div>
-
                             <transition enter-active-class="transition ease-out duration-100"
                                         enter-from-class="transform opacity-0 scale-95"
                                         enter-to-class="transform opacity-100 scale-100"
@@ -103,8 +99,6 @@
                     </div>
                 </div>
             </div>
-
-
             <PopoverPanel v-if="isAuthenticated" as="nav" class="lg:hidden" aria-label="Global">
                 <div class="mx-auto max-w-3xl space-y-1 px-2 pt-2 pb-3 sm:px-4">
                     <a v-for="item in userNavigation" :key="item.name" :href="item.href"
@@ -152,10 +146,8 @@ import {Link} from "@inertiajs/vue3"
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import {usePage, router} from '@inertiajs/vue3';
 import {reactive} from 'vue';
-import {route} from 'ziggy-js';
-
+import { route } from 'ziggy-js';
 const page = usePage();
-
 defineProps({
     isAuthenticated: {
         type: Boolean,
@@ -167,14 +159,12 @@ defineProps({
         type: Boolean,
     },
 });
-
 const routerLink = ((itemName) => {
     console.log(itemName);
     if (itemName === 'Sign out') {
         logout();
     }
 })
-
 function logout() {
     router.post('/logout', {}, {
         onSuccess: () => {
@@ -185,13 +175,10 @@ function logout() {
         },
     });
 }
-
 const user = {
     name: page.props.auth?.user?.username,
     email: page.props.auth?.user?.email,
     imageUrl: page.props.auth?.user?.imageUrl,
 }
-
 const userNavigation = reactive(page.props.navigation);
-
 </script>

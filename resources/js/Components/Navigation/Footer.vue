@@ -16,10 +16,8 @@ text-gray-400 hover:text-gray-300">
         </div>
     </footer>
 </template>
-
 <script setup>
 import {computed, defineComponent, h} from 'vue'
-
 const currentYear = computed(() => new Date().getFullYear());
 const navigation = {
     main: [
