@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Login\Login;
 use App\Http\Requests\Auth\Login\LoginRequest;
 use Illuminate\Contracts\Translation\Translator;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Session\SessionManager;
 use Illuminate\Support\MessageBag;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Contracts\Validation\Validator;
 
 mutates(Login::class);
 
@@ -21,7 +23,7 @@ describe('Login Action', function () {
         $session->shouldReceive('regenerate')->once();
         $request->shouldReceive('session')->once()->andReturn($session);
 
-        $loginAction = new Login();
+        $loginAction = new Login;
         $response = $loginAction->handle($request);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
@@ -41,7 +43,7 @@ describe('Login Action', function () {
 
         $request->shouldReceive('authenticate')->andThrow(new ValidationException($validator));
 
-        $loginAction = new Login();
+        $loginAction = new Login;
 
         expect(function () use ($loginAction, $request) {
             $loginAction->handle($request);

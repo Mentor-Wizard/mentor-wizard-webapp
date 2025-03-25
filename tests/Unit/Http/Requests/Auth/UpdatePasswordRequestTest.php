@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 mutates(UpdatePasswordRequest::class);
 
 describe('UpdatePasswordRequest Validation', function () {
     describe('Current Password Validation', function () {
         it('requires current password', function () {
-            $request = new UpdatePasswordRequest();
+            $request = new UpdatePasswordRequest;
             $validator = Validator::make([
                 'current_password' => '',
                 'password' => 'NewPassword123!',
@@ -26,7 +28,7 @@ describe('UpdatePasswordRequest Validation', function () {
 
     describe('New Password Validation', function () {
         it('requires new password', function () {
-            $request = new UpdatePasswordRequest();
+            $request = new UpdatePasswordRequest;
             $validator = Validator::make([
                 'current_password' => 'OldPassword123!',
                 'password' => '',
@@ -39,7 +41,7 @@ describe('UpdatePasswordRequest Validation', function () {
         });
 
         it('requires password confirmation', function () {
-            $request = new UpdatePasswordRequest();
+            $request = new UpdatePasswordRequest;
             $validator = Validator::make([
                 'current_password' => 'OldPassword123!',
                 'password' => 'NewPassword123!',
@@ -52,7 +54,7 @@ describe('UpdatePasswordRequest Validation', function () {
         });
 
         it('validates password against default Laravel password rules', function () {
-            $request = new UpdatePasswordRequest();
+            $request = new UpdatePasswordRequest;
             $validator = Validator::make([
                 'current_password' => 'OldPassword123!',
                 'password' => 'short',
@@ -73,7 +75,7 @@ describe('UpdatePasswordRequest Validation', function () {
             ]);
             $this->actingAs($user);
 
-            $request = new UpdatePasswordRequest();
+            $request = new UpdatePasswordRequest;
             $validator = Validator::make([
                 'current_password' => 'OldPassword123!',
                 'password' => 'NewPassword123!',
@@ -93,7 +95,7 @@ describe('UpdatePasswordRequest Validation', function () {
             ]);
             $this->actingAs($user);
 
-            $request = new UpdatePasswordRequest();
+            $request = new UpdatePasswordRequest;
             $validator = Validator::make(
                 [
                     'current_password' => 'WrongPassword123!',
@@ -114,7 +116,7 @@ describe('UpdatePasswordRequest Validation', function () {
             ]);
             $this->actingAs($user);
 
-            $request = new UpdatePasswordRequest();
+            $request = new UpdatePasswordRequest;
             $validator = Validator::make(
                 [
                     'current_password' => $currentPassword,

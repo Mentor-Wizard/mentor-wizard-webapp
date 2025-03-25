@@ -45,3 +45,7 @@ Thumbs.db
 # @see https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .yarn/*
 yarn-error.log
+
+*.DS_Store
+phpstan.json
+codequality.json

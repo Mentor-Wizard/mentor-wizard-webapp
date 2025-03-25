@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MentorSession;
 use App\Models\MentorSessionNote;
 use App\Models\Payment;
@@ -47,8 +49,8 @@ describe('MentorSession Model', function () {
 
     it('can create session with basic attributes and casts are correct', function () {
         $mentorSession = MentorSession::factory()->create([
-            'mentor_id' => (string)$this->mentor->getKey(),
-            'menti_id' => (string)$this->menti->getKey(),
+            'mentor_id' => (string) $this->mentor->getKey(),
+            'menti_id' => (string) $this->menti->getKey(),
             'date' => '2024-02-10 15:00:00',
             'cost' => '99.99',
             'is_success' => 1,
@@ -77,7 +79,7 @@ describe('MentorSession Model', function () {
         $this->mentor->delete();
 
         $this->assertDatabaseMissing('mentor_sessions', [
-            'id' => $mentorSession->getKey()
+            'id' => $mentorSession->getKey(),
         ]);
     });
 
@@ -90,12 +92,12 @@ describe('MentorSession Model', function () {
         $this->menti->delete();
 
         $this->assertDatabaseMissing('mentor_sessions', [
-            'id' => $mentorSession->getKey()
+            'id' => $mentorSession->getKey(),
         ]);
     });
 
     it('has correctly defined fillable attributes', function () {
-        $mentorSession = new MentorSession();
+        $mentorSession = new MentorSession;
 
         expect($mentorSession->getFillable())->toBe([
             'mentor_id',
@@ -110,7 +112,7 @@ describe('MentorSession Model', function () {
     });
 
     it('throws an exception when mass assigning unauthorized attributes', function () {
-        $mentorSession = new MentorSession();
+        $mentorSession = new MentorSession;
 
         $mentorSession->fill([
             'mentor_id' => 123,
@@ -127,7 +129,7 @@ describe('MentorSession Model', function () {
 
     it('has a precisely defined cast configuration', function () {
         $reflectionMethod = new ReflectionMethod(MentorSession::class, 'casts');
-        $mentorSession = new MentorSession();
+        $mentorSession = new MentorSession;
         $casts = $reflectionMethod->invoke($mentorSession);
 
         expect($casts)->toBe([
@@ -166,7 +168,7 @@ describe('MentorSession Model', function () {
             MentorSession::create([
                 'mentor_id' => $this->mentor->getKey(),
                 'menti_id' => $this->menti->getKey(),
-                'nonexistent_attribute' => 'test value'
+                'nonexistent_attribute' => 'test value',
             ]);
         })->toThrow(MassAssignmentException::class);
     });
@@ -190,7 +192,7 @@ describe('MentorSession Model', function () {
         ]);
 
         $mentorSessionNote = MentorSessionNote::factory()->create([
-            'mentor_session_id' => $mentorSession->getKey()
+            'mentor_session_id' => $mentorSession->getKey(),
         ]);
 
         expect($mentorSession->mentorSessionNote)->toBeInstanceOf(MentorSessionNote::class)
@@ -204,7 +206,7 @@ describe('MentorSession Model', function () {
         ]);
 
         $payment = Payment::factory()->create([
-            'mentor_session_id' => $mentorSession->getKey()
+            'mentor_session_id' => $mentorSession->getKey(),
         ]);
 
         expect($mentorSession->payment)->toBeInstanceOf(Payment::class)

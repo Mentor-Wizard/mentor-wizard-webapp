@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MentorSession;
 use App\Models\Payment;
 use App\Models\User;
@@ -16,11 +18,11 @@ describe('Payment Model', function () {
 
         $this->mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),    
+            'menti_id' => $this->menti->getKey(),
         ]);
     });
 
-    it('can create session with basic attributes with relations', function() {
+    it('can create session with basic attributes with relations', function () {
         $payment = Payment::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'order_reference' => '111hjjj',
@@ -31,7 +33,7 @@ describe('Payment Model', function () {
             'reason_code' => '001',
             'payment_system' => 'novapay',
             'card_type' => 'visa',
-            'issue_bank_name' => 'bank',        
+            'issue_bank_name' => 'bank',
         ]);
 
         expect($payment)->toBeInstanceOf(Payment::class)
@@ -60,7 +62,7 @@ describe('Payment Model', function () {
             'reason_code' => '00',
             'payment_system' => 'novapay',
             'card_type' => 'visa',
-            'issue_bank_name' => 'bank',             
+            'issue_bank_name' => 'bank',
         ]);
 
         expect($payment)->toBeInstanceOf(Payment::class)
@@ -87,13 +89,13 @@ describe('Payment Model', function () {
             'reason_code' => '01',
             'payment_system' => 'novapay',
             'card_type' => 'visa',
-            'issue_bank_name' => 'bank',     
+            'issue_bank_name' => 'bank',
         ]);
 
         $this->mentorSession->delete();
 
         $this->assertDatabaseMissing('payments', [
-            'id' => $payment->getKey()
+            'id' => $payment->getKey(),
         ]);
     });
 
@@ -113,41 +115,41 @@ describe('Payment Model', function () {
             'issue_bank_name',
         ]);
     });
-        
+
     it('throws an exception when mass assigning unauthorized attributes', function () {
         $payment = new Payment;
 
-        $payment->fill ([
+        $payment->fill([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'order_reference' => '222eeee',
             'amount' => 1,
-                'currency' => 'USD',
-                'transaction_status' => 'success',
-                'reason' => 'pay',
-                'reason_code' => '200',
-                'payment_system' => 'novapay',
-                'card_type' => 'visa',
-                'issue_bank_name' => 'bank',
-                'extra_field' => 'unexpected',
+            'currency' => 'USD',
+            'transaction_status' => 'success',
+            'reason' => 'pay',
+            'reason_code' => '200',
+            'payment_system' => 'novapay',
+            'card_type' => 'visa',
+            'issue_bank_name' => 'bank',
+            'extra_field' => 'unexpected',
         ]);
     })->throws(MassAssignmentException::class);
 
     it('has a precisely defined cast configuration', function () {
-            $reflectionMethod = new ReflectionMethod(Payment::class, 'casts');
-            $payment = new Payment;
-            $casts = $reflectionMethod->invoke($payment);
+        $reflectionMethod = new ReflectionMethod(Payment::class, 'casts');
+        $payment = new Payment;
+        $casts = $reflectionMethod->invoke($payment);
 
-            expect($casts)->toBe([
-                'mentor_session_id' => 'int',
-                'order_reference' => 'string',
-                'amount' => 'int',
-                'currency' => 'string',
-                'transaction_status' => 'string',
-                'reason' => 'string',
-                'reason_code' => 'string',
-                'payment_system' => 'string',
-                'card_type' => 'string',
-                'issue_bank_name' => 'string',
+        expect($casts)->toBe([
+            'mentor_session_id' => 'int',
+            'order_reference' => 'string',
+            'amount' => 'int',
+            'currency' => 'string',
+            'transaction_status' => 'string',
+            'reason' => 'string',
+            'reason_code' => 'string',
+            'payment_system' => 'string',
+            'card_type' => 'string',
+            'issue_bank_name' => 'string',
         ]);
     });
 

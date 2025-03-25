@@ -1,0 +1,155 @@
+name: '🪄 Mentor Wizard | 🔄 CI'
+
+on:
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - README.md
+  pull_request:
+    branches:
+      - develop
+      - feature/*
+      - fix/*
+      - hotfix/*
+      - epic/*
+      - release/*
+    paths-ignore:
+      - README.md
+
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    name: '🧹 Clean up GitHub repo'
+    runs-on: ubuntu-latest
+    permissions: write-all
+    if: github.event_name != 'pull_request'
+
+    steps:
+    - name: '🗑 Delete workflow runs'
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+        retain_days: 7
+        keep_minimum_runs: 1
+        delete_workflow_pattern: ci.yml
+
+  lints:
+    name: '🪄 Lints | ${{ matrix.command.name }}'
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine3.20
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          - {
+            name: '🔍 PHPStan',
+            command: ./vendor/bin/phpstan analyse --error-format=github --memory-limit=2G || true,
+            php: true,
+            node: false,
+          }
+          - {
+            name: '🧽 Laravel Pint',
+            command: ./vendor/bin/pint --test --format=checkstyle | cs2pr || true,
+            php: true,
+            node: false,
+          }
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v4
+
+      - name: '⚙️ Prepare environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          use-php: ${{ matrix.command.php }}
+          use-node: ${{ matrix.command.node }}
+
+      - name: ${{ matrix.command.name }}
+        run: ${{ matrix.command.command }}
+
+  tests:
+    name: '♻️ Tests | ${{ matrix.command.name }}'
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine3.20
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          - {
+            name: '🧬 Pest',
+            command: ./vendor/bin/pest --coverage --parallel --coverage-clover coverage/coverage-clover.xml
+          }
+          - {
+            name: '🦠 Mutation',
+            command: ./vendor/bin/pest --mutate --covered-only --parallel --min=100
+          }
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v4
+
+      - name: '⚙️ Prepare environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          use-node: true
+
+      - name: '${{ matrix.command.name }} tests'
+        run: ${{ matrix.command.command }}
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: testing
+          DB_USERNAME: db
+          DB_PASSWORD: db
+
+      - name: '☂️ Upload results to Codecov'
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: Mentor-Wizard/mentor-wizard-webapp
+          flags: ${{ matrix.command.name }}
+          directory: ./coverage
+          files: ./coverage/coverage-clover.xml
+          verbose: true
+          name: codecov-report
+          commit_parent: ${{ github.event.pull_request.base.sha }}
+
+      - name: '☂️ Upload test results to Codecov'
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.command.name }}
+          directory: ./coverage
+          fail_ci_if_error: true

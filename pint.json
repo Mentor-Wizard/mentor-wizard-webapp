@@ -1,0 +1,14 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "align_multiline_comment": true,
+        "array_syntax": {
+            "syntax": "short"
+        },
+        "declare_strict_types": true,
+        "concat_space": true
+    },
+    "exclude": [
+        "tests"
+    ]
+}

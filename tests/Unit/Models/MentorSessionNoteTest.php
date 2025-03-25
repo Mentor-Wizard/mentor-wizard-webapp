@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MentorSession;
 use App\Models\MentorSessionNote;
 use App\Models\User;
@@ -22,8 +24,8 @@ describe('MentorSessionNote Model', function () {
 
     it('can create session note with basic attributes with relations', function () {
         $mentorSessionNote = MentorSessionNote::factory()->create([
-           'mentor_session_id' => $this->mentorSession->getKey(),
-           'notes' => 'some notes',
+            'mentor_session_id' => $this->mentorSession->getKey(),
+            'notes' => 'some notes',
         ]);
 
         expect($mentorSessionNote)->toBeInstanceOf(MentorSessionNote::class)
@@ -53,12 +55,12 @@ describe('MentorSessionNote Model', function () {
         $this->mentorSession->delete();
 
         $this->assertDatabaseMissing('mentor_session_notes', [
-            'id' => $mentorSessionNote->getKey()
+            'id' => $mentorSessionNote->getKey(),
         ]);
     });
 
     it('has correctly defined fillable attributes', function () {
-        $mentorSessionNote = new MentorSessionNote();
+        $mentorSessionNote = new MentorSessionNote;
 
         expect($mentorSessionNote->getFillable())->toBe([
             'mentor_session_id',
@@ -67,7 +69,7 @@ describe('MentorSessionNote Model', function () {
     });
 
     it('throws an exception when mass assigning unauthorized attributes', function () {
-        $mentorSessionNote = new MentorSessionNote();
+        $mentorSessionNote = new MentorSessionNote;
 
         $mentorSessionNote->fill([
             'mentor_session_id' => 123,
@@ -78,7 +80,7 @@ describe('MentorSessionNote Model', function () {
 
     it('has a precisely defined cast configuration', function () {
         $reflectionMethod = new ReflectionMethod(MentorSessionNote::class, 'casts');
-        $mentorSessionNote = new MentorSessionNote();
+        $mentorSessionNote = new MentorSessionNote;
         $casts = $reflectionMethod->invoke($mentorSessionNote);
 
         expect($casts)->toBe([

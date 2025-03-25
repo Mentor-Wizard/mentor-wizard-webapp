@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Auth\Register\RegistrationRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -14,10 +16,10 @@ describe('RegistrationRequest Validation', function () {
                 'username' => 'validuser',
                 'email' => 'valid@example.com',
                 'password' => 'StrongPassword123!',
-                'password_confirmation' => 'StrongPassword123!'
+                'password_confirmation' => 'StrongPassword123!',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->passes())->toBeTrue();
@@ -30,10 +32,10 @@ describe('RegistrationRequest Validation', function () {
                 'username' => 'user',
                 'email' => 'test@example.com',
                 'password' => 'StrongPassword123!',
-                'password_confirmation' => 'StrongPassword123!'
+                'password_confirmation' => 'StrongPassword123!',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->fails())->toBeTrue()
@@ -44,10 +46,10 @@ describe('RegistrationRequest Validation', function () {
             $data = [
                 'email' => 'test@example.com',
                 'password' => 'StrongPassword123!',
-                'password_confirmation' => 'StrongPassword123!'
+                'password_confirmation' => 'StrongPassword123!',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->fails())->toBeTrue()
@@ -61,10 +63,10 @@ describe('RegistrationRequest Validation', function () {
                 'username' => 'validuser',
                 'email' => 'invalid-email',
                 'password' => 'StrongPassword123!',
-                'password_confirmation' => 'StrongPassword123!'
+                'password_confirmation' => 'StrongPassword123!',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->fails())->toBeTrue()
@@ -74,17 +76,17 @@ describe('RegistrationRequest Validation', function () {
         it('fails when email is not unique', function () {
             $this->seed(RoleSeeder::class);
             User::factory()->create([
-                'email' => 'existing@example.com'
+                'email' => 'existing@example.com',
             ]);
 
             $data = [
                 'username' => 'validuser',
                 'email' => 'existing@example.com',
                 'password' => 'StrongPassword123!',
-                'password_confirmation' => 'StrongPassword123!'
+                'password_confirmation' => 'StrongPassword123!',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->fails())->toBeTrue()
@@ -98,10 +100,10 @@ describe('RegistrationRequest Validation', function () {
                 'username' => 'validuser',
                 'email' => 'test@example.com',
                 'password' => 'StrongPassword123!',
-                'password_confirmation' => 'DifferentPassword123!'
+                'password_confirmation' => 'DifferentPassword123!',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->fails())->toBeTrue()
@@ -112,10 +114,10 @@ describe('RegistrationRequest Validation', function () {
             $data = [
                 'username' => 'validuser',
                 'email' => 'test@example.com',
-                'password_confirmation' => 'password123'
+                'password_confirmation' => 'password123',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->fails())->toBeTrue()
@@ -125,7 +127,7 @@ describe('RegistrationRequest Validation', function () {
 
     describe('Authorization', function () {
         it('always allows registration request', function () {
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             expect($request->authorize())->toBeTrue();
         });
     });
@@ -136,10 +138,10 @@ describe('RegistrationRequest Validation', function () {
                 'username' => 'validuser',
                 'email' => 'test@example.com',
                 'password' => 'simple123',
-                'password_confirmation' => 'simple123'
+                'password_confirmation' => 'simple123',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->passes())->toBeTrue();
@@ -150,10 +152,10 @@ describe('RegistrationRequest Validation', function () {
                 'username' => 'validuser',
                 'email' => 'test@example.com',
                 'password' => '123',
-                'password_confirmation' => '123'
+                'password_confirmation' => '123',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->passes())->toBeFalse();
@@ -163,10 +165,10 @@ describe('RegistrationRequest Validation', function () {
             $data = [
                 'username' => 'validuser',
                 'email' => 'test@example.com',
-                'password' => 'somepassword'
+                'password' => 'somepassword',
             ];
 
-            $request = new RegistrationRequest();
+            $request = new RegistrationRequest;
             $validator = Validator::make($data, $request->rules());
 
             expect($validator->fails())->toBeTrue()

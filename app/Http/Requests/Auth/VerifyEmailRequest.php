@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Verified;
@@ -11,8 +13,6 @@ class VerifyEmailRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -41,8 +41,6 @@ class VerifyEmailRequest extends FormRequest
 
     /**
      * Fulfill the email verification request.
-     *
-     * @return void
      */
     public function fulfill(): void
     {
@@ -55,9 +53,6 @@ class VerifyEmailRequest extends FormRequest
 
     /**
      * Configure the validator instance.
-     *
-     * @param Validator $validator
-     * @return Validator
      */
     public function withValidator(Validator $validator): Validator
     {

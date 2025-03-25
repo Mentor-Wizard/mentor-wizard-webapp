@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\RoleGuardEnum;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,9 +24,12 @@ use Spatie\Permission\Traits\HasRoles;
 #[UseFactory(UserFactory::class)]
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory;
+    use HasRoles;
+    use Notifiable;
 
-    const DEFAULT_PASSWORD_LENGHT = 8;
+    public const DEFAULT_PASSWORD_LENGHT = 8;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -74,6 +79,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserProfile::class);
     }
 
+    public function mentiProgramProgress(): ?HasOne
+    {
+        return $this->hasOne(MentorProgramBlockProgress::class);
+    }
+
     public function mentorReviews(): HasMany
     {
         return $this->hasMany(MentorReview::class, 'mentor_id');
@@ -97,5 +107,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function mentiSessions(): HasMany
     {
         return $this->hasMany(MentorSession::class, 'menti_id');
+    }
+
+    public function mentorChats(): HasMany
+    {
+        return $this->hasMany(Chat::class, 'mentor_id');
+    }
+
+    public function mentiChats(): HasMany
+    {
+        return $this->hasMany(Chat::class, 'menti_id');
+    }
+
+    public function coachChats(): HasMany
+    {
+        return $this->hasMany(Chat::class, 'coach_id');
     }
 }

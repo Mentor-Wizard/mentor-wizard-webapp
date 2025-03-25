@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
-use Symfony\Component\HttpFoundation\Response;
 use Database\Seeders\RoleSeeder;
+use Symfony\Component\HttpFoundation\Response;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\seed;
 
@@ -105,7 +108,7 @@ describe('Unsuccessful Scenarios', function () {
     it('does not allow email longer than the limit', function () {
         $user = User::factory()->create();
 
-        $email = str_repeat('test', 300) . '@admin.com';
+        $email = str_repeat('test', 300).'@admin.com';
         $response = $this->patch(route('profile.update'), [
             'name' => 'change_name',
             'email' => $email,

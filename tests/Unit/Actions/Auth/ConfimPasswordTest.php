@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\ConfirmPassword;
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use Illuminate\Http\RedirectResponse;
@@ -12,7 +14,7 @@ describe('ConfirmPassword Action', function () {
     it('confirms password and redirects to dashboard', function () {
         $mockRequest = Mockery::mock(ConfirmPasswordRequest::class);
         $mockSession = Mockery::mock(Store::class);
-        $action = new ConfirmPassword();
+        $action = new ConfirmPassword;
 
         $mockRequest
             ->shouldReceive('session')
@@ -37,7 +39,7 @@ describe('ConfirmPassword Action', function () {
     it('stores password confirmation timestamp in session', function () {
         $mockRequest = Mockery::mock(ConfirmPasswordRequest::class);
         $mockSession = Mockery::mock(Store::class);
-        $action = new ConfirmPassword();
+        $action = new ConfirmPassword;
 
         $mockRequest
             ->shouldReceive('session')
@@ -54,4 +56,3 @@ describe('ConfirmPassword Action', function () {
         $action->handle($mockRequest);
     });
 });
-

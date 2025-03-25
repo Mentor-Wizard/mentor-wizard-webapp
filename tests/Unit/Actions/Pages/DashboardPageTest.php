@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Pages\DashboardPage;
 use Illuminate\Routing\RouteCollection;
 use Inertia\Response;
@@ -14,7 +16,7 @@ describe('DashboardPage Action', function () {
 
         Route::shouldReceive('getRoutes')->andReturn($mockRouteCollection);
 
-        $action = new DashboardPage();
+        $action = new DashboardPage;
         $result = $action->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();
 

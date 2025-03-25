@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Auth\VerifyEmailRequest;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
@@ -144,7 +146,7 @@ describe('VerifyEmailRequest Fulfill', function () {
 
 describe('VerifyEmailRequest Validation', function () {
     it('returns empty rules array', function () {
-        $request = new VerifyEmailRequest();
+        $request = new VerifyEmailRequest;
 
         expect($request->rules())->toBe([]);
     });

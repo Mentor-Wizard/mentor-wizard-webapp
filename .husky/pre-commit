@@ -1,0 +1,2 @@
+docker compose exec app ./vendor/bin/pint
+git add .

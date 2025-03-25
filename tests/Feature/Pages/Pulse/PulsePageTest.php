@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
+
 use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
@@ -28,7 +31,7 @@ test('allows access to Pulse for admin users', function () {
 
     $admin = User::factory()->create([
         'username' => 'Test ADMIN',
-        'email'    => 'admi@example.com',
+        'email' => 'admi@example.com',
     ]);
 
     $admin->assignRole($role);
@@ -44,7 +47,7 @@ test('allows access to Pulse for superadmin users', function () {
 
     $superadmin = User::factory()->create([
         'username' => 'Test SUPERADMIN',
-        'email'    => 'superadmin@example.com',
+        'email' => 'superadmin@example.com',
     ]);
 
     $superadmin->assignRole($role);

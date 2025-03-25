@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Reset\ResetPassword;
 use App\Http\Requests\Auth\Reset\ResetPasswordRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Http\RedirectResponse;
 
 mutates(ResetPassword::class);
 
@@ -18,7 +20,7 @@ describe('ResetPassword Action', function () {
 
     it('sends password reset link successfully', function () {
         $user = User::factory()->create();
-        $action = new ResetPassword();
+        $action = new ResetPassword;
 
         Password::shouldReceive('sendResetLink')
             ->with(['email' => $user->email])
@@ -26,7 +28,7 @@ describe('ResetPassword Action', function () {
             ->andReturn(Password::RESET_LINK_SENT);
 
         $request = new ResetPasswordRequest([
-            'email' => $user->email
+            'email' => $user->email,
         ]);
 
         $response = $action->handle($request);
@@ -37,7 +39,7 @@ describe('ResetPassword Action', function () {
 
     it('throws validation exception when reset link fails', function () {
         $user = User::factory()->create();
-        $action = new ResetPassword();
+        $action = new ResetPassword;
 
         Password::shouldReceive('sendResetLink')
             ->with(['email' => $user->email])
@@ -45,7 +47,7 @@ describe('ResetPassword Action', function () {
             ->andReturn(Password::RESET_THROTTLED);
 
         $request = new ResetPasswordRequest([
-            'email' => $user->email
+            'email' => $user->email,
         ]);
 
         $this->expectException(ValidationException::class);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\VerifyEmail;
 use App\Http\Requests\Auth\VerifyEmailRequest;
 use App\Models\User;
@@ -20,7 +22,7 @@ describe('VerifyEmail Action', function () {
         $request = Mockery::mock(VerifyEmailRequest::class);
         $request->shouldReceive('user')->once()->andReturn($user);
 
-        $action = new VerifyEmail();
+        $action = new VerifyEmail;
         $result = $action->handle($request);
 
         expect($result->getTargetUrl())
@@ -38,7 +40,7 @@ describe('VerifyEmail Action', function () {
             ->times(3)
             ->andReturn($user);
 
-        $action = new VerifyEmail();
+        $action = new VerifyEmail;
         $result = $action->handle($request);
 
         expect($result->getTargetUrl())

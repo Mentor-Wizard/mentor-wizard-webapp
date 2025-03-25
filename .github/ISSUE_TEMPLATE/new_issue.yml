@@ -1,0 +1,65 @@
+name: "📝 Task"
+description: "Стандартний шаблон для задач у проєкті"
+title: "[Task]: "
+labels: ["task", "development"]
+assignees:
+  - your-github-username
+body:
+  - type: dropdown
+    id: role
+    attributes:
+      label: "🎭 Роль"
+      description: "Хто ініціює цю задачу?"
+      options:
+        - "👤 User (Користувач)"
+        - "👨‍💻 Developer (Розробник)"
+        - "🛠️ DevOps (Інфраструктура)"
+        - "🧪 QA (Тестувальник)"
+        - "📊 Product Manager (Менеджер продукту)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: task_description
+    attributes:
+      label: "📝 Опис задачі"
+      description: "Опиши завдання згідно з вибраною роллю"
+      placeholder: |
+        - **User Story**: Як користувач, я хочу...
+        - **Developer Task**: Необхідно реалізувати...
+        - **DevOps Task**: Потрібно оновити...
+        - **QA Task**: Знайдено баг...
+        - **Product Task**: Новий функціонал для...
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_details
+    attributes:
+      label: "🔧 Технічні деталі"
+      description: "Опис технічної реалізації (якщо потрібно)"
+      placeholder: |
+        -
+      render: markdown
+
+  - type: checkboxes
+    id: acceptance_criteria
+    attributes:
+      label: "✅ Критерії виконання"
+      description: "Що повинно бути реалізовано?"
+      options:
+        - label: "🔹 Код відповідає стандартам"
+          required: true
+        - label: "🔹 Написані тести"
+          required: true
+        - label: "🔹 Реалізовано адаптивність"
+          required: false
+
+  - type: input
+    id: related_issues
+    attributes:
+      label: "🔗 Пов'язані Issue/PR"
+      description: "Посилання на інші Issue чи PR, що мають відношення до цієї задачі"
+      placeholder: "Наприклад: #123, #456"
+

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Reset\GetCreatePasswordPage;
 use Illuminate\Http\Request;
 use Illuminate\Routing\RouteCollection;
@@ -30,7 +32,7 @@ describe('GetCreatePasswordPage', function () {
 
         session(['status' => 'test_message']);
 
-        $action = new GetCreatePasswordPage();
+        $action = new GetCreatePasswordPage;
 
         $result = $action->handle($request);
         $resultData = $result->toResponse(request())->getOriginalContent();
