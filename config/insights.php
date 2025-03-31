@@ -65,7 +65,8 @@ return [
     */
 
     'exclude' => [
-        //  'path/to/directory-or-file'
+        '_ide*.php',
+        'phpstorm.meta.php',
     ],
 
     'add' => [
@@ -107,9 +108,9 @@ return [
     'requirements' => [
         'min-quality' => 80,
         'min-complexity' => 80,
-        'min-architecture' => 70,
+        'min-architecture' => 80,
         'min-style' => 80,
-        'disable-security-check' => true,
+        'disable-security-check' => false,
     ],
 
     /*
