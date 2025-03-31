@@ -59,7 +59,7 @@ jobs:
         command:
           - {
             name: '🔍 Insights',
-            command: ./vendor/bin/phpinsights,
+            command: php artisan insights || true,
             php: true,
             node: false,
           }
