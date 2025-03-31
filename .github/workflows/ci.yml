@@ -58,6 +58,12 @@ jobs:
       matrix:
         command:
           - {
+            name: '🔍 Insights',
+            command: ./vendor/bin/phpinsights,
+            php: true,
+            node: false,
+          }
+          - {
             name: '🔍 PHPStan',
             command: ./vendor/bin/phpstan analyse --error-format=github --memory-limit=2G || true,
             php: true,
