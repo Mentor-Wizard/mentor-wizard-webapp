@@ -1,2 +1,2 @@
-docker compose exec app ./vendor/bin/pint
+/usr/local/bin/docker-compose exec -T app ./vendor/bin/pint
 git add .

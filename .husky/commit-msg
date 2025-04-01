@@ -1,1 +1,1 @@
-docker compose exec app npx --no -- commitlint --edit $1
+/usr/local/bin/docker-compose exec app npx --no -- commitlint --edit $1

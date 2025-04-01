@@ -1,1 +1,1 @@
-docker compose exec app npx validate-branch-name
+/usr/local/bin/docker-compose exec app npx validate-branch-name
