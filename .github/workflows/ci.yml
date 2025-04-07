@@ -61,7 +61,7 @@ jobs:
             name: '🔍 Insights',
             command: php artisan insights -n --ansi --format=github-action || true,
             php: true,
-            node: false,
+            node: false
           }
           - {
             name: '🔍 PHPStan',
