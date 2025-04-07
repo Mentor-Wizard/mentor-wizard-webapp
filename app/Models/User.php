@@ -22,7 +22,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
-final class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory;
     use HasRoles;
@@ -60,6 +60,19 @@ final class User extends Authenticatable implements MustVerifyEmail
         RoleGuardEnum::MENTI->value,
         RoleGuardEnum::COACH->value,
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password'          => 'hashed',
+        ];
+    }
 
     public function profile(): ?HasOne
     {
@@ -109,18 +122,5 @@ final class User extends Authenticatable implements MustVerifyEmail
     public function coachChats(): HasMany
     {
         return $this->hasMany(Chat::class, 'coach_id');
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-        ];
     }
 }

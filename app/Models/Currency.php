@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin IdeHelperCurrency
  */
 #[UseFactory(CurrencyFactory::class)]
-final class Currency extends Model
+class Currency extends Model
 {
     /** @use HasFactory<CurrencyFactory> */
     use HasFactory;

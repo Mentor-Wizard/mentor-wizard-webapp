@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<MentorSessionNote>
  */
-final class MentorSessionNoteFactory extends Factory
+class MentorSessionNoteFactory extends Factory
 {
     /**
      * Define the model's default state.

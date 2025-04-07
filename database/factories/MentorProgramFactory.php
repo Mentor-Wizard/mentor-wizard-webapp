@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 /**
  * @extends Factory<MentorProgram>
  */
-final class MentorProgramFactory extends Factory
+class MentorProgramFactory extends Factory
 {
     /**
      * Define the model's default state.

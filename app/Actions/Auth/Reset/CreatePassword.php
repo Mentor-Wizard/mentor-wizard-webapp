@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsController;
 
-final class CreatePassword
+class CreatePassword
 {
     use AsController;
 
@@ -37,7 +37,7 @@ final class CreatePassword
         // If the password was successfully reset, we will redirect the user back to
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
-        if ($status === Password::PASSWORD_RESET) {
+        if (Password::PASSWORD_RESET === $status) {
             return redirect()->route('login')->with('status', __($status));
         }
 

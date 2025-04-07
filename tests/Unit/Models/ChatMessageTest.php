@@ -19,8 +19,8 @@ describe('ChatMessage Model', function () {
 
         $this->chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id'  => $this->menti->getKey(),
-            'coach_id'  => $this->coach->getKey(),
+            'menti_id' => $this->menti->getKey(),
+            'coach_id' => $this->coach->getKey(),
         ]);
     });
 
@@ -80,7 +80,7 @@ describe('ChatMessage Model', function () {
         $this->menti->delete();
 
         $this->assertDatabaseHas('chat_messages', [
-            'id'      => $chatMessage->getKey(),
+            'id' => $chatMessage->getKey(),
             'user_id' => null,
         ]);
     });
@@ -100,10 +100,10 @@ describe('ChatMessage Model', function () {
         $chatMessage = new ChatMessage;
 
         $chatMessage->fill([
-            'chat_id'         => $this->chat->getKey(),
-            'user_id'         => $this->menti->getKey(),
-            'message'         => 'Test message',
-            'is_read'         => false,
+            'chat_id' => $this->chat->getKey(),
+            'user_id' => $this->menti->getKey(),
+            'message' => 'Test message',
+            'is_read' => false,
             'extra_attribute' => 'value',
         ]);
     })->throws(MassAssignmentException::class);

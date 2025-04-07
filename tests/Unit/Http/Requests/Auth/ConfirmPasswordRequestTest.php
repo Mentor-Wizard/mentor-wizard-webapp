@@ -48,7 +48,7 @@ describe('ConfirmPasswordRequest', function () {
                 ->andReturnSelf()
                 ->shouldReceive('validate')
                 ->with([
-                    'email'    => 'test@example.com',
+                    'email' => 'test@example.com',
                     'password' => 'incorrect_password',
                 ])
                 ->andReturn(false);
@@ -88,7 +88,7 @@ describe('ConfirmPasswordRequest', function () {
                 ->andReturnSelf()
                 ->shouldReceive('validate')
                 ->with([
-                    'email'    => 'test@example.com',
+                    'email' => 'test@example.com',
                     'password' => 'correct_password',
                 ])
                 ->andReturn(true);

@@ -29,10 +29,10 @@ describe('MentorProgramBlockProgress Model', function () {
     it('has correct casts for MentorProgramBlockProgress', function () {
         $model = new MentorProgramBlockProgress;
         expect($model->getCasts())->toEqual([
-            'id'                      => 'int',
+            'id' => 'int',
             'mentor_program_block_id' => 'int',
-            'menti_id'                => 'int',
-            'is_completed'            => 'boolean',
+            'menti_id' => 'int',
+            'is_completed' => 'boolean',
         ]);
     });
 

@@ -39,7 +39,7 @@ return [
                 'host'   => env('REVERB_HOST'),
                 'port'   => env('REVERB_PORT', 443),
                 'scheme' => env('REVERB_SCHEME', 'https'),
-                'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                'useTLS' => 'https' === env('REVERB_SCHEME', 'https'),
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
@@ -57,7 +57,7 @@ return [
                 'port'      => env('PUSHER_PORT', 443),
                 'scheme'    => env('PUSHER_SCHEME', 'https'),
                 'encrypted' => true,
-                'useTLS'    => env('PUSHER_SCHEME', 'https') === 'https',
+                'useTLS'    => 'https' === env('PUSHER_SCHEME', 'https'),
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

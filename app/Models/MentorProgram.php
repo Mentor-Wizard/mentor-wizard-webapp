@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @mixin IdeHelperMentorProgram
  */
-final class MentorProgram extends Model
+class MentorProgram extends Model
 {
     /** @use HasFactory<MentorProgramFactory> */
     use HasFactory;

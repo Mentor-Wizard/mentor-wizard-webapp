@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 use App\Enums\CurrencyEnum;
 use App\Models\Currency;
 use Illuminate\Database\Eloquent\MassAssignmentException;
@@ -12,9 +10,9 @@ mutates(Currency::class);
 describe('Currency Model', function () {
     it('can create a new currency', function () {
         $data = [
-            'name'   => CurrencyEnum::EUR->name,
-            'slug'   => Str::slug(CurrencyEnum::EUR->name),
-            'symbol' => CurrencyEnum::EUR->value,
+            'name' => CurrencyEnum::EUR->name,
+            'slug' => Str::slug(CurrencyEnum::EUR->name),
+            'symbol' => CurrencyEnum::EUR->value
         ];
 
         $currency = Currency::create($data);
@@ -33,8 +31,8 @@ describe('Currency Model', function () {
 
     it('generates a slug automatically if not provided', function () {
         $currency = Currency::create([
-            'name'   => 'EUR',
-            'symbol' => '€',
+            'name' => 'EUR',
+            'symbol' => '€'
         ]);
 
         expect($currency->slug)->toBeNull();

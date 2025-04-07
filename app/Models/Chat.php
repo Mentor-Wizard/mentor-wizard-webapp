@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 #[ObservedBy(ChatObserver::class)]
 #[UseFactory(ChatFactory::class)]
-final class Chat extends Model
+class Chat extends Model
 {
     /** @use HasFactory<ChatFactory> */
     use HasFactory;
@@ -28,6 +28,15 @@ final class Chat extends Model
         'menti_id',
         'coach_id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'mentor_id' => 'int',
+            'menti_id'  => 'int',
+            'coach_id'  => 'int',
+        ];
+    }
 
     public function mentor(): BelongsTo
     {
@@ -47,14 +56,5 @@ final class Chat extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'mentor_id' => 'int',
-            'menti_id'  => 'int',
-            'coach_id'  => 'int',
-        ];
     }
 }

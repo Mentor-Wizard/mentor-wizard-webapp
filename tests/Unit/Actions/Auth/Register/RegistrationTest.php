@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 use App\Actions\Auth\Register\Registration;
 use App\Http\Requests\Auth\Register\RegistrationRequest;
 use App\Models\User;
@@ -24,9 +22,9 @@ describe('Registration Action', function () {
 
     it('can register', function () {
         $request = new RegistrationRequest([
-            'username'              => 'testuser',
-            'email'                 => 'test@example.com',
-            'password'              => 'password',
+            'username' => 'testuser',
+            'email' => 'test@example.com',
+            'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
@@ -49,10 +47,11 @@ describe('Registration Action', function () {
             ->and($user->email)->toBe('test@example.com');
     });
 
+
     it('can not register without username', function () {
         $request = new RegistrationRequest([
-            'email'                 => 'test@example.com',
-            'password'              => 'password',
+            'email' => 'test@example.com',
+            'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
@@ -67,8 +66,8 @@ describe('Registration Action', function () {
 
     it('can not register without email', function () {
         $request = new RegistrationRequest([
-            'username'              => 'testuser',
-            'password'              => 'password',
+            'username' => 'testuser',
+            'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 

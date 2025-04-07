@@ -36,20 +36,20 @@ describe('Password Reset Feature Test', function () {
 
     it('resets the password successfully', function () {
         $user = User::factory()->create([
-            'email'    => 'reset@example.com',
+            'email' => 'reset@example.com',
             'password' => bcrypt('oldpassword'),
         ]);
         $token = Password::broker()->createToken($user);
 
         $this->post(route('password.store'), [
-            'token'                 => $token,
-            'email'                 => $user->email,
-            'password'              => 'newpassword123',
+            'token' => $token,
+            'email' => $user->email,
+            'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123',
         ])->assertRedirect(route('login'));
 
         expect(Auth::attempt([
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'newpassword123',
         ]))->toBeTrue();
     });

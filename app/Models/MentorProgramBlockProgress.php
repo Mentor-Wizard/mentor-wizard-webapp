@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin IdeHelperMentorProgramBlockProgress
  */
 #[UseFactory(MentorProgramBlockProgressFactory::class)]
-final class MentorProgramBlockProgress extends Model
+class MentorProgramBlockProgress extends Model
 {
     /** @use HasFactory<MentorProgramBlockProgressFactory> */
     use HasFactory;
@@ -27,6 +27,15 @@ final class MentorProgramBlockProgress extends Model
         'is_completed',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'mentor_program_block_id' => 'int',
+            'menti_id'                => 'int',
+            'is_completed'            => 'boolean',
+        ];
+    }
+
     public function mentor_program_blocks(): BelongsTo
     {
         return $this->belongsTo(MentorProgramBlock::class, 'mentor_program_block_id');
@@ -35,14 +44,5 @@ final class MentorProgramBlockProgress extends Model
     public function menti(): BelongsTo
     {
         return $this->belongsTo(User::class, 'menti_id');
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'mentor_program_block_id' => 'int',
-            'menti_id'                => 'int',
-            'is_completed'            => 'boolean',
-        ];
     }
 }

@@ -48,27 +48,27 @@ describe('MentorProgramBlock Model', function () {
         $model = new MentorProgramBlock;
 
         expect($model->getCasts())->toEqual([
-            'id'                => 'int',
+            'id' => 'int',
             'mentor_program_id' => 'int',
-            'name'              => 'string',
-            'slug'              => 'string',
-            'description'       => 'string',
+            'name' => 'string',
+            'slug' => 'string',
+            'description' => 'string',
         ]);
     });
 
     it('fails to create the model with duplicate slugs', function () {
         MentorProgramBlock::create([
             'mentor_program_id' => 1,
-            'name'              => 'some name',
-            'description'       => 'some description',
-            'slug'              => 'unique-slug',
+            'name' => 'some name',
+            'description' => 'some description',
+            'slug' => 'unique-slug',
         ]);
 
         $duplicateModel = MentorProgramBlock::create([
             'mentor_program_id' => 2,
-            'name'              => 'some name',
-            'description'       => 'some description',
-            'slug'              => 'unique-slug',
+            'name' => 'some name',
+            'description' => 'some description',
+            'slug' => 'unique-slug',
         ]);
 
         expect($duplicateModel->exists)->toBeFalse();

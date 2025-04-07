@@ -9,7 +9,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-final class GetLoginPage
+class GetLoginPage
 {
     use AsController;
 

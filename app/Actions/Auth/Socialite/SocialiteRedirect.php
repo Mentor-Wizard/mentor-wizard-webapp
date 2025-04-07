@@ -11,13 +11,13 @@ use Laravel\Socialite\Facades\Socialite;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
-final class SocialiteRedirect
+class SocialiteRedirect
 {
     use AsController;
 
     public function handle(string $driver): RedirectResponse
     {
-        if (! SocialiteDriver::isValid($driver)) {
+        if (!SocialiteDriver::isValid($driver)) {
             Log::error('Invalid socialite driver', ['driver' => $driver]);
             abort(Response::HTTP_UNPROCESSABLE_ENTITY);
         }

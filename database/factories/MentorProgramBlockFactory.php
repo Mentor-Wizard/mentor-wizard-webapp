@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 /**
  * @extends Factory<MentorProgram>
  */
-final class MentorProgramBlockFactory extends Factory
+class MentorProgramBlockFactory extends Factory
 {
     /**
      * Define the model's default state.

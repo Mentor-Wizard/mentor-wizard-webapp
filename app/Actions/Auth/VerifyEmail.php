@@ -9,7 +9,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
-final class VerifyEmail
+class VerifyEmail
 {
     use AsController;
 

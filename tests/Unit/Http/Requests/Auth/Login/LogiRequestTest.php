@@ -35,7 +35,7 @@ describe('LoginRequest Authentication', function () {
             $request->shouldReceive('only')
                 ->with('email', 'password')
                 ->andReturn([
-                    'email'    => 'test@example.com',
+                    'email' => 'test@example.com',
                     'password' => 'password',
                 ]);
             $request->shouldReceive('boolean')
@@ -69,7 +69,7 @@ describe('LoginRequest Authentication', function () {
             $request->shouldReceive('only')
                 ->with('email', 'password')
                 ->andReturn([
-                    'email'    => 'test@example.com',
+                    'email' => 'test@example.com',
                     'password' => 'wrong_password',
                 ]);
             $request->shouldReceive('boolean')

@@ -9,7 +9,7 @@ use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
-final class UserObserver
+class UserObserver
 {
     public function created(User $user): void
     {

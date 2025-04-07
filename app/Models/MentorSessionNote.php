@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin IdeHelperMentorSessionNote
  */
 #[UseFactory(MentorSessionNoteFactory::class)]
-final class MentorSessionNote extends Model
+class MentorSessionNote extends Model
 {
     /** @use HasFactory<MentorSessionNoteFactory> */
     use HasFactory;
@@ -24,16 +24,16 @@ final class MentorSessionNote extends Model
         'notes',
     ];
 
-    public function mentorSession(): BelongsTo
-    {
-        return $this->belongsTo(MentorSession::class);
-    }
-
     protected function casts(): array
     {
         return [
             'mentor_session_id' => 'int',
             'notes'             => 'string',
         ];
+    }
+
+    public function mentorSession(): BelongsTo
+    {
+        return $this->belongsTo(MentorSession::class);
     }
 }

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin IdeHelperPayment
  */
 #[UseFactory(PaymentFactory::class)]
-final class Payment extends Model
+class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
     use HasFactory;
@@ -32,11 +32,6 @@ final class Payment extends Model
         'issue_bank_name',
     ];
 
-    public function mentorSession(): BelongsTo
-    {
-        return $this->belongsTo(MentorSession::class, 'mentor_session_id');
-    }
-
     protected function casts(): array
     {
         return [
@@ -51,5 +46,10 @@ final class Payment extends Model
             'card_type'          => 'string',
             'issue_bank_name'    => 'string',
         ];
+    }
+
+    public function mentorSession(): BelongsTo
+    {
+        return $this->belongsTo(MentorSession::class, 'mentor_session_id');
     }
 }

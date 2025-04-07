@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MentorProgramBlockProgress>
  */
-final class MentorProgramBlockProgressFactory extends Factory
+class MentorProgramBlockProgressFactory extends Factory
 {
     /**
      * Define the model's default state.

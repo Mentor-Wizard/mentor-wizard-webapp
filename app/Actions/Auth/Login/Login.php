@@ -8,7 +8,7 @@ use App\Http\Requests\Auth\Login\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
-final class Login
+class Login
 {
     use AsController;
 

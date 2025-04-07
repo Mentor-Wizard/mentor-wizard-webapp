@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<Currency>
  */
-final class CurrencyFactory extends Factory
+class CurrencyFactory extends Factory
 {
     /**
      * Define the model's default state.

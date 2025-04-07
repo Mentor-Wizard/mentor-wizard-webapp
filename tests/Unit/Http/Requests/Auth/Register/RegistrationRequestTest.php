@@ -13,9 +13,9 @@ describe('RegistrationRequest Validation', function () {
     describe('Positive Scenarios', function () {
         it('validates correct registration data', function () {
             $data = [
-                'username'              => 'validuser',
-                'email'                 => 'valid@example.com',
-                'password'              => 'StrongPassword123!',
+                'username' => 'validuser',
+                'email' => 'valid@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -29,9 +29,9 @@ describe('RegistrationRequest Validation', function () {
     describe('Username Validation', function () {
         it('fails when username is too short', function () {
             $data = [
-                'username'              => 'user',
-                'email'                 => 'test@example.com',
-                'password'              => 'StrongPassword123!',
+                'username' => 'user',
+                'email' => 'test@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -44,8 +44,8 @@ describe('RegistrationRequest Validation', function () {
 
         it('fails when username is missing', function () {
             $data = [
-                'email'                 => 'test@example.com',
-                'password'              => 'StrongPassword123!',
+                'email' => 'test@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -60,9 +60,9 @@ describe('RegistrationRequest Validation', function () {
     describe('Email Validation', function () {
         it('fails when email is invalid', function () {
             $data = [
-                'username'              => 'validuser',
-                'email'                 => 'invalid-email',
-                'password'              => 'StrongPassword123!',
+                'username' => 'validuser',
+                'email' => 'invalid-email',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -80,9 +80,9 @@ describe('RegistrationRequest Validation', function () {
             ]);
 
             $data = [
-                'username'              => 'validuser',
-                'email'                 => 'existing@example.com',
-                'password'              => 'StrongPassword123!',
+                'username' => 'validuser',
+                'email' => 'existing@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -97,9 +97,9 @@ describe('RegistrationRequest Validation', function () {
     describe('Password Validation', function () {
         it('fails when password is not confirmed', function () {
             $data = [
-                'username'              => 'validuser',
-                'email'                 => 'test@example.com',
-                'password'              => 'StrongPassword123!',
+                'username' => 'validuser',
+                'email' => 'test@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'DifferentPassword123!',
             ];
 
@@ -112,8 +112,8 @@ describe('RegistrationRequest Validation', function () {
 
         it('requires password', function () {
             $data = [
-                'username'              => 'validuser',
-                'email'                 => 'test@example.com',
+                'username' => 'validuser',
+                'email' => 'test@example.com',
                 'password_confirmation' => 'password123',
             ];
 
@@ -135,9 +135,9 @@ describe('RegistrationRequest Validation', function () {
     describe('Password Validation Without Strict Rules', function () {
         it('passes with a simple password', function () {
             $data = [
-                'username'              => 'validuser',
-                'email'                 => 'test@example.com',
-                'password'              => 'simple123',
+                'username' => 'validuser',
+                'email' => 'test@example.com',
+                'password' => 'simple123',
                 'password_confirmation' => 'simple123',
             ];
 
@@ -149,9 +149,9 @@ describe('RegistrationRequest Validation', function () {
 
         it('fails with a short password', function () {
             $data = [
-                'username'              => 'validuser',
-                'email'                 => 'test@example.com',
-                'password'              => '123',
+                'username' => 'validuser',
+                'email' => 'test@example.com',
+                'password' => '123',
                 'password_confirmation' => '123',
             ];
 
@@ -164,7 +164,7 @@ describe('RegistrationRequest Validation', function () {
         it('requires both password and confirmation', function () {
             $data = [
                 'username' => 'validuser',
-                'email'    => 'test@example.com',
+                'email' => 'test@example.com',
                 'password' => 'somepassword',
             ];
 

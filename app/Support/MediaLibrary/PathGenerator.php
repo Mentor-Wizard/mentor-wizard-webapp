@@ -7,7 +7,7 @@ namespace App\Support\MediaLibrary;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator as BasePathGenerator;
 
-final class PathGenerator implements BasePathGenerator
+class PathGenerator implements BasePathGenerator
 {
     /*
      * Get the path for the given media, relative to the root storage path.
@@ -41,6 +41,6 @@ final class PathGenerator implements BasePathGenerator
         $prefix = config('media-library.prefix');
         $className = class_basename($media->model_type);
 
-        return mb_ltrim("{$prefix}/{$className}/{$media->getKey()}", '/');
+        return ltrim("{$prefix}/{$className}/{$media->getKey()}", '/');
     }
 }

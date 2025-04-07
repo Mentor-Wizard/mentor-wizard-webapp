@@ -9,18 +9,18 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
-final class VerifyEmailRequest extends FormRequest
+class VerifyEmailRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        if (! hash_equals((string) $this->user()->getKey(), (string) $this->route('id'))) {
+        if (!hash_equals((string) $this->user()->getKey(), (string) $this->route('id'))) {
             return false;
         }
 
-        if (! hash_equals(sha1($this->user()->getEmailForVerification()), $this->route('hash'))) {
+        if (!hash_equals(sha1($this->user()->getEmailForVerification()), $this->route('hash'))) {
             return false;
         }
 
@@ -43,7 +43,7 @@ final class VerifyEmailRequest extends FormRequest
      */
     public function fulfill(): void
     {
-        if (! $this->user()->hasVerifiedEmail()) {
+        if (!$this->user()->hasVerifiedEmail()) {
             $this->user()->markEmailAsVerified();
 
             event(new Verified($this->user()));

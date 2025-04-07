@@ -20,7 +20,7 @@ describe('Get Login Page', function () {
         $user = User::factory()->create();
 
         $this->postJson(route('login.attempt'), [
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'password',
         ])
             ->assertStatus(Response::HTTP_FOUND)
@@ -33,7 +33,7 @@ describe('Get Login Page', function () {
         User::factory()->create();
 
         $this->postJson('login', [
-            'email'    => 'admin@admin.com',
+            'email' => 'admin@admin.com',
             'password' => 'password',
         ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -45,7 +45,7 @@ describe('Get Login Page', function () {
         User::factory()->create();
 
         $this->postJson('login', [
-            'email'    => 'admin@admin.com',
+            'email' => 'admin@admin.com',
             'password' => '1',
         ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);

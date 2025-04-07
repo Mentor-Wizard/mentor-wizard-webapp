@@ -7,7 +7,7 @@ namespace App\Http\Requests\Profile;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-final class DestroyProfileRequest extends FormRequest
+class DestroyProfileRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

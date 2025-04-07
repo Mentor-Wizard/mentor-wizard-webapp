@@ -8,7 +8,7 @@ use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
-final class ConfirmPassword
+class ConfirmPassword
 {
     use AsController;
 

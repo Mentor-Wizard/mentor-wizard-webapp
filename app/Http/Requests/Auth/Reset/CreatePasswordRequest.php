@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-final class CreatePasswordRequest extends FormRequest
+class CreatePasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
