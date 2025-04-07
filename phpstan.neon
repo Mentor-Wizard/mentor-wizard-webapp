@@ -1,5 +1,7 @@
 parameters:
     checkOctaneCompatibility: true
+    noEnvCallsOutsideOfConfig: true
+    checkModelAppends: true
     paths:
         - app
         - database/factories
