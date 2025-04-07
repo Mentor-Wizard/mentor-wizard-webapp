@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<UserProfile>
  */
-class UserProfileFactory extends Factory
+final class UserProfileFactory extends Factory
 {
     protected $model = UserProfile::class;
 

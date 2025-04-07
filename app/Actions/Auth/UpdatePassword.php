@@ -10,7 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class UpdatePassword
+final class UpdatePassword
 {
     use AsController;
 

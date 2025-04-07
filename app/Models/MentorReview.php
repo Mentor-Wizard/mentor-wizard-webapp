@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @mixin IdeHelperMentorReview
  */
-class MentorReview extends Model
+final class MentorReview extends Model
 {
     /** @use HasFactory<MentorReviewFactory> */
     use HasFactory;

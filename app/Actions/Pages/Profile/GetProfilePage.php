@@ -10,7 +10,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class GetProfilePage
+final class GetProfilePage
 {
     use AsController;
 

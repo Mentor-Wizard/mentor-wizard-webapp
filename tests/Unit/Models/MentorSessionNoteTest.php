@@ -18,14 +18,14 @@ describe('MentorSessionNote Model', function () {
 
         $this->mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
     });
 
     it('can create session note with basic attributes with relations', function () {
         $mentorSessionNote = MentorSessionNote::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
-            'notes' => 'some notes',
+            'notes'             => 'some notes',
         ]);
 
         expect($mentorSessionNote)->toBeInstanceOf(MentorSessionNote::class)
@@ -38,7 +38,7 @@ describe('MentorSessionNote Model', function () {
     it('can create session note with basic attributes and casts are correct', function () {
         $mentorSessionNote = MentorSessionNote::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
-            'notes' => 'some notes',
+            'notes'             => 'some notes',
         ]);
 
         expect($mentorSessionNote)->toBeInstanceOf(MentorSessionNote::class)
@@ -49,7 +49,7 @@ describe('MentorSessionNote Model', function () {
     it('cascades on mentor session deletion', function () {
         $mentorSessionNote = MentorSessionNote::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
-            'notes' => 'some notes',
+            'notes'             => 'some notes',
         ]);
 
         $this->mentorSession->delete();
@@ -73,8 +73,8 @@ describe('MentorSessionNote Model', function () {
 
         $mentorSessionNote->fill([
             'mentor_session_id' => 123,
-            'notes' => 'text',
-            'extra_field' => 'unexpected',
+            'notes'             => 'text',
+            'extra_field'       => 'unexpected',
         ]);
     })->throws(MassAssignmentException::class);
 
@@ -85,7 +85,7 @@ describe('MentorSessionNote Model', function () {
 
         expect($casts)->toBe([
             'mentor_session_id' => 'int',
-            'notes' => 'string',
+            'notes'             => 'string',
         ]);
     });
 

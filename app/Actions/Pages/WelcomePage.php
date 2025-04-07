@@ -10,7 +10,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class WelcomePage
+final class WelcomePage
 {
     use AsController;
 

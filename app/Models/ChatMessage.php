@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin IdeHelperChatMessage
  */
 #[UseFactory(ChatMessageFactory::class)]
-class ChatMessage extends Model
+final class ChatMessage extends Model
 {
     /** @use HasFactory<ChatMessageFactory> */
     use HasFactory;

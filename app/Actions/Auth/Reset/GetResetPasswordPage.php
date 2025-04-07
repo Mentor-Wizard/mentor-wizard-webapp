@@ -8,7 +8,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class GetResetPasswordPage
+final class GetResetPasswordPage
 {
     use AsController;
 

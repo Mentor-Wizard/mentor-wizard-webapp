@@ -17,7 +17,7 @@ test('denies access to Pulse for unauthorized users', function () {
 
     $user = User::factory()->create([
         'username' => 'Test User',
-        'email' => 'test@example.com',
+        'email'    => 'test@example.com',
     ]);
 
     actingAs($user)
@@ -31,7 +31,7 @@ test('allows access to Pulse for admin users', function () {
 
     $admin = User::factory()->create([
         'username' => 'Test ADMIN',
-        'email' => 'admi@example.com',
+        'email'    => 'admi@example.com',
     ]);
 
     $admin->assignRole($role);
@@ -47,7 +47,7 @@ test('allows access to Pulse for superadmin users', function () {
 
     $superadmin = User::factory()->create([
         'username' => 'Test SUPERADMIN',
-        'email' => 'superadmin@example.com',
+        'email'    => 'superadmin@example.com',
     ]);
 
     $superadmin->assignRole($role);

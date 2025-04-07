@@ -9,9 +9,10 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use JsonException;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
-class PhpstanToGitlab extends Command
+final class PhpstanToGitlab extends Command
 {
     public const int DEPTH = 512;
 
@@ -21,14 +22,14 @@ class PhpstanToGitlab extends Command
 
     /**
      * @throws FileNotFoundException
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function handle(): int
     {
         $inputFile = $this->argument('inputFile');
         $outputFile = $this->argument('outputFile');
 
-        if (!File::exists($inputFile)) {
+        if (! File::exists($inputFile)) {
             $this->error("File not found: {$inputFile}");
 
             return SymfonyCommand::FAILURE;

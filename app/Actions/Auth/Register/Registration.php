@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class Registration
+final class Registration
 {
     use AsController;
 

@@ -13,7 +13,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
-class SocialiteCallback
+final class SocialiteCallback
 {
     use AsController;
 

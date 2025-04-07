@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<Chat>
  */
-class ChatFactory extends Factory
+final class ChatFactory extends Factory
 {
     /**
      * Define the model's default state.

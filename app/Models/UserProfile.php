@@ -15,7 +15,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 /**
  * @mixin IdeHelperUserProfile
  */
-class UserProfile extends Model implements HasMedia
+final class UserProfile extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;

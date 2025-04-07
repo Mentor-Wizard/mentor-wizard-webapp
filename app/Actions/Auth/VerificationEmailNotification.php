@@ -8,7 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class VerificationEmailNotification
+final class VerificationEmailNotification
 {
     use AsController;
 

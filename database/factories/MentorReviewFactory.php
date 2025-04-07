@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<MentorReview>
  */
-class MentorReviewFactory extends Factory
+final class MentorReviewFactory extends Factory
 {
     protected $model = MentorReview::class;
 

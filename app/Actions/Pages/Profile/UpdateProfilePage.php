@@ -8,7 +8,7 @@ use App\Http\Requests\Profile\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class UpdateProfilePage
+final class UpdateProfilePage
 {
     use AsController;
 

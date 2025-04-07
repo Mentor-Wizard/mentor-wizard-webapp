@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @mixin IdeHelperMentorSession
  */
 #[UseFactory(MentorSessionFactory::class)]
-class MentorSession extends Model
+final class MentorSession extends Model
 {
     /** @use HasFactory<MentorSessionFactory> */
     use HasFactory;
@@ -30,20 +30,6 @@ class MentorSession extends Model
         'is_date_changed',
         'cost',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'mentor_id'       => 'int',
-            'menti_id'        => 'int',
-            'date'            => 'datetime',
-            'is_success'      => 'boolean',
-            'is_paid'         => 'boolean',
-            'is_cancelled'    => 'boolean',
-            'is_date_changed' => 'boolean',
-            'cost'            => 'float',
-        ];
-    }
 
     public function mentor(): BelongsTo
     {
@@ -63,5 +49,19 @@ class MentorSession extends Model
     public function mentorSessionNote(): HasOne
     {
         return $this->hasOne(MentorSessionNote::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'mentor_id'       => 'int',
+            'menti_id'        => 'int',
+            'date'            => 'datetime',
+            'is_success'      => 'boolean',
+            'is_paid'         => 'boolean',
+            'is_cancelled'    => 'boolean',
+            'is_date_changed' => 'boolean',
+            'cost'            => 'float',
+        ];
     }
 }

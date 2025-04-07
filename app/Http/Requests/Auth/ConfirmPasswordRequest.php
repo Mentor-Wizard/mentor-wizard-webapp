@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
 
-class ConfirmPasswordRequest extends FormRequest
+final class ConfirmPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,7 +34,7 @@ class ConfirmPasswordRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            if (!Auth::guard('web')->validate([
+            if (! Auth::guard('web')->validate([
                 'email'    => $this->user()->email,
                 'password' => $this->input('password'),
             ])) {

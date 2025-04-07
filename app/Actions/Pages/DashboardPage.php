@@ -8,7 +8,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class DashboardPage
+final class DashboardPage
 {
     use AsController;
 

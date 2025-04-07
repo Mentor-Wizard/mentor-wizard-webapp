@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<UserProfile>
  */
-class AttachmentFactory extends Factory
+final class AttachmentFactory extends Factory
 {
     /**
      * Define the model's default state.

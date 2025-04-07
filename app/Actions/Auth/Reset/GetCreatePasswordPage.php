@@ -9,7 +9,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class GetCreatePasswordPage
+final class GetCreatePasswordPage
 {
     use AsController;
 

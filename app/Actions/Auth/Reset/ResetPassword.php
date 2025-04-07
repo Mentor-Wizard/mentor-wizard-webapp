@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class ResetPassword
+final class ResetPassword
 {
     use AsController;
 
@@ -23,7 +23,7 @@ class ResetPassword
             $request->only('email')
         );
 
-        if (Password::RESET_LINK_SENT === $status) {
+        if ($status === Password::RESET_LINK_SENT) {
             return back()->with('status', __($status));
         }
 

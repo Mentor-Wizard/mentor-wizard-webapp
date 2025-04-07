@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @mixin IdeHelperMentorProgramBlock
  */
 #[UseFactory(MentorProgramBlockFactory::class)]
-class MentorProgramBlock extends Model
+final class MentorProgramBlock extends Model
 {
     /** @use HasFactory<MentorProgramBlockFactory> */
     use HasFactory;
@@ -27,16 +27,6 @@ class MentorProgramBlock extends Model
         'description',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'mentor_program_id' => 'int',
-            'name'              => 'string',
-            'slug'              => 'string',
-            'description'       => 'string',
-        ];
-    }
-
     public function mentorProgramBlockProgress(): HasOne
     {
         return $this->HasOne(MentorProgramBlockProgress::class, 'id');
@@ -45,5 +35,15 @@ class MentorProgramBlock extends Model
     public function mentorProgram(): BelongsTo
     {
         return $this->belongsTo(MentorProgram::class, 'id');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'mentor_program_id' => 'int',
+            'name'              => 'string',
+            'slug'              => 'string',
+            'description'       => 'string',
+        ];
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<ChatMessage>
  */
-class ChatMessageFactory extends Factory
+final class ChatMessageFactory extends Factory
 {
     protected $model = ChatMessage::class;
 

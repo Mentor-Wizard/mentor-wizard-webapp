@@ -7,7 +7,7 @@ namespace App\Http\Requests\Auth\Reset;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ResetPasswordRequest extends FormRequest
+final class ResetPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -9,7 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class DestroyProfilePage
+final class DestroyProfilePage
 {
     use AsController;
 

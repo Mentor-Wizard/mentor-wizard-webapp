@@ -8,7 +8,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class GetConfirmPasswordPage
+final class GetConfirmPasswordPage
 {
     use AsController;
 

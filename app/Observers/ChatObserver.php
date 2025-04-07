@@ -7,7 +7,7 @@ namespace App\Observers;
 use App\Models\Chat;
 use Illuminate\Support\Facades\Log;
 
-class ChatObserver
+final class ChatObserver
 {
     public function saved(Chat $chat): void
     {

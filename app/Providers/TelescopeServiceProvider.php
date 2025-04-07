@@ -10,7 +10,7 @@ use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
-class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
+final class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
     /**
      * Register any application services.
@@ -24,10 +24,10 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $isLocal = $this->app->environment('local', 'testing', 'ci');
 
         Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
-            if ('request' === $entry->type && '/up' === $entry->content['uri']) {
+            if ($entry->type === 'request' && $entry->content['uri'] === '/up') {
                 return false;
             }
-            if ('view' === $entry->type && isset($entry->content['name']) && str_contains($entry->content['name'], 'health-up.blade.php')) {
+            if ($entry->type === 'view' && isset($entry->content['name']) && str_contains($entry->content['name'], 'health-up.blade.php')) {
                 return false;
             }
 

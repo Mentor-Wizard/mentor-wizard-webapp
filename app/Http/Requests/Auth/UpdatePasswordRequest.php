@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-class UpdatePasswordRequest extends FormRequest
+final class UpdatePasswordRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class Logout
+final class Logout
 {
     use AsController;
 
