@@ -15,8 +15,8 @@ describe('UpdatePasswordRequest Validation', function () {
         it('requires current password', function () {
             $request = new UpdatePasswordRequest;
             $validator = Validator::make([
-                'current_password' => '',
-                'password' => 'NewPassword123!',
+                'current_password'      => '',
+                'password'              => 'NewPassword123!',
                 'password_confirmation' => 'NewPassword123!',
             ], $request->rules());
 
@@ -30,8 +30,8 @@ describe('UpdatePasswordRequest Validation', function () {
         it('requires new password', function () {
             $request = new UpdatePasswordRequest;
             $validator = Validator::make([
-                'current_password' => 'OldPassword123!',
-                'password' => '',
+                'current_password'      => 'OldPassword123!',
+                'password'              => '',
                 'password_confirmation' => '',
             ], $request->rules());
 
@@ -43,8 +43,8 @@ describe('UpdatePasswordRequest Validation', function () {
         it('requires password confirmation', function () {
             $request = new UpdatePasswordRequest;
             $validator = Validator::make([
-                'current_password' => 'OldPassword123!',
-                'password' => 'NewPassword123!',
+                'current_password'      => 'OldPassword123!',
+                'password'              => 'NewPassword123!',
                 'password_confirmation' => '',
             ], $request->rules());
 
@@ -56,8 +56,8 @@ describe('UpdatePasswordRequest Validation', function () {
         it('validates password against default Laravel password rules', function () {
             $request = new UpdatePasswordRequest;
             $validator = Validator::make([
-                'current_password' => 'OldPassword123!',
-                'password' => 'short',
+                'current_password'      => 'OldPassword123!',
+                'password'              => 'short',
                 'password_confirmation' => 'short',
             ], $request->rules());
 
@@ -77,8 +77,8 @@ describe('UpdatePasswordRequest Validation', function () {
 
             $request = new UpdatePasswordRequest;
             $validator = Validator::make([
-                'current_password' => 'OldPassword123!',
-                'password' => 'NewPassword123!',
+                'current_password'      => 'OldPassword123!',
+                'password'              => 'NewPassword123!',
                 'password_confirmation' => 'NewPassword123!',
             ], $request->rules());
 
@@ -98,8 +98,8 @@ describe('UpdatePasswordRequest Validation', function () {
             $request = new UpdatePasswordRequest;
             $validator = Validator::make(
                 [
-                    'current_password' => 'WrongPassword123!',
-                    'password' => 'NewPassword123!',
+                    'current_password'      => 'WrongPassword123!',
+                    'password'              => 'NewPassword123!',
                     'password_confirmation' => 'NewPassword123!',
                 ],
                 $request->rules()
@@ -119,8 +119,8 @@ describe('UpdatePasswordRequest Validation', function () {
             $request = new UpdatePasswordRequest;
             $validator = Validator::make(
                 [
-                    'current_password' => $currentPassword,
-                    'password' => $currentPassword,
+                    'current_password'      => $currentPassword,
+                    'password'              => $currentPassword,
                     'password_confirmation' => $currentPassword,
                 ],
                 $request->rules()

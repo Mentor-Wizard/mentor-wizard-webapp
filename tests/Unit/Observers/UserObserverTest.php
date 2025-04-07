@@ -15,7 +15,7 @@ test('success create user test', function () {
 
     $user = User::factory()->create([
         'username' => 'Test User',
-        'email' => 'test@example.com',
+        'email'    => 'test@example.com',
     ]);
 
     expect($user->hasRole(RoleEnum::USER->value))->toBeTrue();

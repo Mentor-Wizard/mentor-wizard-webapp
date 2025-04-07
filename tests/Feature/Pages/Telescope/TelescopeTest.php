@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Models\User;
@@ -15,7 +17,7 @@ describe('Telescope Page', function () {
     it('telescope is accessible for a user in non-local environment', function () {
         $user = User::factory()->create([
             'username' => 'Test USER',
-            'email' => 'user@example.com',
+            'email'    => 'user@example.com',
         ]);
 
         $this->actingAs($user)
@@ -27,7 +29,7 @@ describe('Telescope Page', function () {
         $role = Role::findByName(RoleEnum::ADMIN->value, RoleGuardEnum::ADMIN->value);
         $admin = User::factory()->create([
             'username' => 'Test ADMIN',
-            'email' => 'admin@example.com',
+            'email'    => 'admin@example.com',
         ]);
 
         $admin->syncRoles($role);
@@ -40,7 +42,7 @@ describe('Telescope Page', function () {
     it('telescope avoids loging healthchecks in database', function () {
         $user = User::factory()->create([
             'username' => 'Test USER1',
-            'email' => 'admi@example1.com',
+            'email'    => 'admi@example1.com',
         ]);
 
         $this->actingAs($user)
@@ -55,7 +57,7 @@ describe('Telescope Page', function () {
     it('telescope successfully logs info about request into database', function () {
         $user = User::factory()->create([
             'username' => 'Test USER2',
-            'email' => 'admi@example.com2',
+            'email'    => 'admi@example.com2',
         ]);
 
         $this->actingAs($user)

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use function Pest\Laravel\get;
 
 describe('Log Viewer Page', function () {
@@ -21,4 +23,3 @@ describe('Log Viewer Page', function () {
         ->assertOk()
     );
 })->skip('temporarily to run it on CI');
-

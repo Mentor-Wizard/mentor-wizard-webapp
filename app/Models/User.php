@@ -61,19 +61,6 @@ class User extends Authenticatable implements MustVerifyEmail
         RoleGuardEnum::COACH->value,
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-        ];
-    }
-
     public function profile(): ?HasOne
     {
         return $this->hasOne(UserProfile::class);
@@ -122,5 +109,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function coachChats(): HasMany
     {
         return $this->hasMany(Chat::class, 'coach_id');
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password'          => 'hashed',
+        ];
     }
 }

@@ -37,13 +37,13 @@ describe('Update Profile', function () {
         'updated user with new email' => function () {
             return [
                 'user' => User::factory()->create([
-                    'username' => 'John',
-                    'email' => 'john@example.com',
+                    'username'          => 'John',
+                    'email'             => 'john@example.com',
                     'email_verified_at' => now(),
                 ]),
                 'updateData' => [
                     'username' => 'John',
-                    'email' => 'john.updated@example.com',
+                    'email'    => 'john.updated@example.com',
                 ],
             ];
         },
@@ -51,11 +51,11 @@ describe('Update Profile', function () {
             return [
                 'user' => User::factory()->create([
                     'username' => 'Jane',
-                    'email' => 'jane@example.com',
+                    'email'    => 'jane@example.com',
                 ]),
                 'updateData' => [
                     'username' => 'Jane',
-                    'email' => 'jane@example.com',
+                    'email'    => 'jane@example.com',
                 ],
             ];
         },
@@ -70,7 +70,7 @@ describe('Update Profile', function () {
 
         $request = mockUpdateProfileRequest([
             'username' => $user->username,
-            'email' => 'new.email@example.com',
+            'email'    => 'new.email@example.com',
         ], $user);
 
         $action = new UpdateProfilePage;
@@ -90,7 +90,7 @@ describe('Update Profile', function () {
         $action = new UpdateProfilePage;
         $action->handle($request);
     })->with([
-        'empty name' => ['username' => '', 'email' => 'valid@example.com'],
+        'empty name'    => ['username' => '', 'email' => 'valid@example.com'],
         'invalid email' => ['username' => 'John', 'email' => 'invalid-email'],
     ])->throws(Error::class);
 });

@@ -9,7 +9,7 @@ use Rector\ValueObject\PhpVersion;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
-if (!class_exists(RectorConfig::class)) {
+if (! class_exists(RectorConfig::class)) {
     return;
 }
 

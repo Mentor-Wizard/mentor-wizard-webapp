@@ -10,6 +10,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
+use Throwable;
 
 class RoleSeeder extends Seeder
 {
@@ -32,7 +33,7 @@ class RoleSeeder extends Seeder
             });
 
             DB::commit();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error('[RoleSeeder] Roles are not added to DB', ['error' => $e->getMessage()]);
             DB::rollBack();
         }

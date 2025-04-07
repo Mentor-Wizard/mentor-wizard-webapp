@@ -29,15 +29,6 @@ class Chat extends Model
         'coach_id',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'mentor_id' => 'int',
-            'menti_id'  => 'int',
-            'coach_id'  => 'int',
-        ];
-    }
-
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
@@ -56,5 +47,14 @@ class Chat extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'mentor_id' => 'int',
+            'menti_id'  => 'int',
+            'coach_id'  => 'int',
+        ];
     }
 }

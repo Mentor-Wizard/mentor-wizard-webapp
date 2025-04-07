@@ -24,16 +24,16 @@ class MentorSessionNote extends Model
         'notes',
     ];
 
+    public function mentorSession(): BelongsTo
+    {
+        return $this->belongsTo(MentorSession::class);
+    }
+
     protected function casts(): array
     {
         return [
             'mentor_session_id' => 'int',
             'notes'             => 'string',
         ];
-    }
-
-    public function mentorSession(): BelongsTo
-    {
-        return $this->belongsTo(MentorSession::class);
     }
 }

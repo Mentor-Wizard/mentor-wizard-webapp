@@ -23,7 +23,7 @@ class ResetPassword
             $request->only('email')
         );
 
-        if (Password::RESET_LINK_SENT === $status) {
+        if ($status === Password::RESET_LINK_SENT) {
             return back()->with('status', __($status));
         }
 
