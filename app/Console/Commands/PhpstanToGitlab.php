@@ -9,7 +9,6 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
-use JsonException;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class PhpstanToGitlab extends Command
@@ -22,14 +21,14 @@ class PhpstanToGitlab extends Command
 
     /**
      * @throws FileNotFoundException
-     * @throws JsonException
+     * @throws \JsonException
      */
     public function handle(): int
     {
         $inputFile = $this->argument('inputFile');
         $outputFile = $this->argument('outputFile');
 
-        if (! File::exists($inputFile)) {
+        if (!File::exists($inputFile)) {
             $this->error("File not found: {$inputFile}");
 
             return SymfonyCommand::FAILURE;
@@ -46,9 +45,9 @@ class PhpstanToGitlab extends Command
                         return [
                             'description' => Arr::get($message, 'message'),
                             'fingerprint' => md5($sanitizedFilePath.Arr::get($message, 'message')),
-                            'severity' => 'major',
-                            'location' => [
-                                'path' => $sanitizedFilePath,
+                            'severity'    => 'major',
+                            'location'    => [
+                                'path'  => $sanitizedFilePath,
                                 'lines' => [
                                     'begin' => Arr::get($message, 'line', 1),
                                 ],

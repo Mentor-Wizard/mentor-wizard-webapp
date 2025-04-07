@@ -1,12 +1,18 @@
 {
-    "preset": "laravel",
+    "preset": "symfony",
     "rules": {
         "align_multiline_comment": true,
         "array_syntax": {
             "syntax": "short"
         },
         "declare_strict_types": true,
-        "concat_space": true
+        "concat_space": true,
+        "binary_operator_spaces": {
+            "default": "single_space",
+            "operators": {
+                "=>": "align_single_space"
+            }
+        }
     },
     "exclude": [
         "tests"

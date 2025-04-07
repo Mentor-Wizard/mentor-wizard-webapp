@@ -16,11 +16,11 @@ class VerifyEmailRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        if (! hash_equals((string) $this->user()->getKey(), (string) $this->route('id'))) {
+        if (!hash_equals((string) $this->user()->getKey(), (string) $this->route('id'))) {
             return false;
         }
 
-        if (! hash_equals(sha1($this->user()->getEmailForVerification()), $this->route('hash'))) {
+        if (!hash_equals(sha1($this->user()->getEmailForVerification()), $this->route('hash'))) {
             return false;
         }
 
@@ -35,7 +35,6 @@ class VerifyEmailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
         ];
     }
 
@@ -44,7 +43,7 @@ class VerifyEmailRequest extends FormRequest
      */
     public function fulfill(): void
     {
-        if (! $this->user()->hasVerifiedEmail()) {
+        if (!$this->user()->hasVerifiedEmail()) {
             $this->user()->markEmailAsVerified();
 
             event(new Verified($this->user()));

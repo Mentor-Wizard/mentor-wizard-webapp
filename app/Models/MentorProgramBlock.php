@@ -31,9 +31,9 @@ class MentorProgramBlock extends Model
     {
         return [
             'mentor_program_id' => 'int',
-            'name' => 'string',
-            'slug' => 'string',
-            'description' => 'string',
+            'name'              => 'string',
+            'slug'              => 'string',
+            'description'       => 'string',
         ];
     }
 

@@ -23,11 +23,11 @@ class MentorProgramFactory extends Factory
     public function definition(): array
     {
         return [
-            'mentor_id' => User::factory(),
-            'name' => Str::random(100),
-            'slug' => fake()->slug(),
+            'mentor_id'   => User::factory(),
+            'name'        => Str::random(100),
+            'slug'        => fake()->slug(),
             'description' => fake()->sentence(20),
-            'cost' => fake()->randomFloat(2, 10, 1000),
+            'cost'        => fake()->randomFloat(2, 10, 1000),
             'currency_id' => Currency::factory(),
         ];
     }

@@ -24,19 +24,19 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $isLocal = $this->app->environment('local', 'testing', 'ci');
 
         Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
-            if ($entry->type === 'request' && $entry->content['uri'] === '/up') {
+            if ('request' === $entry->type && '/up' === $entry->content['uri']) {
                 return false;
             }
-            if ($entry->type === 'view' && isset($entry->content['name']) && str_contains($entry->content['name'], 'health-up.blade.php')) {
+            if ('view' === $entry->type && isset($entry->content['name']) && str_contains($entry->content['name'], 'health-up.blade.php')) {
                 return false;
             }
 
-            return $isLocal ||
-                   $entry->isReportableException() ||
-                   $entry->isFailedRequest() ||
-                   $entry->isFailedJob() ||
-                   $entry->isScheduledTask() ||
-                   $entry->hasMonitoredTag();
+            return $isLocal
+                   || $entry->isReportableException()
+                   || $entry->isFailedRequest()
+                   || $entry->isFailedJob()
+                   || $entry->isScheduledTask()
+                   || $entry->hasMonitoredTag();
         });
     }
 

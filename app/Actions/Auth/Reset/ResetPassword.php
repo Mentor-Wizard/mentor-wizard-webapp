@@ -23,12 +23,10 @@ class ResetPassword
             $request->only('email')
         );
 
-        if ($status === Password::RESET_LINK_SENT) {
+        if (Password::RESET_LINK_SENT === $status) {
             return back()->with('status', __($status));
         }
 
-        throw ValidationException::withMessages([
-            'email' => [__($status)],
-        ]);
+        throw ValidationException::withMessages(['email' => [__($status)]]);
     }
 }

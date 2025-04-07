@@ -22,9 +22,9 @@ class MentorProgramBlockFactory extends Factory
     {
         return [
             'mentor_program_id' => MentorProgram::factory(),
-            'name' => Str::random(100),
-            'slug' => fake()->slug(),
-            'description' => fake()->sentence(20),
+            'name'              => Str::random(100),
+            'slug'              => fake()->slug(),
+            'description'       => fake()->sentence(20),
         ];
     }
 }

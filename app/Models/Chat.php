@@ -33,8 +33,8 @@ class Chat extends Model
     {
         return [
             'mentor_id' => 'int',
-            'menti_id' => 'int',
-            'coach_id' => 'int',
+            'menti_id'  => 'int',
+            'coach_id'  => 'int',
         ];
     }
 

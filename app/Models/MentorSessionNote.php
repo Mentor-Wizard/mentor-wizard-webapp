@@ -28,7 +28,7 @@ class MentorSessionNote extends Model
     {
         return [
             'mentor_session_id' => 'int',
-            'notes' => 'string',
+            'notes'             => 'string',
         ];
     }
 

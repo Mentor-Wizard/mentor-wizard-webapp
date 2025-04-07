@@ -34,14 +34,14 @@ class MentorSession extends Model
     protected function casts(): array
     {
         return [
-            'mentor_id' => 'int',
-            'menti_id' => 'int',
-            'date' => 'datetime',
-            'is_success' => 'boolean',
-            'is_paid' => 'boolean',
-            'is_cancelled' => 'boolean',
+            'mentor_id'       => 'int',
+            'menti_id'        => 'int',
+            'date'            => 'datetime',
+            'is_success'      => 'boolean',
+            'is_paid'         => 'boolean',
+            'is_cancelled'    => 'boolean',
             'is_date_changed' => 'boolean',
-            'cost' => 'float',
+            'cost'            => 'float',
         ];
     }
 

@@ -31,8 +31,8 @@ class MentorProgramBlockProgress extends Model
     {
         return [
             'mentor_program_block_id' => 'int',
-            'menti_id' => 'int',
-            'is_completed' => 'boolean',
+            'menti_id'                => 'int',
+            'is_completed'            => 'boolean',
         ];
     }
 

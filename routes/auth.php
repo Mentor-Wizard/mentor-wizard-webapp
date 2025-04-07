@@ -22,7 +22,6 @@ use App\Actions\Auth\VerifyEmail;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-
     Route::get('register', GetRegistrationPage::class)
         ->name('register');
 
@@ -52,7 +51,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-
     Route::get('verify-email', VerificationEmailPrompt::class)
         ->name('verification.notice');
 

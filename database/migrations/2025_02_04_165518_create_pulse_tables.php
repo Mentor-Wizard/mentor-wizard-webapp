@@ -6,14 +6,13 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Pulse\Support\PulseMigration;
 
-return new class extends PulseMigration
-{
+return new class extends PulseMigration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        if (! $this->shouldRun()) {
+        if (!$this->shouldRun()) {
             return;
         }
 
@@ -24,7 +23,7 @@ return new class extends PulseMigration
             $table->mediumText('key');
             match ($this->driver()) {
                 'mariadb', 'mysql' => $table->char('key_hash', 16)->charset('binary')->virtualAs('unhex(md5(`key`))'),
-                'pgsql' => $table->uuid('key_hash')->storedAs('md5("key")::uuid'),
+                'pgsql'  => $table->uuid('key_hash')->storedAs('md5("key")::uuid'),
                 'sqlite' => $table->string('key_hash'),
             };
             $table->mediumText('value');
@@ -41,7 +40,7 @@ return new class extends PulseMigration
             $table->mediumText('key');
             match ($this->driver()) {
                 'mariadb', 'mysql' => $table->char('key_hash', 16)->charset('binary')->virtualAs('unhex(md5(`key`))'),
-                'pgsql' => $table->uuid('key_hash')->storedAs('md5("key")::uuid'),
+                'pgsql'  => $table->uuid('key_hash')->storedAs('md5("key")::uuid'),
                 'sqlite' => $table->string('key_hash'),
             };
             $table->bigInteger('value')->nullable();
@@ -60,7 +59,7 @@ return new class extends PulseMigration
             $table->mediumText('key');
             match ($this->driver()) {
                 'mariadb', 'mysql' => $table->char('key_hash', 16)->charset('binary')->virtualAs('unhex(md5(`key`))'),
-                'pgsql' => $table->uuid('key_hash')->storedAs('md5("key")::uuid'),
+                'pgsql'  => $table->uuid('key_hash')->storedAs('md5("key")::uuid'),
                 'sqlite' => $table->string('key_hash'),
             };
             $table->string('aggregate');

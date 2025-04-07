@@ -23,12 +23,12 @@ class AttachmentFactory extends Factory
         $extention = $this->faker->fileExtension();
 
         return [
-            'attachable_id' => $this->faker->numberBetween(1, 10000),
+            'attachable_id'   => $this->faker->numberBetween(1, 10000),
             'attachable_type' => User::class,
-            'hash_name' => $this->faker->uuid.'.'.$extention,
-            'file_name' => $this->faker->lexify('????????').'.'.$extention,
-            'file_size' => $this->faker->numberBetween(1, 10000),
-            'mime_type' => $this->faker->mimeType(),
+            'hash_name'       => $this->faker->uuid.'.'.$extention,
+            'file_name'       => $this->faker->lexify('????????').'.'.$extention,
+            'file_size'       => $this->faker->numberBetween(1, 10000),
+            'mime_type'       => $this->faker->mimeType(),
         ];
     }
 }
