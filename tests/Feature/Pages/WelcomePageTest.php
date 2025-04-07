@@ -1,7 +1,9 @@
 <?php
 
-use \Symfony\Component\HttpFoundation\Response;
+declare(strict_types=1);
+
 use App\Actions\Pages\WelcomePage;
+use Symfony\Component\HttpFoundation\Response;
 
 covers(WelcomePage::class);
 

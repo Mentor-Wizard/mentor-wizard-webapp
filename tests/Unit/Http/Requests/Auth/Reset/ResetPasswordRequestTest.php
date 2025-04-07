@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Auth\Reset\ResetPasswordRequest;
 use Illuminate\Support\Facades\Validator;
 
@@ -8,7 +10,7 @@ mutates(ResetPasswordRequest::class);
 describe('ResetPasswordRequest Validation', function () {
     describe('Email validation', function () {
         it('requires email to be present', function () {
-            $request = new ResetPasswordRequest();
+            $request = new ResetPasswordRequest;
 
             $validator = Validator::make(['email' => ''], $request->rules());
 
@@ -17,7 +19,7 @@ describe('ResetPasswordRequest Validation', function () {
         });
 
         it('accepts a valid email', function () {
-            $request = new ResetPasswordRequest();
+            $request = new ResetPasswordRequest;
 
             $validator = Validator::make(['email' => 'test@example.com'], $request->rules());
 
@@ -25,7 +27,7 @@ describe('ResetPasswordRequest Validation', function () {
         });
 
         it('rejects an invalid email', function () {
-            $request = new ResetPasswordRequest();
+            $request = new ResetPasswordRequest;
 
             $validator = Validator::make(['email' => 'invalid-email'], $request->rules());
 
@@ -36,7 +38,7 @@ describe('ResetPasswordRequest Validation', function () {
 
     describe('Authorization', function () {
         it('always allows the request', function () {
-            $request = new ResetPasswordRequest();
+            $request = new ResetPasswordRequest;
 
             expect($request->authorize())->toBeTrue();
         });

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Socialite\SocialiteRedirect;
 use App\Enums\SocialiteDriver;
 use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\Response;
-use Laravel\Socialite\Contracts\Provider;
 
 mutates(SocialiteRedirect::class);
 

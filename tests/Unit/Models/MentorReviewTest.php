@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MentorProgram;
 use App\Models\MentorReview;
 use App\Models\User;
@@ -14,7 +16,7 @@ describe('MentorReview Model', function () {
     });
 
     it('has the correct fillable attributes', function () {
-        $model = new MentorReview();
+        $model = new MentorReview;
 
         expect($model->getFillable())->toEqual([
             'mentor_id',

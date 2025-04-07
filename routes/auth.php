@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\ConfirmPassword;
 use App\Actions\Auth\GetConfirmPasswordPage;
 use App\Actions\Auth\Login\GetLoginPage;

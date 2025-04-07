@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Auth\Login;
 
 use Illuminate\Support\Facades\Route;

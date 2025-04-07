@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Auth\Socialite;
 
 use App\Models\User;
@@ -20,7 +22,7 @@ class SocialiteCallback
         $socialiteUser = Socialite::driver($driver)->stateless()->user();
 
         if (empty($socialiteUser->getEmail())) {
-            Log::error("Email is empty, but required for login", ['driver' => $driver]);
+            Log::error('Email is empty, but required for login', ['driver' => $driver]);
             abort(Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
@@ -33,6 +35,7 @@ class SocialiteCallback
         );
 
         Auth::login($user);
+
         return redirect()->route('pages.welcome');
     }
 }

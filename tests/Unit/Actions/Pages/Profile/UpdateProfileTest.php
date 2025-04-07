@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Pages\Profile\UpdateProfilePage;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Arr;
 
 mutates(UpdateProfilePage::class);
 
@@ -21,7 +23,7 @@ describe('Update Profile', function () {
         Auth::login($user);
 
         $request = mockUpdateProfileRequest($updateData, $user);
-        $action = new UpdateProfilePage();
+        $action = new UpdateProfilePage;
         $result = $action->handle($request);
 
         $updatedUser = $user->fresh();
@@ -37,41 +39,41 @@ describe('Update Profile', function () {
                 'user' => User::factory()->create([
                     'username' => 'John',
                     'email' => 'john@example.com',
-                    'email_verified_at' => now()
+                    'email_verified_at' => now(),
                 ]),
                 'updateData' => [
                     'username' => 'John',
-                    'email' => 'john.updated@example.com'
-                ]
+                    'email' => 'john.updated@example.com',
+                ],
             ];
         },
         'updated user with same email' => function () {
             return [
                 'user' => User::factory()->create([
                     'username' => 'Jane',
-                    'email' => 'jane@example.com'
+                    'email' => 'jane@example.com',
                 ]),
                 'updateData' => [
                     'username' => 'Jane',
-                    'email' => 'jane@example.com'
-                ]
+                    'email' => 'jane@example.com',
+                ],
             ];
-        }
+        },
     ]);
 
     it('resets email verification when email changes', function () {
         $user = User::factory()->create([
-            'email_verified_at' => now()
+            'email_verified_at' => now(),
         ]);
 
         Auth::login($user);
 
         $request = mockUpdateProfileRequest([
             'username' => $user->username,
-            'email' => 'new.email@example.com'
+            'email' => 'new.email@example.com',
         ], $user);
 
-        $action = new UpdateProfilePage();
+        $action = new UpdateProfilePage;
         $action->handle($request);
 
         $updatedUser = $user->fresh();
@@ -85,7 +87,7 @@ describe('Update Profile', function () {
 
         $request = mockUpdateProfileRequest($invalidData, $user);
 
-        $action = new UpdateProfilePage();
+        $action = new UpdateProfilePage;
         $action->handle($request);
     })->with([
         'empty name' => ['username' => '', 'email' => 'valid@example.com'],
@@ -93,7 +95,8 @@ describe('Update Profile', function () {
     ])->throws(Error::class);
 });
 
-function mockUpdateProfileRequest(array $data, User $user): UpdateProfileRequest|MockInterface {
+function mockUpdateProfileRequest(array $data, User $user): UpdateProfileRequest|MockInterface
+{
     $request = Mockery::mock(UpdateProfileRequest::class);
     $request->shouldReceive('user')->andReturn($user);
     $request->shouldReceive('validated')->andReturn($data);

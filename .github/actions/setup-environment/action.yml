@@ -1,0 +1,77 @@
+name: '⚙️ Setup environment'
+description: 'Setups environment for testing tasks.'
+
+inputs:
+  php:
+    description: 'PHP version to install'
+    required: true
+    default: '8.4'
+
+  node:
+    description: 'Node.js version to install'
+    required: true
+    default: '22.x'
+
+  use-php:
+    description: 'Whether to install PHP and dependencies'
+    required: false
+    default: 'false'
+
+  use-node:
+    description: 'Whether to install Node.js and dependencies'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+
+    - name: '🐘 Setup PHP ${{ inputs.php }}'
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php }}
+        coverage: pcov
+        extensions: pdo, pdo_pgsql
+        tools: cs2pr
+
+    - name: '🗃 Get composer cache directory'
+      id: composer-cache
+      shell: bash
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: '💽 Cache composer dependencies'
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: "${{ runner.os }}-${{ github.ref_name }}-composer-${{ hashFiles('**/composer.lock') }}"
+        restore-keys: ${{ runner.os }}-${{ github.ref_name }}-composer-
+
+    - name: '📦 Install composer dependencies'
+      shell: bash
+      run: composer i --no-progress --no-scripts -qn --ansi
+
+    - name: '🟧 Setup yarn'
+      if: ${{ inputs.use-node == 'true' }}
+      uses: actions/setup-node@v4
+
+    - name: '📦 Install yarn dependencies'
+      if: ${{ inputs.use-node == 'true' }}
+      shell: bash
+      run: |
+        corepack enable
+        corepack prepare yarn@4.6.0 --activate
+        yarn install
+
+    - name: '📦 Build front-end assets'
+      if: ${{ inputs.use-node == 'true' }}
+      shell: bash
+      run: |
+        yarn build
+
+    - name: '🧰 Set up Laravel'
+      shell: bash
+      run: |
+        cp .env.ci .env.testing
+        php artisan key:generate --env=testing --ansi
+        composer ide-helper
+

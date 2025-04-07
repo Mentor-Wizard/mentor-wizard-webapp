@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGeneratorFactory;
-use Illuminate\Http\UploadedFile;
 
 covers(UserProfile::class);
 
@@ -66,4 +68,3 @@ it('records media conversions', function () {
     expect($conversionNames)->toHaveKey('preview')
         ->and($conversionNames['preview'])->toBeTrue();
 });
-

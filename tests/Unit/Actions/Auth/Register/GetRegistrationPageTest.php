@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 use App\Actions\Auth\Register\GetRegistrationPage;
 use Inertia\Response;
@@ -9,7 +10,7 @@ mutates(GetRegistrationPage::class);
 describe('GetRegistrationPage Action', function () {
 
     it('returns correct Inertia response', function () {
-        $action = new GetRegistrationPage();
+        $action = new GetRegistrationPage;
 
         $response = $action->handle();
         $responseData = $response->toResponse(request())->getOriginalContent();

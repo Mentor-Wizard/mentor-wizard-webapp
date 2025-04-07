@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -14,7 +16,7 @@ describe('MentorProgram Model', function () {
     });
 
     it('has the correct fillable attributes', function () {
-        $model = new MentorProgram();
+        $model = new MentorProgram;
 
         expect($model->getFillable())->toEqual([
             'mentor_id',

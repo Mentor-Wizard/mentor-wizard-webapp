@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Reset\CreatePassword;
 use App\Http\Requests\Auth\Reset\CreatePasswordRequest;
 use App\Models\User;
@@ -36,7 +38,7 @@ describe('CreatePassword Action', function () {
                 'email' => $user->email,
                 'password' => $newPassword,
                 'password_confirmation' => $newPassword,
-                'token' => 'test_token'
+                'token' => 'test_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
@@ -47,17 +49,18 @@ describe('CreatePassword Action', function () {
                 'email' => $user->email,
                 'password' => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'test_token'
+                'token' => 'test_token',
             ]);
 
         Password::shouldReceive('reset')
             ->andReturnUsing(function (array $credentials, $callback) use ($user) {
                 expect($user->email)->toBe(Arr::get($credentials, 'email'));
                 $callback($user);
+
                 return Password::PASSWORD_RESET;
             });
 
-        $action = new CreatePassword();
+        $action = new CreatePassword;
         $result = $action->handle($request);
 
         expect($result->getStatusCode())->toBe(Response::HTTP_FOUND)
@@ -87,7 +90,7 @@ describe('CreatePassword Action', function () {
                 'email' => $user->email,
                 'password' => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'invalid_token'
+                'token' => 'invalid_token',
             ]);
 
         Password::shouldReceive('reset')
@@ -100,7 +103,7 @@ describe('CreatePassword Action', function () {
             ->with('passwords.token', [], null)
             ->andReturn('Invalid reset token');
 
-        $action = new CreatePassword();
+        $action = new CreatePassword;
 
         $exception = null;
         try {
@@ -129,7 +132,7 @@ describe('CreatePassword Action', function () {
                 'email' => $user->email,
                 'password' => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'valid_token'
+                'token' => 'valid_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
@@ -145,10 +148,11 @@ describe('CreatePassword Action', function () {
         Password::shouldReceive('reset')
             ->andReturnUsing(function (array $credentials, $callback) use ($user) {
                 $callback($user);
+
                 return Password::PASSWORD_RESET;
             });
 
-        $action = new CreatePassword();
+        $action = new CreatePassword;
         $response = $action->handle($request);
 
         expect($response->getStatusCode())->toBe(302)
@@ -166,13 +170,13 @@ describe('CreatePassword Action', function () {
                 'email' => $user->email,
                 'password' => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'invalid_token'
+                'token' => 'invalid_token',
             ]);
 
         Password::shouldReceive('reset')
             ->andReturn($status);
 
-        $action = new CreatePassword();
+        $action = new CreatePassword;
 
         try {
             $action->handle($request);
@@ -195,7 +199,7 @@ describe('CreatePassword Action', function () {
         $user = User::factory()->create([
             'email' => 'test@example.com',
             'password' => Hash::make($oldPassword),
-            'remember_token' => 'old_token'
+            'remember_token' => 'old_token',
         ]);
 
         $request = Mockery::mock(CreatePasswordRequest::class);
@@ -205,7 +209,7 @@ describe('CreatePassword Action', function () {
                 'email' => $user->email,
                 'password' => $newPassword,
                 'password_confirmation' => $newPassword,
-                'token' => 'reset_token'
+                'token' => 'reset_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
@@ -214,10 +218,11 @@ describe('CreatePassword Action', function () {
         Password::shouldReceive('reset')
             ->andReturnUsing(function ($credentials, $callback) use ($user) {
                 $callback($user);
+
                 return Password::PASSWORD_RESET;
             });
 
-        $action = new CreatePassword();
+        $action = new CreatePassword;
         $action->handle($request);
 
         $user->refresh();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Auth\Login\LoginRequest;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
@@ -10,12 +12,12 @@ use Illuminate\Validation\ValidationException;
 describe('LoginRequest Authentication', function () {
     describe('Authentication Scenarios', function () {
         it('successfully authorizes request', function () {
-            $request = new LoginRequest();
+            $request = new LoginRequest;
             expect($request->authorize())->toBeTrue();
         });
 
         it('defines correct validation rules', function () {
-            $request = new LoginRequest();
+            $request = new LoginRequest;
             $rules = $request->rules();
 
             expect($rules)->toHaveKeys(['email', 'password'])
@@ -34,7 +36,7 @@ describe('LoginRequest Authentication', function () {
                 ->with('email', 'password')
                 ->andReturn([
                     'email' => 'test@example.com',
-                    'password' => 'password'
+                    'password' => 'password',
                 ]);
             $request->shouldReceive('boolean')
                 ->with('remember')
@@ -68,7 +70,7 @@ describe('LoginRequest Authentication', function () {
                 ->with('email', 'password')
                 ->andReturn([
                     'email' => 'test@example.com',
-                    'password' => 'wrong_password'
+                    'password' => 'wrong_password',
                 ]);
             $request->shouldReceive('boolean')
                 ->with('remember')

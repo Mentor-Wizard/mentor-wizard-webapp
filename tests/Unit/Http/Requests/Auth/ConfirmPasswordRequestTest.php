@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
@@ -9,14 +11,14 @@ mutates(ConfirmPasswordRequest::class);
 describe('ConfirmPasswordRequest', function () {
     describe('Authorization', function () {
         it('always allows access', function () {
-            $request = new ConfirmPasswordRequest();
+            $request = new ConfirmPasswordRequest;
             expect($request->authorize())->toBeTrue();
         });
     });
 
     describe('Validation Rules', function () {
         it('contains a rule for mandatory password entry', function () {
-            $request = new ConfirmPasswordRequest();
+            $request = new ConfirmPasswordRequest;
             $rules = $request->rules();
 
             expect($rules)->toHaveKey('password')
