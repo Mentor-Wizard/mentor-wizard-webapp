@@ -1,4 +1,5 @@
 parameters:
+    checkOctaneCompatibility: true
     paths:
         - app
         - database/factories
