@@ -149,7 +149,7 @@ import {Menu, MenuButton, MenuItem, MenuItems, Popover, PopoverButton, PopoverPa
 import {MagnifyingGlassIcon} from '@heroicons/vue/20/solid'
 import {Bars3Icon, BellIcon, XMarkIcon} from '@heroicons/vue/24/outline'
 import {Link} from "@inertiajs/vue3"
-import ApplicationLogo from "@/Components/ApplicationLogo.vue";
+import ApplicationLogo from "@/Components/UI/Logo/ApplicationLogo.vue";
 import {usePage, router} from '@inertiajs/vue3';
 import {reactive} from 'vue';
 
