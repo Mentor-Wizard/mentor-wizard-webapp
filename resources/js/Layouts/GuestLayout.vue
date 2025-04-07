@@ -19,8 +19,6 @@ import Footer from "@/Components/Navigation/Footer.vue";
         >
             <slot />
         </div>
-        <footer>
             <Footer></Footer>
-        </footer>
     </div>
 </template>
