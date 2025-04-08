@@ -6,6 +6,7 @@ use App\Models\MentorSession;
 use App\Models\MentorSessionNote;
 use App\Models\Payment;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,7 +41,7 @@ describe('MentorSession Model', function () {
             ->and($mentorSession->is_paid)->toBeTrue()
             ->and($mentorSession->is_cancelled)->toBeFalse()
             ->and($mentorSession->is_date_changed)->toBeFalse()
-            ->and($mentorSession->date)->toBeInstanceOf(DateTimeImmutable::class)
+            ->and($mentorSession->date)->toBeInstanceOf(CarbonImmutable::class)
             ->and($mentorSession->mentor)->toBeInstanceOf(User::class)
             ->and($mentorSession->mentor->getKey())->toBe($this->mentor->getKey())
             ->and($mentorSession->menti)->toBeInstanceOf(User::class)
@@ -67,7 +68,7 @@ describe('MentorSession Model', function () {
             ->and($mentorSession->is_paid)->toBeTrue()
             ->and($mentorSession->is_cancelled)->toBeFalse()
             ->and($mentorSession->is_date_changed)->toBeFalse()
-            ->and($mentorSession->date)->toBeInstanceOf(DateTimeImmutable::class);
+            ->and($mentorSession->date)->toBeInstanceOf(CarbonImmutable::class);
     });
 
     it('cascades on mentor deletion', function () {

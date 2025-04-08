@@ -6,7 +6,9 @@ namespace App\Providers;
 
 use App\Enums\RoleEnum;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
@@ -25,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Date::use(CarbonImmutable::class);
+
         $this->configModels();
         $this->configDatabase();
 
