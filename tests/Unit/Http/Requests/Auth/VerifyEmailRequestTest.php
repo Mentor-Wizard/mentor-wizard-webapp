@@ -81,7 +81,7 @@ describe('VerifyEmailRequest Authorization', function (): void {
     it('denies authorization when hash does not match', function (): void {
         $user = Mockery::mock('User');
         $user->shouldReceive('getKey')->once()->andReturn(123);
-        $user->shouldReceive('getEmailForVerification')->once()->andReturn('test@example.com');
+        $user->shouldReceive('getEmailForVerification')->once()->andReturn(123);
 
         $request = Mockery::mock(VerifyEmailRequest::class)
             ->makePartial()

@@ -139,7 +139,7 @@ jobs:
           DB_PASSWORD: db
 
       - name: '☂️ Upload results to Codecov'
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() || matrix.command.name != '🦠 Mutation' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -152,7 +152,7 @@ jobs:
           commit_parent: ${{ github.event.pull_request.base.sha }}
 
       - name: '☂️ Upload test results to Codecov'
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() || matrix.command.name != '🦠 Mutation' }}
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
