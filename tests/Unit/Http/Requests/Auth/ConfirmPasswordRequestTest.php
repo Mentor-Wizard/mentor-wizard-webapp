@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Facades\Auth;
 
 mutates(ConfirmPasswordRequest::class);
 

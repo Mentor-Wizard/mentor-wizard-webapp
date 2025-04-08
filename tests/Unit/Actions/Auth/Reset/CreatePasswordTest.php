@@ -72,7 +72,7 @@ describe('CreatePassword Action', function (): void {
             ->and(strlen((string) $user->remember_token))->toBe(60)
             ->and($user->remember_token)->not()->toBeNull();
 
-        Event::assertDispatched(PasswordReset::class, fn(PasswordReset $event): bool => $event->user === $user);
+        Event::assertDispatched(PasswordReset::class, fn (PasswordReset $event): bool => $event->user === $user);
     });
 
     it('should throw validation exception when password reset fails', function (): void {
@@ -178,7 +178,7 @@ describe('CreatePassword Action', function (): void {
 
         try {
             $action->handle($request);
-            $this->fail('Expected ValidationException for status ' . $status);
+            $this->fail('Expected ValidationException for status '.$status);
         } catch (ValidationException $validationException) {
 
             expect($validationException->errors())->toHaveKey('email')

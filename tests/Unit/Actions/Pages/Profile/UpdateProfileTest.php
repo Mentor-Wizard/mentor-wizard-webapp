@@ -34,7 +34,7 @@ describe('Update Profile', function (): void {
             ->and($updatedUser->username)->toBe(Arr::get($updateData, 'username'))
             ->and($updatedUser->email)->toBe(Arr::get($updateData, 'email'));
     })->with([
-        'updated user with new email' => fn(): array => [
+        'updated user with new email' => fn (): array => [
             'user' => User::factory()->create([
                 'username' => 'John',
                 'email' => 'john@example.com',
@@ -45,7 +45,7 @@ describe('Update Profile', function (): void {
                 'email' => 'john.updated@example.com',
             ],
         ],
-        'updated user with same email' => fn(): array => [
+        'updated user with same email' => fn (): array => [
             'user' => User::factory()->create([
                 'username' => 'Jane',
                 'email' => 'jane@example.com',

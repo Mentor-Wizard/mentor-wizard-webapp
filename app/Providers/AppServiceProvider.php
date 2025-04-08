@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceHttps();
         }
 
-        Gate::define('viewPulse', fn(User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
+        Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
 
         Vite::prefetch(concurrency: 3);
     }

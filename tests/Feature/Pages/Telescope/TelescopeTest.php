@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Models\User;

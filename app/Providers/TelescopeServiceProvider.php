@@ -83,6 +83,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     #[\Override]
     protected function gate(): void
     {
-        Gate::define('viewTelescope', fn(?User $user) => $this->app->environment('local', 'testing', 'ci'));
+        Gate::define('viewTelescope', fn (?User $user) => $this->app->environment('local', 'testing', 'ci'));
     }
 }

@@ -27,7 +27,7 @@ it('redirects to socialite driver if valid driver is provided', function ($drive
 it('logs an error and aborts if an invalid driver is provided', function (): void {
     $invalidDriver = 'invalid';
 
-    Log::shouldReceive('error')->once()->withArgs(fn(string $message, array $context): bool => $message === 'Invalid socialite driver' && $context['driver'] === $invalidDriver);
+    Log::shouldReceive('error')->once()->withArgs(fn (string $message, array $context): bool => $message === 'Invalid socialite driver' && $context['driver'] === $invalidDriver);
 
     (new SocialiteRedirect)->handle($invalidDriver);
 })->throws(HttpException::class);
