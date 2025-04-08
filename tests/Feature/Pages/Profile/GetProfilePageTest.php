@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 
 describe('Profile Page', function (): void {
@@ -13,7 +14,7 @@ describe('Profile Page', function (): void {
 
         $this->actingAs($user)
             ->get(route('profile.edit'))
-            ->assertInertia(fn (Assert $page): \Illuminate\Testing\Fluent\AssertableJson => $page
+            ->assertInertia(fn (Assert $page): AssertableJson => $page
                 ->component('Profile/Edit')
                 ->has('mustVerifyEmail')
                 ->where('status', null)

@@ -46,6 +46,6 @@ describe('MentorProgram Model', function (): void {
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
-        \App\Models\MentorProgram::query()->create(['extra_field' => 'test']);
+        MentorProgram::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 });

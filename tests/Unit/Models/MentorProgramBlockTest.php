@@ -41,7 +41,7 @@ describe('MentorProgramBlock Model', function (): void {
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
-        \App\Models\MentorProgramBlock::query()->create(['extra_field' => 'test']);
+        MentorProgramBlock::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 
     it('has correct casts for MentorProgramBlock', function (): void {
@@ -57,14 +57,14 @@ describe('MentorProgramBlock Model', function (): void {
     });
 
     it('fails to create the model with duplicate slugs', function (): void {
-        \App\Models\MentorProgramBlock::query()->create([
+        MentorProgramBlock::query()->create([
             'mentor_program_id' => 1,
             'name' => 'some name',
             'description' => 'some description',
             'slug' => 'unique-slug',
         ]);
 
-        $duplicateModel = \App\Models\MentorProgramBlock::query()->create([
+        $duplicateModel = MentorProgramBlock::query()->create([
             'mentor_program_id' => 2,
             'name' => 'some name',
             'description' => 'some description',

@@ -90,6 +90,6 @@ describe('MentorSessionNote Model', function (): void {
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
-        \App\Models\MentorSession::query()->create(['extra_field' => 'test']);
+        MentorSession::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 });

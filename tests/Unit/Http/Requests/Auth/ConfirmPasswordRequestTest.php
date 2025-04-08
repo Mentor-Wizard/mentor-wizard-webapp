@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Validator;
+use Illuminate\Contracts\Validation\Validator;
 
 mutates(ConfirmPasswordRequest::class);
 
@@ -53,7 +53,7 @@ describe('ConfirmPasswordRequest', function (): void {
                 ])
                 ->andReturn(false);
 
-            $validatorMock = Mockery::mock(\Illuminate\Contracts\Validation\Validator::class);
+            $validatorMock = Mockery::mock(Validator::class);
             $errorsMock = Mockery::mock();
 
             $validatorMock->shouldReceive('after')
@@ -93,7 +93,7 @@ describe('ConfirmPasswordRequest', function (): void {
                 ])
                 ->andReturn(true);
 
-            $validatorMock = Mockery::mock(\Illuminate\Contracts\Validation\Validator::class);
+            $validatorMock = Mockery::mock(Validator::class);
             $validatorMock->shouldReceive('after')
                 ->with(Mockery::type('Closure'))
                 ->once()

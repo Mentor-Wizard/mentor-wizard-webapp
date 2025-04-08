@@ -17,7 +17,7 @@ describe('Confirm Password Page Feature Test', function (): void {
         $response = $this->get(route('password.confirm'));
 
         $response->assertOk()
-            ->assertInertia(fn (Assert $page): \Inertia\Testing\AssertableInertia => $page
+            ->assertInertia(fn (Assert $page): Assert => $page
                 ->component('Auth/ConfirmPassword')
             );
     });

@@ -182,6 +182,6 @@ describe('Payment Model', function (): void {
             ->and($payment->mentorSession)->toBeInstanceOf(MentorSession::class)
             ->and($payment->mentorSession->getKey())->toBe($this->mentorSession->getKey());
 
-        \App\Models\MentorSession::query()->create(array_merge($data, ['extra_field' => 'test']));
+        MentorSession::query()->create(array_merge($data, ['extra_field' => 'test']));
     })->throws(MassAssignmentException::class);
 });

@@ -145,7 +145,7 @@ describe('MentorSession Model', function (): void {
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
-        \App\Models\MentorSession::query()->create(['extra_field' => 'test']);
+        MentorSession::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 
     it('has a valid mentorSessionNote relation', function (): void {
@@ -165,7 +165,7 @@ describe('MentorSession Model', function (): void {
 
     it('throws MassAssignmentException when trying to fill non-fillable attributes', function (): void {
         expect(function (): void {
-            \App\Models\MentorSession::query()->create([
+            MentorSession::query()->create([
                 'mentor_id' => $this->mentor->getKey(),
                 'menti_id' => $this->menti->getKey(),
                 'nonexistent_attribute' => 'test value',

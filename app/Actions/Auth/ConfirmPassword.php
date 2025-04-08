@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Auth;
 
 use App\Http\Requests\Auth\ConfirmPasswordRequest;
-
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsController;

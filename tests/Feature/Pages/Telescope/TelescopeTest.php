@@ -46,9 +46,9 @@ describe('Telescope Page', function (): void {
         $this->actingAs($user)
             ->get('/up');
 
-        expect(\Laravel\Telescope\Storage\EntryModel::query()->where('type', 'request')->whereJsonContains('content', ['uri' => '/up'])
+        expect(EntryModel::query()->where('type', 'request')->whereJsonContains('content', ['uri' => '/up'])
             ->exists())->toBeFalse()
-            ->and(\Laravel\Telescope\Storage\EntryModel::query()->where('type', 'view')->whereJsonContains('content', ['name' => 'health-up.blade.php'])
+            ->and(EntryModel::query()->where('type', 'view')->whereJsonContains('content', ['name' => 'health-up.blade.php'])
                 ->exists())->toBeFalse();
     });
 
@@ -61,9 +61,9 @@ describe('Telescope Page', function (): void {
         $this->actingAs($user)
             ->get('/');
 
-        expect(\Laravel\Telescope\Storage\EntryModel::query()->where('type', 'request')->whereJsonContains('content', ['uri' => '/'])
+        expect(EntryModel::query()->where('type', 'request')->whereJsonContains('content', ['uri' => '/'])
             ->exists())->toBeTrue()
-            ->and(\Laravel\Telescope\Storage\EntryModel::query()->where('type', 'view')->whereJsonContains('content', ['name' => 'app'])
+            ->and(EntryModel::query()->where('type', 'view')->whereJsonContains('content', ['name' => 'app'])
                 ->exists())->toBeTrue();
     });
 

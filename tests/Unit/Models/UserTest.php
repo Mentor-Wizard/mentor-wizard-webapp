@@ -102,7 +102,7 @@ describe('User Model', function (): void {
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
-        \App\Models\User::query()->create(['extra_field' => 'test']);
+        User::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 
     it('has coach chats relationship', function (): void {

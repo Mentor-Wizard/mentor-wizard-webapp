@@ -34,7 +34,7 @@ describe('Registration Action', function (): void {
             ->and($result->isRedirect())->toBeTrue()
             ->and($result->getTargetUrl())->toBe(route('pages.dashboard'));
 
-        $user = \App\Models\User::query()->where('email', 'test@example.com')->first();
+        $user = User::query()->where('email', 'test@example.com')->first();
 
         Event::assertDispatched(Registered::class, fn(Registered $event): bool => $event->user->username === $user->username && $event->user->email === $user->email);
 

@@ -49,10 +49,10 @@ describe('MentorProgramBlockProgress Model', function (): void {
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
-        \App\Models\MentorProgramBlock::query()->create(['extra_field' => 'test']);
+        MentorProgramBlock::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 
     it('fails to create the model without required fields', function (): void {
-        \App\Models\MentorProgramBlockProgress::query()->create(['mentor_program_block_id' => null, 'menti_id' => null]);
+        MentorProgramBlockProgress::query()->create(['mentor_program_block_id' => null, 'menti_id' => null]);
     })->throws(QueryException::class);
 });

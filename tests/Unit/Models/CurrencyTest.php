@@ -15,7 +15,7 @@ describe('Currency Model', function (): void {
             'symbol' => CurrencyEnum::EUR->value
         ];
 
-        $currency = \App\Models\Currency::query()->create($data);
+        $currency = Currency::query()->create($data);
 
         expect($currency)->toBeInstanceOf(Currency::class)
             ->and($currency->name)->toBe('EUR')
@@ -30,7 +30,7 @@ describe('Currency Model', function (): void {
     });
 
     it('generates a slug automatically if not provided', function (): void {
-        $currency = \App\Models\Currency::query()->create([
+        $currency = Currency::query()->create([
             'name' => 'EUR',
             'symbol' => '€'
         ]);
@@ -46,6 +46,6 @@ describe('Currency Model', function (): void {
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
-        \App\Models\Currency::query()->create(['extra_field' => 'test']);
+        Currency::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 });

@@ -50,7 +50,7 @@ class VerifyEmailRequest extends FormRequest
     /**
      * Configure the validator instance.
      */
-    public function withValidator(Validator $validator): Validator
+    public function withValidator(\Illuminate\Contracts\Validation\Validator $validator): \Illuminate\Contracts\Validation\Validator
     {
         return $validator;
     }
