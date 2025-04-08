@@ -25,12 +25,6 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
-    resolve: {
-        alias: {
-            ziggy: '/vendor/tightenco/ziggy/dist/vue.m',
-            '@': '/resources/js',
-        },
-    },
     server: {
         https: false,
         host: '0.0.0.0',
