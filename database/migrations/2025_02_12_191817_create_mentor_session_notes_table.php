@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mentor_session_notes', function (Blueprint $table) {
+        Schema::create('mentor_session_notes', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(MentorSession::class)->constrained()->cascadeOnDelete();
             $table->text('notes');
@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mentor_session_notes', function (Blueprint $table) {
+        Schema::table('mentor_session_notes', function (Blueprint $table): void {
             $table->dropForeign(['mentor_session_id']);
         });
         Schema::dropIfExists('mentor_session_notes');

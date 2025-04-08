@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mentor_program_block_progresses', function (Blueprint $table) {
+        Schema::create('mentor_program_block_progresses', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('menti_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('mentor_program_block_id')->constrained('mentor_program_blocks')->cascadeOnDelete();
@@ -27,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mentor_program_block_progresses', function (Blueprint $table) {
+        Schema::table('mentor_program_block_progresses', function (Blueprint $table): void {
             $table->dropForeign(['menti_id']);
             $table->dropForeign(['mentor_program_block_id']);
         });

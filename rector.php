@@ -45,12 +45,6 @@ return RectorConfig::configure()
         LaravelSetList::LARAVEL_LEGACY_FACTORIES_TO_CLASSES,
         // LaravelSetList::LARAVEL_STATIC_TO_INJECTION,
     ])
-//    ->withSkip([
-//        StaticCallToMethodCallRector::class => [
-//            __DIR__.'/app/Providers',
-//            __DIR__.'/database',
-//        ],
-//    ])
     ->withParallel(100, 4, 25)
     ->withCache(
         __DIR__.'/var/cache/rector',

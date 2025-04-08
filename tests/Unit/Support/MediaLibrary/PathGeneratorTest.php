@@ -8,9 +8,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 covers(PathGenerator::class);
 
-describe('MediaLibrary PathGenerator', function () {
+describe('MediaLibrary PathGenerator', function (): void {
 
-    it('generates correct base path', function () {
+    it('generates correct base path', function (): void {
         $media = createMediaMock(123, UserProfile::class);
 
         config()->set('media-library.prefix', 'uploads');
@@ -21,7 +21,7 @@ describe('MediaLibrary PathGenerator', function () {
         expect($basePath)->toBe('uploads/UserProfile/123/');
     });
 
-    it('generates correct conversions path', function () {
+    it('generates correct conversions path', function (): void {
         $media = createMediaMock(456, UserProfile::class);
 
         config()->set('media-library.prefix', 'media');
@@ -32,7 +32,7 @@ describe('MediaLibrary PathGenerator', function () {
         expect($conversionPath)->toBe('media/UserProfile/456/conversions/');
     });
 
-    it('generates correct responsive images path', function () {
+    it('generates correct responsive images path', function (): void {
         $media = createMediaMock(789, UserProfile::class);
 
         config()->set('media-library.prefix', 'storage');
@@ -43,7 +43,7 @@ describe('MediaLibrary PathGenerator', function () {
         expect($responsivePath)->toBe('storage/UserProfile/789/responsive-images/');
     });
 
-    it('handles empty prefix correctly', function () {
+    it('handles empty prefix correctly', function (): void {
         $media = createMediaMock(100, UserProfile::class);
 
         config()->set('media-library.prefix', '');

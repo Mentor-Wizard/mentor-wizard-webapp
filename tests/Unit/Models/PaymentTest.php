@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\MassAssignmentException;
 
 covers(Payment::class);
 
-describe('Payment Model', function () {
-    beforeEach(function () {
+describe('Payment Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->mentor = User::factory()->create();
         $this->menti = User::factory()->create();
@@ -22,7 +22,7 @@ describe('Payment Model', function () {
         ]);
     });
 
-    it('can create session with basic attributes with relations', function () {
+    it('can create session with basic attributes with relations', function (): void {
         $payment = Payment::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'order_reference' => '111hjjj',
@@ -51,7 +51,7 @@ describe('Payment Model', function () {
             ->and($payment->mentorSession->getKey())->toBe($this->mentorSession->getKey());
     });
 
-    it('can create session with basic attributes and casts are correct', function () {
+    it('can create session with basic attributes and casts are correct', function (): void {
         $payment = Payment::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'order_reference' => '111hjjj',
@@ -78,7 +78,7 @@ describe('Payment Model', function () {
             ->and($payment->issue_bank_name)->toBeString();
     });
 
-    it('cascades on mentor session deletion', function () {
+    it('cascades on mentor session deletion', function (): void {
         $payment = Payment::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'order_reference' => '111hjjj',
@@ -99,7 +99,7 @@ describe('Payment Model', function () {
         ]);
     });
 
-    it('has correctly defined fillable attributes', function () {
+    it('has correctly defined fillable attributes', function (): void {
         $payment = new Payment;
 
         expect($payment->getFillable())->toBe([
@@ -116,7 +116,7 @@ describe('Payment Model', function () {
         ]);
     });
 
-    it('throws an exception when mass assigning unauthorized attributes', function () {
+    it('throws an exception when mass assigning unauthorized attributes', function (): void {
         $payment = new Payment;
 
         $payment->fill([
@@ -134,7 +134,7 @@ describe('Payment Model', function () {
         ]);
     })->throws(MassAssignmentException::class);
 
-    it('has a precisely defined cast configuration', function () {
+    it('has a precisely defined cast configuration', function (): void {
         $reflectionMethod = new ReflectionMethod(Payment::class, 'casts');
         $payment = new Payment;
         $casts = $reflectionMethod->invoke($payment);
@@ -153,7 +153,7 @@ describe('Payment Model', function () {
         ]);
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
         $data = [
             'mentor_session_id' => $this->mentorSession->getKey(),
             'order_reference' => 'ttt333',
@@ -182,6 +182,6 @@ describe('Payment Model', function () {
             ->and($payment->mentorSession)->toBeInstanceOf(MentorSession::class)
             ->and($payment->mentorSession->getKey())->toBe($this->mentorSession->getKey());
 
-        MentorSession::create(array_merge($data, ['extra_field' => 'test']));
+        \App\Models\MentorSession::query()->create(array_merge($data, ['extra_field' => 'test']));
     })->throws(MassAssignmentException::class);
 });

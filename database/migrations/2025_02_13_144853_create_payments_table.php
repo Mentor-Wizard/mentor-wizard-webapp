@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(MentorSession::class, 'mentor_session_id')->constrained()->cascadeOnDelete();
             $table->string('order_reference');
@@ -35,7 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
+        Schema::table('payments', function (Blueprint $table): void {
             $table->dropForeign(['mentor_session_id']);
         });
         Schema::dropIfExists('payments');

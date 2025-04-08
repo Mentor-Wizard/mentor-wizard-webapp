@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\MassAssignmentException;
 
 mutates(MentorSessionNote::class);
 
-describe('MentorSessionNote Model', function () {
-    beforeEach(function () {
+describe('MentorSessionNote Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->mentor = User::factory()->create();
         $this->menti = User::factory()->create();
@@ -22,7 +22,7 @@ describe('MentorSessionNote Model', function () {
         ]);
     });
 
-    it('can create session note with basic attributes with relations', function () {
+    it('can create session note with basic attributes with relations', function (): void {
         $mentorSessionNote = MentorSessionNote::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'notes' => 'some notes',
@@ -35,7 +35,7 @@ describe('MentorSessionNote Model', function () {
             ->and($mentorSessionNote->mentorSession->getKey())->toBe($this->mentorSession->getKey());
     });
 
-    it('can create session note with basic attributes and casts are correct', function () {
+    it('can create session note with basic attributes and casts are correct', function (): void {
         $mentorSessionNote = MentorSessionNote::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'notes' => 'some notes',
@@ -46,7 +46,7 @@ describe('MentorSessionNote Model', function () {
             ->and($mentorSessionNote->notes)->toBe('some notes');
     });
 
-    it('cascades on mentor session deletion', function () {
+    it('cascades on mentor session deletion', function (): void {
         $mentorSessionNote = MentorSessionNote::factory()->create([
             'mentor_session_id' => $this->mentorSession->getKey(),
             'notes' => 'some notes',
@@ -59,7 +59,7 @@ describe('MentorSessionNote Model', function () {
         ]);
     });
 
-    it('has correctly defined fillable attributes', function () {
+    it('has correctly defined fillable attributes', function (): void {
         $mentorSessionNote = new MentorSessionNote;
 
         expect($mentorSessionNote->getFillable())->toBe([
@@ -68,7 +68,7 @@ describe('MentorSessionNote Model', function () {
         ]);
     });
 
-    it('throws an exception when mass assigning unauthorized attributes', function () {
+    it('throws an exception when mass assigning unauthorized attributes', function (): void {
         $mentorSessionNote = new MentorSessionNote;
 
         $mentorSessionNote->fill([
@@ -78,7 +78,7 @@ describe('MentorSessionNote Model', function () {
         ]);
     })->throws(MassAssignmentException::class);
 
-    it('has a precisely defined cast configuration', function () {
+    it('has a precisely defined cast configuration', function (): void {
         $reflectionMethod = new ReflectionMethod(MentorSessionNote::class, 'casts');
         $mentorSessionNote = new MentorSessionNote;
         $casts = $reflectionMethod->invoke($mentorSessionNote);
@@ -89,7 +89,7 @@ describe('MentorSessionNote Model', function () {
         ]);
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
-        MentorSession::create(['extra_field' => 'test']);
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
+        \App\Models\MentorSession::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 });

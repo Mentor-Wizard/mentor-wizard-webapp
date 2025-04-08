@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Hash;
 
 mutates(UpdatePassword::class);
 
-describe('UpdatePassword Action', function () {
+describe('UpdatePassword Action', function (): void {
 
-    it('updates user password', function () {
+    it('updates user password', function (): void {
         $this->seed(RoleSeeder::class);
 
         $user = User::factory()->create([

@@ -10,12 +10,12 @@ use Inertia\Response;
 
 mutates(VerificationEmailPrompt::class);
 
-describe('VerificationEmailPrompt Unit Test', function () {
-    beforeEach(function () {
+describe('VerificationEmailPrompt Unit Test', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('renders verify email page with status when email is not verified', function () {
+    it('renders verify email page with status when email is not verified', function (): void {
         $status = 'verification-link-sent';
         session(['status' => $status]);
 
@@ -40,7 +40,7 @@ describe('VerificationEmailPrompt Unit Test', function () {
             ->toBe($status);
     });
 
-    it('renders verify email page with null status when no status in session', function () {
+    it('renders verify email page with null status when no status in session', function (): void {
         $user = User::factory()->create([
             'email_verified_at' => null,
         ]);

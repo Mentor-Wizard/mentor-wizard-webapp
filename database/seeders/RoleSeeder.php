@@ -27,13 +27,13 @@ class RoleSeeder extends Seeder
         try {
             DB::beginTransaction();
 
-            collect(self::ROLES)->each(function ($role) {
+            collect(self::ROLES)->each(function ($role): void {
                 Role::query()->createOrFirst($role);
             });
 
             DB::commit();
-        } catch (\Throwable $e) {
-            Log::error('[RoleSeeder] Roles are not added to DB', ['error' => $e->getMessage()]);
+        } catch (\Throwable $throwable) {
+            Log::error('[RoleSeeder] Roles are not added to DB', ['error' => $throwable->getMessage()]);
             DB::rollBack();
         }
     }

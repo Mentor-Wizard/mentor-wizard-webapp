@@ -16,7 +16,7 @@ arch('globals')
 arch()
     ->expect('App\Models')
     ->toBeClasses()
-    ->toExtend('Illuminate\Database\Eloquent\Model');
+    ->toExtend(\Illuminate\Database\Eloquent\Model::class);
 
 arch('app')
     ->expect('App\Enums')

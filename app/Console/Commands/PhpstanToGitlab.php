@@ -30,7 +30,7 @@ class PhpstanToGitlab extends Command
         $outputFile = $this->argument('outputFile');
 
         if (! File::exists($inputFile)) {
-            $this->error("File not found: {$inputFile}");
+            $this->error('File not found: ' . $inputFile);
 
             return SymfonyCommand::FAILURE;
         }
@@ -42,19 +42,17 @@ class PhpstanToGitlab extends Command
                 $sanitizedFilePath = preg_replace('/^\/var\/www\//', '', $filePath);
 
                 return collect(Arr::get($issues, 'messages'))->map(
-                    function (array $message) use ($sanitizedFilePath): array {
-                        return [
-                            'description' => Arr::get($message, 'message'),
-                            'fingerprint' => md5($sanitizedFilePath.Arr::get($message, 'message')),
-                            'severity' => 'major',
-                            'location' => [
-                                'path' => $sanitizedFilePath,
-                                'lines' => [
-                                    'begin' => Arr::get($message, 'line', 1),
-                                ],
+                    fn(array $message): array => [
+                        'description' => Arr::get($message, 'message'),
+                        'fingerprint' => md5($sanitizedFilePath.Arr::get($message, 'message')),
+                        'severity' => 'major',
+                        'location' => [
+                            'path' => $sanitizedFilePath,
+                            'lines' => [
+                                'begin' => Arr::get($message, 'line', 1),
                             ],
-                        ];
-                    }
+                        ],
+                    ]
                 );
             })
             ->values()
@@ -62,7 +60,7 @@ class PhpstanToGitlab extends Command
 
         File::put($outputFile, json_encode($gitlabReport, JSON_PRETTY_PRINT));
 
-        $this->info("GitLab Code Quality report generated: {$outputFile}");
+        $this->info('GitLab Code Quality report generated: ' . $outputFile);
 
         return SymfonyCommand::SUCCESS;
     }

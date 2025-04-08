@@ -8,16 +8,16 @@ use Illuminate\Validation\Validator;
 
 mutates(ConfirmPasswordRequest::class);
 
-describe('ConfirmPasswordRequest', function () {
-    describe('Authorization', function () {
-        it('always allows access', function () {
+describe('ConfirmPasswordRequest', function (): void {
+    describe('Authorization', function (): void {
+        it('always allows access', function (): void {
             $request = new ConfirmPasswordRequest;
             expect($request->authorize())->toBeTrue();
         });
     });
 
-    describe('Validation Rules', function () {
-        it('contains a rule for mandatory password entry', function () {
+    describe('Validation Rules', function (): void {
+        it('contains a rule for mandatory password entry', function (): void {
             $request = new ConfirmPasswordRequest;
             $rules = $request->rules();
 
@@ -26,8 +26,8 @@ describe('ConfirmPasswordRequest', function () {
         });
     });
 
-    describe('Password Validation', function () {
-        it('adds validation error for incorrect password', function () {
+    describe('Password Validation', function (): void {
+        it('adds validation error for incorrect password', function (): void {
             $user = Mockery::mock('User')
                 ->shouldReceive('getAttribute')
                 ->with('email')
@@ -53,7 +53,7 @@ describe('ConfirmPasswordRequest', function () {
                 ])
                 ->andReturn(false);
 
-            $validatorMock = Mockery::mock(Validator::class);
+            $validatorMock = Mockery::mock(\Illuminate\Contracts\Validation\Validator::class);
             $errorsMock = Mockery::mock();
 
             $validatorMock->shouldReceive('after')
@@ -67,7 +67,7 @@ describe('ConfirmPasswordRequest', function () {
             $request->withValidator($validatorMock);
         });
 
-        it('does not add error for correct password', function () {
+        it('does not add error for correct password', function (): void {
             $user = Mockery::mock('User')
                 ->shouldReceive('getAttribute')
                 ->with('email')
@@ -93,7 +93,7 @@ describe('ConfirmPasswordRequest', function () {
                 ])
                 ->andReturn(true);
 
-            $validatorMock = Mockery::mock(Validator::class);
+            $validatorMock = Mockery::mock(\Illuminate\Contracts\Validation\Validator::class);
             $validatorMock->shouldReceive('after')
                 ->with(Mockery::type('Closure'))
                 ->once()

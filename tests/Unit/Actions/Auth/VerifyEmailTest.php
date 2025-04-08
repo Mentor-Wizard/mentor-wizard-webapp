@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Event;
 
 mutates(VerifyEmail::class);
 
-describe('VerifyEmail Action', function () {
-    beforeEach(function () {
+describe('VerifyEmail Action', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('redirects to dashboard if email already verified', function () {
+    it('redirects to dashboard if email already verified', function (): void {
         $user = User::factory()->create();
 
         $request = Mockery::mock(VerifyEmailRequest::class);
@@ -30,7 +30,7 @@ describe('VerifyEmail Action', function () {
             ->toContain('verified=1');
     });
 
-    it('marks email as verified and dispatches verified event', function () {
+    it('marks email as verified and dispatches verified event', function (): void {
         Event::fake();
 
         $user = User::factory()->unverified()->create();
@@ -47,8 +47,6 @@ describe('VerifyEmail Action', function () {
             ->toContain(route('pages.dashboard'))
             ->toContain('verified=1');
 
-        Event::assertDispatched(Verified::class, function (Verified $event) use ($user) {
-            return $event->user === $user;
-        });
+        Event::assertDispatched(Verified::class, fn(Verified $event): bool => $event->user === $user);
     });
 });

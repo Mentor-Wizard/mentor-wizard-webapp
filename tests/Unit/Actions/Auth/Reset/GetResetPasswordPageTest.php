@@ -7,8 +7,8 @@ use Inertia\Response;
 
 mutates(GetResetPasswordPage::class);
 
-describe('GetResetPasswordPage Unit Test', function () {
-    it('returns Inertia view with session status', function () {
+describe('GetResetPasswordPage Unit Test', function (): void {
+    it('returns Inertia view with session status', function (): void {
         $action = new GetResetPasswordPage;
 
         session(['status' => 'test-status']);
@@ -23,7 +23,7 @@ describe('GetResetPasswordPage Unit Test', function () {
             ]);
     });
 
-    it('returns the correct Inertia page with session status', function () {
+    it('returns the correct Inertia page with session status', function (): void {
         $action = new GetResetPasswordPage;
         session()->forget('status');
 

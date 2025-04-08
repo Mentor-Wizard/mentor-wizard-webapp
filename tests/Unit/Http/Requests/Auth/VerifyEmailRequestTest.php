@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Event;
 
 mutates(VerifyEmailRequest::class);
 
-describe('VerifyEmailRequest Authorization', function () {
-    it('authorizes request when user and hash match without string casting', function () {
+describe('VerifyEmailRequest Authorization', function (): void {
+    it('authorizes request when user and hash match without string casting', function (): void {
         $user = Mockery::mock('User');
         $user->shouldReceive('getKey')->once()->andReturn(123);
         $user->shouldReceive('getEmailForVerification')->once()->andReturn('test@example.com');
@@ -34,7 +34,7 @@ describe('VerifyEmailRequest Authorization', function () {
         expect($request->authorize())->toBeTrue();
     });
 
-    it('authorizes request when user and hash match with string casting', function () {
+    it('authorizes request when user and hash match with string casting', function (): void {
         $user = Mockery::mock('User');
         $user->shouldReceive('getKey')->once()->andReturn(123);
         $user->shouldReceive('getEmailForVerification')->once()->andReturn('test@example.com');
@@ -59,7 +59,7 @@ describe('VerifyEmailRequest Authorization', function () {
         expect($request->authorize())->toBeTrue();
     });
 
-    it('denies authorization when user id does not match', function () {
+    it('denies authorization when user id does not match', function (): void {
         $user = Mockery::mock('User');
         $user->shouldReceive('getKey')->once()->andReturn(123);
 
@@ -78,7 +78,7 @@ describe('VerifyEmailRequest Authorization', function () {
         expect($request->authorize())->toBeFalse();
     });
 
-    it('denies authorization when hash does not match', function () {
+    it('denies authorization when hash does not match', function (): void {
         $user = Mockery::mock('User');
         $user->shouldReceive('getKey')->once()->andReturn(123);
         $user->shouldReceive('getEmailForVerification')->once()->andReturn('test@example.com');
@@ -104,8 +104,8 @@ describe('VerifyEmailRequest Authorization', function () {
     });
 });
 
-describe('VerifyEmailRequest Fulfill', function () {
-    it('marks email as verified and dispatches event when email is not verified', function () {
+describe('VerifyEmailRequest Fulfill', function (): void {
+    it('marks email as verified and dispatches event when email is not verified', function (): void {
         $user = Mockery::mock('User');
         $user->shouldReceive('hasVerifiedEmail')->once()->andReturn(false);
         $user->shouldReceive('markEmailAsVerified')->once();
@@ -124,7 +124,7 @@ describe('VerifyEmailRequest Fulfill', function () {
         Event::assertDispatched(Verified::class);
     });
 
-    it('does not mark email as verified or dispatch event when email is already verified', function () {
+    it('does not mark email as verified or dispatch event when email is already verified', function (): void {
         $user = Mockery::mock('User');
         $user->shouldReceive('hasVerifiedEmail')->once()->andReturn(true);
         $user->shouldNotReceive('markEmailAsVerified');
@@ -144,8 +144,8 @@ describe('VerifyEmailRequest Fulfill', function () {
     });
 });
 
-describe('VerifyEmailRequest Validation', function () {
-    it('returns empty rules array', function () {
+describe('VerifyEmailRequest Validation', function (): void {
+    it('returns empty rules array', function (): void {
         $request = new VerifyEmailRequest;
 
         expect($request->rules())->toBe([]);

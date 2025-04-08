@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('chats', function (Blueprint $table) {
+        Schema::create('chats', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(User::class, 'menti_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignIdFor(User::class, 'mentor_id')->nullable()->constrained()->nullOnDelete();
@@ -28,7 +28,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('chats', function (Blueprint $table) {
+        Schema::table('chats', function (Blueprint $table): void {
             $table->dropForeign('mentor_id');
             $table->dropForeign('menti_id');
             $table->dropForeign('coach_id');
