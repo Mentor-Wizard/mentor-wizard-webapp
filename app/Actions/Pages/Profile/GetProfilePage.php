@@ -18,7 +18,7 @@ class GetProfilePage
     {
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => Auth::user() instanceof MustVerifyEmail, // @pest-mutate-ignore
-            'status' => session('status'),
+            'status'          => session('status'),
         ]);
     }
 }

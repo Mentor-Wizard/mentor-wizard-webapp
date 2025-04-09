@@ -64,7 +64,7 @@ describe('Profile Page', function (): void {
             ->and(Arr::get($resultData->getData(), 'page.props.mustVerifyEmail'))->toBeTrue()
             ->and(Arr::get($resultData->getData(), 'page.props.status'))->toBe($status);
     })->with([
-        'no status' => null,
+        'no status'   => null,
         'with status' => 'test-status',
     ]);
 });
