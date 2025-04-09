@@ -10,12 +10,12 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\delete;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });
 
-describe('Destroy Profile', function () {
-    it('deletes the user profile successfully', function () {
+describe('Destroy Profile', function (): void {
+    it('deletes the user profile successfully', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);
@@ -33,7 +33,7 @@ describe('Destroy Profile', function () {
         ]);
     });
 
-    it('invalidates the session after profile deletion', function () {
+    it('invalidates the session after profile deletion', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);
@@ -52,7 +52,7 @@ describe('Destroy Profile', function () {
         expect(session()->has('foo'))->toBeFalse();
     });
 
-    it('regenerates session token after profile deletion', function () {
+    it('regenerates session token after profile deletion', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);

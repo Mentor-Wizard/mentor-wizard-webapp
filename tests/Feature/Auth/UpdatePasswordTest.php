@@ -8,12 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });
 
-describe('Successful scenarios', function () {
-    it('updates the password successfully', function () {
+describe('Successful scenarios', function (): void {
+    it('updates the password successfully', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);
@@ -31,8 +31,8 @@ describe('Successful scenarios', function () {
     });
 });
 
-describe('Unsuccessful scenarios', function () {
-    it('does not update the password when current password is incorrect', function () {
+describe('Unsuccessful scenarios', function (): void {
+    it('does not update the password when current password is incorrect', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);
@@ -49,7 +49,7 @@ describe('Unsuccessful scenarios', function () {
         expect(Hash::check('new-secret-password', $user->password))->toBeFalse();
     });
 
-    it('does not update the password when confirmation password is incorrect', function () {
+    it('does not update the password when confirmation password is incorrect', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);

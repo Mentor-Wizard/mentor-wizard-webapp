@@ -20,6 +20,7 @@ class HandleInertiaRequests extends Middleware
     /**
      * Determine the current asset version.
      */
+    #[\Override]
     public function version(Request $request): ?string
     {
         return parent::version($request);
@@ -30,6 +31,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function share(Request $request): array
     {
         return [

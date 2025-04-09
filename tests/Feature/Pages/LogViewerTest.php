@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use function Pest\Laravel\get;
 
-describe('Log Viewer Page', function () {
-    beforeEach(function () {
+describe('Log Viewer Page', function (): void {
+    beforeEach(function (): void {
         $this->routePath = config('log-viewer.route_path');
         $this->validCredentials = base64_encode(config('very_basic_auth.user').':'.config('very_basic_auth.password'));
     });
@@ -21,4 +23,3 @@ describe('Log Viewer Page', function () {
         ->assertOk()
     );
 })->skip('temporarily to run it on CI');
-

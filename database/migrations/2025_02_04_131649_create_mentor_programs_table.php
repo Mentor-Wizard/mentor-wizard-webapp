@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mentor_programs', function (Blueprint $table) {
+        Schema::create('mentor_programs', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(User::class, 'mentor_id')->constrained()->cascadeOnDelete();
             $table->string('name', 100);
@@ -32,7 +32,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mentor_programs', function (Blueprint $table) {
+        Schema::table('mentor_programs', function (Blueprint $table): void {
             $table->dropForeign(['mentor_id']);
             $table->dropForeign(['currency_id']);
         });

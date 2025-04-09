@@ -12,13 +12,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(SocialiteCallback::class);
 
-describe('Socialite Authentication', function () {
+describe('Socialite Authentication', function (): void {
 
-    beforeEach(function () {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('allows user to login via social provider', function ($driver) {
+    it('allows user to login via social provider', function ($driver): void {
         $socialiteUser = Mockery::mock(SocialiteUser::class);
         $socialiteUser
             ->shouldReceive('getEmail')->andReturn('test@example.com')
@@ -41,7 +41,7 @@ describe('Socialite Authentication', function () {
         ]);
     })->with(SocialiteDriver::cases());
 
-    it('fails when email is empty', function ($driver) {
+    it('fails when email is empty', function ($driver): void {
         $socialiteUser = Mockery::mock(SocialiteUser::class);
         $socialiteUser
             ->shouldReceive('getEmail')->andReturn('')

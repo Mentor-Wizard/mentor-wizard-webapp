@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\MassAssignmentException;
 
 covers(ChatMessage::class);
 
-describe('ChatMessage Model', function () {
-    beforeEach(function () {
+describe('ChatMessage Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->mentor = User::factory()->create();
         $this->menti = User::factory()->create();
@@ -24,7 +24,7 @@ describe('ChatMessage Model', function () {
         ]);
     });
 
-    it('can create chat message with basic attributes with relations', function () {
+    it('can create chat message with basic attributes with relations', function (): void {
         $chatMessage = ChatMessage::factory()->create([
             'chat_id' => $this->chat->getKey(),
             'user_id' => $this->menti->getKey(),
@@ -41,7 +41,7 @@ describe('ChatMessage Model', function () {
             ->and($chatMessage->chat->getKey())->toBe($this->chat->getKey());
     });
 
-    it('can create chat message with basic attributes and casts are correct', function () {
+    it('can create chat message with basic attributes and casts are correct', function (): void {
         $chatMessage = ChatMessage::factory()->create([
             'chat_id' => $this->chat->getKey(),
             'user_id' => $this->menti->getKey(),
@@ -56,7 +56,7 @@ describe('ChatMessage Model', function () {
             ->and($chatMessage->is_read)->toBeBool();
     });
 
-    it('cascades on chat deletion', function () {
+    it('cascades on chat deletion', function (): void {
         $chatMessage = ChatMessage::factory()->create([
             'chat_id' => $this->chat->getKey(),
             'user_id' => $this->menti->getKey(),
@@ -69,7 +69,7 @@ describe('ChatMessage Model', function () {
         $this->assertDatabaseMissing('chat_messages', ['id' => $chatMessage->getKey()]);
     });
 
-    it('cascades on user deletion', function () {
+    it('cascades on user deletion', function (): void {
         $chatMessage = ChatMessage::factory()->create([
             'chat_id' => $this->chat->getKey(),
             'user_id' => $this->menti->getKey(),
@@ -85,7 +85,7 @@ describe('ChatMessage Model', function () {
         ]);
     });
 
-    it('has correctly defined fillable attributes', function () {
+    it('has correctly defined fillable attributes', function (): void {
         $chatMessage = new ChatMessage;
         expect($chatMessage->getFillable())->toBe([
             'chat_id',
@@ -96,7 +96,7 @@ describe('ChatMessage Model', function () {
 
     });
 
-    it('throws an exception when mass assigning unauthorized attributes', function () {
+    it('throws an exception when mass assigning unauthorized attributes', function (): void {
         $chatMessage = new ChatMessage;
 
         $chatMessage->fill([
@@ -108,7 +108,7 @@ describe('ChatMessage Model', function () {
         ]);
     })->throws(MassAssignmentException::class);
 
-    it('has a precisely defined cast configuration', function () {
+    it('has a precisely defined cast configuration', function (): void {
         $reflectionMethod = new ReflectionMethod(ChatMessage::class, 'casts');
         $chatMessage = new ChatMessage;
         $casts = $reflectionMethod->invoke($chatMessage);
@@ -121,7 +121,7 @@ describe('ChatMessage Model', function () {
         ]);
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
         $data = [
             'chat_id' => $this->chat->getKey(),
             'user_id' => $this->menti->getKey(),

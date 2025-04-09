@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(SocialiteRedirect::class);
 
-describe('Socialite Redirect', function () {
+describe('Socialite Redirect', function (): void {
 
-    it('redirects to valid social driver', function ($driver) {
+    it('redirects to valid social driver', function ($driver): void {
         $socialiteMock = Mockery::mock(Provider::class);
         $socialiteMock
             ->shouldReceive('redirect')
@@ -30,7 +30,7 @@ describe('Socialite Redirect', function () {
             ->assertStatus(Response::HTTP_FOUND);
     })->with(SocialiteDriver::cases());
 
-    it('fails with invalid social driver', function () {
+    it('fails with invalid social driver', function (): void {
         $invalidDriver = 'invalid_driver';
 
         Log::shouldReceive('error')

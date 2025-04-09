@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 mutates(Login::class);
 
-describe('Login Action', function () {
+describe('Login Action', function (): void {
 
-    it('redirects to dashboard after successful login', function () {
+    it('redirects to dashboard after successful login', function (): void {
         $request = Mockery::mock(LoginRequest::class);
         $request->shouldReceive('authenticate')->once();
 
@@ -30,7 +30,7 @@ describe('Login Action', function () {
             ->and($response->getTargetUrl())->toBe(route('pages.dashboard'));
     });
 
-    it('handles failed login attempt', function () {
+    it('handles failed login attempt', function (): void {
         $request = Mockery::mock(LoginRequest::class);
 
         $validator = Mockery::mock(Validator::class);
@@ -45,7 +45,7 @@ describe('Login Action', function () {
 
         $loginAction = new Login;
 
-        expect(function () use ($loginAction, $request) {
+        expect(function () use ($loginAction, $request): void {
             $loginAction->handle($request);
         })->toThrow(ValidationException::class);
     });

@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Password;
 
 mutates(ResetPassword::class);
 
-describe('Password Reset Feature Test', function () {
-    beforeEach(function () {
+describe('Password Reset Feature Test', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('can submit password reset request', function () {
+    it('can submit password reset request', function (): void {
         $user = User::factory()->create();
 
         $response = $this->post(route('password.email'), [
@@ -25,7 +25,7 @@ describe('Password Reset Feature Test', function () {
             ->assertSessionHas('status', trans(Password::RESET_LINK_SENT));
     });
 
-    it('shows error for non-existent email', function () {
+    it('shows error for non-existent email', function (): void {
         $response = $this->post(route('password.email'), [
             'email' => 'nonexistent@example.com',
         ]);
@@ -33,7 +33,7 @@ describe('Password Reset Feature Test', function () {
         $response->assertSessionHasErrors('email');
     });
 
-    it('throttles password reset requests', function () {
+    it('throttles password reset requests', function (): void {
         $user = User::factory()->create();
 
         // Simulate multiple password reset requests

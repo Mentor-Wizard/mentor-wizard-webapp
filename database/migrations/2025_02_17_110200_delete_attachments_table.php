@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::create('attachments', function (Blueprint $table) {
+        Schema::create('attachments', function (Blueprint $table): void {
             $table->id();
             $table->morphs('attachable');
             $table->string('hash_name')->comment('file name on disk');
