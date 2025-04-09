@@ -26,7 +26,7 @@ class ChatMessage extends Model
         'is_read',
     ];
 
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'chat_id' => 'int',

@@ -10,8 +10,8 @@ use Inertia\Response;
 
 mutates(GetCreatePasswordPage::class);
 
-describe('GetCreatePasswordPage', function () {
-    it('renders reset password page with email and token', function () {
+describe('GetCreatePasswordPage', function (): void {
+    it('renders reset password page with email and token', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);
         $mockRouteCollection->shouldReceive('getRoutesByName')->andReturn([]);
         Route::shouldReceive('has')

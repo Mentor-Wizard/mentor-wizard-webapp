@@ -26,13 +26,10 @@ class SocialiteCallback
             abort(Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $user = User::firstOrCreate(
-            ['email' => $socialiteUser->getEmail()],
-            [
-                'username' => empty($socialiteUser->getNickname()) ? $socialiteUser->getName() : $socialiteUser->getNickname(),
-                'password' => Str::random(User::DEFAULT_PASSWORD_LENGHT),
-            ]
-        );
+        $user = User::query()->firstOrCreate(['email' => $socialiteUser->getEmail()], [
+            'username' => empty($socialiteUser->getNickname()) ? $socialiteUser->getName() : $socialiteUser->getNickname(),
+            'password' => Str::random(User::DEFAULT_PASSWORD_LENGHT),
+        ]);
 
         Auth::login($user);
 

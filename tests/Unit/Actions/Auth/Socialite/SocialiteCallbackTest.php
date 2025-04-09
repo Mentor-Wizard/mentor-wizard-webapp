@@ -17,12 +17,12 @@ uses(RefreshDatabase::class);
 
 mutates(SocialiteCallback::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     Socialite::shouldReceive('driver')->andReturnSelf();
     Role::create(['name' => RoleEnum::USER, 'guard_name' => RoleGuardEnum::USER]);
 });
 
-it('redirects authenticated user after social login', function ($driver) {
+it('redirects authenticated user after social login', function ($driver): void {
     $socialUser = Mockery::mock();
     $socialUser->shouldReceive('getEmail')->andReturn('test@example.com');
     $socialUser->shouldReceive('getNickname')->andReturn('testuser');
@@ -40,7 +40,7 @@ it('redirects authenticated user after social login', function ($driver) {
     assertAuthenticated();
 })->with(SocialiteDriver::cases());
 
-it('creates user with getName() when getNickname() is empty', function ($driver) {
+it('creates user with getName() when getNickname() is empty', function ($driver): void {
     $socialUser = Mockery::mock();
     $socialUser->shouldReceive('getEmail')->andReturn('test@example.com');
     $socialUser->shouldReceive('getNickname')->andReturn(null);
@@ -58,7 +58,7 @@ it('creates user with getName() when getNickname() is empty', function ($driver)
     assertAuthenticated();
 })->with(SocialiteDriver::cases());
 
-it('creates user with getName() when getName() is empty', function ($driver) {
+it('creates user with getName() when getName() is empty', function ($driver): void {
     $socialUser = Mockery::mock();
     $socialUser->shouldReceive('getEmail')->andReturn('test@example.com');
     $socialUser->shouldReceive('getNickname')->andReturn('testuser');
@@ -76,15 +76,13 @@ it('creates user with getName() when getName() is empty', function ($driver) {
     assertAuthenticated();
 })->with(SocialiteDriver::cases());
 
-it('logs an error and aborts if email is empty', function ($driver) {
+it('logs an error and aborts if email is empty', function ($driver): void {
     $socialUser = Mockery::mock();
     $socialUser->shouldReceive('getEmail')->andReturn(null);
 
     Socialite::shouldReceive('stateless->user')->andReturn($socialUser);
 
-    Log::shouldReceive('error')->once()->withArgs(function (string $message, array $context) use ($driver) {
-        return $message === 'Email is empty, but required for login' && $context['driver'] === $driver->value;
-    });
+    Log::shouldReceive('error')->once()->withArgs(fn(string $message, array $context): bool => $message === 'Email is empty, but required for login' && $context['driver'] === $driver->value);
 
     new SocialiteCallback()->handle($driver->value);
 })->with(SocialiteDriver::cases())->throws(HttpException::class);

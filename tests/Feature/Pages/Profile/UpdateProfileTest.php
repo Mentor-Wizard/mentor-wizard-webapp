@@ -9,19 +9,19 @@ use Symfony\Component\HttpFoundation\Response;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\seed;
 
-beforeEach(function () {
+beforeEach(function (): void {
     seed(RoleSeeder::class);
     $user = User::factory()->create();
     actingAs($user);
 });
 
-describe('Successful Scenarios', function () {
-    it('renders the profile page', function () {
+describe('Successful Scenarios', function (): void {
+    it('renders the profile page', function (): void {
         $this->get(route('profile.edit'))
             ->assertStatus(Response::HTTP_OK);
     });
 
-    it('updates the name and email successfully', function () {
+    it('updates the name and email successfully', function (): void {
         $user = User::factory()->create();
 
         $this->actingAs($user)->patch(route('profile.update'), [
@@ -38,12 +38,12 @@ describe('Successful Scenarios', function () {
     });
 });
 
-describe('Unsuccessful Scenarios', function () {
-    it('returns 404 for incorrect profile page address', function () {
+describe('Unsuccessful Scenarios', function (): void {
+    it('returns 404 for incorrect profile page address', function (): void {
         $this->get('/profil-ee')->assertStatus(Response::HTTP_NOT_FOUND);
     });
 
-    it('does not allow name longer than the limit', function () {
+    it('does not allow name longer than the limit', function (): void {
         $user = User::factory()->create();
 
         $name = str_repeat('test', 300);
@@ -59,7 +59,7 @@ describe('Unsuccessful Scenarios', function () {
         $this->assertNotEquals($name, $user->username);
     });
 
-    it('does not allow name shorter than the limit', function () {
+    it('does not allow name shorter than the limit', function (): void {
         $user = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [
@@ -74,7 +74,7 @@ describe('Unsuccessful Scenarios', function () {
         $this->assertNotEquals('A', $user->username);
     });
 
-    it('does not allow empty name', function () {
+    it('does not allow empty name', function (): void {
         $user = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [
@@ -89,7 +89,7 @@ describe('Unsuccessful Scenarios', function () {
         $this->assertNotEquals('', $user->username);
     });
 
-    it('does not allow non-unique email', function () {
+    it('does not allow non-unique email', function (): void {
         $user = User::factory()->create();
         $secondUser = User::factory()->create();
 
@@ -105,7 +105,7 @@ describe('Unsuccessful Scenarios', function () {
         $this->assertNotEquals($secondUser->email, $user->email);
     });
 
-    it('does not allow email longer than the limit', function () {
+    it('does not allow email longer than the limit', function (): void {
         $user = User::factory()->create();
 
         $email = str_repeat('test', 300).'@admin.com';
@@ -121,7 +121,7 @@ describe('Unsuccessful Scenarios', function () {
         $this->assertNotEquals($email, $user->email);
     });
 
-    it('does not allow empty email', function () {
+    it('does not allow empty email', function (): void {
         $user = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [

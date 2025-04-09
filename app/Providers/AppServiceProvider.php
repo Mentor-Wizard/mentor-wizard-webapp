@@ -18,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
+    #[\Override]
     public function register(): void {}
 
     /**
@@ -32,9 +33,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceHttps();
         }
 
-        Gate::define('viewPulse', function (User $user) {
-            return $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]);
-        });
+        Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
 
         Vite::prefetch(concurrency: 3);
     }
@@ -42,9 +41,6 @@ class AppServiceProvider extends ServiceProvider
     private function configModels(): void
     {
         Model::shouldBeStrict();
-        Model::preventLazyLoading();
-        Model::preventAccessingMissingAttributes();
-        Model::preventSilentlyDiscardingAttributes();
     }
 
     private function configDatabase(): void

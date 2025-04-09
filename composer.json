@@ -88,6 +88,12 @@
         ],
         "pint": [
             "./vendor/bin/pint"
+        ],
+        "rector": [
+            "./vendor/bin/rector process --ansi --dry-run"
+        ],
+        "rector:fix": [
+            "./vendor/bin/rector process --ansi"
         ]
     },
     "extra": {

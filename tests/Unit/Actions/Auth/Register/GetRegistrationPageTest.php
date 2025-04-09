@@ -7,9 +7,9 @@ use Inertia\Response;
 
 mutates(GetRegistrationPage::class);
 
-describe('GetRegistrationPage Action', function () {
+describe('GetRegistrationPage Action', function (): void {
 
-    it('returns correct Inertia response', function () {
+    it('returns correct Inertia response', function (): void {
         $action = new GetRegistrationPage;
 
         $response = $action->handle();

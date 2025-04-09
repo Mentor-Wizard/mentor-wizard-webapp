@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Redirect;
 
 mutates(ConfirmPassword::class);
 
-describe('ConfirmPassword Action', function () {
-    it('confirms password and redirects to dashboard', function () {
+describe('ConfirmPassword Action', function (): void {
+    it('confirms password and redirects to dashboard', function (): void {
         $mockRequest = Mockery::mock(ConfirmPasswordRequest::class);
         $mockSession = Mockery::mock(Store::class);
         $action = new ConfirmPassword;
@@ -36,7 +36,7 @@ describe('ConfirmPassword Action', function () {
         expect($response)->toBeInstanceOf(RedirectResponse::class);
     });
 
-    it('stores password confirmation timestamp in session', function () {
+    it('stores password confirmation timestamp in session', function (): void {
         $mockRequest = Mockery::mock(ConfirmPasswordRequest::class);
         $mockSession = Mockery::mock(Store::class);
         $action = new ConfirmPassword;
