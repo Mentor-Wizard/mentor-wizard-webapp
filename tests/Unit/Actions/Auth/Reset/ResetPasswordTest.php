@@ -12,13 +12,13 @@ use Illuminate\Validation\ValidationException;
 
 mutates(ResetPassword::class);
 
-describe('ResetPassword Action', function () {
-    beforeEach(function () {
+describe('ResetPassword Action', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
     });
 
-    it('sends password reset link successfully', function () {
+    it('sends password reset link successfully', function (): void {
         $user = User::factory()->create();
         $action = new ResetPassword;
 
@@ -37,7 +37,7 @@ describe('ResetPassword Action', function () {
             ->and($response->getSession()->get('status'))->toBe(trans(Password::RESET_LINK_SENT));
     });
 
-    it('throws validation exception when reset link fails', function () {
+    it('throws validation exception when reset link fails', function (): void {
         $user = User::factory()->create();
         $action = new ResetPassword;
 

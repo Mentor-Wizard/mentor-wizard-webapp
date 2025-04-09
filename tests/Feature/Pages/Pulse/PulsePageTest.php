@@ -12,12 +12,12 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-test('denies access to Pulse for unauthorized users', function () {
+test('denies access to Pulse for unauthorized users', function (): void {
     Role::create(['name' => RoleEnum::USER, 'guard_name' => RoleGuardEnum::USER]);
 
     $user = User::factory()->create([
         'username' => 'Test User',
-        'email' => 'test@example.com',
+        'email'    => 'test@example.com',
     ]);
 
     actingAs($user)
@@ -25,13 +25,13 @@ test('denies access to Pulse for unauthorized users', function () {
         ->assertForbidden();
 });
 
-test('allows access to Pulse for admin users', function () {
+test('allows access to Pulse for admin users', function (): void {
     Role::create(['name' => RoleEnum::USER->value, 'guard_name' => RoleGuardEnum::USER->value]);
     $role = Role::create(['name' => RoleEnum::ADMIN->value, 'guard_name' => RoleGuardEnum::ADMIN->value]);
 
     $admin = User::factory()->create([
         'username' => 'Test ADMIN',
-        'email' => 'admi@example.com',
+        'email'    => 'admi@example.com',
     ]);
 
     $admin->assignRole($role);
@@ -41,13 +41,13 @@ test('allows access to Pulse for admin users', function () {
         ->assertOk();
 });
 
-test('allows access to Pulse for superadmin users', function () {
+test('allows access to Pulse for superadmin users', function (): void {
     Role::create(['name' => RoleEnum::USER->value, 'guard_name' => RoleGuardEnum::USER->value]);
     $role = Role::create(['name' => RoleEnum::ADMIN->value, 'guard_name' => RoleGuardEnum::ADMIN->value]);
 
     $superadmin = User::factory()->create([
         'username' => 'Test SUPERADMIN',
-        'email' => 'superadmin@example.com',
+        'email'    => 'superadmin@example.com',
     ]);
 
     $superadmin->assignRole($role);

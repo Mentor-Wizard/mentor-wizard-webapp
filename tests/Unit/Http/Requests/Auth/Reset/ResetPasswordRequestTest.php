@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Validator;
 
 mutates(ResetPasswordRequest::class);
 
-describe('ResetPasswordRequest Validation', function () {
-    describe('Email validation', function () {
-        it('requires email to be present', function () {
+describe('ResetPasswordRequest Validation', function (): void {
+    describe('Email validation', function (): void {
+        it('requires email to be present', function (): void {
             $request = new ResetPasswordRequest;
 
             $validator = Validator::make(['email' => ''], $request->rules());
@@ -18,7 +18,7 @@ describe('ResetPasswordRequest Validation', function () {
                 ->and($validator->errors()->has('email'))->toBeTrue();
         });
 
-        it('accepts a valid email', function () {
+        it('accepts a valid email', function (): void {
             $request = new ResetPasswordRequest;
 
             $validator = Validator::make(['email' => 'test@example.com'], $request->rules());
@@ -26,7 +26,7 @@ describe('ResetPasswordRequest Validation', function () {
             expect($validator->fails())->toBeFalse();
         });
 
-        it('rejects an invalid email', function () {
+        it('rejects an invalid email', function (): void {
             $request = new ResetPasswordRequest;
 
             $validator = Validator::make(['email' => 'invalid-email'], $request->rules());
@@ -36,8 +36,8 @@ describe('ResetPasswordRequest Validation', function () {
         });
     });
 
-    describe('Authorization', function () {
-        it('always allows the request', function () {
+    describe('Authorization', function (): void {
+        it('always allows the request', function (): void {
             $request = new ResetPasswordRequest;
 
             expect($request->authorize())->toBeTrue();

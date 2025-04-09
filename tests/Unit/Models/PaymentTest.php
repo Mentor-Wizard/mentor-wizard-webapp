@@ -10,30 +10,30 @@ use Illuminate\Database\Eloquent\MassAssignmentException;
 
 covers(Payment::class);
 
-describe('Payment Model', function () {
-    beforeEach(function () {
+describe('Payment Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->mentor = User::factory()->create();
         $this->menti = User::factory()->create();
 
         $this->mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
     });
 
-    it('can create session with basic attributes with relations', function () {
+    it('can create session with basic attributes with relations', function (): void {
         $payment = Payment::factory()->create([
-            'mentor_session_id' => $this->mentorSession->getKey(),
-            'order_reference' => '111hjjj',
-            'amount' => 1,
-            'currency' => 'UAH',
+            'mentor_session_id'  => $this->mentorSession->getKey(),
+            'order_reference'    => '111hjjj',
+            'amount'             => 1,
+            'currency'           => 'UAH',
             'transaction_status' => 'success',
-            'reason' => 'pay',
-            'reason_code' => '001',
-            'payment_system' => 'novapay',
-            'card_type' => 'visa',
-            'issue_bank_name' => 'bank',
+            'reason'             => 'pay',
+            'reason_code'        => '001',
+            'payment_system'     => 'novapay',
+            'card_type'          => 'visa',
+            'issue_bank_name'    => 'bank',
         ]);
 
         expect($payment)->toBeInstanceOf(Payment::class)
@@ -51,18 +51,18 @@ describe('Payment Model', function () {
             ->and($payment->mentorSession->getKey())->toBe($this->mentorSession->getKey());
     });
 
-    it('can create session with basic attributes and casts are correct', function () {
+    it('can create session with basic attributes and casts are correct', function (): void {
         $payment = Payment::factory()->create([
-            'mentor_session_id' => $this->mentorSession->getKey(),
-            'order_reference' => '111hjjj',
-            'amount' => 2,
-            'currency' => 'UAH',
+            'mentor_session_id'  => $this->mentorSession->getKey(),
+            'order_reference'    => '111hjjj',
+            'amount'             => 2,
+            'currency'           => 'UAH',
             'transaction_status' => 'success',
-            'reason' => 'pay',
-            'reason_code' => '00',
-            'payment_system' => 'novapay',
-            'card_type' => 'visa',
-            'issue_bank_name' => 'bank',
+            'reason'             => 'pay',
+            'reason_code'        => '00',
+            'payment_system'     => 'novapay',
+            'card_type'          => 'visa',
+            'issue_bank_name'    => 'bank',
         ]);
 
         expect($payment)->toBeInstanceOf(Payment::class)
@@ -78,18 +78,18 @@ describe('Payment Model', function () {
             ->and($payment->issue_bank_name)->toBeString();
     });
 
-    it('cascades on mentor session deletion', function () {
+    it('cascades on mentor session deletion', function (): void {
         $payment = Payment::factory()->create([
-            'mentor_session_id' => $this->mentorSession->getKey(),
-            'order_reference' => '111hjjj',
-            'amount' => 1,
-            'currency' => 'UAH',
+            'mentor_session_id'  => $this->mentorSession->getKey(),
+            'order_reference'    => '111hjjj',
+            'amount'             => 1,
+            'currency'           => 'UAH',
             'transaction_status' => 'success',
-            'reason' => 'pay',
-            'reason_code' => '01',
-            'payment_system' => 'novapay',
-            'card_type' => 'visa',
-            'issue_bank_name' => 'bank',
+            'reason'             => 'pay',
+            'reason_code'        => '01',
+            'payment_system'     => 'novapay',
+            'card_type'          => 'visa',
+            'issue_bank_name'    => 'bank',
         ]);
 
         $this->mentorSession->delete();
@@ -99,7 +99,7 @@ describe('Payment Model', function () {
         ]);
     });
 
-    it('has correctly defined fillable attributes', function () {
+    it('has correctly defined fillable attributes', function (): void {
         $payment = new Payment;
 
         expect($payment->getFillable())->toBe([
@@ -116,55 +116,55 @@ describe('Payment Model', function () {
         ]);
     });
 
-    it('throws an exception when mass assigning unauthorized attributes', function () {
+    it('throws an exception when mass assigning unauthorized attributes', function (): void {
         $payment = new Payment;
 
         $payment->fill([
-            'mentor_session_id' => $this->mentorSession->getKey(),
-            'order_reference' => '222eeee',
-            'amount' => 1,
-            'currency' => 'USD',
+            'mentor_session_id'  => $this->mentorSession->getKey(),
+            'order_reference'    => '222eeee',
+            'amount'             => 1,
+            'currency'           => 'USD',
             'transaction_status' => 'success',
-            'reason' => 'pay',
-            'reason_code' => '200',
-            'payment_system' => 'novapay',
-            'card_type' => 'visa',
-            'issue_bank_name' => 'bank',
-            'extra_field' => 'unexpected',
+            'reason'             => 'pay',
+            'reason_code'        => '200',
+            'payment_system'     => 'novapay',
+            'card_type'          => 'visa',
+            'issue_bank_name'    => 'bank',
+            'extra_field'        => 'unexpected',
         ]);
     })->throws(MassAssignmentException::class);
 
-    it('has a precisely defined cast configuration', function () {
+    it('has a precisely defined cast configuration', function (): void {
         $reflectionMethod = new ReflectionMethod(Payment::class, 'casts');
         $payment = new Payment;
         $casts = $reflectionMethod->invoke($payment);
 
         expect($casts)->toBe([
-            'mentor_session_id' => 'int',
-            'order_reference' => 'string',
-            'amount' => 'int',
-            'currency' => 'string',
+            'mentor_session_id'  => 'int',
+            'order_reference'    => 'string',
+            'amount'             => 'int',
+            'currency'           => 'string',
             'transaction_status' => 'string',
-            'reason' => 'string',
-            'reason_code' => 'string',
-            'payment_system' => 'string',
-            'card_type' => 'string',
-            'issue_bank_name' => 'string',
+            'reason'             => 'string',
+            'reason_code'        => 'string',
+            'payment_system'     => 'string',
+            'card_type'          => 'string',
+            'issue_bank_name'    => 'string',
         ]);
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
         $data = [
-            'mentor_session_id' => $this->mentorSession->getKey(),
-            'order_reference' => 'ttt333',
-            'amount' => 1,
-            'currency' => 'EUR',
+            'mentor_session_id'  => $this->mentorSession->getKey(),
+            'order_reference'    => 'ttt333',
+            'amount'             => 1,
+            'currency'           => 'EUR',
             'transaction_status' => 'success',
-            'reason' => 'pay-pay',
-            'reason_code' => '05',
-            'payment_system' => 'paypal',
-            'card_type' => 'masterecard',
-            'issue_bank_name' => 'bankname',
+            'reason'             => 'pay-pay',
+            'reason_code'        => '05',
+            'payment_system'     => 'paypal',
+            'card_type'          => 'masterecard',
+            'issue_bank_name'    => 'bankname',
         ];
 
         $payment = Payment::factory()->create($data);
@@ -182,6 +182,6 @@ describe('Payment Model', function () {
             ->and($payment->mentorSession)->toBeInstanceOf(MentorSession::class)
             ->and($payment->mentorSession->getKey())->toBe($this->mentorSession->getKey());
 
-        MentorSession::create(array_merge($data, ['extra_field' => 'test']));
+        MentorSession::query()->create(array_merge($data, ['extra_field' => 'test']));
     })->throws(MassAssignmentException::class);
 });

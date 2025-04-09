@@ -6,18 +6,22 @@ namespace App\Providers;
 
 use App\Enums\RoleEnum;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Override;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
+    #[Override]
     public function register(): void {}
 
     /**
@@ -25,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Date::use(CarbonImmutable::class);
+
         $this->configModels();
         $this->configDatabase();
 
@@ -32,9 +38,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceHttps();
         }
 
-        Gate::define('viewPulse', function (User $user) {
-            return $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]);
-        });
+        Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
 
         Vite::prefetch(concurrency: 3);
     }
@@ -42,9 +46,6 @@ class AppServiceProvider extends ServiceProvider
     private function configModels(): void
     {
         Model::shouldBeStrict();
-        Model::preventLazyLoading();
-        Model::preventAccessingMissingAttributes();
-        Model::preventSilentlyDiscardingAttributes();
     }
 
     private function configDatabase(): void

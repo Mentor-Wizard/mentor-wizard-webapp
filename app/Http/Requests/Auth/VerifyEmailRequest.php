@@ -6,8 +6,8 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class VerifyEmailRequest extends FormRequest
 {
@@ -20,11 +20,7 @@ class VerifyEmailRequest extends FormRequest
             return false;
         }
 
-        if (! hash_equals(sha1($this->user()->getEmailForVerification()), $this->route('hash'))) {
-            return false;
-        }
-
-        return true;
+        return hash_equals(sha1((string) $this->user()->getEmailForVerification()), $this->route('hash'));
     }
 
     /**
@@ -35,7 +31,6 @@ class VerifyEmailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
         ];
     }
 

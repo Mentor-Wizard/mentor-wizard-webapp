@@ -15,15 +15,15 @@ use Illuminate\Support\Facades\Hash;
 
 mutates(User::class);
 
-describe('User Model', function () {
-    beforeEach(function () {
+describe('User Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('can create a user', function () {
+    it('can create a user', function (): void {
         $user = User::factory()->create([
             'username' => 'testuser',
-            'email' => 'test@example.com',
+            'email'    => 'test@example.com',
             'password' => 'password123',
         ]);
 
@@ -33,7 +33,7 @@ describe('User Model', function () {
             ->and(Hash::check('password123', $user->password))->toBeTrue();
     });
 
-    it('has a profile relationship', function () {
+    it('has a profile relationship', function (): void {
         $user = User::factory()->create();
         $profile = UserProfile::factory()->for($user)->create();
 
@@ -41,7 +41,7 @@ describe('User Model', function () {
             ->and($user->profile->getKey())->toBe($profile->getKey());
     });
 
-    it('has mentor reviews relationship', function () {
+    it('has mentor reviews relationship', function (): void {
         $mentor = User::factory()->create();
         $review = MentorReview::factory()->for($mentor, 'mentor')->create();
 
@@ -49,7 +49,7 @@ describe('User Model', function () {
             ->and($mentor->mentorReviews->first()->getKey())->toBe($review->getKey());
     });
 
-    it('has reviews by menti relationship', function () {
+    it('has reviews by menti relationship', function (): void {
         $menti = User::factory()->create();
         $review = MentorReview::factory()->for($menti, 'menti')->create();
 
@@ -57,23 +57,23 @@ describe('User Model', function () {
             ->and($menti->reviewsByMenti->first()->getKey())->toBe($review->getKey());
     });
 
-    it('has mentor programs relationship', function () {
+    it('has mentor programs relationship', function (): void {
         $mentor = User::factory()->create();
         $program = MentorProgram::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'name' => 'Test Program',
+            'name'      => 'Test Program',
         ]);
 
         expect($mentor->mentorPrograms)->toHaveCount(1)
             ->and($mentor->mentorPrograms->first()->getKey())->toBe($program->getKey());
     });
 
-    it('has mentor and menti sessions relationships', function () {
+    it('has mentor and menti sessions relationships', function (): void {
         $mentor = User::factory()->create();
         $menti = User::factory()->create();
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'menti_id' => $menti->getKey(),
+            'menti_id'  => $menti->getKey(),
         ]);
 
         expect($mentor->mentorSessions)->toHaveCount(1)
@@ -82,7 +82,7 @@ describe('User Model', function () {
             ->and($menti->mentiSessions->first()->getKey())->toBe($mentorSession->getKey());
     });
 
-    it('has correct hidden attributes', function () {
+    it('has correct hidden attributes', function (): void {
         $user = User::factory()->create();
         $hiddenAttributes = $user->getHidden();
 
@@ -90,22 +90,22 @@ describe('User Model', function () {
             ->and($hiddenAttributes)->toContain('remember_token');
     });
 
-    it('has a precisely defined cast configuration', function () {
+    it('has a precisely defined cast configuration', function (): void {
         $reflectionMethod = new ReflectionMethod(User::class, 'casts');
         $user = new User;
         $casts = $reflectionMethod->invoke($user);
 
         expect($casts)->toBe([
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ]);
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
-        User::create(['extra_field' => 'test']);
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
+        User::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 
-    it('has coach chats relationship', function () {
+    it('has coach chats relationship', function (): void {
         $coach = User::factory()->create();
         $menti = User::factory()->create();
 
@@ -118,33 +118,33 @@ describe('User Model', function () {
             ->and($coach->coachChats->first()->getKey())->toBe($chat->getKey());
     });
 
-    it('has menti chats relationship', function () {
+    it('has menti chats relationship', function (): void {
         $mentor = User::factory()->create();
         $menti = User::factory()->create();
 
         $chat = Chat::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'menti_id' => $menti->getKey(),
+            'menti_id'  => $menti->getKey(),
         ]);
 
         expect($menti->mentiChats)->toHaveCount(1)
             ->and($menti->mentiChats->first()->getKey())->toBe($chat->getKey());
     });
 
-    it('has mentor chats relationship', function () {
+    it('has mentor chats relationship', function (): void {
         $mentor = User::factory()->create();
         $menti = User::factory()->create();
 
         $chat = Chat::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'menti_id' => $menti->getKey(),
+            'menti_id'  => $menti->getKey(),
         ]);
 
         expect($mentor->mentorChats)->toHaveCount(1)
             ->and($mentor->mentorChats->first()->getKey())->toBe($chat->getKey());
     });
 
-    it('returns empty collection when coach has no chats', function () {
+    it('returns empty collection when coach has no chats', function (): void {
         $coach = User::factory()->create();
 
         $coachChats = $coach->coachChats();

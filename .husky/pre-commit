@@ -1,2 +1,3 @@
-docker compose exec -T app ./vendor/bin/pint
+docker compose exec app composer rector:fix
+docker compose exec app composer pint:fix
 git add .

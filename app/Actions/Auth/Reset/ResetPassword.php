@@ -27,8 +27,6 @@ class ResetPassword
             return back()->with('status', __($status));
         }
 
-        throw ValidationException::withMessages([
-            'email' => [__($status)],
-        ]);
+        throw ValidationException::withMessages(['email' => [__($status)]]);
     }
 }

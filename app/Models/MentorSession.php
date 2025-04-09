@@ -31,20 +31,6 @@ class MentorSession extends Model
         'cost',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'mentor_id' => 'int',
-            'menti_id' => 'int',
-            'date' => 'datetime',
-            'is_success' => 'boolean',
-            'is_paid' => 'boolean',
-            'is_cancelled' => 'boolean',
-            'is_date_changed' => 'boolean',
-            'cost' => 'float',
-        ];
-    }
-
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
@@ -63,5 +49,19 @@ class MentorSession extends Model
     public function mentorSessionNote(): HasOne
     {
         return $this->hasOne(MentorSessionNote::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'mentor_id'       => 'int',
+            'menti_id'        => 'int',
+            'date'            => 'datetime',
+            'is_success'      => 'boolean',
+            'is_paid'         => 'boolean',
+            'is_cancelled'    => 'boolean',
+            'is_date_changed' => 'boolean',
+            'cost'            => 'float',
+        ];
     }
 }

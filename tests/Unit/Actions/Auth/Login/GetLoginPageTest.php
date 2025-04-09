@@ -10,9 +10,9 @@ use Inertia\Response;
 
 mutates(GetLoginPage::class);
 
-describe('GetLoginPage Action', function () {
+describe('GetLoginPage Action', function (): void {
 
-    it('returns correct Inertia response', function () {
+    it('returns correct Inertia response', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);
         $mockRouteCollection->shouldReceive('getRoutesByName')->andReturn([]);
 
@@ -32,11 +32,11 @@ describe('GetLoginPage Action', function () {
             ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Auth/Login')
             ->and(Arr::get($resultData->getData(), 'page.props'))->toEqual([
                 'canResetPassword' => true,
-                'status' => 'test_message',
+                'status'           => 'test_message',
             ]);
     });
 
-    it('returns correct Inertia response when password reset is not available', function () {
+    it('returns correct Inertia response when password reset is not available', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);
         $mockRouteCollection->shouldReceive('getRoutesByName')->andReturn([]);
 
@@ -56,7 +56,7 @@ describe('GetLoginPage Action', function () {
             ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Auth/Login')
             ->and(Arr::get($resultData->getData(), 'page.props'))->toEqual([
                 'canResetPassword' => false,
-                'status' => 'test_message',
+                'status'           => 'test_message',
             ]);
     });
 });

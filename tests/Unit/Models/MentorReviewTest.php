@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\MassAssignmentException;
 
 mutates(MentorReview::class);
 
-describe('MentorReview Model', function () {
-    beforeEach(function () {
+describe('MentorReview Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('has the correct fillable attributes', function () {
+    it('has the correct fillable attributes', function (): void {
         $model = new MentorReview;
 
         expect($model->getFillable())->toEqual([
@@ -26,26 +26,26 @@ describe('MentorReview Model', function () {
         ]);
     });
 
-    it('has a relationship with mentor', function () {
+    it('has a relationship with mentor', function (): void {
         $mentorReview = MentorReview::factory()->create();
 
         expect($mentorReview->mentor)->toBeInstanceOf(User::class);
     });
 
-    it('has a relationship with menti', function () {
+    it('has a relationship with menti', function (): void {
         $mentorReview = MentorReview::factory()->create();
 
         expect($mentorReview->mentor)->toBeInstanceOf(User::class);
     });
 
-    it('can create a mentor review using factory', function () {
+    it('can create a mentor review using factory', function (): void {
         $mentorReview = MentorReview::factory()->create();
 
         expect($mentorReview)->toBeInstanceOf(MentorReview::class)
             ->and($mentorReview->exists)->toBeTrue();
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
-        MentorProgram::create(['extra_field' => 'test']);
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
+        MentorProgram::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 });
