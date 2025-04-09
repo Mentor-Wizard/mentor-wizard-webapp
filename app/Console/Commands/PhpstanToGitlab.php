@@ -45,9 +45,9 @@ class PhpstanToGitlab extends Command
                     fn (array $message): array => [
                         'description' => Arr::get($message, 'message'),
                         'fingerprint' => md5($sanitizedFilePath.Arr::get($message, 'message')),
-                        'severity' => 'major',
-                        'location' => [
-                            'path' => $sanitizedFilePath,
+                        'severity'    => 'major',
+                        'location'    => [
+                            'path'  => $sanitizedFilePath,
                             'lines' => [
                                 'begin' => Arr::get($message, 'line', 1),
                             ],

@@ -36,7 +36,7 @@ describe('Socialite Authentication', function (): void {
             ->and(Auth::user()->username)->toBe('testuser');
 
         $this->assertDatabaseHas('users', [
-            'email' => 'test@example.com',
+            'email'    => 'test@example.com',
             'username' => 'testuser',
         ]);
     })->with(SocialiteDriver::cases());

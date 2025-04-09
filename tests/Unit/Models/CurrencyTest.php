@@ -12,8 +12,8 @@ mutates(Currency::class);
 describe('Currency Model', function (): void {
     it('can create a new currency', function (): void {
         $data = [
-            'name' => CurrencyEnum::EUR->name,
-            'slug' => Str::slug(CurrencyEnum::EUR->name),
+            'name'   => CurrencyEnum::EUR->name,
+            'slug'   => Str::slug(CurrencyEnum::EUR->name),
             'symbol' => CurrencyEnum::EUR->value,
         ];
 
@@ -33,7 +33,7 @@ describe('Currency Model', function (): void {
 
     it('generates a slug automatically if not provided', function (): void {
         $currency = Currency::query()->create([
-            'name' => 'EUR',
+            'name'   => 'EUR',
             'symbol' => '€',
         ]);
 

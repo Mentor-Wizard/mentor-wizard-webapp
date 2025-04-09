@@ -22,13 +22,13 @@ describe('MentorSession Model', function (): void {
 
     it('can create session with basic attributes with relations', function (): void {
         $mentorSession = MentorSession::factory()->create([
-            'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'date' => now(),
-            'cost' => 99.99,
-            'is_success' => true,
-            'is_paid' => true,
-            'is_cancelled' => false,
+            'mentor_id'       => $this->mentor->getKey(),
+            'menti_id'        => $this->menti->getKey(),
+            'date'            => now(),
+            'cost'            => 99.99,
+            'is_success'      => true,
+            'is_paid'         => true,
+            'is_cancelled'    => false,
             'is_date_changed' => false,
         ]);
 
@@ -49,13 +49,13 @@ describe('MentorSession Model', function (): void {
 
     it('can create session with basic attributes and casts are correct', function (): void {
         $mentorSession = MentorSession::factory()->create([
-            'mentor_id' => (string) $this->mentor->getKey(),
-            'menti_id' => (string) $this->menti->getKey(),
-            'date' => '2024-02-10 15:00:00',
-            'cost' => '99.99',
-            'is_success' => 1,
-            'is_paid' => 1,
-            'is_cancelled' => 0,
+            'mentor_id'       => (string) $this->mentor->getKey(),
+            'menti_id'        => (string) $this->menti->getKey(),
+            'date'            => '2024-02-10 15:00:00',
+            'cost'            => '99.99',
+            'is_success'      => 1,
+            'is_paid'         => 1,
+            'is_cancelled'    => 0,
             'is_date_changed' => 0,
         ]);
 
@@ -73,7 +73,7 @@ describe('MentorSession Model', function (): void {
     it('cascades on mentor deletion', function (): void {
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
 
         $this->mentor->delete();
@@ -86,7 +86,7 @@ describe('MentorSession Model', function (): void {
     it('cascades on menti deletion', function (): void {
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
 
         $this->menti->delete();
@@ -115,15 +115,15 @@ describe('MentorSession Model', function (): void {
         $mentorSession = new MentorSession;
 
         $mentorSession->fill([
-            'mentor_id' => 123,
-            'menti_id' => 456,
-            'date' => '2024-03-03 12:00:00',
-            'is_success' => 1,
-            'is_paid' => 0,
-            'is_cancelled' => 1,
+            'mentor_id'       => 123,
+            'menti_id'        => 456,
+            'date'            => '2024-03-03 12:00:00',
+            'is_success'      => 1,
+            'is_paid'         => 0,
+            'is_cancelled'    => 1,
             'is_date_changed' => 1,
-            'cost' => '150.75',
-            'extra_field' => 'unexpected',
+            'cost'            => '150.75',
+            'extra_field'     => 'unexpected',
         ]);
     })->throws(MassAssignmentException::class);
 
@@ -133,14 +133,14 @@ describe('MentorSession Model', function (): void {
         $casts = $reflectionMethod->invoke($mentorSession);
 
         expect($casts)->toBe([
-            'mentor_id' => 'int',
-            'menti_id' => 'int',
-            'date' => 'datetime',
-            'is_success' => 'boolean',
-            'is_paid' => 'boolean',
-            'is_cancelled' => 'boolean',
+            'mentor_id'       => 'int',
+            'menti_id'        => 'int',
+            'date'            => 'datetime',
+            'is_success'      => 'boolean',
+            'is_paid'         => 'boolean',
+            'is_cancelled'    => 'boolean',
             'is_date_changed' => 'boolean',
-            'cost' => 'float',
+            'cost'            => 'float',
         ]);
     });
 
@@ -151,12 +151,12 @@ describe('MentorSession Model', function (): void {
     it('has a valid mentorSessionNote relation', function (): void {
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
 
         $mentorSessionNote = MentorSessionNote::factory()->create([
             'mentor_session_id' => $mentorSession->getKey(),
-            'notes' => 'some notes',
+            'notes'             => 'some notes',
         ]);
 
         expect($mentorSession->mentorSessionNote)->toBeInstanceOf(MentorSessionNote::class)
@@ -166,8 +166,8 @@ describe('MentorSession Model', function (): void {
     it('throws MassAssignmentException when trying to fill non-fillable attributes', function (): void {
         expect(function (): void {
             MentorSession::query()->create([
-                'mentor_id' => $this->mentor->getKey(),
-                'menti_id' => $this->menti->getKey(),
+                'mentor_id'             => $this->mentor->getKey(),
+                'menti_id'              => $this->menti->getKey(),
                 'nonexistent_attribute' => 'test value',
             ]);
         })->toThrow(MassAssignmentException::class);
@@ -176,7 +176,7 @@ describe('MentorSession Model', function (): void {
     it('has correctly defined relations', function (): void {
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
 
         expect($mentorSession->mentor())->toBeInstanceOf(BelongsTo::class)
@@ -188,7 +188,7 @@ describe('MentorSession Model', function (): void {
     it('can create session with MentorSessionNote', function (): void {
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
 
         $mentorSessionNote = MentorSessionNote::factory()->create([
@@ -202,7 +202,7 @@ describe('MentorSession Model', function (): void {
     it('can create session with Payment', function (): void {
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
+            'menti_id'  => $this->menti->getKey(),
         ]);
 
         $payment = Payment::factory()->create([

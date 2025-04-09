@@ -19,9 +19,9 @@ describe('Successful Scenarios', function (): void {
 
     it('user registration successful', function (): void {
         $newUserData = [
-            'username' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
+            'username'              => 'Test User',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ];
 
@@ -42,9 +42,9 @@ describe('Unsuccessful Scenarios', function (): void {
 
     it('user registration password is too small', function (): void {
         $newUserData = [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'p',
+            'name'                  => 'Test User',
+            'email'                 => 'test@example.com',
+            'password'              => 'p',
             'password_confirmation' => 'p',
         ];
 
@@ -57,9 +57,9 @@ describe('Unsuccessful Scenarios', function (): void {
 
     it('user registration confirm password is empty', function (): void {
         $newUserData = [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
+            'name'                  => 'Test User',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => '',
         ];
 
@@ -74,9 +74,9 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $newUserData = [
-            'name' => 'Test User',
-            'email' => $user->email,
-            'password' => 'password',
+            'name'                  => 'Test User',
+            'email'                 => $user->email,
+            'password'              => 'password',
             'password_confirmation' => '',
         ];
 
@@ -89,9 +89,9 @@ describe('Unsuccessful Scenarios', function (): void {
 
     it('user registration name is too small', function (): void {
         $newUserData = [
-            'name' => 'T',
-            'email' => 'test@example.com',
-            'password' => 'password',
+            'name'                  => 'T',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => '',
         ];
 

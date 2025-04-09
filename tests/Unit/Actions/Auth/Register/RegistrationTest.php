@@ -24,9 +24,9 @@ describe('Registration Action', function (): void {
 
     it('can register', function (): void {
         $request = new RegistrationRequest([
-            'username' => 'testuser',
-            'email' => 'test@example.com',
-            'password' => 'password',
+            'username'              => 'testuser',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ]);
 
@@ -49,8 +49,8 @@ describe('Registration Action', function (): void {
 
     it('can not register without username', function (): void {
         $request = new RegistrationRequest([
-            'email' => 'test@example.com',
-            'password' => 'password',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ]);
 
@@ -65,8 +65,8 @@ describe('Registration Action', function (): void {
 
     it('can not register without email', function (): void {
         $request = new RegistrationRequest([
-            'username' => 'testuser',
-            'password' => 'password',
+            'username'              => 'testuser',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ]);
 

@@ -26,7 +26,7 @@ describe('CreatePassword Action', function (): void {
         $newPassword = 'new_password';
 
         $user = User::factory()->create([
-            'email' => 'test@example.com',
+            'email'    => 'test@example.com',
             'password' => Hash::make($oldPassword),
         ]);
 
@@ -35,10 +35,10 @@ describe('CreatePassword Action', function (): void {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => $newPassword,
+                'email'                 => $user->email,
+                'password'              => $newPassword,
                 'password_confirmation' => $newPassword,
-                'token' => 'test_token',
+                'token'                 => 'test_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
@@ -46,10 +46,10 @@ describe('CreatePassword Action', function (): void {
 
         $request->shouldReceive('all')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'test_token',
+                'token'                 => 'test_token',
             ]);
 
         Password::shouldReceive('reset')
@@ -85,10 +85,10 @@ describe('CreatePassword Action', function (): void {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'invalid_token',
+                'token'                 => 'invalid_token',
             ]);
 
         Password::shouldReceive('reset')
@@ -127,10 +127,10 @@ describe('CreatePassword Action', function (): void {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'valid_token',
+                'token'                 => 'valid_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
@@ -165,10 +165,10 @@ describe('CreatePassword Action', function (): void {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'invalid_token',
+                'token'                 => 'invalid_token',
             ]);
 
         Password::shouldReceive('reset')
@@ -195,8 +195,8 @@ describe('CreatePassword Action', function (): void {
         $newPassword = 'new_password';
 
         $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make($oldPassword),
+            'email'          => 'test@example.com',
+            'password'       => Hash::make($oldPassword),
             'remember_token' => 'old_token',
         ]);
 
@@ -204,10 +204,10 @@ describe('CreatePassword Action', function (): void {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => $newPassword,
+                'email'                 => $user->email,
+                'password'              => $newPassword,
                 'password_confirmation' => $newPassword,
-                'token' => 'reset_token',
+                'token'                 => 'reset_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')

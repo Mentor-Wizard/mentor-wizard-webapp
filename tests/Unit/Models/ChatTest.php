@@ -21,8 +21,8 @@ describe('Chat Model', function (): void {
     it('can create chat with basic attributes with relations', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ]);
 
         expect($chat)->toBeInstanceOf(Chat::class)
@@ -40,8 +40,8 @@ describe('Chat Model', function (): void {
     it('can create chat with basic attributes and casts are correct', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => (string) $this->mentor->getKey(),
-            'menti_id' => (string) $this->menti->getKey(),
-            'coach_id' => (string) $this->coach->getKey(),
+            'menti_id'  => (string) $this->menti->getKey(),
+            'coach_id'  => (string) $this->coach->getKey(),
         ]);
 
         expect($chat)->toBeInstanceOf(Chat::class)
@@ -53,14 +53,14 @@ describe('Chat Model', function (): void {
     it('cascades on mentor deletion', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ]);
 
         $this->mentor->delete();
 
         $this->assertDatabaseHas('chats', [
-            'id' => $chat->getKey(),
+            'id'        => $chat->getKey(),
             'mentor_id' => null,
         ]);
     });
@@ -68,14 +68,14 @@ describe('Chat Model', function (): void {
     it('cascades on menti deletion', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ]);
 
         $this->menti->delete();
 
         $this->assertDatabaseHas('chats', [
-            'id' => $chat->getKey(),
+            'id'       => $chat->getKey(),
             'menti_id' => null,
         ]);
     });
@@ -83,23 +83,23 @@ describe('Chat Model', function (): void {
     it('cascades on coach deletion', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ]);
 
         $this->coach->delete();
 
         $this->assertDatabaseHas('chats', [
-            'id' => $chat->getKey(),
+            'id'       => $chat->getKey(),
             'coach_id' => null,
         ]);
     });
 
     it('deletes chat when all user IDs are NULL after saving model', function (): void {
         $chat = Chat::factory()->create([
-            'menti_id' => null,
+            'menti_id'  => null,
             'mentor_id' => null,
-            'coach_id' => null,
+            'coach_id'  => null,
         ]);
 
         $chat->save();
@@ -110,14 +110,14 @@ describe('Chat Model', function (): void {
     it('deletes chat when all user IDs are NULL after updadting model', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ]);
 
         $chat->update([
-            'menti_id' => null,
+            'menti_id'  => null,
             'mentor_id' => null,
-            'coach_id' => null,
+            'coach_id'  => null,
         ]);
 
         $chat->save();
@@ -128,8 +128,8 @@ describe('Chat Model', function (): void {
     it('does not delete chat when not all user IDs are NULL', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ]);
 
         $chat->update([
@@ -155,9 +155,9 @@ describe('Chat Model', function (): void {
         $chat = new Chat;
 
         $chat->fill([
-            'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'mentor_id'   => $this->mentor->getKey(),
+            'menti_id'    => $this->menti->getKey(),
+            'coach_id'    => $this->coach->getKey(),
             'extra_field' => 'unexpected',
         ]);
     })->throws(MassAssignmentException::class);
@@ -169,16 +169,16 @@ describe('Chat Model', function (): void {
 
         expect($casts)->toBe([
             'mentor_id' => 'int',
-            'menti_id' => 'int',
-            'coach_id' => 'int',
+            'menti_id'  => 'int',
+            'coach_id'  => 'int',
         ]);
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
         $data = [
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ];
 
         $chat = Chat::factory()->create($data);
@@ -193,14 +193,14 @@ describe('Chat Model', function (): void {
             ->and($chat->coach)->toBeInstanceOf(User::class)
             ->and($chat->coach->getKey())->toBe($this->coach->getKey());
 
-        \App\Models\Chat::query()->create(array_merge($data, ['extra_field' => 'unexpected']));
+        Chat::query()->create(array_merge($data, ['extra_field' => 'unexpected']));
     })->throws(MassAssignmentException::class);
 
     it('has a valid messages relation', function (): void {
         $chat = Chat::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
-            'menti_id' => $this->menti->getKey(),
-            'coach_id' => $this->coach->getKey(),
+            'menti_id'  => $this->menti->getKey(),
+            'coach_id'  => $this->coach->getKey(),
         ]);
 
         $messages = ChatMessage::factory()->create([

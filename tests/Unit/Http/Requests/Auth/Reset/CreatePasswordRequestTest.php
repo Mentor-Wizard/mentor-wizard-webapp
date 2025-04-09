@@ -13,9 +13,9 @@ describe('CreatePasswordRequest Validation', function (): void {
             $request = new CreatePasswordRequest;
 
             $data = [
-                'token' => 'valid-token-123',
-                'email' => 'user@example.com',
-                'password' => 'StrongPassword123!',
+                'token'                 => 'valid-token-123',
+                'email'                 => 'user@example.com',
+                'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -31,8 +31,8 @@ describe('CreatePasswordRequest Validation', function (): void {
             $request = new CreatePasswordRequest;
 
             $data = [
-                'email' => 'user@example.com',
-                'password' => 'StrongPassword123!',
+                'email'                 => 'user@example.com',
+                'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -46,9 +46,9 @@ describe('CreatePasswordRequest Validation', function (): void {
             $request = new CreatePasswordRequest;
 
             $data = [
-                'token' => 'valid-token-123',
-                'email' => 'invalid-email',
-                'password' => 'StrongPassword123!',
+                'token'                 => 'valid-token-123',
+                'email'                 => 'invalid-email',
+                'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -62,9 +62,9 @@ describe('CreatePasswordRequest Validation', function (): void {
             $request = new CreatePasswordRequest;
 
             $data = [
-                'token' => 'valid-token-123',
-                'email' => 'user@example.com',
-                'password' => 'StrongPassword123!',
+                'token'                 => 'valid-token-123',
+                'email'                 => 'user@example.com',
+                'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'DifferentPassword123!',
             ];
 
@@ -78,8 +78,8 @@ describe('CreatePasswordRequest Validation', function (): void {
             $request = new CreatePasswordRequest;
 
             $data = [
-                'token' => 'valid-token-123',
-                'email' => 'user@example.com',
+                'token'                 => 'valid-token-123',
+                'email'                 => 'user@example.com',
                 'password_confirmation' => 'DifferentPassword123!',
             ];
 
@@ -102,9 +102,9 @@ describe('CreatePasswordRequest Validation', function (): void {
         it('rejects password that is too short', function (): void {
             $validator = Validator::make(
                 [
-                    'token' => 'valid-token-123',
-                    'email' => 'user@example.com',
-                    'password' => 'short',
+                    'token'                 => 'valid-token-123',
+                    'email'                 => 'user@example.com',
+                    'password'              => 'short',
                     'password_confirmation' => 'short',
                 ],
                 (new CreatePasswordRequest)->rules()
@@ -118,9 +118,9 @@ describe('CreatePasswordRequest Validation', function (): void {
         it('checks password without mixed case', function (): void {
             $validator = Validator::make(
                 [
-                    'token' => 'valid-token-123',
-                    'email' => 'user@example.com',
-                    'password' => 'lowercasepassword123',
+                    'token'                 => 'valid-token-123',
+                    'email'                 => 'user@example.com',
+                    'password'              => 'lowercasepassword123',
                     'password_confirmation' => 'lowercasepassword123',
                 ],
                 (new CreatePasswordRequest)->rules()
@@ -132,9 +132,9 @@ describe('CreatePasswordRequest Validation', function (): void {
         it('validates password with mixed case and numbers', function (): void {
             $validator = Validator::make(
                 [
-                    'token' => 'valid-token-123',
-                    'email' => 'user@example.com',
-                    'password' => 'StrongPassword123',
+                    'token'                 => 'valid-token-123',
+                    'email'                 => 'user@example.com',
+                    'password'              => 'StrongPassword123',
                     'password_confirmation' => 'StrongPassword123',
                 ],
                 (new CreatePasswordRequest)->rules()
