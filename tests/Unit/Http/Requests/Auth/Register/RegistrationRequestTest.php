@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Validator;
 
 mutates(RegistrationRequest::class);
 
-describe('RegistrationRequest Validation', function () {
-    describe('Positive Scenarios', function () {
-        it('validates correct registration data', function () {
+describe('RegistrationRequest Validation', function (): void {
+    describe('Positive Scenarios', function (): void {
+        it('validates correct registration data', function (): void {
             $data = [
                 'username'              => 'validuser',
                 'email'                 => 'valid@example.com',
@@ -26,8 +26,8 @@ describe('RegistrationRequest Validation', function () {
         });
     });
 
-    describe('Username Validation', function () {
-        it('fails when username is too short', function () {
+    describe('Username Validation', function (): void {
+        it('fails when username is too short', function (): void {
             $data = [
                 'username'              => 'user',
                 'email'                 => 'test@example.com',
@@ -42,7 +42,7 @@ describe('RegistrationRequest Validation', function () {
                 ->and($validator->errors()->get('username'))->toHaveCount(1);
         });
 
-        it('fails when username is missing', function () {
+        it('fails when username is missing', function (): void {
             $data = [
                 'email'                 => 'test@example.com',
                 'password'              => 'StrongPassword123!',
@@ -57,8 +57,8 @@ describe('RegistrationRequest Validation', function () {
         });
     });
 
-    describe('Email Validation', function () {
-        it('fails when email is invalid', function () {
+    describe('Email Validation', function (): void {
+        it('fails when email is invalid', function (): void {
             $data = [
                 'username'              => 'validuser',
                 'email'                 => 'invalid-email',
@@ -73,7 +73,7 @@ describe('RegistrationRequest Validation', function () {
                 ->and($validator->errors()->get('email'))->toHaveCount(1);
         });
 
-        it('fails when email is not unique', function () {
+        it('fails when email is not unique', function (): void {
             $this->seed(RoleSeeder::class);
             User::factory()->create([
                 'email' => 'existing@example.com',
@@ -94,8 +94,8 @@ describe('RegistrationRequest Validation', function () {
         });
     });
 
-    describe('Password Validation', function () {
-        it('fails when password is not confirmed', function () {
+    describe('Password Validation', function (): void {
+        it('fails when password is not confirmed', function (): void {
             $data = [
                 'username'              => 'validuser',
                 'email'                 => 'test@example.com',
@@ -110,7 +110,7 @@ describe('RegistrationRequest Validation', function () {
                 ->and($validator->errors()->get('password'))->toHaveCount(1);
         });
 
-        it('requires password', function () {
+        it('requires password', function (): void {
             $data = [
                 'username'              => 'validuser',
                 'email'                 => 'test@example.com',
@@ -125,15 +125,15 @@ describe('RegistrationRequest Validation', function () {
         });
     });
 
-    describe('Authorization', function () {
-        it('always allows registration request', function () {
+    describe('Authorization', function (): void {
+        it('always allows registration request', function (): void {
             $request = new RegistrationRequest;
             expect($request->authorize())->toBeTrue();
         });
     });
 
-    describe('Password Validation Without Strict Rules', function () {
-        it('passes with a simple password', function () {
+    describe('Password Validation Without Strict Rules', function (): void {
+        it('passes with a simple password', function (): void {
             $data = [
                 'username'              => 'validuser',
                 'email'                 => 'test@example.com',
@@ -147,7 +147,7 @@ describe('RegistrationRequest Validation', function () {
             expect($validator->passes())->toBeTrue();
         });
 
-        it('fails with a short password', function () {
+        it('fails with a short password', function (): void {
             $data = [
                 'username'              => 'validuser',
                 'email'                 => 'test@example.com',
@@ -161,7 +161,7 @@ describe('RegistrationRequest Validation', function () {
             expect($validator->passes())->toBeFalse();
         });
 
-        it('requires both password and confirmation', function () {
+        it('requires both password and confirmation', function (): void {
             $data = [
                 'username' => 'validuser',
                 'email'    => 'test@example.com',

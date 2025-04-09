@@ -11,12 +11,12 @@ use Inertia\Response;
 
 mutates(GetProfilePage::class);
 
-describe('Profile Page', function () {
-    beforeEach(function () {
+describe('Profile Page', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('returns mustVerifyEmail as true for any user type', function (mixed $user) {
+    it('returns mustVerifyEmail as true for any user type', function (mixed $user): void {
         if ($user instanceof User) {
             Auth::login($user);
         } else {
@@ -49,7 +49,7 @@ describe('Profile Page', function () {
         },
     ]);
 
-    it('returns mustVerifyEmail as true with different session statuses', function (?string $status) {
+    it('returns mustVerifyEmail as true with different session statuses', function (?string $status): void {
         $user = User::factory()->create();
         Auth::login($user);
 

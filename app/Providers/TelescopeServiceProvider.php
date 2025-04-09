@@ -15,6 +15,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     /**
      * Register any application services.
      */
+    #[\Override]
     public function register(): void
     {
         Telescope::night();
@@ -23,20 +24,24 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $isLocal = $this->app->environment('local', 'testing', 'ci');
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
+        Telescope::filter(function (IncomingEntry $entry) use ($isLocal): bool {
             if ($entry->type === 'request' && $entry->content['uri'] === '/up') {
                 return false;
             }
-            if ($entry->type === 'view' && isset($entry->content['name']) && str_contains($entry->content['name'], 'health-up.blade.php')) {
+
+            if ($entry->type === 'view' && isset($entry->content['name']) && str_contains((string) $entry->content['name'], 'health-up.blade.php')) {
                 return false;
             }
 
-            return $isLocal
-                   || $entry->isReportableException()
-                   || $entry->isFailedRequest()
-                   || $entry->isFailedJob()
-                   || $entry->isScheduledTask()
-                   || $entry->hasMonitoredTag();
+            return match (true) {
+                $isLocal,
+                $entry->isReportableException(),
+                $entry->isFailedRequest(),
+                $entry->isFailedJob(),
+                $entry->isScheduledTask(),
+                $entry->hasMonitoredTag() => true,
+                default => false,
+            };
         });
     }
 
@@ -63,10 +68,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      *
      * This gate determines who can access Telescope in non-local environments.
      */
+    #[\Override]
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function (?User $user) {
-            return $this->app->environment('local', 'testing', 'ci');
-        });
+        Gate::define('viewTelescope', fn (?User $user) => $this->app->environment('local', 'testing', 'ci'));
     }
 }

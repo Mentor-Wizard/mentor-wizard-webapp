@@ -9,9 +9,9 @@ use Inertia\Response;
 
 mutates(WelcomePage::class);
 
-describe('WelcomePage Action', function () {
+describe('WelcomePage Action', function (): void {
 
-    it('returns correct Inertia response', function () {
+    it('returns correct Inertia response', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);
         $mockRouteCollection->shouldReceive('getRoutesByName')->andReturn([]);
 

@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Auth;
 
 mutates(Logout::class);
 
-describe('Logout Action', function () {
+describe('Logout Action', function (): void {
 
-    it('logs out the user', function () {
+    it('logs out the user', function (): void {
         $request = Mockery::mock(Request::class);
         $request->shouldReceive('session->invalidate')->once();
         $request->shouldReceive('session->regenerateToken')->once();

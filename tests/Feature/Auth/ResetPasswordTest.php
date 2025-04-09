@@ -9,17 +9,17 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\Response;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });
 
-describe('Successful Scenarios', function () {
-    it('renders the forgot password screen', function () {
+describe('Successful Scenarios', function (): void {
+    it('renders the forgot password screen', function (): void {
         $this->get(route('password.request'))
             ->assertStatus(Response::HTTP_OK);
     });
 
-    it('finds the user email', function () {
+    it('finds the user email', function (): void {
         $user = User::factory()->create();
 
         $this->postJson(route('password.email'), [
@@ -29,12 +29,12 @@ describe('Successful Scenarios', function () {
             ->assertRedirect();
     });
 
-    it('renders the screen for creating a new password after email', function () {
+    it('renders the screen for creating a new password after email', function (): void {
         $this->get('/reset-password/6fcdb4b4d76b69f8a8b90a9aceb2a88e865e4df79c866ff76597e1ea803cfe68')
             ->assertStatus(Response::HTTP_OK);
     });
 
-    it('allows a user to reset their password', function () {
+    it('allows a user to reset their password', function (): void {
         Notification::fake();
 
         $user = User::factory()->create();
@@ -59,13 +59,13 @@ describe('Successful Scenarios', function () {
     });
 });
 
-describe('Failure Scenarios', function () {
-    it('returns 404 for wrong address to forgot password screen', function () {
+describe('Failure Scenarios', function (): void {
+    it('returns 404 for wrong address to forgot password screen', function (): void {
         $this->get('/forgot-prd')
             ->assertStatus(Response::HTTP_NOT_FOUND);
     });
 
-    it('returns 422 when user email is not found', function () {
+    it('returns 422 when user email is not found', function (): void {
         User::factory()->create();
 
         $this->postJson(route('password.email'), [
@@ -74,17 +74,17 @@ describe('Failure Scenarios', function () {
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     });
 
-    it('returns 404 for wrong address to create new password screen', function () {
+    it('returns 404 for wrong address to create new password screen', function (): void {
         $this->get('/forgot-prd/6fcdb4b4d76b69f8a8b90a9aceb2a88e865e4df79c866ff76597e1ea803cfe68')
             ->assertStatus(Response::HTTP_NOT_FOUND);
     });
 
-    it('returns 405 when token is missing for create new password screen', function () {
+    it('returns 405 when token is missing for create new password screen', function (): void {
         $this->get(route('password.store'))
             ->assertStatus(Response::HTTP_METHOD_NOT_ALLOWED);
     });
 
-    it('fails when password_confirmation does not match', function () {
+    it('fails when password_confirmation does not match', function (): void {
         Notification::fake();
 
         $user = User::factory()->create();
@@ -93,7 +93,7 @@ describe('Failure Scenarios', function () {
         $this->postJson('/forgot-password', ['email' => $user->email])
             ->assertStatus(Response::HTTP_FOUND);
 
-        Notification::assertSentTo($user, IlluminateResetPassword::class, function ($notification) use ($user, $oldHashedPassword) {
+        Notification::assertSentTo($user, IlluminateResetPassword::class, function ($notification) use ($user, $oldHashedPassword): bool {
             $token = $notification->token;
 
             $this->post(route('password.email'), [

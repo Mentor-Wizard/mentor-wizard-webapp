@@ -12,12 +12,12 @@ use Illuminate\Database\QueryException;
 
 mutates(MentorProgramBlockProgress::class);
 
-describe('MentorProgramBlockProgress Model', function () {
-    beforeEach(function () {
+describe('MentorProgramBlockProgress Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('has the correct fillable attributes', function () {
+    it('has the correct fillable attributes', function (): void {
         $model = new MentorProgramBlockProgress;
         expect($model->getFillable())->toEqual([
             'mentor_program_block_id',
@@ -26,7 +26,7 @@ describe('MentorProgramBlockProgress Model', function () {
         ]);
     });
 
-    it('has correct casts for MentorProgramBlockProgress', function () {
+    it('has correct casts for MentorProgramBlockProgress', function (): void {
         $model = new MentorProgramBlockProgress;
         expect($model->getCasts())->toEqual([
             'id'                      => 'int',
@@ -36,23 +36,23 @@ describe('MentorProgramBlockProgress Model', function () {
         ]);
     });
 
-    it('has a relationship with mentor program', function () {
+    it('has a relationship with mentor program', function (): void {
         $mentorProgram = MentorProgram::factory()->create();
 
         expect($mentorProgram->mentor)->toBeInstanceOf(User::class);
     });
 
-    it('has a relationship with mentiProgramProgress', function () {
+    it('has a relationship with mentiProgramProgress', function (): void {
         $mentiProgramProgress = MentorProgramBlockProgress::factory()->create();
 
         expect($mentiProgramProgress->menti)->toBeInstanceOf(User::class);
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
-        MentorProgramBlock::create(['extra_field' => 'test']);
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
+        MentorProgramBlock::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 
-    it('fails to create the model without required fields', function () {
-        MentorProgramBlockProgress::create(['mentor_program_block_id' => null, 'menti_id' => null]);
+    it('fails to create the model without required fields', function (): void {
+        MentorProgramBlockProgress::query()->create(['mentor_program_block_id' => null, 'menti_id' => null]);
     })->throws(QueryException::class);
 });

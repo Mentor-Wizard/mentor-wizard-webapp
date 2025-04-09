@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 use App\Enums\CurrencyEnum;
 use App\Models\Currency;
 use Illuminate\Database\Eloquent\MassAssignmentException;
@@ -9,15 +7,15 @@ use Illuminate\Support\Str;
 
 mutates(Currency::class);
 
-describe('Currency Model', function () {
-    it('can create a new currency', function () {
+describe('Currency Model', function (): void {
+    it('can create a new currency', function (): void {
         $data = [
-            'name'   => CurrencyEnum::EUR->name,
-            'slug'   => Str::slug(CurrencyEnum::EUR->name),
-            'symbol' => CurrencyEnum::EUR->value,
+            'name' => CurrencyEnum::EUR->name,
+            'slug' => Str::slug(CurrencyEnum::EUR->name),
+            'symbol' => CurrencyEnum::EUR->value
         ];
 
-        $currency = Currency::create($data);
+        $currency = Currency::query()->create($data);
 
         expect($currency)->toBeInstanceOf(Currency::class)
             ->and($currency->name)->toBe('EUR')
@@ -25,29 +23,29 @@ describe('Currency Model', function () {
             ->and($currency->symbol)->toBe('€');
     });
 
-    it('has fillable attributes', function () {
+    it('has fillable attributes', function (): void {
         $fillableAttributes = new Currency()->getFillable();
 
         expect($fillableAttributes)->toEqual(['name', 'slug', 'symbol']);
     });
 
-    it('generates a slug automatically if not provided', function () {
-        $currency = Currency::create([
-            'name'   => 'EUR',
-            'symbol' => '€',
+    it('generates a slug automatically if not provided', function (): void {
+        $currency = Currency::query()->create([
+            'name' => 'EUR',
+            'symbol' => '€'
         ]);
 
         expect($currency->slug)->toBeNull();
     });
 
-    it('can use factory to create currency', function () {
+    it('can use factory to create currency', function (): void {
         $currency = Currency::factory()->create();
 
         expect($currency)->toBeInstanceOf(Currency::class)
             ->and($currency->getKey())->not()->toBeNull();
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
-        Currency::create(['extra_field' => 'test']);
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
+        Currency::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 });

@@ -21,7 +21,8 @@ use App\Actions\Auth\VerificationEmailPrompt;
 use App\Actions\Auth\VerifyEmail;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
+Route::middleware('guest')->group(function (): void {
+
     Route::get('register', GetRegistrationPage::class)
         ->name('register');
 
@@ -44,13 +45,14 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', CreatePassword::class)
         ->name('password.store');
 
-    Route::prefix('auth')->group(function () {
+    Route::prefix('auth')->group(function (): void {
         Route::get('redirect/{driver}', SocialiteRedirect::class)->name('auth.socialite.redirect');
         Route::get('callback/{driver}', SocialiteCallback::class)->name('auth.socialite.callback');
     });
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function (): void {
+
     Route::get('verify-email', VerificationEmailPrompt::class)
         ->name('verification.notice');
 

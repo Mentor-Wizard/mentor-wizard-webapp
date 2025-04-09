@@ -12,7 +12,7 @@ use function Pest\Laravel\actingAs;
 
 uses(RefreshDatabase::class);
 
-test('denies access to Pulse for unauthorized users', function () {
+test('denies access to Pulse for unauthorized users', function (): void {
     Role::create(['name' => RoleEnum::USER, 'guard_name' => RoleGuardEnum::USER]);
 
     $user = User::factory()->create([
@@ -25,7 +25,7 @@ test('denies access to Pulse for unauthorized users', function () {
         ->assertForbidden();
 });
 
-test('allows access to Pulse for admin users', function () {
+test('allows access to Pulse for admin users', function (): void {
     Role::create(['name' => RoleEnum::USER->value, 'guard_name' => RoleGuardEnum::USER->value]);
     $role = Role::create(['name' => RoleEnum::ADMIN->value, 'guard_name' => RoleGuardEnum::ADMIN->value]);
 
@@ -41,7 +41,7 @@ test('allows access to Pulse for admin users', function () {
         ->assertOk();
 });
 
-test('allows access to Pulse for superadmin users', function () {
+test('allows access to Pulse for superadmin users', function (): void {
     Role::create(['name' => RoleEnum::USER->value, 'guard_name' => RoleGuardEnum::USER->value]);
     $role = Role::create(['name' => RoleEnum::ADMIN->value, 'guard_name' => RoleGuardEnum::ADMIN->value]);
 

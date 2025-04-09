@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::whenTableHasColumn('users', 'name', function (Blueprint $table) {
+        Schema::whenTableHasColumn('users', 'name', function (Blueprint $table): void {
             $table->renameColumn('name', 'username');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::whenTableHasColumn('users', 'username', function (Blueprint $table) {
+        Schema::whenTableHasColumn('users', 'username', function (Blueprint $table): void {
             $table->renameColumn('username', 'name');
         });
     }

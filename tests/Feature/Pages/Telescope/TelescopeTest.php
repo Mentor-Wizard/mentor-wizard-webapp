@@ -9,12 +9,12 @@ use Database\Seeders\RoleSeeder;
 use Laravel\Telescope\Storage\EntryModel;
 use Spatie\Permission\Models\Role;
 
-describe('Telescope Page', function () {
-    beforeEach(function () {
+describe('Telescope Page', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('telescope is accessible for a user in non-local environment', function () {
+    it('telescope is accessible for a user in non-local environment', function (): void {
         $user = User::factory()->create([
             'username' => 'Test USER',
             'email'    => 'user@example.com',
@@ -25,7 +25,7 @@ describe('Telescope Page', function () {
             ->assertOk();
     });
 
-    it('telescope is accessible for an admin in non-local environment', function () {
+    it('telescope is accessible for an admin in non-local environment', function (): void {
         $role = Role::findByName(RoleEnum::ADMIN->value, RoleGuardEnum::ADMIN->value);
         $admin = User::factory()->create([
             'username' => 'Test ADMIN',
@@ -39,7 +39,7 @@ describe('Telescope Page', function () {
             ->assertOk();
     });
 
-    it('telescope avoids loging healthchecks in database', function () {
+    it('telescope avoids loging healthchecks in database', function (): void {
         $user = User::factory()->create([
             'username' => 'Test USER1',
             'email'    => 'admi@example1.com',
@@ -48,13 +48,13 @@ describe('Telescope Page', function () {
         $this->actingAs($user)
             ->get('/up');
 
-        expect(EntryModel::where('type', 'request')->whereJsonContains('content', ['uri' => '/up'])
+        expect(EntryModel::query()->where('type', 'request')->whereJsonContains('content', ['uri' => '/up'])
             ->exists())->toBeFalse()
-            ->and(EntryModel::where('type', 'view')->whereJsonContains('content', ['name' => 'health-up.blade.php'])
+            ->and(EntryModel::query()->where('type', 'view')->whereJsonContains('content', ['name' => 'health-up.blade.php'])
                 ->exists())->toBeFalse();
     });
 
-    it('telescope successfully logs info about request into database', function () {
+    it('telescope successfully logs info about request into database', function (): void {
         $user = User::factory()->create([
             'username' => 'Test USER2',
             'email'    => 'admi@example.com2',
@@ -63,9 +63,9 @@ describe('Telescope Page', function () {
         $this->actingAs($user)
             ->get('/');
 
-        expect(EntryModel::where('type', 'request')->whereJsonContains('content', ['uri' => '/'])
+        expect(EntryModel::query()->where('type', 'request')->whereJsonContains('content', ['uri' => '/'])
             ->exists())->toBeTrue()
-            ->and(EntryModel::where('type', 'view')->whereJsonContains('content', ['name' => 'app'])
+            ->and(EntryModel::query()->where('type', 'view')->whereJsonContains('content', ['name' => 'app'])
                 ->exists())->toBeTrue();
     });
 

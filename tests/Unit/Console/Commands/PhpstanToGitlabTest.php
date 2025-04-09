@@ -8,13 +8,13 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 mutates(PhpstanToGitlab::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     File::shouldReceive('exists')->andReturn(false)->byDefault();
     File::shouldReceive('get')->byDefault();
     File::shouldReceive('put')->byDefault();
 });
 
-it('returns an error when the file is not found', function () {
+it('returns an error when the file is not found', function (): void {
     File::shouldReceive('exists')->with('nonexistent.json')->once()->andReturn(false);
     File::shouldNotReceive('get');
     File::shouldNotReceive('put');
@@ -26,18 +26,18 @@ it('returns an error when the file is not found', function () {
         ->assertExitCode(SymfonyCommand::FAILURE);
 });
 
-it('generates a valid GitLab report from a PHPStan file', function () {
+it('generates a valid GitLab report from a PHPStan file', function (): void {
     $inputJson = json_encode([
         'files' => [
             '/var/www/app/SomeClass.php' => [
                 'messages' => [
                     [
                         'message' => 'Some error found',
-                        'line'    => 10,
+                        'line' => 10,
                     ],
                     [
                         'message' => 'Another error found',
-                        'line'    => 25,
+                        'line' => 25,
                     ],
                 ],
             ],
@@ -47,10 +47,10 @@ it('generates a valid GitLab report from a PHPStan file', function () {
     $expectedOutputJson = json_encode([
         [
             'description' => 'Some error found',
-            'fingerprint' => md5('app/SomeClass.php'.'Some error found'),
-            'severity'    => 'major',
-            'location'    => [
-                'path'  => 'app/SomeClass.php',
+            'fingerprint' => md5('app/SomeClass.phpSome error found'),
+            'severity' => 'major',
+            'location' => [
+                'path' => 'app/SomeClass.php',
                 'lines' => [
                     'begin' => 10,
                 ],
@@ -58,10 +58,10 @@ it('generates a valid GitLab report from a PHPStan file', function () {
         ],
         [
             'description' => 'Another error found',
-            'fingerprint' => md5('app/SomeClass.php'.'Another error found'),
-            'severity'    => 'major',
-            'location'    => [
-                'path'  => 'app/SomeClass.php',
+            'fingerprint' => md5('app/SomeClass.phpAnother error found'),
+            'severity' => 'major',
+            'location' => [
+                'path' => 'app/SomeClass.php',
                 'lines' => [
                     'begin' => 25,
                 ],
@@ -74,14 +74,14 @@ it('generates a valid GitLab report from a PHPStan file', function () {
     File::shouldReceive('put')->with('codequality.json', $expectedOutputJson)->once();
 
     $this->artisan('phpstan:convert', [
-        'inputFile'  => 'input.json',
+        'inputFile' => 'input.json',
         'outputFile' => 'codequality.json',
     ])
         ->expectsOutput('GitLab Code Quality report generated: codequality.json')
         ->assertExitCode(SymfonyCommand::SUCCESS);
 });
 
-it('generates a GitLab report from an empty PHPStan result', function () {
+it('generates a GitLab report from an empty PHPStan result', function (): void {
     $emptyJson = json_encode(['files' => []]);
 
     File::shouldReceive('exists')->with('empty.json')->once()->andReturn(true);
@@ -95,10 +95,10 @@ it('generates a GitLab report from an empty PHPStan result', function () {
         ->assertExitCode(SymfonyCommand::SUCCESS);
 });
 
-it('handles missing messages and line keys in PHPStan results correctly', function () {
+it('handles missing messages and line keys in PHPStan results correctly', function (): void {
     $noMessageKeyJson = json_encode([
         'files' => [
-            '/var/www/app/FileWithoutMessages.php'   => [],
+            '/var/www/app/FileWithoutMessages.php' => [],
             '/var/www/app/FileWithEmptyMessages.php' => [
                 'messages' => [],
             ],
@@ -113,10 +113,10 @@ it('handles missing messages and line keys in PHPStan results correctly', functi
     $expectedOutput = json_encode([
         [
             'description' => 'Error without line',
-            'fingerprint' => md5('app/FileWithMessageNoLine.php'.'Error without line'),
-            'severity'    => 'major',
-            'location'    => [
-                'path'  => 'app/FileWithMessageNoLine.php',
+            'fingerprint' => md5('app/FileWithMessageNoLine.phpError without line'),
+            'severity' => 'major',
+            'location' => [
+                'path' => 'app/FileWithMessageNoLine.php',
                 'lines' => ['begin' => 1],
             ],
         ],
@@ -133,7 +133,7 @@ it('handles missing messages and line keys in PHPStan results correctly', functi
         ->assertExitCode(SymfonyCommand::SUCCESS);
 });
 
-it('throws an exception for malformed JSON in the input file', function () {
+it('throws an exception for malformed JSON in the input file', function (): void {
     File::shouldReceive('exists')->with('invalid_json.json')->once()->andReturn(true);
     File::shouldReceive('get')->with('invalid_json.json')->once()->andReturn('{invalid json]');
 
@@ -145,7 +145,7 @@ it('throws an exception for malformed JSON in the input file', function () {
     ]);
 })->throws(JsonException::class);
 
-it('uses correct json_decode parameters explicitly', function () {
+it('uses correct json_decode parameters explicitly', function (): void {
     $validJson = '{"files":[]}';
 
     File::shouldReceive('exists')->with('valid_input.json')->once()->andReturn(true);

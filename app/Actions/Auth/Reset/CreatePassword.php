@@ -24,9 +24,10 @@ class CreatePassword
         // database. Otherwise, we will parse the error and return the response.
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
+            function ($user) use ($request): void {
+
                 $user->forceFill([
-                    'password'       => Hash::make($request->get('password')),
+                    'password' => Hash::make($request->get('password')),
                     'remember_token' => Str::random(60),
                 ])->save();
 
@@ -41,6 +42,8 @@ class CreatePassword
             return redirect()->route('login')->with('status', __($status));
         }
 
-        throw ValidationException::withMessages(['email' => [trans($status)]]);
+        throw ValidationException::withMessages([
+            'email' => [trans($status)],
+        ]);
     }
 }

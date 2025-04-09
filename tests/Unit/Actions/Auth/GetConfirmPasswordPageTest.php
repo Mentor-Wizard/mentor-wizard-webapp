@@ -7,11 +7,12 @@ use Inertia\Response;
 
 mutates(GetConfirmPasswordPage::class);
 
-describe('GetConfirmPasswordPage Unit Test', function () {
-    it('should render the ConfirmPassword page', function () {
+describe('GetConfirmPasswordPage Unit Test', function (): void {
+    it('should render the ConfirmPassword page', function (): void {
         $result = new GetConfirmPasswordPage;
 
         $result = $result->handle();
+
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)

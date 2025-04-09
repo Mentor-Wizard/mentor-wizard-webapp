@@ -10,9 +10,9 @@ use Inertia\Response;
 
 mutates(GetLoginPage::class);
 
-describe('GetLoginPage Action', function () {
+describe('GetLoginPage Action', function (): void {
 
-    it('returns correct Inertia response', function () {
+    it('returns correct Inertia response', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);
         $mockRouteCollection->shouldReceive('getRoutesByName')->andReturn([]);
 
@@ -36,7 +36,7 @@ describe('GetLoginPage Action', function () {
             ]);
     });
 
-    it('returns correct Inertia response when password reset is not available', function () {
+    it('returns correct Inertia response when password reset is not available', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);
         $mockRouteCollection->shouldReceive('getRoutesByName')->andReturn([]);
 
