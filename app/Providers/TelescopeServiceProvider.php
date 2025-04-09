@@ -33,27 +33,15 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
                 return false;
             }
 
-            if ($isLocal) {
-                return true;
-            }
-
-            if ($entry->isReportableException()) {
-                return true;
-            }
-
-            if ($entry->isFailedRequest()) {
-                return true;
-            }
-
-            if ($entry->isFailedJob()) {
-                return true;
-            }
-
-            if ($entry->isScheduledTask()) {
-                return true;
-            }
-
-            return $entry->hasMonitoredTag();
+            return match (true) {
+                $isLocal,
+                $entry->isReportableException(),
+                $entry->isFailedRequest(),
+                $entry->isFailedJob(),
+                $entry->isScheduledTask(),
+                $entry->hasMonitoredTag() => true,
+                default => false,
+            };
         });
     }
 

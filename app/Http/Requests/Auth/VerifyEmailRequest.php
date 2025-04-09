@@ -6,8 +6,8 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class VerifyEmailRequest extends FormRequest
 {
@@ -50,7 +50,7 @@ class VerifyEmailRequest extends FormRequest
     /**
      * Configure the validator instance.
      */
-    public function withValidator(\Illuminate\Contracts\Validation\Validator $validator): \Illuminate\Contracts\Validation\Validator
+    public function withValidator(Validator $validator): Validator
     {
         return $validator;
     }
