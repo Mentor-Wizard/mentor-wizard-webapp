@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Socialite\SocialiteCallback;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertDatabaseHas;
 
@@ -30,7 +33,7 @@ it('redirects authenticated user after social login', function ($driver): void {
 
     Socialite::shouldReceive('stateless->user')->andReturn($socialUser);
 
-    $response = new SocialiteCallback()->handle($driver->value);
+    $response = (new SocialiteCallback)->handle($driver->value);
 
     expect($response)->toBeInstanceOf(RedirectResponse::class)
         ->and($response->getTargetUrl())->toBe(route('pages.welcome'));
@@ -48,7 +51,7 @@ it('creates user with getName() when getNickname() is empty', function ($driver)
 
     Socialite::shouldReceive('stateless->user')->andReturn($socialUser);
 
-    $response = new SocialiteCallback()->handle($driver->value);
+    $response = (new SocialiteCallback)->handle($driver->value);
 
     expect($response)->toBeInstanceOf(RedirectResponse::class)
         ->and($response->getTargetUrl())->toBe(route('pages.welcome'));
@@ -66,7 +69,7 @@ it('creates user with getName() when getName() is empty', function ($driver): vo
 
     Socialite::shouldReceive('stateless->user')->andReturn($socialUser);
 
-    $response = new SocialiteCallback()->handle($driver->value);
+    $response = (new SocialiteCallback)->handle($driver->value);
 
     expect($response)->toBeInstanceOf(RedirectResponse::class)
         ->and($response->getTargetUrl())->toBe(route('pages.welcome'));
@@ -82,7 +85,7 @@ it('logs an error and aborts if email is empty', function ($driver): void {
 
     Socialite::shouldReceive('stateless->user')->andReturn($socialUser);
 
-    Log::shouldReceive('error')->once()->withArgs(fn(string $message, array $context): bool => $message === 'Email is empty, but required for login' && $context['driver'] === $driver->value);
+    Log::shouldReceive('error')->once()->withArgs(fn (string $message, array $context): bool => $message === 'Email is empty, but required for login' && $context['driver'] === $driver->value);
 
-    new SocialiteCallback()->handle($driver->value);
+    (new SocialiteCallback)->handle($driver->value);
 })->with(SocialiteDriver::cases())->throws(HttpException::class);

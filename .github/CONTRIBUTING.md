@@ -6,11 +6,37 @@
 
 На проєкті використовуються інструменти статичного аналізу та форматування, зокрема:
 
-- [Rector](https://github.com/reccor/reccor)
-- [PHPStan](https://phpstan.org/)
-- [Pint](https://laravel.com/docs/pint)
+- [Rector](//github.com/driftingly/rector-laravel)
+- [PHPStan](//phpstan.org/)
+- [Pint](//github.com/laravel/pint)
 
-#### Rector
+### Pint
+
+- Запуск перевірки на **code style**:
+
+    ```sh
+    composer pint
+    ```
+
+  aбо
+
+    ```sh
+    ./vendor/bin/pint . --test
+    ```
+
+- Виправлення **code style**:
+
+  ```sh
+  composer pint:fix
+  ```
+
+  aбо
+
+  ```sh
+  ./vendor/bin/pint .
+  ```
+
+### Rector
 
 - Запуск перевірки:
 

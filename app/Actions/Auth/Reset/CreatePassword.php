@@ -27,7 +27,7 @@ class CreatePassword
             function ($user) use ($request): void {
 
                 $user->forceFill([
-                    'password' => Hash::make($request->get('password')),
+                    'password'       => Hash::make($request->get('password')),
                     'remember_token' => Str::random(60),
                 ])->save();
 

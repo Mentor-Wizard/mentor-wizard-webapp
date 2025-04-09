@@ -33,11 +33,11 @@ it('generates a valid GitLab report from a PHPStan file', function (): void {
                 'messages' => [
                     [
                         'message' => 'Some error found',
-                        'line' => 10,
+                        'line'    => 10,
                     ],
                     [
                         'message' => 'Another error found',
-                        'line' => 25,
+                        'line'    => 25,
                     ],
                 ],
             ],
@@ -48,9 +48,9 @@ it('generates a valid GitLab report from a PHPStan file', function (): void {
         [
             'description' => 'Some error found',
             'fingerprint' => md5('app/SomeClass.phpSome error found'),
-            'severity' => 'major',
-            'location' => [
-                'path' => 'app/SomeClass.php',
+            'severity'    => 'major',
+            'location'    => [
+                'path'  => 'app/SomeClass.php',
                 'lines' => [
                     'begin' => 10,
                 ],
@@ -59,9 +59,9 @@ it('generates a valid GitLab report from a PHPStan file', function (): void {
         [
             'description' => 'Another error found',
             'fingerprint' => md5('app/SomeClass.phpAnother error found'),
-            'severity' => 'major',
-            'location' => [
-                'path' => 'app/SomeClass.php',
+            'severity'    => 'major',
+            'location'    => [
+                'path'  => 'app/SomeClass.php',
                 'lines' => [
                     'begin' => 25,
                 ],
@@ -74,7 +74,7 @@ it('generates a valid GitLab report from a PHPStan file', function (): void {
     File::shouldReceive('put')->with('codequality.json', $expectedOutputJson)->once();
 
     $this->artisan('phpstan:convert', [
-        'inputFile' => 'input.json',
+        'inputFile'  => 'input.json',
         'outputFile' => 'codequality.json',
     ])
         ->expectsOutput('GitLab Code Quality report generated: codequality.json')
@@ -98,7 +98,7 @@ it('generates a GitLab report from an empty PHPStan result', function (): void {
 it('handles missing messages and line keys in PHPStan results correctly', function (): void {
     $noMessageKeyJson = json_encode([
         'files' => [
-            '/var/www/app/FileWithoutMessages.php' => [],
+            '/var/www/app/FileWithoutMessages.php'   => [],
             '/var/www/app/FileWithEmptyMessages.php' => [
                 'messages' => [],
             ],
@@ -114,9 +114,9 @@ it('handles missing messages and line keys in PHPStan results correctly', functi
         [
             'description' => 'Error without line',
             'fingerprint' => md5('app/FileWithMessageNoLine.phpError without line'),
-            'severity' => 'major',
-            'location' => [
-                'path' => 'app/FileWithMessageNoLine.php',
+            'severity'    => 'major',
+            'location'    => [
+                'path'  => 'app/FileWithMessageNoLine.php',
                 'lines' => ['begin' => 1],
             ],
         ],

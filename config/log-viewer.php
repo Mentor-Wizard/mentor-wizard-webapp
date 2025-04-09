@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Log Viewer
@@ -75,8 +74,8 @@ return [
 
     'middleware' => [
         'web',
-        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
-        \Olssonm\VeryBasicAuth\Http\Middleware\VeryBasicAuth::class,
+        Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
+        Olssonm\VeryBasicAuth\Http\Middleware\VeryBasicAuth::class,
     ],
 
     /*
@@ -89,9 +88,9 @@ return [
     */
 
     'api_middleware' => [
-        \Opcodes\LogViewer\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        \Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
-        \Olssonm\VeryBasicAuth\Http\Middleware\VeryBasicAuth::class,
+        Opcodes\LogViewer\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        Opcodes\LogViewer\Http\Middleware\AuthorizeLogViewer::class,
+        Olssonm\VeryBasicAuth\Http\Middleware\VeryBasicAuth::class,
     ],
 
     'api_stateful_domains' => env('LOG_VIEWER_API_STATEFUL_DOMAINS') ? explode(',', env('LOG_VIEWER_API_STATEFUL_DOMAINS')) : null,

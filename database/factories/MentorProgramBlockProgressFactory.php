@@ -22,8 +22,8 @@ class MentorProgramBlockProgressFactory extends Factory
     {
         return [
             'mentor_program_block_id' => MentorProgramBlock::factory(),
-            'menti_id' => User::factory(),
-            'is_completed' => fake()->boolean(),
+            'menti_id'                => User::factory(),
+            'is_completed'            => fake()->boolean(),
         ];
     }
 }
