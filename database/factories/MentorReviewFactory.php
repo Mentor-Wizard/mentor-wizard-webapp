@@ -24,9 +24,9 @@ class MentorReviewFactory extends Factory
     {
         return [
             'mentor_id' => User::factory(),
-            'menti_id'  => User::factory(),
-            'comment'   => fake()->sentence(10),
-            'rating'    => fake()->numberBetween(1, 5),
+            'menti_id' => User::factory(),
+            'comment' => fake()->sentence(10),
+            'rating' => fake()->numberBetween(1, 5),
         ];
     }
 }

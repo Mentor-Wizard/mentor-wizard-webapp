@@ -29,14 +29,14 @@ describe('Socialite Authentication', function (): void {
             ->once()
             ->andReturn($socialiteUser);
 
-        $response = $this->get(route('auth.socialite.callback', ['driver' => $driver->value]))
+        $this->get(route('auth.socialite.callback', ['driver' => $driver->value]))
             ->assertRedirect(route('pages.welcome'));
 
         expect(Auth::user()->email)->toBe('test@example.com')
             ->and(Auth::user()->username)->toBe('testuser');
 
         $this->assertDatabaseHas('users', [
-            'email'    => 'test@example.com',
+            'email' => 'test@example.com',
             'username' => 'testuser',
         ]);
     })->with(SocialiteDriver::cases());

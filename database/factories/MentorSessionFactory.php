@@ -23,14 +23,14 @@ class MentorSessionFactory extends Factory
     public function definition(): array
     {
         return [
-            'mentor_id'       => User::factory(),
-            'menti_id'        => User::factory(),
-            'date'            => fake()->dateTimeBetween('now', '+3 month'),
-            'is_success'      => fake()->boolean(),
-            'is_paid'         => fake()->boolean(),
-            'is_cancelled'    => fake()->boolean(),
+            'mentor_id' => User::factory(),
+            'menti_id' => User::factory(),
+            'date' => fake()->dateTimeBetween('now', '+3 month'),
+            'is_success' => fake()->boolean(),
+            'is_paid' => fake()->boolean(),
+            'is_cancelled' => fake()->boolean(),
             'is_date_changed' => fake()->boolean(),
-            'cost'            => fake()->randomFloat(2, 10, 1000),
+            'cost' => fake()->randomFloat(2, 10, 1000),
         ];
     }
 }

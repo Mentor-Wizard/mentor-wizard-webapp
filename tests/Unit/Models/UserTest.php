@@ -23,7 +23,7 @@ describe('User Model', function (): void {
     it('can create a user', function (): void {
         $user = User::factory()->create([
             'username' => 'testuser',
-            'email'    => 'test@example.com',
+            'email' => 'test@example.com',
             'password' => 'password123',
         ]);
 
@@ -61,7 +61,7 @@ describe('User Model', function (): void {
         $mentor = User::factory()->create();
         $program = MentorProgram::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'name'      => 'Test Program',
+            'name' => 'Test Program',
         ]);
 
         expect($mentor->mentorPrograms)->toHaveCount(1)
@@ -73,7 +73,7 @@ describe('User Model', function (): void {
         $menti = User::factory()->create();
         $mentorSession = MentorSession::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'menti_id'  => $menti->getKey(),
+            'menti_id' => $menti->getKey(),
         ]);
 
         expect($mentor->mentorSessions)->toHaveCount(1)
@@ -97,7 +97,7 @@ describe('User Model', function (): void {
 
         expect($casts)->toBe([
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ]);
     });
 
@@ -124,7 +124,7 @@ describe('User Model', function (): void {
 
         $chat = Chat::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'menti_id'  => $menti->getKey(),
+            'menti_id' => $menti->getKey(),
         ]);
 
         expect($menti->mentiChats)->toHaveCount(1)
@@ -137,7 +137,7 @@ describe('User Model', function (): void {
 
         $chat = Chat::factory()->create([
             'mentor_id' => $mentor->getKey(),
-            'menti_id'  => $menti->getKey(),
+            'menti_id' => $menti->getKey(),
         ]);
 
         expect($mentor->mentorChats)->toHaveCount(1)

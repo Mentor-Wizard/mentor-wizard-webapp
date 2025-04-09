@@ -10,12 +10,12 @@ mutates(CreatePasswordRequest::class);
 describe('CreatePasswordRequest Validation', function (): void {
     describe('Successful Validation Scenarios', function (): void {
         it('passes validation with valid data', function (): void {
-            $request = new CreatePasswordRequest();
+            $request = new CreatePasswordRequest;
 
             $data = [
-                'token'                 => 'valid-token-123',
-                'email'                 => 'user@example.com',
-                'password'              => 'StrongPassword123!',
+                'token' => 'valid-token-123',
+                'email' => 'user@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -28,11 +28,11 @@ describe('CreatePasswordRequest Validation', function (): void {
 
     describe('Validation Failure Scenarios', function (): void {
         it('fails validation when token is missing', function (): void {
-            $request = new CreatePasswordRequest();
+            $request = new CreatePasswordRequest;
 
             $data = [
-                'email'                 => 'user@example.com',
-                'password'              => 'StrongPassword123!',
+                'email' => 'user@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -43,12 +43,12 @@ describe('CreatePasswordRequest Validation', function (): void {
         });
 
         it('fails validation with invalid email', function (): void {
-            $request = new CreatePasswordRequest();
+            $request = new CreatePasswordRequest;
 
             $data = [
-                'token'                 => 'valid-token-123',
-                'email'                 => 'invalid-email',
-                'password'              => 'StrongPassword123!',
+                'token' => 'valid-token-123',
+                'email' => 'invalid-email',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
             ];
 
@@ -59,12 +59,12 @@ describe('CreatePasswordRequest Validation', function (): void {
         });
 
         it('fails validation when password is not confirmed', function (): void {
-            $request = new CreatePasswordRequest();
+            $request = new CreatePasswordRequest;
 
             $data = [
-                'token'                 => 'valid-token-123',
-                'email'                 => 'user@example.com',
-                'password'              => 'StrongPassword123!',
+                'token' => 'valid-token-123',
+                'email' => 'user@example.com',
+                'password' => 'StrongPassword123!',
                 'password_confirmation' => 'DifferentPassword123!',
             ];
 
@@ -75,11 +75,11 @@ describe('CreatePasswordRequest Validation', function (): void {
         });
 
         it('fails validation when password is missing', function (): void {
-            $request = new CreatePasswordRequest();
+            $request = new CreatePasswordRequest;
 
             $data = [
-                'token'                 => 'valid-token-123',
-                'email'                 => 'user@example.com',
+                'token' => 'valid-token-123',
+                'email' => 'user@example.com',
                 'password_confirmation' => 'DifferentPassword123!',
             ];
 
@@ -92,7 +92,7 @@ describe('CreatePasswordRequest Validation', function (): void {
 
     describe('Authorization Scenarios', function (): void {
         it('always allows authorization', function (): void {
-            $request = new CreatePasswordRequest();
+            $request = new CreatePasswordRequest;
 
             expect($request->authorize())->toBeTrue();
         });
@@ -102,12 +102,12 @@ describe('CreatePasswordRequest Validation', function (): void {
         it('rejects password that is too short', function (): void {
             $validator = Validator::make(
                 [
-                    'token'                 => 'valid-token-123',
-                    'email'                 => 'user@example.com',
-                    'password'              => 'short',
+                    'token' => 'valid-token-123',
+                    'email' => 'user@example.com',
+                    'password' => 'short',
                     'password_confirmation' => 'short',
                 ],
-                new CreatePasswordRequest()->rules()
+                (new CreatePasswordRequest)->rules()
             );
 
             expect($validator->fails())->toBeTrue()
@@ -118,12 +118,12 @@ describe('CreatePasswordRequest Validation', function (): void {
         it('checks password without mixed case', function (): void {
             $validator = Validator::make(
                 [
-                    'token'                 => 'valid-token-123',
-                    'email'                 => 'user@example.com',
-                    'password'              => 'lowercasepassword123',
+                    'token' => 'valid-token-123',
+                    'email' => 'user@example.com',
+                    'password' => 'lowercasepassword123',
                     'password_confirmation' => 'lowercasepassword123',
                 ],
-                new CreatePasswordRequest()->rules()
+                (new CreatePasswordRequest)->rules()
             );
 
             expect($validator->fails())->toBeFalse();
@@ -132,12 +132,12 @@ describe('CreatePasswordRequest Validation', function (): void {
         it('validates password with mixed case and numbers', function (): void {
             $validator = Validator::make(
                 [
-                    'token'                 => 'valid-token-123',
-                    'email'                 => 'user@example.com',
-                    'password'              => 'StrongPassword123',
+                    'token' => 'valid-token-123',
+                    'email' => 'user@example.com',
+                    'password' => 'StrongPassword123',
                     'password_confirmation' => 'StrongPassword123',
                 ],
-                new CreatePasswordRequest()->rules()
+                (new CreatePasswordRequest)->rules()
             );
 
             expect($validator->fails())->toBeFalse();

@@ -35,7 +35,7 @@ class ConfirmPasswordRequest extends FormRequest
     {
         $validator->after(function ($validator): void {
             if (! Auth::guard('web')->validate([
-                'email'    => $this->user()->email,
+                'email' => $this->user()->email,
                 'password' => $this->input('password'),
             ])) {
                 $validator->errors()->add('password', __('auth.password'));

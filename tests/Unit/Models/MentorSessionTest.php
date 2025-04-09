@@ -40,7 +40,7 @@ describe('MentorSession Model', function (): void {
             ->and($mentorSession->is_paid)->toBeTrue()
             ->and($mentorSession->is_cancelled)->toBeFalse()
             ->and($mentorSession->is_date_changed)->toBeFalse()
-            ->and($mentorSession->date)->toBeInstanceOf(DateTime::class)
+            ->and($mentorSession->date)->toBeInstanceOf(DateTimeImmutable::class)
             ->and($mentorSession->mentor)->toBeInstanceOf(User::class)
             ->and($mentorSession->mentor->getKey())->toBe($this->mentor->getKey())
             ->and($mentorSession->menti)->toBeInstanceOf(User::class)
@@ -67,7 +67,7 @@ describe('MentorSession Model', function (): void {
             ->and($mentorSession->is_paid)->toBeTrue()
             ->and($mentorSession->is_cancelled)->toBeFalse()
             ->and($mentorSession->is_date_changed)->toBeFalse()
-            ->and($mentorSession->date)->toBeInstanceOf(DateTime::class);
+            ->and($mentorSession->date)->toBeInstanceOf(DateTimeImmutable::class);
     });
 
     it('cascades on mentor deletion', function (): void {

@@ -67,9 +67,9 @@ describe('Password Reset Flow', function (): void {
         $token = Password::createToken($user);
 
         $response = $this->post(route('password.store'), [
-            'token'                 => $token,
-            'email'                 => $user->email,
-            'password'              => 'new-password-123',
+            'token' => $token,
+            'email' => $user->email,
+            'password' => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ]);
 
@@ -78,7 +78,7 @@ describe('Password Reset Flow', function (): void {
 
         $this->assertTrue(
             auth()->attempt([
-                'email'    => $user->email,
+                'email' => $user->email,
                 'password' => 'new-password-123',
             ])
         );
@@ -88,9 +88,9 @@ describe('Password Reset Flow', function (): void {
         $user = User::factory()->create();
 
         $response = $this->post(route('password.store'), [
-            'token'                 => 'invalid-token',
-            'email'                 => $user->email,
-            'password'              => 'new-password-123',
+            'token' => 'invalid-token',
+            'email' => $user->email,
+            'password' => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ]);
 

@@ -26,8 +26,8 @@ class CreatePasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'token'    => 'required',
-            'email'    => 'required|email',
+            'token' => 'required',
+            'email' => 'required|email',
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }

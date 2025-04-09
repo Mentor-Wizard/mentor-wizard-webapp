@@ -69,7 +69,7 @@ describe('CreatePassword Action', function (): void {
         $user->refresh();
 
         expect(Hash::check($newPassword, $user->password))->toBeTrue()
-            ->and(strlen((string) $user->remember_token))->toBe(60)
+            ->and(mb_strlen((string) $user->remember_token))->toBe(60)
             ->and($user->remember_token)->not()->toBeNull();
 
         Event::assertDispatched(PasswordReset::class, fn (PasswordReset $event): bool => $event->user === $user);
@@ -227,6 +227,6 @@ describe('CreatePassword Action', function (): void {
 
         expect(Hash::check($newPassword, $user->password))->toBeTrue()
             ->and($user->remember_token)->not()->toBe('old_token')
-            ->and(strlen((string) $user->remember_token))->toBe(60);
+            ->and(mb_strlen((string) $user->remember_token))->toBe(60);
     });
 });
