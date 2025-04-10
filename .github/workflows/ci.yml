@@ -65,7 +65,7 @@ jobs:
           }
           - {
             name: '🧽 Laravel Pint',
-            command: './vendor/bin/pint --test --ansi --format=checkstyle | cs2pr',
+            command: './vendor/bin/pint --test --cache-file=var/cache/pint/pint.cache --ansi --format=checkstyle | cs2pr',
             php: true,
             node: false,
           }
@@ -114,7 +114,7 @@ jobs:
         command:
           - {
             name: '🧬 Pest',
-            command: ./vendor/bin/pest --coverage --parallel --coverage-clover coverage/coverage-clover.xml
+            command: ./vendor/bin/pest --coverage --parallel --compact --coverage-clover coverage/coverage-clover.xml
           }
           - {
             name: '🦠 Mutation',

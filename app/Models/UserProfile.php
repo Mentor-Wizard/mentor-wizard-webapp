@@ -42,8 +42,9 @@ class UserProfile extends Model implements HasMedia
 
     public function registerMediaConversions(?Media $media = null): void
     {
-        $conversion = $this->addMediaConversion('preview');
-        $conversion->fit(Fit::Contain, self::PREVIEW_HEIGHT, self::PREVIEW_WIDTH);
-        $conversion->nonQueued();
+        $this
+            ->addMediaConversion('preview')
+            ->nonQueued()
+            ->fit(Fit::Contain, self::PREVIEW_HEIGHT, self::PREVIEW_WIDTH);
     }
 }
