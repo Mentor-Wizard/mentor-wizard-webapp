@@ -41,6 +41,6 @@ class PathGenerator implements BasePathGenerator
         $prefix = config('media-library.prefix');
         $className = class_basename($media->model_type);
 
-        return ltrim("{$prefix}/{$className}/{$media->getKey()}", '/');
+        return mb_ltrim(sprintf('%s/%s/%s', $prefix, $className, $media->getKey()), '/');
     }
 }

@@ -15,7 +15,7 @@ Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])
     ->name('pages.dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function (): void {
     Route::get('profile', GetProfilePage::class)->name('profile.edit');
     Route::patch('profile', UpdateProfilePage::class)->name('profile.update');
     Route::delete('profile', DestroyProfilePage::class)->name('profile.destroy');

@@ -9,9 +9,9 @@ use Inertia\Response;
 
 mutates(WelcomePage::class);
 
-describe('WelcomePage Action', function () {
+describe('WelcomePage Action', function (): void {
 
-    it('returns correct Inertia response', function () {
+    it('returns correct Inertia response', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);
         $mockRouteCollection->shouldReceive('getRoutesByName')->andReturn([]);
 
@@ -33,9 +33,9 @@ describe('WelcomePage Action', function () {
         expect($result)->toBeInstanceOf(Response::class)
             ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Welcome')
             ->and(Arr::get($resultData->getData(), 'page.props'))->toEqual([
-                'canLogin' => true,
-                'canRegister' => true,
-                'phpVersion' => PHP_VERSION,
+                'canLogin'       => true,
+                'canRegister'    => true,
+                'phpVersion'     => PHP_VERSION,
                 'laravelVersion' => Application::VERSION,
             ]);
     });

@@ -14,12 +14,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(UpdateProfilePage::class);
 
-describe('Update Profile', function () {
-    beforeEach(function () {
+describe('Update Profile', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('updates user profile successfully', function (User $user, array $updateData) {
+    it('updates user profile successfully', function (User $user, array $updateData): void {
         Auth::login($user);
 
         $request = mockUpdateProfileRequest($updateData, $user);
@@ -34,34 +34,30 @@ describe('Update Profile', function () {
             ->and($updatedUser->username)->toBe(Arr::get($updateData, 'username'))
             ->and($updatedUser->email)->toBe(Arr::get($updateData, 'email'));
     })->with([
-        'updated user with new email' => function () {
-            return [
-                'user' => User::factory()->create([
-                    'username' => 'John',
-                    'email' => 'john@example.com',
-                    'email_verified_at' => now(),
-                ]),
-                'updateData' => [
-                    'username' => 'John',
-                    'email' => 'john.updated@example.com',
-                ],
-            ];
-        },
-        'updated user with same email' => function () {
-            return [
-                'user' => User::factory()->create([
-                    'username' => 'Jane',
-                    'email' => 'jane@example.com',
-                ]),
-                'updateData' => [
-                    'username' => 'Jane',
-                    'email' => 'jane@example.com',
-                ],
-            ];
-        },
+        'updated user with new email' => fn (): array => [
+            'user' => User::factory()->create([
+                'username'          => 'John',
+                'email'             => 'john@example.com',
+                'email_verified_at' => now(),
+            ]),
+            'updateData' => [
+                'username' => 'John',
+                'email'    => 'john.updated@example.com',
+            ],
+        ],
+        'updated user with same email' => fn (): array => [
+            'user' => User::factory()->create([
+                'username' => 'Jane',
+                'email'    => 'jane@example.com',
+            ]),
+            'updateData' => [
+                'username' => 'Jane',
+                'email'    => 'jane@example.com',
+            ],
+        ],
     ]);
 
-    it('resets email verification when email changes', function () {
+    it('resets email verification when email changes', function (): void {
         $user = User::factory()->create([
             'email_verified_at' => now(),
         ]);
@@ -70,7 +66,7 @@ describe('Update Profile', function () {
 
         $request = mockUpdateProfileRequest([
             'username' => $user->username,
-            'email' => 'new.email@example.com',
+            'email'    => 'new.email@example.com',
         ], $user);
 
         $action = new UpdateProfilePage;
@@ -81,7 +77,7 @@ describe('Update Profile', function () {
         expect($updatedUser->email_verified_at)->toBeNull();
     });
 
-    it('throws validation exception for invalid data', function ($invalidData) {
+    it('throws validation exception for invalid data', function ($invalidData): void {
         $user = User::factory()->create();
         Auth::login($user);
 
@@ -90,7 +86,7 @@ describe('Update Profile', function () {
         $action = new UpdateProfilePage;
         $action->handle($request);
     })->with([
-        'empty name' => ['username' => '', 'email' => 'valid@example.com'],
+        'empty name'    => ['username' => '', 'email' => 'valid@example.com'],
         'invalid email' => ['username' => 'John', 'email' => 'invalid-email'],
     ])->throws(Error::class);
 });

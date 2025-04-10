@@ -10,12 +10,12 @@ use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
-test('success create user test', function () {
+test('success create user test', function (): void {
     Role::create(['name' => RoleEnum::USER, 'guard_name' => RoleGuardEnum::USER]);
 
     $user = User::factory()->create([
         'username' => 'Test User',
-        'email' => 'test@example.com',
+        'email'    => 'test@example.com',
     ]);
 
     expect($user->hasRole(RoleEnum::USER->value))->toBeTrue();

@@ -18,9 +18,9 @@ class Registration
 
     public function handle(RegistrationRequest $request): RedirectResponse
     {
-        $user = User::create([
+        $user = User::query()->create([
             'username' => $request->get('username'),
-            'email' => $request->get('email'),
+            'email'    => $request->get('email'),
             'password' => Hash::make($request->get('password')),
         ]);
 

@@ -11,20 +11,20 @@ use Illuminate\Support\Facades\Password;
 
 mutates(GetRegistrationPage::class);
 
-describe('Password Reset Flow', function () {
-    beforeEach(function () {
+describe('Password Reset Flow', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         Notification::fake();
     });
 
-    it('renders forgot password page', function () {
+    it('renders forgot password page', function (): void {
         $this->get(route('password.request'))
             ->assertInertia(fn ($page) => $page
                 ->component('Auth/ForgotPassword')
             );
     });
 
-    it('sends password reset link', function () {
+    it('sends password reset link', function (): void {
         $user = User::factory()->create();
 
         $response = $this->post(route('password.email'), [
@@ -36,7 +36,7 @@ describe('Password Reset Flow', function () {
         Notification::assertSentTo($user, ResetPassword::class);
     });
 
-    it('fails to send reset link for non-existent email', function () {
+    it('fails to send reset link for non-existent email', function (): void {
         $response = $this->post(route('password.email'), [
             'email' => 'nonexistent@example.com',
         ]);
@@ -44,7 +44,7 @@ describe('Password Reset Flow', function () {
         $response->assertSessionHasErrors('email');
     });
 
-    it('renders reset password page', function () {
+    it('renders reset password page', function (): void {
         $user = User::factory()->create();
 
         $token = Password::createToken($user);
@@ -61,15 +61,15 @@ describe('Password Reset Flow', function () {
         );
     });
 
-    it('resets password successfully', function () {
+    it('resets password successfully', function (): void {
         $user = User::factory()->create();
 
         $token = Password::createToken($user);
 
         $response = $this->post(route('password.store'), [
-            'token' => $token,
-            'email' => $user->email,
-            'password' => 'new-password-123',
+            'token'                 => $token,
+            'email'                 => $user->email,
+            'password'              => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ]);
 
@@ -78,19 +78,19 @@ describe('Password Reset Flow', function () {
 
         $this->assertTrue(
             auth()->attempt([
-                'email' => $user->email,
+                'email'    => $user->email,
                 'password' => 'new-password-123',
             ])
         );
     });
 
-    it('fails to reset password with invalid token', function () {
+    it('fails to reset password with invalid token', function (): void {
         $user = User::factory()->create();
 
         $response = $this->post(route('password.store'), [
-            'token' => 'invalid-token',
-            'email' => $user->email,
-            'password' => 'new-password-123',
+            'token'                 => 'invalid-token',
+            'email'                 => $user->email,
+            'password'              => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ]);
 

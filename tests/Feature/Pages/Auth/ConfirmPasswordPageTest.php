@@ -6,8 +6,8 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
 
-describe('Confirm Password Page Feature Test', function () {
-    it('can access confirm password page when authenticated', function () {
+describe('Confirm Password Page Feature Test', function (): void {
+    it('can access confirm password page when authenticated', function (): void {
         $this->seed(RoleSeeder::class);
 
         $user = User::factory()->create();
@@ -17,12 +17,12 @@ describe('Confirm Password Page Feature Test', function () {
         $response = $this->get(route('password.confirm'));
 
         $response->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
+            ->assertInertia(fn (Assert $page): Assert => $page
                 ->component('Auth/ConfirmPassword')
             );
     });
 
-    it('redirects unauthenticated users to login', function () {
+    it('redirects unauthenticated users to login', function (): void {
         $response = $this->get(route('password.confirm'));
 
         $response->assertRedirect(route('login'));

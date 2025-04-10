@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Filename
@@ -183,8 +182,8 @@ return [
     */
 
     'extra' => [
-        'Eloquent' => [\Illuminate\Database\Eloquent\Builder::class, \Illuminate\Database\Query\Builder::class],
-        'Session' => [\Illuminate\Session\Store::class],
+        'Eloquent' => [Illuminate\Database\Eloquent\Builder::class, Illuminate\Database\Query\Builder::class],
+        'Session'  => [Illuminate\Session\Store::class],
     ],
 
     'magic' => [],
@@ -350,5 +349,4 @@ return [
         Filament\Support\Concerns\Macroable::class,
         Spatie\Macroable\Macroable::class,
     ],
-
 ];

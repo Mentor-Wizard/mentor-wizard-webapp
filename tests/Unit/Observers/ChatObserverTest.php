@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Log;
 
 mutates(ChatObserver::class);
 
-describe('ChatObserver', function () {
-    beforeEach(function () {
+describe('ChatObserver', function (): void {
+    beforeEach(function (): void {
         $this->chatObserver = new ChatObserver;
     });
 
-    describe('saved method scenarios', function () {
-        it('should not delete chat when at least one user ID is present', function () {
-            $chat = Mockery::mock(Chat::class, function ($mock) {
+    describe('saved method scenarios', function (): void {
+        it('should not delete chat when at least one user ID is present', function (): void {
+            $chat = Mockery::mock(Chat::class, function ($mock): void {
                 $mock->shouldReceive('getAttribute')
                     ->with('mentor_id')->andReturn(1)
                     ->shouldReceive('getAttribute')
@@ -30,8 +30,8 @@ describe('ChatObserver', function () {
             $this->chatObserver->saved($chat);
         });
 
-        it('should delete chat when all user IDs are null', function () {
-            $chat = Mockery::mock(Chat::class, function ($mock) {
+        it('should delete chat when all user IDs are null', function (): void {
+            $chat = Mockery::mock(Chat::class, function ($mock): void {
                 $mock->shouldReceive('getKey')->once()->andReturn(1);
                 $mock->shouldReceive('getAttribute')
                     ->with('mentor_id')->andReturn(null)
@@ -50,8 +50,8 @@ describe('ChatObserver', function () {
             $this->chatObserver->saved($chat);
         });
 
-        it('should log delete event with correct context', function () {
-            $chat = Mockery::mock(Chat::class, function ($mock) {
+        it('should log delete event with correct context', function (): void {
+            $chat = Mockery::mock(Chat::class, function ($mock): void {
                 $mock->shouldReceive('getKey')->once()->andReturn(42);
                 $mock->shouldReceive('getAttribute')
                     ->with('mentor_id')->andReturn(null)
@@ -63,7 +63,7 @@ describe('ChatObserver', function () {
 
             Log::shouldReceive('info')
                 ->once()
-                ->withArgs(function ($message, $context) {
+                ->withArgs(function ($message, $context): true {
                     expect($message)->toBe('Deleting chat because all user IDs are NULL.')
                         ->and($context)->toBe(['chat' => 42]);
 

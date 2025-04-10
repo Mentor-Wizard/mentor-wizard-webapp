@@ -8,11 +8,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });
 
-test('confirm password screen can be rendered', function () {
+test('confirm password screen can be rendered', function (): void {
     $user = User::factory()->create();
     actingAs($user);
 
@@ -20,7 +20,7 @@ test('confirm password screen can be rendered', function () {
         ->assertStatus(Response::HTTP_OK);
 });
 
-test('password confirmation passed', function () {
+test('password confirmation passed', function (): void {
     $user = User::factory()->create();
     actingAs($user);
 
@@ -30,12 +30,12 @@ test('password confirmation passed', function () {
     $response->assertRedirect(route('pages.dashboard'));
 });
 
-test('user is not authorized', function () {
+test('user is not authorized', function (): void {
     $this->get(route('pages.password.confirm'))
         ->assertStatus(Response::HTTP_FOUND);
 });
 
-test('not found if the page address is incorrect', function () {
+test('not found if the page address is incorrect', function (): void {
     $user = User::factory()->create();
     actingAs($user);
 
@@ -43,7 +43,7 @@ test('not found if the page address is incorrect', function () {
         ->assertStatus(Response::HTTP_NOT_FOUND);
 });
 
-test('the provided password is incorrect', function () {
+test('the provided password is incorrect', function (): void {
     $user = User::factory()->create();
     actingAs($user);
 

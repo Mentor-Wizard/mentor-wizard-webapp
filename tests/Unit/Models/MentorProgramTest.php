@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\MassAssignmentException;
 
 mutates(MentorProgram::class);
 
-describe('MentorProgram Model', function () {
-    beforeEach(function () {
+describe('MentorProgram Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->mentor = User::factory()->create();
     });
 
-    it('has the correct fillable attributes', function () {
+    it('has the correct fillable attributes', function (): void {
         $model = new MentorProgram;
 
         expect($model->getFillable())->toEqual([
@@ -28,7 +28,7 @@ describe('MentorProgram Model', function () {
         ]);
     });
 
-    it('has a relationship with mentor', function () {
+    it('has a relationship with mentor', function (): void {
         $mentorProgram = MentorProgram::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
         ]);
@@ -36,7 +36,7 @@ describe('MentorProgram Model', function () {
         expect($mentorProgram->mentor)->toBeInstanceOf(User::class);
     });
 
-    it('can create a mentor program using factory', function () {
+    it('can create a mentor program using factory', function (): void {
         $mentorProgram = MentorProgram::factory()->create([
             'mentor_id' => $this->mentor->getKey(),
         ]);
@@ -45,7 +45,7 @@ describe('MentorProgram Model', function () {
             ->and($mentorProgram->exists)->toBeTrue();
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
-        MentorProgram::create(['extra_field' => 'test']);
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
+        MentorProgram::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 });

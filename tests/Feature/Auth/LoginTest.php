@@ -6,21 +6,21 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Symfony\Component\HttpFoundation\Response;
 
-describe('Get Login Page', function () {
-    beforeEach(function () {
+describe('Get Login Page', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('can see login page', function () {
+    it('can see login page', function (): void {
         $this->get(route('login'))
             ->assertOk();
     });
 
-    it('can login successful', function () {
+    it('can login successful', function (): void {
         $user = User::factory()->create();
 
         $this->postJson(route('login.attempt'), [
-            'email' => $user->email,
+            'email'    => $user->email,
             'password' => 'password',
         ])
             ->assertStatus(Response::HTTP_FOUND)
@@ -29,11 +29,11 @@ describe('Get Login Page', function () {
         expect(Auth::check())->toBeTrue();
     });
 
-    it('can not login with wrong email', function () {
+    it('can not login with wrong email', function (): void {
         User::factory()->create();
 
         $this->postJson('login', [
-            'email' => 'admin@admin.com',
+            'email'    => 'admin@admin.com',
             'password' => 'password',
         ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -41,11 +41,11 @@ describe('Get Login Page', function () {
         expect(Auth::check())->toBeFalse();
     });
 
-    it('can not login with wrong password', function () {
+    it('can not login with wrong password', function (): void {
         User::factory()->create();
 
         $this->postJson('login', [
-            'email' => 'admin@admin.com',
+            'email'    => 'admin@admin.com',
             'password' => '1',
         ])
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);

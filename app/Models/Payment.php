@@ -32,24 +32,24 @@ class Payment extends Model
         'issue_bank_name',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'mentor_session_id' => 'int',
-            'order_reference' => 'string',
-            'amount' => 'int',
-            'currency' => 'string',
-            'transaction_status' => 'string',
-            'reason' => 'string',
-            'reason_code' => 'string',
-            'payment_system' => 'string',
-            'card_type' => 'string',
-            'issue_bank_name' => 'string',
-        ];
-    }
-
     public function mentorSession(): BelongsTo
     {
         return $this->belongsTo(MentorSession::class, 'mentor_session_id');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'mentor_session_id'  => 'int',
+            'order_reference'    => 'string',
+            'amount'             => 'int',
+            'currency'           => 'string',
+            'transaction_status' => 'string',
+            'reason'             => 'string',
+            'reason_code'        => 'string',
+            'payment_system'     => 'string',
+            'card_type'          => 'string',
+            'issue_bank_name'    => 'string',
+        ];
     }
 }

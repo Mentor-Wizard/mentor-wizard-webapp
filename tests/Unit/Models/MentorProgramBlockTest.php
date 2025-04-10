@@ -12,12 +12,12 @@ use Illuminate\Database\QueryException;
 
 mutates(MentorProgramBlock::class);
 
-describe('MentorProgramBlock Model', function () {
-    beforeEach(function () {
+describe('MentorProgramBlock Model', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('has the correct fillable attributes', function () {
+    it('has the correct fillable attributes', function (): void {
         $model = new MentorProgramBlock;
 
         expect($model->getFillable())->toEqual([
@@ -28,47 +28,47 @@ describe('MentorProgramBlock Model', function () {
         ]);
     });
 
-    it('has a relationship with mentor program', function () {
+    it('has a relationship with mentor program', function (): void {
         $mentorProgram = MentorProgram::factory()->create();
 
         expect($mentorProgram->mentor)->toBeInstanceOf(User::class);
     });
 
-    it('has a relationship with mentiProgramProgress', function () {
+    it('has a relationship with mentiProgramProgress', function (): void {
         $mentiProgramProgress = MentorProgramBlockProgress::factory()->create();
 
         expect($mentiProgramProgress->menti)->toBeInstanceOf(User::class);
     });
 
-    it('has precisely defined fillable attributes and mass assignment works correctly', function () {
-        MentorProgramBlock::create(['extra_field' => 'test']);
+    it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {
+        MentorProgramBlock::query()->create(['extra_field' => 'test']);
     })->throws(MassAssignmentException::class);
 
-    it('has correct casts for MentorProgramBlock', function () {
+    it('has correct casts for MentorProgramBlock', function (): void {
         $model = new MentorProgramBlock;
 
         expect($model->getCasts())->toEqual([
-            'id' => 'int',
+            'id'                => 'int',
             'mentor_program_id' => 'int',
-            'name' => 'string',
-            'slug' => 'string',
-            'description' => 'string',
+            'name'              => 'string',
+            'slug'              => 'string',
+            'description'       => 'string',
         ]);
     });
 
-    it('fails to create the model with duplicate slugs', function () {
-        MentorProgramBlock::create([
+    it('fails to create the model with duplicate slugs', function (): void {
+        MentorProgramBlock::query()->create([
             'mentor_program_id' => 1,
-            'name' => 'some name',
-            'description' => 'some description',
-            'slug' => 'unique-slug',
+            'name'              => 'some name',
+            'description'       => 'some description',
+            'slug'              => 'unique-slug',
         ]);
 
-        $duplicateModel = MentorProgramBlock::create([
+        $duplicateModel = MentorProgramBlock::query()->create([
             'mentor_program_id' => 2,
-            'name' => 'some name',
-            'description' => 'some description',
-            'slug' => 'unique-slug',
+            'name'              => 'some name',
+            'description'       => 'some description',
+            'slug'              => 'unique-slug',
         ]);
 
         expect($duplicateModel->exists)->toBeFalse();

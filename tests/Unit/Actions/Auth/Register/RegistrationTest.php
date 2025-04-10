@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Auth\Register\Registration;
 use App\Http\Requests\Auth\Register\RegistrationRequest;
 use App\Models\User;
@@ -13,32 +15,30 @@ use Illuminate\Support\Facades\Hash;
 
 mutates(Registration::class);
 
-describe('Registration Action', function () {
+describe('Registration Action', function (): void {
 
-    beforeEach(function () {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         Event::fake();
     });
 
-    it('can register', function () {
+    it('can register', function (): void {
         $request = new RegistrationRequest([
-            'username' => 'testuser',
-            'email' => 'test@example.com',
-            'password' => 'password',
+            'username'              => 'testuser',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ]);
 
-        $result = new Registration()->handle($request);
+        $result = (new Registration)->handle($request);
 
         expect($result)->toBeInstanceOf(RedirectResponse::class)
             ->and($result->isRedirect())->toBeTrue()
             ->and($result->getTargetUrl())->toBe(route('pages.dashboard'));
 
-        $user = User::where('email', 'test@example.com')->first();
+        $user = User::query()->where('email', 'test@example.com')->first();
 
-        Event::assertDispatched(Registered::class, function (Registered $event) use ($user) {
-            return $event->user->username === $user->username && $event->user->email === $user->email;
-        });
+        Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user->username === $user->username && $event->user->email === $user->email);
 
         expect(Auth::check())->toBeTrue()
             ->and(Auth::user()->is($user))->toBeTrue()
@@ -47,15 +47,14 @@ describe('Registration Action', function () {
             ->and($user->email)->toBe('test@example.com');
     });
 
-
-    it('can not register without username', function () {
+    it('can not register without username', function (): void {
         $request = new RegistrationRequest([
-            'email' => 'test@example.com',
-            'password' => 'password',
+            'email'                 => 'test@example.com',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ]);
 
-        new Registration()->handle($request);
+        (new Registration)->handle($request);
 
         Event::assertNotDispatched(Registered::class);
         $this->assertDatabaseMissing('users', [
@@ -64,14 +63,14 @@ describe('Registration Action', function () {
 
     })->throws(QueryException::class);
 
-    it('can not register without email', function () {
+    it('can not register without email', function (): void {
         $request = new RegistrationRequest([
-            'username' => 'testuser',
-            'password' => 'password',
+            'username'              => 'testuser',
+            'password'              => 'password',
             'password_confirmation' => 'password',
         ]);
 
-        new Registration()->handle($request);
+        (new Registration)->handle($request);
 
         Event::assertNotDispatched(Registered::class);
         $this->assertDatabaseMissing('users', [

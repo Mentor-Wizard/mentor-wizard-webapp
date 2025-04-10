@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
-describe('LoginRequest Authentication', function () {
-    describe('Authentication Scenarios', function () {
-        it('successfully authorizes request', function () {
+describe('LoginRequest Authentication', function (): void {
+    describe('Authentication Scenarios', function (): void {
+        it('successfully authorizes request', function (): void {
             $request = new LoginRequest;
             expect($request->authorize())->toBeTrue();
         });
 
-        it('defines correct validation rules', function () {
+        it('defines correct validation rules', function (): void {
             $request = new LoginRequest;
             $rules = $request->rules();
 
@@ -26,8 +26,8 @@ describe('LoginRequest Authentication', function () {
         });
     });
 
-    describe('Successful Authentication', function () {
-        it('authenticates with valid credentials', function () {
+    describe('Successful Authentication', function (): void {
+        it('authenticates with valid credentials', function (): void {
             $request = Mockery::mock(LoginRequest::class)
                 ->makePartial()
                 ->shouldAllowMockingProtectedMethods();
@@ -35,7 +35,7 @@ describe('LoginRequest Authentication', function () {
             $request->shouldReceive('only')
                 ->with('email', 'password')
                 ->andReturn([
-                    'email' => 'test@example.com',
+                    'email'    => 'test@example.com',
                     'password' => 'password',
                 ]);
             $request->shouldReceive('boolean')
@@ -60,8 +60,8 @@ describe('LoginRequest Authentication', function () {
         });
     });
 
-    describe('Failed Authentication', function () {
-        it('throws validation exception on failed login', function () {
+    describe('Failed Authentication', function (): void {
+        it('throws validation exception on failed login', function (): void {
             $request = Mockery::mock(LoginRequest::class)
                 ->makePartial()
                 ->shouldAllowMockingProtectedMethods();
@@ -69,7 +69,7 @@ describe('LoginRequest Authentication', function () {
             $request->shouldReceive('only')
                 ->with('email', 'password')
                 ->andReturn([
-                    'email' => 'test@example.com',
+                    'email'    => 'test@example.com',
                     'password' => 'wrong_password',
                 ]);
             $request->shouldReceive('boolean')
@@ -97,8 +97,8 @@ describe('LoginRequest Authentication', function () {
         });
     });
 
-    describe('Rate Limiting', function () {
-        it('prevents login when rate limit exceeded', function () {
+    describe('Rate Limiting', function (): void {
+        it('prevents login when rate limit exceeded', function (): void {
             $request = Mockery::mock(LoginRequest::class)
                 ->makePartial()
                 ->shouldAllowMockingProtectedMethods();
@@ -127,7 +127,7 @@ describe('LoginRequest Authentication', function () {
             Event::assertDispatched(Lockout::class);
         });
 
-        it('allows login when rate limit not exceeded', function () {
+        it('allows login when rate limit not exceeded', function (): void {
             $request = Mockery::mock(LoginRequest::class)
                 ->makePartial()
                 ->shouldAllowMockingProtectedMethods();
@@ -145,8 +145,8 @@ describe('LoginRequest Authentication', function () {
         });
     });
 
-    describe('Throttle Key Generation', function () {
-        it('generates correct throttle key', function () {
+    describe('Throttle Key Generation', function (): void {
+        it('generates correct throttle key', function (): void {
             $request = Mockery::mock(LoginRequest::class)
                 ->makePartial()
                 ->shouldAllowMockingProtectedMethods();

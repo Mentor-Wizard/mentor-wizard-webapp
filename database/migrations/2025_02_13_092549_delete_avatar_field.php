@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::whenTableHasColumn('user_profiles', 'avatar', function (Blueprint $table) {
+        Schema::whenTableHasColumn('user_profiles', 'avatar', function (Blueprint $table): void {
             $table->dropColumn('avatar');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::whenTableDoesntHaveColumn('user_profiles', 'avatar', function (Blueprint $table) {
+        Schema::whenTableDoesntHaveColumn('user_profiles', 'avatar', function (Blueprint $table): void {
             $table->string('avatar')->nullable()->after('last_name');
         });
     }

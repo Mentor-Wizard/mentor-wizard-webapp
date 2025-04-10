@@ -11,11 +11,11 @@ use Spatie\MediaLibrary\Support\PathGenerator\PathGeneratorFactory;
 
 covers(UserProfile::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });
 
-it('can create a user profile', function () {
+it('can create a user profile', function (): void {
     $user = User::factory()->create();
 
     $profile = UserProfile::factory()->create(['user_id' => $user->id]);
@@ -24,7 +24,7 @@ it('can create a user profile', function () {
         ->and($profile->user_id)->toBe($user->id);
 });
 
-it('belongs to the user', function () {
+it('belongs to the user', function (): void {
     $user = User::factory()->create();
     $profile = UserProfile::factory()->create(['user_id' => $user->id]);
 
@@ -32,7 +32,7 @@ it('belongs to the user', function () {
         ->and($profile->user->id)->toBe($user->id);
 });
 
-it('successfully upload an image', function () {
+it('successfully upload an image', function (): void {
     Storage::fake('public');
     $file = UploadedFile::fake()->image('test-image.jpg', 600, 400);
 
@@ -43,20 +43,20 @@ it('successfully upload an image', function () {
     Storage::disk('public')->assertExists($path);
 });
 
-it('upload avatar when profile is null', function () {
+it('upload avatar when profile is null', function (): void {
     $this->expectExceptionMessage('Call to a member function getMedia() on null');
     $user = User::factory()->create();
-    $user->profile->getMedia('avatar')[0];
+    $user->profile->getMedia('avatar');
 })->throws(Error::class);
 
-it('upload avatar when file is null', function () {
+it('upload avatar when file is null', function (): void {
     Storage::fake('public');
     $user = User::factory()->withProfile()->create();
     $user->profile->addMedia(null)->toMediaCollection('avatar');
-    $user->profile->getMedia('avatar')[0];
+    $user->profile->getMedia('avatar');
 })->throws(TypeError::class);
 
-it('records media conversions', function () {
+it('records media conversions', function (): void {
     Storage::fake('public');
     $file = UploadedFile::fake()->image('test-image.jpg', 600, 400);
 

@@ -9,18 +9,18 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
-describe('Email Verification', function () {
-    beforeEach(function () {
+describe('Email Verification', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('can verify email successfully', function () {
+    it('can verify email successfully', function (): void {
         $user = User::factory()->unverified()->create();
 
         $verificationUrl = URL::temporarySignedRoute(
             'verification.verify',
             now()->addMinutes(60),
-            ['id' => $user->getKey(), 'hash' => sha1($user->email)]
+            ['id' => $user->getKey(), 'hash' => sha1((string) $user->email)]
         );
 
         $this->actingAs($user)->get($verificationUrl)
@@ -31,7 +31,7 @@ describe('Email Verification', function () {
         expect($user->hasVerifiedEmail())->toBeTrue();
     });
 
-    it('cannot verify email with invalid signature', function () {
+    it('cannot verify email with invalid signature', function (): void {
         $user = User::factory()->unverified()->create();
 
         $invalidVerificationUrl = URL::temporarySignedRoute(
@@ -43,11 +43,12 @@ describe('Email Verification', function () {
         $response = $this->actingAs($user)->get($invalidVerificationUrl);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
+
         $user->refresh();
         expect($user->hasVerifiedEmail())->toBeFalse();
     });
 
-    it('sends verification email', function () {
+    it('sends verification email', function (): void {
         Notification::fake();
 
         $user = User::factory()->unverified()->create();

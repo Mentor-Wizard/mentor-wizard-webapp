@@ -15,18 +15,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(CreatePassword::class);
 
-describe('CreatePassword Action', function () {
-    beforeEach(function () {
+describe('CreatePassword Action', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         Event::fake();
     });
 
-    it('should reset password successfully', closure: function () {
+    it('should reset password successfully', closure: function (): void {
         $oldPassword = 'initial_password';
         $newPassword = 'new_password';
 
         $user = User::factory()->create([
-            'email' => 'test@example.com',
+            'email'    => 'test@example.com',
             'password' => Hash::make($oldPassword),
         ]);
 
@@ -35,10 +35,10 @@ describe('CreatePassword Action', function () {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => $newPassword,
+                'email'                 => $user->email,
+                'password'              => $newPassword,
                 'password_confirmation' => $newPassword,
-                'token' => 'test_token',
+                'token'                 => 'test_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
@@ -46,14 +46,14 @@ describe('CreatePassword Action', function () {
 
         $request->shouldReceive('all')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'test_token',
+                'token'                 => 'test_token',
             ]);
 
         Password::shouldReceive('reset')
-            ->andReturnUsing(function (array $credentials, $callback) use ($user) {
+            ->andReturnUsing(function (array $credentials, $callback) use ($user): string {
                 expect($user->email)->toBe(Arr::get($credentials, 'email'));
                 $callback($user);
 
@@ -69,15 +69,13 @@ describe('CreatePassword Action', function () {
         $user->refresh();
 
         expect(Hash::check($newPassword, $user->password))->toBeTrue()
-            ->and(strlen($user->remember_token))->toBe(60)
+            ->and(mb_strlen((string) $user->remember_token))->toBe(60)
             ->and($user->remember_token)->not()->toBeNull();
 
-        Event::assertDispatched(PasswordReset::class, function (PasswordReset $event) use ($user) {
-            return $event->user === $user;
-        });
+        Event::assertDispatched(PasswordReset::class, fn (PasswordReset $event): bool => $event->user === $user);
     });
 
-    it('should throw validation exception when password reset fails', function () {
+    it('should throw validation exception when password reset fails', function (): void {
         $user = User::factory()->create([
             'email' => 'test@example.com',
         ]);
@@ -87,10 +85,10 @@ describe('CreatePassword Action', function () {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'invalid_token',
+                'token'                 => 'invalid_token',
             ]);
 
         Password::shouldReceive('reset')
@@ -108,8 +106,8 @@ describe('CreatePassword Action', function () {
         $exception = null;
         try {
             $action->handle($request);
-        } catch (ValidationException $e) {
-            $exception = $e;
+        } catch (ValidationException $validationException) {
+            $exception = $validationException;
         }
 
         expect($exception)->toBeInstanceOf(ValidationException::class)
@@ -119,7 +117,7 @@ describe('CreatePassword Action', function () {
         Event::assertNotDispatched(PasswordReset::class);
     });
 
-    it('redirects to login with correct status when password reset is successful', function () {
+    it('redirects to login with correct status when password reset is successful', function (): void {
         $user = User::factory()->create([
             'email' => 'test@example.com',
         ]);
@@ -129,10 +127,10 @@ describe('CreatePassword Action', function () {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'valid_token',
+                'token'                 => 'valid_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
@@ -146,7 +144,7 @@ describe('CreatePassword Action', function () {
             ->andReturn('passwords.reset');
 
         Password::shouldReceive('reset')
-            ->andReturnUsing(function (array $credentials, $callback) use ($user) {
+            ->andReturnUsing(function (array $credentials, $callback) use ($user): string {
                 $callback($user);
 
                 return Password::PASSWORD_RESET;
@@ -160,17 +158,17 @@ describe('CreatePassword Action', function () {
             ->and($response->getSession()->get('status'))->toBe('passwords.reset');
     });
 
-    it('handles different password reset statuses correctly', function (string $status) {
+    it('handles different password reset statuses correctly', function (string $status): void {
         $user = User::factory()->create();
 
         $request = Mockery::mock(CreatePasswordRequest::class);
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => 'new_password',
+                'email'                 => $user->email,
+                'password'              => 'new_password',
                 'password_confirmation' => 'new_password',
-                'token' => 'invalid_token',
+                'token'                 => 'invalid_token',
             ]);
 
         Password::shouldReceive('reset')
@@ -180,11 +178,11 @@ describe('CreatePassword Action', function () {
 
         try {
             $action->handle($request);
-            $this->fail("Expected ValidationException for status $status");
-        } catch (ValidationException $exception) {
+            $this->fail('Expected ValidationException for status '.$status);
+        } catch (ValidationException $validationException) {
 
-            expect($exception->errors())->toHaveKey('email')
-                ->and(Arr::get($exception->errors(), 'email.0'))->toBe(trans($status));
+            expect($validationException->errors())->toHaveKey('email')
+                ->and(Arr::get($validationException->errors(), 'email.0'))->toBe(trans($status));
         }
     })->with([
         Password::INVALID_USER,
@@ -192,13 +190,13 @@ describe('CreatePassword Action', function () {
         Password::RESET_THROTTLED,
     ]);
 
-    it('changes password and remember token during reset', function () {
+    it('changes password and remember token during reset', function (): void {
         $oldPassword = 'old_password';
         $newPassword = 'new_password';
 
         $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make($oldPassword),
+            'email'          => 'test@example.com',
+            'password'       => Hash::make($oldPassword),
             'remember_token' => 'old_token',
         ]);
 
@@ -206,17 +204,17 @@ describe('CreatePassword Action', function () {
         $request->shouldReceive('only')
             ->with('email', 'password', 'password_confirmation', 'token')
             ->andReturn([
-                'email' => $user->email,
-                'password' => $newPassword,
+                'email'                 => $user->email,
+                'password'              => $newPassword,
                 'password_confirmation' => $newPassword,
-                'token' => 'reset_token',
+                'token'                 => 'reset_token',
             ]);
         $request->shouldReceive('get')
             ->with('password')
             ->andReturn('new_password');
 
         Password::shouldReceive('reset')
-            ->andReturnUsing(function ($credentials, $callback) use ($user) {
+            ->andReturnUsing(function ($credentials, $callback) use ($user): string {
                 $callback($user);
 
                 return Password::PASSWORD_RESET;
@@ -229,6 +227,6 @@ describe('CreatePassword Action', function () {
 
         expect(Hash::check($newPassword, $user->password))->toBeTrue()
             ->and($user->remember_token)->not()->toBe('old_token')
-            ->and(strlen($user->remember_token))->toBe(60);
+            ->and(mb_strlen((string) $user->remember_token))->toBe(60);
     });
 });

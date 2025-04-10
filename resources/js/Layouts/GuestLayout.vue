@@ -1,7 +1,7 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import ApplicationLogo from '@/Components/UI/Logo/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
-// import Footer from "@/Components/Navigation/Footer.vue";
+import Footer from "@/Components/Navigation/Footer.vue";
 </script>
 
 <template>
@@ -19,8 +19,6 @@ import { Link } from '@inertiajs/vue3';
         >
             <slot />
         </div>
-        <footer>
-<!--            <Footer></Footer>-->
-        </footer>
+            <Footer></Footer>
     </div>
 </template>

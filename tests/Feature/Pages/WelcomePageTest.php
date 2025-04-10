@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 covers(WelcomePage::class);
 
-it('returns a successful response', function () {
+it('returns a successful response', function (): void {
     $response = $this->get('/');
 
     $response->assertStatus(Response::HTTP_OK);
