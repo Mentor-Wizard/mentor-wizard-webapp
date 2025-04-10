@@ -59,6 +59,11 @@ runs:
       shell: bash
       run: composer i --no-progress --no-scripts -qn --ansi
 
+    - name: '⚙️ Enable Corepack'
+      if: ${{ inputs.use-node == 'true' }}
+      shell: bash
+      run: corepack enable
+
     - name: '❇️ Setup Node.js ${{ inputs.node }}'
       if: ${{ inputs.use-node == 'true' }}
       uses: actions/setup-node@v4
