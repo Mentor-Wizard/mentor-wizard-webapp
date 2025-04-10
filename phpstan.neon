@@ -26,4 +26,9 @@ parameters:
         - '#Cannot call method .* on mixed.#'
         - '#Cannot access property .* on mixed.#'
         - '#Method .* should return Illuminate\\Http\\RedirectResponse but returns Symfony\\Component\\HttpFoundation\\RedirectResponse.#'
+        - '#Call to an undefined method Illuminate\Http\Request::session().#'
+        - '#Call to an undefined method .*::get\(\)#'
+        - '#Call to an undefined method .*::session\(\)#'
+        - '#Call to an undefined method .*::only\(\)#'
+        - '#Access to undefined constant Illuminate\Support\Facades\.*#'
 

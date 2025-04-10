@@ -6,7 +6,6 @@ import MainPageText from "@/Components/MainPageText.vue";
 
 <template>
   <Head title="Dashboard" />
-
   <AuthenticatedLayout>
     <template #header>
       <MainPageText title="Dashboard"/>
