@@ -1,5 +1,6 @@
 includes:
   - vendor/larastan/larastan/extension.neon
+  - vendor/tomasvotruba/cognitive-complexity/config/extension.neon
 
 parameters:
   checkOctaneCompatibility: true
@@ -9,6 +10,9 @@ parameters:
     - app
     - database
   level: 5
+  cognitive_complexity:
+    class: 85
+    function: 8
   tmpDir: ./var/cache/phpstan
   ignoreErrors:
     - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper#'
