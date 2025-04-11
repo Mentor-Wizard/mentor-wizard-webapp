@@ -26,6 +26,11 @@ class ChatMessage extends Model
         'is_read',
     ];
 
+    public function chat(): BelongsTo
+    {
+        return $this->belongsTo(Chat::class);
+    }
+
     protected function casts(): array
     {
         return [
@@ -34,10 +39,5 @@ class ChatMessage extends Model
             'message' => 'string',
             'is_read' => 'boolean',
         ];
-    }
-
-    public function chat(): BelongsTo
-    {
-        return $this->belongsTo(Chat::class);
     }
 }

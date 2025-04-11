@@ -142,7 +142,6 @@ lints:
     - php artisan key:generate
   script:
     - ./vendor/bin/phpstan analyse --memory-limit=2G --error-format=json > phpstan.json || true
-    - php artisan phpstan:convert phpstan.json codequality.json
   artifacts:
     reports:
       codequality: codequality.json

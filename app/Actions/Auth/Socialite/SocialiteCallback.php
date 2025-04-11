@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider as SocialiteAbstractProvider;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,15 +20,20 @@ class SocialiteCallback
 
     public function handle(string $driver): RedirectResponse
     {
-        $socialiteUser = Socialite::driver($driver)->stateless()->user();
+        /** @var SocialiteAbstractProvider $provider */
+        $provider = Socialite::driver($driver);
 
-        if (empty($socialiteUser->getEmail())) {
+        $socialiteUser = $provider->stateless()->user();
+
+        $email = $socialiteUser->getEmail();
+
+        if (! $email) {
             Log::error('Email is empty, but required for login', ['driver' => $driver]);
             abort(Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $user = User::query()->firstOrCreate(['email' => $socialiteUser->getEmail()], [
-            'username' => empty($socialiteUser->getNickname()) ? $socialiteUser->getName() : $socialiteUser->getNickname(),
+        $user = User::query()->firstOrCreate(['email' => $email], [
+            'username' => $socialiteUser->getNickname() ?: $socialiteUser->getName(),
             'password' => Str::random(User::DEFAULT_PASSWORD_LENGHT),
         ]);
 

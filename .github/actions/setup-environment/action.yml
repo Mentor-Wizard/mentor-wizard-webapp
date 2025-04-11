@@ -41,37 +41,48 @@ runs:
 
     - name: '💽 Cache composer dependencies'
       uses: actions/cache@v4
+      if: ${{ inputs.use-php == 'true' }}
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: "${{ runner.os }}-${{ github.ref_name }}-composer-${{ hashFiles('**/composer.lock') }}"
         restore-keys: ${{ runner.os }}-${{ github.ref_name }}-composer-
 
+    - name: '💽 Cache var directory'
+      uses: actions/cache@v4
+      if: ${{ inputs.use-php == 'true' }}
+      with:
+        path: var
+        key: "${{ runner.os }}-${{ github.ref_name }}-var"
+        restore-keys: ${{ runner.os }}-${{ github.ref_name }}-var
+
     - name: '📦 Install composer dependencies'
       shell: bash
       run: composer i --no-progress --no-scripts -qn --ansi
 
-    - name: '🟧 Setup yarn'
+    - name: '⚙️ Enable Corepack'
+      if: ${{ inputs.use-node == 'true' }}
+      shell: bash
+      run: corepack enable
+
+    - name: '❇️ Setup Node.js ${{ inputs.node }}'
       if: ${{ inputs.use-node == 'true' }}
       uses: actions/setup-node@v4
+      with:
+        cache: yarn
+        node-version: ${{ inputs.node }}
 
     - name: '📦 Install yarn dependencies'
       if: ${{ inputs.use-node == 'true' }}
       shell: bash
-      run: |
-        corepack enable
-        corepack prepare yarn@4.6.0 --activate
-        yarn install
+      run: yarn install --frozen-lockfile --immutable
 
     - name: '📦 Build front-end assets'
       if: ${{ inputs.use-node == 'true' }}
       shell: bash
-      run: |
-        yarn build
+      run: yarn build
 
     - name: '🧰 Set up Laravel'
       shell: bash
       run: |
         cp .env.ci .env.testing
         php artisan key:generate --env=testing --ansi
-        composer ide-helper
-

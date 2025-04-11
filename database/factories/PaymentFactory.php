@@ -21,15 +21,15 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_reference' => fake()->sentence(20),
-            'amount' => fake()->numberBetween(1, 100),
-            'currency' => Currency::factory(),
+            'order_reference'    => fake()->sentence(20),
+            'amount'             => fake()->numberBetween(1, 100),
+            'currency'           => Currency::factory(),
             'transaction_status' => fake()->sentence(20),
-            'reason' => fake()->sentence(20),
-            'reason_code' => fake()->sentence(10),
-            'payment_system' => fake()->sentence(20),
-            'card_type' => fake()->sentence(20),
-            'issue_bank_name' => fake()->sentence(20),
+            'reason'             => fake()->sentence(20),
+            'reason_code'        => fake()->sentence(10),
+            'payment_system'     => fake()->sentence(20),
+            'card_type'          => fake()->sentence(20),
+            'issue_bank_name'    => fake()->sentence(20),
         ];
     }
 }

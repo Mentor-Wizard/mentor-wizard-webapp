@@ -19,8 +19,8 @@ describe('Successful scenarios', function (): void {
         actingAs($user);
 
         $this->put(route('password.update'), [
-            'current_password' => 'password',
-            'password' => 'new-secret-password',
+            'current_password'      => 'password',
+            'password'              => 'new-secret-password',
             'password_confirmation' => 'new-secret-password',
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -38,8 +38,8 @@ describe('Unsuccessful scenarios', function (): void {
         actingAs($user);
 
         $this->put(route('password.update'), [
-            'current_password' => 'asd',
-            'password' => 'new-secret-password',
+            'current_password'      => 'asd',
+            'password'              => 'new-secret-password',
             'password_confirmation' => 'new-secret-password',
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -55,8 +55,8 @@ describe('Unsuccessful scenarios', function (): void {
         actingAs($user);
 
         $this->put(route('password.update'), [
-            'current_password' => 'password',
-            'password' => 'new-secret-password',
+            'current_password'      => 'password',
+            'password'              => 'new-secret-password',
             'password_confirmation' => 'new-secret',
         ])
             ->assertStatus(Response::HTTP_FOUND);

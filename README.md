@@ -1,7 +1,7 @@
 ![Release](https://img.shields.io/github/v/release/Mentor-Wizard/mentor-wizard-webapp)
 ![Build](https://github.com/Mentor-Wizard/mentor-wizard-webapp/actions/workflows/ci.yml/badge.svg?branch=develop)
 ![Contributors](https://img.shields.io/github/contributors/Mentor-Wizard/mentor-wizard-webapp?branch=develop)
-
+[![codecov](https://codecov.io/gh/Mentor-Wizard/mentor-wizard-webapp/graph/badge.svg?token=R65AS6PVOP)](https://codecov.io/gh/Mentor-Wizard/mentor-wizard-webapp)
 
 # Mentor Wizard
 

@@ -21,8 +21,8 @@ class CurrencyFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->randomElement(CurrencyEnum::names()),
-            'slug' => fake()->slug(),
+            'name'   => fake()->randomElement(CurrencyEnum::names()),
+            'slug'   => fake()->slug(),
             'symbol' => fake()->randomElement(CurrencyEnum::values()),
         ];
     }

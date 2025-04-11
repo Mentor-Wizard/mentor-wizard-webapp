@@ -26,7 +26,7 @@ describe('Successful Scenarios', function (): void {
 
         $this->actingAs($user)->patch(route('profile.update'), [
             'username' => 'change_name',
-            'email' => 'change_email@email.com',
+            'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND)
             ->assertRedirect(route('profile.edit'));
@@ -49,7 +49,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $name = str_repeat('test', 300);
         $response = $this->patch(route('profile.update'), [
             'username' => $name,
-            'email' => 'change_email@email.com',
+            'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
@@ -64,7 +64,7 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $response = $this->patch(route('profile.update'), [
             'username' => 'A',
-            'email' => 'change_email@email.com',
+            'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
@@ -79,7 +79,7 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $response = $this->patch(route('profile.update'), [
             'username' => '',
-            'email' => 'change_email@email.com',
+            'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
@@ -94,7 +94,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $secondUser = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [
-            'name' => 'change_name',
+            'name'  => 'change_name',
             'email' => $secondUser->email,
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -110,7 +110,7 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $email = str_repeat('test', 300).'@admin.com';
         $response = $this->patch(route('profile.update'), [
-            'name' => 'change_name',
+            'name'  => 'change_name',
             'email' => $email,
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -125,7 +125,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [
-            'name' => 'change_name',
+            'name'  => 'change_name',
             'email' => '',
         ])
             ->assertStatus(Response::HTTP_FOUND);

@@ -46,9 +46,9 @@ describe('Successful Scenarios', function (): void {
             $token = $notification->token;
 
             test()->post('/reset-password', [
-                'token' => $token,
-                'email' => $user->email,
-                'password' => 'new-secure-password',
+                'token'                 => $token,
+                'email'                 => $user->email,
+                'password'              => 'new-secure-password',
                 'password_confirmation' => 'new-secure-password',
             ])->assertStatus(Response::HTTP_FOUND);
 
@@ -97,9 +97,9 @@ describe('Failure Scenarios', function (): void {
             $token = $notification->token;
 
             $this->post(route('password.email'), [
-                'token' => $token,
-                'email' => $user->email,
-                'password' => 'new-secure-password',
+                'token'                 => $token,
+                'email'                 => $user->email,
+                'password'              => 'new-secure-password',
                 'password_confirmation' => 'invalid-confirmation',
             ])
                 ->assertStatus(Response::HTTP_FOUND);
