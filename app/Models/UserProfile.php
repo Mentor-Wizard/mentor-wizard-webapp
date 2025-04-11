@@ -44,7 +44,7 @@ class UserProfile extends Model implements HasMedia
     {
         $this
             ->addMediaConversion('preview')
-            ->fit(Fit::Contain, self::PREVIEW_HEIGHT, self::PREVIEW_WIDTH)
-            ->nonQueued();
+            ->nonQueued()
+            ->fit(Fit::Contain, self::PREVIEW_HEIGHT, self::PREVIEW_WIDTH);
     }
 }
