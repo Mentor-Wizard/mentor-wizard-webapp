@@ -52,7 +52,3 @@ const footer = useFooter()
     </div>
   </footer>
 </template>
-
-<style scoped>
-
-</style>
