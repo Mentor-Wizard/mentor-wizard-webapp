@@ -63,11 +63,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="relative mx-auto mt-32 max-w-7xl px-6 lg:px-8"
-            v-if="$slots.footer"
-    >
-      <slot name="footer"/>
-    </footer>
+    <GuestFooter/>
   </div>
 </template>
 
@@ -78,6 +74,7 @@ import {Bars3Icon, XMarkIcon,} from '@heroicons/vue/24/outline'
 import ApplicationLogo from "@/Components/UI/Logo/ApplicationLogo.vue";
 import {Link} from "@inertiajs/vue3";
 import {useNavigation} from "@/Stores/navigation.js";
+import GuestFooter from "@/Components/Navigation/Footer/GuestFooter.vue";
 
 const mobileMenuOpen = ref(false)
 const {landingNavigation: navigation} = useNavigation()
