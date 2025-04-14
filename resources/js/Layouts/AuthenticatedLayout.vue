@@ -97,7 +97,7 @@
         </div>
       </main>
 
-      <AuthenticatedFooter/>
+      <Footer/>
     </div>
   </div>
 </template>
@@ -108,7 +108,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import ApplicationLogo from "@/Components/UI/Logo/ApplicationLogo.vue";
 import {Link} from "@inertiajs/vue3";
 import {useNavigation} from "@/Stores/navigation.js";
-import AuthenticatedFooter from "@/Components/Navigation/Footer/AuthenticatedFooter.vue";
+import Footer from "@/Components/Navigation/Footer.vue";
 
 const user = {
   imageUrl:

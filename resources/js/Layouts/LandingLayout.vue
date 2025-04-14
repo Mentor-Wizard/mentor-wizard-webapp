@@ -63,7 +63,7 @@
     </main>
 
     <!-- Footer -->
-    <GuestFooter/>
+    <Footer/>
   </div>
 </template>
 
@@ -74,7 +74,7 @@ import {Bars3Icon, XMarkIcon,} from '@heroicons/vue/24/outline'
 import ApplicationLogo from "@/Components/UI/Logo/ApplicationLogo.vue";
 import {Link} from "@inertiajs/vue3";
 import {useNavigation} from "@/Stores/navigation.js";
-import GuestFooter from "@/Components/Navigation/Footer/GuestFooter.vue";
+import Footer from "@/Components/Navigation/Footer.vue";
 
 const mobileMenuOpen = ref(false)
 const {landingNavigation: navigation} = useNavigation()
