@@ -31,7 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
-            if (app()->isProduction() || app()->runningUnitTests() || $response->getStatusCode() === Response::HTTP_NOT_FOUND) {
+            // Show custom page on production or if status 404
+            if ((app()->isProduction() || app()->runningUnitTests() || $response->getStatusCode() === Response::HTTP_NOT_FOUND)
+                && ! $response->isRedirect()) {
                 return Inertia::render('Error', ['status' => $response->getStatusCode()])
                     ->toResponse($request)
                     ->setStatusCode($response->getStatusCode());
