@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\Pages\MentorProgram\CreateMentorProgramAction;
+use App\Actions\Pages\WelcomePage;
 use App\Actions\Pages\DashboardPage;
-use App\Actions\Pages\Profile\DestroyProfilePage;
+use Illuminate\Support\Facades\Route;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\UpdateProfilePage;
-use App\Actions\Pages\WelcomePage;
-use Illuminate\Support\Facades\Route;
+use App\Actions\Pages\Profile\DestroyProfilePage;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 
@@ -19,6 +20,13 @@ Route::middleware('auth')->group(function (): void {
     Route::get('profile', GetProfilePage::class)->name('profile.edit');
     Route::patch('profile', UpdateProfilePage::class)->name('profile.update');
     Route::delete('profile', DestroyProfilePage::class)->name('profile.destroy');
+});
+
+Route::middleware('auth', 'role:user')->group(function (): void {
+    Route::get('mentor-program/create', CreateMentorProgramAction::class)
+        ->name('mentor-program.create');
+    Route::get('mentor-program/{mentorProgram:slug}/edit', CreateMentorProgramAction::class)
+        ->name('mentor-program.edit');
 });
 
 require __DIR__.'/auth.php';
