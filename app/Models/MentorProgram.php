@@ -11,14 +11,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[UseFactory(MentorProgramFactory::class)]
 /**
  * @mixin IdeHelperMentorProgram
  */
+#[UseFactory(MentorProgramFactory::class)]
 class MentorProgram extends Model
 {
     /** @use HasFactory<MentorProgramFactory> */
-    use HasFactory;
+    use HasFactory; 
 
     protected $fillable = [
         'mentor_id',
