@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Profile;
 
+use App\Models\UserProfile;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -19,6 +20,7 @@ class GetProfilePage
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => Auth::user() instanceof MustVerifyEmail, // @pest-mutate-ignore
             'status'          => session('status'),
+            'avatar' => Auth::user()->profile ? Auth::user()->profile?->getFirstMediaUrl('avatar') : UserProfile::DEFAULT_AVATAR,
         ]);
     }
 }

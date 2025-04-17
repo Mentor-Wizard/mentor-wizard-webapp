@@ -7,88 +7,127 @@ import {useForm, usePage} from '@inertiajs/vue3';
 import InputSuccess from "@/Components/UI/Forms/InputSuccess.vue";
 import {useTemplateRef} from "vue";
 import SecondaryButton from "@/Components/UI/Button/SecondaryButton.vue";
+import { ref } from 'vue';
 
 defineProps({
-  mustVerifyEmail: {
-    type: Boolean,
-  },
-  status: {
-    type: String,
-  },
+    mustVerifyEmail: {
+        type: Boolean,
+    },
+    status: {
+        type: String,
+    },
 });
 
 const user = usePage().props.auth.user;
+const profile = user?.profile;
+const avatar = ref(usePage().props.avatar);
 
 const logoInput = useTemplateRef('logo-input')
 
 const chooseFiles = () => {
-  logoInput.value.click()
+    logoInput.value.click()
 }
 
 const form = useForm({
-  username: user.username,
-  email: user.email,
-  logo: ''
+    name: profile?.name ?? '',
+    last_name: profile?.last_name ?? '',
+    email: user.email,
+    logo: ''
 });
+
+const onFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    form.logo = file;
+    avatar.value = URL.createObjectURL(file); // оновлюємо аватар для перегляду
+};
+
+const submit = () => {
+    const formData = new FormData();
+    formData.append('name', form.name);
+    formData.append('email', form.email);
+    if (form.logo instanceof File) {
+        formData.append('logo', form.logo);
+    }
+
+    form.patch(route('profile.update'), {
+        forceFormData: true,
+    });
+};
 </script>
 
 <template>
-  <div class="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
-    <div>
-      <h2 class="text-base/7 font-semibold">Personal Information</h2>
-      <p class="mt-1 text-sm/6 text-gray-400">Use a permanent address where you can receive mail.</p>
+    <div class="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+        <div>
+            <h2 class="text-base/7 font-semibold">Personal Information</h2>
+            <p class="mt-1 text-sm/6 text-gray-400">Use a permanent address where you can receive mail.</p>
+        </div>
+        <form @submit.prevent="submit" class="md:col-span-2">
+            <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
+                <div class="col-span-full flex items-center gap-x-8">
+                    <img
+                        :src="avatar"
+                        alt="" class="size-24 flex-none rounded-lg bg-gray-800 object-cover"/>
+                    <div>
+                        <SecondaryButton
+                            class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50"
+                            @click="chooseFiles">
+                            Change avatar
+                        </SecondaryButton>
+                        <p class="mt-2 text-xs/5 text-gray-400">JPG, GIF or PNG. 1MB max.</p>
+                    </div>
+                    <input type="file"
+                           :hidden="true"
+                           ref="logo-input"
+                           accept="image/gif, image/jpeg, image/png"
+                           @change="onFileChange"/>
+
+                </div>
+
+                <div class="col-span-full">
+                    <InputLabel for="name" value="Name"/>
+
+                    <div class="mt-2">
+                        <TextInput id="name" v-model="form.name" required/>
+                    </div>
+
+                    <InputError class="mt-2" :message="form.errors.name"/>
+                </div>
+                <div class="col-span-full">
+                    <InputLabel for="last_name" value="Last name"/>
+
+                    <div class="mt-2">
+                        <TextInput id="last_name" v-model="form.last_name" required/>
+                    </div>
+
+                    <InputError class="mt-2" :message="form.errors.last_name"/>
+                </div>
+
+                <div class="col-span-full">
+
+                    <InputLabel for="email" value="Email address"/>
+
+                    <div class="mt-2">
+                        <TextInput id="email" type="email" autocomplete="email" v-model="form.email" required/>
+                    </div>
+
+                    <InputError class="mt-2" :message="form.errors.email"/>
+                </div>
+
+
+                <div class="mt-8 flex">
+                    <div class="w-auto">
+                        <PrimaryButton :class="{ 'opacity-25 cursor-not-allowed': form.processing }"
+                                       :disabled="form.processing">
+                            Save
+                        </PrimaryButton>
+
+
+                        <InputSuccess message="Saved" :is-show="form.recentlySuccessful"/>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
-    <form @submit.prevent="form.patch(route('profile.update'))" class="md:col-span-2">
-      <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
-        <div class="col-span-full flex items-center gap-x-8">
-          <img
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-              alt="" class="size-24 flex-none rounded-lg bg-gray-800 object-cover"/>
-          <div>
-            <SecondaryButton
-                class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50"
-                @click="chooseFiles">
-              Change avatar
-            </SecondaryButton>
-            <p class="mt-2 text-xs/5 text-gray-400">JPG, GIF or PNG. 1MB max.</p>
-          </div>
-          <TextInput v-model="form.logo" type="file" :hidden="true" ref="logo-input"
-                     accept="image/gif, image/jpeg, image/png"/>
-        </div>
-
-        <div class="col-span-full">
-          <InputLabel for="username" value="Username"/>
-
-          <div class="mt-2">
-            <TextInput id="username" v-model="form.username" required/>
-          </div>
-
-          <InputError class="mt-2" :message="form.errors.username"/>
-        </div>
-
-        <div class="col-span-full">
-
-          <InputLabel for="email" value="Email address"/>
-
-          <div class="mt-2">
-            <TextInput id="email" type="email" autocomplete="email" v-model="form.email" required/>
-          </div>
-
-          <InputError class="mt-2" :message="form.errors.email"/>
-        </div>
-
-
-        <div class="mt-8 flex">
-          <div class="w-auto">
-            <PrimaryButton :class="{ 'opacity-25 cursor-not-allowed': form.processing }" :disabled="form.processing">
-              Save
-            </PrimaryButton>
-
-
-            <InputSuccess message="Saved" :is-show="form.recentlySuccessful"/>
-          </div>
-        </div>
-      </div>
-    </form>
-  </div>
 </template>

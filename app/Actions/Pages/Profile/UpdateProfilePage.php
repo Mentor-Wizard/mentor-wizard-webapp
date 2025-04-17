@@ -6,7 +6,7 @@ namespace App\Actions\Pages\Profile;
 
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
@@ -25,12 +25,26 @@ class UpdateProfilePage
             $request->user()->email_verified_at = null;
         }
 
+        $request->user()->email = Arr::get($request, 'email');
         $request->user()->save();
-        info('Updating profile pre logo');
+        $request->user()->profile()->updateOrCreate(
+            [],
+            [
+                'name' => Arr::get($request, 'name'),
+                'last_name' => Arr::get($request, 'last_name'),
+            ]
+        );
 
         if ($request->hasFile('logo')) {
-            Log::debug('Updating profile logo');
-            $request->user()->profile->addMedia($request->file('logo'))->toMediaCollection('avatar');
+
+            $request->user()
+                ->profile
+                ->clearMediaCollection('avatar');
+
+            $request->user()
+                ->profile
+                ->addMedia($request->file('logo'))
+                ->toMediaCollection('avatar');
         }
 
         return redirect()->route('profile.edit');
