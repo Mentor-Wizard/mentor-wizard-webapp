@@ -14,11 +14,16 @@ class CreateMentorProgramAction
 {
     use AsController;
 
-    public function handle(?MentorProgram $mentorProgram): Response
+    public function handle(?MentorProgram $mentorProgram = null): Response
     {
+        $currencies = array_combine(
+            CurrencyEnum::names(),
+            CurrencyEnum::values()
+        );
+
         return Inertia::render('MentorProgram/CreateOrEdit', [
-            'program' => $mentorProgram ?? null,
-            'currencies' => CurrencyEnum::cases(),
+            'program' => $mentorProgram,
+            'currencies' => $currencies,
         ]);
     }
 }

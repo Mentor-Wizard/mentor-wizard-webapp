@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import TextInput from '@/Components/UI/Forms/TextInput.vue'
@@ -8,14 +8,15 @@ import InputError from '@/Components/UI/Forms/InputError.vue'
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue'
 import DangerButton from '@/Components/UI/Button/DangerButton.vue'
 import Modal from '@/Components/Modal.vue'
+import TextArea from '@/Components/UI/Forms/TextArea.vue'
+import SelectField from '@/Components/UI/Forms/SelectField.vue'
 
 const props = defineProps({
     program: {
-        type: Object,
-        default: null
+        type: [Object, null]
     },
     currencies: {
-        type: Array,
+        type: Object,
         required: true
     }
 
@@ -24,14 +25,19 @@ const props = defineProps({
 const showDeleteModal = ref(false)
 
 const form = useForm({
-    name: props.program?.name || '',
-    description: props.program?.description || '',
-    cost: props.program?.cost || '',
-    currency_id: props.program?.currency_id || '',
-    slug: props.program?.slug || ''
+    name: props.program?.name ?? '',
+    description: props.program?.description ?? '',
+    cost: props.program?.cost ?? '',
+    currency_id: props.program?.currency_id ?? '',
+    slug: props.program?.slug ?? ''
 })
 
-const isEdit = computed(() => !!props.program)
+const isEdit = computed(() => {
+    return props.program !== null && typeof props.program === 'object'
+})
+const transformedCurrencies = computed(() => {
+    return Object.entries(props.currencies).map(([name, value]) => ({ name, value }));
+})
 
 const submit = () => {
     if (isEdit.value) {
@@ -69,49 +75,30 @@ const deleteProgram = () => {
                         <form @submit.prevent="submit" class="space-y-8 divide-y divide-gray-200">
                             <div class="space-y-6">
                                 <div>
-                                    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-6">
-                                        Program Information
-                                    </h3>
-
                                     <div class="space-y-6">
                                         <div>
-                                            <InputLabel for="name" value="Program Name"
-                                                class="block text-sm font-medium text-gray-700" />
-                                            <TextInput id="name" v-model="form.name" type="text"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                required />
+                                            <InputLabel for="name" value="Program Name" />
+                                            <TextInput id="name" v-model="form.name" type="text" required />
                                             <InputError :message="form.errors.name" class="mt-2" />
                                         </div>
 
                                         <div>
-                                            <InputLabel for="description" value="Description"
-                                                class="block text-sm font-medium text-gray-700" />
-                                            <textarea id="description" v-model="form.description" rows="4"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+                                            <InputLabel for="description" value="Description" />
+                                            <TextArea id="description" v-model="form.description" rows="3" />
                                             <InputError :message="form.errors.description" class="mt-2" />
                                         </div>
 
-                                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 mb-2">
                                             <div>
-                                                <InputLabel for="cost" value="Cost"
-                                                    class="block text-sm font-medium text-gray-700" />
-                                                <TextInput id="cost" v-model="form.cost" type="number"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                    required />
+                                                <InputLabel for="cost" value="Cost" />
+                                                <TextInput id="cost" v-model="form.cost" type="number" required />
                                                 <InputError :message="form.errors.cost" class="mt-2" />
                                             </div>
 
                                             <div>
-                                                <InputLabel for="currency_id" value="Currency"
-                                                    class="block text-sm font-medium text-gray-700" />
-                                                <select id="currency_id" v-model="form.currency_id"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                    required>
-                                                    <option v-for="currency in currencies" :key="currency.id"
-                                                        :value="currency.id">
-                                                        {{ currency.code }}
-                                                    </option>
-                                                </select>
+                                                <InputLabel for="currency_id" value="Currency" />
+                                                <SelectField id="currency_id" v-model="form.currency_id"
+                                                    :currencies="transformedCurrencies" required />
                                                 <InputError :message="form.errors.currency_id" class="mt-2" />
                                             </div>
                                         </div>
@@ -121,17 +108,18 @@ const deleteProgram = () => {
 
                             <div class="pt-6">
                                 <div class="flex justify-end space-x-3">
-                                    <DangerButton v-if="program" type="button" @click="confirmDelete"
+                                    <DangerButton v-if="isEdit" type="button" @click="confirmDelete"
                                         class="inline-flex justify-center">
                                         Delete Program
                                     </DangerButton>
 
                                     <PrimaryButton :disabled="form.processing" class="inline-flex justify-center">
-                                        {{ program ? 'Update Program' : 'Create Program' }}
+                                        {{ isEdit ? 'Update Program' : 'Create Program' }}
                                     </PrimaryButton>
                                 </div>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
