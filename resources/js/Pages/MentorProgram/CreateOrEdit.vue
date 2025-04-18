@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import TextInput from '@/Components/UI/Forms/TextInput.vue'
@@ -20,7 +20,6 @@ const props = defineProps({
         type: Object,
         required: true
     }
-
 })
 
 const showDeleteModal = ref(false)
@@ -30,6 +29,7 @@ const form = useForm({
     description: props.program?.description ?? '',
     cost: props.program?.cost ?? '',
     currency_id: props.program?.currency_id ?? '',
+    slug: props.program?.slug ?? '',
 })
 
 const isEdit = computed(() => {
@@ -41,7 +41,11 @@ const transformedCurrencies = computed(() => {
 
 const submit = () => {
     if (isEdit.value) {
-        form.put(route('mentor-program.update', props.program.id))
+        form.put(route('mentor-program.update', props.program.slug), {
+            onSuccess: () => {
+                form.reset()
+            }
+        })
     } else {
         form.post(route('mentor-program.store'), {
             onSuccess: () => {
@@ -56,7 +60,7 @@ const confirmDelete = () => {
 }
 
 const deleteProgram = () => {
-    form.delete(route('mentor-program.destroy', props.program.id), {
+    form.delete(route('mentor-program.destroy', props.program.slug), {
         onSuccess: () => {
             showDeleteModal.value = false
         }
