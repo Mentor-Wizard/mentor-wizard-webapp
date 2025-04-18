@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\MentorProgram;
 
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class StoreMentorProgramRequest extends FormRequest
 {
@@ -19,18 +21,18 @@ class StoreMentorProgramRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name'        => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'slug' => ['required', 'string', 'max:255', Rule::unique('mentor_programs', 'slug')],
-            'cost' => ['required', 'numeric', 'min:0'],
+            'slug'        => ['required', 'string', 'max:255', Rule::unique('mentor_programs', 'slug')],
+            'cost'        => ['required', 'numeric', 'min:0'],
             'currency_id' => ['required', 'exists:currencies,id'],
         ];
     }
 
-        protected function prepareForValidation(): void
+    protected function prepareForValidation(): void
     {
-           $this->merge([
-            'slug' => Str::slug($this->slug),
+        $this->merge([
+            'slug' => Str::slug($this->name),
         ]);
     }
 }

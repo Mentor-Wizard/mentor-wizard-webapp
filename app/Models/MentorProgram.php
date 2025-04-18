@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MentorProgram extends Model
 {
     /** @use HasFactory<MentorProgramFactory> */
-    use HasFactory; 
+    use HasFactory;
 
     protected $fillable = [
         'mentor_id',

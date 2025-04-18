@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\Currency;
 use App\Enums\CurrencyEnum;
+use App\Models\Currency;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class CurrencySeeder extends Seeder
 {
@@ -16,8 +17,8 @@ class CurrencySeeder extends Seeder
     {
         foreach (CurrencyEnum::cases() as $currency) {
             Currency::factory()->create([
-                'name' => $currency->name,
-                'symbol' => $currency->value
+                'name'   => $currency->name,
+                'symbol' => $currency->value,
             ]);
         }
     }

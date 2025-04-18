@@ -13,7 +13,8 @@ import SelectField from '@/Components/UI/Forms/SelectField.vue'
 
 const props = defineProps({
     program: {
-        type: [Object, null]
+        type: Object,
+        default: null
     },
     currencies: {
         type: Object,
@@ -29,7 +30,6 @@ const form = useForm({
     description: props.program?.description ?? '',
     cost: props.program?.cost ?? '',
     currency_id: props.program?.currency_id ?? '',
-    slug: props.program?.slug ?? ''
 })
 
 const isEdit = computed(() => {
@@ -43,7 +43,11 @@ const submit = () => {
     if (isEdit.value) {
         form.put(route('mentor-program.update', props.program.id))
     } else {
-        form.post(route('mentor-program.store'))
+        form.post(route('mentor-program.store'), {
+            onSuccess: () => {
+                form.reset()
+            }
+        })
     }
 }
 
@@ -52,7 +56,7 @@ const confirmDelete = () => {
 }
 
 const deleteProgram = () => {
-    form.delete(route('mentor-programs.destroy', props.program.id), {
+    form.delete(route('mentor-program.destroy', props.program.id), {
         onSuccess: () => {
             showDeleteModal.value = false
         }
@@ -78,7 +82,7 @@ const deleteProgram = () => {
                                     <div class="space-y-6">
                                         <div>
                                             <InputLabel for="name" value="Program Name" />
-                                            <TextInput id="name" v-model="form.name" type="text"  />
+                                            <TextInput id="name" v-model="form.name" type="text" />
                                             <InputError :message="form.errors.name" class="mt-2" />
                                         </div>
 

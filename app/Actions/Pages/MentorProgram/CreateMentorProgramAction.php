@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\MentorProgram;
 
+use App\Models\Currency;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\Currency;
-use App\Models\MentorProgram;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class CreateMentorProgramAction
 {
     use AsController;
 
-    public function handle(?MentorProgram $mentorProgram = null): Response
+    public function handle(): Response
     {
-        $currencies = Currency::pluck('name', 'id')->toArray();
+        $currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         return Inertia::render('MentorProgram/CreateOrEdit', [
-            'program' => $mentorProgram,
+            'program'    => null,
             'currencies' => $currencies,
         ]);
     }
