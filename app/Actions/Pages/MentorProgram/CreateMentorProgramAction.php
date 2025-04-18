@@ -6,7 +6,7 @@ namespace App\Actions\Pages\MentorProgram;
 
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Enums\CurrencyEnum;
+use App\Models\Currency;
 use App\Models\MentorProgram;
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -16,10 +16,7 @@ class CreateMentorProgramAction
 
     public function handle(?MentorProgram $mentorProgram = null): Response
     {
-        $currencies = array_combine(
-            CurrencyEnum::names(),
-            CurrencyEnum::values()
-        );
+        $currencies = Currency::pluck('name', 'id')->toArray();
 
         return Inertia::render('MentorProgram/CreateOrEdit', [
             'program' => $mentorProgram,

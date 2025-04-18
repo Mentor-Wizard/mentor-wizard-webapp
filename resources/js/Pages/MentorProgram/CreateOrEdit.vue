@@ -36,14 +36,14 @@ const isEdit = computed(() => {
     return props.program !== null && typeof props.program === 'object'
 })
 const transformedCurrencies = computed(() => {
-    return Object.entries(props.currencies).map(([name, value]) => ({ name, value }));
+    return Object.entries(props.currencies).map(([id, value]) => ({ id, value }));
 })
 
 const submit = () => {
     if (isEdit.value) {
-        form.put(route('mentor-programs.update', props.program.id))
+        form.put(route('mentor-program.update', props.program.id))
     } else {
-        form.post(route('mentor-programs.store'))
+        form.post(route('mentor-program.store'))
     }
 }
 
@@ -78,7 +78,7 @@ const deleteProgram = () => {
                                     <div class="space-y-6">
                                         <div>
                                             <InputLabel for="name" value="Program Name" />
-                                            <TextInput id="name" v-model="form.name" type="text" required />
+                                            <TextInput id="name" v-model="form.name" type="text"  />
                                             <InputError :message="form.errors.name" class="mt-2" />
                                         </div>
 
