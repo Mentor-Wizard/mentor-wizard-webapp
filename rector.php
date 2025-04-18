@@ -19,6 +19,9 @@ return RectorConfig::configure()
         __DIR__.'/routes',
         __DIR__.'/tests',
     ])
+    ->withSkip([
+        __DIR__.'/resources',
+    ])
     ->withPhpVersion(PhpVersion::PHP_84)
     ->withPhpSets(php84: true)
     ->withPreparedSets(

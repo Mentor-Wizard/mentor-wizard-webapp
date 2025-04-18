@@ -7,11 +7,11 @@ import {
     MenuItem,
     MenuItems,
 } from '@headlessui/vue'
-import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import { usePage, router, Link } from '@inertiajs/vue3';
-import { useNavigation } from "@/Stores/navigation.js";
-import { computed } from "vue";
+import {MagnifyingGlassIcon} from '@heroicons/vue/20/solid'
+import {Bars3Icon, BellIcon, XMarkIcon} from '@heroicons/vue/24/outline'
+import {usePage, router, Link} from '@inertiajs/vue3';
+import {useNavigation} from "@/Stores/navigation.js";
+import {computed} from "vue";
 import NavbarLogo from "@/Components/Navigation/Navbar/NavbarLogo.vue";
 
 defineProps({
@@ -22,18 +22,19 @@ defineProps({
 });
 
 const page = usePage();
+const navigationStore = useNavigation();
+
 const currentUser = computed(() => page.props.auth?.user ?? {});
 const isLoggedIn = computed(() => !!currentUser.value?.email);
-
-const navigationStore = useNavigation();
 
 const mainNavigations = computed(() => {
     return isLoggedIn.value ? navigationStore.authenticatedNavigation : navigationStore.landingNavigation;
 });
 const userNavigations = computed(() => navigationStore.userNavigation);
+const authNavigations = computed(() => navigationStore.authNavigation);
 
 function logout() {
-    router.post(route('logout'), {});
+    router.post(route('logout'));
 }
 
 const mainNavLinkClasses = (navItemHref) => {
@@ -60,8 +61,12 @@ const handleUserNavClick = (navItem) => {
     }
 };
 
-const profileImageUrl = computed(() => currentUser.value?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80');
+// FIXME: Add avatar url after #24 task implementation
+const profileImageUrl = computed(() => currentUser?.avatar ||
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+);
 
+console.log(page.props.auth);
 </script>
 
 <template>
@@ -71,10 +76,11 @@ const profileImageUrl = computed(() => currentUser.value?.avatar_url || 'https:/
             <div class="flex h-16 justify-between">
                 <div class="flex px-2 lg:px-0">
                     <div class="flex shrink-0 items-center p-1">
-                        <NavbarLogo />
+                        <NavbarLogo/>
                     </div>
                     <div class="hidden lg:ml-6 lg:flex lg:space-x-8">
-                        <Link v-for="mainNavigation in mainNavigations" :key="mainNavigation.name" :href="mainNavigation.href"
+                        <Link v-for="mainNavigation in mainNavigations" :key="mainNavigation.name"
+                              :href="mainNavigation.href"
                               :class="mainNavLinkClasses(mainNavigation.href)">
                             {{ mainNavigation.name }}
                         </Link>
@@ -100,54 +106,73 @@ const profileImageUrl = computed(() => currentUser.value?.avatar_url || 'https:/
                         <XMarkIcon v-else class="block size-6" aria-hidden="true"/>
                     </DisclosureButton>
                 </div>
-                <div v-if="isLoggedIn" class="hidden lg:ml-4 lg:flex lg:items-center">
-                    <button type="button"
-                            class="relative shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        <span class="absolute -inset-1.5"/>
-                        <span class="sr-only">View notifications</span>
-                        <BellIcon class="size-6" aria-hidden="true"/>
-                    </button>
 
-                    <Menu as="div" class="relative ml-4 shrink-0">
-                        <div>
-                            <MenuButton
-                                class="relative flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                <span class="absolute -inset-1.5"/>
-                                <span class="sr-only">Open user menu</span>
-                                <img class="size-8 rounded-full" :src="profileImageUrl" alt="User avatar"/>
-                            </MenuButton>
-                        </div>
-                        <transition enter-active-class="transition ease-out duration-100"
-                                    enter-from-class="transform opacity-0 scale-95"
-                                    enter-to-class="transform opacity-100 scale-100"
-                                    leave-active-class="transition ease-in duration-75"
-                                    leave-from-class="transform opacity-100 scale-100"
-                                    leave-to-class="transform opacity-0 scale-95">
-                            <MenuItems
-                                class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-                                <MenuItem v-for="userNavigation in userNavigations" :key="userNavigation.name" v-slot="{ active }">
-                                    <component :is="userNavigation.href === route('logout') ? 'button' : Link"
-                                               :href="userNavigation.href !== route('logout') ? userNavigation.href : undefined"
-                                               :class="[active ? 'bg-gray-100' : '', 'block w-full px-4 py-2 text-left text-sm text-gray-700']"
-                                               @click="handleUserNavClick(userNavigation)">
-                                        {{ userNavigation.name }}
-                                    </component>
-                                </MenuItem>
-                            </MenuItems>
-                        </transition>
-                    </Menu>
+                <div class="hidden lg:ml-4 lg:flex lg:items-center">
+                    <div v-if="isLoggedIn" class="flex items-center">
+                        <button type="button"
+                                class="relative shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            <span class="absolute -inset-1.5"/>
+                            <span class="sr-only">View notifications</span>
+                            <BellIcon class="size-6" aria-hidden="true"/>
+                        </button>
+
+                        <Menu as="div" class="relative ml-4 shrink-0">
+                            <div>
+                                <MenuButton
+                                    class="relative flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    <span class="absolute -inset-1.5"/>
+                                    <span class="sr-only">Open user menu</span>
+                                    <img class="size-8 rounded-full" :src="profileImageUrl" alt="User avatar"/>
+                                </MenuButton>
+                            </div>
+                            <transition enter-active-class="transition ease-out duration-100"
+                                        enter-from-class="transform opacity-0 scale-95"
+                                        enter-to-class="transform opacity-100 scale-100"
+                                        leave-active-class="transition ease-in duration-75"
+                                        leave-from-class="transform opacity-100 scale-100"
+                                        leave-to-class="transform opacity-0 scale-95">
+                                <MenuItems
+                                    class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                                    <MenuItem v-for="userNavigation in userNavigations" :key="userNavigation.name"
+                                              v-slot="{ active }">
+                                        <component :is="userNavigation.href === route('logout') ? 'button' : Link"
+                                                   :href="userNavigation.href !== route('logout') ? userNavigation.href : undefined"
+                                                   :class="[active ? 'bg-gray-100' : '', 'block w-full px-4 py-2 text-left text-sm text-gray-700']"
+                                                   @click="handleUserNavClick(userNavigation)">
+                                            {{ userNavigation.name }}
+                                        </component>
+                                    </MenuItem>
+                                </MenuItems>
+                            </transition>
+                        </Menu>
+                    </div>
+                    <div v-else class="flex items-center space-x-8">
+                        <Link v-for="authNavigation in authNavigations" :key="authNavigation.name"
+                              :href="authNavigation.href"
+                              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500">
+                            {{ authNavigation.name }}
+                        </Link>
+                    </div>
                 </div>
+
             </div>
         </div>
 
-        <DisclosurePanel class="lg:hidden" v-if="isLoggedIn">
+        <DisclosurePanel class="lg:hidden">
             <div class="bg-white space-y-1 pt-2 pb-3">
-                <DisclosureButton v-for="mainNavigation in mainNavigations" :key="mainNavigation.name" as="a" :href="mainNavigation.href"
+                <DisclosureButton v-for="mainNavigation in mainNavigations" :key="mainNavigation.name" as="a"
+                                  :href="mainNavigation.href"
                                   :class="mobileNavLinkClasses(mainNavigation.href)">
                     {{ mainNavigation.name }}
                 </DisclosureButton>
+                <DisclosureButton v-if="!isLoggedIn" v-for="authNavigation in authNavigations"
+                                  :key="authNavigation.name" as="a" :href="authNavigation.href"
+                                  :class="mainNavLinkClasses(authNavigation.href)">
+                    {{ authNavigation.name }}
+                </DisclosureButton>
             </div>
-            <div class="bg-white border-t border-gray-200 pt-4 pb-3">
+
+            <div v-if="isLoggedIn" class="bg-white border-t border-gray-200 pt-4 pb-3">
                 <div class="flex items-center px-4">
                     <div class="shrink-0">
                         <img class="size-10 rounded-full" :src="profileImageUrl" alt="User avatar"/>

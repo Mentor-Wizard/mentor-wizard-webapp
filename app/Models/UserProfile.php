@@ -35,6 +35,17 @@ class UserProfile extends Model implements HasMedia
         'description',
     ];
 
+    protected $visible = [
+        'id',
+        'name',
+        'last_name',
+        'linkedin',
+        'telegram',
+        'whatsapp',
+        'phone',
+        'description',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

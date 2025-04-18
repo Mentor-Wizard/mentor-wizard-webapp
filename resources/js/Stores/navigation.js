@@ -19,6 +19,10 @@ export const useNavigation = defineStore('navigation', () => {
         {name: 'Your Profile', href: route('profile.edit')},
         {name: 'Sign out', href: route('logout')},
     ]
+    const authNavigation = [
+        {name: 'Sign In', href: route('login')},
+        {name: 'Register', href: route('register')},
+    ]
 
-    return {landingNavigation, authenticatedNavigation, userNavigation};
+    return {landingNavigation, authenticatedNavigation, userNavigation, authNavigation};
 })
