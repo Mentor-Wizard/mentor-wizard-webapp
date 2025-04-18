@@ -15,7 +15,7 @@ class CurrencySeeder extends Seeder
     public function run(): void
     {
         foreach (CurrencyEnum::cases() as $currency) {
-            Currency::create([
+            Currency::factory()->create([
                 'name' => $currency->name,
                 'symbol' => $currency->value
             ]);
