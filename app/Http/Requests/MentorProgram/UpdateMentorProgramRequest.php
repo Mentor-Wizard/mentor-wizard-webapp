@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\MentorProgram;
 
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateMentorProgramRequest extends FormRequest
 {

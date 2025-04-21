@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\MentorProgram;
 
-use Inertia\Inertia;
+use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
 use App\Models\MentorProgram;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
 
 class StoreMentorProgramAction
 {
