@@ -14,9 +14,8 @@ class EditMentorProgramAction
 {
     use AsController;
 
-    public function handle(?MentorProgram $mentorProgram = null): Response
+    public function handle(?MentorProgram $mentorProgram): Response
     {
-        // dd($mentorProgram);
         $currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         return Inertia::render('MentorProgram/CreateOrEdit', [

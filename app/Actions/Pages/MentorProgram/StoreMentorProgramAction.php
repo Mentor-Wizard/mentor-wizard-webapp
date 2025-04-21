@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\MentorProgram;
 
-use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
+use Inertia\Inertia;
 use App\Models\MentorProgram;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Lorisleiva\Actions\Concerns\AsController;
+use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
 
 class StoreMentorProgramAction
 {
     use AsController;
 
-    public function handle(StoreMentorProgramRequest $request): RedirectResponse
+    public function handle(StoreMentorProgramRequest $request): Response
     {
-        $mentorProgram = MentorProgram::query()->create([
+        MentorProgram::query()->create([
             ...$request->validated(),
             'mentor_id' => Auth::id(),
         ]);
 
-        return redirect()->route('mentor-program.create', $mentorProgram);
+        return Inertia::location(route('mentor-program.create'));
     }
 }

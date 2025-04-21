@@ -18,7 +18,6 @@ class CreateMentorProgramAction
         $currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         return Inertia::render('MentorProgram/CreateOrEdit', [
-            'program'    => null,
             'currencies' => $currencies,
         ]);
     }

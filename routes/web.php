@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\WelcomePage;
 use App\Actions\Pages\DashboardPage;
-use Illuminate\Support\Facades\Route;
-use App\Actions\Pages\Profile\GetProfilePage;
-use App\Actions\Pages\Profile\UpdateProfilePage;
-use App\Actions\Pages\Profile\DestroyProfilePage;
+use App\Actions\Pages\MentorProgram\CreateMentorProgramAction;
+use App\Actions\Pages\MentorProgram\DestroyMentorProgramAction;
 use App\Actions\Pages\MentorProgram\EditMentorProgramAction;
 use App\Actions\Pages\MentorProgram\StoreMentorProgramAction;
-use App\Actions\Pages\MentorProgram\CreateMentorProgramAction;
 use App\Actions\Pages\MentorProgram\UpdateMentorProgramAction;
-use App\Actions\Pages\MentorProgram\DestroyMentorProgramAction;
+use App\Actions\Pages\Profile\DestroyProfilePage;
+use App\Actions\Pages\Profile\GetProfilePage;
+use App\Actions\Pages\Profile\UpdateProfilePage;
+use App\Actions\Pages\WelcomePage;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 
