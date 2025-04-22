@@ -11,7 +11,7 @@ import {MagnifyingGlassIcon} from '@heroicons/vue/20/solid'
 import {Bars3Icon, BellIcon, XMarkIcon} from '@heroicons/vue/24/outline'
 import {usePage, router, Link} from '@inertiajs/vue3';
 import {useNavigation} from "@/Stores/navigation.js";
-import {computed} from "vue";
+import {computed, ref} from "vue";
 import NavbarLogo from "@/Components/Navigation/Navbar/NavbarLogo.vue";
 
 defineProps({
@@ -28,6 +28,7 @@ const logout = () => {
 }
 
 const currentUser = computed(() => page.props.auth?.user ?? {});
+const currentUserAvatar = ref(page.props.auth?.avatar ?? null);
 const isLoggedIn = computed(() => !!currentUser.value?.email);
 
 const mainNavigations = computed(() => isLoggedIn.value ? navigationStore.authenticatedNavigation : navigationStore.landingNavigation);
@@ -35,7 +36,7 @@ const userNavigations = computed(() => navigationStore.userNavigation);
 const authNavigations = computed(() => navigationStore.authNavigation);
 
 // FIXME: Add avatar url after #24 task implementation
-const profileImageUrl = computed(() => currentUser?.avatar ||
+const profileImageUrl = computed(() => currentUserAvatar?.value ||
     'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
 );
 

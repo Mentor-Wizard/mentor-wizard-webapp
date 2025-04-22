@@ -68,3 +68,21 @@ it('records media conversions', function (): void {
     expect($conversionNames)->toHaveKey('preview')
         ->and($conversionNames['preview'])->toBeTrue();
 });
+
+it('returns avatar url when avatar exists', function (): void {
+    Storage::fake('public');
+    $file = UploadedFile::fake()->image('avatar.jpg');
+    $user = User::factory()->withProfile()->create();
+    $profile = $user->profile;
+
+    $media = $profile->addMedia($file)->toMediaCollection('avatar');
+
+    expect($profile->avatar)->toBe($media->getUrl());
+});
+
+it('returns empty string when avatar does not exist', function (): void {
+    $user = User::factory()->withProfile()->create();
+    $profile = $user->profile;
+
+    expect($profile->avatar)->toBe('');
+});
