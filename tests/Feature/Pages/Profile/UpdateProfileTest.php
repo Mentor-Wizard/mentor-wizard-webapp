@@ -75,12 +75,12 @@ describe('Unsuccessful Scenarios', function (): void {
         $file = UploadedFile::fake()->create('avatar.doc', 100, 'application/msword');
 
         $response = $this
-        ->patch(route('profile.update'), [
-            'name'      => 'change_name',
-            'last_name' => 'change_last_name',
-            'email'     => 'change_email@email.com',
-            'logo'      => $file,
-        ]);
+            ->patch(route('profile.update'), [
+                'name'      => 'change_name',
+                'last_name' => 'change_last_name',
+                'email'     => 'change_email@email.com',
+                'logo'      => $file,
+            ]);
 
         $response->assertSessionHasErrors([
             'logo' => 'The logo field must be an image.',
