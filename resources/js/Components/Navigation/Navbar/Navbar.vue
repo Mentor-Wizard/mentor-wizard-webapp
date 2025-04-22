@@ -30,15 +30,11 @@ const logout = () => {
 const currentUser = computed(() => page.props.auth?.user ?? {});
 const isLoggedIn = computed(() => !!currentUser.value?.email);
 
-const mainNavigations = computed(() => {
-    return isLoggedIn.value ? navigationStore.authenticatedNavigation : navigationStore.landingNavigation;
-});
+const mainNavigations = computed(() => isLoggedIn.value ? navigationStore.authenticatedNavigation : navigationStore.landingNavigation);
 const userNavigations = computed(() => navigationStore.userNavigation);
 const authNavigations = computed(() => navigationStore.authNavigation);
 
-const isActiveLink = (navItemHref) => {
-    return page.props.ziggy.location === navItemHref;
-};
+const isActiveLink = (navItemHref) => page.props.ziggy.location === navItemHref;
 
 const mainNavLinkClasses = (navItemHref) => {
     return {
