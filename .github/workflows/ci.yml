@@ -22,7 +22,7 @@ on:
 jobs:
   cleanup:
     name: '🧹 Clean up GitHub repo'
-    runs-on: ubuntu-latest
+    runs-on: mw-staging
     permissions: write-all
     if: github.event_name != 'pull_request'
 
@@ -36,7 +36,7 @@ jobs:
 
   lints:
     name: '🪄 Lints | ${{ matrix.command.name }}'
-    runs-on: ubuntu-latest
+    runs-on: mw-staging
 
     services:
       postgres:
@@ -91,7 +91,7 @@ jobs:
 
   tests:
     name: '♻️ Tests | ${{ matrix.command.name }}'
-    runs-on: ubuntu-latest
+    runs-on: mw-staging
 
     services:
       postgres:
