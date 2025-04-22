@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\Testing\File;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Http\Testing\File;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\seed;
@@ -30,10 +30,10 @@ describe('Successful Scenarios', function (): void {
         $file = UploadedFile::fake()->image('avatar.png');
 
         $this->actingAs($user)->patch(route('profile.update'), [
-            'name' => 'change_name',
+            'name'      => 'change_name',
             'last_name' => 'change_last_name',
-            'email'    => 'change_email@email.com',
-            'logo'     => $file,
+            'email'     => 'change_email@email.com',
+            'logo'      => $file,
         ])
             ->assertStatus(Response::HTTP_FOUND)
             ->assertRedirect(route('profile.edit'));
@@ -59,7 +59,7 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $name = str_repeat('test', 300);
         $response = $this->patch(route('profile.update'), [
-            'name' => $name,
+            'name'     => $name,
             'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -74,12 +74,12 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $file = UploadedFile::fake()->create('avatar.doc', 100, 'application/msword');
 
-        $response = $this->
-        patch(route('profile.update'), [
-            'name' => 'change_name',
+        $response = $this
+        ->patch(route('profile.update'), [
+            'name'      => 'change_name',
             'last_name' => 'change_last_name',
-            'email'    => 'change_email@email.com',
-            'logo'     => $file,
+            'email'     => 'change_email@email.com',
+            'logo'      => $file,
         ]);
 
         $response->assertSessionHasErrors([
@@ -93,10 +93,10 @@ describe('Unsuccessful Scenarios', function (): void {
         $file = File::create('avatar.png', 100000);
 
         $response = $this->actingAs($user)->patch(route('profile.update'), [
-            'name' => 'change_name',
+            'name'      => 'change_name',
             'last_name' => 'change_last_name',
-            'email'    => 'change_email@email.com',
-            'logo'     => $file,
+            'email'     => 'change_email@email.com',
+            'logo'      => $file,
         ]);
 
         $response->assertSessionHasErrors([
@@ -108,7 +108,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [
-            'name' => 'A',
+            'name'     => 'A',
             'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -123,7 +123,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [
-            'name' => '',
+            'name'     => '',
             'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);

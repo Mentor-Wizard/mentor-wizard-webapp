@@ -68,3 +68,17 @@ it('records media conversions', function (): void {
     expect($conversionNames)->toHaveKey('preview')
         ->and($conversionNames['preview'])->toBeTrue();
 });
+
+it('has the correct fillable attributes', function (): void {
+    $model = new UserProfile;
+    expect($model->getFillable())->toEqual([
+        'user_id',
+        'name',
+        'last_name',
+        'linkedin',
+        'telegram',
+        'whatsapp',
+        'phone',
+        'description',
+    ]);
+});

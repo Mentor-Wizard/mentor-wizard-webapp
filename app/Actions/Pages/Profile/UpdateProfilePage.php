@@ -29,13 +29,7 @@ class UpdateProfilePage
 
         $request->user()->email = Arr::get($request, 'email');
         $request->user()->save();
-        $request->user()->profile()->updateOrCreate(
-            [],
-            [
-                'name' => Arr::get($request, 'name'),
-                'last_name' => Arr::get($request, 'last_name'),
-            ]
-        );
+        $request->user()->profile()->updateOrCreate([], $this->dataUpdate($request));
 
         if ($request->hasFile('logo')) {
 
@@ -50,5 +44,13 @@ class UpdateProfilePage
         }
 
         return redirect()->route('profile.edit');
+    }
+
+    public function dataUpdate(UpdateProfileRequest $request)
+    {
+        return [
+            'name'      => Arr::get($request, 'name'),
+            'last_name' => Arr::get($request, 'last_name'),
+        ];
     }
 }
