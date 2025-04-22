@@ -19,6 +19,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @mixin IdeHelperUser
+ *
+ * @property-read UserProfile|null $profile
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
