@@ -106,6 +106,7 @@ services:
         image: nginx:1.26.0-alpine
         container_name: mw-webserver
         restart: unless-stopped
+        user: "${UID}:${GID}"
         volumes:
             - ./:/var/www
             - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
