@@ -49,9 +49,6 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
-            'page'    => [
-                'uri' => url()->current(),
-            ],
             'project' => [
                 'name' => config('app.name'),
             ],
