@@ -23,6 +23,9 @@ defineProps({
 
 const page = usePage();
 const navigationStore = useNavigation();
+const logout = () => {
+    router.post(route('logout'));
+}
 
 const currentUser = computed(() => page.props.auth?.user ?? {});
 const isLoggedIn = computed(() => !!currentUser.value?.email);
@@ -32,10 +35,6 @@ const mainNavigations = computed(() => {
 });
 const userNavigations = computed(() => navigationStore.userNavigation);
 const authNavigations = computed(() => navigationStore.authNavigation);
-
-const logout = () => {
-    router.post(route('logout'));
-}
 
 const isActiveLink = (navItemHref) => {
     return page.props.ziggy.location === navItemHref;
