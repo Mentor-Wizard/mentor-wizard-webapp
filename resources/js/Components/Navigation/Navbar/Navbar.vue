@@ -33,25 +33,27 @@ const mainNavigations = computed(() => {
 const userNavigations = computed(() => navigationStore.userNavigation);
 const authNavigations = computed(() => navigationStore.authNavigation);
 
-function logout() {
+const logout = () => {
     router.post(route('logout'));
 }
 
+const isActiveLink = (navItemHref) => {
+    return page.props.ziggy.location === navItemHref;
+};
+
 const mainNavLinkClasses = (navItemHref) => {
-    const isActive = page.props.ziggy.location === navItemHref;
     return {
-        'border-b-2 border-indigo-500 text-gray-900': isActive,
-        'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': !isActive,
+        'border-b-2 border-indigo-500 text-gray-900': isActiveLink(navItemHref),
+        'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': !isActiveLink(navItemHref),
         'inline-flex items-center px-1 pt-1 text-sm font-medium': true,
     };
 };
 
 const mobileNavLinkClasses = (navItemHref) => {
-    const isActive = page.props.ziggy.location === navItemHref;
     return {
         'block border-l-4 py-2 pr-4 pl-3 text-base font-medium': true,
-        'bg-indigo-50 border-indigo-500 text-indigo-700': isActive,
-        'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800': !isActive,
+        'bg-indigo-50 border-indigo-500 text-indigo-700': isActiveLink(navItemHref),
+        'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800': !isActiveLink(navItemHref),
     };
 };
 
@@ -65,8 +67,6 @@ const handleUserNavClick = (navItem) => {
 const profileImageUrl = computed(() => currentUser?.avatar ||
     'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
 );
-
-console.log(page.props.auth);
 </script>
 
 <template>
