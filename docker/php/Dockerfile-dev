@@ -6,7 +6,8 @@ RUN \
     set -ex && \
     apk update && \
     apk add --no-cache libstdc++ libpq && \
-    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev linux-headers postgresql-dev openssl-dev pcre-dev pcre2-dev zlib-dev libzip-dev && \
+    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev linux-headers postgresql-dev openssl-dev pcre-dev \
+      pcre2-dev zlib-dev libzip-dev && \
     apk add --no-cache libzip libzip-dev && \
     apk add --no-cache supervisor && \
     apk add --no-cache freetype-dev libjpeg-turbo-dev libpng-dev && \
@@ -35,6 +36,8 @@ RUN \
     rm -f swoole.tar.gz && \
     docker-php-source delete && \
     apk del .build-deps
+
+RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory-limit.ini
 
 RUN apk add --no-cache nodejs npm git
 RUN npm install -g corepack
