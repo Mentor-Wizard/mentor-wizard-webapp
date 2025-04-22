@@ -10,7 +10,7 @@ export const useNavigation = defineStore('navigation', () => {
     ]);
 
     const authenticatedNavigation = [
-        {name: 'Home', href: route('pages.welcome')},
+        {name: 'Home', href: route('pages.dashboard')},
         {name: 'Team', href: '#'},
         {name: 'Projects', href: '#'},
         {name: 'Calendar', href: '#'},
