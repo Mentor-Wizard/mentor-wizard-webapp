@@ -15,7 +15,7 @@ on:
 jobs:
   deploy:
     name: Deploy ${{ github.event.inputs.environment }} from ${{ github.event.inputs.branch }}
-    runs-on: self-hosted
+    runs-on: mw-staging
     environment:
       name: ${{ github.event.inputs.environment }}
 
