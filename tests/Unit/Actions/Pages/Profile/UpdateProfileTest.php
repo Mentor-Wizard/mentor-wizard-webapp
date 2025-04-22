@@ -71,6 +71,7 @@ describe('Update Profile', function (): void {
         $reflection = new ReflectionClass(UpdateProfilePage::class);
         $method = $reflection->getMethod('dataUpdate');
         $method->setAccessible(true);
+
         $request = mockUpdateProfileRequest($updateData, $user);
         $data = $method->invoke($action, $request);
         expect($data['name'])->toBe('Jane')

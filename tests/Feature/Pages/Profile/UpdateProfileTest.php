@@ -30,9 +30,9 @@ describe('Successful Scenarios', function (): void {
         $file = UploadedFile::fake()->image($filename);
 
         $this->actingAs($user)->patch(route('profile.update'), [
-            'name'      => 'change_name',
-            'last_name' => 'change_last_name',
-            'email'     => 'change_email@email.com',
+            'name'        => 'change_name',
+            'last_name'   => 'change_last_name',
+            'email'       => 'change_email@email.com',
             'avatar'      => $file,
         ])
             ->assertStatus(Response::HTTP_FOUND)
@@ -76,9 +76,9 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $response = $this
             ->patch(route('profile.update'), [
-                'name'      => 'change_name',
-                'last_name' => 'change_last_name',
-                'email'     => 'change_email@email.com',
+                'name'        => 'change_name',
+                'last_name'   => 'change_last_name',
+                'email'       => 'change_email@email.com',
                 'avatar'      => $file,
             ]);
 
@@ -93,9 +93,9 @@ describe('Unsuccessful Scenarios', function (): void {
         $file = File::create('avatar.png', 100000);
 
         $response = $this->actingAs($user)->patch(route('profile.update'), [
-            'name'      => 'change_name',
-            'last_name' => 'change_last_name',
-            'email'     => 'change_email@email.com',
+            'name'        => 'change_name',
+            'last_name'   => 'change_last_name',
+            'email'       => 'change_email@email.com',
             'avatar'      => $file,
         ]);
 

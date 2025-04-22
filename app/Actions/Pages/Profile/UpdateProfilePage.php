@@ -26,7 +26,7 @@ class UpdateProfilePage
             $request->user()->email_verified_at = null;
         }
 
-        $request->user()->email = $request->get('email');;
+        $request->user()->email = $request->get('email');
         $request->user()->save();
         $request->user()->profile()->updateOrCreate([], $this->dataUpdate($request));
 
@@ -48,7 +48,7 @@ class UpdateProfilePage
     private function dataUpdate(UpdateProfileRequest $request): array
     {
         return [
-            'name' => $request->get('name'),
+            'name'      => $request->get('name'),
             'last_name' => $request->get('last_name'),
         ];
     }
