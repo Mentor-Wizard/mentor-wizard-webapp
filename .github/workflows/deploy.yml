@@ -1,35 +1,30 @@
 name: Deploy To Staging
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy'
-        required: true
-        default: 'main'
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        default: 'staging'
+  push:
+    branches:
+      - '**'
+    tags:
+      - '*.*.*'
 
 jobs:
   deploy:
-    name: Deploy ${{ github.event.inputs.environment }} from ${{ github.event.inputs.branch }}
+    name: Deploy staging from ${{ github.ref_name }}
     runs-on: mw-staging
     environment:
-      name: ${{ github.event.inputs.environment }}
+      name: staging
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ github.ref }}
 
       - name: Pull latest changes
         run: |
           git fetch
-          git checkout ${{ github.event.inputs.branch }}
-          git pull origin ${{ github.event.inputs.branch }}
+          git checkout ${{ github.ref }}
+          git pull origin ${{ github.ref }}
 
       - name: Create .env file
         run: |
@@ -43,9 +38,10 @@ jobs:
           docker compose up -d --build
           sleep 10
 
-          docker compose exec mw-app yarn install --frozen-lockfile
-          docker compose exec mw-app yarn build
+          docker compose exec app yarn install --frozen-lockfile
+          docker compose exec app yarn build
 
-          docker compose exec mw-app php artisan optimize
+          docker compose exec app composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+          docker compose exec app php artisan optimize
 
-          docker compose exec mw-app php artisan migrate --force
+          docker compose exec app php artisan migrate --force
