@@ -29,7 +29,7 @@ class UpdateProfileRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
-            'logo' => [
+            'avatar' => [
                 'nullable',
                 'image',
                 'mimes:jpg,jpeg,png,gif',

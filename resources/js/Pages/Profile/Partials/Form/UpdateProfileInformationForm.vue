@@ -21,34 +21,33 @@ defineProps({
 const user = usePage().props.auth.user;
 const profile = user?.profile;
 const avatar = ref(usePage().props.avatar);
-
-const logoInput = useTemplateRef('logo-input')
+const avatarInput = ref('avatar-input')
 
 const chooseFiles = () => {
-    logoInput.value.click()
+    avatarInput.value.click()
 }
 
 const form = useForm({
-    name: profile?.name ?? '',
-    last_name: profile?.last_name ?? '',
+    name: profile?.name,
+    last_name: profile?.last_name,
     email: user.email,
-    logo: ''
+    avatar: null
 });
 
 const onFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    form.logo = file;
-    avatar.value = URL.createObjectURL(file); // оновлюємо аватар для перегляду
+    form.avatar = file;
+    avatar.value = URL.createObjectURL(file);
 };
 
 const submit = () => {
     const formData = new FormData();
     formData.append('name', form.name);
     formData.append('email', form.email);
-    if (form.logo instanceof File) {
-        formData.append('logo', form.logo);
+    if (form.avatar instanceof File) {
+        formData.append('avatar', form.avatar);
     }
 
     form.patch(route('profile.update'), {
@@ -79,7 +78,7 @@ const submit = () => {
                     </div>
                     <input type="file"
                            :hidden="true"
-                           ref="logo-input"
+                           ref="avatar-input"
                            accept="image/gif, image/jpeg, image/png"
                            @change="onFileChange"/>
 

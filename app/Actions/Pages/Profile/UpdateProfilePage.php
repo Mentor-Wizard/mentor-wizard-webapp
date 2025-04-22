@@ -21,17 +21,17 @@ class UpdateProfilePage
      */
     public function handle(UpdateProfileRequest $request): RedirectResponse
     {
-        $request->user()->email = Arr::get($request, 'email');
+        $request->user()->email = $request->get('email');
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
-        $request->user()->email = Arr::get($request, 'email');
+        $request->user()->email = $request->get('email');;
         $request->user()->save();
         $request->user()->profile()->updateOrCreate([], $this->dataUpdate($request));
 
-        if ($request->hasFile('logo')) {
+        if ($request->hasFile('avatar')) {
 
             $request->user()
                 ->profile
@@ -39,18 +39,18 @@ class UpdateProfilePage
 
             $request->user()
                 ->profile
-                ->addMedia($request->file('logo'))
+                ->addMedia($request->file('avatar'))
                 ->toMediaCollection('avatar');
         }
 
         return redirect()->route('profile.edit');
     }
 
-    public function dataUpdate(UpdateProfileRequest $request): array
+    private function dataUpdate(UpdateProfileRequest $request): array
     {
         return [
-            'name'      => Arr::get($request, 'name'),
-            'last_name' => Arr::get($request, 'last_name'),
+            'name'      => $request->get('name'),
+            'last_name' => $request->get('last_name'),
         ];
     }
 }

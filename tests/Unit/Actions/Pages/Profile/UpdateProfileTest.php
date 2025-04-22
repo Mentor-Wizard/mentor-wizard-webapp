@@ -66,9 +66,13 @@ describe('Update Profile', function (): void {
             'last_name' => 'Dou',
             'email'     => 'jane@example.com',
         ];
+
         $action = new UpdateProfilePage;
+        $reflection = new ReflectionClass(UpdateProfilePage::class);
+        $method = $reflection->getMethod('dataUpdate');
+        $method->setAccessible(true);
         $request = mockUpdateProfileRequest($updateData, $user);
-        $data = $action->dataUpdate($request);
+        $data = $method->invoke($action, $request);
         expect($data['name'])->toBe('Jane')
             ->and($data['last_name'])->toBe('Dou');
     });
@@ -114,10 +118,11 @@ function mockUpdateProfileRequest(array $data, User $user): UpdateProfileRequest
     $request = Mockery::mock(UpdateProfileRequest::class);
     $request->shouldReceive('user')->andReturn($user);
     $request->shouldReceive('validated')->andReturn($data);
+    $request->shouldReceive('get')->with('email')->andReturn($data['email']);
+    $request->shouldReceive('get')->with('name')->andReturn($data['name']);
+    $request->shouldReceive('get')->with('last_name')->andReturn($data['last_name']);
 
-    $request->shouldReceive('offsetExists')->andReturnUsing(fn ($key): bool => array_key_exists($key, $data));
-    $request->shouldReceive('offsetGet')->andReturnUsing(fn ($key) => $data[$key] ?? null);
-    $request->shouldReceive('hasFile')->with('logo')->andReturn(false);
+    $request->shouldReceive('hasFile')->with('avatar')->andReturn(false);
 
     return $request;
 }

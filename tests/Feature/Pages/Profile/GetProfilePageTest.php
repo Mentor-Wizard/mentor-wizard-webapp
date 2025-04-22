@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Actions\Pages\Profile\GetProfilePage;
 use App\Models\User;
+use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
+
+mutates(GetProfilePage::class);
 
 describe('Profile Page', function (): void {
     it('loads the profile page for an authenticated user', function (): void {
@@ -18,6 +22,8 @@ describe('Profile Page', function (): void {
                 ->component('Profile/Edit')
                 ->has('mustVerifyEmail')
                 ->where('status', null)
+                ->has('avatar')
+                ->where('avatar', UserProfile::DEFAULT_AVATAR_URL)
             );
     });
 

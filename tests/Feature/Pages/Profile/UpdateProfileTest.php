@@ -23,17 +23,17 @@ describe('Successful Scenarios', function (): void {
             ->assertStatus(Response::HTTP_OK);
     });
 
-    it('updates the name and email successfully', function (): void {
+    it('updates the name and email successfully', function ($filename): void {
         $user = User::factory()->create();
 
         Storage::fake('public');
-        $file = UploadedFile::fake()->image('avatar.png');
+        $file = UploadedFile::fake()->image($filename);
 
         $this->actingAs($user)->patch(route('profile.update'), [
             'name'      => 'change_name',
             'last_name' => 'change_last_name',
             'email'     => 'change_email@email.com',
-            'logo'      => $file,
+            'avatar'      => $file,
         ])
             ->assertStatus(Response::HTTP_FOUND)
             ->assertRedirect(route('profile.edit'));
@@ -44,9 +44,9 @@ describe('Successful Scenarios', function (): void {
             ->and($user->profile->last_name)->toBe('change_last_name')
             ->and($user->email)->toBe('change_email@email.com');
         $this->assertDatabaseHas('media', [
-            'file_name'    => 'avatar.png',
+            'file_name'    => $filename,
         ]);
-    });
+    })->with(['avatar.png', 'avatar.jpeg', 'avatar.jpg', 'avatar.gif']);
 });
 
 describe('Unsuccessful Scenarios', function (): void {
@@ -79,11 +79,11 @@ describe('Unsuccessful Scenarios', function (): void {
                 'name'      => 'change_name',
                 'last_name' => 'change_last_name',
                 'email'     => 'change_email@email.com',
-                'logo'      => $file,
+                'avatar'      => $file,
             ]);
 
         $response->assertSessionHasErrors([
-            'logo' => 'The logo field must be an image.',
+            'avatar' => 'The avatar field must be an image.',
         ]);
     });
 
@@ -96,11 +96,11 @@ describe('Unsuccessful Scenarios', function (): void {
             'name'      => 'change_name',
             'last_name' => 'change_last_name',
             'email'     => 'change_email@email.com',
-            'logo'      => $file,
+            'avatar'      => $file,
         ]);
 
         $response->assertSessionHasErrors([
-            'logo' => 'The logo field must not be greater than 1024 kilobytes.',
+            'avatar' => 'The avatar field must not be greater than 1024 kilobytes.',
         ]);
     });
 
