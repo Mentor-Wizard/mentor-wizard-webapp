@@ -115,7 +115,7 @@ function mockUpdateProfileRequest(array $data, User $user): UpdateProfileRequest
     $request->shouldReceive('user')->andReturn($user);
     $request->shouldReceive('validated')->andReturn($data);
 
-    $request->shouldReceive('offsetExists')->andReturnUsing(fn ($key) => array_key_exists($key, $data));
+    $request->shouldReceive('offsetExists')->andReturnUsing(fn ($key): bool => array_key_exists($key, $data));
     $request->shouldReceive('offsetGet')->andReturnUsing(fn ($key) => $data[$key] ?? null);
     $request->shouldReceive('hasFile')->with('logo')->andReturn(false);
 

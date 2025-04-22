@@ -18,6 +18,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
+ * @property UserProfile|null $profile
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]

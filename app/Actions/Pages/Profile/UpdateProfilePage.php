@@ -46,7 +46,7 @@ class UpdateProfilePage
         return redirect()->route('profile.edit');
     }
 
-    public function dataUpdate(UpdateProfileRequest $request)
+    public function dataUpdate(UpdateProfileRequest $request): array
     {
         return [
             'name'      => Arr::get($request, 'name'),
