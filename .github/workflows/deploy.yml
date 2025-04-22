@@ -16,6 +16,11 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
+      - name: Fix permissions for logs
+        run: |
+          sudo chown -R $USER:$USER storage/logs || true
+          sudo rm -rf storage/logs/* || true
+
       - name: Pull latest changes
         run: |
           git fetch
