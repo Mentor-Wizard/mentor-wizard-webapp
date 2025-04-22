@@ -6,7 +6,6 @@ namespace App\Actions\Pages\Profile;
 
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
@@ -49,7 +48,7 @@ class UpdateProfilePage
     private function dataUpdate(UpdateProfileRequest $request): array
     {
         return [
-            'name'      => $request->get('name'),
+            'name' => $request->get('name'),
             'last_name' => $request->get('last_name'),
         ];
     }
