@@ -1,11 +1,7 @@
 name: Deploy To Staging
 
 on:
-  push:
-    branches:
-      - '**'
-    tags:
-      - '*.*.*'
+  workflow_dispatch:
 
 jobs:
   deploy:
