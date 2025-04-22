@@ -21,6 +21,8 @@ class UpdateProfilePage
      */
     public function handle(UpdateProfileRequest $request): RedirectResponse
     {
+        $request->user()->email = Arr::get($request, 'email');
+
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }

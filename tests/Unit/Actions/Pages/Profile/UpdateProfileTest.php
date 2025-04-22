@@ -31,41 +31,45 @@ describe('Update Profile', function (): void {
         expect($result)->toBeInstanceOf(RedirectResponse::class)
             ->and($result->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($result->getTargetUrl())->toBe(route('profile.edit'))
-            ->and($updatedUser->username)->toBe(Arr::get($updateData, 'username'))
+            ->and($updatedUser->profile->name)->toBe(Arr::get($updateData, 'name'))
             ->and($updatedUser->email)->toBe(Arr::get($updateData, 'email'));
     })->with([
         'updated user with new email' => fn (): array => [
-            'user' => User::factory()->create([
+            'user' => User::factory()->withProfile()->create([
                 'username'          => 'John',
                 'email'             => 'john@example.com',
                 'email_verified_at' => now(),
             ]),
             'updateData' => [
-                'username' => 'John',
-                'email'    => 'john.updated@example.com',
+                'name'      => 'John',
+                'last_name' => 'Dou',
+                'email'     => 'john.updated@example.com',
             ],
         ],
         'updated user with same email' => fn (): array => [
-            'user' => User::factory()->create([
+            'user' => User::factory()->withProfile()->create([
                 'username' => 'Jane',
                 'email'    => 'jane@example.com',
             ]),
             'updateData' => [
-                'username' => 'Jane',
+                'name' => 'Jane',
+                'last_name' => 'Dou',
                 'email'    => 'jane@example.com',
             ],
         ],
     ]);
 
     it('resets email verification when email changes', function (): void {
-        $user = User::factory()->create([
+        $user = User::factory()->withProfile()->create([
+            'email'    => 'old.email@example.com',
             'email_verified_at' => now(),
         ]);
 
         Auth::login($user);
 
         $request = mockUpdateProfileRequest([
-            'username' => $user->username,
+            'name'      => 'John',
+            'last_name' => 'Dou',
             'email'    => 'new.email@example.com',
         ], $user);
 
@@ -86,8 +90,8 @@ describe('Update Profile', function (): void {
         $action = new UpdateProfilePage;
         $action->handle($request);
     })->with([
-        'empty name'    => ['username' => '', 'email' => 'valid@example.com'],
-        'invalid email' => ['username' => 'John', 'email' => 'invalid-email'],
+        'empty name'    => ['name' => '', 'email' => 'valid@example.com'],
+        'invalid email' => ['name' => 'John', 'email' => 'invalid-email'],
     ])->throws(Error::class);
 });
 
@@ -96,6 +100,10 @@ function mockUpdateProfileRequest(array $data, User $user): UpdateProfileRequest
     $request = Mockery::mock(UpdateProfileRequest::class);
     $request->shouldReceive('user')->andReturn($user);
     $request->shouldReceive('validated')->andReturn($data);
+
+    $request->shouldReceive('offsetExists')->andReturnUsing(fn($key) => array_key_exists($key, $data));
+    $request->shouldReceive('offsetGet')->andReturnUsing(fn($key) => $data[$key] ?? null);
+    $request->shouldReceive('hasFile')->with('logo')->andReturn(false);
 
     return $request;
 }
