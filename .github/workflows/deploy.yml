@@ -16,10 +16,10 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Fix permissions for logs
+      - name: Export UID:GID
         run: |
-          sudo chown -R $USER:$USER storage/logs || true
-          sudo rm -rf storage/logs/* || true
+          echo "UID=$(id -u)" >> $GITHUB_ENV
+          echo "GID=$(id -g)" >> $GITHUB_ENV
 
       - name: Pull latest changes
         run: |
@@ -28,6 +28,9 @@ jobs:
           git pull origin ${{ github.ref }}
 
       - name: Create .env file
+        env:
+          UID: ${{ env.UID }}
+          GID: ${{ env.GID }}
         run: |
           cat > .env << 'EOL'
           ${{ secrets.ENV_FILE }}
