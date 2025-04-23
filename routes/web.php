@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\DashboardPage;
-use App\Actions\Pages\MentorProgram\CreateMentorProgramAction;
-use App\Actions\Pages\MentorProgram\DestroyMentorProgramAction;
-use App\Actions\Pages\MentorProgram\EditMentorProgramAction;
-use App\Actions\Pages\MentorProgram\StoreMentorProgramAction;
-use App\Actions\Pages\MentorProgram\UpdateMentorProgramAction;
+use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
+use App\Actions\Pages\MentorProgram\DestroyMentorProgramPage;
+use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
+use App\Actions\Pages\MentorProgram\StoreMentorProgramPage;
+use App\Actions\Pages\MentorProgram\UpdateMentorProgramPage;
 use App\Actions\Pages\Profile\DestroyProfilePage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\UpdateProfilePage;
@@ -27,15 +27,15 @@ Route::middleware('auth')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('mentor-program/create', CreateMentorProgramAction::class)
+    Route::get('mentor-program/create', CreateMentorProgramPage::class)
         ->name('mentor-program.create');
-    Route::post('mentor-program', StoreMentorProgramAction::class)->name('mentor-program.store');
+    Route::post('mentor-program', StoreMentorProgramPage::class)->name('mentor-program.store');
 
-    Route::get('mentor-program/{mentorProgram:slug}/edit', EditMentorProgramAction::class)
+    Route::get('mentor-program/{mentorProgram:slug}/edit', EditMentorProgramPage::class)
         ->name('mentor-program.edit');
-    Route::put('mentor-program/{mentorProgram:slug}', UpdateMentorProgramAction::class)
+    Route::put('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::class)
         ->name('mentor-program.update');
-    Route::delete('mentor-program/{mentorProgram:slug}', DestroyMentorProgramAction::class)->name('mentor-program.destroy');
+    Route::delete('mentor-program/{mentorProgram:slug}', DestroyMentorProgramPage::class)->name('mentor-program.destroy');
 });
 
 require __DIR__.'/auth.php';

@@ -10,7 +10,7 @@ use Inertia\Inertia;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
-class UpdateMentorProgramAction
+class UpdateMentorProgramPage
 {
     use AsController;
 

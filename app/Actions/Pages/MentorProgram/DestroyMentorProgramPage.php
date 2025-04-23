@@ -8,7 +8,7 @@ use App\Models\MentorProgram;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class DestroyMentorProgramAction
+class DestroyMentorProgramPage
 {
     use AsController;
 
