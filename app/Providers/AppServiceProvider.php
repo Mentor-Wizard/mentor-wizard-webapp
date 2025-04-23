@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configModels();
         $this->configDatabase();
 
-        if ($this->app->isProduction() || $this->app->isLocal()) {
+        if ($this->app->isProduction()) {
             URL::forceHttps();
         }
 

@@ -49,7 +49,7 @@
 <script setup>
 import {ref} from 'vue'
 import {Dialog, DialogPanel} from '@headlessui/vue'
-import {Bars3Icon, XMarkIcon,} from '@heroicons/vue/24/outline'
+import {XMarkIcon} from '@heroicons/vue/24/outline'
 import ApplicationLogo from "@/Components/UI/Logo/ApplicationLogo.vue";
 import {Link} from "@inertiajs/vue3";
 import {useNavigation} from "@/Stores/navigation.js";
