@@ -31,12 +31,15 @@ jobs:
         env:
           UID: ${{ env.UID }}
           GID: ${{ env.GID }}
-        run: |
-          cat > .env << 'EOL'
-          ${{ secrets.ENV_FILE }}
-          EOL
+        uses: timheuer/write-file-action@v1
+        with:
+          path: .env
+          contents: ${{ secrets.ENV_FILE }}
 
       - name: Docker deploy
+        env:
+          UID: ${{ env.UID }}
+          GID: ${{ env.GID }}
         run: |
           docker compose down --remove-orphans
           docker compose up -d --build
