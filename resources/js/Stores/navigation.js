@@ -10,15 +10,19 @@ export const useNavigation = defineStore('navigation', () => {
     ]);
 
     const authenticatedNavigation = [
-        { name: 'Dashboard', href: route('pages.welcome'), current: true },
-        { name: 'Team', href: '#', current: false },
-        { name: 'Projects', href: '#', current: false },
-        { name: 'Calendar', href: '#', current: false },
+        {name: 'Dashboard', href: route('pages.dashboard')},
+        {name: 'Team', href: '#'},
+        {name: 'Projects', href: '#'},
+        {name: 'Calendar', href: '#'},
     ]
     const userNavigation = [
-        { name: 'Your Profile', href:route('profile.edit')  },
-        { name: 'Sign out', href: route('logout'), method: 'post'},
+        {name: 'Your Profile', href: route('profile.edit')},
+        {name: 'Sign out', href: route('logout')},
+    ]
+    const authNavigation = [
+        {name: 'Sign In', href: route('login')},
+        {name: 'Register', href: route('register')},
     ]
 
-    return {landingNavigation, authenticatedNavigation, userNavigation};
+    return {landingNavigation, authenticatedNavigation, userNavigation, authNavigation};
 })
