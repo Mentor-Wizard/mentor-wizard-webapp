@@ -20,23 +20,25 @@ class UpdateProfilePage
      */
     public function handle(UpdateProfileRequest $request): RedirectResponse
     {
-        $request->user()->email = $request->get('email');
+        $user = auth()->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->email = $request->get('email');
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->email = $request->get('email');
-        $request->user()->save();
-        $request->user()->profile()->updateOrCreate([], $this->dataUpdate($request));
+        $user->email = $request->get('email');
+        $user->save();
+        $user->profile()->updateOrCreate([], $this->dataUpdate($request));
 
         if ($request->hasFile('avatar')) {
 
-            $request->user()
+            $user
                 ->profile
                 ->clearMediaCollection('avatar');
 
-            $request->user()
+            $user
                 ->profile
                 ->addMedia($request->file('avatar'))
                 ->toMediaCollection('avatar');
