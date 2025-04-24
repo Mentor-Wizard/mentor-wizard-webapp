@@ -62,6 +62,10 @@ jobs:
           echo "Waiting for services to initialize (15 seconds)..."
           sleep 15
 
+          # Виставляємо широкі права на запис для storage та bootstrap/cache всередині контейнера
+          echo "Setting storage and cache permissions inside container..."
+          docker compose exec app chmod -R 777 storage bootstrap/cache
+
           # Встановлюємо залежності PHP через Composer всередині контейнера 'app'
           # Використовуємо -u $UID:$GID для запуску команди від імені поточного користувача хоста
           echo "Installing Composer dependencies..."
