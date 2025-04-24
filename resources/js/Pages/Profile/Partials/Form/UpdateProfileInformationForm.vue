@@ -9,12 +9,12 @@ import SecondaryButton from "@/Components/UI/Button/SecondaryButton.vue";
 import { ref } from 'vue';
 
 defineProps({
-    mustVerifyEmail: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
+  mustVerifyEmail: {
+    type: Boolean,
+  },
+  status: {
+    type: String,
+  },
 });
 
 const user = usePage().props.auth.user;
@@ -23,7 +23,7 @@ const avatar = ref(usePage().props.avatar);
 const avatarInput = ref('avatar-input')
 
 const chooseFiles = () => {
-    avatarInput.value.click()
+  avatarInput.value.click()
 }
 
 const form = useForm({
