@@ -42,22 +42,19 @@
     </main>
 
     <!-- Footer -->
-    <footer class="relative mx-auto mt-32 max-w-7xl px-6 lg:px-8"
-            v-if="$slots.footer"
-    >
-      <slot name="footer"/>
-    </footer>
+    <Footer/>
   </div>
 </template>
 
 <script setup>
 import {ref} from 'vue'
 import {Dialog, DialogPanel} from '@headlessui/vue'
-import {Bars3Icon, XMarkIcon,} from '@heroicons/vue/24/outline'
+import {XMarkIcon} from '@heroicons/vue/24/outline'
 import ApplicationLogo from "@/Components/UI/Logo/ApplicationLogo.vue";
 import {Link} from "@inertiajs/vue3";
 import {useNavigation} from "@/Stores/navigation.js";
 import Navbar from "@/Components/Navigation/Navbar/Navbar.vue";
+import Footer from "@/Components/Navigation/Footer.vue";
 
 const mobileMenuOpen = ref(false)
 const {landingNavigation: navigation} = useNavigation()
