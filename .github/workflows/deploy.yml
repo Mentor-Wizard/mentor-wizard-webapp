@@ -37,6 +37,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }} # Отримуємо код з гілки/тегу, що ініціював воркфлоу
+          clean: false # Додайте цей рядок
 
       - name: Create .env file
         run: |
