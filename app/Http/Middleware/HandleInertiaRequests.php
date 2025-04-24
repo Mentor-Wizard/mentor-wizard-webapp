@@ -37,16 +37,19 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'auth' => [
-                'user' => fn () => $request->user()?->load('profile'),
+            'auth'    => [
+                'user'   => $request->user()?->load([
+                    'roles',
+                    'permissions',
+                    'profile',
+                ]),
+                'avatar' => $request->user()?->profile?->avatar,
             ],
-            'ziggy' => fn () => [
+            'ziggy'   => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
-            'navigation'     => config('websitesettings.navigationSections'),
-            'userNavigation' => config('websitesettings.userNavigationSections'),
-            'project'        => [
+            'project' => [
                 'name' => config('app.name'),
             ],
         ];

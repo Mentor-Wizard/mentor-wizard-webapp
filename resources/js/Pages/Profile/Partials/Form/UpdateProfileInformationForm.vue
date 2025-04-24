@@ -20,10 +20,10 @@ defineProps({
 const user = usePage().props.auth.user;
 const profile = user?.profile;
 const avatar = ref(usePage().props.avatar);
-const avatarInput = ref('avatar-input')
+const avatarInput = ref(null)
 
 const chooseFiles = () => {
-  avatarInput.value.click()
+  avatarInput.value?.click()
 }
 
 const form = useForm({
@@ -77,7 +77,7 @@ const submit = () => {
                     </div>
                     <input type="file"
                            :hidden="true"
-                           ref="avatar-input"
+                           ref="avatarInput"
                            accept="image/gif, image/jpeg, image/png"
                            @change="onFileChange"/>
 

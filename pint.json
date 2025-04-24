@@ -54,5 +54,5 @@
             "elements": ["arrays", "parameters"]
         }
     },
-    "exclude": ["public", "var"]
+    "exclude": ["public", "var", "resources"]
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Pages\Profile;
 
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Models\UserProfile;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
@@ -30,16 +31,15 @@ class UpdateProfilePage
 
         $user->email = $request->get('email');
         $user->save();
-        $user->profile()->updateOrCreate([], $this->dataUpdate($request));
+
+        /** @var UserProfile $profile */
+        $profile = $user->profile()->updateOrCreate([], $this->dataUpdate($request));
 
         if ($request->hasFile('avatar')) {
 
-            $user
-                ->profile
-                ->clearMediaCollection('avatar');
+            $profile->clearMediaCollection('avatar');
 
-            $user
-                ->profile
+            $profile
                 ->addMedia($request->file('avatar'))
                 ->toMediaCollection('avatar');
         }

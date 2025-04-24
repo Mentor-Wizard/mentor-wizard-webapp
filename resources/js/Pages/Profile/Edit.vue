@@ -5,32 +5,39 @@
     </template>
     <div>
       <main>
+        <div class="py-12">
+          <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-        <TabGroup :selectedIndex="selectedTab" @change="changeTab">
-          <h1 class="sr-only">Account Settings</h1>
-          <header class="border-b border-white/5">
-            <MobileTabSelect :options="navigation" v-model="selectedTab"/>
-            <div class="hidden sm:block">
-              <TabList class="border-b border-gray-200">
-                <div class="-mb-px flex space-x-8" aria-label="Tabs">
-                  <Tab v-for="tab in navigation" :key="tab.name" v-slot="{ selected }"
-                       class="focus-visible:outline-none">
-                    <div
-                        :class="[selected ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700', 'group inline-flex items-center border-b-2 px-1 py-4 text-sm font-medium']"
-                        :aria-current="selected ? 'page' : undefined">
-                      <span>{{ tab.name }}</span>
-                    </div>
-                  </Tab>
-                </div>
-              </TabList>
+            <div class="overflow-hidden bg-white shadow-xs sm:rounded-lg p-8">
+
+              <TabGroup :selectedIndex="selectedTab" @change="changeTab">
+                <h1 class="sr-only">Account Settings</h1>
+                <header class="border-b border-white/5">
+                  <MobileTabSelect :options="navigation" v-model="selectedTab"/>
+                  <div class="hidden sm:block">
+                    <TabList class="border-b border-gray-200">
+                      <div class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <Tab v-for="tab in navigation" :key="tab.name" v-slot="{ selected }"
+                             class="focus-visible:outline-none">
+                          <div
+                              :class="[selected ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700', 'group inline-flex items-center border-b-2 px-1 py-4 text-sm font-medium']"
+                              :aria-current="selected ? 'page' : undefined">
+                            <span>{{ tab.name }}</span>
+                          </div>
+                        </Tab>
+                      </div>
+                    </TabList>
+                  </div>
+                </header>
+                <TabPanels>
+                  <TabPanel v-for="tab in navigation">
+                    <component :is="tab.component"/>
+                  </TabPanel>
+                </TabPanels>
+              </TabGroup>
             </div>
-          </header>
-          <TabPanels>
-            <TabPanel v-for="tab in navigation">
-              <component :is="tab.component"/>
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
+          </div>
+        </div>
       </main>
     </div>
   </AuthenticatedLayout>
