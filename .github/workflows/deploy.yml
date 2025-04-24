@@ -11,6 +11,22 @@ jobs:
       name: staging
 
     steps:
+      - name: Ensure workspace log directory permissions
+        run: |
+          # Визначаємо шлях до робочої директорії (може відрізнятися залежно від конфігурації ранера)
+          WORKSPACE_PATH="${{ github.workspace }}"
+          LOG_DIR="$WORKSPACE_PATH/storage/logs"
+          # Перевіряємо, чи існує директорія, і змінюємо власника/права доступу
+          if [ -d "$LOG_DIR" ]; then
+            echo "Fixing permissions for $LOG_DIR..."
+            # Використовуємо id -u та id -g для отримання поточного UID/GID користувача ранера
+            sudo chown -R $(id -u):$(id -g) "$LOG_DIR"
+            sudo chmod -R u+w "$LOG_DIR" # Додаємо права на запис для власника
+          else
+            echo "Log directory $LOG_DIR does not exist, skipping permission fix."
+          fi
+        continue-on-error: true # Продовжуємо, навіть якщо тут виникне помилка (наприклад, sudo недоступний)
+
       - name: Export UID:GID
         run: |
           echo "UID=$(id -u)" >> $GITHUB_ENV
