@@ -29,7 +29,6 @@ class UpdateProfilePage
             $user->email_verified_at = null;
         }
 
-        $user->email = $request->get('email');
         $user->save();
 
         /** @var UserProfile $profile */
