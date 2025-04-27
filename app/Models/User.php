@@ -19,6 +19,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @mixin IdeHelperUser
+ *
+ * @property-read UserProfile|null $profile
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
@@ -28,7 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasRoles;
     use Notifiable;
 
-    public const DEFAULT_PASSWORD_LENGHT = 8;
+    public const int MIN_PASSWORD_LENGTH = 8;
 
     /**
      * The attributes that are mass assignable.
@@ -59,6 +61,15 @@ class User extends Authenticatable implements MustVerifyEmail
         RoleGuardEnum::MENTOR->value,
         RoleGuardEnum::MENTI->value,
         RoleGuardEnum::COACH->value,
+    ];
+
+    protected $visible = [
+        'id',
+        'username',
+        'email',
+        'created_at',
+        'updated_at',
+        'profile',
     ];
 
     public function profile(): ?HasOne
