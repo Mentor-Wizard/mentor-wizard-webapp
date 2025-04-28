@@ -86,3 +86,17 @@ it('returns empty string when avatar does not exist', function (): void {
 
     expect($profile->avatar)->toBe('');
 });
+
+it('has the correct fillable attributes', function (): void {
+    $model = new UserProfile;
+    expect($model->getFillable())->toEqual([
+        'user_id',
+        'name',
+        'last_name',
+        'linkedin',
+        'telegram',
+        'whatsapp',
+        'phone',
+        'description',
+    ]);
+});
