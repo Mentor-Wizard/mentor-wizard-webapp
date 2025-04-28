@@ -13,23 +13,22 @@ class UpdateMentorProgramRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // return Auth::check() && Auth::user()->hasRole('mentor');
-        return true; // Authorization handled via middleware
+        return Auth::check() && Auth::user()->hasRole('mentor');
     }
 
     public function rules(): array
     {
         return [
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'slug'        => [
+            'name'         => ['required', 'string', 'max:255'],
+            'description'  => ['required', 'string'],
+            'slug'         => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('mentor_programs')->ignore($this->route('mentorProgram')),
             ],
-            'cost'        => ['required', 'numeric', 'min:0'],
-            'currency_id' => ['required', 'exists:currencies,id'],
+            'cost'         => ['required', 'numeric', 'min:0'],
+            'currency_id'  => ['required', 'exists:currencies,id'],
         ];
     }
 

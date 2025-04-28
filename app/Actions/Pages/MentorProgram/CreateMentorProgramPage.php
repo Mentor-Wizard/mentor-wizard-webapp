@@ -15,7 +15,7 @@ class CreateMentorProgramPage
 
     public function handle(): Response
     {
-        $currencies = Currency::query()->pluck('name', 'id')->toArray();
+        $currencies = Currency::query()->pluck('name', 'id');
 
         return Inertia::render('MentorProgram/CreateOrEdit', [
             'currencies' => $currencies,

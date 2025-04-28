@@ -30,7 +30,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('mentor-program/create', CreateMentorProgramPage::class)
         ->name('mentor-program.create');
     Route::post('mentor-program', StoreMentorProgramPage::class)->name('mentor-program.store');
-
     Route::get('mentor-program/{mentorProgram:slug}/edit', EditMentorProgramPage::class)
         ->name('mentor-program.edit');
     Route::put('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::class)

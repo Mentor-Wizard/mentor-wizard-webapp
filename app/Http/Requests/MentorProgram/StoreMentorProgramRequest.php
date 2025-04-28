@@ -13,8 +13,7 @@ class StoreMentorProgramRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // return Auth::check() && Auth::user()->hasRole('mentor');
-        return true; // Assuming authorization is handled through middleware
+        return Auth::check() && Auth::user()->hasRole('mentor');
     }
 
     public function rules(): array
