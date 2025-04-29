@@ -2,6 +2,84 @@
 
 declare(strict_types=1);
 
-test('example', function (): void {
-    expect(true)->toBeTrue();
+use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
+use App\Models\Currency;
+use App\Models\MentorProgram;
+use Database\Seeders\CurrencySeeder;
+use Database\Seeders\RoleSeeder;
+use Inertia\Response;
+
+mutates(EditMentorProgramPage::class);
+
+describe('Edit Mentor Program', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = [
+            1 => 'UAH',
+            2 => 'USD',
+            3 => 'EUR',
+            4 => 'GBP',
+        ];
+        $this->data = [
+            'name'        => 'Test Program',
+            'slug'        => 'test-program',
+            'description' => 'Test Description',
+            'cost'        => 100.0,
+            'currency_id' => 1,
+        ];
+    });
+
+    it('renders the mentor program edit page with currencies and program data', function (): void {
+        $mentorProgram = MentorProgram::factory()->create($this->data);
+        $action = new EditMentorProgramPage;
+
+        $result = $action->handle($mentorProgram);
+        $resultData = $result->toResponse(request())->getOriginalContent();
+
+        expect($result)->toBeInstanceOf(Response::class)
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('MentorProgram/CreateOrEdit')
+            ->and(Arr::get($resultData->getData(), 'page.props.currencies'))->toBe($this->currencies)
+            ->and(Arr::get($resultData->getData(), 'page.props.program'))->toMatchArray($this->data)
+            ->and(Arr::get($resultData->getData(), 'page.props.program.id'))->toBe($mentorProgram->id);
+    });
+
+    it('handles empty currencies table', function (): void {
+        Currency::query()->delete();
+
+        $action = new EditMentorProgramPage;
+        expect(fn (): Response => $action->handle())->toThrow(Exception::class, 'Currencies table is empty');
+    });
+
+    it('contains required page structure', function (): void {
+        $action = new EditMentorProgramPage;
+        $result = $action->handle();
+        $data = $result->toResponse(request())->getOriginalContent()->getData();
+
+        expect($data)->toHaveKey('page')
+            ->and($data['page'])->toHaveKeys(['component', 'props'])
+            ->and($data['page']['props'])->toHaveKeys(['currencies', 'program']);
+    });
+
+    it('preserves currency id-name mapping', function (): void {
+        $action = new EditMentorProgramPage;
+        $result = $action->handle();
+        $currencies = Arr::get($result->toResponse(request())->getOriginalContent()->getData(), 'page.props.currencies');
+
+        expect($currencies)->toHaveCount(4)
+            ->and($currencies[1])->toBe('UAH')
+            ->and($currencies[2])->toBe('USD')
+            ->and($currencies[3])->toBe('EUR')
+            ->and($currencies[4])->toBe('GBP');
+    });
+
+    it('can handle null mentor program', function (): void {
+        $action = new EditMentorProgramPage;
+        $result = $action->handle();
+        $program = Arr::get($result->toResponse(request())->getOriginalContent()->getData(), 'page.props.program');
+
+        expect($program)->toBeNull();
+    });
 });
