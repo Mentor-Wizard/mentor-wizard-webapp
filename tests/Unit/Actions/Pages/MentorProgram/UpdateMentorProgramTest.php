@@ -12,10 +12,67 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 mutates(UpdateMentorProgramPage::class);
+
+describe('UpdateMentorProgramRequest Validation', function (): void {
+    beforeEach(function (): void {
+        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
+        $this->seed(CurrencySeeder::class);
+        $this->seed(RoleSeeder::class);
+
+        $this->user = createAndAuthenticateMentor();
+        $this->prepareRequest = function (UpdateMentorProgramRequest $request): void {
+            $request->setContainer(app());
+            $request->setRedirector(app(Illuminate\Routing\Redirector::class));
+            $request->setUserResolver(fn () => $this->user);
+        };
+    });
+
+    it('validates with correct data', function (array $validData): void {
+        $request = new UpdateMentorProgramRequest;
+        $request->merge($validData);
+        ($this->prepareRequest)($request);
+
+        expect($request->authorize())->toBeTrue();
+        expect($request->rules())->toBeArray();
+        expect(fn () => $request->validateResolved())->not->toThrow(ValidationException::class);
+    })->with('validMentorProgramData');
+
+    it('fails validation with invalid data', function (array $invalidData, string $errorField): void {
+        $request = new UpdateMentorProgramRequest;
+        $request->merge($invalidData);
+        ($this->prepareRequest)($request);
+
+        try {
+            $request->validateResolved();
+            $this->fail('Validation should have failed');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey($errorField);
+        }
+    })->with('invalidMentorProgramData');
+
+    it('prepares slug for validation', function (): void {
+        $request = new UpdateMentorProgramRequest;
+        $request->merge([
+            'name'        => 'Test Program Name',
+            'description' => 'Test Description',
+            'cost'        => 99.99,
+            'currency_id' => 1,
+        ]);
+
+        ($this->prepareRequest)($request);
+
+        $request->validateResolved();
+
+        expect($request->all())
+            ->toHaveKey('slug')
+            ->and($request->get('slug'))->toBe('test-program-name');
+    });
+});
 
 describe('Update Mentor Program', function (): void {
     beforeEach(function (): void {
@@ -23,10 +80,7 @@ describe('Update Mentor Program', function (): void {
         $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
 
-        $this->user = User::factory()->create();
-        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
-
-        Auth::login($this->user);
+        $this->user = createAndAuthenticateMentor();
 
         $this->mentorProgram = MentorProgram::factory()->create([
             'mentor_id'   => $this->user->id,
@@ -80,7 +134,6 @@ describe('Update Mentor Program', function (): void {
             ->and($response->getTargetUrl())->toBe(route('mentor-program.edit', $updateData['slug']));
     });
 
-    // ///OTHER TESTS/////
     it('throws exception when trying to update non-existent program', function (): void {
         $updateData = [
             'name'        => 'Updated Program',
@@ -161,94 +214,22 @@ describe('Update Mentor Program', function (): void {
         $this->fail('Exception was not thrown');
     });
 
-    // it('preserves mentor_id during update', function (): void {
-    //     $updateData = [
-    //         'name' => 'Updated Program',
-    //         'slug' => 'updated-program',
-    //         'description' => 'Updated Description',
-    //         'cost' => 150.0,
-    //         'currency_id' => 2,
-    //         'mentor_id' => 999, // Attempting to change mentor_id
-    //     ];
-
-    //     $request = mockUpdateMentorProgramRequest($updateData);
-    //     expect(fn () => (new UpdateMentorProgramPage)->handle($request, $anotherMentorProgram))
-    //         ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class, 'Unauthorized action.');
-    // });
-
-    // it('validates required fields', function (): void {
-    //     $updateData = [
-    //         'name' => '', // Empty required field
-    //         'slug' => '',
-    //         'description' => null,
-    //         'cost' => null,
-    //         'currency_id' => null,
-    //     ];
-
-    //     $request = mockUpdateMentorProgramRequest($updateData);
-
-    //     expect(fn () => (new UpdateMentorProgramPage)->handle($request, $this->mentorProgram))
-    //         ->toThrow(ValidationException::class);
-    // });
-
-    // it('handles invalid currency_id', function (): void {
-    //     $updateData = [
-    //         'name' => 'Updated Program',
-    //         'slug' => 'updated-program',
-    //         'description' => 'Updated Description',
-    //         'cost' => 150.0,
-    //         'currency_id' => 999, // Non-existent currency
-    //     ];
-
-    //     $request = mockUpdateMentorProgramRequest($updateData);
-
-    //     expect(fn () => (new UpdateMentorProgramPage)->handle($request, $this->mentorProgram))
-    //         ->toThrow(ValidationException::class);
-    // });
-
-    // it('prevents duplicate slugs', function (): void {
-    //     // Create another program with known slug
-    //     MentorProgram::factory()->create(['slug' => 'existing-slug']);
-
-    //     $updateData = [
-    //         'name' => 'Updated Program',
-    //         'slug' => 'existing-slug', // Attempting to use existing slug
-    //         'description' => 'Updated Description',
-    //         'cost' => 150.0,
-    //         'currency_id' => 2,
-    //     ];
-
-    //     $request = mockUpdateMentorProgramRequest($updateData);
-
-    //     expect(fn () => (new UpdateMentorProgramPage)->handle($request, $this->mentorProgram))
-    //         ->toThrow(ValidationException::class);
-    // });
-
-    // it('accepts decimal costs', function (): void {
-    //     $updateData = [
-    //         'name' => 'Updated Program',
-    //         'slug' => 'updated-program',
-    //         'description' => 'Updated Description',
-    //         'cost' => 150.99,
-    //         'currency_id' => 2,
-    //     ];
-
-    //     $request = mockUpdateMentorProgramRequest($updateData);
-    //     $action = new UpdateMentorProgramPage;
-
-    //     $action->handle($request, $this->mentorProgram);
-    //     $updatedProgram = $this->mentorProgram->fresh();
-
-    //     expect($updatedProgram->cost)->toBe(150.99);
-    // });
-
 });
 
-function mockUpdateMentorProgramRequest(array $data): UpdateMentorProgramRequest
+function mockUpdateMentorProgramRequest(array $data, ?User $user = null): UpdateMentorProgramRequest
 {
     $request = Mockery::mock(UpdateMentorProgramRequest::class);
     $request->shouldReceive('validated')->andReturn($data);
-    $request->shouldReceive('user')->andReturn(Auth::user());
+    $request->shouldReceive('user')->andReturn($user ?? Auth::user());
 
     return $request;
+}
+
+function createAndAuthenticateMentor(): User
+{
+    $user = User::factory()->create();
+    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+    Auth::login($user);
+
+    return $user;
 }
