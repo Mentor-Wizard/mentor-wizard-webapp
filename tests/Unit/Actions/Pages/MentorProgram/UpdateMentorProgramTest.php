@@ -18,13 +18,43 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(UpdateMentorProgramPage::class);
 
+describe('Store Mentor Program Request Authorization', function (): void {
+    beforeEach(function (): void {
+        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
+        $this->seed(CurrencySeeder::class);
+        $this->seed(RoleSeeder::class);
+    });
+
+    it('authorizes authenticated mentor', function (): void {
+        createAndAuthenticateMentorForUpdate();
+        $request = new UpdateMentorProgramRequest;
+
+        expect($request->authorize())->toBeTrue();
+    });
+
+    it('denies unauthenticated user', function (): void {
+        Auth::logout();
+        $request = new UpdateMentorProgramRequest;
+
+        expect($request->authorize())->toBeFalse();
+    });
+
+    it('denies non-mentor authenticated user', function (): void {
+        $regularUser = User::factory()->create();
+        Auth::login($regularUser);
+        $request = new UpdateMentorProgramRequest;
+
+        expect($request->authorize())->toBeFalse();
+    });
+});
+
 describe('UpdateMentorProgramRequest Validation', function (): void {
     beforeEach(function (): void {
         DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
         $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
 
-        $this->user = createAndAuthenticateMentor();
+        $this->user = createAndAuthenticateMentorForUpdate();
         $this->prepareRequest = function (UpdateMentorProgramRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(app(Illuminate\Routing\Redirector::class));
@@ -80,7 +110,7 @@ describe('Update Mentor Program', function (): void {
         $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
 
-        $this->user = createAndAuthenticateMentor();
+        $this->user = createAndAuthenticateMentorForUpdate();
 
         $this->mentorProgram = MentorProgram::factory()->create([
             'mentor_id'   => $this->user->id,
@@ -225,7 +255,7 @@ function mockUpdateMentorProgramRequest(array $data, ?User $user = null): Update
     return $request;
 }
 
-function createAndAuthenticateMentor(): User
+function createAndAuthenticateMentorForUpdate(): User
 {
     $user = User::factory()->create();
     $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
