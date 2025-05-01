@@ -26,7 +26,7 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('profile', DestroyProfilePage::class)->name('profile.destroy');
 });
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'role:mentor'])->group(function (): void {
     Route::get('mentor-program/create', CreateMentorProgramPage::class)
         ->name('mentor-program.create');
     Route::post('mentor-program', StoreMentorProgramPage::class)->name('mentor-program.store');
