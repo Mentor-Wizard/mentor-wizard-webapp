@@ -21,6 +21,15 @@ class UpdateProfileRequest extends FormRequest
         return [
             'name'      => ['required', 'string', 'min:5', 'max:50'],
             'last_name' => ['required', 'string', 'min:5', 'max:50'],
+            'linkedin' => ['nullable','string', 'max:200'],
+            'telegram' => ['nullable','string', 'max:100'],
+            'whatsapp' => ['nullable','string', 'max:100'],
+            'description' => ['nullable','string', 'max:1000'],
+            'phone' => [
+                'nullable',
+                'string',
+                'regex:/^\+\d{11,15}$/',
+            ],
             'email'     => [
                 'required',
                 'string',
@@ -36,5 +45,12 @@ class UpdateProfileRequest extends FormRequest
                 'max:1024',
             ],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'phone' => str_replace(' ', '', $this->phone),
+        ]);
     }
 }

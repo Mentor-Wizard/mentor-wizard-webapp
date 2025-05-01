@@ -3,9 +3,12 @@ import InputError from '@/Components/UI/Forms/InputError.vue';
 import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 import TextInput from '@/Components/UI/Forms/TextInput.vue';
+import TextArea from '@/Components/UI/Forms/TextArea.vue';
 import {useForm, usePage} from '@inertiajs/vue3';
 import InputSuccess from "@/Components/UI/Forms/InputSuccess.vue";
 import SecondaryButton from "@/Components/UI/Button/SecondaryButton.vue";
+import PhoneNumberInput from "@/Components/UI/Forms/PhoneNumberInput.vue";
+
 import { ref } from 'vue';
 
 defineProps({
@@ -30,7 +33,12 @@ const form = useForm({
     name: profile?.name,
     last_name: profile?.last_name,
     email: user.email,
-    avatar: null
+    avatar: null,
+    phone: profile?.phone,
+    linkedin: profile?.linkedin ?? '',
+    telegram: profile?.telegram ?? '',
+    whatsapp: profile?.whatsapp ?? '',
+    description: profile?.description ?? '',
 });
 
 const onFileChange = (e) => {
@@ -89,9 +97,9 @@ const submit = () => {
                     <div class="mt-2">
                         <TextInput id="name" v-model="form.name" required/>
                     </div>
-
                     <InputError class="mt-2" :message="form.errors.name"/>
                 </div>
+
                 <div class="col-span-full">
                     <InputLabel for="last_name" value="Last name"/>
 
@@ -113,6 +121,51 @@ const submit = () => {
                     <InputError class="mt-2" :message="form.errors.email"/>
                 </div>
 
+                <div class="col-span-full">
+                    <InputLabel for="email" value="Phone"/>
+
+                    <div class="mt-2">
+                        <PhoneNumberInput v-model="form.phone" />
+                    </div>
+
+                    <InputError class="mt-2" :message="form.errors.phone"/>
+                </div>
+
+                <div class="col-span-full">
+                    <InputLabel for="linkedin" value="Linkedin"/>
+
+                    <div class="mt-2">
+                        <TextInput id="linkedin" v-model="form.linkedin"/>
+                    </div>
+                    <InputError class="mt-2" :message="form.errors.linkedin"/>
+                </div>
+
+                <div class="col-span-full">
+                    <InputLabel for="telegram" value="Telegram"/>
+
+                    <div class="mt-2">
+                        <TextInput id="telegram" v-model="form.telegram"/>
+                    </div>
+                    <InputError class="mt-2" :message="form.errors.telegram"/>
+                </div>
+
+                <div class="col-span-full">
+                    <InputLabel for="whatsapp" value="Whatsapp"/>
+
+                    <div class="mt-2">
+                        <TextInput id="whatsapp" v-model="form.whatsapp"/>
+                    </div>
+                    <InputError class="mt-2" :message="form.errors.whatsapp"/>
+                </div>
+
+                <div class="col-span-full">
+                    <InputLabel for="description" value="Description"/>
+
+                    <div class="mt-2">
+                        <TextArea id="description" v-model="form.description"/>
+                    </div>
+                    <InputError class="mt-2" :message="form.errors.description"/>
+                </div>
 
                 <div class="mt-8 flex">
                     <div class="w-auto">
@@ -120,7 +173,6 @@ const submit = () => {
                                        :disabled="form.processing">
                             Save
                         </PrimaryButton>
-
 
                         <InputSuccess message="Saved" :is-show="form.recentlySuccessful"/>
                     </div>

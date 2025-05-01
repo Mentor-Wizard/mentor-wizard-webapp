@@ -32,5 +32,8 @@
     "packageManager": "yarn@4.6.0",
     "engines": {
         "yarn": ">= 4.6.0"
+    },
+    "dependencies": {
+        "vue-tel-input": "^9.3.0"
     }
 }

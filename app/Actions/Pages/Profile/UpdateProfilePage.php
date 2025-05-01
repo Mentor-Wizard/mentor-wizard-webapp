@@ -51,6 +51,11 @@ class UpdateProfilePage
         return [
             'name'      => $request->get('name'),
             'last_name' => $request->get('last_name'),
+            'linkedin' => $request->get('linkedin'),
+            'telegram' => $request->get('telegram'),
+            'whatsapp' => $request->get('whatsapp'),
+            'description' => $request->get('description'),
+            'phone' => $request->get('phone'),
         ];
     }
 }
