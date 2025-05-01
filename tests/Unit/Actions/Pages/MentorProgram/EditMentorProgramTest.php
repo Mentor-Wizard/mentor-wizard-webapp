@@ -49,13 +49,17 @@ describe('Edit Mentor Program', function (): void {
     it('handles empty currencies table', function (): void {
         Currency::query()->delete();
 
+        $this->withoutExceptionHandling();
+
         $action = new EditMentorProgramPage;
-        expect(fn (): Response => $action->handle())->toThrow(Exception::class, 'Currencies table is empty');
+        expect(fn (): Response => $action->handle(MentorProgram::factory()->make($this->data)))
+            ->toThrow(Exception::class, 'Currencies table is empty');
     });
 
     it('contains required page structure', function (): void {
         $action = new EditMentorProgramPage;
-        $result = $action->handle();
+        $mentorProgram = MentorProgram::factory()->create($this->data);
+        $result = $action->handle($mentorProgram);
         $data = $result->toResponse(request())->getOriginalContent()->getData();
 
         expect($data)->toHaveKey('page')
@@ -65,7 +69,8 @@ describe('Edit Mentor Program', function (): void {
 
     it('preserves currency id-name mapping', function (): void {
         $action = new EditMentorProgramPage;
-        $result = $action->handle();
+        $mentorProgram = MentorProgram::factory()->create($this->data);
+        $result = $action->handle($mentorProgram);
         $currencies = Arr::get($result->toResponse(request())->getOriginalContent()->getData(), 'page.props.currencies');
 
         expect($currencies)->toHaveCount(4)
@@ -77,9 +82,10 @@ describe('Edit Mentor Program', function (): void {
 
     it('can handle null mentor program', function (): void {
         $action = new EditMentorProgramPage;
-        $result = $action->handle();
+        $mentorProgram = MentorProgram::factory()->create($this->data);
+        $result = $action->handle($mentorProgram);
         $program = Arr::get($result->toResponse(request())->getOriginalContent()->getData(), 'page.props.program');
 
-        expect($program)->toBeNull();
+        expect($program)->not->toBeNull();
     });
 });

@@ -15,7 +15,7 @@ class EditMentorProgramPage
 {
     use AsController;
 
-    public function handle(?MentorProgram $mentorProgram = null): Response
+    public function handle(MentorProgram $mentorProgram): Response
     {
         $currencies = Currency::query()->pluck('name', 'id');
         throw_if($currencies->isEmpty(), new Exception('Currencies table is empty'));
