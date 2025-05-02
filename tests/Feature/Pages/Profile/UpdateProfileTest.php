@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Http\Testing\File;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -71,7 +70,6 @@ describe('Unsuccessful Scenarios', function (): void {
     });
 
     it('file extend is wrong', function (): void {
-
         $file = UploadedFile::fake()->create('avatar.doc', 100, 'application/msword');
 
         $response = $this
@@ -87,10 +85,27 @@ describe('Unsuccessful Scenarios', function (): void {
         ]);
     });
 
+    it('updates the name and email successfully', function (): void {
+        $user = User::factory()->create();
+
+        $file = UploadedFile::fake()->image('avatar.docx')->size(2000);
+
+        $response = $this->actingAs($user)->patch(route('profile.update'), [
+            'name'        => 'change_name',
+            'last_name'   => 'change_last_name',
+            'email'       => 'change_email@email.com',
+            'avatar'      => $file,
+        ]);
+
+        $response->assertSessionHasErrors([
+            'avatar' => 'The avatar field must be a file of type: jpg, jpeg, png, gif.',
+        ]);
+    });
+
     it('file size is wrong', function (): void {
         $user = User::factory()->create();
 
-        $file = File::create('avatar.png', 100000);
+        $file = UploadedFile::fake()->image('avatar.png')->size(2000);
 
         $response = $this->actingAs($user)->patch(route('profile.update'), [
             'name'        => 'change_name',
@@ -155,9 +170,9 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $email = str_repeat('test', 300).'@admin.com';
         $response = $this->patch(route('profile.update'), [
-            'name'  => 'change_name',
+            'name'       => 'change_name',
             'last_name'  => 'change_last_name',
-            'email' => $email,
+            'email'      => $email,
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
@@ -171,9 +186,9 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $response = $this->patch(route('profile.update'), [
-            'name'  => 'change_name',
+            'name'       => 'change_name',
             'last_name'  => 'change_last_name',
-            'email' => '',
+            'email'      => '',
         ])
             ->assertStatus(Response::HTTP_FOUND);
 

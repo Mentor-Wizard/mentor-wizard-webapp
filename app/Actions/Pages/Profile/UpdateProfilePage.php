@@ -49,13 +49,13 @@ class UpdateProfilePage
     private function dataUpdate(UpdateProfileRequest $request): array
     {
         return [
-            'name'      => $request->get('name'),
-            'last_name' => $request->get('last_name'),
-            'linkedin' => $request->get('linkedin'),
-            'telegram' => $request->get('telegram'),
-            'whatsapp' => $request->get('whatsapp'),
+            'name'        => $request->get('name'),
+            'last_name'   => $request->get('last_name'),
+            'linkedin'    => $request->get('linkedin'),
+            'telegram'    => $request->get('telegram'),
+            'whatsapp'    => $request->get('whatsapp'),
             'description' => $request->get('description'),
-            'phone' => $request->get('phone'),
+            'phone'       => $request->get('phone'),
         ];
     }
 }

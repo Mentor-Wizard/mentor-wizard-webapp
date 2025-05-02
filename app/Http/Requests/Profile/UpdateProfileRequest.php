@@ -19,21 +19,18 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'      => ['required', 'string', 'min:5', 'max:50'],
-            'last_name' => ['required', 'string', 'min:5', 'max:50'],
-            'linkedin' => ['nullable','string', 'max:200'],
-            'telegram' => ['nullable','string', 'max:100'],
-            'whatsapp' => ['nullable','string', 'max:100'],
-            'description' => ['nullable','string', 'max:1000'],
-            'phone' => [
+            'name'        => ['required', 'string', 'min:5', 'max:50'],
+            'last_name'   => ['required', 'string', 'min:5', 'max:50'],
+            'linkedin'    => ['nullable', 'string', 'max:200'],
+            'telegram'    => ['nullable', 'string', 'max:100'],
+            'whatsapp'    => ['nullable', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'phone'       => [
                 'nullable',
-                'string',
                 'regex:/^\+\d{11,15}$/',
             ],
             'email'     => [
                 'required',
-                'string',
-                'lowercase',
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
@@ -49,7 +46,7 @@ class UpdateProfileRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        if(!empty($this->phone)) {
+        if (! empty($this->phone)) {
             $this->merge([
                 'phone' => str_replace(' ', '', $this->phone),
             ]);

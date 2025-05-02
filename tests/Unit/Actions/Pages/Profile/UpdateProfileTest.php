@@ -41,14 +41,14 @@ describe('Update Profile', function (): void {
                 'email_verified_at' => now(),
             ]),
             'updateData' => [
-                'name'      => 'John',
-                'last_name' => 'Dou',
-                'linkedin' => 'linkedin',
-                'telegram' => 'telegram',
-                'whatsapp' => 'whatsapp',
+                'name'        => 'John',
+                'last_name'   => 'Dou',
+                'linkedin'    => 'linkedin',
+                'telegram'    => 'telegram',
+                'whatsapp'    => 'whatsapp',
                 'description' => 'description',
-                'phone' => '+380671234567',
-                'email'     => 'john.updated@example.com',
+                'phone'       => '+380671234567',
+                'email'       => 'john.updated@example.com',
             ],
         ],
         'updated user with same email' => fn (): array => [
@@ -57,14 +57,14 @@ describe('Update Profile', function (): void {
                 'email'    => 'jane@example.com',
             ]),
             'updateData' => [
-                'name'      => 'Jane',
-                'last_name' => 'Dou',
-                'linkedin' => 'linkedin',
-                'telegram' => 'telegram',
-                'whatsapp' => 'whatsapp',
+                'name'        => 'Jane',
+                'last_name'   => 'Dou',
+                'linkedin'    => 'linkedin',
+                'telegram'    => 'telegram',
+                'whatsapp'    => 'whatsapp',
                 'description' => 'description',
-                'phone' => '+380671234567',
-                'email'     => 'jane@example.com',
+                'phone'       => '+380671234567',
+                'email'       => 'jane@example.com',
             ],
         ],
     ]);
@@ -72,14 +72,14 @@ describe('Update Profile', function (): void {
     it('check data update', function (): void {
         $user = User::factory()->withProfile()->create();
         $updateData = [
-            'name'      => 'Jane',
-            'last_name' => 'Dou',
-            'linkedin' => 'linkedin',
-            'telegram' => 'telegram',
-            'whatsapp' => 'whatsapp',
+            'name'        => 'Jane',
+            'last_name'   => 'Dou',
+            'linkedin'    => 'linkedin',
+            'telegram'    => 'telegram',
+            'whatsapp'    => 'whatsapp',
             'description' => 'description',
-            'phone' => '+380671234567',
-            'email'     => 'jane@example.com',
+            'phone'       => '+380671234567',
+            'email'       => 'jane@example.com',
         ];
 
         $action = new UpdateProfilePage;
@@ -107,14 +107,14 @@ describe('Update Profile', function (): void {
         Auth::login($user);
 
         $request = mockUpdateProfileRequest([
-            'name'      => 'John',
-            'last_name' => 'Dou',
-            'linkedin' => 'linkedin',
-            'telegram' => 'telegram',
-            'whatsapp' => 'whatsapp',
+            'name'        => 'John',
+            'last_name'   => 'Dou',
+            'linkedin'    => 'linkedin',
+            'telegram'    => 'telegram',
+            'whatsapp'    => 'whatsapp',
             'description' => 'description',
-            'phone' => '+380671234567',
-            'email'     => 'new.email@example.com',
+            'phone'       => '+380671234567',
+            'email'       => 'new.email@example.com',
         ], $user);
 
         $action = new UpdateProfilePage;
