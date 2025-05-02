@@ -29,6 +29,13 @@ describe('Update Info Profile', function (): void {
         expect($result)->toBeInstanceOf(RedirectResponse::class)
             ->and($result->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($result->getTargetUrl())->toBe(route('profile.edit'));
+
+        $user->refresh();
+        expect($user->profile->linkedin)->toBe('https://www.linkedin.com/in/john')
+            ->and($user->profile->telegram)->toBe('https://t.me/john')
+            ->and($user->profile->whatsapp)->toBe('https://wa.me/john')
+            ->and($user->profile->description)->toBe('description')
+            ->and($user->profile->phone)->toBe('+380671234567');
     })->with([
         'info updated user with new email' => fn (): array => [
             'user'       => User::factory()->withProfile()->create(),

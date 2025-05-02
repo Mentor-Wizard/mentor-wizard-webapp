@@ -20,6 +20,27 @@ describe('Successful Scenarios', function (): void {
         $this->get(route('profile.edit'))
             ->assertStatus(Response::HTTP_OK);
     });
+    it('fill profile', function (): void {
+        $user = User::factory()->withProfile()->create();
+
+        $response = $this->actingAs($user)->patch(route('profile.update-info'), [
+            'linkedin'    => 'https://www.linkedin.com/in/john',
+            'telegram'    => 'https://t.me/john',
+            'whatsapp'    => 'https://wa.me/john',
+            'description' => 'description',
+            'phone'       => '+380671234567',
+        ])
+            ->assertStatus(Response::HTTP_FOUND);
+
+        $this->assertTrue($response->isRedirect(route('profile.edit')));
+
+        $user->refresh();
+        expect($user->profile->linkedin)->toBe('https://www.linkedin.com/in/john')
+            ->and($user->profile->telegram)->toBe('https://t.me/john')
+            ->and($user->profile->whatsapp)->toBe('https://wa.me/john')
+            ->and($user->profile->description)->toBe('description')
+            ->and($user->profile->phone)->toBe('+380671234567');
+    });
 });
 
 describe('Unsuccessful Scenarios', function (): void {
