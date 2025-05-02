@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\Profile\UpdateProfilePage;
-use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Actions\Pages\Profile\UpdateProfileMainPage;
+use App\Http\Requests\Profile\UpdateProfileMainRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -12,18 +12,18 @@ use Illuminate\Support\Facades\Auth;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(UpdateProfilePage::class);
+mutates(UpdateProfileMainPage::class);
 
-describe('Update Profile', function (): void {
+describe('Update Main Profile', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('updates user profile successfully', function (User $user, array $updateData): void {
+    it('updates user main profile successfully', function (User $user, array $updateData): void {
         Auth::login($user);
 
-        $request = mockUpdateProfileRequest($updateData, $user);
-        $action = new UpdateProfilePage;
+        $request = mockUpdateMainProfileRequest($updateData, $user);
+        $action = new UpdateProfileMainPage;
         $result = $action->handle($request);
 
         $updatedUser = $user->fresh();
@@ -34,7 +34,7 @@ describe('Update Profile', function (): void {
             ->and($updatedUser->profile->name)->toBe(Arr::get($updateData, 'name'))
             ->and($updatedUser->email)->toBe(Arr::get($updateData, 'email'));
     })->with([
-        'updated user with new email' => fn (): array => [
+        'main updated user with new email' => fn (): array => [
             'user' => User::factory()->withProfile()->create([
                 'username'          => 'John',
                 'email'             => 'john@example.com',
@@ -43,15 +43,10 @@ describe('Update Profile', function (): void {
             'updateData' => [
                 'name'        => 'John',
                 'last_name'   => 'Dou',
-                'linkedin'    => 'linkedin',
-                'telegram'    => 'telegram',
-                'whatsapp'    => 'whatsapp',
-                'description' => 'description',
-                'phone'       => '+380671234567',
                 'email'       => 'john.updated@example.com',
             ],
         ],
-        'updated user with same email' => fn (): array => [
+        'main updated user with same email' => fn (): array => [
             'user' => User::factory()->withProfile()->create([
                 'username' => 'Jane',
                 'email'    => 'jane@example.com',
@@ -59,43 +54,29 @@ describe('Update Profile', function (): void {
             'updateData' => [
                 'name'        => 'Jane',
                 'last_name'   => 'Dou',
-                'linkedin'    => 'linkedin',
-                'telegram'    => 'telegram',
-                'whatsapp'    => 'whatsapp',
-                'description' => 'description',
-                'phone'       => '+380671234567',
                 'email'       => 'jane@example.com',
             ],
         ],
     ]);
+
 
     it('check data update', function (): void {
         $user = User::factory()->withProfile()->create();
         $updateData = [
             'name'        => 'Jane',
             'last_name'   => 'Dou',
-            'linkedin'    => 'linkedin',
-            'telegram'    => 'telegram',
-            'whatsapp'    => 'whatsapp',
-            'description' => 'description',
-            'phone'       => '+380671234567',
             'email'       => 'jane@example.com',
         ];
 
-        $action = new UpdateProfilePage;
-        $reflection = new ReflectionClass(UpdateProfilePage::class);
+        $action = new UpdateProfileMainPage;
+        $reflection = new ReflectionClass(UpdateProfileMainPage::class);
         $method = $reflection->getMethod('dataUpdate');
         $method->setAccessible(true);
 
-        $request = mockUpdateProfileRequest($updateData, $user);
+        $request = mockUpdateMainProfileRequest($updateData, $user);
         $data = $method->invoke($action, $request);
         expect($data['name'])->toBe('Jane')
-            ->and($data['last_name'])->toBe('Dou')
-            ->and($data['linkedin'])->toBe('linkedin')
-            ->and($data['telegram'])->toBe('telegram')
-            ->and($data['whatsapp'])->toBe('whatsapp')
-            ->and($data['description'])->toBe('description')
-            ->and($data['phone'])->toBe('+380671234567');
+            ->and($data['last_name'])->toBe('Dou');
     });
 
     it('resets email verification when email changes', function (): void {
@@ -106,18 +87,13 @@ describe('Update Profile', function (): void {
 
         Auth::login($user);
 
-        $request = mockUpdateProfileRequest([
+        $request = mockUpdateMainProfileRequest([
             'name'        => 'John',
             'last_name'   => 'Dou',
-            'linkedin'    => 'linkedin',
-            'telegram'    => 'telegram',
-            'whatsapp'    => 'whatsapp',
-            'description' => 'description',
-            'phone'       => '+380671234567',
             'email'       => 'new.email@example.com',
         ], $user);
 
-        $action = new UpdateProfilePage;
+        $action = new UpdateProfileMainPage;
         $action->handle($request);
 
         $updatedUser = $user->fresh();
@@ -129,9 +105,9 @@ describe('Update Profile', function (): void {
         $user = User::factory()->create();
         Auth::login($user);
 
-        $request = mockUpdateProfileRequest($invalidData, $user);
+        $request = mockUpdateMainProfileRequest($invalidData, $user);
 
-        $action = new UpdateProfilePage;
+        $action = new UpdateProfileMainPage;
         $action->handle($request);
     })->with([
         'empty name'    => ['name' => '', 'email' => 'valid@example.com'],
@@ -139,21 +115,16 @@ describe('Update Profile', function (): void {
     ])->throws(Error::class);
 });
 
-function mockUpdateProfileRequest(array $data, User $user): UpdateProfileRequest|MockInterface
+function mockUpdateMainProfileRequest(array $data, User $user): UpdateProfileMainRequest|MockInterface
 {
-    $request = Mockery::mock(UpdateProfileRequest::class);
+    $request = Mockery::mock(UpdateProfileMainRequest::class);
     $request->shouldReceive('user')->andReturn($user);
     $request->shouldReceive('validated')->andReturn($data);
     $request->shouldReceive('get')->with('email')->andReturn($data['email']);
     $request->shouldReceive('get')->with('name')->andReturn($data['name']);
     $request->shouldReceive('get')->with('last_name')->andReturn($data['last_name']);
-    $request->shouldReceive('get')->with('linkedin')->andReturn($data['linkedin']);
-    $request->shouldReceive('get')->with('telegram')->andReturn($data['telegram']);
-    $request->shouldReceive('get')->with('whatsapp')->andReturn($data['whatsapp']);
-    $request->shouldReceive('get')->with('description')->andReturn($data['description']);
-    $request->shouldReceive('get')->with('phone')->andReturn($data['phone']);
-
     $request->shouldReceive('hasFile')->with('avatar')->andReturn(false);
 
     return $request;
 }
+

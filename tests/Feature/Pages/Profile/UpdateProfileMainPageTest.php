@@ -28,7 +28,7 @@ describe('Successful Scenarios', function (): void {
         Storage::fake('public');
         $file = UploadedFile::fake()->image($filename);
 
-        $this->actingAs($user)->patch(route('profile.update'), [
+        $this->actingAs($user)->patch(route('profile.update-main'), [
             'name'        => 'change_name',
             'last_name'   => 'change_last_name',
             'email'       => 'change_email@email.com',
@@ -57,7 +57,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $name = str_repeat('test', 300);
-        $response = $this->patch(route('profile.update'), [
+        $response = $this->patch(route('profile.update-main'), [
             'name'     => $name,
             'email'    => 'change_email@email.com',
         ])
@@ -73,7 +73,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $file = UploadedFile::fake()->create('avatar.doc', 100, 'application/msword');
 
         $response = $this
-            ->patch(route('profile.update'), [
+            ->patch(route('profile.update-main'), [
                 'name'        => 'change_name',
                 'last_name'   => 'change_last_name',
                 'email'       => 'change_email@email.com',
@@ -90,7 +90,7 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $file = UploadedFile::fake()->image('avatar.docx')->size(2000);
 
-        $response = $this->actingAs($user)->patch(route('profile.update'), [
+        $response = $this->actingAs($user)->patch(route('profile.update-main'), [
             'name'        => 'change_name',
             'last_name'   => 'change_last_name',
             'email'       => 'change_email@email.com',
@@ -107,7 +107,7 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $file = UploadedFile::fake()->image('avatar.png')->size(2000);
 
-        $response = $this->actingAs($user)->patch(route('profile.update'), [
+        $response = $this->actingAs($user)->patch(route('profile.update-main'), [
             'name'        => 'change_name',
             'last_name'   => 'change_last_name',
             'email'       => 'change_email@email.com',
@@ -122,7 +122,7 @@ describe('Unsuccessful Scenarios', function (): void {
     it('does not allow name shorter than the limit', function (): void {
         $user = User::factory()->create();
 
-        $response = $this->patch(route('profile.update'), [
+        $response = $this->patch(route('profile.update-main'), [
             'name'     => 'A',
             'email'    => 'change_email@email.com',
         ])
@@ -137,7 +137,7 @@ describe('Unsuccessful Scenarios', function (): void {
     it('does not allow empty name', function (): void {
         $user = User::factory()->create();
 
-        $response = $this->patch(route('profile.update'), [
+        $response = $this->patch(route('profile.update-main'), [
             'name'     => '',
             'email'    => 'change_email@email.com',
         ])
@@ -153,7 +153,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
         $secondUser = User::factory()->create();
 
-        $response = $this->patch(route('profile.update'), [
+        $response = $this->patch(route('profile.update-main'), [
             'name'  => 'change_name',
             'email' => $secondUser->email,
         ])
@@ -169,7 +169,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $email = str_repeat('test', 300).'@admin.com';
-        $response = $this->patch(route('profile.update'), [
+        $response = $this->patch(route('profile.update-main'), [
             'name'       => 'change_name',
             'last_name'  => 'change_last_name',
             'email'      => $email,
@@ -185,7 +185,7 @@ describe('Unsuccessful Scenarios', function (): void {
     it('does not allow empty email', function (): void {
         $user = User::factory()->create();
 
-        $response = $this->patch(route('profile.update'), [
+        $response = $this->patch(route('profile.update-main'), [
             'name'       => 'change_name',
             'last_name'  => 'change_last_name',
             'email'      => '',

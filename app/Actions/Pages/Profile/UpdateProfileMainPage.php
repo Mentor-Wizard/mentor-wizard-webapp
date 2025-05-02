@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Profile;
 
-use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Http\Requests\Profile\UpdateProfileMainRequest;
 use App\Models\UserProfile;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
-class UpdateProfilePage
+class UpdateProfileMainPage
 {
     use AsController;
 
@@ -19,7 +19,7 @@ class UpdateProfilePage
      * @throws FileIsTooBig
      * @throws FileDoesNotExist
      */
-    public function handle(UpdateProfileRequest $request): RedirectResponse
+    public function handle(UpdateProfileMainRequest $request): RedirectResponse
     {
         $user = auth()->user();
 
@@ -46,16 +46,11 @@ class UpdateProfilePage
         return redirect()->route('profile.edit');
     }
 
-    private function dataUpdate(UpdateProfileRequest $request): array
+    private function dataUpdate(UpdateProfileMainRequest $request): array
     {
         return [
             'name'        => $request->get('name'),
             'last_name'   => $request->get('last_name'),
-            'linkedin'    => $request->get('linkedin'),
-            'telegram'    => $request->get('telegram'),
-            'whatsapp'    => $request->get('whatsapp'),
-            'description' => $request->get('description'),
-            'phone'       => $request->get('phone'),
         ];
     }
 }

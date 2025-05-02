@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateProfileRequest extends FormRequest
+class UpdateProfileMainRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -21,14 +21,6 @@ class UpdateProfileRequest extends FormRequest
         return [
             'name'        => ['required', 'string', 'min:5', 'max:50'],
             'last_name'   => ['required', 'string', 'min:5', 'max:50'],
-            'linkedin'    => ['nullable', 'string', 'max:200'],
-            'telegram'    => ['nullable', 'string', 'max:100'],
-            'whatsapp'    => ['nullable', 'string', 'max:100'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'phone'       => [
-                'nullable',
-                'regex:/^\+\d{11,15}$/',
-            ],
             'email'     => [
                 'required',
                 'email',
@@ -42,14 +34,5 @@ class UpdateProfileRequest extends FormRequest
                 'max:1024',
             ],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        if (! empty($this->phone)) {
-            $this->merge([
-                'phone' => str_replace(' ', '', $this->phone),
-            ]);
-        }
     }
 }

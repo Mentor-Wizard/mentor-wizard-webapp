@@ -6,10 +6,9 @@ import TextInput from '@/Components/UI/Forms/TextInput.vue';
 import TextArea from '@/Components/UI/Forms/TextArea.vue';
 import {useForm, usePage} from '@inertiajs/vue3';
 import InputSuccess from "@/Components/UI/Forms/InputSuccess.vue";
-import SecondaryButton from "@/Components/UI/Button/SecondaryButton.vue";
 import PhoneNumberInput from "@/Components/UI/Forms/PhoneNumberInput.vue";
 
-import { ref } from 'vue';
+import {ref} from 'vue';
 
 defineProps({
   mustVerifyEmail: {
@@ -22,162 +21,90 @@ defineProps({
 
 const user = usePage().props.auth.user;
 const profile = user?.profile;
-const avatar = ref(usePage().props.avatar);
-const avatarInput = ref(null)
-
-const chooseFiles = () => {
-  avatarInput.value?.click()
-}
 
 const form = useForm({
-    name: profile?.name,
-    last_name: profile?.last_name,
-    email: user.email,
-    avatar: null,
-    phone: profile?.phone,
-    linkedin: profile?.linkedin ?? '',
-    telegram: profile?.telegram ?? '',
-    whatsapp: profile?.whatsapp ?? '',
-    description: profile?.description ?? '',
+  phone: profile?.phone,
+  linkedin: profile?.linkedin ?? '',
+  telegram: profile?.telegram ?? '',
+  whatsapp: profile?.whatsapp ?? '',
+  description: profile?.description ?? '',
 });
 
-const onFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    form.avatar = file;
-    avatar.value = URL.createObjectURL(file);
-};
-
 const submit = () => {
-    const formData = new FormData();
-    formData.append('name', form.name);
-    formData.append('email', form.email);
-    if (form.avatar instanceof File) {
-        formData.append('avatar', form.avatar);
-    }
-
-    form.patch(route('profile.update'), {
-        forceFormData: true,
-    });
+  form.patch(route('profile.update-info'), {
+    forceFormData: true,
+  });
 };
 </script>
 
 <template>
-    <div class="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
-        <div>
-            <h2 class="text-base/7 font-semibold">Personal Information</h2>
-            <p class="mt-1 text-sm/6 text-gray-400">Use a permanent address where you can receive mail.</p>
-        </div>
-        <form @submit.prevent="submit" class="md:col-span-2">
-            <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
-                <div class="col-span-full flex items-center gap-x-8">
-                    <img
-                        :src="avatar"
-                        alt="" class="size-24 flex-none rounded-lg bg-gray-800 object-cover"/>
-                    <div>
-                        <SecondaryButton
-                            class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50"
-                            @click="chooseFiles">
-                            Change avatar
-                        </SecondaryButton>
-                        <p class="mt-2 text-xs/5 text-gray-400">JPG, GIF or PNG. 1MB max.</p>
-                    </div>
-                    <input type="file"
-                           :hidden="true"
-                           ref="avatarInput"
-                           accept="image/gif, image/jpeg, image/png"
-                           @change="onFileChange"/>
-
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="name" value="Name"/>
-
-                    <div class="mt-2">
-                        <TextInput id="name" v-model="form.name" required/>
-                    </div>
-                    <InputError class="mt-2" :message="form.errors.name"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="last_name" value="Last name"/>
-
-                    <div class="mt-2">
-                        <TextInput id="last_name" v-model="form.last_name" required/>
-                    </div>
-
-                    <InputError class="mt-2" :message="form.errors.last_name"/>
-                </div>
-
-                <div class="col-span-full">
-
-                    <InputLabel for="email" value="Email address"/>
-
-                    <div class="mt-2">
-                        <TextInput id="email" type="email" autocomplete="email" v-model="form.email" required/>
-                    </div>
-
-                    <InputError class="mt-2" :message="form.errors.email"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="email" value="Phone"/>
-
-                    <div class="mt-2">
-                        <PhoneNumberInput v-model="form.phone" />
-                    </div>
-
-                    <InputError class="mt-2" :message="form.errors.phone"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="linkedin" value="Linkedin"/>
-
-                    <div class="mt-2">
-                        <TextInput id="linkedin" v-model="form.linkedin"/>
-                    </div>
-                    <InputError class="mt-2" :message="form.errors.linkedin"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="telegram" value="Telegram"/>
-
-                    <div class="mt-2">
-                        <TextInput id="telegram" v-model="form.telegram"/>
-                    </div>
-                    <InputError class="mt-2" :message="form.errors.telegram"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="whatsapp" value="Whatsapp"/>
-
-                    <div class="mt-2">
-                        <TextInput id="whatsapp" v-model="form.whatsapp"/>
-                    </div>
-                    <InputError class="mt-2" :message="form.errors.whatsapp"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="description" value="Description"/>
-
-                    <div class="mt-2">
-                        <TextArea id="description" v-model="form.description"/>
-                    </div>
-                    <InputError class="mt-2" :message="form.errors.description"/>
-                </div>
-
-                <div class="mt-8 flex">
-                    <div class="w-auto">
-                        <PrimaryButton :class="{ 'opacity-25 cursor-not-allowed': form.processing }"
-                                       :disabled="form.processing">
-                            Save
-                        </PrimaryButton>
-
-                        <InputSuccess message="Saved" :is-show="form.recentlySuccessful"/>
-                    </div>
-                </div>
-            </div>
-        </form>
+  <div class="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+    <div>
+      <h2 class="text-base/7 font-semibold">Personal Information</h2>
+      <p class="mt-1 text-sm/6 text-gray-400">Add additional information about yourself.</p>
     </div>
+    <form @submit.prevent="submit" class="md:col-span-2">
+      <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
+        <div class="col-span-full">
+          <InputLabel for="email" value="Phone"/>
+
+          <div class="mt-2">
+            <PhoneNumberInput v-model="form.phone"/>
+          </div>
+          <p class="text-sm/6 text-gray-500">Example: +380671234578</p>
+          <InputError class="mt-2" :message="form.errors.phone"/>
+        </div>
+
+        <div class="col-span-full">
+          <InputLabel for="linkedin" value="Linkedin"/>
+
+          <div class="mt-2">
+            <TextInput id="linkedin" v-model="form.linkedin"/>
+          </div>
+          <p class="text-sm/6 text-gray-500">Example: https://www.linkedin.com/in/john</p>
+          <InputError class="mt-2" :message="form.errors.linkedin"/>
+        </div>
+
+        <div class="col-span-full">
+          <InputLabel for="telegram" value="Telegram"/>
+
+          <div class="mt-2">
+            <TextInput id="telegram" v-model="form.telegram"/>
+          </div>
+          <p class="text-sm/6 text-gray-500">Example: https://t.me/john</p>
+          <InputError class="mt-2" :message="form.errors.telegram"/>
+        </div>
+
+        <div class="col-span-full">
+          <InputLabel for="whatsapp" value="Whatsapp"/>
+
+          <div class="mt-2">
+            <TextInput id="whatsapp" v-model="form.whatsapp"/>
+          </div>
+          <p class="text-sm/6 text-gray-500">Example: https://wa.me/380671234578</p>
+          <InputError class="mt-2" :message="form.errors.whatsapp"/>
+        </div>
+
+        <div class="col-span-full">
+          <InputLabel for="description" value="Description"/>
+
+          <div class="mt-2">
+            <TextArea id="description" v-model="form.description"/>
+          </div>
+          <InputError class="mt-2" :message="form.errors.description"/>
+        </div>
+
+        <div class="mt-8 flex">
+          <div class="w-auto">
+            <PrimaryButton :class="{ 'opacity-25 cursor-not-allowed': form.processing }"
+                           :disabled="form.processing">
+              Save
+            </PrimaryButton>
+
+            <InputSuccess message="Saved" :is-show="form.recentlySuccessful"/>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
 </template>
