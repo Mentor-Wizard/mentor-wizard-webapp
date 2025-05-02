@@ -33,6 +33,7 @@ describe('Store Mentor Program Request Authorization', function (): void {
     });
 
     it('denies unauthenticated user', function (): void {
+        createAndAuthenticateMentorForUpdate();
         Auth::logout();
         $request = new UpdateMentorProgramRequest;
 
@@ -125,7 +126,7 @@ describe('Update Mentor Program', function (): void {
     it('updates mentor program with valid data', function (): void {
         $updateData = [
             'name'        => 'Updated Program',
-            'slug'        => 'updated-program',
+            'slug'        => $this->mentorProgram->slug,
             'description' => 'Updated Description',
             'cost'        => 150.0,
             'currency_id' => 2,
@@ -140,7 +141,7 @@ describe('Update Mentor Program', function (): void {
 
         expect($updatedProgram)
             ->name->toBe($updateData['name'])
-            ->slug->toBe($updateData['slug'])
+            ->slug->toBe($this->mentorProgram->slug)
             ->description->toBe($updateData['description'])
             ->cost->toBe($updateData['cost'])
             ->currency_id->toBe($updateData['currency_id'])
@@ -150,7 +151,7 @@ describe('Update Mentor Program', function (): void {
     it('returns redirect response with correct route', function (): void {
         $updateData = [
             'name'        => 'Updated Program',
-            'slug'        => 'updated-program',
+            'slug'        => $this->mentorProgram->slug,
             'description' => 'Updated Description',
             'cost'        => 150.0,
             'currency_id' => 2,
@@ -161,13 +162,13 @@ describe('Update Mentor Program', function (): void {
 
         expect($response)
             ->toBeInstanceOf(Response::class)
-            ->and($response->getTargetUrl())->toBe(route('mentor-program.edit', $updateData['slug']));
+            ->and($response->getTargetUrl())->toBe(route('mentor-program.edit', $this->mentorProgram->slug));
     });
 
     it('throws exception when trying to update non-existent program', function (): void {
         $updateData = [
             'name'        => 'Updated Program',
-            'slug'        => 'updated-program',
+            'slug'        => $this->mentorProgram->slug,
             'description' => 'Updated Description',
             'cost'        => 150.0,
             'currency_id' => 2,
@@ -197,7 +198,7 @@ describe('Update Mentor Program', function (): void {
 
         $updateData = [
             'name'        => 'Trying to Update',
-            'slug'        => 'trying-to-update',
+            'slug'        => $this->mentorProgram->slug,
             'description' => 'Trying to Update Description',
             'cost'        => 150.0,
             'currency_id' => 2,
@@ -224,7 +225,7 @@ describe('Update Mentor Program', function (): void {
 
         $updateData = [
             'name'        => 'Trying to Update',
-            'slug'        => 'trying-to-update',
+            'slug'        => $this->mentorProgram->slug,
             'description' => 'Trying to Update Description',
             'cost'        => 150.0,
             'currency_id' => 2,

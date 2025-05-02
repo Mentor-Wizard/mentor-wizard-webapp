@@ -22,10 +22,8 @@ describe('Destroy Mentor Program', function (): void {
         $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
 
-        $this->user = User::factory()->create();
-        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
-
-        Auth::login($this->user);
+        $this->user = createAndAuthenticateMentorForDestroy();
+        $this->request = Request::create('/')->setUserResolver(fn (): User => $this->user);
 
         $this->mentorProgram = MentorProgram::factory()->create([
             'mentor_id'   => $this->user->id,
@@ -38,11 +36,8 @@ describe('Destroy Mentor Program', function (): void {
     });
 
     it('deletes mentor program and returns redirect response', function (): void {
-        $request = Request::create('/');
-        $request->setUserResolver(fn () => $this->user);
-
         $action = new DestroyMentorProgramPage;
-        $response = $action->handle($request, $this->mentorProgram);
+        $response = $action->handle($this->request, $this->mentorProgram);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
             ->and($response->getTargetUrl())->toBe(route('mentor-program.create'))
@@ -50,12 +45,9 @@ describe('Destroy Mentor Program', function (): void {
     });
 
     it('throws exception when trying to delete non-existent program', function (): void {
-        $request = Request::create('/');
-        $request->setUserResolver(fn () => $this->user);
-
         $this->mentorProgram->delete();
 
-        expect(fn (): RedirectResponse => (new DestroyMentorProgramPage)->handle($request, $this->mentorProgram))
+        expect(fn (): RedirectResponse => (new DestroyMentorProgramPage)->handle($this->request, $this->mentorProgram))
             ->toThrow(ModelNotFoundException::class, 'Mentor program not found.');
     });
 
@@ -72,11 +64,8 @@ describe('Destroy Mentor Program', function (): void {
             'currency_id' => 1,
         ]);
 
-        $request = Request::create('/');
-        $request->setUserResolver(fn () => $this->user);
-
         try {
-            (new DestroyMentorProgramPage)->handle($request, $anotherMentorProgram);
+            (new DestroyMentorProgramPage)->handle($this->request, $anotherMentorProgram);
         } catch (Symfony\Component\HttpKernel\Exception\HttpException $httpException) {
             expect($httpException->getStatusCode())->toBe(403)
                 ->and($httpException->getMessage())->toBe('Unauthorized action.');
@@ -87,3 +76,12 @@ describe('Destroy Mentor Program', function (): void {
         $this->fail('Exception was not thrown');
     });
 });
+
+function createAndAuthenticateMentorForDestroy(): User
+{
+    $user = User::factory()->create();
+    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+    Auth::login($user);
+
+    return $user;
+}

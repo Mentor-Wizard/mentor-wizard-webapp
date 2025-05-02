@@ -32,6 +32,7 @@ describe('Store Mentor Program Request Authorization', function (): void {
     });
 
     it('denies unauthenticated user', function (): void {
+        createAndAuthenticateMentorForStore();
         Auth::logout();
         $request = new StoreMentorProgramRequest;
 
