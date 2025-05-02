@@ -191,7 +191,7 @@ docker compose exec app php artisan test --mutate --covered-only --min=100 --par
 
 ### Тестування
 
-- Для запуску тестування потрбіно увімкнути `Xdebug` (він вимкнений за замовчуванням):
+- Для запуску тестування потрібно увімкнути `Xdebug` (він вимкнений за замовчуванням):
 
     ```sh
     ddev xdebug on
