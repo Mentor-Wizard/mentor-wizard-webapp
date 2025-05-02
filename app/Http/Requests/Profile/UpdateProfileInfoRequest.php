@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Profile;
 
-use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateProfileInfoRequest extends FormRequest
 {
@@ -24,23 +22,23 @@ class UpdateProfileInfoRequest extends FormRequest
                 'string',
                 'max:200',
                 'regex:/^https:\/\/(www\.)?linkedin\.com\/.+$/i',
-                ],
+            ],
             'telegram'    => [
                 'nullable',
                 'string',
                 'max:100',
                 'regex:/^https:\/\/(www\.)?t\.me\/.+$/i',
-                ],
+            ],
             'whatsapp'    => [
                 'nullable',
                 'string',
                 'max:100',
                 'regex:/^https:\/\/(www\.)?wa\.me\/.+$/i',
-                ],
+            ],
             'description' => [
                 'nullable',
                 'string',
-                'max:1000'
+                'max:1000',
             ],
             'phone'       => [
                 'nullable',

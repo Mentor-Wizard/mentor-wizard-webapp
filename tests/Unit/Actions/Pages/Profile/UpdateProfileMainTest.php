@@ -59,7 +59,6 @@ describe('Update Main Profile', function (): void {
         ],
     ]);
 
-
     it('check data update', function (): void {
         $user = User::factory()->withProfile()->create();
         $updateData = [
@@ -127,4 +126,3 @@ function mockUpdateMainProfileRequest(array $data, User $user): UpdateProfileMai
 
     return $request;
 }
-

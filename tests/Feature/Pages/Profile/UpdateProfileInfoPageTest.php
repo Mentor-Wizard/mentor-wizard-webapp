@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;

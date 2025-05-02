@@ -87,7 +87,6 @@ describe('Profile data Validation', function (): void {
             ->and($validator->errors()->get('phone'))->toContain('The phone field format is invalid.');
     });
 
-
     it('wrong data length', function (): void {
         $request = new UpdateProfileInfoRequest;
 

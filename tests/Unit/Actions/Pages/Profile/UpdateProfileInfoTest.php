@@ -3,13 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\Profile\UpdateProfileInfoPage;
-use App\Actions\Pages\Profile\UpdateProfileMainPage;
 use App\Http\Requests\Profile\UpdateProfileInfoRequest;
 use App\Http\Requests\Profile\UpdateProfileMainRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,7 +31,7 @@ describe('Update Info Profile', function (): void {
             ->and($result->getTargetUrl())->toBe(route('profile.edit'));
     })->with([
         'info updated user with new email' => fn (): array => [
-            'user' => User::factory()->withProfile()->create(),
+            'user'       => User::factory()->withProfile()->create(),
             'updateData' => [
                 'linkedin'    => 'https://www.linkedin.com/in/john',
                 'telegram'    => 'https://t.me/john',
@@ -41,7 +39,7 @@ describe('Update Info Profile', function (): void {
                 'description' => 'description',
                 'phone'       => '+380671234567',
             ],
-        ]
+        ],
     ]);
 
     it('check data update', function (): void {
