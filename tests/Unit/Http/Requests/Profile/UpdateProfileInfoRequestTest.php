@@ -107,4 +107,22 @@ describe('Profile data Validation', function (): void {
             ->and($validator->errors()->get('description'))
             ->toContain('The description field must not be greater than 1000 characters.');
     });
+
+    it('requires incorrect data', function (): void {
+        $request = new UpdateProfileInfoRequest;
+
+        $validator = Validator::make([
+            'linkedin'    => 'linkedin_linkedin_linkedin',
+            'telegram'    => 'telegram_telegram_telegram',
+            'whatsapp'    => 'whatsapp_whatsapp',
+        ], $request->rules());
+
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->get('linkedin'))
+            ->toContain('The linkedin field format is invalid.')
+            ->and($validator->errors()->get('telegram'))
+            ->toContain('The telegram field format is invalid.')
+            ->and($validator->errors()->get('whatsapp'))
+            ->toContain('The whatsapp field format is invalid.');
+    });
 });

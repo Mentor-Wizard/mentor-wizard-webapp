@@ -66,6 +66,7 @@ describe('Profile data Validation', function (): void {
         $user = User::factory()->make(['id' => 1]);
         $request = new UpdateProfileMainRequest;
         $request->setUserResolver(fn () => $user);
+
         $file = UploadedFile::fake()->image('avatar.docx')->size(2000);
         $validator = Validator::make([
             'name'        => 1,
