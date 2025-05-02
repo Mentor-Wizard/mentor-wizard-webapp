@@ -43,6 +43,11 @@ describe('Update Profile', function (): void {
             'updateData' => [
                 'name'      => 'John',
                 'last_name' => 'Dou',
+                'linkedin' => 'linkedin',
+                'telegram' => 'telegram',
+                'whatsapp' => 'whatsapp',
+                'description' => 'description',
+                'phone' => '+380671234567',
                 'email'     => 'john.updated@example.com',
             ],
         ],
@@ -54,6 +59,11 @@ describe('Update Profile', function (): void {
             'updateData' => [
                 'name'      => 'Jane',
                 'last_name' => 'Dou',
+                'linkedin' => 'linkedin',
+                'telegram' => 'telegram',
+                'whatsapp' => 'whatsapp',
+                'description' => 'description',
+                'phone' => '+380671234567',
                 'email'     => 'jane@example.com',
             ],
         ],
@@ -64,6 +74,11 @@ describe('Update Profile', function (): void {
         $updateData = [
             'name'      => 'Jane',
             'last_name' => 'Dou',
+            'linkedin' => 'linkedin',
+            'telegram' => 'telegram',
+            'whatsapp' => 'whatsapp',
+            'description' => 'description',
+            'phone' => '+380671234567',
             'email'     => 'jane@example.com',
         ];
 
@@ -75,7 +90,12 @@ describe('Update Profile', function (): void {
         $request = mockUpdateProfileRequest($updateData, $user);
         $data = $method->invoke($action, $request);
         expect($data['name'])->toBe('Jane')
-            ->and($data['last_name'])->toBe('Dou');
+            ->and($data['last_name'])->toBe('Dou')
+            ->and($data['linkedin'])->toBe('linkedin')
+            ->and($data['telegram'])->toBe('telegram')
+            ->and($data['whatsapp'])->toBe('whatsapp')
+            ->and($data['description'])->toBe('description')
+            ->and($data['phone'])->toBe('+380671234567');
     });
 
     it('resets email verification when email changes', function (): void {
@@ -89,6 +109,11 @@ describe('Update Profile', function (): void {
         $request = mockUpdateProfileRequest([
             'name'      => 'John',
             'last_name' => 'Dou',
+            'linkedin' => 'linkedin',
+            'telegram' => 'telegram',
+            'whatsapp' => 'whatsapp',
+            'description' => 'description',
+            'phone' => '+380671234567',
             'email'     => 'new.email@example.com',
         ], $user);
 
@@ -122,6 +147,11 @@ function mockUpdateProfileRequest(array $data, User $user): UpdateProfileRequest
     $request->shouldReceive('get')->with('email')->andReturn($data['email']);
     $request->shouldReceive('get')->with('name')->andReturn($data['name']);
     $request->shouldReceive('get')->with('last_name')->andReturn($data['last_name']);
+    $request->shouldReceive('get')->with('linkedin')->andReturn($data['linkedin']);
+    $request->shouldReceive('get')->with('telegram')->andReturn($data['telegram']);
+    $request->shouldReceive('get')->with('whatsapp')->andReturn($data['whatsapp']);
+    $request->shouldReceive('get')->with('description')->andReturn($data['description']);
+    $request->shouldReceive('get')->with('phone')->andReturn($data['phone']);
 
     $request->shouldReceive('hasFile')->with('avatar')->andReturn(false);
 

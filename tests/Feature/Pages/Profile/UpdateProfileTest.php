@@ -156,6 +156,7 @@ describe('Unsuccessful Scenarios', function (): void {
         $email = str_repeat('test', 300).'@admin.com';
         $response = $this->patch(route('profile.update'), [
             'name'  => 'change_name',
+            'last_name'  => 'change_last_name',
             'email' => $email,
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -171,6 +172,7 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $response = $this->patch(route('profile.update'), [
             'name'  => 'change_name',
+            'last_name'  => 'change_last_name',
             'email' => '',
         ])
             ->assertStatus(Response::HTTP_FOUND);

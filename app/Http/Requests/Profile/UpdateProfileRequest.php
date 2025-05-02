@@ -49,8 +49,10 @@ class UpdateProfileRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        $this->merge([
-            'phone' => str_replace(' ', '', $this->phone),
-        ]);
+        if(!empty($this->phone)) {
+            $this->merge([
+                'phone' => str_replace(' ', '', $this->phone),
+            ]);
+        }
     }
 }
