@@ -34,7 +34,7 @@ class SocialiteCallback
 
         $user = User::query()->firstOrCreate(['email' => $email], [
             'username' => $socialiteUser->getNickname() ?: $socialiteUser->getName(),
-            'password' => Str::random(User::DEFAULT_PASSWORD_LENGHT),
+            'password' => Str::random(User::MIN_PASSWORD_LENGTH),
         ]);
 
         Auth::login($user);
