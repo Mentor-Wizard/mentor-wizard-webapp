@@ -60,12 +60,9 @@ describe('Update Info Profile', function (): void {
         ];
 
         $action = new UpdateProfileInfoPage;
-        $reflection = new ReflectionClass(UpdateProfileInfoPage::class);
-        $method = $reflection->getMethod('dataUpdate');
-        $method->setAccessible(true);
 
         $request = mockUpdateInfoProfileRequest($updateData, $user);
-        $data = $method->invoke($action, $request);
+        $data = $request->validated();
         expect($data['linkedin'])->toBe('https://www.linkedin.com/in/john')
             ->and($data['telegram'])->toBe('https://t.me/john')
             ->and($data['whatsapp'])->toBe('https://wa.me/380671234578')
@@ -77,11 +74,7 @@ describe('Update Info Profile', function (): void {
 function mockUpdateInfoProfileRequest(array $data, User $user): UpdateProfileMainRequest|MockInterface
 {
     $request = Mockery::mock(UpdateProfileInfoRequest::class);
-    $request->shouldReceive('get')->with('linkedin')->andReturn($data['linkedin']);
-    $request->shouldReceive('get')->with('telegram')->andReturn($data['telegram']);
-    $request->shouldReceive('get')->with('whatsapp')->andReturn($data['whatsapp']);
-    $request->shouldReceive('get')->with('description')->andReturn($data['description']);
-    $request->shouldReceive('get')->with('phone')->andReturn($data['phone']);
+    $request->shouldReceive('validated')->andReturn($data);
 
     return $request;
 }

@@ -69,7 +69,7 @@ describe('Update Main Profile', function (): void {
 
         $action = new UpdateProfileMainPage;
         $reflection = new ReflectionClass(UpdateProfileMainPage::class);
-        $method = $reflection->getMethod('dataUpdate');
+        $method = $reflection->getMethod('getRequestData');
         $method->setAccessible(true);
 
         $request = mockUpdateMainProfileRequest($updateData, $user);

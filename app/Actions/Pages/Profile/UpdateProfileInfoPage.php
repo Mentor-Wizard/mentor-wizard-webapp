@@ -16,19 +16,8 @@ class UpdateProfileInfoPage
     {
         $user = auth()->user();
 
-        $user->profile()->updateOrCreate([], $this->dataUpdate($request));
+        $user->profile()->updateOrCreate([], $request->validated());
 
         return redirect()->route('profile.edit');
-    }
-
-    private function dataUpdate(UpdateProfileInfoRequest $request): array
-    {
-        return [
-            'linkedin'    => $request->get('linkedin'),
-            'telegram'    => $request->get('telegram'),
-            'whatsapp'    => $request->get('whatsapp'),
-            'description' => $request->get('description'),
-            'phone'       => $request->get('phone'),
-        ];
     }
 }

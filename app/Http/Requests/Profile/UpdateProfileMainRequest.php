@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Profile;
 
-use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateProfileMainRequest extends FormRequest
 {
@@ -25,7 +23,7 @@ class UpdateProfileMainRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                'unique:users,email',
             ],
             'avatar' => [
                 'nullable',

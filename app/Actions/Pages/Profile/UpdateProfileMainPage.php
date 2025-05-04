@@ -32,7 +32,7 @@ class UpdateProfileMainPage
         $user->save();
 
         /** @var UserProfile $profile */
-        $profile = $user->profile()->updateOrCreate([], $this->dataUpdate($request));
+        $profile = $user->profile()->updateOrCreate([], $this->getRequestData($request));
 
         if ($request->hasFile('avatar')) {
 
@@ -46,7 +46,7 @@ class UpdateProfileMainPage
         return redirect()->route('profile.edit');
     }
 
-    private function dataUpdate(UpdateProfileMainRequest $request): array
+    private function getRequestData(UpdateProfileMainRequest $request): array
     {
         return [
             'name'        => $request->get('name'),
