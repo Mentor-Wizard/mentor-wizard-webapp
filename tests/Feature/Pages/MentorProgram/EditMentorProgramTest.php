@@ -8,6 +8,7 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +31,7 @@ describe('Mentor Program Edit Page', function (): void {
         $mentorProgram = MentorProgram::factory()->create();
         $response = get(route('mentor-program.edit', $mentorProgram->slug));
 
-        $response->assertInertia(fn (Assert $page): Illuminate\Testing\Fluent\AssertableJson => $page
+        $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('MentorProgram/CreateOrEdit')
             ->has('currencies', 4)
             ->whereContains('currencies', 'UAH')
