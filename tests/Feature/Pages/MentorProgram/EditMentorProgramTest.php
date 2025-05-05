@@ -17,9 +17,8 @@ use function Pest\Laravel\get;
 
 describe('Mentor Program Edit Page', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
 
         $this->user = User::factory()->create();
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
@@ -34,10 +33,10 @@ describe('Mentor Program Edit Page', function (): void {
         $response->assertInertia(fn (Assert $page): Illuminate\Testing\Fluent\AssertableJson => $page
             ->component('MentorProgram/CreateOrEdit')
             ->has('currencies', 4)
-            ->where('currencies.1', 'UAH')
-            ->where('currencies.2', 'USD')
-            ->where('currencies.3', 'EUR')
-            ->where('currencies.4', 'GBP')
+            ->whereContains('currencies', 'UAH')
+            ->whereContains('currencies', 'USD')
+            ->whereContains('currencies', 'EUR')
+            ->whereContains('currencies', 'GBP')
             ->has('program')
             ->where('program.id', $mentorProgram->id)
             ->where('program.name', $mentorProgram->name)

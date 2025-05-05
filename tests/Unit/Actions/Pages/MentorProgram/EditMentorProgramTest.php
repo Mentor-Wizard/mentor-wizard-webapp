@@ -15,20 +15,14 @@ describe('Edit Mentor Program', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
 
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
         $this->seed(CurrencySeeder::class);
-        $this->currencies = [
-            1 => 'UAH',
-            2 => 'USD',
-            3 => 'EUR',
-            4 => 'GBP',
-        ];
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
         $this->data = [
             'name'        => 'Test Program',
             'slug'        => 'test-program',
             'description' => 'Test Description',
             'cost'        => 100.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ];
     });
 
@@ -74,10 +68,7 @@ describe('Edit Mentor Program', function (): void {
         $currencies = Arr::get($result->toResponse(request())->getOriginalContent()->getData(), 'page.props.currencies');
 
         expect($currencies)->toHaveCount(4)
-            ->and($currencies[1])->toBe('UAH')
-            ->and($currencies[2])->toBe('USD')
-            ->and($currencies[3])->toBe('EUR')
-            ->and($currencies[4])->toBe('GBP');
+            ->toContain('USD', 'EUR', 'UAH', 'GBP');
     });
 
     it('can handle null mentor program', function (): void {

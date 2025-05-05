@@ -8,6 +8,7 @@ use App\Models\Currency;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,24 +18,23 @@ use function Pest\Laravel\get;
 
 describe('Mentor Program Create Page', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
 
         $this->user = User::factory()->create();
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
     });
 
     it('renders mentor program creation page with currencies', function (): void {
-        $response = $this->actingAs($this->user)->get(route('mentor-program.create'));
 
-        $response->assertInertia(fn (Assert $page): Illuminate\Testing\Fluent\AssertableJson => $page
+        $response = $this->actingAs($this->user)->get(route('mentor-program.create'));
+        $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('MentorProgram/CreateOrEdit')
             ->has('currencies', 4)
-            ->where('currencies.1', 'UAH')
-            ->where('currencies.2', 'USD')
-            ->where('currencies.3', 'EUR')
-            ->where('currencies.4', 'GBP')
+            ->whereContains('currencies', 'UAH')
+            ->whereContains('currencies', 'USD')
+            ->whereContains('currencies', 'EUR')
+            ->whereContains('currencies', 'GBP')
         );
     });
 
@@ -51,9 +51,9 @@ describe('Mentor Program Create Page', function (): void {
     it('response contains required page structure', function (): void {
         $response = $this->actingAs($this->user)->get(route('mentor-program.create'));
 
-        $response->assertInertia(fn (Assert $page): Illuminate\Testing\Fluent\AssertableJson => $page
+        $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('MentorProgram/CreateOrEdit')
-            ->has('currencies')
+            ->has('currencies', 4)
         );
     });
 

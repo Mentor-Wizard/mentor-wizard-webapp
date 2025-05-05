@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
+use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
@@ -16,9 +17,9 @@ use function Pest\Laravel\put;
 
 describe('Mentor Program Update Page', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = User::factory()->create();
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
@@ -29,7 +30,7 @@ describe('Mentor Program Update Page', function (): void {
             'slug'        => 'original-program',
             'description' => 'Original Description',
             'cost'        => 100.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
     });
 
@@ -40,7 +41,7 @@ describe('Mentor Program Update Page', function (): void {
             'name'        => 'Updated Program Name',
             'description' => 'Updated Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
             'slug'        => $this->mentorProgram->slug,
         ];
 
@@ -53,7 +54,7 @@ describe('Mentor Program Update Page', function (): void {
             'name'        => 'Updated Program Name',
             'description' => 'Updated Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
             'slug'        => $this->mentorProgram->slug,
         ]);
     });
@@ -67,7 +68,7 @@ describe('Mentor Program Update Page', function (): void {
             'name'        => 'Updated Program Name',
             'description' => 'Updated Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
         ]);
 
         $response->assertStatus(Response::HTTP_NOT_FOUND);
@@ -83,7 +84,7 @@ describe('Mentor Program Update Page', function (): void {
             'slug'        => 'another-program',
             'description' => 'Another Description',
             'cost'        => 75.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
 
         actingAs($this->user);
@@ -92,7 +93,7 @@ describe('Mentor Program Update Page', function (): void {
             'name'        => 'Updated Program Name',
             'description' => 'Updated Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
         ]);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
@@ -102,7 +103,7 @@ describe('Mentor Program Update Page', function (): void {
             'name'        => 'Another Program',
             'description' => 'Another Description',
             'cost'        => 75.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
     });
 

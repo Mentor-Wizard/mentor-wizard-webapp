@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Pages\MentorProgram\DestroyMentorProgramPage;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
+use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
@@ -18,9 +19,9 @@ mutates(DestroyMentorProgramPage::class);
 
 describe('Destroy Mentor Program', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = createAndAuthenticateMentorForDestroy();
         $this->request = Request::create('/')->setUserResolver(fn (): User => $this->user);
@@ -31,7 +32,7 @@ describe('Destroy Mentor Program', function (): void {
             'slug'        => 'test-program',
             'description' => 'Test Description',
             'cost'        => 100.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
     });
 
@@ -61,7 +62,7 @@ describe('Destroy Mentor Program', function (): void {
             'slug'        => 'another-program',
             'description' => 'Another Description',
             'cost'        => 75.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
 
         try {

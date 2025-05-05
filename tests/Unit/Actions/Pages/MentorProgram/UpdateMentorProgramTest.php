@@ -6,6 +6,7 @@ use App\Actions\Pages\MentorProgram\UpdateMentorProgramPage;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Http\Requests\MentorProgram\UpdateMentorProgramRequest;
+use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
@@ -20,9 +21,9 @@ mutates(UpdateMentorProgramPage::class);
 
 describe('Store Mentor Program Request Authorization', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
     });
 
     it('authorizes authenticated mentor', function (): void {
@@ -51,9 +52,9 @@ describe('Store Mentor Program Request Authorization', function (): void {
 
 describe('UpdateMentorProgramRequest Validation', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = createAndAuthenticateMentorForUpdate();
         $this->prepareRequest = function (UpdateMentorProgramRequest $request): void {
@@ -71,7 +72,22 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
         expect($request->authorize())->toBeTrue();
         expect($request->rules())->toBeArray();
         expect(fn () => $request->validateResolved())->not->toThrow(ValidationException::class);
-    })->with('validMentorProgramData');
+    })->with([
+        'full valid data' => fn (): array => [
+            'name'        => 'Valid Program Name',
+            'slug'        => 'valid-program-slug',
+            'description' => 'Valid program description',
+            'cost'        => 99.99,
+            'currency_id' => array_key_first($this->currencies),
+        ],
+        'minimal valid data' => fn (): array => [
+            'name'        => 'Min Program',
+            'slug'        => 'min-program',
+            'description' => 'Min description',
+            'cost'        => 0,
+            'currency_id' => array_key_first($this->currencies),
+        ],
+    ]);
 
     it('fails validation with invalid data', function (array $invalidData, string $errorField): void {
         $request = new UpdateMentorProgramRequest;
@@ -84,7 +100,59 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
         } catch (ValidationException $validationException) {
             expect($validationException->errors())->toHaveKey($errorField);
         }
-    })->with('invalidMentorProgramData');
+    })->with([
+        'empty name' => fn (): array => [
+            [
+                'name'        => '',
+                'slug'        => 'valid-slug',
+                'description' => 'Valid description',
+                'cost'        => 99.99,
+                'currency_id' => array_key_first($this->currencies),
+            ],
+            'errorField' => 'name',
+        ],
+        'too long name' => fn (): array => [
+            [
+                'name'        => str_repeat('a', 256),
+                'slug'        => 'valid-slug',
+                'description' => 'Valid description',
+                'cost'        => 99.99,
+                'currency_id' => array_key_first($this->currencies),
+            ],
+            'errorField' => 'name',
+        ],
+        'invalid slug format' => fn (): array => [
+            [
+                'name'        => 'Valid Name',
+                'slug'        => 123,
+                'description' => 'Valid description',
+                'cost'        => 99.99,
+                'currency_id' => array_key_first($this->currencies),
+            ],
+            'errorField' => 'slug',
+        ],
+        'negative cost' => fn (): array => [
+            [
+                'name'        => 'Valid Name',
+                'slug'        => 'valid-slug',
+                'description' => 'Valid description',
+                'cost'        => -1,
+                'currency_id' => array_key_first($this->currencies),
+            ],
+            'errorField' => 'cost',
+        ],
+        'non-existent currency' => fn (): array => [
+            [
+                'name'        => 'Valid Name',
+                'slug'        => 'valid-slug',
+                'description' => 'Valid description',
+                'cost'        => 99.99,
+                'currency_id' => 999,
+            ],
+            'errorField' => 'currency_id',
+        ],
+
+    ]);
 
     it('prepares slug for validation', function (): void {
         $request = new UpdateMentorProgramRequest;
@@ -92,7 +160,7 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
             'name'        => 'Test Program Name',
             'description' => 'Test Description',
             'cost'        => 99.99,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
 
         ($this->prepareRequest)($request);
@@ -107,9 +175,9 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
 
 describe('Update Mentor Program', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = createAndAuthenticateMentorForUpdate();
 
@@ -119,7 +187,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => 'original-program',
             'description' => 'Original Description',
             'cost'        => 50.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
     });
 
@@ -129,7 +197,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => $this->mentorProgram->slug,
             'description' => 'Updated Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
         ];
 
         $request = mockUpdateMentorProgramRequest($updateData);
@@ -154,7 +222,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => $this->mentorProgram->slug,
             'description' => 'Updated Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
         ];
 
         $request = mockUpdateMentorProgramRequest($updateData);
@@ -171,7 +239,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => $this->mentorProgram->slug,
             'description' => 'Updated Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
         ];
 
         $request = mockUpdateMentorProgramRequest($updateData);
@@ -193,7 +261,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => 'another-program',
             'description' => 'Another Description',
             'cost'        => 75.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
 
         $updateData = [
@@ -201,7 +269,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => $this->mentorProgram->slug,
             'description' => 'Trying to Update Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
         ];
 
         $request = mockUpdateMentorProgramRequest($updateData);
@@ -220,7 +288,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => 'another-program',
             'description' => 'Another Description',
             'cost'        => 75.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
 
         $updateData = [
@@ -228,7 +296,7 @@ describe('Update Mentor Program', function (): void {
             'slug'        => $this->mentorProgram->slug,
             'description' => 'Trying to Update Description',
             'cost'        => 150.0,
-            'currency_id' => 2,
+            'currency_id' => array_keys($this->currencies)[1],
         ];
 
         $request = mockUpdateMentorProgramRequest($updateData);

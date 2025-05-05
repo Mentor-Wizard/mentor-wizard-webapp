@@ -6,6 +6,7 @@ use App\Actions\Pages\MentorProgram\StoreMentorProgramPage;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
+use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
@@ -19,7 +20,6 @@ mutates(StoreMentorProgramPage::class);
 
 describe('Store Mentor Program Request Authorization', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
         $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
     });
@@ -50,9 +50,9 @@ describe('Store Mentor Program Request Authorization', function (): void {
 
 describe('StoreMentorProgramRequest Validation', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = createAndAuthenticateMentorForStore();
         $this->prepareRequest = function (StoreMentorProgramRequest $request): void {
@@ -68,7 +68,7 @@ describe('StoreMentorProgramRequest Validation', function (): void {
             'name'        => 'Test Program Name',
             'description' => 'Test Description',
             'cost'        => 99.99,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
         ($this->prepareRequest)($request);
 
@@ -100,7 +100,7 @@ describe('StoreMentorProgramRequest Validation', function (): void {
             'name'        => 'Test Program Name',
             'description' => 'Test Description',
             'cost'        => 99.99,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
 
         ($this->prepareRequest)($request);
@@ -150,9 +150,9 @@ describe('StoreMentorProgramRequest Validation', function (): void {
 
 describe('Store Mentor Program', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = createAndAuthenticateMentorForStore();
     });
@@ -163,7 +163,7 @@ describe('Store Mentor Program', function (): void {
             'slug'        => 'test-program',
             'description' => 'Test Description',
             'cost'        => 100.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ];
         $request = mockStoreMentorProgramRequest($this->validData);
         $action = new StoreMentorProgramPage;
@@ -185,7 +185,7 @@ describe('Store Mentor Program', function (): void {
             'slug'        => 'test-program',
             'description' => 'Test Description',
             'cost'        => 100.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ]);
 
         $response = (new StoreMentorProgramPage)->handle($request);

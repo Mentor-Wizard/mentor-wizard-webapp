@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
+use App\Models\Currency;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
@@ -15,9 +16,9 @@ use function Pest\Laravel\post;
 
 describe('Mentor Program Store Page', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
-        $this->seed(CurrencySeeder::class);
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = User::factory()->create();
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
@@ -30,7 +31,7 @@ describe('Mentor Program Store Page', function (): void {
             'name'        => 'New Mentor Program',
             'description' => 'This is a description for the new mentor program.',
             'cost'        => 200.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ];
 
         $response = post(route('mentor-program.store'), $programData);
@@ -38,11 +39,11 @@ describe('Mentor Program Store Page', function (): void {
         $response->assertRedirect(route('mentor-program.create'));
 
         $this->assertDatabaseHas('mentor_programs', [
+            'mentor_id'   => $this->user->id,
             'name'        => 'New Mentor Program',
             'description' => 'This is a description for the new mentor program.',
             'cost'        => 200.0,
-            'currency_id' => 1,
-            'mentor_id'   => $this->user->id,
+            'currency_id' => array_key_first($this->currencies),
         ]);
     });
 
@@ -70,7 +71,7 @@ describe('Mentor Program Store Page', function (): void {
             'name'        => 'Unauthorized Program',
             'description' => 'This should not be created.',
             'cost'        => 100.0,
-            'currency_id' => 1,
+            'currency_id' => array_key_first($this->currencies),
         ];
 
         $response = post(route('mentor-program.store'), $programData);

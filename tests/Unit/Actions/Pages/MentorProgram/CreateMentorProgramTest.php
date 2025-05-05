@@ -11,14 +11,8 @@ mutates(CreateMentorProgramPage::class);
 
 describe('Create Mentor Program', function (): void {
     beforeEach(function (): void {
-        DB::statement('ALTER SEQUENCE currencies_id_seq RESTART WITH 1');
         $this->seed(CurrencySeeder::class);
-        $this->currencies = [
-            1 => 'UAH',
-            2 => 'USD',
-            3 => 'EUR',
-            4 => 'GBP',
-        ];
+        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
     });
 
     it('renders the mentor program creation page with currencies', function (): void {
@@ -55,9 +49,6 @@ describe('Create Mentor Program', function (): void {
         $currencies = Arr::get($result->toResponse(request())->getOriginalContent()->getData(), 'page.props.currencies');
 
         expect($currencies)->toHaveCount(4)
-            ->and($currencies[1])->toBe('UAH')
-            ->and($currencies[2])->toBe('USD')
-            ->and($currencies[3])->toBe('EUR')
-            ->and($currencies[4])->toBe('GBP');
+            ->toContain('USD', 'EUR', 'UAH', 'GBP');
     });
 });
