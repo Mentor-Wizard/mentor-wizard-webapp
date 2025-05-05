@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Http\Requests\Profile\UpdateProfileInfoRequest;
+use App\Http\Requests\Profile\UpdateProfileRequest;
 
-mutates(UpdateProfileInfoRequest::class);
+mutates(UpdateProfileRequest::class);
 
 describe('Profile data Validation', function (): void {
     it('requires correct data', function (): void {
-        $request = new UpdateProfileInfoRequest;
+        $request = new UpdateProfileRequest;
 
         $validator = Validator::make([
+            'name'        => 'current_name',
+            'last_name'   => 'last_name!',
             'linkedin'    => 'https://www.linkedin.com/in/john',
             'telegram'    => 'https://t.me/john',
             'whatsapp'    => 'https://wa.me/john',
@@ -23,7 +25,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('requires current password', function (): void {
-        $request = new UpdateProfileInfoRequest;
+        $request = new UpdateProfileRequest;
 
         $request->merge([
             'phone' => '+38 067 123 45 67',
@@ -37,11 +39,13 @@ describe('Profile data Validation', function (): void {
     });
 
     it('returns expected validation keys', function (): void {
-        $request = new UpdateProfileInfoRequest;
+        $request = new UpdateProfileRequest;
 
         $rules = $request->rules();
 
         expect(array_keys($rules))->toEqualCanonicalizing([
+            'name',
+            'last_name',
             'linkedin',
             'telegram',
             'whatsapp',
@@ -51,9 +55,11 @@ describe('Profile data Validation', function (): void {
     });
 
     it('nullable fields', function (): void {
-        $request = new UpdateProfileInfoRequest;
+        $request = new UpdateProfileRequest;
 
         $validator = Validator::make([
+            'name'         => null,
+            'last_name'    => null,
             'linkedin'     => null,
             'telegram'     => null,
             'whatsapp'     => null,
@@ -62,6 +68,8 @@ describe('Profile data Validation', function (): void {
         ], $request->rules());
 
         expect($validator->fails())->toBeFalse()
+            ->and($validator->errors()->has('name'))->toBeFalse()
+            ->and($validator->errors()->has('last_name'))->toBeFalse()
             ->and($validator->errors()->has('linkedin'))->toBeFalse()
             ->and($validator->errors()->has('telegram'))->toBeFalse()
             ->and($validator->errors()->has('whatsapp'))->toBeFalse()
@@ -70,8 +78,10 @@ describe('Profile data Validation', function (): void {
     });
 
     it('wrong data type', function (): void {
-        $request = new UpdateProfileInfoRequest;
+        $request = new UpdateProfileRequest;
         $validator = Validator::make([
+            'name'        => 1,
+            'last_name'   => 1,
             'linkedin'    => 1,
             'telegram'    => 1,
             'whatsapp'    => 1,
@@ -80,6 +90,8 @@ describe('Profile data Validation', function (): void {
         ], $request->rules());
 
         expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->get('name'))->toContain('The name field must be a string.')
+            ->and($validator->errors()->get('last_name'))->toContain('The last name field must be a string.')
             ->and($validator->errors()->get('linkedin'))->toContain('The linkedin field must be a string.')
             ->and($validator->errors()->get('telegram'))->toContain('The telegram field must be a string.')
             ->and($validator->errors()->get('whatsapp'))->toContain('The whatsapp field must be a string.')
@@ -87,10 +99,12 @@ describe('Profile data Validation', function (): void {
             ->and($validator->errors()->get('phone'))->toContain('The phone field format is invalid.');
     });
 
-    it('wrong data length', function (): void {
-        $request = new UpdateProfileInfoRequest;
+    it('wrong data length max', function (): void {
+        $request = new UpdateProfileRequest;
 
         $validator = Validator::make([
+            'name'        => str_repeat('a', 60),
+            'last_name'   => str_repeat('a', 60),
             'linkedin'    => 'https://www.linkedin.com/in/'.str_repeat('a', 600),
             'telegram'    => 'https://t.me/'.str_repeat('a', 600),
             'whatsapp'    => 'https://wa.me/'.str_repeat('a', 600),
@@ -98,6 +112,10 @@ describe('Profile data Validation', function (): void {
         ], $request->rules());
 
         expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->get('name'))
+            ->toContain('The name field must not be greater than 50 characters.')
+            ->and($validator->errors()->get('last_name'))
+            ->toContain('The last name field must not be greater than 50 characters.')
             ->and($validator->errors()->get('linkedin'))
             ->toContain('The linkedin field must not be greater than 200 characters.')
             ->and($validator->errors()->get('telegram'))
@@ -109,7 +127,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('requires incorrect data', function (): void {
-        $request = new UpdateProfileInfoRequest;
+        $request = new UpdateProfileRequest;
 
         $validator = Validator::make([
             'linkedin'    => 'linkedin_linkedin_linkedin',
@@ -124,5 +142,16 @@ describe('Profile data Validation', function (): void {
             ->toContain('The telegram field format is invalid.')
             ->and($validator->errors()->get('whatsapp'))
             ->toContain('The whatsapp field format is invalid.');
+    });
+
+    it('wrong data length min', function (): void {
+        $request = new UpdateProfileRequest;
+        $validator = Validator::make([
+            'name'        => 'a',
+            'last_name'   => 'a',
+        ], $request->rules());
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->get('name'))->toContain('The name field must be at least 3 characters.')
+            ->and($validator->errors()->get('last_name'))->toContain('The last name field must be at least 3 characters.');
     });
 });

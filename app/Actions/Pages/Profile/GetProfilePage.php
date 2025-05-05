@@ -20,7 +20,7 @@ class GetProfilePage
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => Auth::user() instanceof MustVerifyEmail, // @pest-mutate-ignore
             'status'          => session('status'),
-            'avatar'          => Auth::user()->profile?->getFirstMediaUrl('avatar') ?? UserProfile::DEFAULT_AVATAR_URL,
+            'avatar'          => Auth::user()->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
         ]);
     }
 }

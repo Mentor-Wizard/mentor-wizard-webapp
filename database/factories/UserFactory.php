@@ -44,9 +44,4 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
-
-    public function withProfile(array $data = []): static
-    {
-        return $this->has(UserProfile::factory()->state($data), 'profile');
-    }
 }

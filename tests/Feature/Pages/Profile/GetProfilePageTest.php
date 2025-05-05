@@ -36,7 +36,7 @@ describe('Profile Page', function (): void {
     it('shows uploaded avatar if media exists', function (): void {
         Storage::fake('public');
         $this->seed(RoleSeeder::class);
-        $user = User::factory()->withProfile()->create();
+        $user = User::factory()->create();
         $this->actingAs($user);
 
         $file = UploadedFile::fake()->image('avatar.jpg');

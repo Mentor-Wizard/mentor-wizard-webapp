@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateProfileMainRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -19,8 +19,12 @@ class UpdateProfileMainRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => ['required', 'string', 'min:5', 'max:50'],
-            'last_name'   => ['required', 'string', 'min:5', 'max:50'],
+            'username'        => [
+                'required',
+                'string',
+                'min:5',
+                'max:255',
+            ],
             'email'       => [
                 'required',
                 'email',

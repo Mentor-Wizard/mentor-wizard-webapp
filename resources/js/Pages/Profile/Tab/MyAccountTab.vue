@@ -1,15 +1,15 @@
 <script setup>
 
-import UpdateProfileInformationForm from "@/Pages/Profile/Partials/Form/UpdateProfileInformationForm.vue";
-import UpdateProfileMainForm from "@/Pages/Profile/Partials/Form/UpdateProfileMainForm.vue";
+import UpdateProfileForm from "@/Pages/Profile/Partials/Form/UpdateProfileForm.vue";
+import UpdateUserForm from "@/Pages/Profile/Partials/Form/UpdateUserForm.vue";
 import DeleteUserForm from "@/Pages/Profile/Partials/Form/DeleteUserForm.vue";
 import UpdatePasswordForm from "@/Pages/Profile/Partials/Form/UpdatePasswordForm.vue";
 </script>
 
 <template>
-  <UpdateProfileMainForm/>
+  <UpdateUserForm/>
 
-  <UpdateProfileInformationForm/>
+  <UpdateProfileForm/>
 
   <UpdatePasswordForm/>
 

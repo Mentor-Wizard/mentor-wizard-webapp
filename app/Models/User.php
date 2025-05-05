@@ -18,6 +18,8 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
+ * @property string $username
+ * @property string $email
  * @property-read UserProfile|null $profile
  *
  * @mixin IdeHelperUser

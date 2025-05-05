@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Profile;
 
-use App\Http\Requests\Profile\UpdateProfileInfoRequest;
+use App\Http\Requests\Profile\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class UpdateProfileInfoPage
+class UpdateProfilePage
 {
     use AsController;
 
-    public function handle(UpdateProfileInfoRequest $request): RedirectResponse
+    public function handle(UpdateProfileRequest $request): RedirectResponse
     {
         $user = auth()->user();
 

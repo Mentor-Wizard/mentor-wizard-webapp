@@ -17,20 +17,19 @@ beforeEach(function (): void {
 });
 
 describe('Successful Scenarios', function (): void {
-    it('renders the profile page', function (): void {
+    it('renders the user page', function (): void {
         $this->get(route('profile.edit'))
             ->assertStatus(Response::HTTP_OK);
     });
 
-    it('updates the name and email successfully', function ($filename): void {
+    it('updates the username and email successfully', function ($filename): void {
         $user = User::factory()->create();
 
         Storage::fake('public');
         $file = UploadedFile::fake()->image($filename);
 
-        $this->actingAs($user)->patch(route('profile.update-main'), [
-            'name'        => 'change_name',
-            'last_name'   => 'change_last_name',
+        $this->actingAs($user)->patch(route('user.update'), [
+            'username'    => 'change_name',
             'email'       => 'change_email@email.com',
             'avatar'      => $file,
         ])
@@ -39,8 +38,7 @@ describe('Successful Scenarios', function (): void {
 
         $user->refresh();
 
-        expect($user->profile->name)->toBe('change_name')
-            ->and($user->profile->last_name)->toBe('change_last_name')
+        expect($user->username)->toBe('change_name')
             ->and($user->email)->toBe('change_email@email.com');
         $this->assertDatabaseHas('media', [
             'file_name'    => $filename,
@@ -53,29 +51,25 @@ describe('Unsuccessful Scenarios', function (): void {
         $this->get('/profil-ee')->assertStatus(Response::HTTP_NOT_FOUND);
     });
 
-    it('does not allow name longer than the limit', function (): void {
+    it('does not allow username longer than the limit', function (): void {
         $user = User::factory()->create();
 
         $name = str_repeat('test', 300);
-        $response = $this->patch(route('profile.update-main'), [
-            'name'     => $name,
-            'email'    => 'change_email@email.com',
+        $response = $this->patch(route('user.update'), [
+            'username'  => $name,
+            'email'     => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
         $this->assertFalse($response->isRedirect(route('profile.edit')));
-
-        $user->refresh();
-        $this->assertNull($user->profile);
     });
 
     it('file extend is wrong', function (): void {
         $file = UploadedFile::fake()->create('avatar.doc', 100, 'application/msword');
 
         $response = $this
-            ->patch(route('profile.update-main'), [
-                'name'        => 'change_name',
-                'last_name'   => 'change_last_name',
+            ->patch(route('user.update'), [
+                'username'    => 'change_name',
                 'email'       => 'change_email@email.com',
                 'avatar'      => $file,
             ]);
@@ -85,14 +79,13 @@ describe('Unsuccessful Scenarios', function (): void {
         ]);
     });
 
-    it('updates the name and email successfully', function (): void {
+    it('updates the username and email successfully', function (): void {
         $user = User::factory()->create();
 
         $file = UploadedFile::fake()->image('avatar.docx')->size(2000);
 
-        $response = $this->actingAs($user)->patch(route('profile.update-main'), [
-            'name'        => 'change_name',
-            'last_name'   => 'change_last_name',
+        $response = $this->actingAs($user)->patch(route('user.update'), [
+            'username'    => 'change_name',
             'email'       => 'change_email@email.com',
             'avatar'      => $file,
         ]);
@@ -107,9 +100,8 @@ describe('Unsuccessful Scenarios', function (): void {
 
         $file = UploadedFile::fake()->image('avatar.png')->size(2000);
 
-        $response = $this->actingAs($user)->patch(route('profile.update-main'), [
-            'name'        => 'change_name',
-            'last_name'   => 'change_last_name',
+        $response = $this->actingAs($user)->patch(route('user.update'), [
+            'username'    => 'change_name',
             'email'       => 'change_email@email.com',
             'avatar'      => $file,
         ]);
@@ -122,40 +114,34 @@ describe('Unsuccessful Scenarios', function (): void {
     it('does not allow name shorter than the limit', function (): void {
         $user = User::factory()->create();
 
-        $response = $this->patch(route('profile.update-main'), [
-            'name'     => 'A',
+        $response = $this->patch(route('user.update'), [
+            'username' => 'A',
             'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
         $this->assertFalse($response->isRedirect(route('profile.edit')));
-
-        $user->refresh();
-        $this->assertNull($user->profile);
     });
 
     it('does not allow empty name', function (): void {
         $user = User::factory()->create();
 
-        $response = $this->patch(route('profile.update-main'), [
-            'name'     => '',
+        $response = $this->patch(route('user.update'), [
+            'username' => '',
             'email'    => 'change_email@email.com',
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
         $this->assertFalse($response->isRedirect(route('profile.edit')));
-
-        $user->refresh();
-        $this->assertNull($user->profile);
     });
 
     it('does not allow non-unique email', function (): void {
         $user = User::factory()->create();
         $secondUser = User::factory()->create();
 
-        $response = $this->patch(route('profile.update-main'), [
-            'name'  => 'change_name',
-            'email' => $secondUser->email,
+        $response = $this->patch(route('user.update'), [
+            'username'  => 'change_name',
+            'email'     => $secondUser->email,
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
@@ -169,9 +155,8 @@ describe('Unsuccessful Scenarios', function (): void {
         $user = User::factory()->create();
 
         $email = str_repeat('test', 300).'@admin.com';
-        $response = $this->patch(route('profile.update-main'), [
-            'name'       => 'change_name',
-            'last_name'  => 'change_last_name',
+        $response = $this->patch(route('user.update'), [
+            'username'   => 'change_name',
             'email'      => $email,
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -185,9 +170,8 @@ describe('Unsuccessful Scenarios', function (): void {
     it('does not allow empty email', function (): void {
         $user = User::factory()->create();
 
-        $response = $this->patch(route('profile.update-main'), [
-            'name'       => 'change_name',
-            'last_name'  => 'change_last_name',
+        $response = $this->patch(route('user.update'), [
+            'username'   => 'change_name',
             'email'      => '',
         ])
             ->assertStatus(Response::HTTP_FOUND);

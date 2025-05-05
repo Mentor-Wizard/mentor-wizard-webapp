@@ -21,9 +21,11 @@ describe('Successful Scenarios', function (): void {
             ->assertStatus(Response::HTTP_OK);
     });
     it('fill profile', function (): void {
-        $user = User::factory()->withProfile()->create();
+        $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->patch(route('profile.update-info'), [
+        $response = $this->actingAs($user)->patch(route('profile.update'), [
+            'name'        => 'John',
+            'last_name'   => 'Dou',
             'linkedin'    => 'https://www.linkedin.com/in/john',
             'telegram'    => 'https://t.me/john',
             'whatsapp'    => 'https://wa.me/john',
@@ -35,7 +37,10 @@ describe('Successful Scenarios', function (): void {
         $this->assertTrue($response->isRedirect(route('profile.edit')));
 
         $user->refresh();
+
         expect($user->profile->linkedin)->toBe('https://www.linkedin.com/in/john')
+            ->and($user->profile->name)->toBe('John')
+            ->and($user->profile->last_name)->toBe('Dou')
             ->and($user->profile->telegram)->toBe('https://t.me/john')
             ->and($user->profile->whatsapp)->toBe('https://wa.me/john')
             ->and($user->profile->description)->toBe('description')
@@ -51,7 +56,9 @@ describe('Unsuccessful Scenarios', function (): void {
     it('does not allow name longer than the limit', function (): void {
         $user = User::factory()->create();
 
-        $response = $this->patch(route('profile.update-info'), [
+        $response = $this->patch(route('profile.update'), [
+            'name'        => str_repeat('a', 600),
+            'last_name'   => str_repeat('a', 600),
             'linkedin'    => 'https://www.linkedin.com/in/'.str_repeat('a', 600),
             'telegram'    => 'https://t.me/'.str_repeat('a', 600),
             'whatsapp'    => 'https://wa.me/'.str_repeat('a', 600),
@@ -60,8 +67,5 @@ describe('Unsuccessful Scenarios', function (): void {
             ->assertStatus(Response::HTTP_FOUND);
 
         $this->assertFalse($response->isRedirect(route('profile.edit')));
-
-        $user->refresh();
-        $this->assertNull($user->profile);
     });
 });

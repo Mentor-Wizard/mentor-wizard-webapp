@@ -7,7 +7,7 @@ namespace App\Http\Requests\Profile;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProfileInfoRequest extends FormRequest
+class UpdateProfileRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -17,6 +17,18 @@ class UpdateProfileInfoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name'        => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:50',
+            ],
+            'last_name'   => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:50',
+            ],
             'linkedin'    => [
                 'nullable',
                 'string',

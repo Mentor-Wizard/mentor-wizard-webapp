@@ -28,8 +28,7 @@ const chooseFiles = () => {
 }
 
 const form = useForm({
-    name: profile?.name,
-    last_name: profile?.last_name,
+    username: user.username,
     email: user.email,
     avatar: null,
 });
@@ -44,13 +43,13 @@ const onFileChange = (e) => {
 
 const submit = () => {
     const formData = new FormData();
-    formData.append('name', form.name);
+    formData.append('username', form.username);
     formData.append('email', form.email);
     if (form.avatar instanceof File) {
         formData.append('avatar', form.avatar);
     }
 
-    form.patch(route('profile.update-main'), {
+    form.patch(route('user.update'), {
         forceFormData: true,
     });
 };
@@ -59,7 +58,7 @@ const submit = () => {
 <template>
     <div class="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
         <div>
-            <h2 class="text-base/7 font-semibold">Main Information</h2>
+            <h2 class="text-base/7 font-semibold">Account Information</h2>
             <p class="mt-1 text-sm/6 text-gray-400">Use a permanent address where you can receive mail.</p>
         </div>
         <form @submit.prevent="submit" class="md:col-span-2">
@@ -85,22 +84,12 @@ const submit = () => {
                 </div>
 
                 <div class="col-span-full">
-                    <InputLabel for="name" value="Name"/>
+                    <InputLabel for="username" value="User name"/>
 
                     <div class="mt-2">
-                        <TextInput id="name" v-model="form.name" required/>
+                        <TextInput id="username" v-model="form.username" required/>
                     </div>
-                    <InputError class="mt-2" :message="form.errors.name"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="last_name" value="Last name"/>
-
-                    <div class="mt-2">
-                        <TextInput id="last_name" v-model="form.last_name" required/>
-                    </div>
-
-                    <InputError class="mt-2" :message="form.errors.last_name"/>
+                    <InputError class="mt-2" :message="form.errors.username"/>
                 </div>
 
                 <div class="col-span-full">
@@ -114,7 +103,7 @@ const submit = () => {
                     <InputError class="mt-2" :message="form.errors.email"/>
                 </div>
 
-                <div class="mt-8 flex">
+                <div class="flex">
                     <div class="w-auto">
                         <PrimaryButton :class="{ 'opacity-25 cursor-not-allowed': form.processing }"
                                        :disabled="form.processing">
