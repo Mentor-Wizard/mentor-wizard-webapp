@@ -6,7 +6,6 @@ import TextInput from '@/Components/UI/Forms/TextInput.vue';
 import {useForm, usePage} from '@inertiajs/vue3';
 import InputSuccess from "@/Components/UI/Forms/InputSuccess.vue";
 import SecondaryButton from "@/Components/UI/Button/SecondaryButton.vue";
-
 import { ref } from 'vue';
 
 defineProps({

@@ -16,7 +16,7 @@ class UpdateProfilePage
     {
         $user = auth()->user();
 
-        $user->profile()->updateOrCreate([], $request->validated());
+        $user->profile->update($request->validated());
 
         return redirect()->route('profile.edit');
     }
