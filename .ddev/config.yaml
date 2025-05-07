@@ -33,9 +33,9 @@ web_extra_exposed_ports:
     http_port: 8080
     https_port: 8443
   - name: 'vite'
-    container_port: 5173
+    container_port: 5174
     http_port: 5172
-    https_port: 5173
+    https_port: 5174
 hooks:
   pre-start:
     # Add redis, cron and task to ddev if not already installed.
