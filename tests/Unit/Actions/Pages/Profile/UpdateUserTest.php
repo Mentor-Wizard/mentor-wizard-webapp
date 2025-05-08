@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\Profile\UpdateUserPage;
+use app\Actions\User\UpdateUser;
 use App\Http\Requests\Profile\UpdateUserRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(UpdateUserPage::class);
+mutates(UpdateUser::class);
 
 describe('Update Main Profile', function (): void {
     beforeEach(function (): void {
@@ -23,7 +23,7 @@ describe('Update Main Profile', function (): void {
         Auth::login($user);
 
         $request = mockUpdateUserRequest($updateData, $user);
-        $action = new UpdateUserPage;
+        $action = new UpdateUser;
         $result = $action->handle($request);
 
         $updatedUser = $user->fresh();
@@ -70,7 +70,7 @@ describe('Update Main Profile', function (): void {
             'email'           => 'new.email@example.com',
         ], $user);
 
-        $action = new UpdateUserPage;
+        $action = new UpdateUser;
         $action->handle($request);
 
         $updatedUser = $user->fresh();
@@ -84,7 +84,7 @@ describe('Update Main Profile', function (): void {
 
         $request = mockUpdateUserRequest($invalidData, $user);
 
-        $action = new UpdateUserPage;
+        $action = new UpdateUser;
         $action->handle($request);
     })->with([
         'empty name'    => ['username' => '', 'email' => 'valid@example.com'],

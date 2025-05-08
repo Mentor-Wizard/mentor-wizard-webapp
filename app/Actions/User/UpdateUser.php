@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Pages\Profile;
+namespace app\Actions\User;
 
 use App\Http\Requests\Profile\UpdateUserRequest;
 use Illuminate\Http\RedirectResponse;
@@ -10,7 +10,7 @@ use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
-class UpdateUserPage
+class UpdateUser
 {
     use AsController;
 

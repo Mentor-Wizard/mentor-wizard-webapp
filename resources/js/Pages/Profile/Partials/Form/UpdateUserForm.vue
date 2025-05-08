@@ -18,7 +18,6 @@ defineProps({
 });
 
 const user = usePage().props.auth.user;
-const profile = user?.profile;
 const avatar = ref(usePage().props.avatar);
 const avatarInput = ref(null)
 

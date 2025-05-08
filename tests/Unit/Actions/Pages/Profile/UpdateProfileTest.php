@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\Profile\UpdateProfilePage;
+use app\Actions\Profile\UpdateProfile;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Requests\Profile\UpdateUserRequest;
 use App\Models\User;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(UpdateProfilePage::class);
+mutates(UpdateProfile::class);
 
 describe('Update Info Profile', function (): void {
     beforeEach(function (): void {
@@ -23,7 +23,7 @@ describe('Update Info Profile', function (): void {
         Auth::login($user);
 
         $request = mockUpdateProfileRequest($updateData, $user);
-        $action = new UpdateProfilePage;
+        $action = new UpdateProfile;
         $result = $action->handle($request);
 
         expect($result)->toBeInstanceOf(RedirectResponse::class)

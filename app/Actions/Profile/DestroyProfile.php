@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Pages\Profile;
+namespace app\Actions\Profile;
 
 use App\Http\Requests\Profile\DestroyProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class DestroyProfilePage
+class DestroyProfile
 {
     use AsController;
 
