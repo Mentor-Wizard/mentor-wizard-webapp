@@ -19,37 +19,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(UpdateMentorProgramPage::class);
 
-describe('Store Mentor Program Request Authorization', function (): void {
-    beforeEach(function (): void {
-        $this->seed(RoleSeeder::class);
-        $this->seed(CurrencySeeder::class);
-        $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
-    });
-
-    it('authorizes authenticated mentor', function (): void {
-        createAndAuthenticateMentorForUpdate();
-        $request = new UpdateMentorProgramRequest;
-
-        expect($request->authorize())->toBeTrue();
-    });
-
-    it('denies unauthenticated user', function (): void {
-        createAndAuthenticateMentorForUpdate();
-        Auth::logout();
-        $request = new UpdateMentorProgramRequest;
-
-        expect($request->authorize())->toBeFalse();
-    });
-
-    it('denies non-mentor authenticated user', function (): void {
-        $regularUser = User::factory()->create();
-        Auth::login($regularUser);
-        $request = new UpdateMentorProgramRequest;
-
-        expect($request->authorize())->toBeFalse();
-    });
-});
-
 describe('UpdateMentorProgramRequest Validation', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

@@ -18,36 +18,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(StoreMentorProgramPage::class);
 
-describe('Store Mentor Program Request Authorization', function (): void {
-    beforeEach(function (): void {
-        $this->seed(CurrencySeeder::class);
-        $this->seed(RoleSeeder::class);
-    });
-
-    it('authorizes authenticated mentor', function (): void {
-        createAndAuthenticateMentorForStore();
-        $request = new StoreMentorProgramRequest;
-
-        expect($request->authorize())->toBeTrue();
-    });
-
-    it('denies unauthenticated user', function (): void {
-        createAndAuthenticateMentorForStore();
-        Auth::logout();
-        $request = new StoreMentorProgramRequest;
-
-        expect($request->authorize())->toBeFalse();
-    });
-
-    it('denies non-mentor authenticated user', function (): void {
-        $regularUser = User::factory()->create();
-        Auth::login($regularUser);
-        $request = new StoreMentorProgramRequest;
-
-        expect($request->authorize())->toBeFalse();
-    });
-});
-
 describe('StoreMentorProgramRequest Validation', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

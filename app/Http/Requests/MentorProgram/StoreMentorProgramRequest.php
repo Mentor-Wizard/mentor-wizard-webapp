@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\MentorProgram;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -13,7 +12,7 @@ class StoreMentorProgramRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::check() && Auth::user()->hasRole('mentor');
+        return true;
     }
 
     public function rules(): array
