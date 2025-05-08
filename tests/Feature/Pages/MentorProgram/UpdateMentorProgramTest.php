@@ -13,7 +13,7 @@ use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\put;
+use function Pest\Laravel\patch;
 
 describe('Mentor Program Update Page', function (): void {
     beforeEach(function (): void {
@@ -45,7 +45,7 @@ describe('Mentor Program Update Page', function (): void {
             'slug'        => $this->mentorProgram->slug,
         ];
 
-        $response = put(route('mentor-program.update', $this->mentorProgram->slug), $updatedData);
+        $response = patch(route('mentor-program.update', $this->mentorProgram->slug), $updatedData);
 
         $response->assertRedirect(route('mentor-program.edit', $this->mentorProgram->slug));
 
@@ -64,7 +64,7 @@ describe('Mentor Program Update Page', function (): void {
 
         $nonExistentSlug = 'non-existent-slug';
 
-        $response = put(route('mentor-program.update', $nonExistentSlug), [
+        $response = patch(route('mentor-program.update', $nonExistentSlug), [
             'name'        => 'Updated Program Name',
             'description' => 'Updated Description',
             'cost'        => 150.0,
@@ -89,7 +89,7 @@ describe('Mentor Program Update Page', function (): void {
 
         actingAs($this->user);
 
-        $response = put(route('mentor-program.update', $anotherMentorProgram->slug), [
+        $response = patch(route('mentor-program.update', $anotherMentorProgram->slug), [
             'name'        => 'Updated Program Name',
             'description' => 'Updated Description',
             'cost'        => 150.0,
@@ -117,7 +117,7 @@ describe('Mentor Program Update Page', function (): void {
             'currency_id' => null,
         ];
 
-        $response = put(route('mentor-program.update', $this->mentorProgram->slug), $invalidData);
+        $response = patch(route('mentor-program.update', $this->mentorProgram->slug), $invalidData);
 
         $response->assertSessionHasErrors(['name', 'description', 'cost', 'currency_id']);
     });
