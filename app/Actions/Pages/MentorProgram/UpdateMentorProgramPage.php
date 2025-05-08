@@ -18,8 +18,8 @@ class UpdateMentorProgramPage
     public function handle(UpdateMentorProgramRequest $request, MentorProgram $mentorProgram): Response
     {
         throw_unless($mentorProgram->exists, new ModelNotFoundException('Mentor program not found.'));
+        abort_if($request->user()->cannot('update', $mentorProgram), 403, 'Unauthorized action.');
 
-        abort_if($mentorProgram->mentor_id !== $request->user()->id, 403, 'Unauthorized action.');
         $mentorProgram->update($request->validated());
 
         return Inertia::location(route('mentor-program.edit', $mentorProgram->slug));

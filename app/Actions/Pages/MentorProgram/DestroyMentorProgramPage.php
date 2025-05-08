@@ -18,7 +18,8 @@ class DestroyMentorProgramPage
     {
         throw_unless($mentorProgram->exists, new ModelNotFoundException('Mentor program not found.'));
 
-        abort_if($mentorProgram->mentor_id !== $request->user()->id, 403, 'Unauthorized action.');
+        abort_if($request->user()->cannot('delete', $mentorProgram), 403, 'Unauthorized action.');
+
         $mentorProgram->delete();
 
         return redirect()->route('mentor-program.create');

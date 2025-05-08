@@ -35,12 +35,6 @@ const form = useForm({
 const isEdit = computed(() => {
     return props.program !== null && typeof props.program === "object";
 });
-const transformedCurrencies = computed(() => {
-    return Object.entries(props.currencies).map(([id, value]) => ({
-        id,
-        value,
-    }));
-});
 
 const submit = () => {
     if (isEdit.value) {
@@ -163,7 +157,7 @@ const deleteProgram = () => {
                                                     id="currency_id"
                                                     v-model="form.currency_id"
                                                     :currencies="
-                                                        transformedCurrencies
+                                                        currencies
                                                     "
                                                     required
                                                 />
