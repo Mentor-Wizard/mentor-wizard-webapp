@@ -32,7 +32,7 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
     Route::post('mentor-program', StoreMentorProgramPage::class)->name('mentor-program.store');
     Route::get('mentor-program/{mentorProgram:slug}/edit', EditMentorProgramPage::class)
         ->name('mentor-program.edit');
-    Route::put('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::class)
+    Route::patch('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::class)
         ->name('mentor-program.update');
     Route::delete('mentor-program/{mentorProgram:slug}', DestroyMentorProgramPage::class)->name('mentor-program.destroy');
 });

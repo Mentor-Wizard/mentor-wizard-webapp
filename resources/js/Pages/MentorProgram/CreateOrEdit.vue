@@ -38,7 +38,7 @@ const isEdit = computed(() => {
 
 const submit = () => {
     if (isEdit.value) {
-        form.put(route("mentor-program.update", props.program.slug), {
+        form.patch(route("mentor-program.update", props.program.slug), {
             onSuccess: () => {
                 form.reset();
             },
