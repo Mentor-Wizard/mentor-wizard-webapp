@@ -8,10 +8,11 @@ use App\Actions\Pages\MentorProgram\DestroyMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\StoreMentorProgramPage;
 use App\Actions\Pages\MentorProgram\UpdateMentorProgramPage;
-use App\Actions\Pages\Profile\DestroyProfilePage;
 use App\Actions\Pages\Profile\GetProfilePage;
-use App\Actions\Pages\Profile\UpdateProfilePage;
 use App\Actions\Pages\WelcomePage;
+use App\Actions\Profile\DeleteUserProfile;
+use App\Actions\Profile\UpdateUserProfile;
+use App\Actions\User\UpdateUser;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
@@ -21,9 +22,10 @@ Route::get('dashboard', DashboardPage::class)
     ->name('pages.dashboard');
 
 Route::middleware('auth')->group(function (): void {
+    Route::patch('user', UpdateUser::class)->name('user.update');
     Route::get('profile', GetProfilePage::class)->name('profile.edit');
-    Route::patch('profile', UpdateProfilePage::class)->name('profile.update');
-    Route::delete('profile', DestroyProfilePage::class)->name('profile.destroy');
+    Route::patch('profile', UpdateUserProfile::class)->name('profile.update');
+    Route::delete('profile', DeleteUserProfile::class)->name('profile.destroy');
 });
 
 Route::middleware(['auth', 'role:mentor'])->group(function (): void {
