@@ -18,7 +18,7 @@ class UpdateMentorProgramPage
     public function handle(UpdateMentorProgramRequest $request, MentorProgram $mentorProgram): Response
     {
         throw_unless($mentorProgram->exists, new ModelNotFoundException('Mentor program not found.'));
-        abort_if($request->user()->cannot('update', $mentorProgram), 403, 'Unauthorized action.');
+        abort_if($request->user()->cannot('update', $mentorProgram), Response::HTTP_FORBIDDEN, 'Unauthorized action.');
 
         $mentorProgram->update($request->validated());
 

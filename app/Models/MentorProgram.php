@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Observers\MentorProgramObserver;
 use Database\Factories\MentorProgramFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @mixin IdeHelperMentorProgram
  */
+#[ObservedBy(MentorProgramObserver::class)]
 #[UseFactory(MentorProgramFactory::class)]
 class MentorProgram extends Model
 {

@@ -37,7 +37,7 @@ describe('Edit Mentor Program', function (): void {
             ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('MentorProgram/CreateOrEdit')
             ->and(Arr::get($resultData->getData(), 'page.props.currencies'))->toBe($this->currencies)
             ->and(Arr::get($resultData->getData(), 'page.props.program'))->toMatchArray($this->data)
-            ->and(Arr::get($resultData->getData(), 'page.props.program.id'))->toBe($mentorProgram->id);
+            ->and(Arr::get($resultData->getData(), 'page.props.program.id'))->toBe($mentorProgram->getKey());
     });
 
     it('handles empty currencies table', function (): void {

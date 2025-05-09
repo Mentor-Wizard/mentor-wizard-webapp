@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\Response;
 
 mutates(DestroyMentorProgramPage::class);
 
@@ -27,7 +28,7 @@ describe('Destroy Mentor Program', function (): void {
         $this->request = Request::create('/')->setUserResolver(fn (): User => $this->user);
 
         $this->mentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $this->user->id,
+            'mentor_id'   => $this->user->getKey(),
             'name'        => 'Test Program',
             'slug'        => 'test-program',
             'description' => 'Test Description',
@@ -57,7 +58,7 @@ describe('Destroy Mentor Program', function (): void {
         $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
 
         $anotherMentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $anotherUser->id,
+            'mentor_id'   => $anotherUser->getKey(),
             'name'        => 'Another Program',
             'slug'        => 'another-program',
             'description' => 'Another Description',
@@ -68,7 +69,7 @@ describe('Destroy Mentor Program', function (): void {
         try {
             (new DestroyMentorProgramPage)->handle($this->request, $anotherMentorProgram);
         } catch (Symfony\Component\HttpKernel\Exception\HttpException $httpException) {
-            expect($httpException->getStatusCode())->toBe(403)
+            expect($httpException->getStatusCode())->toBe(Response::HTTP_FORBIDDEN)
                 ->and($httpException->getMessage())->toBe('Unauthorized action.');
 
             return;

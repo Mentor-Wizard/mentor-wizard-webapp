@@ -39,7 +39,7 @@ describe('Mentor Program Store Page', function (): void {
         $response->assertRedirect(route('mentor-program.create'));
 
         $this->assertDatabaseHas('mentor_programs', [
-            'mentor_id'   => $this->user->id,
+            'mentor_id'   => $this->user->getKey(),
             'name'        => 'New Mentor Program',
             'description' => 'This is a description for the new mentor program.',
             'cost'        => 200.0,

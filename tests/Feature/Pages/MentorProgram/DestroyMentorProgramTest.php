@@ -25,7 +25,7 @@ describe('Mentor Program Destroy Page', function (): void {
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
 
         $this->mentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $this->user->id,
+            'mentor_id'   => $this->user->getKey(),
             'name'        => 'Test Program',
             'slug'        => 'test-program',
             'description' => 'Test Description',
@@ -42,7 +42,7 @@ describe('Mentor Program Destroy Page', function (): void {
         $response->assertRedirect(route('mentor-program.create'));
 
         $this->assertDatabaseMissing('mentor_programs', [
-            'id' => $this->mentorProgram->id,
+            'id' => $this->mentorProgram->getKey(),
         ]);
     });
 
@@ -61,7 +61,7 @@ describe('Mentor Program Destroy Page', function (): void {
         $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
 
         $anotherMentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $anotherUser->id,
+            'mentor_id'   => $anotherUser->getKey(),
             'name'        => 'Another Program',
             'slug'        => 'another-program',
             'description' => 'Another Description',
@@ -76,7 +76,7 @@ describe('Mentor Program Destroy Page', function (): void {
         $response->assertStatus(Response::HTTP_FORBIDDEN);
 
         $this->assertDatabaseHas('mentor_programs', [
-            'id' => $anotherMentorProgram->id,
+            'id' => $anotherMentorProgram->getKey(),
         ]);
     });
 

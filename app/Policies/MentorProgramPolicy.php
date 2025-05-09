@@ -11,11 +11,11 @@ class MentorProgramPolicy
 {
     public function update(User $user, MentorProgram $mentorProgram): bool
     {
-        return $mentorProgram->mentor_id === $user->id;
+        return $mentorProgram->mentor_id === $user->getKey();
     }
 
     public function delete(User $user, MentorProgram $mentorProgram): bool
     {
-        return $mentorProgram->mentor_id === $user->id;
+        return $mentorProgram->mentor_id === $user->getKey();
     }
 }

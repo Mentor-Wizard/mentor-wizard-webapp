@@ -101,11 +101,6 @@ const deleteProgram = () => {
                                                 :message="form.errors.name"
                                                 class="mt-2"
                                             />
-                                            <InputError
-                                                v-if="form.errors.slug"
-                                                :message="form.errors.slug"
-                                                class="mt-2"
-                                            />
                                         </div>
 
                                         <div>
@@ -156,9 +151,7 @@ const deleteProgram = () => {
                                                 <SelectField
                                                     id="currency_id"
                                                     v-model="form.currency_id"
-                                                    :currencies="
-                                                        currencies
-                                                    "
+                                                    :currencies="currencies"
                                                     required
                                                 />
                                                 <InputError

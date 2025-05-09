@@ -25,7 +25,7 @@ describe('Mentor Program Update Page', function (): void {
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
 
         $this->mentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $this->user->id,
+            'mentor_id'   => $this->user->getKey(),
             'name'        => 'Original Program Name',
             'slug'        => 'original-program',
             'description' => 'Original Description',
@@ -50,7 +50,7 @@ describe('Mentor Program Update Page', function (): void {
         $response->assertRedirect(route('mentor-program.edit', $this->mentorProgram->slug));
 
         $this->assertDatabaseHas('mentor_programs', [
-            'id'          => $this->mentorProgram->id,
+            'id'          => $this->mentorProgram->getKey(),
             'name'        => 'Updated Program Name',
             'description' => 'Updated Description',
             'cost'        => 150.0,
@@ -79,7 +79,7 @@ describe('Mentor Program Update Page', function (): void {
         $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
 
         $anotherMentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $anotherUser->id,
+            'mentor_id'   => $anotherUser->getKey(),
             'name'        => 'Another Program',
             'slug'        => 'another-program',
             'description' => 'Another Description',
@@ -99,7 +99,7 @@ describe('Mentor Program Update Page', function (): void {
         $response->assertStatus(Response::HTTP_FORBIDDEN);
 
         $this->assertDatabaseHas('mentor_programs', [
-            'id'          => $anotherMentorProgram->id,
+            'id'          => $anotherMentorProgram->getKey(),
             'name'        => 'Another Program',
             'description' => 'Another Description',
             'cost'        => 75.0,

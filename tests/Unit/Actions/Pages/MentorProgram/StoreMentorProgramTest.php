@@ -64,23 +64,6 @@ describe('StoreMentorProgramRequest Validation', function (): void {
         }
     });
 
-    it('prepares slug for validation', function (): void {
-        $request = new StoreMentorProgramRequest;
-        $request->merge([
-            'name'        => 'Test Program Name',
-            'description' => 'Test Description',
-            'cost'        => 99.99,
-            'currency_id' => array_key_first($this->currencies),
-        ]);
-
-        ($this->prepareRequest)($request);
-        $request->validateResolved();
-
-        expect($request->all())
-            ->toHaveKey('slug')
-            ->and($request->get('slug'))->toBe('test-program-name');
-    });
-
     it('fails validation with invalid cost value', function (): void {
         $request = new StoreMentorProgramRequest;
         $request->merge([
@@ -146,7 +129,24 @@ describe('Store Mentor Program', function (): void {
             ->description->toBe($this->validData['description'])
             ->cost->toBe($this->validData['cost'])
             ->currency_id->toBe($this->validData['currency_id'])
-            ->mentor_id->toBe($this->user->id);
+            ->mentor_id->toBe($this->user->getKey());
+    });
+
+    it('does not modify slug if provided during creation', function (): void {
+        $request = mockStoreMentorProgramRequest([
+            'name'        => 'Test Program',
+            'slug'        => 'custom-slug',
+            'description' => 'Test Description',
+            'cost'        => 100.0,
+            'currency_id' => array_key_first($this->currencies),
+        ]);
+
+        $action = new StoreMentorProgramPage;
+        $action->handle($request);
+
+        $createdProgram = MentorProgram::query()->latest()->first();
+
+        expect($createdProgram->slug)->toBe('custom-slug');
     });
 
     it('returns redirect response', function (): void {

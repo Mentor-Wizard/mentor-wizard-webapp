@@ -39,7 +39,7 @@ describe('Mentor Program Edit Page', function (): void {
             ->whereContains('currencies', 'EUR')
             ->whereContains('currencies', 'GBP')
             ->has('program')
-            ->where('program.id', $mentorProgram->id)
+            ->where('program.id', $mentorProgram->getKey())
             ->where('program.name', $mentorProgram->name)
             ->where('program.slug', $mentorProgram->slug)
             ->where('program.description', $mentorProgram->description)
