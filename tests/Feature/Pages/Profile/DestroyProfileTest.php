@@ -14,7 +14,7 @@ beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });
 
-describe('Destroy Profile', function (): void {
+describe('Destroy User', function (): void {
     it('deletes the user profile successfully', function (): void {
         $user = User::factory()->create();
 

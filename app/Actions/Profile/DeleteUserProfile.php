@@ -2,21 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Pages\Profile;
+namespace App\Actions\Profile;
 
-use App\Http\Requests\Profile\DestroyProfileRequest;
+use App\Http\Requests\UserProfile\DeleteUserProfileRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class DestroyProfilePage
+class DeleteUserProfile
 {
     use AsController;
 
-    public function handle(DestroyProfileRequest $request): RedirectResponse
+    public function handle(DeleteUserProfileRequest $request): RedirectResponse
     {
         $user = $request->user();
-        Auth::logout();
+        auth()->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

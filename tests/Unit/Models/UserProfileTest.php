@@ -36,22 +36,16 @@ it('successfully upload an image', function (): void {
     Storage::fake('public');
     $file = UploadedFile::fake()->image('test-image.jpg', 600, 400);
 
-    $user = User::factory()->withProfile()->create();
+    $user = User::factory()->create();
     $user->profile->addMedia($file)->toMediaCollection('avatar');
     $media = $user->profile->getMedia('avatar')[0];
     $path = PathGeneratorFactory::create($media)->getPath($media);
     Storage::disk('public')->assertExists($path);
 });
 
-it('upload avatar when profile is null', function (): void {
-    $this->expectExceptionMessage('Call to a member function getMedia() on null');
-    $user = User::factory()->create();
-    $user->profile->getMedia('avatar');
-})->throws(Error::class);
-
 it('upload avatar when file is null', function (): void {
     Storage::fake('public');
-    $user = User::factory()->withProfile()->create();
+    $user = User::factory()->create();
     $user->profile->addMedia(null)->toMediaCollection('avatar');
     $user->profile->getMedia('avatar');
 })->throws(TypeError::class);
@@ -60,7 +54,7 @@ it('records media conversions', function (): void {
     Storage::fake('public');
     $file = UploadedFile::fake()->image('test-image.jpg', 600, 400);
 
-    $user = User::factory()->withProfile()->create();
+    $user = User::factory()->create();
     $user->profile->addMedia($file)->toMediaCollection('avatar');
     $media = $user->profile->getMedia('avatar')[0];
     $conversionNames = $media->getGeneratedConversions();
@@ -72,7 +66,7 @@ it('records media conversions', function (): void {
 it('returns avatar url when avatar exists', function (): void {
     Storage::fake('public');
     $file = UploadedFile::fake()->image('avatar.jpg');
-    $user = User::factory()->withProfile()->create();
+    $user = User::factory()->create();
     $profile = $user->profile;
 
     $media = $profile->addMedia($file)->toMediaCollection('avatar');
@@ -81,7 +75,7 @@ it('returns avatar url when avatar exists', function (): void {
 });
 
 it('returns empty string when avatar does not exist', function (): void {
-    $user = User::factory()->withProfile()->create();
+    $user = User::factory()->create();
     $profile = $user->profile;
 
     expect($profile->avatar)->toBe('');
