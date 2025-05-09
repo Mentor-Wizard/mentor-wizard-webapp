@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Pages\Profile;
+namespace App\Actions\User;
 
-use App\Http\Requests\Profile\UpdateProfileRequest;
-use App\Models\UserProfile;
+use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
-class UpdateProfilePage
+class UpdateUser
 {
     use AsController;
 
@@ -19,11 +18,12 @@ class UpdateProfilePage
      * @throws FileIsTooBig
      * @throws FileDoesNotExist
      */
-    public function handle(UpdateProfileRequest $request): RedirectResponse
+    public function handle(UpdateUserRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
 
         $user->email = $request->get('email');
+        $user->username = $request->get('username');
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -31,26 +31,16 @@ class UpdateProfilePage
 
         $user->save();
 
-        /** @var UserProfile $profile */
-        $profile = $user->profile()->updateOrCreate([], $this->dataUpdate($request));
-
         if ($request->hasFile('avatar')) {
 
-            $profile->clearMediaCollection('avatar');
+            $user->profile->clearMediaCollection('avatar');
 
-            $profile
+            $user
+                ->profile
                 ->addMedia($request->file('avatar'))
                 ->toMediaCollection('avatar');
         }
 
         return redirect()->route('profile.edit');
-    }
-
-    private function dataUpdate(UpdateProfileRequest $request): array
-    {
-        return [
-            'name'      => $request->get('name'),
-            'last_name' => $request->get('last_name'),
-        ];
     }
 }

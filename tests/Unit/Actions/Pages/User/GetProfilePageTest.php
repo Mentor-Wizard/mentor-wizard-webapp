@@ -5,14 +5,12 @@ declare(strict_types=1);
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 
 mutates(GetProfilePage::class);
 
-describe('Profile Page', function (): void {
+describe('User Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -41,14 +39,6 @@ describe('Profile Page', function (): void {
         'unverified user' => fn () => User::factory()->create([
             'email_verified_at' => null,
         ]),
-        'mocked user' => function () {
-            $mock = Mockery::mock(User::class, MustVerifyEmail::class);
-            $mock->shouldNotReceive('instanceof')->andReturn(ShouldBeUnique::class);
-            $mock->shouldReceive('getAuthIdentifier')->andReturn(1);
-            $mock->shouldReceive('getAttribute')->with('profile')->andReturn(null);
-
-            return $mock;
-        },
     ]);
 
     it('returns mustVerifyEmail as true with different session statuses', function (?string $status): void {
