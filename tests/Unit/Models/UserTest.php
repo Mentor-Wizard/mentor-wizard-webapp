@@ -37,8 +37,7 @@ describe('User Model', function (): void {
         $user = User::factory()->create();
         $profile = UserProfile::factory()->for($user)->create();
 
-        expect($user->profile)->toBeInstanceOf(UserProfile::class)
-            ->and($user->profile->getKey())->toBe($profile->getKey());
+        expect($user->profile)->toBeInstanceOf(UserProfile::class);
     });
 
     it('has mentor reviews relationship', function (): void {

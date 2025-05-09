@@ -14,5 +14,6 @@ class UserObserver
     public function created(User $user): void
     {
         $user->assignRole(Role::findByName(RoleEnum::USER->value, RoleGuardEnum::USER->value));
+        $user->profile()->create();
     }
 }

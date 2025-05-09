@@ -155,6 +155,7 @@ docker compose exec app php artisan test --mutate --covered-only --min=100
 Або в паралельному режимі:
 ```bash
 docker compose exec app php artisan test --mutate --covered-only --min=100 --parallel
+docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100
 ```
 
 ## DDEV Інсталяція
