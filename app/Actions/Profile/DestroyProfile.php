@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Actions\Profile;
+namespace App\Actions\Profile;
 
 use App\Http\Requests\Profile\DestroyProfileRequest;
 use Illuminate\Http\RedirectResponse;

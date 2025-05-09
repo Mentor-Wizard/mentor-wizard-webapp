@@ -82,7 +82,7 @@ const submit = () => {
                 </div>
 
                 <div class="col-span-full">
-                    <InputLabel for="username" value="User name"/>
+                    <InputLabel for="username" value="User Name"/>
 
                     <div class="mt-2">
                         <TextInput id="username" v-model="form.username" required/>

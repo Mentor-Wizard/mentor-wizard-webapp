@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace app\Actions\Profile;
+namespace App\Actions\Profile;
 
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class UpdateProfile
+class UpdateUserProfile
 {
     use AsController;
 

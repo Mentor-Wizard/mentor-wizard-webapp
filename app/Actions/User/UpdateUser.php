@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Actions\User;
+namespace App\Actions\User;
 
 use App\Http\Requests\Profile\UpdateUserRequest;
 use Illuminate\Http\RedirectResponse;
