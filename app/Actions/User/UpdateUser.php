@@ -20,7 +20,7 @@ class UpdateUser
      */
     public function handle(UpdateUserRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
 
         $user->email = $request->get('email');
         $user->username = $request->get('username');

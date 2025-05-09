@@ -6,7 +6,6 @@ namespace App\Actions\Profile;
 
 use App\Http\Requests\UserProfile\DeleteUserProfileRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class DeleteUserProfile
@@ -16,7 +15,7 @@ class DeleteUserProfile
     public function handle(DeleteUserProfileRequest $request): RedirectResponse
     {
         $user = $request->user();
-        Auth::logout();
+        auth()->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

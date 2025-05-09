@@ -6,7 +6,6 @@ namespace App\Actions\Pages\Profile;
 
 use App\Models\UserProfile;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -17,10 +16,12 @@ class GetProfilePage
 
     public function handle(): Response
     {
+        $user = auth()->user();
+
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => Auth::user() instanceof MustVerifyEmail, // @pest-mutate-ignore
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail, // @pest-mutate-ignore
             'status'          => session('status'),
-            'avatar'          => Auth::user()->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
+            'avatar'          => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
         ]);
     }
 }
