@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use app\Actions\User\UpdateUser;
-use App\Http\Requests\Profile\UpdateUserRequest;
+use App\Actions\User\UpdateUser;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(UpdateUser::class);
 
-describe('Update Main Profile', function (): void {
+describe('Update Main User', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -34,25 +34,25 @@ describe('Update Main Profile', function (): void {
             ->and($updatedUser->username)->toBe(Arr::get($updateData, 'username'))
             ->and($updatedUser->email)->toBe(Arr::get($updateData, 'email'));
     })->with([
-        'main updated user with new email' => fn (): array => [
-            'user' => User::factory()->create([
+        'main updated user with new email'  => fn (): array => [
+            'user'       => User::factory()->create([
                 'username'          => 'John',
                 'email'             => 'john@example.com',
                 'email_verified_at' => now(),
             ]),
             'updateData' => [
-                'username'        => 'John updated',
-                'email'           => 'john.updated@example.com',
+                'username' => 'John updated',
+                'email'    => 'john.updated@example.com',
             ],
         ],
         'main updated user with same email' => fn (): array => [
-            'user' => User::factory()->create([
+            'user'       => User::factory()->create([
                 'username' => 'Jane',
                 'email'    => 'jane@example.com',
             ]),
             'updateData' => [
-                'username'        => 'Jane',
-                'email'           => 'jane@example.com',
+                'username' => 'Jane',
+                'email'    => 'jane@example.com',
             ],
         ],
     ]);
@@ -66,8 +66,8 @@ describe('Update Main Profile', function (): void {
         Auth::login($user);
 
         $request = mockUpdateUserRequest([
-            'username'        => 'John',
-            'email'           => 'new.email@example.com',
+            'username' => 'John',
+            'email'    => 'new.email@example.com',
         ], $user);
 
         $action = new UpdateUser;

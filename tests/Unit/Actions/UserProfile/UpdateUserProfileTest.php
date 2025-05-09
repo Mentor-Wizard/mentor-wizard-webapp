@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Profile\UpdateUserProfile;
-use App\Http\Requests\Profile\UpdateProfileRequest;
-use App\Http\Requests\Profile\UpdateUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\UserProfile\UpdateUserProfileRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(UpdateUserProfile::class);
 
-describe('Update Info Profile', function (): void {
+describe('Update Info User', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -57,7 +57,7 @@ describe('Update Info Profile', function (): void {
 
 function mockUpdateProfileRequest(array $data, User $user): UpdateUserRequest|MockInterface
 {
-    $request = Mockery::mock(UpdateProfileRequest::class);
+    $request = Mockery::mock(UpdateUserProfileRequest::class);
     $request->shouldReceive('validated')->andReturn($data);
 
     return $request;

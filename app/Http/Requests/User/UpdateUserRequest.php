@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Profile;
+namespace App\Http\Requests\User;
 
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;

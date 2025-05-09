@@ -10,7 +10,7 @@ use Inertia\Response;
 
 mutates(GetProfilePage::class);
 
-describe('Profile Page', function (): void {
+describe('User Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });

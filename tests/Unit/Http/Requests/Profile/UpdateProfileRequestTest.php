@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Http\Requests\UserProfile\UpdateUserProfileRequest;
 
-mutates(UpdateProfileRequest::class);
+mutates(UpdateUserProfileRequest::class);
 
-describe('Profile data Validation', function (): void {
+describe('User data Validation', function (): void {
     it('requires correct data', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
 
         $validator = Validator::make([
             'name'        => 'current_name',
@@ -25,7 +25,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('requires current password', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
 
         $request->merge([
             'phone' => '+38 067 123 45 67',
@@ -39,7 +39,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('returns expected validation keys', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
 
         $rules = $request->rules();
 
@@ -55,7 +55,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('nullable fields', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
 
         $validator = Validator::make([
             'name'         => null,
@@ -78,7 +78,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('wrong data type', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
         $validator = Validator::make([
             'name'        => 1,
             'last_name'   => 1,
@@ -100,7 +100,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('wrong data length max', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
 
         $validator = Validator::make([
             'name'        => str_repeat('a', 60),
@@ -127,7 +127,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('requires incorrect data', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
 
         $validator = Validator::make([
             'linkedin'    => 'linkedin_linkedin_linkedin',
@@ -145,7 +145,7 @@ describe('Profile data Validation', function (): void {
     });
 
     it('wrong data length min', function (): void {
-        $request = new UpdateProfileRequest;
+        $request = new UpdateUserProfileRequest;
         $validator = Validator::make([
             'name'        => 'a',
             'last_name'   => 'a',

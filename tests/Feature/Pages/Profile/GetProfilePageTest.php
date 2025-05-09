@@ -12,7 +12,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 mutates(GetProfilePage::class);
 
-describe('Profile Page', function (): void {
+describe('User Page', function (): void {
     it('loads the profile page for an authenticated user', function (): void {
         $this->seed(RoleSeeder::class);
         $user = User::factory()->create();

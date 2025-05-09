@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\User;
 
-use App\Http\Requests\Profile\UpdateUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
