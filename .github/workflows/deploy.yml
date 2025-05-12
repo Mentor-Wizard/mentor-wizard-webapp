@@ -2,50 +2,117 @@ name: Deploy To Staging
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy'
-        required: true
-        default: 'main'
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        default: 'staging'
 
 jobs:
   deploy:
-    name: Deploy ${{ github.event.inputs.environment }} from ${{ github.event.inputs.branch }}
+    name: Deploy staging from ${{ github.ref_name }}
     runs-on: mw-staging
     environment:
-      name: ${{ github.event.inputs.environment }}
+      name: staging
 
     steps:
+      - name: Ensure workspace log directory permissions
+        run: |
+          # Визначаємо шлях до робочої директорії (може відрізнятися залежно від конфігурації ранера)
+          WORKSPACE_PATH="${{ github.workspace }}"
+          LOG_DIR="$WORKSPACE_PATH/storage/logs"
+          # Перевіряємо, чи існує директорія, і змінюємо власника/права доступу
+          if [ -d "$LOG_DIR" ]; then
+            echo "Fixing permissions for $LOG_DIR..."
+            # Використовуємо id -u та id -g для отримання поточного UID/GID користувача ранера
+            sudo chown -R $(id -u):$(id -g) "$LOG_DIR"
+            sudo chmod -R u+w "$LOG_DIR" # Додаємо права на запис для власника
+          else
+            echo "Log directory $LOG_DIR does not exist, skipping permission fix."
+          fi
+        continue-on-error: true # Продовжуємо, навіть якщо тут виникне помилка (наприклад, sudo недоступний)
+
+      - name: Export UID:GID
+        run: |
+          echo "UID=$(id -u)" >> $GITHUB_ENV
+          echo "GID=$(id -g)" >> $GITHUB_ENV
+        # Це гарантує, що команди docker виконуються з правильними правами користувача на хості
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
-
-      - name: Pull latest changes
-        run: |
-          git fetch
-          git checkout ${{ github.event.inputs.branch }}
-          git pull origin ${{ github.event.inputs.branch }}
+          ref: ${{ github.ref }} # Отримуємо код з гілки/тегу, що ініціював воркфлоу
+          clean: false # Додайте цей рядок
 
       - name: Create .env file
         run: |
-          cat > .env << 'EOL'
-          ${{ secrets.ENV_FILE }}
-          EOL
+          echo "${{ secrets.ENV_FILE }}" > .env
 
-      - name: Docker deploy
+      - name: Deploy Application
+        env:
+          UID: ${{ env.UID }}
+          GID: ${{ env.GID }}
         run: |
+          # Зупиняємо існуючі сервіси та видаляємо "осиротілі" контейнери
+          echo "Stopping existing containers..."
           docker compose down --remove-orphans
+
+          # Збираємо образи (якщо Dockerfile змінився) та запускаємо сервіси у фоновому режимі
+          # Передаємо UID/GID для коректних прав доступу всередині контейнера, особливо для монтованих томів
+          echo "Building and starting containers..."
           docker compose up -d --build
-          sleep 10
 
-          docker compose exec mw-app yarn install --frozen-lockfile
-          docker compose exec mw-app yarn build
+          # Зачекаємо трохи, щоб контейнери (особливо БД) ініціалізувалися
+          # Розгляньте використання 'docker compose wait' або скрипта для перевірки стану сервісів замість sleep
+          echo "Waiting for services to initialize (15 seconds)..."
+          sleep 15
 
-          docker compose exec mw-app php artisan optimize
+          # Виставляємо широкі права на запис для storage та bootstrap/cache всередині контейнера
+          echo "Setting storage and cache permissions inside container..."
+          docker compose exec app chmod -R 777 storage bootstrap/cache
 
-          docker compose exec mw-app php artisan migrate --force
+          # Встановлюємо залежності PHP через Composer всередині контейнера 'app'
+          # Використовуємо -u $UID:$GID для запуску команди від імені поточного користувача хоста
+          echo "Installing Composer dependencies..."
+          docker compose exec -u $UID:$GID app composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+          # Встановлюємо залежності Node.js через Yarn всередині контейнера 'app'
+          echo "Installing Yarn dependencies..."
+          docker compose exec -u $UID:$GID app yarn install --frozen-lockfile
+
+          # Збираємо фронтенд-ассети всередині контейнера 'app'
+          echo "Building frontend assets..."
+          docker compose exec -u $UID:$GID app yarn build
+
+          # Переводимо додаток у режим обслуговування
+          # Додано `|| true`, щоб крок не завершився помилкою, якщо додаток вже в режимі обслуговування
+          echo "Entering maintenance mode..."
+          docker compose exec -u $UID:$GID app php artisan down || true
+
+          # Виконуємо міграції бази даних
+          # Ключ --force необхідний для виконання міграцій у продакшн-середовищі без запиту підтвердження
+          echo "Running database migrations..."
+          docker compose exec -u $UID:$GID app php artisan migrate --force
+
+          # Оптимізуємо Laravel (кешування конфігурації, роутів, представлень)
+          echo "Optimizing application..."
+          docker compose exec -u $UID:$GID app php artisan optimize:clear # Спочатку очистимо старий кеш
+          docker compose exec -u $UID:$GID app php artisan optimize       # Створюємо новий кеш
+
+          # Виводимо додаток з режиму обслуговування
+          echo "Exiting maintenance mode..."
+          docker compose exec -u $UID:$GID app php artisan up
+
+          echo "Deployment to staging successful!"
+
+      - name: Health Check
+        run: |
+          echo "Performing health check..."
+          max_attempts=5
+          attempt=1
+          until curl -s -f http://localhost/up || [ $attempt -eq $max_attempts ]
+          do
+            echo "Health check attempt $attempt of $max_attempts failed, waiting 10 seconds..."
+            sleep 10
+            attempt=$((attempt + 1))
+          done
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Health check failed after $max_attempts attempts"
+            exit 1
+          fi
+          echo "Health check passed successfully!"
