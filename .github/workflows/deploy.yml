@@ -68,7 +68,7 @@ jobs:
 
           # Wait for services to initialize
           echo "Waiting for services to initialize..."
-          docker compose -f docker-compose.staging.yml wait
+          docker compose -f docker-compose.staging.yml wait db app webserver redis
 
           # Check if SSL certificates exist, if not create them
           echo "Checking SSL certificates..."
