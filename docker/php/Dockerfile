@@ -44,8 +44,11 @@ RUN apk add --no-cache nodejs npm git
 RUN npm install -g corepack
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
-# Copy .env file first
-COPY .env /var/www/.env
+# Create directory structure first
+RUN mkdir -p /var/www
+
+# Create an empty .env file as a fallback
+RUN touch /var/www/.env
 
 # Copy application code
 COPY . /var/www/

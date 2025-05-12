@@ -47,13 +47,9 @@ jobs:
 
       - name: Create .env file
         run: |
-          # Check if .env file already exists
-          if [ ! -f ".env" ]; then
-            echo "Creating .env file from secrets..."
-            echo "${{ secrets.ENV_FILE }}" > .env
-          else
-            echo ".env file already exists, skipping creation"
-          fi
+          # Always create a fresh .env file from secrets
+          echo "Creating .env file from secrets..."
+          echo "${{ secrets.ENV_FILE }}" > .env
 
       - name: Deploy Application
         env:
