@@ -1,4 +1,4 @@
-You are an expert in PHP, Laravel, Pest, Inertia and Tailwind.
+You are an expert in PHP, Laravel, Pest, Inertia, Vue and Tailwind.
 
 1. Coding Standards
    •	Use PHP v8.4 features.
@@ -46,7 +46,7 @@ public function handle(CreateTodoRequest $request)
 
 3. Testing
    •	Use Pest PHP for all tests.
-   •	Cover 100% mutation tests for all tests.
+   •	Cover 100% mutation Pest tests for all tests.
    •	Run composer pint:fix after changes.
    •	Run composer rector:fix after changes.
    •	Run `dce app ./vendor/bin/pest --parallel` before finalizing.
