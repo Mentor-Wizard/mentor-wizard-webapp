@@ -2,10 +2,16 @@ name: Deploy To Staging
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+        type: string
 
 jobs:
   deploy:
-    name: Deploy staging from ${{ github.ref_name }}
+    name: Deploy staging from ${{ github.event.inputs.branch }}
     runs-on: mw-staging
     environment:
       name: staging
@@ -13,90 +19,83 @@ jobs:
     steps:
       - name: Ensure workspace log directory permissions
         run: |
-          # Визначаємо шлях до робочої директорії (може відрізнятися залежно від конфігурації ранера)
+          # Define the path to the working directory
           WORKSPACE_PATH="${{ github.workspace }}"
           LOG_DIR="$WORKSPACE_PATH/storage/logs"
-          # Перевіряємо, чи існує директорія, і змінюємо власника/права доступу
+          # Check if the directory exists and change owner/permissions
           if [ -d "$LOG_DIR" ]; then
             echo "Fixing permissions for $LOG_DIR..."
-            # Використовуємо id -u та id -g для отримання поточного UID/GID користувача ранера
+            # Use id -u and id -g to get the current UID/GID of the runner user
             sudo chown -R $(id -u):$(id -g) "$LOG_DIR"
-            sudo chmod -R u+w "$LOG_DIR" # Додаємо права на запис для власника
+            sudo chmod -R u+w "$LOG_DIR" # Add write permissions for the owner
           else
             echo "Log directory $LOG_DIR does not exist, skipping permission fix."
           fi
-        continue-on-error: true # Продовжуємо, навіть якщо тут виникне помилка (наприклад, sudo недоступний)
+        continue-on-error: true # Continue even if there's an error here (e.g., sudo not available)
 
       - name: Export UID:GID
         run: |
           echo "UID=$(id -u)" >> $GITHUB_ENV
           echo "GID=$(id -g)" >> $GITHUB_ENV
-        # Це гарантує, що команди docker виконуються з правильними правами користувача на хості
+        # This ensures that docker commands are executed with the correct user permissions on the host
 
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }} # Отримуємо код з гілки/тегу, що ініціював воркфлоу
-          clean: false # Додайте цей рядок
+          ref: ${{ github.event.inputs.branch }} # Get code from the specified branch
+          clean: false
 
       - name: Create .env file
         run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+          # Check if .env file already exists
+          if [ ! -f ".env" ]; then
+            echo "Creating .env file from secrets..."
+            echo "${{ secrets.ENV_FILE }}" > .env
+          else
+            echo ".env file already exists, skipping creation"
+          fi
 
       - name: Deploy Application
         env:
           UID: ${{ env.UID }}
           GID: ${{ env.GID }}
         run: |
-          # Зупиняємо існуючі сервіси та видаляємо "осиротілі" контейнери
+          # Stop existing services and remove orphaned containers
           echo "Stopping existing containers..."
-          docker compose down --remove-orphans
+          docker compose -f docker-compose.staging.yml down --remove-orphans
 
-          # Збираємо образи (якщо Dockerfile змінився) та запускаємо сервіси у фоновому режимі
-          # Передаємо UID/GID для коректних прав доступу всередині контейнера, особливо для монтованих томів
+          # Build images (if Dockerfile changed) and start services in the background
           echo "Building and starting containers..."
-          docker compose up -d --build
+          docker compose -f docker-compose.staging.yml up -d --build
 
-          # Зачекаємо трохи, щоб контейнери (особливо БД) ініціалізувалися
-          # Розгляньте використання 'docker compose wait' або скрипта для перевірки стану сервісів замість sleep
-          echo "Waiting for services to initialize (15 seconds)..."
-          sleep 15
+          # Wait for services to initialize
+          echo "Waiting for services to initialize..."
+          docker compose -f docker-compose.staging.yml wait
 
-          # Виставляємо широкі права на запис для storage та bootstrap/cache всередині контейнера
-          echo "Setting storage and cache permissions inside container..."
-          docker compose exec app chmod -R 777 storage bootstrap/cache
+          # Check if SSL certificates exist, if not create them
+          echo "Checking SSL certificates..."
+          if [ ! -f "/etc/letsencrypt/live/mentor-wizard.com/fullchain.pem" ]; then
+            echo "SSL certificates not found, generating..."
+            docker compose -f docker-compose.staging.yml exec webserver mkdir -p /etc/letsencrypt/live/mentor-wizard.com
+            docker compose -f docker-compose.staging.yml exec app certbot certonly --standalone --staging --non-interactive --agree-tos --email mentor.wizard.ua@gmail.com -d mentor-wizard.com || true
+          fi
 
-          # Встановлюємо залежності PHP через Composer всередині контейнера 'app'
-          # Використовуємо -u $UID:$GID для запуску команди від імені поточного користувача хоста
-          echo "Installing Composer dependencies..."
-          docker compose exec -u $UID:$GID app composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-
-          # Встановлюємо залежності Node.js через Yarn всередині контейнера 'app'
-          echo "Installing Yarn dependencies..."
-          docker compose exec -u $UID:$GID app yarn install --frozen-lockfile
-
-          # Збираємо фронтенд-ассети всередині контейнера 'app'
-          echo "Building frontend assets..."
-          docker compose exec -u $UID:$GID app yarn build
-
-          # Переводимо додаток у режим обслуговування
-          # Додано `|| true`, щоб крок не завершився помилкою, якщо додаток вже в режимі обслуговування
+          # Put the application in maintenance mode
           echo "Entering maintenance mode..."
-          docker compose exec -u $UID:$GID app php artisan down || true
+          docker compose -f docker-compose.staging.yml exec app php artisan down || true
 
-          # Виконуємо міграції бази даних
-          # Ключ --force необхідний для виконання міграцій у продакшн-середовищі без запиту підтвердження
+          # Run database migrations
           echo "Running database migrations..."
-          docker compose exec -u $UID:$GID app php artisan migrate --force
+          docker compose -f docker-compose.staging.yml exec app php artisan migrate --force
 
-          # Оптимізуємо Laravel (кешування конфігурації, роутів, представлень)
+          # Optimize Laravel (cache configuration, routes, views)
           echo "Optimizing application..."
-          docker compose exec -u $UID:$GID app php artisan optimize:clear # Спочатку очистимо старий кеш
-          docker compose exec -u $UID:$GID app php artisan optimize       # Створюємо новий кеш
+          docker compose -f docker-compose.staging.yml exec app php artisan optimize:clear # First clear the old cache
+          docker compose -f docker-compose.staging.yml exec app php artisan optimize       # Create new cache
 
-          # Виводимо додаток з режиму обслуговування
+          # Take the application out of maintenance mode
           echo "Exiting maintenance mode..."
-          docker compose exec -u $UID:$GID app php artisan up
+          docker compose -f docker-compose.staging.yml exec app php artisan up
 
           echo "Deployment to staging successful!"
 
@@ -105,7 +104,7 @@ jobs:
           echo "Performing health check..."
           max_attempts=5
           attempt=1
-          until curl -s -f http://localhost/up || [ $attempt -eq $max_attempts ]
+          until curl -s -f https://mentor-wizard.com/up || [ $attempt -eq $max_attempts ]
           do
             echo "Health check attempt $attempt of $max_attempts failed, waiting 10 seconds..."
             sleep 10
