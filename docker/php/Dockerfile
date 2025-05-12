@@ -53,6 +53,9 @@ RUN test -f /var/www/.env || touch /var/www/.env
 # Set proper permissions
 RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
+# Set working directory
+WORKDIR "/var/www/"
+
 # Install PHP dependencies
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
@@ -66,7 +69,5 @@ RUN certbot certonly --standalone --staging --non-interactive --agree-tos --emai
 COPY docker/php/supervisord/supervisord.conf /etc/
 
 EXPOSE 8000 80 443
-
-WORKDIR "/var/www/"
 
 ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
