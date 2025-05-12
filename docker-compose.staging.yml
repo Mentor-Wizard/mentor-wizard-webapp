@@ -40,11 +40,11 @@ services:
             - mw-db-network
             - mw-webserver-network
             - mw-redis-network
-        healthcheck:
-            test: curl -s http://localhost:8000/up >/dev/null || exit 1
-            interval: 5s
-            timeout: 10s
-            retries: 20
+#        healthcheck:
+#            test: curl -s http://localhost:8000/up >/dev/null || exit 1
+#            interval: 5s
+#            timeout: 10s
+#            retries: 20
 
     workers:
         <<: *app
