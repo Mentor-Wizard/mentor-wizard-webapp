@@ -51,7 +51,7 @@ WORKDIR "/var/www/"
 COPY . /var/www/
 
 # Install PHP dependencies
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader || true
 
 # Create an empty .env file if it doesn't exist
 RUN test -f /var/www/.env || touch /var/www/.env
