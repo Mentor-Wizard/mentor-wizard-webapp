@@ -44,7 +44,16 @@ RUN apk add --no-cache nodejs npm git
 RUN npm install -g corepack
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
-# Copy application code
+# Copy composer files first
+COPY composer.json composer.lock /var/www/
+
+# Set working directory
+WORKDIR "/var/www/"
+
+# Install PHP dependencies
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+# Copy the rest of the application code
 COPY . /var/www/
 
 # Create an empty .env file if it doesn't exist
@@ -52,12 +61,6 @@ RUN test -f /var/www/.env || touch /var/www/.env
 
 # Set proper permissions
 RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
-
-# Set working directory
-WORKDIR "/var/www/"
-
-# Install PHP dependencies
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # Install JS dependencies and build assets
 RUN yarn install --frozen-lockfile && yarn build
