@@ -44,14 +44,11 @@ RUN apk add --no-cache nodejs npm git
 RUN npm install -g corepack
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
-# Create directory structure first
-RUN mkdir -p /var/www
-
-# Create an empty .env file as a fallback
-RUN touch /var/www/.env
-
 # Copy application code
 COPY . /var/www/
+
+# Create an empty .env file if it doesn't exist
+RUN test -f /var/www/.env || touch /var/www/.env
 
 # Set proper permissions
 RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache

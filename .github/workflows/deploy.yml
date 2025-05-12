@@ -50,6 +50,8 @@ jobs:
           # Always create a fresh .env file from secrets
           echo "Creating .env file from secrets..."
           echo "${{ secrets.ENV_FILE }}" > .env
+          # Ensure the .env file exists in the Docker build context
+          ls -la .env
 
       - name: Deploy Application
         env:
