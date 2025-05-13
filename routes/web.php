@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
-use App\Actions\Pages\MentorProgram\DestroyMentorProgramPage;
+use App\Actions\MentorPrograms\DeleteMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
-use App\Actions\Pages\MentorProgram\StoreMentorProgramPage;
-use App\Actions\Pages\MentorProgram\UpdateMentorProgramPage;
+use App\Actions\MentorPrograms\StoreMentorProgramPage;
+use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
@@ -36,7 +36,7 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
         ->name('mentor-program.edit');
     Route::patch('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::class)
         ->name('mentor-program.update');
-    Route::delete('mentor-program/{mentorProgram:slug}', DestroyMentorProgramPage::class)->name('mentor-program.destroy');
+    Route::delete('mentor-program/{mentorProgram:slug}', DeleteMentorProgramPage::class)->name('mentor-program.destroy');
 });
 
 require __DIR__.'/auth.php';

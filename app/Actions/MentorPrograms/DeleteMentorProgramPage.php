@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Pages\MentorProgram;
+namespace App\Actions\MentorPrograms;
 
 use App\Models\MentorProgram;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
-class DestroyMentorProgramPage
+class DeleteMentorProgramPage
 {
     use AsController;
 

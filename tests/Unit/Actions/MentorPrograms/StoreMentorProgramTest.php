@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\MentorProgram\StoreMentorProgramPage;
+use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;

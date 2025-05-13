@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Pages\MentorProgram;
+namespace App\Actions\MentorPrograms;
 
 use App\Http\Requests\MentorProgram\UpdateMentorProgramRequest;
 use App\Models\MentorProgram;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\MentorProgram\DestroyMentorProgramPage;
+use App\Actions\MentorPrograms\DeleteMentorProgramPage;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(DestroyMentorProgramPage::class);
+mutates(DeleteMentorProgramPage::class);
 
 describe('Destroy Mentor Program', function (): void {
     beforeEach(function (): void {
@@ -38,7 +38,7 @@ describe('Destroy Mentor Program', function (): void {
     });
 
     it('deletes mentor program and returns redirect response', function (): void {
-        $action = new DestroyMentorProgramPage;
+        $action = new DeleteMentorProgramPage;
         $response = $action->handle($this->request, $this->mentorProgram);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
@@ -49,7 +49,7 @@ describe('Destroy Mentor Program', function (): void {
     it('throws exception when trying to delete non-existent program', function (): void {
         $this->mentorProgram->delete();
 
-        expect(fn (): RedirectResponse => (new DestroyMentorProgramPage)->handle($this->request, $this->mentorProgram))
+        expect(fn (): RedirectResponse => (new DeleteMentorProgramPage)->handle($this->request, $this->mentorProgram))
             ->toThrow(ModelNotFoundException::class, 'Mentor program not found.');
     });
 
@@ -67,7 +67,7 @@ describe('Destroy Mentor Program', function (): void {
         ]);
 
         try {
-            (new DestroyMentorProgramPage)->handle($this->request, $anotherMentorProgram);
+            (new DeleteMentorProgramPage)->handle($this->request, $anotherMentorProgram);
         } catch (Symfony\Component\HttpKernel\Exception\HttpException $httpException) {
             expect($httpException->getStatusCode())->toBe(Response::HTTP_FORBIDDEN)
                 ->and($httpException->getMessage())->toBe('Unauthorized action.');
