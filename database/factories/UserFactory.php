@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -43,10 +42,5 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'email_verified_at' => null,
         ]);
-    }
-
-    public function withProfile(array $data = []): static
-    {
-        return $this->has(UserProfile::factory()->state($data), 'profile');
     }
 }

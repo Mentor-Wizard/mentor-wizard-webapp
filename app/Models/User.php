@@ -18,7 +18,8 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- * @property-read UserProfile|null $profile
+ * @property-read UserProfile $profile
+ * @property string $username
  *
  * @mixin IdeHelperUser
  */
@@ -72,7 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile',
     ];
 
-    public function profile(): ?HasOne
+    public function profile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
     }

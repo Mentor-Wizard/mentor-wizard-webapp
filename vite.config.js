@@ -10,7 +10,10 @@ const devServerUrl = process.env.DDEV_PRIMARY_URL
 export default defineConfig({
     plugins: [
         laravel({
-            input: 'resources/js/app.js',
+            input: [
+                'resources/js/app.js',
+                'resources/css/minimal.css',
+            ],
             ssr: 'resources/js/ssr.js',
             refresh: true,
             valetTls: false

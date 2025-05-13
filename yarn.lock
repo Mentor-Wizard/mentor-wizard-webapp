@@ -2981,6 +2981,7 @@ __metadata:
     tailwindcss: "npm:^4.1"
     vite: "npm:^6.2.6"
     vue: "npm:^3.5.13"
+    vue-tel-input: "npm:^9.3.0"
   languageName: unknown
   linkType: soft
 
@@ -3395,6 +3396,16 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: 10c0/08681e83e8338f3915cee729d8296bb9cfd53f71d6796816445d58cd84a8387396a3f5f3e179c52b09e98ccf7247ec3fabb50b95b0e7f3289a619ef8bf71bd8a
+  languageName: node
+  linkType: hard
+
+"vue-tel-input@npm:^9.3.0":
+  version: 9.3.0
+  resolution: "vue-tel-input@npm:9.3.0"
+  peerDependencies:
+    libphonenumber-js: ^1.10.51
+    vue: ^3.5.4
+  checksum: 10c0/24664a9fa8352aed4fcdc29a73a21e53c006b25d89e5816cb952eaf92090b20ff557da4d209128fa0144526b1a587554794c8f21eab849a6759c1e44d6ce5944
   languageName: node
   linkType: hard
 
