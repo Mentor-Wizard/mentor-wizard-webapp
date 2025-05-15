@@ -24,17 +24,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: '🔒 Generate known_hosts'
+        id: known-hosts
+        run: |
+          echo "known_hosts=$(ssh-keyscan -H ${{ secrets.SERVER_HOST }})" >> $GITHUB_OUTPUT
+
       - name: '🔑 Set up SSH'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           name: id_rsa # optional
           if_key_exists: replace
-
-      - name: '🔒 Add server to known hosts'
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          known_hosts: ${{ steps.known-hosts.outputs.known_hosts }}
 
       - name: '🔄 Create .env file from secrets'
         run: |
