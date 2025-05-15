@@ -62,9 +62,8 @@ RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 # Install JS dependencies and build assets
 RUN yarn install --frozen-lockfile && yarn build
 
-# Generate SSL certificate
-RUN mkdir -p /etc/letsencrypt/live/mentor-wizard.com
-RUN certbot certonly --standalone --staging --non-interactive --agree-tos --email mentor.wizard.ua@gmail.com -d mentor-wizard.com || true
+# SSL certificates are now generated during deployment
+RUN mkdir -p /etc/letsencrypt
 
 COPY docker/php/supervisord/supervisord.conf /etc/
 

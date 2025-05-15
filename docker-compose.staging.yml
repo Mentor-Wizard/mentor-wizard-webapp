@@ -21,9 +21,7 @@ services:
 
     app:
         &app
-        build:
-            context: ./
-            dockerfile: docker/php/Dockerfile
+        image: ${DOCKER_IMAGE:-ghcr.io/mentor-wizard/mentor-wizard-webapp/php-app:latest}
         restart: unless-stopped
         container_name: mw-app
         environment:
