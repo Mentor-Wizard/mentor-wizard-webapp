@@ -14,63 +14,105 @@ on:
 
 jobs:
   deploy:
-    name: '🚀 Deploy to ${{ github.event.inputs.environment }}'
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    name: Deploy staging from ${{ github.event.inputs.branch }}
+    runs-on: mw-staging
+    environment:
+      name: staging
 
     steps:
-      - name: '🛎 Checkout'
+      - name: Ensure workspace log directory permissions
+        run: |
+          # Define the path to the working directory
+          WORKSPACE_PATH="${{ github.workspace }}"
+          LOG_DIR="$WORKSPACE_PATH/storage/logs"
+          # Check if the directory exists and change owner/permissions
+          if [ -d "$LOG_DIR" ]; then
+            echo "Fixing permissions for $LOG_DIR..."
+            # Use id -u and id -g to get the current UID/GID of the runner user
+            sudo chown -R $(id -u):$(id -g) "$LOG_DIR"
+            sudo chmod -R u+w "$LOG_DIR" # Add write permissions for the owner
+          else
+            echo "Log directory $LOG_DIR does not exist, skipping permission fix."
+          fi
+        continue-on-error: true # Continue even if there's an error here (e.g., sudo not available)
+
+      - name: Export UID:GID
+        run: |
+          echo "UID=$(id -u)" >> $GITHUB_ENV
+          echo "GID=$(id -g)" >> $GITHUB_ENV
+        # This ensures that docker commands are executed with the correct user permissions on the host
+
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch }} # Get code from the specified branch
+          clean: false
 
-      - name: '🔒 Generate known_hosts'
-        id: known-hosts
+      - name: Create .env file
         run: |
-          echo "known_hosts=$(ssh-keyscan -H ${{ secrets.SERVER_HOST }})" >> $GITHUB_OUTPUT
-
-      - name: '🔑 Set up SSH'
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          name: id_rsa # optional
-          if_key_exists: replace
-          known_hosts: ${{ steps.known-hosts.outputs.known_hosts }}
-
-      - name: '🔄 Create .env file from secrets'
-        run: |
+          # Always create a fresh .env file from secrets
+          echo "Creating .env file from secrets..."
           echo "${{ secrets.ENV_FILE }}" > .env
+          # Ensure the .env file exists in the Docker build context
+          ls -la .env
 
-      - name: '🏗️ Build Docker image'
+      - name: Deploy Application
+        env:
+          UID: ${{ env.UID }}
+          GID: ${{ env.GID }}
         run: |
-          docker build -t mentor-wizard-app:latest -f docker/php/Dockerfile .
+          # Stop existing services and remove orphaned containers
+          echo "Stopping existing containers..."
+          docker compose -f docker-compose.staging.yml down --remove-orphans
 
-      - name: '🔄 Copy files to server'
-        run: |
-          rsync -avz --exclude='.git' --exclude='node_modules' --exclude='vendor' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}
+          # Build images (if Dockerfile changed) and start services in the background
+          echo "Building and starting containers..."
+          docker compose -f docker-compose.staging.yml up -d --build
 
-      - name: '🔄 Copy .env file to server'
-        run: |
-          scp .env ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}/.env
+          # Wait for services to initialize
+          echo "Waiting for services to initialize..."
+          docker compose -f docker-compose.staging.yml wait db app webserver redis
 
-      - name: '🛑 Enable maintenance mode'
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd ${{ secrets.SERVER_PATH }} && docker compose exec -T app php artisan down"
+          # Check if SSL certificates exist, if not create them
+          echo "Checking SSL certificates..."
+          if [ ! -f "/etc/letsencrypt/live/mentor-wizard.com/fullchain.pem" ]; then
+            echo "SSL certificates not found, generating..."
+            docker compose -f docker-compose.staging.yml exec webserver mkdir -p /etc/letsencrypt/live/mentor-wizard.com
+            docker compose -f docker-compose.staging.yml exec app certbot certonly --standalone --staging --non-interactive --agree-tos --email mentor.wizard.ua@gmail.com -d mentor-wizard.com || true
+          fi
 
-      - name: '🔄 Run database migrations'
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd ${{ secrets.SERVER_PATH }} && docker compose exec -T app php artisan migrate --force"
+          # Put the application in maintenance mode
+          echo "Entering maintenance mode..."
+          docker compose -f docker-compose.staging.yml exec app php artisan down || true
 
-      - name: '🔄 Restart Docker containers'
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd ${{ secrets.SERVER_PATH }} && docker compose -f docker-compose.staging.yml down && docker compose -f docker-compose.staging.yml up -d"
+          # Run database migrations
+          echo "Running database migrations..."
+          docker compose -f docker-compose.staging.yml exec app php artisan migrate --force
 
-      - name: '✅ Disable maintenance mode'
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd ${{ secrets.SERVER_PATH }} && docker compose exec -T app php artisan up"
-        if: success()
+          # Optimize Laravel (cache configuration, routes, views)
+          echo "Optimizing application..."
+          docker compose -f docker-compose.staging.yml exec app php artisan optimize:clear # First clear the old cache
+          docker compose -f docker-compose.staging.yml exec app php artisan optimize       # Create new cache
 
-      - name: '❌ Notify on failure'
-        if: failure()
+          # Take the application out of maintenance mode
+          echo "Exiting maintenance mode..."
+          docker compose -f docker-compose.staging.yml exec app php artisan up
+
+          echo "Deployment to staging successful!"
+
+      - name: Health Check
         run: |
-          echo "Deployment failed. Please check the logs for more information."
+          echo "Performing health check..."
+          max_attempts=5
+          attempt=1
+          until curl -s -f https://mentor-wizard.com/up || [ $attempt -eq $max_attempts ]
+          do
+            echo "Health check attempt $attempt of $max_attempts failed, waiting 10 seconds..."
+            sleep 10
+            attempt=$((attempt + 1))
+          done
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Health check failed after $max_attempts attempts"
+            exit 1
+          fi
+          echo "Health check passed successfully!"
