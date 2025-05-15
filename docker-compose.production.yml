@@ -21,7 +21,7 @@ services:
 
     app:
         &app
-        image: ${DOCKER_IMAGE}
+        image: ${DOCKER_IMAGE:-ghcr.io/mentor-wizard/mentor-wizard-webapp/php-app:latest}
         restart: unless-stopped
         container_name: mw-app-prod
         environment:
