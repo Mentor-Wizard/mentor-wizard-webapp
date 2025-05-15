@@ -19,7 +19,7 @@ on:
 jobs:
   build:
     name: Build and push Docker image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write
@@ -109,7 +109,7 @@ jobs:
         run: |
           # Set the Docker Compose file based on the environment
           if [ "${{ github.event.inputs.environment }}" == "production" ]; then
-            echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV  # Use staging file for now, can be changed to production file later
+            echo "COMPOSE_FILE=docker-compose.production.yml" >> $GITHUB_ENV
             echo "Using docker-compose.staging.yml for production environment"
           else
             echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV
@@ -127,8 +127,8 @@ jobs:
           docker compose -f $COMPOSE_FILE down --remove-orphans
 
           # Pull the latest Docker image
-          echo "Pulling Docker image: $DOCKER_IMAGE"
-          docker pull $DOCKER_IMAGE
+          #echo "Pulling Docker image: $DOCKER_IMAGE"
+          #docker pull $DOCKER_IMAGE
 
           # Start services in the background using the pre-built Docker image
           echo "Starting containers..."
