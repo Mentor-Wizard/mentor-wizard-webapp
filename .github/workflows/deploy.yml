@@ -11,13 +11,62 @@ on:
         options:
           - staging
           - production
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
 
 jobs:
+  build:
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/php-app
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/php/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy:
-    name: Deploy staging from ${{ github.event.inputs.branch }}
-    runs-on: mw-staging
+    name: Deploy ${{ github.event.inputs.environment }} from ${{ github.event.inputs.branch }}
+    runs-on: ${{ github.event.inputs.environment == 'production' && 'mw-production' || 'mw-staging' }}
     environment:
-      name: staging
+      name: ${{ github.event.inputs.environment }}
+    needs: build
 
     steps:
       - name: Ensure workspace log directory permissions
@@ -56,56 +105,89 @@ jobs:
           # Ensure the .env file exists in the Docker build context
           ls -la .env
 
+      - name: Set Docker Compose file
+        run: |
+          # Set the Docker Compose file based on the environment
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV  # Use staging file for now, can be changed to production file later
+            echo "Using docker-compose.staging.yml for production environment"
+          else
+            echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV
+            echo "Using docker-compose.staging.yml for staging environment"
+          fi
+
       - name: Deploy Application
         env:
           UID: ${{ env.UID }}
           GID: ${{ env.GID }}
+          DOCKER_IMAGE: ${{ needs.build.outputs.image_tag }}
         run: |
           # Stop existing services and remove orphaned containers
           echo "Stopping existing containers..."
-          docker compose -f docker-compose.staging.yml down --remove-orphans
+          docker compose -f $COMPOSE_FILE down --remove-orphans
 
-          # Build images (if Dockerfile changed) and start services in the background
-          echo "Building and starting containers..."
-          docker compose -f docker-compose.staging.yml up -d --build
+          # Pull the latest Docker image
+          echo "Pulling Docker image: $DOCKER_IMAGE"
+          docker pull $DOCKER_IMAGE
+
+          # Start services in the background using the pre-built Docker image
+          echo "Starting containers..."
+          docker compose -f $COMPOSE_FILE up -d
 
           # Wait for services to initialize
           echo "Waiting for services to initialize..."
-          docker compose -f docker-compose.staging.yml wait db app webserver redis
+          docker compose -f $COMPOSE_FILE wait db app webserver redis
+
+          # Set the domain based on the environment
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            DOMAIN="mentor-wizard.com"
+          else
+            DOMAIN="staging.mentor-wizard.com"
+          fi
 
           # Check if SSL certificates exist, if not create them
-          echo "Checking SSL certificates..."
-          if [ ! -f "/etc/letsencrypt/live/mentor-wizard.com/fullchain.pem" ]; then
+          echo "Checking SSL certificates for $DOMAIN..."
+          if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
             echo "SSL certificates not found, generating..."
-            docker compose -f docker-compose.staging.yml exec webserver mkdir -p /etc/letsencrypt/live/mentor-wizard.com
-            docker compose -f docker-compose.staging.yml exec app certbot certonly --standalone --staging --non-interactive --agree-tos --email mentor.wizard.ua@gmail.com -d mentor-wizard.com || true
+            docker compose -f $COMPOSE_FILE exec webserver mkdir -p /etc/letsencrypt/live/$DOMAIN
+            docker compose -f $COMPOSE_FILE exec app certbot certonly --standalone --staging --non-interactive --agree-tos --email mentor.wizard.ua@gmail.com -d $DOMAIN || true
           fi
 
           # Put the application in maintenance mode
           echo "Entering maintenance mode..."
-          docker compose -f docker-compose.staging.yml exec app php artisan down || true
+          docker compose -f $COMPOSE_FILE exec app php artisan down || true
 
           # Run database migrations
           echo "Running database migrations..."
-          docker compose -f docker-compose.staging.yml exec app php artisan migrate --force
+          docker compose -f $COMPOSE_FILE exec app php artisan migrate --force
 
           # Optimize Laravel (cache configuration, routes, views)
           echo "Optimizing application..."
-          docker compose -f docker-compose.staging.yml exec app php artisan optimize:clear # First clear the old cache
-          docker compose -f docker-compose.staging.yml exec app php artisan optimize       # Create new cache
+          docker compose -f $COMPOSE_FILE exec app php artisan optimize:clear # First clear the old cache
+          docker compose -f $COMPOSE_FILE exec app php artisan optimize       # Create new cache
 
           # Take the application out of maintenance mode
           echo "Exiting maintenance mode..."
-          docker compose -f docker-compose.staging.yml exec app php artisan up
+          docker compose -f $COMPOSE_FILE exec app php artisan up
 
-          echo "Deployment to staging successful!"
+          echo "Deployment to ${{ github.event.inputs.environment }} successful!"
 
       - name: Health Check
         run: |
           echo "Performing health check..."
           max_attempts=5
           attempt=1
-          until curl -s -f https://mentor-wizard.com/up || [ $attempt -eq $max_attempts ]
+
+          # Set the domain based on the environment
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            DOMAIN="https://mentor-wizard.com"
+          else
+            DOMAIN="https://staging.mentor-wizard.com"
+          fi
+
+          echo "Checking health at $DOMAIN/up"
+
+          until curl -s -f $DOMAIN/up || [ $attempt -eq $max_attempts ]
           do
             echo "Health check attempt $attempt of $max_attempts failed, waiting 10 seconds..."
             sleep 10
