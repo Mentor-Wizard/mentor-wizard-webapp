@@ -25,6 +25,7 @@ jobs:
       packages: write
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
+      image_tag_first: ${{ steps.meta.outputs.tags && steps.meta.outputs.tags[0] || '' }}
 
     steps:
       - name: Checkout code
@@ -47,8 +48,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}/php-app
           tags: |
             type=sha,format=long
-            type=ref,event=branch
-            type=ref,event=tag
+          sep-tags: ','
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -110,7 +110,7 @@ jobs:
           # Set the Docker Compose file based on the environment
           if [ "${{ github.event.inputs.environment }}" == "production" ]; then
             echo "COMPOSE_FILE=docker-compose.production.yml" >> $GITHUB_ENV
-            echo "Using docker-compose.staging.yml for production environment"
+            echo "Using docker-compose.production.yml for production environment"
           else
             echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV
             echo "Using docker-compose.staging.yml for staging environment"
@@ -120,14 +120,16 @@ jobs:
         env:
           UID: ${{ env.UID }}
           GID: ${{ env.GID }}
-          DOCKER_IMAGE: ${{ needs.build.outputs.image_tag }}
         run: |
           # Stop existing services and remove orphaned containers
           echo "Stopping existing containers..."
           docker compose -f $COMPOSE_FILE down --remove-orphans
 
+          # Extract the first Docker image tag from the list
+          DOCKER_IMAGE=$(echo "${{ needs.build.outputs.image_tag }}" | head -n 1)
+          echo "Using Docker image: $DOCKER_IMAGE"
+
           # Pull the latest Docker image
-          echo "Pulling Docker image: $DOCKER_IMAGE"
           docker pull $DOCKER_IMAGE
 
           # Start services in the background using the pre-built Docker image
