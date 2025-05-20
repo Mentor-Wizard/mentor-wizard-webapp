@@ -53,10 +53,6 @@ app/DTO
 * Use Inertia and VueJS.
 * Keep UI minimal.
 
-5. Deploy
-* Use Github Actions for deploy.
-* Use Docker for build images.
-
-6. Task Completion Requirements
+5. Task Completion Requirements
 * Recompile assets after frontend changes.
 * Follow all rules before marking tasks complete.
