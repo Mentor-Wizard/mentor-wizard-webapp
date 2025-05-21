@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
-class DeleteMentorProgramPage
+class DeleteMentorProgram
 {
     use AsController;
 
@@ -23,6 +23,6 @@ class DeleteMentorProgramPage
 
         $mentorProgram->delete();
 
-        return redirect()->route('mentor-program.create');
+        return redirect()->route('mentor-program.list');
     }
 }

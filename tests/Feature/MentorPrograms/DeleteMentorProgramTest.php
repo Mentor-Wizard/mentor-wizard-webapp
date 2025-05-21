@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\delete;
 
-describe('Mentor Program Destroy Page', function (): void {
+describe('Mentor Program Destroy', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->seed(CurrencySeeder::class);

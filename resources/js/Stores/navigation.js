@@ -23,7 +23,7 @@ export const useNavigation = defineStore('navigation', () => {
             { name: 'Calendar', href: '#' },
         ];
         if (isMentor.value) {
-            base.push({ name: 'Mentor Program', href: '#' });
+            base.push({ name: 'Mentor Programs', href: route('mentor-program.list') });
         }
         return base;
     });
