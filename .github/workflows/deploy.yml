@@ -6,18 +6,15 @@ on:
 
 jobs:
   build:
-    name: Build Docker image locally
+    name: Build Docker image
     runs-on: self-hosted
-    permissions:
-      contents: read
     outputs:
       image_tag: ${{ steps.git.outputs.sha }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }} # Use the branch that triggered the workflow
+          ref: ${{ github.ref_name }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -26,13 +23,7 @@ jobs:
         id: git
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Debug Docker tags
-        run: |
-          echo "Git SHA: ${{ steps.git.outputs.sha }}"
-          echo "Current branch: ${{ github.ref_name }}"
-          echo "Docker tag will be: mw-php-app:sha-${{ steps.git.outputs.sha }}"
-
-      - name: Build Docker image locally
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -44,56 +35,33 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy from ${{ github.ref_name }}
-    runs-on: mw-staging # Default to staging environment
+    name: Deploy to Staging
+    runs-on: mw-staging
+    needs: build
     environment:
       name: staging
-    needs: build
     env:
       IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
-
     steps:
-      - name: Ensure workspace log directory permissions
-        run: |
-          # Define the path to the working directory
-          WORKSPACE_PATH="${{ github.workspace }}"
-          LOG_DIR="$WORKSPACE_PATH/storage/logs"
-          # Check if the directory exists and change owner/permissions
-          if [ -d "$LOG_DIR" ]; then
-            echo "Fixing permissions for $LOG_DIR..."
-            # Use id -u and id -g to get the current UID/GID of the runner user
-            sudo chown -R $(id -u):$(id -g) "$LOG_DIR"
-            sudo chmod -R u+w "$LOG_DIR" # Add write permissions for the owner
-          else
-            echo "Log directory $LOG_DIR does not exist, skipping permission fix."
-          fi
-        continue-on-error: true # Continue even if there's an error here (e.g., sudo not available)
-
-      - name: Export UID:GID
-        run: |
-          echo "UID=$(id -u)" >> $GITHUB_ENV
-          echo "GID=$(id -g)" >> $GITHUB_ENV
-        # This ensures that docker commands are executed with the correct user permissions on the host
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }} # Get code from the current branch
+          ref: ${{ github.ref_name }}
           clean: false
 
       - name: Create .env file
         run: |
-          # Always create a fresh .env file from secrets
-          echo "Creating .env file from secrets..."
           echo "${{ secrets.ENV_FILE }}" > .env
-          # Ensure the .env file exists in the Docker build context
-          ls -la .env
+        shell: bash
 
       - name: Set Docker Compose file
+        run: echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV
+
+      - name: Ensure storage permissions
         run: |
-          # Set the Docker Compose file for staging environment
-          echo "COMPOSE_FILE=docker-compose.staging.yml" >> $GITHUB_ENV
-          echo "Using docker-compose.staging.yml for staging environment"
+          mkdir -p storage/logs
+          chmod -R 775 storage
+          chown -R $(id -u):$(id -g) storage
 
       - name: Deploy Application
         env:
@@ -101,98 +69,30 @@ jobs:
           GID: ${{ env.GID }}
           DOCKER_IMAGE: "mw-php-app:sha-${{ env.IMAGE_TAG }}"
         run: |
-          # Stop existing services and remove orphaned containers
-          echo "Stopping existing containers..."
           docker compose -f $COMPOSE_FILE down --remove-orphans
-
-          echo "Using Docker image: $DOCKER_IMAGE"
-
-          # Fallback to latest if needed
           if ! docker image inspect $DOCKER_IMAGE &>/dev/null; then
-            echo "Image $DOCKER_IMAGE not found, using latest instead"
             DOCKER_IMAGE="mw-php-app:latest"
           fi
-
-          echo "Using Docker image: $DOCKER_IMAGE"
-
-          # Start services in the background using the pre-built Docker image
-          echo "Starting services..."
           DOCKER_IMAGE=$DOCKER_IMAGE docker compose --env-file .env -f $COMPOSE_FILE up -d
-
-          # Wait for services to initialize
-          echo "Waiting for services to initialize..."
-          docker compose --env-file .env -f $COMPOSE_FILE wait db app webserver redis
-
-          # Set the domain for staging
-          DOMAIN="staging.mentor-wizard.com"
-
-          # Check if SSL certificates exist, if not create them
-          echo "Checking SSL certificates for $DOMAIN..."
-          if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
-            echo "SSL certificates not found, generating..."
-            docker compose --env-file .env -f $COMPOSE_FILE exec webserver mkdir -p /etc/letsencrypt/live/$DOMAIN
-            docker compose --env-file .env -f $COMPOSE_FILE exec app certbot certonly --standalone --staging --non-interactive --agree-tos --email mentor.wizard.ua@gmail.com -d $DOMAIN || true
-          fi
-
-          # Put the application in maintenance mode
-          echo "Entering maintenance mode..."
           docker compose --env-file .env -f $COMPOSE_FILE exec app php artisan down || true
-
-          # Run database migrations
-          echo "Running database migrations..."
           docker compose --env-file .env -f $COMPOSE_FILE exec app php artisan migrate --force
-
-          # Optimize Laravel (cache configuration, routes, views)
-          echo "Optimizing application..."
-          docker compose --env-file .env -f $COMPOSE_FILE exec app php artisan optimize:clear # First clear the old cache
-          docker compose --env-file .env -f $COMPOSE_FILE exec app php artisan optimize       # Create new cache
-
-          # Take the application out of maintenance mode
-          echo "Exiting maintenance mode..."
+          docker compose --env-file .env -f $COMPOSE_FILE exec app php artisan optimize:clear
+          docker compose --env-file .env -f $COMPOSE_FILE exec app php artisan optimize
           docker compose --env-file .env -f $COMPOSE_FILE exec app php artisan up
-
-          echo "Deployment of branch ${{ github.ref_name }} successful!"
 
       - name: Health Check
         run: |
-          echo "Performing health check..."
-          max_attempts=5
-          attempt=1
-
-          # Set the domain for staging
-          DOMAIN="https://staging.mentor-wizard.com"
-
-          echo "Checking health at $DOMAIN/up"
-
-          until curl -s -f $DOMAIN/up || [ $attempt -eq $max_attempts ]
-          do
-            echo "Health check attempt $attempt of $max_attempts failed, waiting 10 seconds..."
+          for i in {1..5}; do
+            if curl -sf https://staging.mentor-wizard.com/up; then
+              echo "Health check passed!"
+              exit 0
+            fi
             sleep 10
-            attempt=$((attempt + 1))
           done
-          if [ $attempt -eq $max_attempts ]; then
-            echo "Health check failed after $max_attempts attempts"
-            exit 1
-          fi
-          echo "Health check passed successfully!"
+          echo "Health check failed!"
+          exit 1
 
       - name: Clean up unused Docker images
         run: |
-          echo "Cleaning up unused Docker images..."
-          # List images before cleanup
-          echo "Docker images before cleanup:"
-          docker images
-
-          # Remove dangling images (untagged images)
-          echo "Removing dangling images..."
           docker image prune -f
-
-          # Remove unused images (not used by any container)
-          echo "Removing unused images..."
           docker image prune -a -f --filter "until=24h"
-
-          # List images after cleanup
-          echo "Docker images after cleanup:"
-          docker images
-
-          echo "Docker cleanup completed successfully!"
