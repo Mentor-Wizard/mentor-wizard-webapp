@@ -27,6 +27,8 @@ Route::middleware('auth')->group(function (): void {
     Route::get('profile', GetProfilePage::class)->name('profile.edit');
     Route::patch('profile', UpdateUserProfile::class)->name('profile.update');
     Route::delete('profile', DeleteUserProfile::class)->name('profile.destroy');
+    Route::patch('profile', UpdateUserProfile::class)->name('profile.update');
+    Route::delete('profile', DeleteUserProfile::class)->name('profile.destroy');
 });
 
 Route::middleware(['auth', 'role:mentor'])->group(function (): void {
