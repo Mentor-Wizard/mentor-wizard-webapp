@@ -11,10 +11,19 @@ jobs:
     outputs:
       image_tag: ${{ steps.git.outputs.sha }}
     steps:
+      - name: Fix permissions before checkout
+        run: |
+          if [ -d "/home/mw/actions-runner/_work/mentor-wizard-webapp/mentor-wizard-webapp" ]; then
+            sudo chown -R $(id -u):$(id -g) /home/mw/actions-runner/_work/mentor-wizard-webapp/mentor-wizard-webapp || true
+            sudo chmod -R 775 /home/mw/actions-runner/_work/mentor-wizard-webapp/mentor-wizard-webapp/storage || true
+          fi
+        continue-on-error: true
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          clean: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -43,6 +52,14 @@ jobs:
     env:
       IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
     steps:
+      - name: Fix permissions before checkout
+        run: |
+          if [ -d "/home/mw/actions-runner/_work/mentor-wizard-webapp/mentor-wizard-webapp" ]; then
+            sudo chown -R $(id -u):$(id -g) /home/mw/actions-runner/_work/mentor-wizard-webapp/mentor-wizard-webapp || true
+            sudo chmod -R 775 /home/mw/actions-runner/_work/mentor-wizard-webapp/mentor-wizard-webapp/storage || true
+          fi
+        continue-on-error: true
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -59,9 +76,11 @@ jobs:
 
       - name: Ensure storage permissions
         run: |
-          mkdir -p storage/logs
+          mkdir -p storage/logs/nginx
           chmod -R 775 storage
-          chown -R $(id -u):$(id -g) storage
+          sudo chown -R $(id -u):$(id -g) storage
+          touch storage/logs/nginx/error.log storage/logs/nginx/access.log
+          chmod 664 storage/logs/nginx/*.log
 
       - name: Deploy Application
         env:
