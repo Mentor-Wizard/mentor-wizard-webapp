@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
