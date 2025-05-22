@@ -1,0 +1,57 @@
+{
+    # Global options
+    frankenphp
+    debug
+}
+
+:80 {
+    # Set document root to Laravel public directory
+    root * /var/www/public
+
+    # Handle static files
+    file_server
+
+    # Enable PHP processing
+    php_fastcgi
+
+    # Enable compression
+    encode gzip
+
+    # Log everything for debugging
+    log {
+        output stdout
+        format console
+        level DEBUG
+    }
+
+    # Special handling for Laravel
+    try_files {path} {path}/index.php =404
+
+    # Handle Laravel routes
+    @rewrite {
+        path_regexp .+
+    }
+    rewrite @rewrite /index.php
+}
+
+:443 {
+    # Same as above but with TLS
+    root * /var/www/public
+    file_server
+    php_fastcgi
+    encode gzip
+    tls internal
+
+    log {
+        output stdout
+        format console
+        level DEBUG
+    }
+
+    try_files {path} {path}/index.php =404
+
+    @rewrite {
+        path_regexp .+
+    }
+    rewrite @rewrite /index.php
+}

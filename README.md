@@ -185,10 +185,12 @@ docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --m
     ```dotenv
     OCTANE_HTTPS=true
 
-    REVERB_HOST=${DDEV_HOSTNAME}
-    REVERB_PORT=8443
+    REVERB_HOST=localhost
+    REVERB_PORT=443
     REVERB_SCHEME=https
     ```
+
+Ваш проект буде доступний за адресою http://localhost
 
 ### Тестування
 
