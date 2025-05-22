@@ -39,7 +39,7 @@ services:
         restart: unless-stopped
         container_name: mw-app
         environment:
-            COMMAND: php artisan octane:start --watch --host=0.0.0.0 --port=8000 --verbose
+            COMMAND: php artisan octane:start --server=frankenphp --watch --host=0.0.0.0 --port=80 --admin-port=2019 --verbose
             PROCESS: app
             XDEBUG_MODE: debug,coverage
         depends_on:
@@ -52,13 +52,16 @@ services:
             - mw_app_composer_data:/.composer
             - mw_app_npm_data:/.npm
         ports:
+            - "80:80"     # Map host port 80 to container port 80
+            - "443:443"   # Map host port 443 to container port 443
+            - "2019:2019" # FrankenPHP admin port
             - "5173:5173"
         networks:
             - mw-db-network
             - mw-webserver-network
             - mw-redis-network
         healthcheck:
-            test: curl -s http://localhost:8000/up >/dev/null || exit 1
+            test: curl -s http://localhost:80/up || exit 1
             interval: 5s
             timeout: 10s
             retries: 20
@@ -102,25 +105,8 @@ services:
             - mw-db-network
             - mw-redis-network
 
-    webserver:
-        image: nginx:1.26.0-alpine
-        container_name: mw-webserver
-        restart: unless-stopped
-        volumes:
-            - ./:/var/www
-            - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
-            #            - ./docker/nginx/certs/:/etc/nginx/certs/
-            - ./storage/logs/nginx/:/var/log/nginx/
-        ports:
-            - 80:80
-        #            - 443:443
-        networks:
-            - mw-webserver-network
-        healthcheck:
-            test: curl -s http://localhost/up >/dev/null || exit 1
-            interval: 5s
-            timeout: 10s
-            retries: 20
+    # FrankenPHP includes its own web server, so we don't need a separate nginx service
+    # The app service now handles both PHP processing and HTTP serving
 
     redis:
         image: redis:7.2.4-alpine

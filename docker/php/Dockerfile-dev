@@ -1,52 +1,51 @@
-FROM php:8.4.4-cli-alpine3.21
+FROM dunglas/frankenphp:1.6-php8.4-alpine
 
 COPY --from=composer:2.8.5 /usr/bin/composer /usr/bin/
 
 RUN \
     set -ex && \
     apk update && \
-    apk add --no-cache libstdc++ libpq && \
-    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev linux-headers postgresql-dev openssl-dev pcre-dev \
-      pcre2-dev zlib-dev libzip-dev && \
-    apk add --no-cache libzip libzip-dev && \
+    apk add --no-cache libstdc++ libpq curl bash && \
+    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev postgresql-dev && \
     apk add --no-cache supervisor && \
     apk add --no-cache freetype-dev libjpeg-turbo-dev libpng-dev && \
     apk add --no-cache jpegoptim optipng pngquant gifsicle libavif && \
-    pecl channel-update pecl.php.net && \
-    docker-php-ext-configure zip && \
-    docker-php-ext-install sockets zip exif && \
-    docker-php-ext-enable exif && \
-    pecl install redis && \
-    docker-php-ext-enable redis && \
-    pecl install xdebug && \
-    docker-php-ext-enable xdebug && \
-    docker-php-source extract && \
-    mkdir /usr/src/php/ext/swoole && \
-    curl -sfL https://github.com/swoole/swoole-src/archive/v6.0.0.tar.gz -o swoole.tar.gz && \
-    tar xfz swoole.tar.gz --strip-components=1 -C /usr/src/php/ext/swoole && \
-    docker-php-ext-configure swoole \
-        --enable-swoole-pgsql \
-        --enable-openssl      \
-        --enable-sockets --enable-swoole-curl && \
-    docker-php-ext-install -j$(nproc) swoole && \
-    docker-php-ext-configure pcntl --enable-pcntl && \
-    docker-php-ext-install pcntl && \
-    docker-php-ext-configure gd --with-freetype=shared --with-jpeg=shared && \
-    docker-php-ext-install gd && \
-    rm -f swoole.tar.gz && \
-    docker-php-source delete && \
+    # Install required PHP extensions
+    install-php-extensions \
+        exif \
+        pcntl \
+        xdebug \
+        gd \
+        redis \
+        pgsql \
+        pdo_pgsql \
+        sockets \
+        zip && \
+    # Cleanup
     apk del .build-deps
 
+# PHP Configuration
 RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory-limit.ini
+RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/error-reporting.ini
+RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/error-reporting.ini
 
+# Install Node.js
 RUN apk add --no-cache nodejs npm git
 RUN npm install -g corepack
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
+# Copy supervisor configuration
 COPY docker/php/supervisord/supervisord.conf /etc/
 
-EXPOSE 8000
+# Prepare for FrankenPHP
+COPY docker/caddy/Caddyfile /etc/caddy/Caddyfile
+
+# Expose FrankenPHP ports
+EXPOSE 80 443 2019
 
 WORKDIR "/var/www/"
+
+# Initialize directories
+RUN mkdir -p /var/www/storage/logs /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/framework/cache
 
 ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
