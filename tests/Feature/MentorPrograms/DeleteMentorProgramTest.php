@@ -39,7 +39,7 @@ describe('Mentor Program Destroy', function (): void {
 
         $response = delete(route('mentor-program.destroy', $this->mentorProgram->slug));
 
-        $response->assertRedirect(route('mentor-program.create'));
+        $response->assertRedirect(route('mentor-program.list'));
 
         $this->assertDatabaseMissing('mentor_programs', [
             'id' => $this->mentorProgram->getKey(),

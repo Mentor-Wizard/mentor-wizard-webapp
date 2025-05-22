@@ -7,7 +7,7 @@ import Modal from "@/Components/Modal.vue";
 import PrimaryButton from "@/Components/UI/Button/PrimaryButton.vue";
 import DangerButton from "@/Components/UI/Button/DangerButton.vue";
 import {ref} from "vue";
-import { router } from '@inertiajs/vue3';
+import {router} from '@inertiajs/vue3';
 
 const showDeleteModal = ref(false);
 const programToDelete = ref(null);
@@ -55,59 +55,68 @@ const deleteProgram = () => {
         </template>
 
         <div class="py-12">
-            <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-8 bg-white border-b border-gray-200">
-                        <ul role="list" class="divide-y divide-gray-100">
-                            <li v-for="program in programs" :key="program.id"
-                                class="flex items-center justify-between gap-x-6 py-5">
-                                <div class="min-w-0">
-                                    <div class="flex items-start gap-x-3">
-                                        <p class="text-sm/6 font-semibold text-gray-900">{{ program.name }}</p>
-                                        <p class="mt-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset">{{ program.cost }} {{ program.currency.symbol }}</p>
+                        <template v-if="programs.length > 0">
+                            <ul role="list" class="divide-y divide-gray-100">
+                                <li v-for="program in programs" :key="program.id"
+                                    class="flex items-center justify-between gap-x-6 py-5">
+                                    <div class="min-w-0">
+                                        <div class="flex items-start gap-x-3">
+                                            <p class="text-sm/6 font-semibold text-gray-900">{{ program.name }}</p>
+                                            <p class="mt-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset">
+                                                {{ program.cost }} {{ program.currency.symbol }}</p>
 
+                                        </div>
+                                        <div class="mt-1 flex items-center gap-x-2 text-xs/5 text-gray-500">
+                                            <p class="truncate">Created by {{ formatDate(program.created_at) }}</p>
+                                        </div>
                                     </div>
-                                    <div class="mt-1 flex items-center gap-x-2 text-xs/5 text-gray-500">
-                                        <p class="truncate">Created by {{ formatDate(program.created_at) }}</p>
+                                    <div class="flex flex-none items-center gap-x-4">
+                                        <a href="#"
+                                           class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block">View
+                                            program<span class="sr-only">, {{ program.name }}</span></a>
+                                        <Menu as="div" class="relative flex-none">
+                                            <MenuButton class="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
+                                                <span class="sr-only">Open options</span>
+                                                <EllipsisVerticalIcon class="size-5" aria-hidden="true"/>
+                                            </MenuButton>
+                                            <transition enter-active-class="transition ease-out duration-100"
+                                                        enter-from-class="transform opacity-0 scale-95"
+                                                        enter-to-class="transform opacity-100 scale-100"
+                                                        leave-active-class="transition ease-in duration-75"
+                                                        leave-from-class="transform opacity-100 scale-100"
+                                                        leave-to-class="transform opacity-0 scale-95">
+                                                <MenuItems
+                                                    class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-hidden">
+                                                    <MenuItem v-slot="{ active }">
+                                                        <a :href="route('mentor-program.edit', program.slug)"
+                                                           :class="[active ? 'bg-gray-50 outline-hidden' : '', 'block px-3 py-1 text-sm/6 text-gray-900']"
+                                                        >Edit<span class="sr-only">, {{ program.name }}</span></a
+                                                        >
+                                                    </MenuItem>
+                                                    <MenuItem v-slot="{ active }">
+                                                        <button
+                                                            type="button"
+                                                            @click="confirmDelete(program)"
+                                                            :class="[active ? 'bg-gray-50 outline-hidden' : '', 'block w-full text-left px-3 py-1 text-sm/6 text-gray-900']"
+                                                        >
+                                                            Delete<span class="sr-only">, {{ program.name }}</span>
+                                                        </button>
+                                                    </MenuItem>
+                                                </MenuItems>
+                                            </transition>
+                                        </Menu>
                                     </div>
-                                </div>
-                                <div class="flex flex-none items-center gap-x-4">
-                                    <a href="#"
-                                       class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block">View program<span class="sr-only">, {{ program.name }}</span></a>
-                                    <Menu as="div" class="relative flex-none">
-                                        <MenuButton class="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
-                                            <span class="sr-only">Open options</span>
-                                            <EllipsisVerticalIcon class="size-5" aria-hidden="true"/>
-                                        </MenuButton>
-                                        <transition enter-active-class="transition ease-out duration-100"
-                                                    enter-from-class="transform opacity-0 scale-95"
-                                                    enter-to-class="transform opacity-100 scale-100"
-                                                    leave-active-class="transition ease-in duration-75"
-                                                    leave-from-class="transform opacity-100 scale-100"
-                                                    leave-to-class="transform opacity-0 scale-95">
-                                            <MenuItems
-                                                class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-hidden">
-                                                <MenuItem v-slot="{ active }">
-                                                    <a :href="route('mentor-program.edit', program.slug)"
-                                                       :class="[active ? 'bg-gray-50 outline-hidden' : '', 'block px-3 py-1 text-sm/6 text-gray-900']"
-                                                    >Edit<span class="sr-only">, {{ program.name }}</span></a
-                                                    >
-                                                </MenuItem>
-                                                <MenuItem v-slot="{ active }">
-                                                    <button
-                                                        type="button"
-                                                        @click="confirmDelete(program)"
-                                                        :class="[active ? 'bg-gray-50 outline-hidden' : '', 'block w-full text-left px-3 py-1 text-sm/6 text-gray-900']"
-                                                    >
-                                                        Delete<span class="sr-only">, {{ program.name }}</span>
-                                                    </button>
-                                                </MenuItem>
-                                            </MenuItems>
-                                        </transition>
-                                    </Menu>
-                                </div>
-                            </li>
-                        </ul>
+                                </li>
+                            </ul>
+                        </template>
+                        <template v-else>
+                            <div class="text-center text-gray-500 text-sm">
+                                You don't have any programs yet.
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>

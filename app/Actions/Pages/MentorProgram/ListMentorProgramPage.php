@@ -19,7 +19,7 @@ class ListMentorProgramPage
         $programs = auth()
             ->user()
             ->mentorPrograms()
-            ->select('id', 'name', 'slug', 'description', 'cost', 'currency_id', 'currency_id', 'created_at')
+            ->select('id', 'name', 'slug', 'description', 'cost', 'currency_id', 'created_at')
             ->with(['currency:id,symbol'])
             ->orderBy('created_at', 'desc')
             ->get()
