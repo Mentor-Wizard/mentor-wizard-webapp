@@ -37,6 +37,11 @@ class MentorProgram extends Model
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
+    }
+
     public function mentorProgramBlocks(): HasMany
     {
         return $this->hasMany(MentorProgramBlock::class, 'mentor_program_id');

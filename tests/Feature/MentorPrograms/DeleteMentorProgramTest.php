@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\delete;
 
-describe('Mentor Program Destroy Page', function (): void {
+describe('Mentor Program Destroy', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->seed(CurrencySeeder::class);
@@ -39,7 +39,7 @@ describe('Mentor Program Destroy Page', function (): void {
 
         $response = delete(route('mentor-program.destroy', $this->mentorProgram->slug));
 
-        $response->assertRedirect(route('mentor-program.create'));
+        $response->assertRedirect(route('mentor-program.list'));
 
         $this->assertDatabaseMissing('mentor_programs', [
             'id' => $this->mentorProgram->getKey(),
