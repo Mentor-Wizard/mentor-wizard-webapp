@@ -199,7 +199,7 @@ const deleteProgram = () => {
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <Modal :modelValue="showDeleteModal" @update:modelValue="val => showDeleteModal = val">
+        <Modal v-model="showDeleteModal">
             <div class="p-6">
                 <h2 class="text-lg font-medium text-gray-900">
                     Are you sure you want to delete this program?
