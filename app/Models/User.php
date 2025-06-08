@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -24,11 +26,12 @@ use Spatie\Permission\Traits\HasRoles;
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, HasMedia
 {
     use HasFactory;
     use HasRoles;
     use Notifiable;
+    use InteractsWithMedia;
 
     public const int MIN_PASSWORD_LENGTH = 8;
 
@@ -72,8 +75,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile',
         'media',
     ];
-
-    protected $appends = ['avatar'];
 
     public function profile(): HasOne
     {

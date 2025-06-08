@@ -49,7 +49,6 @@ class UserProfile extends Model implements HasMedia
         'whatsapp',
         'phone',
         'description',
-        'avatar'
     ];
 
     public function user(): BelongsTo
@@ -74,7 +73,7 @@ class UserProfile extends Model implements HasMedia
     public function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => $this->getFirstMediaUrl('avatar'),
+            get: fn (): string => $this->getFirstMediaUrl('avatar'),
         );
     }
 }

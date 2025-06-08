@@ -38,12 +38,12 @@ return [
 
     'guards' => [
         'web' => [
-            'driver'   => 'session',
-            'provider' => 'users',
+            'driver'    => 'session',
+            'provider'  => 'users',
         ],
         'mentor' => [
-            'driver' => 'session',
-            'provider' => 'users',
+            'driver'    => 'session',
+            'provider'  => 'users',
         ],
 
     ],
