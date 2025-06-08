@@ -31,6 +31,7 @@ class UserProfile extends Model implements HasMedia
         'user_id',
         'name',
         'last_name',
+        'title',
         'linkedin',
         'telegram',
         'whatsapp',
@@ -41,12 +42,14 @@ class UserProfile extends Model implements HasMedia
     protected $visible = [
         'id',
         'name',
+        'title',
         'last_name',
         'linkedin',
         'telegram',
         'whatsapp',
         'phone',
         'description',
+        'avatar'
     ];
 
     public function user(): BelongsTo
@@ -62,10 +65,16 @@ class UserProfile extends Model implements HasMedia
             ->fit(Fit::Contain, self::PREVIEW_HEIGHT, self::PREVIEW_WIDTH);
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')
+            ->singleFile();
+    }
+
     public function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => $this->getFirstMediaUrl('avatar'),
+            get: fn(): string => $this->getFirstMediaUrl('avatar'),
         );
     }
 }

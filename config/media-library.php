@@ -283,4 +283,15 @@ return [
      * disabled lazy loading globally in the service provider.
      */
     'force_lazy_loading' => env('FORCE_MEDIA_LIBRARY_LAZY_LOADING', true),
+    'permissions' => [
+        'files' => [
+            'public' => 0664,
+            'private' => 0600,
+        ],
+        'directories' => [
+            'public' => 0775,
+            'private' => 0700,
+        ],
+    ],
+
 ];

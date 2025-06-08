@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth\Login;
 
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,7 +18,7 @@ class GetLoginPage
     {
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
-            'status'           => session('status'),
+            'status' => session('status'),
         ]);
     }
 }

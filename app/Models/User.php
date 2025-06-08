@@ -20,7 +20,6 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property-read UserProfile $profile
  * @property string $username
- *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
@@ -71,7 +70,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'created_at',
         'updated_at',
         'profile',
+        'media',
     ];
+
+    protected $appends = ['avatar'];
 
     public function profile(): HasOne
     {

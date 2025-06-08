@@ -15,12 +15,13 @@ use Throwable;
 class RoleSeeder extends Seeder
 {
     private const array ROLES = [
-        ['name' => RoleEnum::USER, 'guard_name' => RoleGuardEnum::USER],
-        ['name' => RoleEnum::ADMIN, 'guard_name' => RoleGuardEnum::ADMIN],
-        ['name' => RoleEnum::SUPER_ADMIN, 'guard_name' => RoleGuardEnum::SUPER_ADMIN],
-        ['name' => RoleEnum::MENTOR, 'guard_name' => RoleGuardEnum::MENTOR],
-        ['name' => RoleEnum::MENTI, 'guard_name' => RoleGuardEnum::MENTI],
-        ['name' => RoleEnum::COACH, 'guard_name' => RoleGuardEnum::COACH],
+        ['name' => RoleEnum::USER->value, 'guard_name' => RoleGuardEnum::USER->value],
+        ['name' => RoleEnum::ADMIN->value, 'guard_name' => RoleGuardEnum::ADMIN->value],
+        ['name' => RoleEnum::SUPER_ADMIN->value, 'guard_name' => RoleGuardEnum::SUPER_ADMIN->value],
+        ['name' => RoleEnum::MENTOR->value, 'guard_name' => RoleGuardEnum::MENTOR->value],
+        ['name' => RoleEnum::MENTOR->value, 'guard_name' => 'web'],
+        ['name' => RoleEnum::MENTI->value, 'guard_name' => RoleGuardEnum::MENTI->value],
+        ['name' => RoleEnum::COACH->value, 'guard_name' => RoleGuardEnum::COACH->value],
     ];
 
     public function run(): void

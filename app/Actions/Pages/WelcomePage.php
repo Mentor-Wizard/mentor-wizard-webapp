@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages;
 
+use App\Enums\RoleGuardEnum;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,6 +24,9 @@ class WelcomePage
             'canRegister'    => Route::has('register'),
             'laravelVersion' => Application::VERSION,
             'phpVersion'     => PHP_VERSION,
+            'mentors'     =>  new UserResource(User::query()
+                ->role('mentor')
+                ->with(['profile','profile.media'])->paginate(5))
         ]);
     }
 }
