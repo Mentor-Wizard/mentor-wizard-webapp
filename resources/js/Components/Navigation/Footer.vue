@@ -9,7 +9,7 @@ const footer = useFooter()
 <template>
     <footer class="relative mx-auto mt-32 max-w-7xl px-6 lg:px-8">
         <div class="justify-center mt-4 items-center">
-            <MentorsList></MentorsList>
+            <MentorsList/>
         </div>
         <div class="border-t border-gray-900/10 py-16 sm:py-24 lg:py-32">
             <div class="xl:grid xl:grid-cols-3 xl:gap-8">
