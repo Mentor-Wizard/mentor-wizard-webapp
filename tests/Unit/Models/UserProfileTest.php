@@ -87,6 +87,7 @@ it('has the correct fillable attributes', function (): void {
         'user_id',
         'name',
         'last_name',
+        'title',
         'linkedin',
         'telegram',
         'whatsapp',

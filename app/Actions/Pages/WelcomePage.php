@@ -24,7 +24,7 @@ class WelcomePage
             'laravelVersion' => Application::VERSION,
             'phpVersion'     => PHP_VERSION,
             'mentors'        => new UserResource(User::query()
-                ->role('mentor')
+                ->role('mentor', 'web')
                 ->with(['profile', 'profile.media'])->paginate(5)),
         ]);
     }

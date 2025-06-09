@@ -42,6 +42,6 @@ describe('WelcomePage Action', function (): void {
                 'phpVersion'     => PHP_VERSION,
                 'laravelVersion' => Application::VERSION,
             ])
-            ->and(fn ($result): \Pest\Mixins\Expectation => expect(Arr::get($resultData->getData(), 'page.props.mentors'))->toBeArray());
+            ->and(fn ($result): Pest\Mixins\Expectation => expect(Arr::get($resultData->getData(), 'page.props.mentors'))->toBeArray());
     });
 });
