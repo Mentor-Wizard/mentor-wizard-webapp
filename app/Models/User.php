@@ -22,16 +22,17 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property-read UserProfile $profile
  * @property string $username
+ *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
-class User extends Authenticatable implements MustVerifyEmail, HasMedia
+class User extends Authenticatable implements HasMedia, MustVerifyEmail
 {
     use HasFactory;
     use HasRoles;
-    use Notifiable;
     use InteractsWithMedia;
+    use Notifiable;
 
     public const int MIN_PASSWORD_LENGTH = 8;
 

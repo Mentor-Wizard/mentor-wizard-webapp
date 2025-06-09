@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Override;
 
 class UserResource extends ResourceCollection
 {
@@ -14,11 +15,11 @@ class UserResource extends ResourceCollection
      *
      * @return array<int|string, mixed>
      */
-    #[\Override]
+    #[Override]
     public function toArray(Request $request): array
     {
         return [
-            'data' => $this->collection->map(fn($user): array => [
+            'data' => $this->collection->map(fn ($user): array => [
                 'id'                => $user->id,
                 'username'          => $user->username,
                 'email'             => $user->email,
