@@ -1,58 +1,182 @@
-You are an expert in PHP, Laravel, Pest, Inertia, Vue and Tailwind.
+# Mentor Wizard Development Guidelines
 
-1. Coding Standards
-* Use PHP v8.4 features.
-* Follow pint.json coding rules.
-* Enforce strict types and array shapes via PHPStan.
+This document provides essential information for developers working on the Mentor Wizard project.
 
-2. Project Structure & Architecture
-* Delete .gitkeep when adding a file.
-* Stick to existing structure—no new folders.
-* Avoid DB::; use Model::query() only.
-* No dependency changes without approval.
+## Build/Configuration Instructions
 
-2.1 Directory Conventions
+### Environment Setup
 
-app/Http/Controllers
-* No abstract/base controllers.
+1. **Clone the repository and set up environment variables**:
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your specific configuration
+   ```
 
-app/Http/Requests
-* Use FormRequest for validation.
-* Name with Create, Update, Delete.
+2. **Start the Docker environment**:
+   ```bash
+   docker compose up -d
+   ```
 
-app/Actions
-* Use Actions pattern and naming verbs.
-* Use Laravel Actions [package](https://www.laravelactions.com/) for Actions.
-* Use `docker compose exec php artisan make:action {actionName}` for Actions creation.
-* Use `AsController` trait as default for Actions.
+3. **Install dependencies**:
+   ```bash
+   docker compose exec app composer install
+   docker compose exec app yarn install
+   ```
 
-app/DTO
-* Use DTO for passing requests data throw Actions
+4. **Generate application key**:
+   ```bash
+   docker compose exec app php artisan key:generate
+   ```
 
-3. Testing
-* Use Pest PHP for all tests.
-* Cover 100% mutation Pest tests for all tests.
-* Run `docker compose exec composer pint:fix` after changes.
-* Run `docker compose exec composer rector:fix` after changes.
-* Run `docker compose exec app ./vendor/bin/pest --parallel` before finalizing.
-* Don’t remove tests without approval.
-* All code must be tested.
-* Avoid Mocks, use Models Factories instead.
-* Generate a {Model}Factory with each model.
+5. **Run migrations**:
+   ```bash
+   docker compose exec app php artisan migrate
+   ```
 
-3.1 Test Directory Structure
-* Console: tests/Feature/Console
-* Controllers: tests/Feature/Http
-* Actions: tests/Unit/Actions
-* Models: tests/Unit/Models
-* Jobs: tests/Unit/Jobs
-* DTO: tests/Unit/DTO
+6. **Build frontend assets**:
+   ```bash
+   docker compose exec app yarn build
+   ```
 
-4. Styling & UI
-* Use Tailwind CSS Plus components.
-* Use Inertia and VueJS.
-* Keep UI minimal.
+### Docker Environment
 
-5. Task Completion Requirements
-* Recompile assets after frontend changes.
-* Follow all rules before marking tasks complete.
+The project uses Docker with the following services:
+- **app**: Main application container running FrankenPHP (PHP 8.4 with built-in web server)
+- **db**: PostgreSQL 17 database
+- **db-test**: PostgreSQL database for testing
+- **redis**: Redis 7.2.4 for caching, queues, and broadcasting
+- **workers**: Queue worker container
+- **schedule**: Scheduler container using supercronic
+- **websockets**: WebSockets server using Laravel Reverb
+- **mailpit**: Email testing service
+
+## Testing Information
+
+### Running Tests
+
+1. **Run all tests**:
+   ```bash
+   docker compose exec app ./vendor/bin/pest --parallel
+   ```
+
+2. **Run specific test**:
+   ```bash
+   docker compose exec app ./vendor/bin/pest --filter=TestName
+   ```
+
+3. **Run tests with coverage**:
+   ```bash
+   docker compose exec app ./vendor/bin/pest --coverage
+   ```
+
+### Creating Tests
+
+1. **Test Directory Structure**:
+   - Feature tests: `tests/Feature/`
+     - Console: `tests/Feature/Console/`
+     - Controllers: `tests/Feature/Http/`
+   - Unit tests: `tests/Unit/`
+     - Actions: `tests/Unit/Actions/`
+     - Models: `tests/Unit/Models/`
+     - Jobs: `tests/Unit/Jobs/`
+     - DTO: `tests/Unit/DTO/`
+
+2. **Creating a new test**:
+   - Use Pest PHP syntax with describe/it blocks
+   - Follow BDD style with descriptive test names
+   - Use the `mutates()` function for mutation testing
+
+3. **Example Test**:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use App\Support\StringHelper;
+
+describe('StringHelper', function (): void {
+    it('returns the original string if it is shorter than the maximum length', function (): void {
+        $string = 'Hello, World!';
+        $result = StringHelper::truncate($string, 20);
+        
+        expect($result)->toBe($string);
+    });
+    
+    it('truncates the string and appends an ellipsis if it is longer than the maximum length', function (): void {
+        $string = 'Hello, World!';
+        $result = StringHelper::truncate($string, 5);
+        
+        expect($result)->toBe('Hello...');
+    });
+});
+```
+
+### Test Quality
+
+1. **After making changes, run**:
+   ```bash
+   docker compose exec app composer pint:fix
+   docker compose exec app composer rector:fix
+   ```
+
+2. **Ensure 100% mutation test coverage**:
+   ```bash
+   docker compose exec app ./vendor/bin/pest --coverage
+   ```
+
+## Additional Development Information
+
+### Code Style and Quality
+
+1. **PHP Version**: The project uses PHP 8.4 features.
+
+2. **Code Formatting**:
+   - Run Pint to fix code style:
+     ```bash
+     docker compose exec app composer pint:fix
+     ```
+   - Run Rector to fix code quality:
+     ```bash
+     docker compose exec app composer rector:fix
+     ```
+
+3. **Static Analysis**:
+   - The project uses PHPStan for static analysis with strict types and array shapes.
+
+### Project Architecture
+
+1. **Actions Pattern**:
+   - Use Laravel Actions package for business logic
+   - Create new actions with:
+     ```bash
+     docker compose exec app php artisan make:action {actionName}
+     ```
+   - Use `AsController` trait as default for Actions
+
+2. **Data Transfer Objects (DTOs)**:
+   - Use DTOs for passing request data through Actions
+
+3. **Database Access**:
+   - Avoid using `DB::` facade directly
+   - Use `Model::query()` instead
+
+4. **Frontend Development**:
+   - The project uses Inertia.js with Vue.js and Tailwind CSS
+   - After making frontend changes, recompile assets:
+     ```bash
+     docker compose exec app yarn build
+     ```
+
+### Debugging
+
+1. **Xdebug**:
+   - Xdebug is enabled in the development environment
+   - Configure your IDE to connect to Xdebug on the Docker container
+
+2. **Logs**:
+   - Application logs are stored in `storage/logs/`
+   - Access Laravel Telescope at `/telescope` for request/response debugging
+
+3. **Email Testing**:
+   - Access Mailpit at port 8025 to view sent emails in the development environment

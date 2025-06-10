@@ -34,6 +34,9 @@ RUN apk add --no-cache nodejs npm git
 RUN npm install -g corepack
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
+# Add alias for php artisan command
+RUN echo 'alias a="php artisan"' >> /etc/profile.d/aliases.sh
+
 # Copy supervisor configuration
 COPY docker/php/supervisord/supervisord.conf /etc/
 
