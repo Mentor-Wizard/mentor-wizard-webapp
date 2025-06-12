@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\DashboardPage;
+use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
@@ -11,6 +12,8 @@ use App\Actions\User\UpdateUser;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
+
+Route::get('mentor/{slag}', GetMentorProfilePage::class)->name('profile.mentor');
 
 Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])
