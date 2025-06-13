@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\RoleGuardEnum;
 use App\Observers\UserObserver;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -133,5 +134,12 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
         ];
+    }
+
+    public function rating(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float => (float)$this->mentorReviews()->avg('rating'),
+        );
     }
 }
