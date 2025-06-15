@@ -140,4 +140,14 @@ describe('UserResource', function (): void {
         expect($resourceArray['data'][0]['profile'])
             ->toBeNull();
     });
+
+    it('includes meta key in the response', function (): void {
+        $user = User::factory()->create();
+        $userCollection = $user->newCollection([$user]);
+        $resource = new UserResource($userCollection);
+        $result = $resource->toArray(request());
+
+        expect($result)->toHaveKey('meta');
+    });
+
 });

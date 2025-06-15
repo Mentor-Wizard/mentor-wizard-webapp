@@ -38,7 +38,7 @@ class UserResource extends ResourceCollection
                     'avatar'        => $user->profile->getFirstMediaUrl('avatar') ?: null,
                 ] : null,
             ]),
-            'meta',
+            'meta'=>[],
         ];
     }
 }
