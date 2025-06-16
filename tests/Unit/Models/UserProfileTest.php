@@ -82,7 +82,7 @@ it('returns empty string when avatar does not exist', function (): void {
     expect($profile->avatar)->toBe('');
 });
 
-test('user profile registers avatar media collection', function () {
+test('user profile registers avatar media collection', function (): void {
     $user = User::factory()->create();
     $profile = $user->profile;
 
@@ -94,7 +94,7 @@ test('user profile registers avatar media collection', function () {
     expect($avatarCollection->singleFile)->toBeTrue();
 });
 
-test('user profile enforces single file constraint on avatar collection', function () {
+test('user profile enforces single file constraint on avatar collection', function (): void {
     $user = User::factory()->create();
     $profile = $user->profile;
 
@@ -109,7 +109,7 @@ test('user profile enforces single file constraint on avatar collection', functi
     expect($profile->getFirstMedia('avatar')->file_name)->toBe('avatar2.jpg');
 });
 
-test('avatar attribute returns correct media url', function () {
+test('avatar attribute returns correct media url', function (): void {
     $user = User::factory()->create();
     $profile = $user->profile;
 
