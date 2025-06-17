@@ -38,7 +38,7 @@ class GetMentorProfilePage
 
     private function getMentor(string $slug): User
     {
-        $user = \App\Models\User::query()->where('slug', $slug)->firstOrFail();
+        $user = User::query()->where('slug', $slug)->firstOrFail();
         if ($user->hasRole(RoleEnum::MENTOR->value)) {
             return $user;
         }

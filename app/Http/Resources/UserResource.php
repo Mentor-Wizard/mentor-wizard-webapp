@@ -6,11 +6,11 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 
 /**
  * Class UserResource
  *
- * @package App\Http\Resources
  *
  * @property int $id
  * @property string $username
@@ -26,7 +26,7 @@ class UserResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    #[\Override]
+    #[Override]
     public function toArray(Request $request): array
     {
         return [

@@ -26,7 +26,7 @@ class UserObserver
         $originalSlug = $slug;
         $counter = 1;
 
-        while (\App\Models\User::query()->where('slug', $slug)->exists()) {
+        while (User::query()->where('slug', $slug)->exists()) {
             $slug = $originalSlug.'-'.$counter++;
         }
 

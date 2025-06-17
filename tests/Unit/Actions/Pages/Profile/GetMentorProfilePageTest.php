@@ -61,7 +61,7 @@ describe('Mentor Page', function (): void {
 
         $action = new GetMentorProfilePage;
 
-        expect(fn (): \Inertia\Response => $action->handle($user->slug))
+        expect(fn (): Response => $action->handle($user->slug))
             ->toThrow(AuthorizationException::class, 'Access denied.');
     });
 });
