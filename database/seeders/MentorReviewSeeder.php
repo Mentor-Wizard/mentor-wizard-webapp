@@ -20,11 +20,11 @@ class MentorReviewSeeder extends Seeder
 
             foreach ($mentors as $mentor) {
                 for ($i = 0; $i < 20; $i++) {
-                    MentorReview::create([
+                    \App\Models\MentorReview::query()->create([
                         'mentor_id' => $mentor->id,
-                        'menti_id' => $menti->id,
-                        'comment' => fake()->sentence(50),
-                        'rating' => fake()->numberBetween(1, 5),
+                        'menti_id'  => $menti->id,
+                        'comment'   => fake()->sentence(50),
+                        'rating'    => fake()->numberBetween(1, 5),
                     ]);
                 }
             }

@@ -24,17 +24,17 @@ test('success create user test', function (): void {
 test('user slug is incremented if not unique', function (): void {
     // Створюємо роль, щоб avoid exception у assignRole
     Role::create([
-        'name' => RoleEnum::USER,
+        'name'       => RoleEnum::USER,
         'guard_name' => RoleGuardEnum::USER,
     ]);
 
     User::factory()->create([
-        'email' => 'Email case',
+        'email'    => 'Email case',
         'username' => 'User 1',
     ]);
 
     $secondUser = User::factory()->create([
-        'email' => 'email-case',
+        'email'    => 'email-case',
         'username' => 'User 2',
     ]);
 

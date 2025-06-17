@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
@@ -13,18 +14,18 @@ describe('Mentor Page', function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('correctly transforms user resource', function () {
+    it('correctly transforms user resource', function (): void {
         $user = User::factory()->create([
             'username' => 'Test User',
-            'email' => 'test@example.com',
+            'email'    => 'test@example.com',
         ]);
         $user->profile->update([
-            'name' => 'profile name',
-            'last_name' => 'profile last_name',
-            'linkedin' => 'profile linkedin',
-            'telegram' => 'profile telegram',
-            'whatsapp' => 'profile whatsapp',
-            'phone' => 'profile phone',
+            'name'        => 'profile name',
+            'last_name'   => 'profile last_name',
+            'linkedin'    => 'profile linkedin',
+            'telegram'    => 'profile telegram',
+            'whatsapp'    => 'profile whatsapp',
+            'phone'       => 'profile phone',
             'description' => 'profile description',
         ]);
         $user->refresh();
@@ -33,19 +34,19 @@ describe('Mentor Page', function (): void {
         $resource = UserResource::make($user)->resolve();
 
         expect($resource)->toMatchArray([
-            'id' => $user->id,
-            'username' => 'Test User',
-            'email' => 'test@example.com',
-            'created_at' => $user->created_at,
-            'name' => 'profile name',
-            'last_name' => 'profile last_name',
-            'linkedin' => 'profile linkedin',
-            'telegram' => 'profile telegram',
-            'whatsapp' => 'profile whatsapp',
-            'phone' => 'profile phone',
+            'id'          => $user->id,
+            'username'    => 'Test User',
+            'email'       => 'test@example.com',
+            'created_at'  => $user->created_at,
+            'name'        => 'profile name',
+            'last_name'   => 'profile last_name',
+            'linkedin'    => 'profile linkedin',
+            'telegram'    => 'profile telegram',
+            'whatsapp'    => 'profile whatsapp',
+            'phone'       => 'profile phone',
             'description' => 'profile description',
-            'avatar' => '',
-            'rating' => 0,
+            'avatar'      => '',
+            'rating'      => 0,
         ]);
     });
 });

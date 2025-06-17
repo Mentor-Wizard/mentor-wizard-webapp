@@ -30,17 +30,19 @@ class GetMentorProfilePage
             ->withQueryString();
 
         return Inertia::render('Profile/Mentor', [
-            'mentor' => UserResource::make($mentor)->resolve(),
-            'reviews' => $reviews,
+            'mentor'        => UserResource::make($mentor)->resolve(),
+            'reviews'       => $reviews,
             'defaultAvatar' => UserProfile::DEFAULT_AVATAR_URL,
         ]);
     }
+
     private function getMentor(string $slug): User
     {
-        $user = User::where('slug', $slug)->firstOrFail();
+        $user = \App\Models\User::query()->where('slug', $slug)->firstOrFail();
         if ($user->hasRole(RoleEnum::MENTOR->value)) {
             return $user;
         }
+
         throw new AuthorizationException('Access denied.');
     }
 }

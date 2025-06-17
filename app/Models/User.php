@@ -6,11 +6,11 @@ namespace App\Models;
 
 use App\Enums\RoleGuardEnum;
 use App\Observers\UserObserver;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -21,6 +21,7 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property-read UserProfile $profile
  * @property string $username
+ *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
@@ -123,6 +124,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Chat::class, 'coach_id');
     }
 
+    public function rating(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
+        );
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -134,12 +142,5 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
         ];
-    }
-
-    public function rating(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => (float)$this->mentorReviews()->avg('rating'),
-        );
     }
 }

@@ -7,8 +7,8 @@ namespace App\Observers;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class UserObserver
 {
@@ -26,8 +26,8 @@ class UserObserver
         $originalSlug = $slug;
         $counter = 1;
 
-        while (User::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter++;
+        while (\App\Models\User::query()->where('slug', $slug)->exists()) {
+            $slug = $originalSlug.'-'.$counter++;
         }
 
         return $slug;

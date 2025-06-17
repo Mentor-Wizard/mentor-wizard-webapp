@@ -35,6 +35,7 @@ describe('Mentor Page', function (): void {
         ]);
         $user->refresh();
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+
         $action = new GetMentorProfilePage;
         $result = $action->handle($user->slug);
         $resultData = $result->toResponse(request())->getOriginalContent();
@@ -58,9 +59,9 @@ describe('Mentor Page', function (): void {
     it('throws AuthorizationException if user is not mentor', function (): void {
         $user = User::factory()->create();
 
-        $action = new GetMentorProfilePage();
+        $action = new GetMentorProfilePage;
 
-        expect(fn () => $action->handle($user->slug))
+        expect(fn (): \Inertia\Response => $action->handle($user->slug))
             ->toThrow(AuthorizationException::class, 'Access denied.');
     });
 });
