@@ -19,9 +19,9 @@ class GetMentorProfilePage
 
     const int PER_PAGE = 4;
 
-    public function handle(string $slag): Response
+    public function handle(string $slug): Response
     {
-        $mentor = $this->getMentor($slag);
+        $mentor = $this->getMentor($slug);
 
         $reviews = $mentor->mentorReviews()
             ->with('menti.profile')
@@ -35,12 +35,12 @@ class GetMentorProfilePage
             'defaultAvatar' => UserProfile::DEFAULT_AVATAR_URL,
         ]);
     }
-    private function getMentor(string $slag): User
+    private function getMentor(string $slug): User
     {
-        $user = User::where('slug', $slag)->firstOrFail();
+        $user = User::where('slug', $slug)->firstOrFail();
         if ($user->hasRole(RoleEnum::MENTOR->value)) {
             return $user;
         }
-        throw new AuthorizationException('mentor', 'Access denied.');
+        throw new AuthorizationException('Access denied.');
     }
 }
