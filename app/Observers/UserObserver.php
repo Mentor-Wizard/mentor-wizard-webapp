@@ -16,7 +16,7 @@ class UserObserver
     {
         $user->assignRole(Role::findByName(RoleEnum::USER->value, RoleGuardEnum::USER->value));
         $user->profile()->create();
-        $user->slug = $this->generateUniqueSlug($user->email);
+        $user->slug = $this->generateUniqueSlug($user->username);
         $user->save();
     }
 

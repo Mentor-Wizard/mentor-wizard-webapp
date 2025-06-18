@@ -30,13 +30,13 @@ test('user slug is incremented if not unique', function (): void {
 
     User::factory()->create([
         'email'    => 'Email case',
-        'username' => 'User 1',
+        'username' => 'User case',
     ]);
 
     $secondUser = User::factory()->create([
         'email'    => 'email-case',
-        'username' => 'User 2',
+        'username' => 'user-case',
     ]);
 
-    expect($secondUser->slug)->toBe('email-case-1');
+    expect($secondUser->slug)->toBe('user-case-1');
 });

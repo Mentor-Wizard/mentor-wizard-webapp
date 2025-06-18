@@ -15,7 +15,7 @@ class MentorReviewSeeder extends Seeder
         $users = User::all();
 
         foreach ($users as $menti) {
-            // Вибираємо всіх інших користувачів, щоб залишити їм відгуки
+            // We select all other users to leave them reviews.
             $mentors = $users->where('id', '!=', $menti->id)->shuffle()->take(20);
 
             foreach ($mentors as $mentor) {

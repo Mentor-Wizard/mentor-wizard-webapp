@@ -1,3 +1,20 @@
+<script setup>
+
+import LandingLayout from "@/Layouts/LandingLayout.vue";
+import {usePage} from '@inertiajs/vue3';
+import {StarIcon} from '@heroicons/vue/20/solid'
+import Pagination from '@/Components/Pagination.vue'
+import {computed} from "vue";
+import LinkedinButton from "@/Components/UI/Button/LinkedinButton.vue";
+import TelegramButton from "@/Components/UI/Button/TelegramButton.vue";
+import WhatsappButton from "@/Components/UI/Button/WhatsappButton.vue";
+
+const mentor = usePage().props.mentor
+const reviews = computed(() => usePage().props.reviews)
+const defaultAvatar = usePage().props.defaultAvatar
+
+</script>
+
 <template>
     <LandingLayout>
         <div class="py-12 bg-gray-100">
@@ -114,20 +131,3 @@
         </div>
     </LandingLayout>
 </template>
-
-<script setup>
-
-import LandingLayout from "@/Layouts/LandingLayout.vue";
-import {usePage} from '@inertiajs/vue3';
-import {StarIcon} from '@heroicons/vue/20/solid'
-import Pagination from '@/Components/Pagination.vue'
-import {computed} from "vue";
-import LinkedinButton from "@/Components/UI/Button/LinkedinButton.vue";
-import TelegramButton from "@/Components/UI/Button/TelegramButton.vue";
-import WhatsappButton from "@/Components/UI/Button/WhatsappButton.vue";
-
-const mentor = usePage().props.mentor
-const reviews = computed(() => usePage().props.reviews)
-const defaultAvatar = usePage().props.defaultAvatar
-
-</script>
