@@ -23,14 +23,14 @@ const defaultAvatar = usePage().props.defaultAvatar
                     <main class="mx-auto max-w-2xl sm:px-6 lg:max-w-7xl lg:px-8">
                         <div class="px-4 py-6 sm:px-6 lg:grid lg:grid-cols-12 lg:gap-x-8 lg:p-8">
                             <div class="sm:flex lg:col-span-7">
-                                <img :src="mentor.avatar" :alt="mentor.name"
+                                <img :src="mentor.profile.avatar" :alt="mentor.profile.name"
                                      class="aspect-square w-full shrink-0 rounded-lg object-cover sm:size-40 pt-3"/>
                                 <div class="mt-6 sm:mt-0 sm:ml-6">
                                     <h3 class="text-base font-medium text-gray-900">
-                                        <p class="mt-2 text-sm font-medium text-gray-900">{{ mentor.name }}
-                                            {{ mentor.last_name }}</p>
+                                        <p class="mt-2 text-sm font-medium text-gray-900">{{ mentor.profile.name }}
+                                            {{ mentor.profile.last_name }}</p>
                                     </h3>
-                                    <p class="mt-3 text-sm text-gray-500">{{ mentor.description }}</p>
+                                    <p class="mt-3 text-sm text-gray-500">{{ mentor.profile.description }}</p>
                                 </div>
                             </div>
 
@@ -57,12 +57,12 @@ const defaultAvatar = usePage().props.defaultAvatar
                                     <div>
                                         <dt class="font-medium text-gray-900">Contact</dt>
                                         <dd class="mt-3 flex space-x-3 text-gray-500">
-                                            <LinkedinButton :url="mentor.linkedin"/>
-                                            <TelegramButton :url="mentor.telegram"/>
-                                            <WhatsappButton :url="mentor.whatsapp"/>
+                                            <LinkedinButton :url="mentor.profile.linkedin"/>
+                                            <TelegramButton :url="mentor.profile.telegram"/>
+                                            <WhatsappButton :url="mentor.profile.whatsapp"/>
                                         </dd>
                                         <dd class="mt-4 text-gray-500 flex items-center gap-2">
-                                            <a :href="`tel:${mentor.phone}`">{{ mentor.phone }}</a>
+                                            <a :href="`tel:${mentor.profile.phone}`">{{ mentor.profile.phone }}</a>
                                         </dd>
                                     </div>
                                 </dl>

@@ -129,6 +129,7 @@ docker compose exec app ./vendor/bin/phpstan analyse --memory-limit=2G
 
 ```bash
 docker compose exec app php artisan test --coverage
+docker compose exec app ./vendor/bin/pest --coverage --parallel --compact --coverage-clover coverage/coverage-clover.xml
 ```
 
 ### 4. Мутаційні тести

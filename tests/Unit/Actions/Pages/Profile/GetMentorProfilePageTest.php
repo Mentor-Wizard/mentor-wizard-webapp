@@ -8,7 +8,7 @@ use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
@@ -44,13 +44,13 @@ describe('Mentor Page', function (): void {
             ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/Mentor')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.username'))->toBe('Test User')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.email'))->toBe('test@example.com')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.name'))->toBe('profile name')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.last_name'))->toBe('profile last_name')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.linkedin'))->toBe('profile linkedin')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.telegram'))->toBe('profile telegram')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.whatsapp'))->toBe('profile whatsapp')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.phone'))->toBe('profile phone')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.description'))->toBe('profile description')
+            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.name'))->toBe('profile name')
+            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.last_name'))->toBe('profile last_name')
+            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.linkedin'))->toBe('profile linkedin')
+            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.telegram'))->toBe('profile telegram')
+            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.whatsapp'))->toBe('profile whatsapp')
+            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.phone'))->toBe('profile phone')
+            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.description'))->toBe('profile description')
             ->and(Arr::get($resultData->getData(), 'page.props.reviews'))->toBeArray()
             ->and(Arr::get($resultData->getData(), 'page.props.reviews.total'))->toBe(0)
             ->and(Arr::get($resultData->getData(), 'page.props.defaultAvatar'))->toBe(UserProfile::DEFAULT_AVATAR_URL);
@@ -62,6 +62,6 @@ describe('Mentor Page', function (): void {
         $action = new GetMentorProfilePage;
 
         expect(fn (): Response => $action->handle($user->slug))
-            ->toThrow(AuthorizationException::class, 'Access denied.');
+            ->toThrow(ModelNotFoundException::class);
     });
 });

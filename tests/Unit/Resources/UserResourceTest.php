@@ -19,15 +19,7 @@ describe('Mentor Page', function (): void {
             'username' => 'Test User',
             'email'    => 'test@example.com',
         ]);
-        $user->profile->update([
-            'name'        => 'profile name',
-            'last_name'   => 'profile last_name',
-            'linkedin'    => 'profile linkedin',
-            'telegram'    => 'profile telegram',
-            'whatsapp'    => 'profile whatsapp',
-            'phone'       => 'profile phone',
-            'description' => 'profile description',
-        ]);
+
         $user->refresh();
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
 
@@ -38,14 +30,6 @@ describe('Mentor Page', function (): void {
             'username'    => 'Test User',
             'email'       => 'test@example.com',
             'created_at'  => $user->created_at,
-            'name'        => 'profile name',
-            'last_name'   => 'profile last_name',
-            'linkedin'    => 'profile linkedin',
-            'telegram'    => 'profile telegram',
-            'whatsapp'    => 'profile whatsapp',
-            'phone'       => 'profile phone',
-            'description' => 'profile description',
-            'avatar'      => '',
             'rating'      => 0,
         ]);
     });

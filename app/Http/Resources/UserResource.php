@@ -34,14 +34,7 @@ class UserResource extends JsonResource
             'username'    => $this->username,
             'email'       => $this->email,
             'created_at'  => $this->created_at,
-            'name'        => $this->profile->name,
-            'last_name'   => $this->profile->last_name,
-            'linkedin'    => $this->profile->linkedin,
-            'telegram'    => $this->profile->telegram,
-            'whatsapp'    => $this->profile->whatsapp,
-            'phone'       => $this->profile->phone,
-            'description' => $this->profile->description,
-            'avatar'      => $this->profile->avatar,
+            'profile'     => UserProfileResource::make($this->profile)->resolve(),
             'rating'      => floor($this->rating * 10) / 10,
         ];
     }

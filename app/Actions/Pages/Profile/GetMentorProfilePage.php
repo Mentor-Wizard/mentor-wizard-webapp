@@ -8,7 +8,7 @@ use App\Enums\RoleEnum;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\UserProfile;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -43,6 +43,6 @@ class GetMentorProfilePage
             return $user;
         }
 
-        throw new AuthorizationException('Access denied.');
+        throw new ModelNotFoundException;
     }
 }
