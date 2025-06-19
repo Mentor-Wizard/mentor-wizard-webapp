@@ -9,6 +9,7 @@ use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 
@@ -57,13 +58,13 @@ describe('Mentor Profile Page', function (): void {
         ]);
 
         $this->get(route('page.mentor', ['slug' => $mentor->slug]))
-            ->assertInertia(fn (Assert $page) => $page
+            ->assertInertia(fn (Assert $page): AssertableJson => $page
                 ->component('Profile/Mentor')
-                ->has('mentor', fn (Assert $mentorData) => $mentorData
+                ->has('mentor', fn (Assert $mentorData): AssertableJson => $mentorData
                     ->where('username', 'Mentor User')
                     ->where('email', 'mentor@example.com')
                     ->where('rating', 5)
-                    ->has('profile', fn (Assert $profile) => $profile
+                    ->has('profile', fn (Assert $profile): AssertableJson => $profile
                         ->where('name', 'Mentor profile name')
                         ->where('last_name', 'Mentor profile last_name')
                         ->where('linkedin', 'Mentor profile linkedin')
@@ -77,16 +78,16 @@ describe('Mentor Profile Page', function (): void {
                     ->etc()
                 )
                 ->has('reviews.data', 1)
-                ->has('reviews.data.0', fn (Assert $review) => $review
+                ->has('reviews.data.0', fn (Assert $review): AssertableJson => $review
                     ->where('mentor_id', $mentor->id)
                     ->where('menti_id', $menti->id)
                     ->where('comment', 'Perfect')
                     ->where('rating', 5)
-                    ->has('menti', fn (Assert $mentiData) => $mentiData
+                    ->has('menti', fn (Assert $mentiData): AssertableJson => $mentiData
                         ->where('id', $menti->id)
                         ->where('username', 'Menti User')
                         ->where('email', 'menti@example.com')
-                        ->has('profile', fn (Assert $profile) => $profile
+                        ->has('profile', fn (Assert $profile): AssertableJson => $profile
                             ->where('name', 'Menti profile name')
                             ->where('last_name', 'Menti profile last_name')
                             ->where('linkedin', 'Menti profile linkedin')
