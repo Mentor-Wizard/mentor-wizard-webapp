@@ -14,6 +14,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
+ * @property-read string $avatar URL of the avatar image
  * @mixin IdeHelperUserProfile
  */
 class UserProfile extends Model implements HasMedia
@@ -27,7 +28,7 @@ class UserProfile extends Model implements HasMedia
 
     public const string DEFAULT_AVATAR_URL = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
-    public const string TEST_AVATAR_URL = 'https://ui-avatars.com/api/?name=Test+User&background=random&size=256&format=png';
+    public const string TEST_AVATAR_URL = 'https://ui-avatars.com/api/?name=%s&background=random&size=256&format=png';
 
     protected $fillable = [
         'user_id',
@@ -51,6 +52,10 @@ class UserProfile extends Model implements HasMedia
         'whatsapp',
         'phone',
         'description',
+        'avatar',
+    ];
+
+    protected $appends = [
         'avatar',
     ];
 
