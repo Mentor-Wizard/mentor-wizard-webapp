@@ -27,6 +27,10 @@ class UserProfile extends Model implements HasMedia
 
     public const string DEFAULT_AVATAR_URL = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
+    public const string TEST_AVATAR_URL = 'https://ui-avatars.com/api/?name=Test+User&background=random&size=256&format=png';
+
+    protected $appends = ['avatar'];
+
     protected $fillable = [
         'user_id',
         'name',
@@ -49,6 +53,7 @@ class UserProfile extends Model implements HasMedia
         'whatsapp',
         'phone',
         'description',
+        'avatar',
     ];
 
     public function user(): BelongsTo
@@ -70,10 +75,8 @@ class UserProfile extends Model implements HasMedia
             ->singleFile();
     }
 
-    public function avatar(): Attribute
+    protected function avatar(): Attribute
     {
-        return Attribute::make(
-            get: fn (): string => $this->getFirstMediaUrl('avatar'),
-        );
+        return Attribute::get(fn (): string => $this->getFirstMediaUrl('avatar') !== '' ? $this->getFirstMediaUrl('avatar') : self::DEFAULT_AVATAR_URL);
     }
 }

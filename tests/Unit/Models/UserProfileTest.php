@@ -79,7 +79,7 @@ it('returns empty string when avatar does not exist', function (): void {
     $user = User::factory()->create();
     $profile = $user->profile;
 
-    expect($profile->avatar)->toBe('');
+    expect($profile->avatar)->toBe(UserProfile::DEFAULT_AVATAR_URL);
 });
 
 test('user profile registers avatar media collection', function (): void {
@@ -113,7 +113,7 @@ test('avatar attribute returns correct media url', function (): void {
     $user = User::factory()->create();
     $profile = $user->profile;
 
-    expect($profile->avatar)->toBe('');
+    expect($profile->avatar)->toBe(UserProfile::DEFAULT_AVATAR_URL);
 
     $profile->addMedia(UploadedFile::fake()->image('avatar.jpg'))
         ->toMediaCollection('avatar');

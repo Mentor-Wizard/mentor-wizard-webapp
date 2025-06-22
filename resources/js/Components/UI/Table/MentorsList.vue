@@ -4,7 +4,6 @@ import {EnvelopeIcon, UserIcon} from '@heroicons/vue/20/solid'
 import {usePage} from "@inertiajs/vue3";
 import Pagination from "@/Components/UI/Table/Pagination.vue";
 
-const DEFAULT_AVATAR_URL = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
 const page = usePage();
 const mentors = computed(() => page.props.mentors ?? {});
@@ -17,7 +16,7 @@ const mentors = computed(() => page.props.mentors ?? {});
                 class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm">
                 <div class="flex flex-1 flex-col p-8">
                     <img class="mx-auto size-20 shrink-0 rounded-full"
-                         :src="mentor?.profile?.avatar || DEFAULT_AVATAR_URL"
+                         :src="mentor?.profile?.avatar"
                          alt=""/>
                     <h3 class="mt-4 text-sm font-medium text-gray-900">{{ mentor.username }}</h3>
                     <dl class="mt-1 flex grow flex-col justify-between">
@@ -33,8 +32,8 @@ const mentors = computed(() => page.props.mentors ?? {});
                     <div class="mt-px flex divide-x divide-gray-200">
                         <div class="flex w-0 flex-1">
                             <a :href="`mailto:${mentor.email}`"
-                               class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900">
-                                <EnvelopeIcon class="size-5 text-gray-400" aria-hidden="true"/>
+                               class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4  text-sm font-semibold text-gray-900">
+                                <EnvelopeIcon class="size-8 text-gray-400 pl-2" aria-hidden="true"/>
                                 Contact Mentor
                             </a>
                             <a :href="`${mentor.profile.linkedin}`" v-if="mentor?.profile?.linkedin"
@@ -48,7 +47,7 @@ const mentors = computed(() => page.props.mentors ?? {});
             </li>
         </ul>
         <div class="flex justify-center my-5">
-            <Pagination :pagination="mentors['meta'].links"/>
+            <Pagination :pagination="mentors['links']"/>
         </div>
     </div>
 </template>

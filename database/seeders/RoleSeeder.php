@@ -19,7 +19,6 @@ class RoleSeeder extends Seeder
         ['name' => RoleEnum::ADMIN->value, 'guard_name' => RoleGuardEnum::ADMIN->value],
         ['name' => RoleEnum::SUPER_ADMIN->value, 'guard_name' => RoleGuardEnum::SUPER_ADMIN->value],
         ['name' => RoleEnum::MENTOR->value, 'guard_name' => RoleGuardEnum::MENTOR->value],
-        ['name' => RoleEnum::MENTOR->value, 'guard_name' => 'web'],
         ['name' => RoleEnum::MENTI->value, 'guard_name' => RoleGuardEnum::MENTI->value],
         ['name' => RoleEnum::COACH->value, 'guard_name' => RoleGuardEnum::COACH->value],
     ];

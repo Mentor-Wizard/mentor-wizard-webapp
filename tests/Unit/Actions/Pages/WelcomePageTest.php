@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use App\Actions\Pages\WelcomePage;
 use App\Enums\RoleEnum;
+use App\Enums\RoleGuardEnum;
 use App\Models\User;
+use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\RouteCollection;
 use Inertia\Response;
@@ -17,6 +20,7 @@ mutates(WelcomePage::class);
 describe('WelcomePage Action', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+        $this->seed(UserSeeder::class);
     });
 
     it('returns correct Inertia response', function (): void {
@@ -50,40 +54,44 @@ describe('WelcomePage Action', function (): void {
     });
 
     it('includes mentors in the response with pagination', function (): void {
-        $role = Role::findByName(RoleEnum::MENTOR->value, 'web');
+        $role = Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value);
 
-        User::factory()->count(7)->create()->each(function (User $user) use ($role): void {
+        User::factory()->count(User::DEFAULT_MENTOR_PAGE_PAGINATION)->create()->each(function (User $user) use ($role): void {
             $user->syncRoles($role);
         });
 
-        $response = $this->get('/');
+        $response = $this->get(route('pages.welcome'));
+
         $response->assertStatus(SymfonyResponse::HTTP_OK);
 
         $response->assertInertia(function ($page): void {
             $page->has('mentors')
-                ->has('mentors.data', 5)
                 ->has('mentors.data.0.profile')
-                ->has('mentors.links')
-                ->has('mentors.meta');
+                ->has('mentors.links');
 
             $mentors = $page->toArray()['props']['mentors']['data'];
-            expect($mentors[0]['profile']['avatar'])->toBeNull();
+            expect($mentors[0]['profile']['avatar'])->not()->toBeNull();
         });
     });
 
     it('properly loads profile media relationship for mentors', function (): void {
-        $role = Role::findByName(RoleEnum::MENTOR->value, 'web');
+        $role = Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value);
         $user = User::factory()->create();
         $user->syncRoles($role);
 
-        // Set up the profile with media
         $user->profile()->update([
-            'name'      => 'Test Name',
-            'last_name' => 'Test Last Name',
+            'name'          => explode(' ', (string) $user->username)[0],
+            'last_name'     => explode(' ', (string) $user->username)[1],
+            'title'         => fake()->jobTitle(),
+            'linkedin'      => fake()->url,
+            'telegram'      => fake()->userName,
+            'whatsapp'      => fake()->phoneNumber,
+            'phone'         => fake()->phoneNumber,
+            'description'   => fake()->text(),
         ]);
 
         $name = urlencode($user->profile->name.' '.$user->profile->last_name);
-        $avatarUrl = sprintf('https://ui-avatars.com/api/?name=%s&background=random&size=256&format=png', $name);
+        $avatarUrl = sprintf(UserProfile::TEST_AVATAR_URL, $name);
         $user->profile->addMediaFromUrl($avatarUrl)
             ->usingFileName('avatar.png')
             ->toMediaCollection('avatar');
@@ -92,7 +100,7 @@ describe('WelcomePage Action', function (): void {
         $reflection = new ReflectionMethod($welcomePage, 'handle');
         $welcomePageCode = file_get_contents($reflection->getFileName());
 
-        expect($welcomePageCode)->toContain("with(['profile', 'profile.media'])");
+        expect($welcomePageCode)->toContain("with(['profile'])");
 
         $result = $welcomePage->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();

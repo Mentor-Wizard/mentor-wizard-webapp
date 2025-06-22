@@ -13,14 +13,14 @@ import MentorsList from "@/Components/UI/Table/MentorsList.vue";
                 <ApplicationLogo class="h-18 w-18 fill-current text-gray-500"/>
             </Link>
         </div>
+        <div class="justify-center mt-4 items-center">
+            <MentorsList></MentorsList>
+        </div>
 
         <div
             class="mt-4 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
         >
             <slot/>
-        </div>
-        <div class="justify-center mt-4 items-center">
-            <MentorsList></MentorsList>
         </div>
     </div>
 </template>

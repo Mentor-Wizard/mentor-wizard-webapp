@@ -36,6 +36,8 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
 
     public const int MIN_PASSWORD_LENGTH = 8;
 
+    public const int DEFAULT_MENTOR_PAGE_PAGINATION = 10;
+
     /**
      * The attributes that are mass assignable.
      *
