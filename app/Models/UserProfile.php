@@ -29,8 +29,6 @@ class UserProfile extends Model implements HasMedia
 
     public const string TEST_AVATAR_URL = 'https://ui-avatars.com/api/?name=Test+User&background=random&size=256&format=png';
 
-    protected $appends = ['avatar'];
-
     protected $fillable = [
         'user_id',
         'name',
