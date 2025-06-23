@@ -35,7 +35,7 @@ class UserResource extends JsonResource
             'email'       => $this->email,
             'created_at'  => $this->created_at,
             'profile'     => UserProfileResource::make($this->profile)->resolve(),
-            'rating'      => floor($this->rating * 10) / 10,
+            'rating'      => round($this->rating, 2),
         ];
     }
 }

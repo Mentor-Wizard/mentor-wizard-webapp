@@ -19,30 +19,20 @@ class GetMentorProfilePage
 
     const int PER_PAGE = 4;
 
-    public function handle(string $slug): Response
+    public function handle(User $user): Response
     {
-        $mentor = $this->getMentor($slug);
+        throw_unless($user->hasRole(RoleEnum::MENTOR->value), new ModelNotFoundException);
 
-        $reviews = $mentor->mentorReviews()
+        $reviews = $user->mentorReviews()
             ->with('menti.profile')
             ->latest()
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
         return Inertia::render('Profile/Mentor', [
-            'mentor'        => UserResource::make($mentor)->resolve(),
+            'mentor'        => UserResource::make($user)->resolve(),
             'reviews'       => $reviews,
             'defaultAvatar' => UserProfile::DEFAULT_AVATAR_URL,
         ]);
-    }
-
-    private function getMentor(string $slug): User
-    {
-        $user = User::query()->where('slug', $slug)->firstOrFail();
-        if ($user->hasRole(RoleEnum::MENTOR->value)) {
-            return $user;
-        }
-
-        throw new ModelNotFoundException;
     }
 }

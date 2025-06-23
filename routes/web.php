@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 
-Route::get('mentor/{slug}', GetMentorProfilePage::class)->name('page.mentor');
+Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
 
 Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])

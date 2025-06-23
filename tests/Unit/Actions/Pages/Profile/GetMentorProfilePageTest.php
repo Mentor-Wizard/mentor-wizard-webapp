@@ -37,7 +37,7 @@ describe('Mentor Page', function (): void {
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
 
         $action = new GetMentorProfilePage;
-        $result = $action->handle($user->slug);
+        $result = $action->handle($user);
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
@@ -61,7 +61,7 @@ describe('Mentor Page', function (): void {
 
         $action = new GetMentorProfilePage;
 
-        expect(fn (): Response => $action->handle($user->slug))
+        expect(fn (): Response => $action->handle($user))
             ->toThrow(ModelNotFoundException::class);
     });
 });

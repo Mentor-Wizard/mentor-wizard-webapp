@@ -57,7 +57,7 @@ describe('Mentor Profile Page', function (): void {
             'rating'    => 5,
         ]);
 
-        $this->get(route('page.mentor', ['slug' => $mentor->slug]))
+        $this->get(route('page.mentor', ['user' => $mentor->slug]))
             ->assertInertia(fn (Assert $page): AssertableJson => $page
                 ->component('Profile/Mentor')
                 ->has('mentor', fn (Assert $mentorData): AssertableJson => $mentorData
@@ -106,7 +106,7 @@ describe('Mentor Profile Page', function (): void {
     });
 
     it('loads the mentor profile page with wrong slug', function (): void {
-        $this->get(route('page.mentor', ['slug' => 'random-slug']))
+        $this->get(route('page.mentor', ['user' => 'random-slug']))
             ->assertNotFound();
     });
 });
