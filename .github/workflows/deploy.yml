@@ -45,7 +45,7 @@ jobs:
 
   deploy:
     name: Deploy to Staging
-    runs-on: mw-staging
+    runs-on: self-hosted
     needs: build
     environment:
       name: staging
