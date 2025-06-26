@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\MentorPrograms\DeleteMentorProgramPage;
+use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Enums\RoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(DeleteMentorProgramPage::class);
+mutates(DeleteMentorProgram::class);
 
 describe('Destroy Mentor Program', function (): void {
     beforeEach(function (): void {
@@ -38,18 +38,18 @@ describe('Destroy Mentor Program', function (): void {
     });
 
     it('deletes mentor program and returns redirect response', function (): void {
-        $action = new DeleteMentorProgramPage;
+        $action = new DeleteMentorProgram;
         $response = $action->handle($this->request, $this->mentorProgram);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getTargetUrl())->toBe(route('mentor-program.create'))
+            ->and($response->getTargetUrl())->toBe(route('mentor-program.list'))
             ->and(MentorProgram::query()->count())->toBe(0);
     });
 
     it('throws exception when trying to delete non-existent program', function (): void {
         $this->mentorProgram->delete();
 
-        expect(fn (): RedirectResponse => (new DeleteMentorProgramPage)->handle($this->request, $this->mentorProgram))
+        expect(fn (): RedirectResponse => (new DeleteMentorProgram)->handle($this->request, $this->mentorProgram))
             ->toThrow(ModelNotFoundException::class, 'Mentor program not found.');
     });
 
@@ -67,7 +67,7 @@ describe('Destroy Mentor Program', function (): void {
         ]);
 
         try {
-            (new DeleteMentorProgramPage)->handle($this->request, $anotherMentorProgram);
+            (new DeleteMentorProgram)->handle($this->request, $anotherMentorProgram);
         } catch (Symfony\Component\HttpKernel\Exception\HttpException $httpException) {
             expect($httpException->getStatusCode())->toBe(Response::HTTP_FORBIDDEN)
                 ->and($httpException->getMessage())->toBe('Unauthorized action.');
