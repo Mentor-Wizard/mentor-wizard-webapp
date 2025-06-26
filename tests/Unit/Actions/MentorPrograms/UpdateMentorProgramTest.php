@@ -11,7 +11,6 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -171,86 +170,6 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
             expect($response)
                 ->toBeInstanceOf(Response::class)
                 ->and($response->getTargetUrl())->toBe(route('mentor-program.edit', $this->mentorProgram->slug));
-        });
-
-        it('throws exception when trying to update non-existent program', function (): void {
-            $updateData = [
-                'name'        => 'Updated Program',
-                'slug'        => $this->mentorProgram->slug,
-                'description' => 'Updated Description',
-                'cost'        => 150.0,
-                'currency_id' => array_keys($this->currencies)[1],
-            ];
-
-            $request = mockUpdateMentorProgramRequest($updateData);
-            $this->mentorProgram->delete();
-
-            expect(fn (): Response => (new UpdateMentorProgramPage)->handle($request, $this->mentorProgram))
-                ->toThrow(ModelNotFoundException::class);
-        });
-
-        it("throws exception when trying to update another mentor's program", function (): void {
-            // Create another user/mentor
-            $anotherUser = User::factory()->create();
-            $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
-
-            // Create a program owned by another mentor
-            $anotherMentorProgram = MentorProgram::factory()->create([
-                'mentor_id'   => $anotherUser->getKey(),
-                'name'        => 'Another Program',
-                'slug'        => 'another-program',
-                'description' => 'Another Description',
-                'cost'        => 75.0,
-                'currency_id' => array_key_first($this->currencies),
-            ]);
-
-            $updateData = [
-                'name'        => 'Trying to Update',
-                'slug'        => $this->mentorProgram->slug,
-                'description' => 'Trying to Update Description',
-                'cost'        => 150.0,
-                'currency_id' => array_keys($this->currencies)[1],
-            ];
-
-            $request = mockUpdateMentorProgramRequest($updateData);
-
-            expect(fn (): Response => (new UpdateMentorProgramPage)->handle($request, $anotherMentorProgram))
-                ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class, 'Unauthorized action.');
-        });
-
-        it("throws 403 forbidden when trying to update another mentor's program", function (): void {
-            $anotherUser = User::factory()->create();
-            $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
-
-            $anotherMentorProgram = MentorProgram::factory()->create([
-                'mentor_id'   => $anotherUser->getKey(),
-                'name'        => 'Another Program',
-                'slug'        => 'another-program',
-                'description' => 'Another Description',
-                'cost'        => 75.0,
-                'currency_id' => array_key_first($this->currencies),
-            ]);
-
-            $updateData = [
-                'name'        => 'Trying to Update',
-                'slug'        => $this->mentorProgram->slug,
-                'description' => 'Trying to Update Description',
-                'cost'        => 150.0,
-                'currency_id' => array_keys($this->currencies)[1],
-            ];
-
-            $request = mockUpdateMentorProgramRequest($updateData);
-
-            try {
-                (new UpdateMentorProgramPage)->handle($request, $anotherMentorProgram);
-            } catch (Symfony\Component\HttpKernel\Exception\HttpException $httpException) {
-                expect($httpException->getStatusCode())->toBe(Response::HTTP_FORBIDDEN)
-                    ->and($httpException->getMessage())->toBe('Unauthorized action.');
-
-                return;
-            }
-
-            $this->fail('Exception was not thrown');
         });
 
     });
