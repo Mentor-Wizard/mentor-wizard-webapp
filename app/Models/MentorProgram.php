@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Observers\MentorProgramObserver;
 use Database\Factories\MentorProgramFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[UseFactory(MentorProgramFactory::class)]
 /**
  * @mixin IdeHelperMentorProgram
  */
+#[ObservedBy(MentorProgramObserver::class)]
+#[UseFactory(MentorProgramFactory::class)]
 class MentorProgram extends Model
 {
     /** @use HasFactory<MentorProgramFactory> */
@@ -32,6 +35,11 @@ class MentorProgram extends Model
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function mentorProgramBlocks(): HasMany
