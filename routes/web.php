@@ -9,6 +9,7 @@ use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
+use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
@@ -17,6 +18,8 @@ use App\Actions\User\UpdateUser;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
+
+Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
 
 Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])
