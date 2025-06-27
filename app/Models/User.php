@@ -69,6 +69,9 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         RoleGuardEnum::COACH->value,
     ];
 
+    //    protected string $guard_name = 'web';
+    //
+    //    protected function getDefaultGuardName(): string { return $this->guard_name; }
     protected $visible = [
         'id',
         'username',
