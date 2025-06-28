@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Pages\WelcomePage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
@@ -54,7 +53,7 @@ describe('WelcomePage Action', function (): void {
     });
 
     it('includes mentors in the response with pagination', function (): void {
-        $role = Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value);
+        $role = Role::findByName(RoleEnum::MENTOR->value);
 
         User::factory()->count(User::DEFAULT_MENTOR_PAGE_PAGINATION)->create()->each(function (User $user) use ($role): void {
             $user->syncRoles($role);
@@ -75,7 +74,7 @@ describe('WelcomePage Action', function (): void {
     });
 
     it('properly loads profile media relationship for mentors', function (): void {
-        $role = Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value);
+        $role = Role::findByName(RoleEnum::MENTOR->value);
         $user = User::factory()->create();
         $user->syncRoles($role);
 

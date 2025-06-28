@@ -114,11 +114,11 @@ jobs:
         command:
           - {
             name: '🧬 Pest',
-            command: ./vendor/bin/pest --coverage --parallel --compact --coverage-clover coverage/coverage-clover.xml
+            command: ./vendor/bin/pest --coverage --compact --coverage-clover coverage/coverage-clover.xml
           }
           - {
             name: '🦠 Mutation',
-            command: ./vendor/bin/pest --mutate --covered-only --parallel --min=100
+            command: ./vendor/bin/pest --mutate --covered-only --min=100
           }
 
     steps:

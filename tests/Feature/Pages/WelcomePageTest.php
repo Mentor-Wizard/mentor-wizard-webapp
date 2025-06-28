@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Pages\WelcomePage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\UserSeeder;
@@ -18,7 +17,7 @@ beforeEach(function (): void {
     $this->seed(UserSeeder::class);
 });
 it('returns a successful response', function (): void {
-    $role = Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value);
+    $role = Role::findByName(RoleEnum::MENTOR->value);
     $user = User::factory()->create([
         'username'          => 'johndoe',
         'email'             => 'john@example.com',

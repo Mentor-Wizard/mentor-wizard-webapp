@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Laravel\Telescope\Storage\EntryModel;
@@ -26,7 +25,7 @@ describe('Telescope Page', function (): void {
     });
 
     it('telescope is accessible for an admin in non-local environment', function (): void {
-        $role = Role::findByName(RoleEnum::ADMIN->value, RoleGuardEnum::ADMIN->value);
+        $role = Role::findByName(RoleEnum::ADMIN->value);
         $admin = User::factory()->create([
             'username' => 'Test ADMIN',
             'email'    => 'admin@example.com',

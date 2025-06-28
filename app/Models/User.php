@@ -10,6 +10,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -69,9 +70,6 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         RoleGuardEnum::COACH->value,
     ];
 
-    //    protected string $guard_name = 'web';
-    //
-    //    protected function getDefaultGuardName(): string { return $this->guard_name; }
     protected $visible = [
         'id',
         'username',
@@ -130,6 +128,13 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     public function coachChats(): HasMany
     {
         return $this->hasMany(Chat::class, 'coach_id');
+    }
+
+    public function rating(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
+        );
     }
 
     /**

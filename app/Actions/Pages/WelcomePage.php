@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Pages;
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -24,7 +23,7 @@ class WelcomePage
             'canRegister'    => Route::has('register'),
             'laravelVersion' => Application::VERSION,
             'phpVersion'     => PHP_VERSION,
-            'mentors'        => User::query()->role(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value)
+            'mentors'        => User::query()->role(RoleEnum::MENTOR->value)
                 ->with(['profile'])
                 ->paginate(User::DEFAULT_MENTOR_PAGE_PAGINATION),
         ]);
