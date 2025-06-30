@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\RoleEnum;
 use App\Http\Resources\UserProfileResource;
 use App\Models\User;
+use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
@@ -40,7 +41,7 @@ describe('Mentor Page', function (): void {
             'whatsapp'    => 'profile whatsapp',
             'phone'       => 'profile phone',
             'description' => 'profile description',
-            'avatar'      => '',
+            'avatar'      => UserProfile::DEFAULT_AVATAR_URL,
         ]);
     });
 });

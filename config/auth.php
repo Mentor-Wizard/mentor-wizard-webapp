@@ -41,26 +41,6 @@ return [
             'driver'    => 'session',
             'provider'  => 'users',
         ],
-        'user' => [
-            'driver'    => 'session',
-            'provider'  => 'users',
-        ],
-        'mentor' => [
-            'driver'    => 'session',
-            'provider'  => 'users',
-        ],
-        'menti' => [
-            'driver'    => 'session',
-            'provider'  => 'users',
-        ],
-        'coach' => [
-            'driver'    => 'session',
-            'provider'  => 'users',
-        ],
-        'superadmin' => [
-            'driver'    => 'session',
-            'provider'  => 'users',
-        ],
     ],
 
     /*

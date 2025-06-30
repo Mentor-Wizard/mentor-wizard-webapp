@@ -71,7 +71,7 @@ describe('Mentor Profile Page', function (): void {
                         ->where('whatsapp', 'Mentor profile whatsapp')
                         ->where('phone', 'Mentor profile phone')
                         ->where('description', 'Mentor profile description')
-                        ->where('avatar', '')
+                        ->where('avatar', UserProfile::DEFAULT_AVATAR_URL)
                         ->etc()
                     )
                     ->etc()
