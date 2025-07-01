@@ -21,7 +21,6 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property-read UserProfile $profile
  * @property string $username
- *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
