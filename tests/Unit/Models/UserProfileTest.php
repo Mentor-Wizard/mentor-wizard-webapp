@@ -92,5 +92,7 @@ it('has the correct fillable attributes', function (): void {
         'whatsapp',
         'phone',
         'description',
+        'cost_per_hour',
+        'currency_id',
     ]);
 });
