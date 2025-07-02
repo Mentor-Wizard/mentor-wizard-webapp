@@ -6,7 +6,7 @@ RUN \
     set -ex && \
     apk update && \
     apk add --no-cache libstdc++ libpq && \
-    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev linux-headers postgresql-dev openssl-dev pcre-dev pcre2-dev zlib-dev && \
+    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS curl-dev linux-headers postgresql-dev openssl-dev pcre-dev pcre2-dev zlib-dev icu-dev && \
     apk add --no-cache supervisor && \
     apk add --no-cache supercronic && \
     apk add --no-cache freetype-dev libjpeg-turbo-dev libpng-dev && \
@@ -29,7 +29,7 @@ RUN \
     docker-php-ext-install -j$(nproc) swoole && \
     docker-php-ext-configure pcntl --enable-pcntl && \
     docker-php-ext-install pcntl && \
-    docker-php-ext-configure gd && \
+    docker-php-ext-install intl && \
     docker-php-ext-install gd && \
     rm -f swoole.tar.gz && \
     docker-php-source delete && \
