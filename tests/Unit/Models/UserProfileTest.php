@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Currency;
 use App\Models\User;
 use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
@@ -95,4 +96,14 @@ it('has the correct fillable attributes', function (): void {
         'cost_per_hour',
         'currency_id',
     ]);
+});
+
+it('has currency relationship', function () {
+    $currency = Currency::factory()->create();
+    $profile = UserProfile::factory()->create([
+        'currency_id' => $currency->id,
+    ]);
+
+    expect($profile->currency)->not->toBeNull()
+        ->and($profile->currency->id)->toEqual($currency->id);
 });
