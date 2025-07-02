@@ -98,7 +98,7 @@ it('has the correct fillable attributes', function (): void {
     ]);
 });
 
-it('has currency relationship', function () {
+it('has currency relationship', function (): void {
     $currency = Currency::factory()->create();
     $profile = UserProfile::factory()->create([
         'currency_id' => $currency->id,
