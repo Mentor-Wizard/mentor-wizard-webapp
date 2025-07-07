@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Currency;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -32,6 +33,8 @@ class UserProfileFactory extends Factory
             'whatsapp'      => fake()->phoneNumber,
             'phone'         => fake()->phoneNumber,
             'description'   => fake()->text(),
+            'cost_per_hour'  => fake()->randomFloat(2, 10, 100),
+            'currency_id'    => Currency::query()->inRandomOrder()->value('id') ?? Currency::factory(),
         ];
     }
 }

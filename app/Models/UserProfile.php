@@ -58,6 +58,8 @@ class UserProfile extends Model implements HasMedia
 
     protected $appends = [
         'avatar',
+        'cost_per_hour',
+        'currency_id',
     ];
 
     public function user(): BelongsTo
