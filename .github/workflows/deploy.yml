@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build Docker image
-    runs-on: self-hosted
+    runs-on: mw-debian-2gb
     outputs:
       image_tag: ${{ steps.git.outputs.sha }}
     steps:
@@ -45,7 +45,7 @@ jobs:
 
   deploy:
     name: Deploy to Staging
-    runs-on: self-hosted
+    runs-on: mw-debian-2gb
     needs: build
     environment:
       name: staging
