@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build Docker image
-    runs-on: mw-stage
+    runs-on: mw-staging
     outputs:
       image_tag: ${{ steps.git.outputs.sha }}
     steps:
@@ -45,7 +45,7 @@ jobs:
 
   deploy:
     name: Deploy to Staging
-    runs-on: mw-stage
+    runs-on: mw-staging
     needs: build
     environment:
       name: staging
