@@ -71,6 +71,11 @@ class UserProfile extends Model implements HasMedia
         return $this->belongsTo(User::class);
     }
 
+    public function currency(): ?BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
+    }
+
     public function registerMediaConversions(?Media $media = null): void
     {
         $this

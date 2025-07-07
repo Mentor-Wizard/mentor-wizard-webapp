@@ -42,7 +42,7 @@ describe('Mentor Program Edit Page', function (): void {
             ->where('program.name', $mentorProgram->name)
             ->where('program.slug', $mentorProgram->slug)
             ->where('program.description', $mentorProgram->description)
-            ->where('program.cost', $mentorProgram->cost)
+            ->where('program.cost', number_format($mentorProgram->cost, 2))
             ->where('program.currency_id', $mentorProgram->currency_id)
         );
     });

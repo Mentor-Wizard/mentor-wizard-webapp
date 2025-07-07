@@ -134,7 +134,7 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
                 'name'        => 'Updated Program',
                 'slug'        => $this->mentorProgram->slug,
                 'description' => 'Updated Description',
-                'cost'        => 150.0,
+                'cost'        => '150.00',
                 'currency_id' => array_keys($this->currencies)[1],
             ];
 

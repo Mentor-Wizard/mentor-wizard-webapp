@@ -10,7 +10,8 @@ $telescopeProviders = app()->environment('local', 'testing', 'ci') && class_exis
 
 return [
     App\Providers\AppServiceProvider::class,
-    Spatie\Permission\PermissionServiceProvider::class,
+    App\Providers\Filament\AdminPanelProvider::class,
     Olssonm\VeryBasicAuth\VeryBasicAuthServiceProvider::class,
+    Spatie\Permission\PermissionServiceProvider::class,
     ...$telescopeProviders,
 ];

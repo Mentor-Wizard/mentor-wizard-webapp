@@ -114,7 +114,7 @@ describe('Store Mentor Program', function (): void {
             'name'        => 'Test Program',
             'slug'        => 'test-program',
             'description' => 'Test Description',
-            'cost'        => 100.0,
+            'cost'        => '100.00',
             'currency_id' => array_key_first($this->currencies),
         ];
         $request = mockStoreMentorProgramRequest($this->validData);
