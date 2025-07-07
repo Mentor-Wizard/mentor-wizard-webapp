@@ -41,6 +41,8 @@ class UserProfile extends Model implements HasMedia
         'whatsapp',
         'phone',
         'description',
+        'cost_per_hour',
+        'currency_id',
     ];
 
     protected $visible = [
@@ -65,6 +67,11 @@ class UserProfile extends Model implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function currency(): ?BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     public function registerMediaConversions(?Media $media = null): void
