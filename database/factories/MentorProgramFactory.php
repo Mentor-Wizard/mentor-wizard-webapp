@@ -28,7 +28,7 @@ class MentorProgramFactory extends Factory
             'slug'        => fake()->slug(),
             'description' => fake()->sentence(20),
             'cost'        => fake()->randomFloat(2, 10, 1000),
-            'currency_id' => Currency::query()->inRandomOrder()->value('id') ?? Currency::factory(),
+            'currency_id' => Currency::factory(),
         ];
     }
 }

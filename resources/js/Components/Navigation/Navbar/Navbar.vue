@@ -31,7 +31,6 @@ const currentUser = computed(() => page.props.auth?.user ?? {});
 const currentUserAvatar = ref(page.props.auth?.avatar ?? null);
 const isLoggedIn = computed(() => !!currentUser.value?.email);
 
-
 const mainNavigations = computed(() => isLoggedIn.value ? navigationStore.authenticatedNavigation : navigationStore.landingNavigation);
 const userNavigations = computed(() => navigationStore.userNavigation);
 const authNavigations = computed(() => navigationStore.authNavigation);

@@ -49,9 +49,4 @@ yarn-error.log
 *.DS_Store
 phpstan.json
 codequality.json
-
 frankenphp
-
-/public/css/filament
-/public/fonts/filament
-/public/js/filament

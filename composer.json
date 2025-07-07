@@ -3,10 +3,12 @@
     "description": "The skeleton application for the Laravel framework.",
     "license": "MIT",
     "type": "project",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "require": {
         "php": "^8.4",
-        "filament/filament": "~4.0",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.8",
         "laravel/octane": "^2.9",
@@ -38,7 +40,7 @@
         "tomasvotruba/cognitive-complexity": "^1.0",
         "wulfheart/laravel-actions-ide-helper": "^0.10.0"
     },
-    "minimum-stability": "beta",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
@@ -80,8 +82,7 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi",
-            "@php artisan filament:upgrade"
+            "@php artisan package:discover --ansi"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
