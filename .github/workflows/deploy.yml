@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build Docker image
-    runs-on: mw-debian-2gb
+    runs-on: mw-stage
     outputs:
       image_tag: ${{ steps.git.outputs.sha }}
     steps:
@@ -39,13 +39,13 @@ jobs:
           file: ./docker/php/Dockerfile
           push: false
           load: true
-          tags: mw-php-app:sha-${{ steps.git.outputs.sha }},mw-php-app:latest
+          tags: mw-php-app:sha-${{ steps.git.outputs.sha }}-mw-php-app:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
     name: Deploy to Staging
-    runs-on: mw-debian-2gb
+    runs-on: mw-stage
     needs: build
     environment:
       name: staging
