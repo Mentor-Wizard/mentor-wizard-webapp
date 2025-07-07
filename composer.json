@@ -9,6 +9,7 @@
     ],
     "require": {
         "php": "^8.4",
+        "filament/filament": "~4.0",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.8",
         "laravel/octane": "^2.9",
@@ -40,7 +41,7 @@
         "tomasvotruba/cognitive-complexity": "^1.0",
         "wulfheart/laravel-actions-ide-helper": "^0.10.0"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
