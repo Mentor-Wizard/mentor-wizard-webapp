@@ -41,6 +41,8 @@ class UserProfile extends Model implements HasMedia
         'whatsapp',
         'phone',
         'description',
+        'cost_per_hour',
+        'currency_id',
     ];
 
     protected $visible = [
@@ -54,6 +56,8 @@ class UserProfile extends Model implements HasMedia
         'phone',
         'description',
         'avatar',
+        'cost_per_hour',
+        'currency_id',
     ];
 
     protected $appends = [
