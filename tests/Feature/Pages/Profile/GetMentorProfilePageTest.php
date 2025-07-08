@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -32,7 +31,7 @@ describe('Mentor Profile Page', function (): void {
             'description' => 'Mentor profile description',
         ]);
         $mentor->refresh();
-        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $menti = User::factory()->create([
             'username' => 'Menti User',
@@ -48,7 +47,7 @@ describe('Mentor Profile Page', function (): void {
             'description' => 'Menti profile description',
         ]);
         $menti->refresh();
-        $menti->assignRole(Role::findByName(RoleEnum::MENTI->value, RoleGuardEnum::MENTI->value));
+        $menti->assignRole(Role::findByName(RoleEnum::MENTI->value));
 
         MentorReview::factory()->create([
             'mentor_id' => $mentor->id,
@@ -72,7 +71,7 @@ describe('Mentor Profile Page', function (): void {
                         ->where('whatsapp', 'Mentor profile whatsapp')
                         ->where('phone', 'Mentor profile phone')
                         ->where('description', 'Mentor profile description')
-                        ->where('avatar', '')
+                        ->where('avatar', UserProfile::DEFAULT_AVATAR_URL)
                         ->etc()
                     )
                     ->etc()

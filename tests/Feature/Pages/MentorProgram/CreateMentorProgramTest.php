@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
@@ -22,7 +21,7 @@ describe('Mentor Program Create Page', function (): void {
         $this->seed(CurrencySeeder::class);
 
         $this->user = User::factory()->create();
-        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
     });
 
     it('renders mentor program creation page with currencies', function (): void {

@@ -2,6 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import MainPageText from "@/Components/MainPageText.vue";
+import MentorsList from "@/Components/UI/Table/MentorsList.vue";
 </script>
 
 <template>

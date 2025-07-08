@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
@@ -11,7 +10,7 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 
 test('success create user test', function (): void {
-    Role::create(['name' => RoleEnum::USER, 'guard_name' => RoleGuardEnum::USER]);
+    Role::create(['name' => RoleEnum::USER]);
 
     $user = User::factory()->create([
         'username' => 'Test User',
@@ -25,7 +24,6 @@ test('user slug is incremented if not unique', function (): void {
     // Створюємо роль, щоб avoid exception у assignRole
     Role::create([
         'name'       => RoleEnum::USER,
-        'guard_name' => RoleGuardEnum::USER,
     ]);
 
     User::factory()->create([

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\User;
 use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
@@ -34,7 +33,7 @@ describe('Mentor Page', function (): void {
             'description' => 'profile description',
         ]);
         $user->refresh();
-        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $action = new GetMentorProfilePage;
         $result = $action->handle($user);

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
 use App\Models\Currency;
 use App\Models\MentorProgram;
@@ -177,7 +176,7 @@ function mockStoreMentorProgramRequest(array $data): StoreMentorProgramRequest
 function createAndAuthenticateMentorForStore(): User
 {
     $user = User::factory()->create();
-    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
     Auth::login($user);
 
     return $user;
