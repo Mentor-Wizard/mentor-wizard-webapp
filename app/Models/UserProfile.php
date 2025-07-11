@@ -14,6 +14,8 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
+ * @property-read string $avatar URL of the avatar image
+ *
  * @mixin IdeHelperUserProfile
  */
 class UserProfile extends Model implements HasMedia
@@ -27,10 +29,13 @@ class UserProfile extends Model implements HasMedia
 
     public const string DEFAULT_AVATAR_URL = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
+    public const string TEST_AVATAR_URL = 'https://ui-avatars.com/api/?name=%s&background=random&size=256&format=png';
+
     protected $fillable = [
         'user_id',
         'name',
         'last_name',
+        'title',
         'linkedin',
         'telegram',
         'whatsapp',
@@ -43,14 +48,20 @@ class UserProfile extends Model implements HasMedia
     protected $visible = [
         'id',
         'name',
+        'title',
         'last_name',
         'linkedin',
         'telegram',
         'whatsapp',
         'phone',
         'description',
+        'avatar',
         'cost_per_hour',
         'currency_id',
+    ];
+
+    protected $appends = [
+        'avatar',
     ];
 
     public function user(): BelongsTo
@@ -71,10 +82,14 @@ class UserProfile extends Model implements HasMedia
             ->fit(Fit::Contain, self::PREVIEW_HEIGHT, self::PREVIEW_WIDTH);
     }
 
-    public function avatar(): Attribute
+    public function registerMediaCollections(): void
     {
-        return Attribute::make(
-            get: fn (): string => $this->getFirstMediaUrl('avatar'),
-        );
+        $this->addMediaCollection('avatar')
+            ->singleFile();
+    }
+
+    protected function avatar(): Attribute
+    {
+        return Attribute::get(fn (): string => $this->getFirstMediaUrl('avatar') !== '' ? $this->getFirstMediaUrl('avatar') : self::DEFAULT_AVATAR_URL);
     }
 }

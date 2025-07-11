@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -55,7 +54,7 @@ describe('Destroy Mentor Program', function (): void {
 
     it("throws 403 forbidden when trying to delete another mentor's program", function (): void {
         $anotherUser = User::factory()->create();
-        $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $anotherMentorProgram = MentorProgram::factory()->create([
             'mentor_id'   => $anotherUser->getKey(),
@@ -82,7 +81,7 @@ describe('Destroy Mentor Program', function (): void {
 function createAndAuthenticateMentorForDestroy(): User
 {
     $user = User::factory()->create();
-    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
     Auth::login($user);
 
     return $user;

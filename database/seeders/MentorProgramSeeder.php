@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -20,7 +19,7 @@ class MentorProgramSeeder extends Seeder
     public function run(): void
     {
         $mentor = User::factory()->create(['username' => 'Test Mentor']);
-        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $currencies = Currency::query()->pluck('id');
 

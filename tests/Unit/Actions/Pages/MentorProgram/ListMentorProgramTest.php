@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -21,7 +20,7 @@ describe('List Mentor Program', function (): void {
 
         $this->seed(CurrencySeeder::class);
         $user = User::factory()->create();
-        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
         Auth::login($user);
 
         $this->currencies = Currency::query()->pluck('name', 'id')->toArray();

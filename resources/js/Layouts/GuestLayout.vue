@@ -1,6 +1,7 @@
 <script setup>
 import ApplicationLogo from '@/Components/UI/Logo/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
+import {Link} from '@inertiajs/vue3';
+import MentorsList from "@/Components/UI/Table/MentorsList.vue";
 </script>
 
 <template>
@@ -9,14 +10,17 @@ import { Link } from '@inertiajs/vue3';
     >
         <div>
             <Link href="/">
-                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
+                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500"/>
             </Link>
+        </div>
+        <div class="justify-center mt-4 items-center">
+            <MentorsList></MentorsList>
         </div>
 
         <div
             class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
         >
-            <slot />
+            <slot/>
         </div>
     </div>
 </template>

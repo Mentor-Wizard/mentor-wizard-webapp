@@ -14,6 +14,7 @@ covers(UserProfile::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
+    Storage::fake('public');
 });
 
 it('can create a user profile', function (): void {
@@ -79,7 +80,50 @@ it('returns empty string when avatar does not exist', function (): void {
     $user = User::factory()->create();
     $profile = $user->profile;
 
-    expect($profile->avatar)->toBe('');
+    expect($profile->avatar)->toBe(UserProfile::DEFAULT_AVATAR_URL);
+});
+
+test('user profile registers avatar media collection', function (): void {
+    $user = User::factory()->create();
+    $profile = $user->profile;
+
+    $collections = $profile->getRegisteredMediaCollections();
+
+    expect($collections->contains('name', 'avatar'))->toBeTrue();
+
+    $avatarCollection = $collections->where('name', 'avatar')->first();
+    expect($avatarCollection->singleFile)->toBeTrue();
+});
+
+test('user profile enforces single file constraint on avatar collection', function (): void {
+    $user = User::factory()->create();
+    $profile = $user->profile;
+
+    $profile->addMedia(UploadedFile::fake()->image('avatar1.jpg'))
+        ->toMediaCollection('avatar');
+
+    $profile->addMedia(UploadedFile::fake()->image('avatar2.jpg'))
+        ->toMediaCollection('avatar');
+
+    expect($profile->getMedia('avatar')->count())->toBe(1);
+
+    expect($profile->getFirstMedia('avatar')->file_name)->toBe('avatar2.jpg');
+});
+
+test('avatar attribute returns correct media url', function (): void {
+    $user = User::factory()->create();
+    $profile = $user->profile;
+
+    expect($profile->avatar)->toBe(UserProfile::DEFAULT_AVATAR_URL);
+
+    $profile->addMedia(UploadedFile::fake()->image('avatar.jpg'))
+        ->toMediaCollection('avatar');
+
+    $profile->refresh();
+
+    expect($profile->avatar)
+        ->not->toBeEmpty()
+        ->toContain('/avatar.jpg');
 });
 
 it('has the correct fillable attributes', function (): void {
@@ -88,6 +132,7 @@ it('has the correct fillable attributes', function (): void {
         'user_id',
         'name',
         'last_name',
+        'title',
         'linkedin',
         'telegram',
         'whatsapp',

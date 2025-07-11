@@ -92,6 +92,15 @@ docker compose exec app yarn install
 docker compose exec app yarn dev
 ```
 
+### 10. Опублікувати доступ до public папки 
+
+Виконайте команду:
+
+```bash
+docker compose exec app php artisan storage:link
+```
+
+
 ## Тестування
 
 Перед початком тестування виконайте наступні налаштування.

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Http\Requests\MentorProgram\UpdateMentorProgramRequest;
 use App\Models\Currency;
 use App\Models\MentorProgram;
@@ -186,7 +185,7 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
     function createAndAuthenticateMentorForUpdate(): User
     {
         $user = User::factory()->create();
-        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
         Auth::login($user);
 
         return $user;

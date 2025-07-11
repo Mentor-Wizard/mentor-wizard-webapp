@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -26,13 +28,16 @@ use Spatie\Permission\Traits\HasRoles;
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements HasMedia, MustVerifyEmail
 {
     use HasFactory;
     use HasRoles;
+    use InteractsWithMedia;
     use Notifiable;
 
     public const int MIN_PASSWORD_LENGTH = 8;
+
+    public const int DEFAULT_MENTOR_PAGE_PAGINATION = 10;
 
     /**
      * The attributes that are mass assignable.
@@ -72,6 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'created_at',
         'updated_at',
         'profile',
+        'media',
     ];
 
     public function profile(): HasOne

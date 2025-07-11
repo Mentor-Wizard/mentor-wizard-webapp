@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -21,7 +20,7 @@ describe('Mentor Page', function (): void {
         ]);
 
         $user->refresh();
-        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $resource = UserResource::make($user)->resolve();
 

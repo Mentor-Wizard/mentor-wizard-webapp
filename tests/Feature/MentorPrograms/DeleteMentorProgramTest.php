@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -22,7 +21,7 @@ describe('Mentor Program Destroy', function (): void {
         $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
 
         $this->user = User::factory()->create();
-        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $this->mentorProgram = MentorProgram::factory()->create([
             'mentor_id'   => $this->user->getKey(),
@@ -58,7 +57,7 @@ describe('Mentor Program Destroy', function (): void {
 
     it("throws 403 when trying to delete another mentor's program", function (): void {
         $anotherUser = User::factory()->create();
-        $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $anotherMentorProgram = MentorProgram::factory()->create([
             'mentor_id'   => $anotherUser->getKey(),

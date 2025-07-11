@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Http\Resources\UserProfileResource;
 use App\Models\User;
+use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
@@ -29,7 +29,7 @@ describe('Mentor Page', function (): void {
             'description' => 'profile description',
         ]);
         $user->refresh();
-        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $resource = UserProfileResource::make($user->profile)->resolve();
 
@@ -41,7 +41,7 @@ describe('Mentor Page', function (): void {
             'whatsapp'    => 'profile whatsapp',
             'phone'       => 'profile phone',
             'description' => 'profile description',
-            'avatar'      => '',
+            'avatar'      => UserProfile::DEFAULT_AVATAR_URL,
         ]);
     });
 });

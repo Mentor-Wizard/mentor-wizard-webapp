@@ -27,6 +27,7 @@ class UserProfileFactory extends Factory
             'user_id'        => User::factory(),
             'name'           => fake()->firstName,
             'last_name'      => fake()->lastName,
+            'title'          => fake()->jobTitle(),
             'linkedin'       => fake()->url,
             'telegram'       => fake()->userName,
             'whatsapp'       => fake()->phoneNumber,

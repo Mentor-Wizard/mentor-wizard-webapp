@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\MentorPrograms\DeleteMentorProgramPage;
 use App\Enums\RoleEnum;
-use App\Enums\RoleGuardEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -67,7 +66,7 @@ describe('Delete Mentor Program Page', function (): void {
 function createAndAuthenticateMentorForDeletePage(): User
 {
     $user = User::factory()->create();
-    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value, RoleGuardEnum::MENTOR->value));
+    $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
     Auth::login($user);
 
     return $user;
