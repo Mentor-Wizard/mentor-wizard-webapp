@@ -1,4 +1,4 @@
-FROM php:8.4.4-cli-alpine3.21
+FROM php:8.4.5-cli-alpine3.21
 
 COPY --from=composer:2.8.5 /usr/bin/composer /usr/bin/
 
@@ -35,7 +35,7 @@ RUN \
     docker-php-source delete && \
     apk del .build-deps
 
-RUN apk add --no-cache nodejs npm git
+RUN apk add --no-cache git nodejs=22.15.1-r0 npm
 RUN npm install -g corepack
 RUN corepack enable && corepack prepare yarn@4.6.0 --activate
 
