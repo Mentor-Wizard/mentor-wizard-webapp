@@ -23,7 +23,6 @@ it('is related to mentor profiles', function (): void {
         ->and($tag->mentorProfiles->first()->is($profile))->toBeTrue();
 });
 
-
 it('casts type field to TagEnum', function (): void {
     $tag = MentorTag::factory()->create([
         'type' => TagEnum::LANGUAGE,
@@ -31,4 +30,14 @@ it('casts type field to TagEnum', function (): void {
 
     expect($tag->type)->toBeInstanceOf(TagEnum::class)
         ->and($tag->type)->toBe(TagEnum::LANGUAGE);
+});
+
+it('has a precisely defined cast configuration', function (): void {
+    $reflectionMethod = new ReflectionMethod(MentorTag::class, 'casts');
+    $mentorTag = new MentorTag;
+    $casts = $reflectionMethod->invoke($mentorTag);
+
+    expect($casts)->toBe([
+        'type' => TagEnum::class,
+    ]);
 });
