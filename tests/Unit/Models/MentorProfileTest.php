@@ -23,7 +23,6 @@ it('can create a mentor profile', function (): void {
         ->and($profile->user_id)->toBe($user->id);
 });
 
-
 it('has the correct fillable attributes', function (): void {
     $model = new MentorProfile;
     expect($model->getFillable())->toEqual([
@@ -46,7 +45,7 @@ it('has currency relationship', function (): void {
         ->and($profile->currency->id)->toEqual($currency->id);
 });
 
-it('belongs to a user', function () {
+it('belongs to a user', function (): void {
     $user = User::factory()->create();
     $profile = MentorProfile::factory()->create(['user_id' => $user->id]);
 
@@ -54,7 +53,7 @@ it('belongs to a user', function () {
         ->and($profile->user->is($user))->toBeTrue();
 });
 
-it('returns related mentor tags', function () {
+it('returns related mentor tags', function (): void {
     $profile = MentorProfile::factory()->create();
     $tag = MentorTag::factory()->create();
 
@@ -64,7 +63,7 @@ it('returns related mentor tags', function () {
         ->and($profile->mentorTags->first()->is($tag))->toBeTrue();
 });
 
-it('returns only language tags', function () {
+it('returns only language tags', function (): void {
     $profile = MentorProfile::factory()->create();
 
     $langTag = MentorTag::factory()->create(['type' => TagEnum::LANGUAGE]);
@@ -76,7 +75,7 @@ it('returns only language tags', function () {
         ->and($profile->languages->first()->is($langTag))->toBeTrue();
 });
 
-it('returns only stack tags', function () {
+it('returns only stack tags', function (): void {
     $profile = MentorProfile::factory()->create();
 
     $langTag = MentorTag::factory()->create(['type' => TagEnum::LANGUAGE]);
@@ -87,5 +86,3 @@ it('returns only stack tags', function () {
     expect($profile->stacks)->toHaveCount(1)
         ->and($profile->stacks->first()->is($stackTag))->toBeTrue();
 });
-
-

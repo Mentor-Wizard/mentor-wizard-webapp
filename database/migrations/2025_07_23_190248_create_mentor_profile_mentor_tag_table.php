@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MentorProfile;
 use App\Models\MentorTag;
 use Illuminate\Database\Migrations\Migration;
@@ -13,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mentor_profile_mentor_tag', function (Blueprint $table) {
+        Schema::create('mentor_profile_mentor_tag', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(MentorProfile::class, 'mentor_profile_id')->constrained()->cascadeOnDelete();
             $table->foreignIdFor(MentorTag::class, 'mentor_tag_id')->constrained()->cascadeOnDelete();

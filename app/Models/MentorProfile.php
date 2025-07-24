@@ -13,9 +13,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-
 /**
  * @property-read string $avatar URL of the avatar image
+ *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]
@@ -40,6 +40,7 @@ class MentorProfile extends Model
         'currency_id',
         'experience_started_at',
     ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -57,15 +58,11 @@ class MentorProfile extends Model
 
     public function languages(): Attribute
     {
-        return Attribute::get(function () {
-            return $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get();
-        });
+        return Attribute::get(fn() => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
     }
 
     public function stacks(): Attribute
     {
-        return Attribute::get(function () {
-            return $this->mentorTags()->where('type', TagEnum::STACK)->get();
-        });
+        return Attribute::get(fn() => $this->mentorTags()->where('type', TagEnum::STACK)->get());
     }
 }

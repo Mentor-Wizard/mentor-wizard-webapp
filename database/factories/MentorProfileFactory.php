@@ -7,7 +7,6 @@ namespace Database\Factories;
 use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\User;
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

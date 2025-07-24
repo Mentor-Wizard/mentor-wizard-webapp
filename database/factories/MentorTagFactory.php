@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\TagEnum;
@@ -19,7 +21,7 @@ class MentorTagFactory extends Factory
     {
         return [
             'type' => fake()->randomElement([TagEnum::STACK, TagEnum::LANGUAGE]),
-            'tag' => $this->faker->word(),
+            'tag'  => fake()->word(),
         ];
     }
 }

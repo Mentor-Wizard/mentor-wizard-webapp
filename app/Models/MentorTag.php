@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\TagEnum;
@@ -17,14 +19,15 @@ class MentorTag extends Model
 {
     use HasFactory;
 
+    public function mentorProfiles(): BelongsToMany
+    {
+        return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_tag');
+    }
+
     protected function casts(): array
     {
         return [
             'type' => TagEnum::class,
         ];
-    }
-    public function mentorProfiles(): BelongsToMany
-    {
-        return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_tag');
     }
 }
