@@ -30,7 +30,6 @@ describe('Mentor Page', function (): void {
             'telegram'    => 'profile telegram',
             'whatsapp'    => 'profile whatsapp',
             'phone'       => 'profile phone',
-            'description' => 'profile description',
         ]);
         $user->refresh();
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
@@ -49,7 +48,6 @@ describe('Mentor Page', function (): void {
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.telegram'))->toBe('profile telegram')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.whatsapp'))->toBe('profile whatsapp')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.phone'))->toBe('profile phone')
-            ->and(Arr::get($resultData->getData(), 'page.props.mentor.profile.description'))->toBe('profile description')
             ->and(Arr::get($resultData->getData(), 'page.props.reviews'))->toBeArray()
             ->and(Arr::get($resultData->getData(), 'page.props.reviews.total'))->toBe(0)
             ->and(Arr::get($resultData->getData(), 'page.props.defaultAvatar'))->toBe(UserProfile::DEFAULT_AVATAR_URL);

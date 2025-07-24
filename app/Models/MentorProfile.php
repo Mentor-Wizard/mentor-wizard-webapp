@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\TagEnum;
+use Database\Factories\MentorProfileFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Image\Enums\Fit;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 
 /**
  * @property-read string $avatar URL of the avatar image
  * @mixin IdeHelperMentorProfile
  */
+#[UseFactory(MentorProfileFactory::class)]
 class MentorProfile extends Model
 {
     use HasFactory;
@@ -48,7 +50,7 @@ class MentorProfile extends Model
         return $this->belongsTo(Currency::class, 'currency_id');
     }
 
-    public function mentorTags()
+    public function mentorTags(): BelongsToMany
     {
         return $this->belongsToMany(MentorTag::class, 'mentor_profile_mentor_tag');
     }
@@ -56,14 +58,14 @@ class MentorProfile extends Model
     public function languages(): Attribute
     {
         return Attribute::get(function () {
-            return $this->mentorTags()->where('type', MentorTag::LANGUAGE)->get();
+            return $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get();
         });
     }
 
     public function stacks(): Attribute
     {
         return Attribute::get(function () {
-            return $this->mentorTags()->where('type', MentorTag::STACK)->get();
+            return $this->mentorTags()->where('type', TagEnum::STACK)->get();
         });
     }
 }

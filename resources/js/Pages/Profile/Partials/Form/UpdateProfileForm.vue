@@ -29,7 +29,6 @@ const form = useForm({
     linkedin: profile?.linkedin ?? '',
     telegram: profile?.telegram ?? '',
     whatsapp: profile?.whatsapp ?? '',
-    description: profile?.description ?? '',
 });
 
 const submit = () => {
@@ -103,15 +102,6 @@ const submit = () => {
                     </div>
                     <p class="text-sm/6 text-gray-500">Example: https://wa.me/380671234578</p>
                     <InputError class="mt-2" :message="form.errors.whatsapp"/>
-                </div>
-
-                <div class="col-span-full">
-                    <InputLabel for="description" value="Description"/>
-
-                    <div class="mt-2">
-                        <TextArea id="description" v-model="form.description"/>
-                    </div>
-                    <InputError class="mt-2" :message="form.errors.description"/>
                 </div>
 
                 <div class="flex">

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TagEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,8 @@ class MentorTagFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'type' => fake()->randomElement([TagEnum::STACK, TagEnum::LANGUAGE]),
+            'tag' => $this->faker->word(),
         ];
     }
 }
