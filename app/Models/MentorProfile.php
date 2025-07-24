@@ -58,11 +58,11 @@ class MentorProfile extends Model
 
     public function languages(): Attribute
     {
-        return Attribute::get(fn() => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
+        return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
     }
 
     public function stacks(): Attribute
     {
-        return Attribute::get(fn() => $this->mentorTags()->where('type', TagEnum::STACK)->get());
+        return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
     }
 }
