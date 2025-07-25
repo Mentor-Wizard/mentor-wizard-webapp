@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum SocialiteDriver: string
+enum SocialiteDriverEnum: string
 {
     case GOOGLE = 'google';
     case GITHUB = 'github';

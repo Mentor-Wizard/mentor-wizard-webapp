@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\Socialite\SocialiteRedirect;
-use App\Enums\SocialiteDriver;
+use App\Enums\SocialiteDriverEnum;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
@@ -28,7 +28,7 @@ describe('Socialite Redirect', function (): void {
         $this->get(route('auth.socialite.redirect', ['driver' => $driver->value]))
             ->assertRedirect()
             ->assertStatus(Response::HTTP_FOUND);
-    })->with(SocialiteDriver::cases());
+    })->with(SocialiteDriverEnum::cases());
 
     it('fails with invalid social driver', function (): void {
         $invalidDriver = 'invalid_driver';
