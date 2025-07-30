@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth\Socialite;
 
-use App\Enums\SocialiteDriver;
+use App\Enums\SocialiteDriverEnum;
 use Illuminate\Http\RedirectResponse as LaravelRedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -18,7 +18,7 @@ class SocialiteRedirect
 
     public function handle(string $driver): SymfonyRedirectResponse|LaravelRedirectResponse
     {
-        if (! SocialiteDriver::isValid($driver)) {
+        if (! SocialiteDriverEnum::isValid($driver)) {
             Log::error('Invalid socialite driver', ['driver' => $driver]);
             abort(Response::HTTP_UNPROCESSABLE_ENTITY);
         }

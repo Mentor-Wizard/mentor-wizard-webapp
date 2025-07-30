@@ -17,7 +17,6 @@ use Override;
  * @property string $telegram
  * @property string $whatsapp
  * @property string $phone
- * @property string $description
  * @property string $avatar
  */
 class UserProfileResource extends JsonResource
@@ -37,7 +36,6 @@ class UserProfileResource extends JsonResource
             'telegram'    => $this->telegram,
             'whatsapp'    => $this->whatsapp,
             'phone'       => $this->phone,
-            'description' => $this->description,
             'avatar'      => $this->avatar,
         ];
     }

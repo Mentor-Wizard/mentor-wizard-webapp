@@ -16,7 +16,6 @@ describe('User data Validation', function (): void {
             'linkedin'    => 'https://www.linkedin.com/in/john',
             'telegram'    => 'https://t.me/john',
             'whatsapp'    => 'https://wa.me/john',
-            'description' => 'description!',
             'phone'       => '+380671234567',
         ], $request->rules());
 
@@ -49,7 +48,6 @@ describe('User data Validation', function (): void {
             'linkedin',
             'telegram',
             'whatsapp',
-            'description',
             'phone',
         ]);
     });
@@ -63,7 +61,6 @@ describe('User data Validation', function (): void {
             'linkedin'     => null,
             'telegram'     => null,
             'whatsapp'     => null,
-            'description'  => null,
             'phone'        => null,
         ], $request->rules());
 
@@ -73,7 +70,6 @@ describe('User data Validation', function (): void {
             ->and($validator->errors()->has('linkedin'))->toBeFalse()
             ->and($validator->errors()->has('telegram'))->toBeFalse()
             ->and($validator->errors()->has('whatsapp'))->toBeFalse()
-            ->and($validator->errors()->has('description'))->toBeFalse()
             ->and($validator->errors()->has('phone'))->toBeFalse();
     });
 
@@ -85,7 +81,6 @@ describe('User data Validation', function (): void {
             'linkedin'    => 1,
             'telegram'    => 1,
             'whatsapp'    => 1,
-            'description' => 1,
             'phone'       => 123,
         ], $request->rules());
 
@@ -95,7 +90,6 @@ describe('User data Validation', function (): void {
             ->and($validator->errors()->get('linkedin'))->toContain('The linkedin field must be a string.')
             ->and($validator->errors()->get('telegram'))->toContain('The telegram field must be a string.')
             ->and($validator->errors()->get('whatsapp'))->toContain('The whatsapp field must be a string.')
-            ->and($validator->errors()->get('description'))->toContain('The description field must be a string.')
             ->and($validator->errors()->get('phone'))->toContain('The phone field format is invalid.');
     });
 
@@ -108,7 +102,6 @@ describe('User data Validation', function (): void {
             'linkedin'    => 'https://www.linkedin.com/in/'.str_repeat('a', 600),
             'telegram'    => 'https://t.me/'.str_repeat('a', 600),
             'whatsapp'    => 'https://wa.me/'.str_repeat('a', 600),
-            'description' => str_repeat('a', 6000),
         ], $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -121,9 +114,7 @@ describe('User data Validation', function (): void {
             ->and($validator->errors()->get('telegram'))
             ->toContain('The telegram field must not be greater than 100 characters.')
             ->and($validator->errors()->get('whatsapp'))
-            ->toContain('The whatsapp field must not be greater than 100 characters.')
-            ->and($validator->errors()->get('description'))
-            ->toContain('The description field must not be greater than 1000 characters.');
+            ->toContain('The whatsapp field must not be greater than 100 characters.');
     });
 
     it('requires incorrect data', function (): void {
