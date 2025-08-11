@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property-read string $avatar URL of the avatar image
- *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]
@@ -54,6 +53,11 @@ class MentorProfile extends Model
     public function mentorTags(): BelongsToMany
     {
         return $this->belongsToMany(MentorTag::class, 'mentor_profile_mentor_tag');
+    }
+    
+    public function mentorPrograms(): BelongsToMany
+    {
+        return $this->belongsToMany(MentorProgram::class, 'mentor_profile_mentor_program');
     }
 
     public function languages(): Attribute
