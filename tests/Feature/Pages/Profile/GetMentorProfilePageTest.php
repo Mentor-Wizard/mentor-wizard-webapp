@@ -28,7 +28,6 @@ describe('Mentor Profile Page', function (): void {
             'telegram'    => 'Mentor profile telegram',
             'whatsapp'    => 'Mentor profile whatsapp',
             'phone'       => 'Mentor profile phone',
-            'description' => 'Mentor profile description',
         ]);
         $mentor->refresh();
         $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
@@ -44,7 +43,6 @@ describe('Mentor Profile Page', function (): void {
             'telegram'    => 'Menti profile telegram',
             'whatsapp'    => 'Menti profile whatsapp',
             'phone'       => 'Menti profile phone',
-            'description' => 'Menti profile description',
         ]);
         $menti->refresh();
         $menti->assignRole(Role::findByName(RoleEnum::MENTI->value));
@@ -70,7 +68,6 @@ describe('Mentor Profile Page', function (): void {
                         ->where('telegram', 'Mentor profile telegram')
                         ->where('whatsapp', 'Mentor profile whatsapp')
                         ->where('phone', 'Mentor profile phone')
-                        ->where('description', 'Mentor profile description')
                         ->where('avatar', UserProfile::DEFAULT_AVATAR_URL)
                         ->etc()
                     )
@@ -93,7 +90,6 @@ describe('Mentor Profile Page', function (): void {
                             ->where('telegram', 'Menti profile telegram')
                             ->where('whatsapp', 'Menti profile whatsapp')
                             ->where('phone', 'Menti profile phone')
-                            ->where('description', 'Menti profile description')
                             ->etc()
                         )
                         ->etc()

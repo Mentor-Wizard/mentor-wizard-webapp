@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Auth\Socialite\SocialiteCallback;
 use App\Enums\RoleEnum;
-use App\Enums\SocialiteDriver;
+use App\Enums\SocialiteDriverEnum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +40,7 @@ it('redirects authenticated user after social login', function ($driver): void {
     assertDatabaseHas('users', ['email' => 'test@example.com']);
 
     assertAuthenticated();
-})->with(SocialiteDriver::cases());
+})->with(SocialiteDriverEnum::cases());
 
 it('creates user with getName() when getNickname() is empty', function ($driver): void {
     $socialUser = Mockery::mock();
@@ -58,7 +58,7 @@ it('creates user with getName() when getNickname() is empty', function ($driver)
     assertDatabaseHas('users', ['email' => 'test@example.com']);
 
     assertAuthenticated();
-})->with(SocialiteDriver::cases());
+})->with(SocialiteDriverEnum::cases());
 
 it('creates user with getName() when getName() is empty', function ($driver): void {
     $socialUser = Mockery::mock();
@@ -76,7 +76,7 @@ it('creates user with getName() when getName() is empty', function ($driver): vo
     assertDatabaseHas('users', ['email' => 'test@example.com']);
 
     assertAuthenticated();
-})->with(SocialiteDriver::cases());
+})->with(SocialiteDriverEnum::cases());
 
 it('logs an error and aborts if email is empty', function ($driver): void {
     $socialUser = Mockery::mock();
@@ -87,4 +87,4 @@ it('logs an error and aborts if email is empty', function ($driver): void {
     Log::shouldReceive('error')->once()->withArgs(fn (string $message, array $context): bool => $message === 'Email is empty, but required for login' && $context['driver'] === $driver->value);
 
     (new SocialiteCallback)->handle($driver->value);
-})->with(SocialiteDriver::cases())->throws(HttpException::class);
+})->with(SocialiteDriverEnum::cases())->throws(HttpException::class);

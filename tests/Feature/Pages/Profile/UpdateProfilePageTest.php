@@ -29,7 +29,6 @@ describe('Successful Scenarios', function (): void {
             'linkedin'    => 'https://www.linkedin.com/in/john',
             'telegram'    => 'https://t.me/john',
             'whatsapp'    => 'https://wa.me/john',
-            'description' => 'description',
             'phone'       => '+380671234567',
         ])
             ->assertStatus(Response::HTTP_FOUND);
@@ -43,7 +42,6 @@ describe('Successful Scenarios', function (): void {
             ->and($user->profile->last_name)->toBe('Dou')
             ->and($user->profile->telegram)->toBe('https://t.me/john')
             ->and($user->profile->whatsapp)->toBe('https://wa.me/john')
-            ->and($user->profile->description)->toBe('description')
             ->and($user->profile->phone)->toBe('+380671234567');
     });
 });
@@ -62,7 +60,6 @@ describe('Unsuccessful Scenarios', function (): void {
             'linkedin'    => 'https://www.linkedin.com/in/'.str_repeat('a', 600),
             'telegram'    => 'https://t.me/'.str_repeat('a', 600),
             'whatsapp'    => 'https://wa.me/'.str_repeat('a', 600),
-            'description' => str_repeat('a', 6000),
         ])
             ->assertStatus(Response::HTTP_FOUND);
 
