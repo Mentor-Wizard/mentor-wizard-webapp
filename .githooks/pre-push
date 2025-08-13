@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Pre-push hook to validate branch names
+# Based on the original Husky pre-push hook
+
+docker compose exec app npx validate-branch-name

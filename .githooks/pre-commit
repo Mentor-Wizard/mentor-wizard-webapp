@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Pre-commit hook to run code quality tools
+# Based on the original Husky pre-commit hook
+
+docker compose exec app composer rector:fix
+docker compose exec app composer pint:fix
+git add .
