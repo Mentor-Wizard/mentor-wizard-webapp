@@ -27,12 +27,10 @@ class UserProfileFactory extends Factory
             'user_id'        => User::factory(),
             'name'           => fake()->firstName,
             'last_name'      => fake()->lastName,
-            'title'          => fake()->jobTitle(),
             'linkedin'       => fake()->url,
             'telegram'       => fake()->userName,
             'whatsapp'       => fake()->phoneNumber,
             'phone'          => fake()->phoneNumber,
-            'description'    => fake()->text(),
             'cost_per_hour'  => fake()->randomFloat(2, 10, 100),
             'currency_id'    => Currency::query()->inRandomOrder()->value('id') ?? Currency::factory(),
         ];

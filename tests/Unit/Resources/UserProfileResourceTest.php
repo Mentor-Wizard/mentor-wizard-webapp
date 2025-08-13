@@ -26,7 +26,6 @@ describe('Mentor Page', function (): void {
             'telegram'    => 'profile telegram',
             'whatsapp'    => 'profile whatsapp',
             'phone'       => 'profile phone',
-            'description' => 'profile description',
         ]);
         $user->refresh();
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
@@ -40,7 +39,6 @@ describe('Mentor Page', function (): void {
             'telegram'    => 'profile telegram',
             'whatsapp'    => 'profile whatsapp',
             'phone'       => 'profile phone',
-            'description' => 'profile description',
             'avatar'      => UserProfile::DEFAULT_AVATAR_URL,
         ]);
     });

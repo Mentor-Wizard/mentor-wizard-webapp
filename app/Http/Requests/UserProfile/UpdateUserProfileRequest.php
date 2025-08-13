@@ -47,11 +47,6 @@ class UpdateUserProfileRequest extends FormRequest
                 'max:100',
                 'regex:/^https:\/\/(www\.)?wa\.me\/.+$/i',
             ],
-            'description' => [
-                'nullable',
-                'string',
-                'max:1000',
-            ],
             'phone'       => [
                 'nullable',
                 'regex:/^\+\d{11,15}$/',

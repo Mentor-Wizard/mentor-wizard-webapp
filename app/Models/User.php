@@ -85,6 +85,11 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return $this->hasOne(UserProfile::class);
     }
 
+    public function mentorProfile(): ?HasOne
+    {
+        return $this->hasOne(MentorProfile::class);
+    }
+
     public function mentiProgramProgress(): ?HasOne
     {
         return $this->hasOne(MentorProgramBlockProgress::class);
