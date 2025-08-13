@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Commit message hook to validate commit messages with commitlint
+# Based on the original Husky commit-msg hook
+
+docker compose exec app npx --no -- commitlint --edit "$1"

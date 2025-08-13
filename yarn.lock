@@ -2049,15 +2049,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"husky@npm:^9.1.7":
-  version: 9.1.7
-  resolution: "husky@npm:9.1.7"
-  bin:
-    husky: bin.js
-  checksum: 10c0/35bb110a71086c48906aa7cd3ed4913fb913823715359d65e32e0b964cb1e255593b0ae8014a5005c66a68e6fa66c38dcfa8056dbbdfb8b0187c0ffe7ee3a58f
-  languageName: node
-  linkType: hard
-
 "iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
@@ -3004,7 +2995,6 @@ __metadata:
     chokidar: "npm:^4.0.3"
     commitlint: "npm:^19.7.1"
     concurrently: "npm:^9.1.2"
-    husky: "npm:^9.1.7"
     laravel-echo: "npm:^2.0.2"
     laravel-vite-plugin: "npm:^1.2.0"
     pinia: "npm:^3.0.1"

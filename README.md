@@ -84,7 +84,20 @@ docker compose exec app php artisan migrate
 docker compose exec app yarn install
 ```
 
-### 9. Компіляція frontend
+### 9. Налаштування Git hooks
+
+Виконайте команду для налаштування спільних Git hooks:
+
+```bash
+./setup-git-hooks.sh
+```
+
+Це налаштує наступні hooks:
+- **pre-commit**: Запускає Rector і Pint для виправлення коду
+- **commit-msg**: Валідує повідомлення комітів з commitlint
+- **pre-push**: Валідує назви гілок
+
+### 10. Компіляція frontend
 
 Виконайте команду:
 
@@ -92,7 +105,7 @@ docker compose exec app yarn install
 docker compose exec app yarn dev
 ```
 
-### 10. Опублікувати доступ до public папки 
+### 11. Опублікувати доступ до public папки
 
 Виконайте команду:
 
