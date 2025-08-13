@@ -32,7 +32,6 @@ describe('User data Validation', function (): void {
         ]);
 
         $reflection = new ReflectionMethod($request, 'prepareForValidation');
-        $reflection->setAccessible(true);
         $reflection->invoke($request);
 
         expect($request->input('phone'))->toBe('+380671234567');

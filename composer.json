@@ -28,6 +28,7 @@
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.24",
         "larastan/larastan": "^3.3",
+        "laravel/boost": "^1.0",
         "laravel/pail": "^1.2",
         "laravel/pint": "^1.22",
         "laravel/telescope": "^5.7",
@@ -38,7 +39,7 @@
         "tomasvotruba/cognitive-complexity": "^1.0",
         "wulfheart/laravel-actions-ide-helper": "^0.10.0"
     },
-    "minimum-stability": "beta",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
