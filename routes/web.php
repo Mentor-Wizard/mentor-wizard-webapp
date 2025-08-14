@@ -9,7 +9,6 @@ use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Pages\Calendar\CalendarsListPage;
-use App\Actions\Pages\Calendar\CreateCalendarPage;
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
@@ -24,7 +23,6 @@ use App\Actions\User\UpdateUser;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
-
 
 Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
 
@@ -72,4 +70,4 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
         ->name('pages.calendar.delete');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

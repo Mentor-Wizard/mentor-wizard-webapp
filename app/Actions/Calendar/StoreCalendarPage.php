@@ -15,9 +15,9 @@ class StoreCalendarPage
 {
     use AsController;
 
-    public function handle(StoreEventRequest $request):Response
+    public function handle(StoreEventRequest $request): Response
     {
-        if(!auth()->user()->hasRole('mentor')){
+        if (! auth()->user()->hasRole('mentor')) {
             return response()->json(['message' => 'Only mentee can create events.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -26,7 +26,7 @@ class StoreCalendarPage
         ]);
 
         $event->users()->attach(auth()->id(), [
-            'role' => EventRoleEnum::HOST->value,
+            'role'       => EventRoleEnum::HOST->value,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

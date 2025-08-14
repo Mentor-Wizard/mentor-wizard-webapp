@@ -7,15 +7,13 @@ use App\Enums\EventRoleEnum;
 use App\Enums\EventStatusEnum;
 use App\Enums\EventTypeEnum;
 use App\Enums\RoleEnum;
+use App\Models\Event as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\Response;
-use App\Models\Event as EventModel;
-use Illuminate\Support\Carbon;
 
 mutates(DeleteCalendarPage::class);
 
@@ -30,24 +28,24 @@ describe('Delete Calendar Event Page', function (): void {
 
         $this->nonMentorUser = User::factory()->create();
 
-        $this->user = createAndAuthenticateMentorForDestroy();
+        $this->user = createAndAuthenticateMentorForDestroyUnit();
         $this->request = Request::create('/')->setUserResolver(fn (): User => $this->user);
 
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d') .' 09:00:00',
+            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null
+            'mentor_program_id' => null,
         ]);
         $this->event->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
     });
 
     it('deletes mentor program and returns redirect response', function (): void {
-        $action = new DeleteCalendarPage();
+        $action = new DeleteCalendarPage;
         $response = $action->handle($this->event->unique_id);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
@@ -61,7 +59,7 @@ describe('Delete Calendar Event Page', function (): void {
 
         $response = new DeleteCalendarPage()->handle($deletedEventId);
 
-        expect($response)->toBeInstanceOf(\Illuminate\Http\JsonResponse::class)
+        expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
             ->and($response->getStatusCode())->toBe(404)
             ->and($response->getData(true)['message'])->toBe('Event not found');
 
@@ -74,25 +72,25 @@ describe('Delete Calendar Event Page', function (): void {
         $anotherMentorEvent = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d') .' 09:00:00',
+            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null
+            'mentor_program_id' => null,
         ]);
 
         $response = new DeleteCalendarPage()->handle($this->event->unique_id);
 
-        expect($response)->toBeInstanceOf(\Illuminate\Http\JsonResponse::class)
+        expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
             ->and($response->getStatusCode())->toBe(403)
             ->and($response->getData(true)['message'])->toBe('Attempt to delete event of other mentor');
-//
-//        $this->fail('Exception was not thrown');
+        //
+        //        $this->fail('Exception was not thrown');
     });
 });
 
-function createAndAuthenticateMentorForDestroy(): User
+function createAndAuthenticateMentorForDestroyUnit(): User
 {
     $user = User::factory()->create();
     $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));

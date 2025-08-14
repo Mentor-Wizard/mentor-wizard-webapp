@@ -15,7 +15,6 @@ enum EventCalendarColoursEnum: string
     case PINK = 'pink';
     case GRAY = 'gray';
 
-
     public static function names(): array
     {
         return array_column(self::cases(), 'name');
@@ -30,5 +29,4 @@ enum EventCalendarColoursEnum: string
     {
         return self::values()[array_rand(self::values())];
     }
-
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Enums\EventRoleEnum;
 use App\Enums\EventStatusEnum;
 use App\Enums\EventTypeEnum;
-use App\Models\Event as EventModel;
 use App\Enums\RoleEnum;
+use App\Models\Event as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
@@ -26,16 +26,15 @@ describe('Calendar Event Edit Page', function (): void {
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d') .' 09:00:00',
+            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null
+            'mentor_program_id' => null,
         ]);
         $this->event->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
     });
-
 
     it('updates event successfully', function (): void {
         $updateEventData = [
@@ -61,13 +60,13 @@ describe('Calendar Event Edit Page', function (): void {
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null
+            'mentor_program_id' => null,
         ]);
 
         $this->assertDatabaseHas('event_user', [
             'event_id'          => $this->event->getKey(),
             'user_id'           => $this->user->getKey(),
-            'role'              => EventRoleEnum::HOST
+            'role'              => EventRoleEnum::HOST,
         ]);
     });
 
@@ -84,21 +83,21 @@ describe('Calendar Event Edit Page', function (): void {
             'description'       => Str::random(2001),
         ];
 
-        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit',$this->event->unique_id), $invalidData);
-        $response->assertSessionHasErrors(['fromDate', 'description','title','type']);
+        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->unique_id), $invalidData);
+        $response->assertSessionHasErrors(['fromDate', 'description', 'title', 'type']);
 
         $invalidData = [
-            'title'             =>  Str::random(256),
-            'fromDate'          =>  '2024-08-15',
-            'fromTime'          =>  null,
-            'toDate'            =>  null,
-            'toTime'            =>  null,
-            'type'              =>  'individual',
-            'description'       =>  Str::random(2001),
+            'title'             => Str::random(256),
+            'fromDate'          => '2024-08-15',
+            'fromTime'          => null,
+            'toDate'            => null,
+            'toTime'            => null,
+            'type'              => 'individual',
+            'description'       => Str::random(2001),
         ];
 
-        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit',$this->event->unique_id), $invalidData);
-        $response->assertSessionHasErrors(['fromDate', 'description','title','type']);
+        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->unique_id), $invalidData);
+        $response->assertSessionHasErrors(['fromDate', 'description', 'title', 'type']);
     });
 
     it('throws 403 when a non-mentor user tries to create an event', function (): void {
@@ -115,7 +114,7 @@ describe('Calendar Event Edit Page', function (): void {
         ];
 
         $response = $this->withoutMiddleware()
-            ->patch(route('pages.calendar.edit',$this->event->unique_id), $eventData);
+            ->patch(route('pages.calendar.edit', $this->event->unique_id), $eventData);
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 });

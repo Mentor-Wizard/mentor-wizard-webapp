@@ -27,7 +27,7 @@ describe('EditEventRequest Validation', function (): void {
         $this->prepareRequest = function (EditEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(app(Illuminate\Routing\Redirector::class));
-            $request->setUserResolver(fn() => $this->user);
+            $request->setUserResolver(fn () => $this->user);
         };
     });
 
@@ -38,18 +38,19 @@ describe('EditEventRequest Validation', function (): void {
 
         expect($request->authorize())->toBeTrue();
         expect($request->rules())->toBeArray();
-        expect(fn() => $request->validateResolved())->not->toThrow(ValidationException::class);
+        expect(fn () => $request->validateResolved())->not->toThrow(ValidationException::class);
     })->with([
         'single day event' => function (): array {
             $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+
             return [
-                'title' => 'Updated Standup',
-                'fromDate' => $tomorrow,
-                'toDate' => $tomorrow,
-                'fromTime' => '11:00',
-                'toTime' => '12:00',
+                'title'       => 'Updated Standup',
+                'fromDate'    => $tomorrow,
+                'toDate'      => $tomorrow,
+                'fromTime'    => '11:00',
+                'toTime'      => '12:00',
                 'description' => 'Updated desc',
-                'type' => EventTypeEnum::INDIVIDUAL->value,
+                'type'        => EventTypeEnum::INDIVIDUAL->value,
             ];
         },
     ]);
@@ -66,23 +67,23 @@ describe('EditEventRequest Validation', function (): void {
             expect($validationException->errors())->toHaveKey($errorField);
         }
     })->with([
-        'empty title' => fn(): array => [[
-            'title' => '',
-            'fromDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toTime' => '10:00',
+        'empty title' => fn (): array => [[
+            'title'       => '',
+            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
+            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toTime'      => '10:00',
             'description' => 'x',
-            'type' => EventTypeEnum::INDIVIDUAL->value,
+            'type'        => EventTypeEnum::INDIVIDUAL->value,
         ], 'title'],
-        'toTime before fromTime' => fn(): array => [[
-            'title' => 'Wrong time',
-            'fromDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime' => '09:00',
+        'toTime before fromTime' => fn (): array => [[
+            'title'       => 'Wrong time',
+            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
+            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '10:00',
+            'toTime'      => '09:00',
             'description' => 'x',
-            'type' => EventTypeEnum::GROUP->value,
+            'type'        => EventTypeEnum::GROUP->value,
         ], 'toTime'],
     ]);
 });
@@ -93,13 +94,13 @@ describe('Update Calendar Event', function (): void {
         $this->user = createAndAuthenticateMentorForCalendarUpdate();
 
         $this->event = EventModel::factory()->create([
-            'title' => 'Default event',
-            'status' => EventStatusEnum::CONFIRMED->value,
-            'start_date_time' => Carbon::tomorrow()->format('Y-m-d') . ' 09:00:00',
-            'date' => Carbon::tomorrow()->format('Y-m-d'),
-            'duration' => 3600,
-            'type' => EventTypeEnum::INDIVIDUAL->value,
-            'description' => 'Test description',
+            'title'             => 'Default event',
+            'status'            => EventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
+            'date'              => Carbon::tomorrow()->format('Y-m-d'),
+            'duration'          => 3600,
+            'type'              => EventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Test description',
             'mentor_program_id' => null,
         ]);
         $this->event->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
@@ -109,15 +110,15 @@ describe('Update Calendar Event', function (): void {
         $start = Carbon::tomorrow()->setTime(13, 0, 0);
         $end = Carbon::tomorrow()->setTime(14, 30, 0);
         $payload = [
-            'unique_id' => $this->event->unique_id,
-            'title' => 'Updated Title',
-            'status' => EventStatusEnum::CONFIRMED->value,
+            'unique_id'       => $this->event->unique_id,
+            'title'           => 'Updated Title',
+            'status'          => EventStatusEnum::CONFIRMED->value,
             'start_date_time' => $start,
-            'end_date_time' => $end,
-            'duration' => $start->diffInSeconds($end),
-            'date' => $start->format('Y-m-d'),
-            'type' => EventTypeEnum::GROUP->value,
-            'description' => 'Updated description',
+            'end_date_time'   => $end,
+            'duration'        => $start->diffInSeconds($end),
+            'date'            => $start->format('Y-m-d'),
+            'type'            => EventTypeEnum::GROUP->value,
+            'description'     => 'Updated description',
         ];
 
         $request = Mockery::mock(EditEventRequest::class);
@@ -134,7 +135,7 @@ describe('Update Calendar Event', function (): void {
         expect($updated)
             ->title->toBe('Updated Title')
             ->date->toBe($start->format('Y-m-d'))
-            ->duration->toBe((int)$start->diffInSeconds($end))
+            ->duration->toBe((int) $start->diffInSeconds($end))
             ->type->toBe(EventTypeEnum::GROUP->value)
             ->description->toBe('Updated description');
     });

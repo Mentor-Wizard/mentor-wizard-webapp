@@ -10,6 +10,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Override;
 
 class EditEventRequest extends FormRequest
 {
@@ -31,7 +32,7 @@ class EditEventRequest extends FormRequest
         ];
     }
 
-    #[\Override]
+    #[Override]
     public function messages(): array
     {
         return [
@@ -54,39 +55,13 @@ class EditEventRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation(): void
-    {
-        if ($this->has(['fromDate', 'toDate', 'fromTime', 'toTime'])) {
-            $fromDateTime = Carbon::createFromFormat('Y-m-d H:i', $this->fromDate . ' ' . $this->fromTime);
-            $toDateTime = Carbon::createFromFormat('Y-m-d H:i', $this->toDate . ' ' . $this->toTime);
-            if ($this->fromDate === $this->toDate && $this->toTime <= $this->fromTime) {
-                return;
-            }
-        }
-    }
-
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
-            if (!$this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'), $this->input('toDate'), $this->input('toTime'))) {
+            if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'), $this->input('toDate'), $this->input('toTime'))) {
                 $validator->errors()->add('fromDate', 'there are another events on this time');
             }
         });
-    }
-
-
-    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime)
-    {
-        $this->validated();
-        $startDateTimestamp = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $fromDate . ' ' . $fromTime
-        )->timestamp;
-        $endDateTimestamp = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $toDate . ' ' . $toTime
-        )->timestamp;
-        return auth()->user()->checkAvailableSlots($startDateTimestamp, $endDateTimestamp);
     }
 
     public function getEventData(): array
@@ -94,16 +69,15 @@ class EditEventRequest extends FormRequest
         $validated = $this->validated();
         $startDateTime = Carbon::createFromFormat(
             'Y-m-d H:i',
-            $validated['fromDate'] . ' ' . $validated['fromTime']
+            $validated['fromDate'].' '.$validated['fromTime']
         );
         $endDateTime = Carbon::createFromFormat(
             'Y-m-d H:i',
-            $validated['toDate'] . ' ' . $validated['toTime']
+            $validated['toDate'].' '.$validated['toTime']
         );
 
-
         $duration = $startDateTime->diffInSeconds($endDateTime);
-        $eventType = match($validated['type']) {
+        $eventType = match ($validated['type']) {
             'individual'        => EventTypeEnum::INDIVIDUAL->value,
             'group'             => EventTypeEnum::GROUP->value,
             default             => EventTypeEnum::INDIVIDUAL->value,
@@ -120,5 +94,31 @@ class EditEventRequest extends FormRequest
             'status'            => EventStatusEnum::CONFIRMED,
             'date'              => $startDateTime->format('Y-m-d'),
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has(['fromDate', 'toDate', 'fromTime', 'toTime'])) {
+            $fromDateTime = Carbon::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
+            $toDateTime = Carbon::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
+            if ($this->fromDate === $this->toDate && $this->toTime <= $this->fromTime) {
+                return;
+            }
+        }
+    }
+
+    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime)
+    {
+        $this->validated();
+        $startDateTimestamp = Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $fromDate.' '.$fromTime
+        )->timestamp;
+        $endDateTimestamp = Carbon::createFromFormat(
+            'Y-m-d H:i',
+            $toDate.' '.$toTime
+        )->timestamp;
+
+        return auth()->user()->checkAvailableSlots($startDateTimestamp, $endDateTimestamp);
     }
 }

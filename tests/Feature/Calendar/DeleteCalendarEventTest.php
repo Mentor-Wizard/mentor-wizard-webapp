@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-
 use App\Enums\EventRoleEnum;
 use App\Enums\EventStatusEnum;
 use App\Enums\EventTypeEnum;
 use App\Enums\RoleEnum;
+use App\Models\Event as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\Event as EventModel;
 
 use function Pest\Laravel\actingAs;
 
@@ -34,12 +33,12 @@ describe('Calendar Event Delete Page', function (): void {
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d') .' 09:00:00',
+            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null
+            'mentor_program_id' => null,
         ]);
         $this->event->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
 
@@ -50,7 +49,7 @@ describe('Calendar Event Delete Page', function (): void {
         auth()->login($this->user);
 
         $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete',$this->event->unique_id));
+            ->delete(route('pages.calendar.delete', $this->event->unique_id));
         $response->assertRedirect(route('pages.calendar'));
 
         $this->assertDatabaseMissing('events', [
@@ -58,13 +57,12 @@ describe('Calendar Event Delete Page', function (): void {
         ]);
     });
 
-
     it('throws 403 when a non-mentor user tries to delete an event', function (): void {
         actingAs($this->nonMentorUser);
         auth()->login($this->nonMentorUser);
 
         $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete',$this->event->unique_id));
+            ->delete(route('pages.calendar.delete', $this->event->unique_id));
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 
@@ -73,7 +71,7 @@ describe('Calendar Event Delete Page', function (): void {
         auth()->login($this->anotherMentor);
 
         $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete',$this->event->unique_id));
+            ->delete(route('pages.calendar.delete', $this->event->unique_id));
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 });

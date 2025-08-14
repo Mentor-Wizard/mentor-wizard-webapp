@@ -30,6 +30,7 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property-read UserProfile $profile
  * @property string $username
+ *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
@@ -136,7 +137,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return $this->hasMany(Chat::class, 'menti_id');
     }
 
-    public function events(): belongsToMany
+    public function events(): BelongsToMany
     {
         return $this->belongsToMany(Event::class)->withTimestamps();
     }
@@ -149,21 +150,21 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     public function rating(): Attribute
     {
         return Attribute::make(
-            get: fn(): float => (float)$this->mentorReviews()->avg('rating'),
+            get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
         );
     }
 
-//    private function getEvents(Carbon $startDate, Carbon $endDate)
-//    {
-//        return $this->events()
-//            ->whereBetween('start_date_time',
-//                [$startDate, $endDate])->orderBy('start_date_time', 'asc')->get();
-//    }
+    //    private function getEvents(Carbon $startDate, Carbon $endDate)
+    //    {
+    //        return $this->events()
+    //            ->whereBetween('start_date_time',
+    //                [$startDate, $endDate])->orderBy('start_date_time', 'asc')->get();
+    //    }
 
-    public function getMonthFormattedEvents(string $date, string $timezone = "Europe/Kyiv"): array
+    public function getMonthFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
         $appTimezone = config('app.timezone');
-        $setTimeZone = $timezone != $appTimezone ? $timezone : null;
+        $setTimeZone = $timezone !== $appTimezone ? $timezone : null;
         $startDate = Carbon::parse($date, $setTimeZone)->startOfMonth()->startOfWeek();
         $endDate = Carbon::parse($date, $setTimeZone)->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
@@ -181,7 +182,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
             ->groupBy('date')
             ->map(function (Collection $dateEvents) use ($date): array {
                 $payload = [
-                    'date' => $dateEvents->first()->start_date_time->format('Y-m-d'),
+                    'date'   => $dateEvents->first()->start_date_time->format('Y-m-d'),
                     'events' => EventResource::collection($dateEvents)->resolve(),
                 ];
                 if (Carbon::parse($date)->isSameMonth($dateEvents->first()->start_date_time)) {
@@ -201,30 +202,30 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
 
         $calendarView = [];
         foreach ($monthDates as $monthDate) {
-            if (!Arr::has($events, $monthDate->format('Y-m-d'))) {
+            if (! Arr::has($events, $monthDate->format('Y-m-d'))) {
                 $calendarView[] = ['date' => $monthDate->format('Y-m-d'), 'events' => []];
             } else {
                 $calendarView[] = $events[$monthDate->format('Y-m-d')];
             }
         }
 
-        if ($userEventsCheckBefore->where("start_date_time", "<", $startDate)->count() > 0) {
+        if ($userEventsCheckBefore->where('start_date_time', '<', $startDate)->count() > 0) {
             $hasEventsBefore = true;
         }
 
-        if ($userEventsCheckAfter->where("start_date_time", ">", $endDate->endOfDay())->get()->count() > 0) {
+        if ($userEventsCheckAfter->where('start_date_time', '>', $endDate->endOfDay())->get()->count() > 0) {
             $hasEventsAfter = true;
         }
 
         return ['calendarView' => $calendarView,
-            'hasEventsBefore' => $hasEventsBefore,
-            'hasEventsAfter' => $hasEventsAfter];
+            'hasEventsBefore'  => $hasEventsBefore,
+            'hasEventsAfter'   => $hasEventsAfter];
     }
 
-    public function getWeekFormattedEvents(string $date, string $timezone = "Europe/Kyiv"): array
+    public function getWeekFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
         $appTimezone = config('app.timezone');
-        $setTimeZone = $timezone != $appTimezone ? $timezone : null;
+        $setTimeZone = $timezone !== $appTimezone ? $timezone : null;
         $startDate = Carbon::parse($date, $setTimeZone)->startOfWeek();
         $endDate = Carbon::parse($date, $setTimeZone)->endOfWeek();
         $todayDate = Carbon::parse($date, $setTimeZone);
@@ -233,20 +234,20 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
 
         $events = $userEvents->whereBetween('start_date_time',
             [$startDate, $endDate])->orderBy('start_date_time')->get()
-            ->map(fn(Event $dayEvent): array => [
-                'id' => $dayEvent->unique_id,
-                'dayNumber' => (int)Carbon::parse($dayEvent->start_date_time)->format('w') + 1,
-                'time' => Carbon::parse($dayEvent->start_date_time)->format('g:i A'),
-                'dateTime' => Carbon::parse($dayEvent->start_date_time)->format('Y-m-d"T"H:i:s'),
-                'durationIndex' => (int)($dayEvent->duration * 12 / 3600),
-                'startIndex' => (int)((((int)Carbon::parse($dayEvent->start_date_time)->format('H') * 3600 +
-                            (int)Carbon::parse($dayEvent->start_date_time)->format('m') * 60 +
-                            (int)Carbon::parse($dayEvent->start_date_time)->format('s')) * 6 / 3600) + 2),
-                'title' => $dayEvent->title,
-                'href' => $dayEvent->web_link,
-                'colour' => EventCalendarColoursEnum::randomValue()
+            ->map(fn (Event $dayEvent): array => [
+                'id'            => $dayEvent->unique_id,
+                'dayNumber'     => (int) Carbon::parse($dayEvent->start_date_time)->format('w') + 1,
+                'time'          => Carbon::parse($dayEvent->start_date_time)->format('g:i A'),
+                'dateTime'      => Carbon::parse($dayEvent->start_date_time)->format('Y-m-d"T"H:i:s'),
+                'durationIndex' => (int) ($dayEvent->duration * 12 / 3600),
+                'startIndex'    => (int) ((((int) Carbon::parse($dayEvent->start_date_time)->format('H') * 3600
+                            + (int) Carbon::parse($dayEvent->start_date_time)->format('m') * 60
+                            + (int) Carbon::parse($dayEvent->start_date_time)->format('s')) * 6 / 3600) + 2),
+                'title'  => $dayEvent->title,
+                'href'   => $dayEvent->web_link,
+                'colour' => EventCalendarColoursEnum::randomValue(),
             ]);
-        $daysEvents = $userEventsForCalendar->pluck("date")->unique()->toArray();
+        $daysEvents = $userEventsForCalendar->pluck('date')->unique()->toArray();
         $weekDays = CarbonPeriod::create($startDate, '1 day', $endDate);
         $calendarView = [];
 
@@ -272,19 +273,18 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         }
 
         return [
-            'events' => $events,
+            'events'       => $events,
             'calendarView' => $calendarView,
         ];
     }
 
-
-    public function getDailyFormattedEvents(string $date, string $timezone = "Europe/Kyiv"): array
+    public function getDailyFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
-        $setTimeZone = $timezone != config('app.timezone') ? $timezone : null;
+        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
         $todayDate = Carbon::parse($date, $setTimeZone)->startOfDay();
         $tomorrowDate = Carbon::parse($date, $setTimeZone)->addDay()->startOfDay();
-        $firstEvent = $this->events()->orderBy("start_date_time")->first();
-        $latestEvent = $this->events()->orderBy("start_date_time", 'desc')->latest()->first();
+        $firstEvent = $this->events()->orderBy('start_date_time')->first();
+        $latestEvent = $this->events()->orderBy('start_date_time', 'desc')->latest()->first();
 
         $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $date, $setTimeZone)->startOfMonth();
         $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $date, $setTimeZone)->endOfMonth();
@@ -299,19 +299,19 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
 
         $events = $dayEvents->whereBetween('start_date_time',
             [$todayDate, $tomorrowDate])->orderBy('start_date_time')->get()
-            ->map(fn(Event $dayEvent): array => [
-                'id' => $dayEvent->unique_id,
-                'time' => Carbon::parse($dayEvent->start_date_time)->format('g:i A'),
-                'dateTime' => Carbon::parse($dayEvent->start_date_time)->format('Y-m-d"T"H:i:s'),
-                'durationIndex' => (int)($dayEvent->duration * 12 / 3600),
-                'startIndex' => (int)((((int)Carbon::parse($dayEvent->start_date_time)->format('H') * 3600 +
-                            (int)Carbon::parse($dayEvent->start_date_time)->format('m') * 60 +
-                            (int)Carbon::parse($dayEvent->start_date_time)->format('s')) * 6 / 3600) + 2),
-                'title' => $dayEvent->title,
-                'href' => $dayEvent->web_link,
-                'colour' => EventCalendarColoursEnum::randomValue()
+            ->map(fn (Event $dayEvent): array => [
+                'id'            => $dayEvent->unique_id,
+                'time'          => Carbon::parse($dayEvent->start_date_time)->format('g:i A'),
+                'dateTime'      => Carbon::parse($dayEvent->start_date_time)->format('Y-m-d"T"H:i:s'),
+                'durationIndex' => (int) ($dayEvent->duration * 12 / 3600),
+                'startIndex'    => (int) ((((int) Carbon::parse($dayEvent->start_date_time)->format('H') * 3600
+                            + (int) Carbon::parse($dayEvent->start_date_time)->format('m') * 60
+                            + (int) Carbon::parse($dayEvent->start_date_time)->format('s')) * 6 / 3600) + 2),
+                'title'  => $dayEvent->title,
+                'href'   => $dayEvent->web_link,
+                'colour' => EventCalendarColoursEnum::randomValue(),
             ]);
-        $daysEvents = $dailyEvents->pluck("date")->unique()->toArray();
+        $daysEvents = $dailyEvents->pluck('date')->unique()->toArray();
 
         $calendarView = [];
         foreach ($months as $month) {
@@ -347,7 +347,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         }
 
         return [
-            'events' => $events,
+            'events'       => $events,
             'calendarView' => $calendarView,
         ];
     }
@@ -362,16 +362,15 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         $currentDatetimeStamp = $currentDate->timestamp;
         $events = $this->events()->where('start_date_time', '>', $currentDate)->orderBy('start_date_time')->get();
         $previousEvent = null;
-        if ($events->count() == 0) {
+        if ($events->count() === 0) {
             return [];
-        };
+        }
 
         foreach ($events as $event) {
             if (is_null($previousEvent)) {
                 if ($currentDatetimeStamp < $event->start_date_time->timestamp) {
-                    $availableSlots[] = ['start' => $currentDatetimeStamp, 'end' => $event->start_date_time->timestamp];;
+                    $availableSlots[] = ['start' => $currentDatetimeStamp, 'end' => $event->start_date_time->timestamp];
                 }
-
                 $previousEvent = $event;
             } else {
                 $availableSlots[] = ['start' => $previousEvent->end_date_time->timestamp, 'end' => $event->start_date_time->timestamp];
@@ -381,13 +380,14 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         }
 
         $availableSlots[] = ['start' => $previousEvent->end_date_time->timestamp, 'end' => Carbon::now()->addYear()->timestamp];
+
         return $availableSlots;
     }
 
     public function checkAvailableSlots($startDateTime, $endDateTime): bool
     {
         $availableSlots = $this->getAvailableSlots();
-        if (count($availableSlots) == 0) {
+        if (count($availableSlots) === 0) {
             return true;
         }
 
@@ -411,7 +411,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 }

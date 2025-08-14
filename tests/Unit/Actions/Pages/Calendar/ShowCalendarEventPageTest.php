@@ -6,8 +6,8 @@ use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Enums\EventStatusEnum;
 use App\Enums\EventTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\User;
 use App\Models\Event as EventModel;
+use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 use Inertia\Response;
@@ -24,8 +24,8 @@ describe('Show Calendar Event Page', function (): void {
 
         $this->viewer = User::factory()->create();
 
-        $this->start = Carbon::parse(Carbon::today()->addDays(1)->format('Y-m-d') . ' 09:30:00');
-        $this->end = Carbon::parse(Carbon::today()->addDays(1)->format('Y-m-d') . ' 11:00:00');
+        $this->start = Carbon::parse(Carbon::today()->addDays(1)->format('Y-m-d').' 09:30:00');
+        $this->end = Carbon::parse(Carbon::today()->addDays(1)->format('Y-m-d').' 11:00:00');
 
         $this->event = EventModel::factory()->create([
             'title'             => 'Demo Event',

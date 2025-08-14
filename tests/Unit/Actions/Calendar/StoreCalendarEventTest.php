@@ -42,12 +42,13 @@ describe('StoreEventRequest Validation', function (): void {
     })->with([
         'single day event' => function (): array {
             $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+
             return [
-                'title' => 'Standup',
-                'fromDate' => $tomorrow,
-                'toDate' => $tomorrow,
-                'fromTime' => '09:00',
-                'toTime' => '10:00',
+                'title'       => 'Standup',
+                'fromDate'    => $tomorrow,
+                'toDate'      => $tomorrow,
+                'fromTime'    => '09:00',
+                'toTime'      => '10:00',
                 'description' => 'Daily standup',
                 // Must match Rule::in(EventTypeEnum::values())
                 'type' => EventTypeEnum::INDIVIDUAL->value,
@@ -56,14 +57,15 @@ describe('StoreEventRequest Validation', function (): void {
         'multi day event' => function (): array {
             $tomorrow = Carbon::tomorrow()->format('Y-m-d');
             $dayAfter = Carbon::tomorrow()->addDay()->format('Y-m-d');
+
             return [
-                'title' => 'Hackathon',
-                'fromDate' => $tomorrow,
-                'toDate' => $dayAfter,
-                'fromTime' => '09:00',
-                'toTime' => '10:00',
+                'title'       => 'Hackathon',
+                'fromDate'    => $tomorrow,
+                'toDate'      => $dayAfter,
+                'fromTime'    => '09:00',
+                'toTime'      => '10:00',
                 'description' => 'Team building',
-                'type' => EventTypeEnum::GROUP->value,
+                'type'        => EventTypeEnum::GROUP->value,
             ];
         },
     ]);
@@ -81,40 +83,40 @@ describe('StoreEventRequest Validation', function (): void {
         }
     })->with([
         'empty title' => fn (): array => [[
-            'title' => '',
-            'fromDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toTime' => '10:00',
+            'title'       => '',
+            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
+            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toTime'      => '10:00',
             'description' => 'x',
-            'type' => EventTypeEnum::INDIVIDUAL->value,
+            'type'        => EventTypeEnum::INDIVIDUAL->value,
         ], 'title'],
         'past fromDate' => fn (): array => [[
-            'title' => 'Past date',
-            'fromDate' => Carbon::yesterday()->format('Y-m-d'),
-            'toDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toTime' => '10:00',
+            'title'       => 'Past date',
+            'fromDate'    => Carbon::yesterday()->format('Y-m-d'),
+            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toTime'      => '10:00',
             'description' => 'x',
-            'type' => EventTypeEnum::INDIVIDUAL->value,
+            'type'        => EventTypeEnum::INDIVIDUAL->value,
         ], 'fromDate'],
         'toTime before fromTime (same day)' => fn (): array => [[
-            'title' => 'Wrong time',
-            'fromDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime' => '09:00',
+            'title'       => 'Wrong time',
+            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
+            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '10:00',
+            'toTime'      => '09:00',
             'description' => 'x',
-            'type' => EventTypeEnum::GROUP->value,
+            'type'        => EventTypeEnum::GROUP->value,
         ], 'toTime'],
         'invalid type' => fn (): array => [[
-            'title' => 'Type fail',
-            'fromDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate' => Carbon::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toTime' => '10:00',
+            'title'       => 'Type fail',
+            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
+            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toTime'      => '10:00',
             'description' => 'x',
-            'type' => 'Invalid',
+            'type'        => 'Invalid',
         ], 'type'],
     ]);
 });
@@ -130,15 +132,15 @@ describe('Store Calendar Event', function (): void {
         $end = Carbon::tomorrow()->setTime(10, 0, 0);
 
         $eventPayload = [
-            'unique_id' => (string) str()->uuid(),
-            'title' => 'Planning',
-            'status' => EventStatusEnum::CONFIRMED->value,
+            'unique_id'       => (string) str()->uuid(),
+            'title'           => 'Planning',
+            'status'          => EventStatusEnum::CONFIRMED->value,
             'start_date_time' => $start,
-            'end_date_time' => $end,
-            'duration' => $start->diffInSeconds($end),
-            'date' => $start->format('Y-m-d'),
-            'type' => EventTypeEnum::INDIVIDUAL->value,
-            'description' => 'Sprint planning',
+            'end_date_time'   => $end,
+            'duration'        => $start->diffInSeconds($end),
+            'date'            => $start->format('Y-m-d'),
+            'type'            => EventTypeEnum::INDIVIDUAL->value,
+            'description'     => 'Sprint planning',
         ];
 
         $request = Mockery::mock(StoreEventRequest::class);
@@ -158,7 +160,7 @@ describe('Store Calendar Event', function (): void {
             ->title->toBe('Planning')
             ->status->toBe(EventStatusEnum::CONFIRMED->value)
             ->date->toBe($start->format('Y-m-d'))
-            ->duration->toBe((int)$start->diffInSeconds($end));
+            ->duration->toBe((int) $start->diffInSeconds($end));
 
         $attached = $event->users()
             ->where('users.id', $this->user->getKey())
