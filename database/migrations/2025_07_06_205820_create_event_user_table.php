@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event_user', function (Blueprint $table) {
+        Schema::create('event_user', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
-            $table->foreignId('role')->constrained()->onDelete('cascade');
+            $table->string('role')->nullable();
+            $table->dateTime('confirmed_at')->nullable();
             $table->timestamps();
         });
     }

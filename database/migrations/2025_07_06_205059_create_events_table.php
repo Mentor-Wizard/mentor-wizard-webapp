@@ -11,16 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('events', function (Blueprint $table) {
+        Schema::create('events', function (Blueprint $table): void {
             $table->id();
+            $table->uuid('unique_id');
             $table->string('title');
             $table->string("status")->nullable();
-            $table->dateTime("start_date");
-            $table->dateTime("end_date");
+            $table->dateTime("start_date_time");
+            $table->integer("duration")->nullable();
             $table->string("type");
             $table->string("web_link");
             $table->text("description")->nullable();
-            $table->foreignId('mentor_program_id')->constrained();
+            $table->foreignId('mentor_program_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

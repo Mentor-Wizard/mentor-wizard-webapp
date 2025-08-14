@@ -2,9 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Actions\Calendar\DeleteCalendarPage;
+use App\Actions\Calendar\EditCalendarPage;
+use App\Actions\Calendar\StoreCalendarPage;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
+use App\Actions\Pages\Calendar\CalendarsListPage;
+use App\Actions\Pages\Calendar\CreateCalendarPage;
+use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
@@ -18,6 +24,7 @@ use App\Actions\User\UpdateUser;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
+
 
 Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
 
@@ -50,4 +57,19 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
         ->name('mentor-program.list');
 });
 
-require __DIR__.'/auth.php';
+Route::get('calendar', CalendarsListPage::class)
+    ->middleware(['auth', 'verified'])
+    ->name('pages.calendar');
+Route::get('calendar/event/{id}', ShowCalendarEventPage::class)
+    ->middleware(['auth', 'verified'])
+    ->name('pages.calendar.show');
+Route::middleware(['auth', 'role:mentor'])->group(function (): void {
+    Route::post('calendar/event/store', StoreCalendarPage::class)
+        ->name('pages.calendar.store');
+    Route::patch('calendar/event/edit/{id}', EditCalendarPage::class)
+        ->name('pages.calendar.edit');
+    Route::delete('calendar/event/delete/{id}', DeleteCalendarPage::class)
+        ->name('pages.calendar.delete');
+});
+
+require __DIR__ . '/auth.php';

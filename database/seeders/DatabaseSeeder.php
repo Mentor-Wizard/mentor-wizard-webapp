@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             CoachSeeder::class,
             CurrencySeeder::class,
             MentorProgramSeeder::class,
+            EventSeeder::class,
         ]);
     }
 }

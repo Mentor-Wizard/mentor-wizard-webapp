@@ -17,6 +17,27 @@ export default {
             },
         },
     },
+    safelist: [
+        // Background colors
+        'bg-blue-50', 'bg-blue-100', 'bg-blue-200', 'bg-blue-500', 'bg-blue-700', 'bg-blue-900',
+        'bg-gray-50', 'bg-gray-100', 'bg-gray-200', 'bg-gray-500', 'bg-gray-700', 'bg-gray-900',
+        'bg-orange-50', 'bg-orange-100', 'bg-orange-200', 'bg-orange-500', 'bg-orange-700', 'bg-orange-900',
+        'bg-green-50', 'bg-green-100', 'bg-green-200', 'bg-green-500', 'bg-green-700', 'bg-green-900',
+        'bg-red-50', 'bg-red-100', 'bg-red-200', 'bg-red-500', 'bg-red-700', 'bg-red-900',
+        'bg-purple-50', 'bg-purple-100', 'bg-purple-200', 'bg-purple-500', 'bg-purple-700', 'bg-purple-900',
+        'bg-yellow-50', 'bg-yellow-100', 'bg-yellow-200', 'bg-yellow-500', 'bg-yellow-700', 'bg-yellow-900',
+        'bg-pink-50', 'bg-pink-100', 'bg-pink-200', 'bg-pink-500', 'bg-pink-700', 'bg-pink-900',
+
+        // Text colors
+        'text-blue-500', 'text-blue-700',
+        'text-gray-500', 'text-gray-700',
+        'text-orange-500', 'text-orange-700',
+        'text-green-500', 'text-green-700',
+        'text-red-500', 'text-red-700',
+        'text-purple-500', 'text-purple-700',
+        'text-yellow-500', 'text-yellow-700',
+        'text-pink-500', 'text-pink-700',
+    ],
 
     plugins: [forms],
 };
