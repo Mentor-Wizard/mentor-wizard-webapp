@@ -20,10 +20,10 @@ class MentorProgramSeeder extends Seeder
      */
     public function run(): void
     {
-        collect()->times(20, function (int $index) {
+        collect()->times(20, function (int $index): void {
             $mentor = User::factory()->create([
-                'email'    => "mentor{$index}@example.com",
-                'username' => "Mentor {$index}",
+                'email'    => sprintf('mentor%d@example.com', $index),
+                'username' => 'Mentor '.$index,
             ]);
 
             $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));

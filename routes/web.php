@@ -15,7 +15,10 @@ use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
+use App\Models\MentorProfile;
 use Illuminate\Support\Facades\Route;
+
+Route::get('profile-program', fn () => MentorProfile::with(['mentorPrograms', 'mentorTags'])->get());
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 
