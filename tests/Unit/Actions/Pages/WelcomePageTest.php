@@ -81,12 +81,10 @@ describe('WelcomePage Action', function (): void {
         $user->profile()->update([
             'name'          => explode(' ', (string) $user->username)[0],
             'last_name'     => explode(' ', (string) $user->username)[1],
-            'title'         => fake()->jobTitle(),
             'linkedin'      => fake()->url,
             'telegram'      => fake()->userName,
             'whatsapp'      => fake()->phoneNumber,
             'phone'         => fake()->phoneNumber,
-            'description'   => fake()->text(),
         ]);
 
         $name = urlencode($user->profile->name.' '.$user->profile->last_name);

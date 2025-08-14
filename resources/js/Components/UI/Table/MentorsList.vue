@@ -2,7 +2,7 @@
 import {computed} from 'vue'
 import {EnvelopeIcon, UserIcon} from '@heroicons/vue/20/solid'
 import {usePage} from "@inertiajs/vue3";
-import Pagination from "@/Components/UI/Table/Pagination.vue";
+import Pagination from '@/Components/Navigation/Pagination.vue'
 
 
 const page = usePage();
@@ -47,7 +47,7 @@ const mentors = computed(() => page.props.mentors ?? {});
             </li>
         </ul>
         <div class="flex justify-center my-5">
-            <Pagination :pagination="mentors['links']"/>
+           <Pagination :data="mentors" />
         </div>
     </div>
 </template>

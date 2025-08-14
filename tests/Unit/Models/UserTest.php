@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Chat;
+use App\Models\MentorProfile;
 use App\Models\MentorProgram;
 use App\Models\MentorReview;
 use App\Models\MentorSession;
@@ -38,6 +39,13 @@ describe('User Model', function (): void {
         $profile = UserProfile::factory()->for($user)->create();
 
         expect($user->profile)->toBeInstanceOf(UserProfile::class);
+    });
+
+    it('has a mentor relationship', function (): void {
+        $user = User::factory()->create();
+        MentorProfile::factory()->for($user)->create();
+
+        expect($user->mentorProfile)->toBeInstanceOf(MentorProfile::class);
     });
 
     it('has mentor reviews relationship', function (): void {

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\Socialite\SocialiteCallback;
-use App\Enums\SocialiteDriver;
+use App\Enums\SocialiteDriverEnum;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
@@ -39,7 +39,7 @@ describe('Socialite Authentication', function (): void {
             'email'    => 'test@example.com',
             'username' => 'testuser',
         ]);
-    })->with(SocialiteDriver::cases());
+    })->with(SocialiteDriverEnum::cases());
 
     it('fails when email is empty', function ($driver): void {
         $socialiteUser = Mockery::mock(SocialiteUser::class);
@@ -58,5 +58,5 @@ describe('Socialite Authentication', function (): void {
         $this->assertDatabaseMissing('users', [
             'username' => 'testuser',
         ]);
-    })->with(SocialiteDriver::cases());
+    })->with(SocialiteDriverEnum::cases());
 });

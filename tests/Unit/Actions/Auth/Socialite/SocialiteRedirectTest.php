@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\Socialite\SocialiteRedirect;
-use App\Enums\SocialiteDriver;
+use App\Enums\SocialiteDriverEnum;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -22,7 +22,7 @@ it('redirects to socialite driver if valid driver is provided', function ($drive
 
     expect($response)->toBeInstanceOf(RedirectResponse::class);
     expect($response->getTargetUrl())->toBe('/auth/'.($driver->value).'/redirect');
-})->with(SocialiteDriver::cases());
+})->with(SocialiteDriverEnum::cases());
 
 it('logs an error and aborts if an invalid driver is provided', function (): void {
     $invalidDriver = 'invalid';
