@@ -7,6 +7,7 @@ namespace App\Filament\Resources\User;
 use App\Filament\Resources\User\Pages\CreateUser;
 use App\Filament\Resources\User\Pages\EditUser;
 use App\Filament\Resources\User\Pages\ListUsers;
+use App\Filament\Resources\User\Tables\UsersTable;
 use App\Models\User;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -25,13 +26,40 @@ class UserResource extends Resource
     #[Override]
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
-        return UserForm::make();
+        return $schema->schema([
+            \Filament\Schemas\Components\Group::make([
+                \Filament\Forms\Components\TextInput::make('username')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
+
+                \Filament\Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
+            ])->columns(2),
+
+            \Filament\Schemas\Components\Group::make([
+                \Filament\Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->required()
+                    ->minLength(User::MIN_PASSWORD_LENGTH)
+                    ->hiddenOn('edit'),
+
+                \Filament\Forms\Components\Select::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
+            ])->columns(2),
+        ]);
     }
 
     #[Override]
     public static function table(Table $table): Table
     {
-        return UsersTable::make()->table($table);
+        return UsersTable::configure($table);
     }
 
     #[Override]
