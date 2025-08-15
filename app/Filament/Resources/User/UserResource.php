@@ -9,7 +9,10 @@ use App\Filament\Resources\User\Pages\EditUser;
 use App\Filament\Resources\User\Pages\ListUsers;
 use App\Filament\Resources\User\Tables\UsersTable;
 use App\Models\User;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
 use Filament\Tables\Table;
 use Override;
 
@@ -27,31 +30,16 @@ class UserResource extends Resource
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
         return $schema->schema([
-            \Filament\Schemas\Components\Group::make([
-                \Filament\Forms\Components\TextInput::make('username')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+            Group::make([
+                TextInput::make('username')->required()->maxLength(255)->unique(ignoreRecord: true),
 
-                \Filament\Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                TextInput::make('email')->email()->required()->maxLength(255)->unique(ignoreRecord: true),
             ])->columns(2),
 
-            \Filament\Schemas\Components\Group::make([
-                \Filament\Forms\Components\TextInput::make('password')
-                    ->password()
-                    ->required()
-                    ->minLength(User::MIN_PASSWORD_LENGTH)
-                    ->hiddenOn('edit'),
+            Group::make([
+                TextInput::make('password')->password()->required()->minLength(User::MIN_PASSWORD_LENGTH)->hiddenOn('edit'),
 
-                \Filament\Forms\Components\Select::make('roles')
-                    ->relationship('roles', 'name')
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                Select::make('roles')->relationship('roles', 'name')->multiple()->preload()->searchable(),
             ])->columns(2),
         ]);
     }
