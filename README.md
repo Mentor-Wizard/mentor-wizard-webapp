@@ -84,7 +84,20 @@ docker compose exec app php artisan migrate
 docker compose exec app yarn install
 ```
 
-### 9. Компіляція frontend
+### 9. Налаштування Git hooks
+
+Виконайте команду для налаштування спільних Git hooks:
+
+```bash
+./setup-git-hooks.sh
+```
+
+Це налаштує наступні hooks:
+- **pre-commit**: Запускає Rector і Pint для виправлення коду
+- **commit-msg**: Валідує повідомлення комітів з commitlint
+- **pre-push**: Валідує назви гілок
+
+### 10. Компіляція frontend
 
 Виконайте команду:
 
@@ -92,7 +105,7 @@ docker compose exec app yarn install
 docker compose exec app yarn dev
 ```
 
-### 10. Опублікувати доступ до public папки 
+### 11. Опублікувати доступ до public папки
 
 Виконайте команду:
 
@@ -100,6 +113,40 @@ docker compose exec app yarn dev
 docker compose exec app php artisan storage:link
 ```
 
+## Laravel Boost MCP Setup
+
+Цей проект налаштовано для роботи з Laravel Boost MCP сервером, який надає потужні інструменти для розробки через Model Context Protocol.
+
+### Налаштування MCP
+
+MCP конфігурація вже включена в проект у файлі `.junie/mcp/mcp.json`. Щоб використовувати Laravel Boost:
+
+1. Переконайтеся, що Docker контейнери запущені:
+```bash
+docker compose up -d
+```
+
+2. MCP сервер автоматично використовуватиме наступну команду для підключення:
+```bash
+docker exec -i mw-app php /var/www/artisan boost:mcp
+```
+
+### Доступні інструменти Laravel Boost
+
+Laravel Boost надає наступні інструменти для розробки:
+
+- **База даних**: `database-query`, `database-schema`, `database-connections`
+- **Конфігурація**: `get-config`, `list-available-config-keys`, `list-available-env-vars`
+- **Artisan**: `list-artisan-commands`
+- **Відлагодження**: `tinker`, `last-error`, `read-log-entries`, `browser-logs`
+- **URL генерація**: `get-absolute-url`
+- **Маршрути**: `list-routes`
+- **Документація**: `search-docs` - пошук документації для встановлених пакетів
+- **Інформація про застосунок**: `application-info`
+
+### Використання з IDE
+
+Для використання з підтримуваними IDE (як-от Claude Desktop, Cursor тощо), переконайтеся, що MCP клієнт налаштовано на використання конфігурації з `.junie/mcp/mcp.json`.
 
 ## Тестування
 
