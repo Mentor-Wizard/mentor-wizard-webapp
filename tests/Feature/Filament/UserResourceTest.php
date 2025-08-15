@@ -26,9 +26,9 @@ describe('Filament UserResource', function (): void {
         // Set current panel for Filament
         Filament::setCurrentPanel('admin');
 
-        // Create test currency
+        // Create a test currency
         $this->currency = Currency::factory()->create([
-            'name'   => 'US Dollar',
+            'name'   => 'USD',
             'slug'   => 'usd',
             'symbol' => '$',
         ]);

@@ -9,24 +9,26 @@ use App\Filament\Resources\User\Pages\EditUser;
 use App\Filament\Resources\User\Pages\ListUsers;
 use App\Filament\Resources\User\Tables\UsersTable;
 use App\Models\User;
-use Filament\Forms\Components\FileUpload;
+use BackedEnum;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Table;
 use Override;
+use UnitEnum;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    // protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-users';
 
-    // protected static ?string $navigationGroup = 'User Management';
+    protected static string|null|UnitEnum $navigationGroup = 'User Management';
 
-    // protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 1;
 
     #[Override]
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
@@ -50,24 +52,17 @@ class UserResource extends Resource
             Section::make('Profile Information')
                 ->relationship('profile')
                 ->schema([
-                    FileUpload::make('avatar')
+                    SpatieMediaLibraryFileUpload::make('avatar')
                         ->label('Avatar')
                         ->image()
+                        ->avatar()
                         ->imageEditor()
                         ->imageCropAspectRatio('1:1')
                         ->imageResizeTargetWidth('300')
                         ->imageResizeTargetHeight('300')
                         ->maxSize(5120) // 5MB
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
-                        ->storeFiles(false)
-                        ->dehydrated(false)
-                        ->afterStateUpdated(function ($state, $record, $get): void {
-                            if ($state && $record) {
-                                // In profile relationship context, $record is UserProfile, need User
-                                $user = $record->user ?? $record;
-                                app(\App\Actions\User\AddAvatar::class)->handle($user, $state);
-                            }
-                        }),
+                        ->collection('avatar'),
 
                     Group::make([
                         TextInput::make('name')
