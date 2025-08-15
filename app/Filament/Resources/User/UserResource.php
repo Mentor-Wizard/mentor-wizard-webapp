@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Table;
 use Override;
 
@@ -30,17 +31,81 @@ class UserResource extends Resource
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
         return $schema->schema([
-            Group::make([
-                TextInput::make('username')->required()->maxLength(255)->unique(ignoreRecord: true),
+            Section::make('User Account')
+                ->schema([
+                    Group::make([
+                        TextInput::make('username')->required()->maxLength(255)->unique(ignoreRecord: true),
 
-                TextInput::make('email')->email()->required()->maxLength(255)->unique(ignoreRecord: true),
-            ])->columns(2),
+                        TextInput::make('email')->email()->required()->maxLength(255)->unique(ignoreRecord: true),
+                    ])->columns(2),
 
-            Group::make([
-                TextInput::make('password')->password()->required()->minLength(User::MIN_PASSWORD_LENGTH)->hiddenOn('edit'),
+                    Group::make([
+                        TextInput::make('password')->password()->required()->minLength(User::MIN_PASSWORD_LENGTH)->hiddenOn('edit'),
 
-                Select::make('roles')->relationship('roles', 'name')->multiple()->preload()->searchable(),
-            ])->columns(2),
+                        Select::make('roles')->relationship('roles', 'name')->multiple()->preload()->searchable(),
+                    ])->columns(2),
+                ]),
+
+            Section::make('Profile Information')
+                ->relationship('profile')
+                ->schema([
+                    Group::make([
+                        TextInput::make('name')
+                            ->label('First Name')
+                            ->maxLength(50)
+                            ->minLength(3),
+
+                        TextInput::make('last_name')
+                            ->label('Last Name')
+                            ->maxLength(50)
+                            ->minLength(3),
+                    ])->columns(2),
+
+                    Group::make([
+                        TextInput::make('phone')
+                            ->label('Phone Number')
+                            ->placeholder('+1234567890')
+                            ->regex('/^\+\d{11,15}$/')
+                            ->helperText('Enter phone number with country code (e.g., +1234567890)'),
+
+                        Select::make('currency_id')
+                            ->label('Currency')
+                            ->relationship('currency', 'name')
+                            ->searchable()
+                            ->preload(),
+                    ])->columns(2),
+
+                    Group::make([
+                        TextInput::make('cost_per_hour')
+                            ->label('Hourly Rate')
+                            ->numeric()
+                            ->step(0.01)
+                            ->minValue(0),
+                    ])->columns(2),
+
+                    Group::make([
+                        TextInput::make('linkedin')
+                            ->label('LinkedIn Profile')
+                            ->url()
+                            ->maxLength(200)
+                            ->placeholder('https://www.linkedin.com/in/username')
+                            ->regex('/^https:\/\/(www\.)?linkedin\.com\/.+$/i'),
+
+                        TextInput::make('telegram')
+                            ->label('Telegram Profile')
+                            ->url()
+                            ->maxLength(100)
+                            ->placeholder('https://t.me/username')
+                            ->regex('/^https:\/\/(www\.)?t\.me\/.+$/i'),
+                    ])->columns(2),
+
+                    TextInput::make('whatsapp')
+                        ->label('WhatsApp')
+                        ->url()
+                        ->maxLength(100)
+                        ->placeholder('https://wa.me/1234567890')
+                        ->regex('/^https:\/\/(www\.)?wa\.me\/.+$/i'),
+                ]),
         ]);
     }
 
