@@ -6,6 +6,8 @@ use App\Filament\Resources\User\Pages\CreateUser;
 use App\Filament\Resources\User\Pages\EditUser;
 use App\Models\Currency;
 use App\Models\User;
+use Database\Seeders\CurrencySeeder;
+use Database\Seeders\RoleSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -14,10 +16,7 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    // Create roles and currencies directly instead of running expensive seeders
-    Role::query()->firstOrCreate(['name' => 'mentor']);
-    Role::query()->firstOrCreate(['name' => 'user']);
-    Currency::query()->firstOrCreate(['name' => 'USD', 'slug' => 'usd', 'symbol' => '$']);
+    $this->seed([RoleSeeder::class, CurrencySeeder::class]);
 
     $this->actingAs(User::factory()->create());
 
