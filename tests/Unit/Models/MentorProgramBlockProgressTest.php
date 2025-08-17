@@ -42,10 +42,18 @@ describe('MentorProgramBlockProgress Model', function (): void {
         expect($mentorProgram->mentor)->toBeInstanceOf(User::class);
     });
 
-    it('has a relationship with mentiProgramProgress', function (): void {
+    it('has a relationship with menti', function (): void {
         $mentiProgramProgress = MentorProgramBlockProgress::factory()->create();
 
         expect($mentiProgramProgress->menti)->toBeInstanceOf(User::class);
+    });
+
+    it('has a relationship with mentor program blocks', function (): void {
+        $mentiProgramProgress = MentorProgramBlockProgress::factory()->create();
+
+        $relationship = $mentiProgramProgress->mentor_program_blocks();
+
+        expect($relationship)->toBeInstanceOf(Illuminate\Database\Eloquent\Relations\BelongsTo::class);
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {

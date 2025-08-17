@@ -6,11 +6,14 @@ namespace App\Actions\User;
 
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Lorisleiva\Actions\Concerns\AsObject;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
 class AddAvatar
 {
+    use AsObject;
+
     /**
      * @throws FileIsTooBig
      * @throws FileDoesNotExist
