@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User;
 
-use App\Actions\MentorTag\CreateMentorTag;
-use App\Enums\TagEnum;
 use App\Filament\Resources\User\Pages\CreateUser;
 use App\Filament\Resources\User\Pages\EditUser;
 use App\Filament\Resources\User\Pages\ListUsers;
@@ -159,12 +157,6 @@ class UserResource extends Resource
                         ->multiple()
                         ->searchable()
                         ->preload()
-                        ->createOptionUsing(function (string $name): int {
-                            // Default to STACK type for new tags
-                            $tag = CreateMentorTag::run($name, TagEnum::STACK);
-
-                            return $tag->getKey();
-                        })
                         ->getOptionLabelUsing(function (int|string $value): string {
                             /** @var MentorTag|null $tag */
                             $tag = MentorTag::query()->find($value);
@@ -175,7 +167,7 @@ class UserResource extends Resource
 
                             return ucwords((string) $tag->tag).' ('.ucfirst((string) $tag->type).')';
                         })
-                        ->helperText('Select existing tags or type new ones to create them. New tags will be created as Stack type.'),
+                        ->helperText('Select existing tags from the available options.'),
                 ])
                 ->visible(function (?User $record): bool {
                     if (! $record instanceof User) {
