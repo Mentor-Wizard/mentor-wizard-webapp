@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User;
 
+use App\Actions\MentorTag\CreateMentorTagAction;
+use App\Enums\TagEnum;
 use App\Filament\Resources\User\Pages\CreateUser;
 use App\Filament\Resources\User\Pages\EditUser;
 use App\Filament\Resources\User\Pages\ListUsers;
 use App\Filament\Resources\User\Tables\UsersTable;
+use App\Models\MentorTag;
 use App\Models\User;
 use BackedEnum;
 use Exception;
@@ -153,7 +156,18 @@ class UserResource extends Resource
                         ->multiple()
                         ->searchable()
                         ->preload()
-                        ->helperText('Select the technologies and skills you can mentor in'),
+                        ->createOptionUsing(function (string $name): int {
+                            // Default to STACK type for new tags
+                            $tag = CreateMentorTagAction::run($name, TagEnum::STACK);
+
+                            return $tag->getKey();
+                        })
+                        ->getOptionLabelUsing(function ($value): string {
+                            $tag = MentorTag::query()->find($value);
+
+                            return $tag ? ucwords((string) $tag->tag).' ('.ucfirst((string) $tag->type->value).')' : '';
+                        })
+                        ->helperText('Select existing tags or type new ones to create them. New tags will be created as Stack type.'),
                 ])
                 ->visible(function (?User $record): bool {
                     if (! $record instanceof User) {

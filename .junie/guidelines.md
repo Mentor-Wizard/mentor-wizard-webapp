@@ -181,6 +181,7 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - **Class Organization**: Specific order for class elements (constants, properties, methods)
 - **Array Formatting**: Trailing commas in multiline arrays and parameters
 - **Eloquent Models**: Use `getKey()` method in models instead of `id`
+- **Eloquent Models**: Use `query()` method in models queries
 - **Eloquent Relationships**: Use `with()` method for eager loading
 - **Eloquent Relationships**: Use `withCount()` method for eager loading counts
 - **Eloquent Relationships**: Use `withTrashed()` method for eager loading trashed models
