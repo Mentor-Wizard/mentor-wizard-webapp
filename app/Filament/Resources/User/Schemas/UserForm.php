@@ -6,14 +6,22 @@ namespace App\Filament\Resources\User\Schemas;
 
 use App\Models\User;
 use Closure;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 
 class UserForm extends Schema
 {
-    public function schema(\Filament\Schemas\Components\Component|\Filament\Actions\Action|\Filament\Actions\ActionGroup|\Illuminate\Contracts\Support\Htmlable|Closure|array|string $components): static
+    /**
+     * @throws Exception
+     */
+    public function schema(Component|Action|ActionGroup|Htmlable|Closure|array|string $components): static
     {
         return $this->components([
             Group::make([
