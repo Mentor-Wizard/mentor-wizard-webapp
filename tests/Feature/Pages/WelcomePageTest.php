@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Pages\WelcomePage;
 use App\Enums\RoleEnum;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Database\Seeders\UserSeeder;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,10 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 covers(WelcomePage::class);
 
 beforeEach(function (): void {
-    // Create roles only when needed, avoid expensive seeding
-    Role::query()->firstOrCreate(['name' => RoleEnum::MENTOR->value]);
-    Role::query()->firstOrCreate(['name' => RoleEnum::USER->value]);
-    // Remove UserSeeder completely - it downloads images from external URLs
+    $this->seed([RoleSeeder::class, UserSeeder::class]);
 });
 it('returns a successful response', function (): void {
     $role = Role::findByName(RoleEnum::MENTOR->value);
