@@ -10,8 +10,10 @@ use App\Filament\Resources\User\Pages\ListUsers;
 use App\Filament\Resources\User\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
+use Exception;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
@@ -30,6 +32,9 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    /**
+     * @throws Exception
+     */
     #[Override]
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
@@ -76,27 +81,11 @@ class UserResource extends Resource
                             ->minLength(3),
                     ])->columns(2),
 
-                    Group::make([
-                        TextInput::make('phone')
-                            ->label('Phone Number')
-                            ->placeholder('+1234567890')
-                            ->regex('/^\+\d{11,15}$/')
-                            ->helperText('Enter phone number with country code (e.g., +1234567890)'),
-
-                        Select::make('currency_id')
-                            ->label('Currency')
-                            ->relationship('currency', 'name')
-                            ->searchable()
-                            ->preload(),
-                    ])->columns(2),
-
-                    Group::make([
-                        TextInput::make('cost_per_hour')
-                            ->label('Hourly Rate')
-                            ->numeric()
-                            ->step(0.01)
-                            ->minValue(0),
-                    ])->columns(2),
+                    TextInput::make('phone')
+                        ->label('Phone Number')
+                        ->placeholder('+1234567890')
+                        ->regex('/^\+\d{11,15}$/')
+                        ->helperText('Enter phone number with country code (e.g., +1234567890)'),
 
                     Group::make([
                         TextInput::make('linkedin')
@@ -121,6 +110,58 @@ class UserResource extends Resource
                         ->placeholder('https://wa.me/1234567890')
                         ->regex('/^https:\/\/(www\.)?wa\.me\/.+$/i'),
                 ]),
+
+            Section::make('Mentor Profile')
+                ->relationship('mentorProfile')
+                ->schema([
+                    Group::make([
+                        TextInput::make('title')
+                            ->label('Professional Title')
+                            ->maxLength(100)
+                            ->placeholder('Senior Software Engineer, Tech Lead, etc.'),
+
+                        Select::make('currency_id')
+                            ->label('Currency')
+                            ->relationship('currency', 'name')
+                            ->searchable()
+                            ->preload(),
+                    ])->columns(2),
+
+                    Group::make([
+                        TextInput::make('rate')
+                            ->label('Hourly Rate')
+                            ->numeric()
+                            ->step(0.01)
+                            ->minValue(0)
+                            ->prefix('$'),
+
+                        TextInput::make('experience_started_at')
+                            ->label('Experience Started')
+                            ->type('date')
+                            ->helperText('When did you start your professional career?'),
+                    ])->columns(2),
+
+                    Textarea::make('description')
+                        ->label('Professional Description')
+                        ->maxLength(1000)
+                        ->placeholder('Describe your experience, expertise, and what you can offer as a mentor...')
+                        ->rows(4),
+
+                    Select::make('mentorTags')
+                        ->label('Skills & Technologies')
+                        ->relationship('mentorTags', 'tag')
+                        ->multiple()
+                        ->searchable()
+                        ->preload()
+                        ->helperText('Select the technologies and skills you can mentor in'),
+                ])
+                ->visible(function (?User $record): bool {
+                    if (! $record instanceof User) {
+                        return false;
+                    }
+
+                    return $record->hasRole('mentor');
+                }),
         ]);
     }
 

@@ -180,6 +180,10 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - **Modern PHP**: Use PHP 8.4 features and modern type casting
 - **Class Organization**: Specific order for class elements (constants, properties, methods)
 - **Array Formatting**: Trailing commas in multiline arrays and parameters
+- **Eloquent Models**: Use `getKey()` method in models instead of `id`
+- **Eloquent Relationships**: Use `with()` method for eager loading
+- **Eloquent Relationships**: Use `withCount()` method for eager loading counts
+- **Eloquent Relationships**: Use `withTrashed()` method for eager loading trashed models
 
 ### Architecture Patterns
 - **Laravel Actions**: Business logic organized in Action classes (`lorisleiva/laravel-actions`)
@@ -187,6 +191,15 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - **Domain Organization**: Features organized by domain (Auth, MentorPrograms, etc.)
 - **Repository Pattern**: Not explicitly used, relies on Eloquent models
 - **Service Layer**: Implemented via Action classes
+- **Database Migrations**: Every change in DB structure should be reflected in a migration
+- **Database Seeders**: Every change in DB data should be reflected in a seeder
+- **Database Factories**: Every change in DB data should be reflected in a factory
+- **Database Queries**: Prefer Eloquent models over raw queries
+- **Database Relationships**: Prefer Eloquent relationships to raw queries
+- **Database Eager Loading**: Prefer Eloquent eager loading over raw queries
+- **Database Pagination**: Prefer Eloquent pagination over raw queries
+- **Database Scopes**: Prefer Eloquent scopes over raw queries
+- **Database Soft Deletes**: Prefer Eloquent soft deletes over raw queries
 
 ### Performance Considerations
 - **Laravel Octane**: Uses Swoole for high-performance application server

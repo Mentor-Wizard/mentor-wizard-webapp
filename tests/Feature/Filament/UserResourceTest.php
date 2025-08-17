@@ -50,14 +50,12 @@ describe('Filament UserResource', function (): void {
         ];
 
         $profileData = [
-            'profile.name'          => 'John',
-            'profile.last_name'     => 'Doe',
-            'profile.phone'         => '+1234567890123',
-            'profile.currency_id'   => $this->currency->id,
-            'profile.cost_per_hour' => 50.00,
-            'profile.linkedin'      => 'https://www.linkedin.com/in/johndoe',
-            'profile.telegram'      => 'https://t.me/johndoe',
-            'profile.whatsapp'      => 'https://wa.me/1234567890',
+            'profile.name'      => 'John',
+            'profile.last_name' => 'Doe',
+            'profile.phone'     => '+1234567890123',
+            'profile.linkedin'  => 'https://www.linkedin.com/in/johndoe',
+            'profile.telegram'  => 'https://t.me/johndoe',
+            'profile.whatsapp'  => 'https://wa.me/1234567890',
         ];
 
         Livewire::test(CreateUser::class)
@@ -74,15 +72,13 @@ describe('Filament UserResource', function (): void {
         expect($user)->not->toBeNull();
 
         $this->assertDatabaseHas('user_profiles', [
-            'user_id'       => $user->id,
-            'name'          => 'John',
-            'last_name'     => 'Doe',
-            'phone'         => '+1234567890123',
-            'currency_id'   => $this->currency->id,
-            'cost_per_hour' => 50.00,
-            'linkedin'      => 'https://www.linkedin.com/in/johndoe',
-            'telegram'      => 'https://t.me/johndoe',
-            'whatsapp'      => 'https://wa.me/1234567890',
+            'user_id'   => $user->id,
+            'name'      => 'John',
+            'last_name' => 'Doe',
+            'phone'     => '+1234567890123',
+            'linkedin'  => 'https://www.linkedin.com/in/johndoe',
+            'telegram'  => 'https://t.me/johndoe',
+            'whatsapp'  => 'https://wa.me/1234567890',
         ]);
     });
 
@@ -100,13 +96,12 @@ describe('Filament UserResource', function (): void {
         ]);
 
         $updatedData = [
-            'username'              => 'updateduser',
-            'email'                 => 'updated@example.com',
-            'profile.name'          => 'Updated',
-            'profile.last_name'     => 'Person',
-            'profile.phone'         => '+9876543210123',
-            'profile.cost_per_hour' => 75.50,
-            'profile.linkedin'      => 'https://www.linkedin.com/in/updatedperson',
+            'username'          => 'updateduser',
+            'email'             => 'updated@example.com',
+            'profile.name'      => 'Updated',
+            'profile.last_name' => 'Person',
+            'profile.phone'     => '+9876543210123',
+            'profile.linkedin'  => 'https://www.linkedin.com/in/updatedperson',
         ];
 
         Livewire::test(EditUser::class, [
@@ -123,12 +118,11 @@ describe('Filament UserResource', function (): void {
         ]);
 
         $this->assertDatabaseHas('user_profiles', [
-            'user_id'       => $user->id,
-            'name'          => 'Updated',
-            'last_name'     => 'Person',
-            'phone'         => '+9876543210123',
-            'cost_per_hour' => 75.50,
-            'linkedin'      => 'https://www.linkedin.com/in/updatedperson',
+            'user_id'   => $user->id,
+            'name'      => 'Updated',
+            'last_name' => 'Person',
+            'phone'     => '+9876543210123',
+            'linkedin'  => 'https://www.linkedin.com/in/updatedperson',
         ]);
     });
 
@@ -159,17 +153,15 @@ describe('Filament UserResource', function (): void {
     it('allows optional profile fields to be empty', function (): void {
         Livewire::test(CreateUser::class)
             ->fillForm([
-                'username'              => 'testuser',
-                'email'                 => 'test@example.com',
-                'password'              => 'password123',
-                'profile.name'          => null,
-                'profile.last_name'     => null,
-                'profile.phone'         => null,
-                'profile.linkedin'      => null,
-                'profile.telegram'      => null,
-                'profile.whatsapp'      => null,
-                'profile.cost_per_hour' => null,
-                'profile.currency_id'   => null,
+                'username'          => 'testuser',
+                'email'             => 'test@example.com',
+                'password'          => 'password123',
+                'profile.name'      => null,
+                'profile.last_name' => null,
+                'profile.phone'     => null,
+                'profile.linkedin'  => null,
+                'profile.telegram'  => null,
+                'profile.whatsapp'  => null,
             ])
             ->call('create')
             ->assertNotified();
