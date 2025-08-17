@@ -8,11 +8,14 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    $this->artisan('db:seed', ['--class' => Database\Seeders\RoleSeeder::class]);
+    // Create roles directly instead of running an expensive seeder
+    Role::query()->firstOrCreate(['name' => 'mentor']);
+    Role::query()->firstOrCreate(['name' => 'user']);
     $this->actingAs(User::factory()->create());
     Filament::setCurrentPanel('app');
 });

@@ -9,13 +9,15 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    // Seed roles and currencies
-    $this->artisan('db:seed', ['--class' => Database\Seeders\RoleSeeder::class]);
-    $this->artisan('db:seed', ['--class' => Database\Seeders\CurrencySeeder::class]);
+    // Create roles and currencies directly instead of running expensive seeders
+    Role::query()->firstOrCreate(['name' => 'mentor']);
+    Role::query()->firstOrCreate(['name' => 'user']);
+    Currency::query()->firstOrCreate(['name' => 'USD', 'slug' => 'usd', 'symbol' => '$']);
 
     $this->actingAs(User::factory()->create());
 
@@ -25,7 +27,7 @@ beforeEach(function (): void {
 describe('UserResource Mentor Profile Fields', function (): void {
     it('can create user with mentor profile when mentor role is selected', function (): void {
         $currency = Currency::query()->first();
-        $mentorRole = Spatie\Permission\Models\Role::query()->where('name', 'mentor')->first();
+        $mentorRole = Role::query()->where('name', 'mentor')->first();
 
         Livewire::test(CreateUser::class)
             ->fillForm([
@@ -71,7 +73,7 @@ describe('UserResource Mentor Profile Fields', function (): void {
     });
 
     it('validates required mentor profile fields when mentor role is selected', function (): void {
-        $mentorRole = Spatie\Permission\Models\Role::query()->where('name', 'mentor')->first();
+        $mentorRole = Role::query()->where('name', 'mentor')->first();
 
         Livewire::test(CreateUser::class)
             ->fillForm([
@@ -93,7 +95,7 @@ describe('UserResource Mentor Profile Fields', function (): void {
 
     it('validates individual required mentor profile fields', function (string $field): void {
         $currency = Currency::query()->first();
-        $mentorRole = Spatie\Permission\Models\Role::query()->where('name', 'mentor')->first();
+        $mentorRole = Role::query()->where('name', 'mentor')->first();
 
         $formData = [
             'username'                            => 'mentoruser',
