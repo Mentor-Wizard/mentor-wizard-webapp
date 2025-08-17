@@ -48,9 +48,14 @@ describe('CreateMentorTag', function (): void {
         $stackTag = $action->handle('Python', TagEnum::STACK);
         $languageTag = $action->handle('Python', TagEnum::LANGUAGE);
 
-        expect($stackTag->getKey())->not->toBe($languageTag->getKey())->and($stackTag->type)->toBe(TagEnum::STACK)->and($languageTag->type)->toBe(TagEnum::LANGUAGE)->and($stackTag->tag)->toBe('python')->and($languageTag->tag)->toBe('python')->and(MentorTag::query()->where('tag', 'python')->count())->toBe(2);
+        expect($stackTag->getKey())->not->toBe($languageTag->getKey())
+            ->and($stackTag->type)->toBe(TagEnum::STACK)
+            ->and($languageTag->type)->toBe(TagEnum::LANGUAGE)
+            ->and($stackTag->tag)->toBe('python')
+            ->and($languageTag->tag)->toBe('python');
 
         // Verify both records exist
+        expect(MentorTag::query()->where('tag', 'python')->count())->toBe(2);
     });
 
     it('handles empty and whitespace-only strings', function (): void {

@@ -17,7 +17,10 @@ class CreateMentorTag
     {
         $normalizedTag = Str::lower(mb_trim($tag));
 
-        $existingTag = MentorTag::query()->where('tag', $normalizedTag)->where('type', $type)->first();
+        $existingTag = MentorTag::query()
+            ->where('tag', $normalizedTag)
+            ->where('type', $type)
+            ->first();
 
         if ($existingTag) {
             return $existingTag;

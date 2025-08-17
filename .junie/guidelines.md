@@ -192,7 +192,7 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - **Domain Organization**: Features organized by domain (Auth, MentorPrograms, etc.)
 - **Repository Pattern**: Not explicitly used, relies on Eloquent models
 - **Service Layer**: Implemented via Action classes
-- **Database Migrations**: Every change in DB structure should be reflected in a migration
+- **Database Migrations**: Every change in the DB structure should be reflected in a new migration
 - **Database Seeders**: Every change in DB data should be reflected in a seeder
 - **Database Factories**: Every change in DB data should be reflected in a factory
 - **Database Queries**: Prefer Eloquent models over raw queries

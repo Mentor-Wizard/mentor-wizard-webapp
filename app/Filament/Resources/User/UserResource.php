@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User;
 
-use App\Actions\MentorTag\CreateMentorTagAction;
+use App\Actions\MentorTag\CreateMentorTag;
 use App\Enums\TagEnum;
 use App\Filament\Resources\User\Pages\CreateUser;
 use App\Filament\Resources\User\Pages\EditUser;
@@ -127,7 +127,8 @@ class UserResource extends Resource
                             ->label('Currency')
                             ->relationship('currency', 'name')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->required(),
                     ])->columns(2),
 
                     Group::make([
@@ -136,12 +137,14 @@ class UserResource extends Resource
                             ->numeric()
                             ->step(0.01)
                             ->minValue(0)
-                            ->prefix('$'),
+                            ->prefix('$')
+                            ->required(),
 
                         TextInput::make('experience_started_at')
                             ->label('Experience Started')
                             ->type('date')
-                            ->helperText('When did you start your professional career?'),
+                            ->helperText('When did you start your professional career?')
+                            ->required(),
                     ])->columns(2),
 
                     Textarea::make('description')
@@ -158,7 +161,7 @@ class UserResource extends Resource
                         ->preload()
                         ->createOptionUsing(function (string $name): int {
                             // Default to STACK type for new tags
-                            $tag = CreateMentorTagAction::run($name, TagEnum::STACK);
+                            $tag = CreateMentorTag::run($name, TagEnum::STACK);
 
                             return $tag->getKey();
                         })

@@ -69,4 +69,56 @@ describe('UserResource Mentor Profile Fields', function (): void {
 
         expect($component)->not->toBeNull();
     });
+
+    it('validates required mentor profile fields when mentor role is selected', function (): void {
+        $mentorRole = Spatie\Permission\Models\Role::query()->where('name', 'mentor')->first();
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'username'          => 'mentoruser',
+                'email'             => 'mentor@example.com',
+                'password'          => 'password123',
+                'roles'             => [$mentorRole->id],
+                'profile.name'      => 'John',
+                'profile.last_name' => 'Doe',
+                // Intentionally omitting required mentor profile fields
+            ])
+            ->call('create')
+            ->assertHasFormErrors([
+                'mentorProfile.rate',
+                'mentorProfile.currency_id',
+                'mentorProfile.experience_started_at',
+            ]);
+    });
+
+    it('validates individual required mentor profile fields', function (string $field): void {
+        $currency = Currency::query()->first();
+        $mentorRole = Spatie\Permission\Models\Role::query()->where('name', 'mentor')->first();
+
+        $formData = [
+            'username'                            => 'mentoruser',
+            'email'                               => 'mentor@example.com',
+            'password'                            => 'password123',
+            'roles'                               => [$mentorRole->id],
+            'profile.name'                        => 'John',
+            'profile.last_name'                   => 'Doe',
+            'mentorProfile.title'                 => 'Senior Software Engineer',
+            'mentorProfile.description'           => 'Experienced developer',
+            'mentorProfile.rate'                  => '100.00',
+            'mentorProfile.currency_id'           => $currency->id,
+            'mentorProfile.experience_started_at' => '2013-01-01',
+        ];
+
+        // Remove the field being tested
+        unset($formData[$field]);
+
+        Livewire::test(CreateUser::class)
+            ->fillForm($formData)
+            ->call('create')
+            ->assertHasFormErrors([$field]);
+    })->with([
+        'mentorProfile.rate',
+        'mentorProfile.currency_id',
+        'mentorProfile.experience_started_at',
+    ]);
 });
