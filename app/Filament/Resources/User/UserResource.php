@@ -165,10 +165,15 @@ class UserResource extends Resource
 
                             return $tag->getKey();
                         })
-                        ->getOptionLabelUsing(function ($value): string {
+                        ->getOptionLabelUsing(function (int|string $value): string {
+                            /** @var MentorTag|null $tag */
                             $tag = MentorTag::query()->find($value);
 
-                            return $tag ? ucwords((string) $tag->tag).' ('.ucfirst((string) $tag->type->value).')' : '';
+                            if ($tag === null) {
+                                return '';
+                            }
+
+                            return ucwords((string) $tag->tag).' ('.ucfirst((string) $tag->type).')';
                         })
                         ->helperText('Select existing tags or type new ones to create them. New tags will be created as Stack type.'),
                 ])
