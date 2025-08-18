@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\MentorProgram;
 use App\Models\MentorProgramBlock;
-use App\Models\MentorProgramBlockProgress;
-use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\QueryException;
@@ -29,15 +26,19 @@ describe('MentorProgramBlock Model', function (): void {
     });
 
     it('has a relationship with mentor program', function (): void {
-        $mentorProgram = MentorProgram::factory()->create();
+        $mentorProgramBlock = MentorProgramBlock::factory()->create();
 
-        expect($mentorProgram->mentor)->toBeInstanceOf(User::class);
+        $relationship = $mentorProgramBlock->mentorProgram();
+
+        expect($relationship)->toBeInstanceOf(Illuminate\Database\Eloquent\Relations\BelongsTo::class);
     });
 
-    it('has a relationship with mentiProgramProgress', function (): void {
-        $mentiProgramProgress = MentorProgramBlockProgress::factory()->create();
+    it('has a relationship with mentor program block progress', function (): void {
+        $mentorProgramBlock = MentorProgramBlock::factory()->create();
 
-        expect($mentiProgramProgress->menti)->toBeInstanceOf(User::class);
+        $relationship = $mentorProgramBlock->mentorProgramBlockProgress();
+
+        expect($relationship)->toBeInstanceOf(Illuminate\Database\Eloquent\Relations\HasOne::class);
     });
 
     it('has precisely defined fillable attributes and mass assignment works correctly', function (): void {

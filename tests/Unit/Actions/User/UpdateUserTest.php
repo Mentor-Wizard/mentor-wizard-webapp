@@ -7,8 +7,10 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,6 +19,7 @@ mutates(UpdateUser::class);
 describe('Update Main User', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+        Storage::fake('public');
     });
 
     it('updates user main profile successfully', function (User $user, array $updateData): void {
@@ -78,6 +81,33 @@ describe('Update Main User', function (): void {
         expect($updatedUser->email_verified_at)->toBeNull();
     });
 
+    it('updates user profile with avatar successfully', function (): void {
+        $user = User::factory()->create([
+            'username' => 'John',
+            'email'    => 'john@example.com',
+        ]);
+
+        Auth::login($user);
+
+        $avatar = UploadedFile::fake()->image('avatar.jpg', 100, 100);
+        $updateData = [
+            'username' => 'John Updated',
+            'email'    => 'john.updated@example.com',
+        ];
+
+        $request = mockUpdateUserRequestWithAvatar($updateData, $user, $avatar);
+        $action = new UpdateUser;
+        $result = $action->handle($request);
+
+        $updatedUser = $user->fresh();
+
+        expect($result)->toBeInstanceOf(RedirectResponse::class)
+            ->and($result->getTargetUrl())->toBe(route('profile.edit'))
+            ->and($updatedUser->username)->toBe('John Updated')
+            ->and($updatedUser->email)->toBe('john.updated@example.com')
+            ->and($updatedUser->profile->getMedia('avatar'))->toHaveCount(1);
+    });
+
     it('throws validation exception for invalid data', function ($invalidData): void {
         $user = User::factory()->create();
         Auth::login($user);
@@ -100,6 +130,19 @@ function mockUpdateUserRequest(array $data, User $user): UpdateUserRequest|MockI
     $request->shouldReceive('get')->with('email')->andReturn($data['email']);
     $request->shouldReceive('get')->with('username')->andReturn($data['username']);
     $request->shouldReceive('hasFile')->with('avatar')->andReturn(false);
+
+    return $request;
+}
+
+function mockUpdateUserRequestWithAvatar(array $data, User $user, UploadedFile $avatar): UpdateUserRequest|MockInterface
+{
+    $request = Mockery::mock(UpdateUserRequest::class);
+    $request->shouldReceive('user')->andReturn($user);
+    $request->shouldReceive('validated')->andReturn($data);
+    $request->shouldReceive('get')->with('email')->andReturn($data['email']);
+    $request->shouldReceive('get')->with('username')->andReturn($data['username']);
+    $request->shouldReceive('hasFile')->with('avatar')->andReturn(true);
+    $request->shouldReceive('file')->with('avatar')->andReturn($avatar);
 
     return $request;
 }

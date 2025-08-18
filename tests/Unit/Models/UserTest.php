@@ -159,4 +159,25 @@ describe('User Model', function (): void {
         expect($coachChats)->toBeInstanceOf(HasMany::class)
             ->and($coach->coachChats)->toHaveCount(0);
     });
+
+    it('has menti program progress relationship', function (): void {
+        $menti = User::factory()->create();
+
+        $relationship = $menti->mentiProgramProgress();
+
+        expect($relationship)->toBeInstanceOf(Illuminate\Database\Eloquent\Relations\HasOne::class);
+    });
+
+    it('returns correct filament name', function (): void {
+        $user = User::factory()->create(['username' => 'testuser']);
+
+        expect($user->getFilamentName())->toBe('testuser');
+    });
+
+    it('returns empty string when username is null for filament name', function (): void {
+        $user = new User;
+        $user->username = null;
+
+        expect($user->getFilamentName())->toBe('');
+    });
 });
