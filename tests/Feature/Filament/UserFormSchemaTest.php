@@ -5,17 +5,16 @@ declare(strict_types=1);
 use App\Filament\Resources\User\Pages\CreateUser;
 use App\Filament\Resources\User\Schemas\UserForm;
 use App\Models\User;
+use Database\Seeders\CurrencySeeder;
+use Database\Seeders\RoleSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    // Create roles directly instead of running an expensive seeder
-    Role::query()->firstOrCreate(['name' => 'mentor']);
-    Role::query()->firstOrCreate(['name' => 'user']);
+    $this->seed([RoleSeeder::class, CurrencySeeder::class]);
     $this->actingAs(User::factory()->create());
     Filament::setCurrentPanel('app');
 });

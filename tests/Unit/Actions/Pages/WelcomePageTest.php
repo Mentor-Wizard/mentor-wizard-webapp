@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Pages\WelcomePage;
 use App\Enums\RoleEnum;
 use App\Models\User;
-use Database\Seeders\UserSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\RouteCollection;
 use Inertia\Response;
@@ -16,10 +16,7 @@ mutates(WelcomePage::class);
 
 describe('WelcomePage Action', function (): void {
     beforeEach(function (): void {
-        // Create roles only when needed, avoid expensive seeding
-        Role::query()->firstOrCreate(['name' => RoleEnum::MENTOR->value]);
-        Role::query()->firstOrCreate(['name' => RoleEnum::USER->value]);
-        // Remove UserSeeder completely - it downloads images from external URLs
+        $this->seed([RoleSeeder::class]);
     });
 
     it('returns correct Inertia response', function (): void {
