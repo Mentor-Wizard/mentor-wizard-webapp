@@ -32,14 +32,14 @@ class MentorProfile extends Model
         'experience_started_at',
     ];
 
-    protected $visible = [
-        'id',
-        'title',
-        'description',
-        'rate',
-        'currency_id',
-        'experience_started_at',
-    ];
+    // protected $visible = [
+    //     'id',
+    //     'title',
+    //     'description',
+    //     'rate',
+    //     'currency_id',
+    //     'experience_started_at',
+    // ];
 
     public function user(): BelongsTo
     {

@@ -11,16 +11,16 @@ use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetProfilePage;
+use App\Actions\Pages\Profile\ListMentorProfilePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
-use App\Models\MentorProfile;
 use Illuminate\Support\Facades\Route;
 
-Route::get('profile-program', fn () => MentorProfile::with(['mentorPrograms', 'mentorTags'])->get());
-
 Route::get('/', WelcomePage::class)->name('pages.welcome');
+
+Route::get('profile-programs', ListMentorProfilePage::class);
 
 Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
 
