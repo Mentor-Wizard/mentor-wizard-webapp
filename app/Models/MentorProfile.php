@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * @property-read string $avatar URL of the avatar image
  *
+ * @TODO: Add visible properties after filters and frontend implementation
+ *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]
@@ -31,15 +33,6 @@ class MentorProfile extends Model
         'currency_id',
         'experience_started_at',
     ];
-
-    // protected $visible = [
-    //     'id',
-    //     'title',
-    //     'description',
-    //     'rate',
-    //     'currency_id',
-    //     'experience_started_at',
-    // ];
 
     public function user(): BelongsTo
     {
