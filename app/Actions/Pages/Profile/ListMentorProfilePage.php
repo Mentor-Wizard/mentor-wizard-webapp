@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Profile;
 
-use App\Enums\TagEnum;
+use App\Filters\ProfileRateFilter;
+use App\Filters\ProgramCostFilter;
+use App\Filters\TagLanguagesFilter;
+use App\Filters\TagStacksFilter;
 use App\Models\MentorProfile;
-use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -25,36 +27,10 @@ class ListMentorProfilePage
                 'mentorPrograms.name',
                 'mentorPrograms.description',
 
-                // Range filters
-                AllowedFilter::callback('rate', function (Builder $query, $rate): void {
-                    $query->whereBetween('rate', [
-                        $rate[0] ?? 0,
-                        $rate[1] ?? PHP_FLOAT_MAX,
-                    ]);
-                }),
-                AllowedFilter::callback('cost', function (Builder $query, $costs): void {
-                    $query->whereHas('mentorPrograms', function (Builder $query) use ($costs): void {
-                        $query->whereBetween('cost', [
-                            $costs[0] ?? 0,
-                            $costs[1] ?? PHP_FLOAT_MAX,
-                        ]);
-                    });
-                }),
-
-                // Filters for tags (mentorTags)
-                AllowedFilter::callback('languages', function (Builder $query, $tags): void {
-                    $query->whereHas('mentorTags', function (Builder $query) use ($tags): void {
-                        $query->where('type', TagEnum::LANGUAGE)
-                            ->whereIn('tag', $tags);
-                    });
-                }),
-                AllowedFilter::callback('stacks', function (Builder $query, $tags): void {
-                    $tags = is_array($tags) ? $tags : explode(',', $tags);
-                    $query->whereHas('mentorTags', function (Builder $query) use ($tags): void {
-                        $query->where('type', TagEnum::STACK)
-                            ->whereIn('tag', $tags);
-                    });
-                }),
+                AllowedFilter::custom('rate', new ProfileRateFilter),
+                AllowedFilter::custom('cost', new ProgramCostFilter),
+                AllowedFilter::custom('languages', new TagLanguagesFilter),
+                AllowedFilter::custom('stacks', new TagStacksFilter),
             ])
             ->allowedSorts([
                 'id',
