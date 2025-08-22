@@ -54,12 +54,12 @@ class MentorProfile extends Model
         return $this->belongsToMany(MentorProgram::class, 'mentor_profile_mentor_program');
     }
 
-    public function languages(): Attribute
+    protected function languages(): Attribute
     {
         return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
     }
 
-    public function stacks(): Attribute
+    protected function stacks(): Attribute
     {
         return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
     }

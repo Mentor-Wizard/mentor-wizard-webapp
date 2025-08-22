@@ -135,7 +135,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return $this->hasMany(Chat::class, 'coach_id');
     }
 
-    public function rating(): Attribute
+    protected function rating(): Attribute
     {
         return Attribute::make(
             get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
