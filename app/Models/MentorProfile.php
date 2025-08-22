@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * @property-read string $avatar URL of the avatar image
  *
- * @TODO: Add visible properties after filters and frontend implementation
+ * @TODO : Add visible properties after filters and frontend implementation
  *
  * @mixin IdeHelperMentorProfile
  */
