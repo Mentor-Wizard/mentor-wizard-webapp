@@ -136,16 +136,16 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->hasMany(Chat::class, 'coach_id');
     }
 
+    public function getFilamentName(): string
+    {
+        return $this->username ?? '';
+    }
+
     protected function rating(): Attribute
     {
         return Attribute::make(
             get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
         );
-    }
-
-    public function getFilamentName(): string
-    {
-        return $this->username ?? '';
     }
 
     /**
