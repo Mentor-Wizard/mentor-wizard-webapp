@@ -7,7 +7,7 @@ import Footer from '@/Components/Navigation/Footer.vue';
     <div class="min-h-screen bg-gray-100">
       <Navbar />
       <!-- Page Heading -->
-      <header class="bg-white shadow" v-if="$slots.header">
+      <header v-if="$slots.header" class="bg-white shadow">
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <slot name="header" />
         </div>
@@ -16,7 +16,7 @@ import Footer from '@/Components/Navigation/Footer.vue';
       <main>
         <slot />
       </main>
-      <Footer></Footer>
+      <Footer />
     </div>
   </div>
 </template>

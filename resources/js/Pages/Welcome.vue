@@ -435,7 +435,9 @@ const faqs = [
                   Most popular
                 </p>
               </div>
-              <p class="mt-4 text-sm/6 text-gray-600">{{ tier.description }}</p>
+              <p class="mt-4 text-sm/6 text-gray-600">
+                {{ tier.description }}
+              </p>
               <p class="mt-6 flex items-baseline gap-x-1">
                 <span
                   class="text-4xl font-semibold tracking-tight text-gray-900"
@@ -494,7 +496,9 @@ const faqs = [
             {{ faq.question }}
           </dt>
           <dd class="mt-4 lg:col-span-7 lg:mt-0">
-            <p class="text-base/7 text-gray-600">{{ faq.answer }}</p>
+            <p class="text-base/7 text-gray-600">
+              {{ faq.answer }}
+            </p>
           </dd>
         </div>
       </dl>

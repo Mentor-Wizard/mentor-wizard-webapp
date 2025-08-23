@@ -127,11 +127,11 @@ const deleteProgram = () => {
                           <MenuItem v-slot="{ active }">
                             <button
                               type="button"
-                              @click="confirmDelete(program)"
                               :class="[
                                 active ? 'bg-gray-50 outline-hidden' : '',
                                 'block w-full px-3 py-1 text-left text-sm/6 text-gray-900',
                               ]"
+                              @click="confirmDelete(program)"
                             >
                               Delete<span class="sr-only"
                                 >, {{ program.name }}</span

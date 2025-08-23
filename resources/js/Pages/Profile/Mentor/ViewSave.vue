@@ -128,7 +128,9 @@ const defaultAvatar = usePage().props.defaultAvatar;
                       </div>
                     </div>
 
-                    <p class="text-sm text-gray-500">{{ review.comment }}</p>
+                    <p class="text-sm text-gray-500">
+                      {{ review.comment }}
+                    </p>
                   </div>
 
                   <div class="hidden w-full gap-4 sm:flex">
@@ -145,7 +147,9 @@ const defaultAvatar = usePage().props.defaultAvatar;
                         {{ review.menti.profile.name }}
                         {{ review.menti.profile.last_name }}
                       </h3>
-                      <p class="text-sm text-gray-500">{{ review.comment }}</p>
+                      <p class="text-sm text-gray-500">
+                        {{ review.comment }}
+                      </p>
                     </div>
 
                     <div class="flex shrink-0 items-center">

@@ -63,7 +63,7 @@ const submit = () => {
         Use a permanent address where you can receive mail.
       </p>
     </div>
-    <form @submit.prevent="submit" class="md:col-span-2">
+    <form class="md:col-span-2" @submit.prevent="submit">
       <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div class="col-span-full flex items-center gap-x-8">
           <img
@@ -83,9 +83,9 @@ const submit = () => {
             </p>
           </div>
           <input
+            ref="avatarInput"
             type="file"
             :hidden="true"
-            ref="avatarInput"
             accept="image/gif, image/jpeg, image/png"
             @change="onFileChange"
           />
@@ -106,9 +106,9 @@ const submit = () => {
           <div class="mt-2">
             <TextInput
               id="email"
+              v-model="form.email"
               type="email"
               autocomplete="email"
-              v-model="form.email"
               required
             />
           </div>

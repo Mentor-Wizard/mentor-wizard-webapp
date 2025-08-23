@@ -70,10 +70,10 @@ const mobileNavLinkClasses = (navItemHref) => {
 
 <template>
   <Disclosure
+    v-slot="{ open }"
     as="nav"
     :class="{ 'bg-transparent': transparent, 'bg-white': !transparent }"
     class="shadow-sm"
-    v-slot="{ open }"
   >
     <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8">
       <div class="flex h-16 justify-between">
@@ -212,8 +212,8 @@ const mobileNavLinkClasses = (navItemHref) => {
           {{ mainNavigation.name }}
         </DisclosureButton>
         <DisclosureButton
-          v-if="!isLoggedIn"
           v-for="authNavigation in authNavigations"
+          v-if="!isLoggedIn"
           :key="authNavigation.name"
           as="a"
           :href="authNavigation.href"

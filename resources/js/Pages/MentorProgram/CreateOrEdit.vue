@@ -78,8 +78,8 @@ const deleteProgram = () => {
         <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
           <div class="border-b border-gray-200 bg-white p-8">
             <form
-              @submit.prevent="submit"
               class="space-y-8 divide-y divide-gray-200"
+              @submit.prevent="submit"
             >
               <div class="space-y-6">
                 <div>
@@ -150,8 +150,8 @@ const deleteProgram = () => {
                   <DangerButton
                     v-if="isEdit"
                     type="button"
-                    @click="confirmDelete"
                     class="inline-flex justify-center"
+                    @click="confirmDelete"
                   >
                     Delete Program
                   </DangerButton>
@@ -184,7 +184,7 @@ const deleteProgram = () => {
           <PrimaryButton @click="showDeleteModal = false">
             Cancel
           </PrimaryButton>
-          <DangerButton @click="deleteProgram" :disabled="form.processing">
+          <DangerButton :disabled="form.processing" @click="deleteProgram">
             Delete Program
           </DangerButton>
         </div>

@@ -14,7 +14,7 @@ import MentorsList from '@/Components/UI/Table/MentorsList.vue';
       </Link>
     </div>
     <div class="mt-4 items-center justify-center">
-      <MentorsList></MentorsList>
+      <MentorsList />
     </div>
 
     <div

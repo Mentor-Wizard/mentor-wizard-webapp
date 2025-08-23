@@ -62,7 +62,7 @@ const closeModal = () => {
 
     <Modal
       :model-value="confirmingUserDeletion"
-      @update:modelValue="closeModal"
+      @update:model-value="closeModal"
     >
       <div class="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
         <CloseButton @click="closeModal" />
@@ -77,9 +77,9 @@ const closeModal = () => {
           />
         </div>
         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-          <DialogTitle as="h3" class="text-base font-semibold text-gray-900"
-            >Deactivate account</DialogTitle
-          >
+          <DialogTitle as="h3" class="text-base font-semibold text-gray-900">
+            Deactivate account
+          </DialogTitle>
           <div class="mt-2">
             <p class="text-sm text-gray-500">
               Are you sure you want to deactivate your account? All of your data
@@ -106,11 +106,12 @@ const closeModal = () => {
         </div>
       </div>
       <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-        <DangerButton @click="deleteUser">Deactivate</DangerButton>
+        <DangerButton @click="deleteUser"> Deactivate </DangerButton>
         <SecondaryButton
           class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
           @click="closeModal"
-          >Cancel
+        >
+          Cancel
         </SecondaryButton>
       </div>
     </Modal>

@@ -45,7 +45,7 @@ const updatePassword = () => {
       </p>
     </div>
 
-    <form @submit.prevent="updatePassword" class="md:col-span-2">
+    <form class="md:col-span-2" @submit.prevent="updatePassword">
       <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div class="col-span-full">
           <InputLabel for="current_password" value="Current password" />
@@ -54,9 +54,9 @@ const updatePassword = () => {
             <TextInput
               id="current_password"
               ref="currentPasswordInput"
+              v-model="form.current_password"
               type="password"
               autocomplete="current_password"
-              v-model="form.current_password"
               required
             />
           </div>
@@ -70,10 +70,10 @@ const updatePassword = () => {
           <div class="mt-2">
             <TextInput
               id="password"
-              type="password"
               ref="passwordInput"
-              autocomplete="password"
               v-model="form.password"
+              type="password"
+              autocomplete="password"
               required
             />
           </div>
@@ -87,9 +87,9 @@ const updatePassword = () => {
           <div class="mt-2">
             <TextInput
               id="password_confirmation"
+              v-model="form.password_confirmation"
               type="password"
               autocomplete="password_confirmation"
-              v-model="form.password_confirmation"
               required
             />
           </div>

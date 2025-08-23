@@ -8,12 +8,12 @@
         <div class="py-12">
           <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white p-8 shadow-xs sm:rounded-lg">
-              <TabGroup :selectedIndex="selectedTab" @change="changeTab">
+              <TabGroup :selected-index="selectedTab" @change="changeTab">
                 <h1 class="sr-only">Account Settings</h1>
                 <header class="border-b border-white/5">
                   <MobileTabSelect
-                    :options="navigation"
                     v-model="selectedTab"
+                    :options="navigation"
                   />
                   <div class="hidden sm:block">
                     <TabList class="border-b border-gray-200">

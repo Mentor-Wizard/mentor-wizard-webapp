@@ -24,7 +24,7 @@ defineProps({
 
 <template>
   <TabList class="grid grid-cols-1 sm:hidden">
-    <Listbox as="div" v-model="selected">
+    <Listbox v-model="selected" as="div">
       <div class="relative mt-2">
         <ListboxButton
           class="grid w-full cursor-default grid-cols-1 rounded-md bg-white py-1.5 pr-2 pl-3 text-left text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
@@ -48,10 +48,10 @@ defineProps({
               class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-hidden sm:text-sm"
             >
               <Tab
-                :as="ListboxOption"
                 v-for="(item, key) in options"
                 :key="key"
                 v-slot="{ selected }"
+                :as="ListboxOption"
               >
                 <div
                   :class="[

@@ -9,7 +9,7 @@ const mentors = computed(() => page.props.mentors ?? {});
 </script>
 
 <template>
-  <div class="justify-center" v-if="mentors['data'] && mentors['data'].length">
+  <div v-if="mentors['data'] && mentors['data'].length" class="justify-center">
     <ul
       role="list"
       class="grid grid-cols-1 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
@@ -30,7 +30,9 @@ const mentors = computed(() => page.props.mentors ?? {});
           </h3>
           <dl class="mt-1 flex grow flex-col justify-between">
             <dt class="sr-only">Title</dt>
-            <dd class="text-sm text-gray-500">{{ mentor?.profile?.title }}</dd>
+            <dd class="text-sm text-gray-500">
+              {{ mentor?.profile?.title }}
+            </dd>
             <hr class="my-1 h-px border-0 bg-gray-200" />
             <dt class="sr-only">Description</dt>
             <dd class="text-sm text-gray-500">
@@ -52,8 +54,8 @@ const mentors = computed(() => page.props.mentors ?? {});
                 Contact Mentor
               </a>
               <a
-                :href="`${mentor.profile.linkedin}`"
                 v-if="mentor?.profile?.linkedin"
+                :href="`${mentor.profile.linkedin}`"
                 class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent bg-blue-100 py-4 text-sm font-semibold text-gray-900"
               >
                 <UserIcon class="size-5 text-gray-400" aria-hidden="true" />

@@ -22,7 +22,7 @@ const props = defineProps({
         preserve-state
         class="inline-flex items-center border-t-2 border-transparent pt-4 pr-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
         :class="{ 'pointer-events-none text-gray-300': !data.prev_page_url }"
-      ></Link>
+      />
     </div>
 
     <div class="hidden md:-mt-px md:flex">
@@ -56,7 +56,7 @@ const props = defineProps({
         preserve-state
         class="inline-flex items-center border-t-2 border-transparent pt-4 pl-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
         :class="{ 'pointer-events-none text-gray-300': !data.next_page_url }"
-      ></Link>
+      />
     </div>
   </div>
   <div
