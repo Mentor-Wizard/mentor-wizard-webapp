@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\RoleGuardEnum;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -28,7 +29,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
-class User extends Authenticatable implements HasMedia, MustVerifyEmail
+class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 {
     use HasFactory;
     use HasRoles;
@@ -140,6 +141,11 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return Attribute::make(
             get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
         );
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->username ?? '';
     }
 
     /**

@@ -32,13 +32,7 @@ class UpdateUser
         $user->save();
 
         if ($request->hasFile('avatar')) {
-
-            $user->profile->clearMediaCollection('avatar');
-
-            $user
-                ->profile
-                ->addMedia($request->file('avatar'))
-                ->toMediaCollection('avatar');
+            AddAvatar::run($user, $request->file('avatar'));
         }
 
         return redirect()->route('profile.edit');

@@ -17,22 +17,22 @@
 cp .env.example .env
 
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # Install PHP dependencies
-docker-compose exec app composer install
+docker compose exec app composer install
 
 # Install Node dependencies
-docker-compose exec app yarn install
+docker compose exec app yarn install
 
 # Generate application key
-docker-compose exec app php artisan key:generate
+docker compose exec app php artisan key:generate
 
 # Run migrations
-docker-compose exec app php artisan migrate
+docker compose exec app php artisan migrate
 
 # Build frontend assets
-docker-compose exec app yarn dev
+docker compose exec app yarn dev
 ```
 
 #### Option 2: Local Development
@@ -94,16 +94,16 @@ Feature tests do not need to mutate.
 #### With Docker
 ```bash
 # Run all tests
-docker-compose exec app ./vendor/bin/pest
+docker compose exec app ./vendor/bin/pest
 
 # Run with coverage
-docker-compose exec app ./vendor/bin/pest --coverage
+docker compose exec app ./vendor/bin/pest --coverage
 
 # Run mutation testing
-docker-compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100
+docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100
 
 # Run specific test file
-docker-compose exec app ./vendor/bin/pest tests/Unit/ExampleTest.php
+docker compose exec app ./vendor/bin/pest tests/Unit/ExampleTest.php
 ```
 
 #### Local Environment
@@ -180,6 +180,11 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - **Modern PHP**: Use PHP 8.4 features and modern type casting
 - **Class Organization**: Specific order for class elements (constants, properties, methods)
 - **Array Formatting**: Trailing commas in multiline arrays and parameters
+- **Eloquent Models**: Use `getKey()` method in models instead of `id`
+- **Eloquent Models**: Use `query()` method in models queries
+- **Eloquent Relationships**: Use `with()` method for eager loading
+- **Eloquent Relationships**: Use `withCount()` method for eager loading counts
+- **Eloquent Relationships**: Use `withTrashed()` method for eager loading trashed models
 
 ### Architecture Patterns
 - **Laravel Actions**: Business logic organized in Action classes (`lorisleiva/laravel-actions`)
@@ -187,6 +192,15 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - **Domain Organization**: Features organized by domain (Auth, MentorPrograms, etc.)
 - **Repository Pattern**: Not explicitly used, relies on Eloquent models
 - **Service Layer**: Implemented via Action classes
+- **Database Migrations**: Every change in the DB structure should be reflected in a new migration
+- **Database Seeders**: Every change in DB data should be reflected in a seeder
+- **Database Factories**: Every change in DB data should be reflected in a factory
+- **Database Queries**: Prefer Eloquent models over raw queries
+- **Database Relationships**: Prefer Eloquent relationships to raw queries
+- **Database Eager Loading**: Prefer Eloquent eager loading over raw queries
+- **Database Pagination**: Prefer Eloquent pagination over raw queries
+- **Database Scopes**: Prefer Eloquent scopes over raw queries
+- **Database Soft Deletes**: Prefer Eloquent soft deletes over raw queries
 
 ### Performance Considerations
 - **Laravel Octane**: Uses Swoole for high-performance application server
@@ -583,11 +597,14 @@ it('is true', function () {
 </code-snippet>
 
 ### Running Tests
+- Always run tests in a Docker container.
 - Run the minimal number of tests using an appropriate filter before finalizing code edits.
-- To run all tests: `php artisan test`.
-- To run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --filter=testName` (recommended after making a change to a related file).
+- To run all tests: `docker compose exec -it app php artisan test`.
+- To run all tests in a file: `docker compose exec -it app php artisan test tests/Feature/ExampleTest.php`.
+- To filter on a particular test name: `docker compose exec -it app php artisan test --filter=testName` (recommended after making a change to a related file).
 - When the tests relating to your changes are passing, ask the user if they would like to run the entire test suite to ensure everything is still passing.
+- After running tests run mutation tests: `docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100`.
+- After running mutation tests, run the test suite again to ensure everything is still passing.
 
 ### Pest Assertions
 - When asserting status codes on a response, use the specific method like `assertForbidden` and `assertNotFound` instead of using `assertStatus(403)` or similar, e.g.:
