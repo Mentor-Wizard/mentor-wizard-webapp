@@ -752,7 +752,8 @@ document.addEventListener('livewire:init', function () {
         console.error(message);
     });
 
-}); </code-snippet>
+});
+</code-snippet>
 
 === pint/core rules ===
 
@@ -809,11 +810,12 @@ document.addEventListener('livewire:init', function () {
   `assertForbidden` and `assertNotFound` instead of using `assertStatus(403)` or
   similar, e.g.:
   <code-snippet name="Pest Example Asserting postJson Response" lang="php">
-  it('returns all', function () { $response = $this->postJson('/api/docs', []);
+  it('returns all', function () {
+    $response = $this->postJson('/api/docs', []);
 
-              $response->assertSuccessful();
-
-    }); </code-snippet>
+    $response->assertSuccessful();
+  });
+  </code-snippet>
 
 ### Mocking
 

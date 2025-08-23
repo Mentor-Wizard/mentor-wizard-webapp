@@ -8,3 +8,4 @@ public
 taskfile.yml
 .gitlab-ci.yml
 compose.yml
+.junie/guidelines.md
