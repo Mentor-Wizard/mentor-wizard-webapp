@@ -73,7 +73,7 @@ runs:
     - name: '📦 Install yarn dependencies'
       if: ${{ inputs.use-node == 'true' }}
       shell: bash
-      run: yarn install --frozen-lockfile --immutable
+      run: yarn install --immutable
 
     - name: '📦 Build front-end assets'
       if: ${{ inputs.use-node == 'true' }}

@@ -74,7 +74,7 @@ jobs:
             }
           - {
               name: '🅿️ Prettier',
-              command: 'yarn exec prettier . -с',
+              command: 'yarn exec prettier . -c',
               node: true,
             }
 
