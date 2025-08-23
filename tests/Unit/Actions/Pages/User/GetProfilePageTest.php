@@ -31,7 +31,7 @@ describe('User Page', function (): void {
         expect($result)->toBeInstanceOf(Response::class)
             ->and(Arr::get($resultData->getData(), 'page.props.mustVerifyEmail'))->toBeTrue()
             ->and(Arr::get($resultData->getData(), 'page.props.status'))->toBe('test-status')
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/Edit');
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/EditPage');
     })->with([
         'verified user' => fn () => User::factory()->create([
             'email_verified_at' => now()->subDay(),
@@ -52,7 +52,7 @@ describe('User Page', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/Edit')
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/EditPage')
             ->and(Arr::get($resultData->getData(), 'page.props.mustVerifyEmail'))->toBeTrue()
             ->and(Arr::get($resultData->getData(), 'page.props.status'))->toBe($status);
     })->with([
