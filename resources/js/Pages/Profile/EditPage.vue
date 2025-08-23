@@ -1,3 +1,31 @@
+<script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import MainPageText from '@/Components/MainPageText.vue';
+import { BellIcon, CreditCardIcon, UserIcon } from '@heroicons/vue/20/solid';
+import { ref, shallowRef } from 'vue';
+import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
+import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
+import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
+import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
+
+const selectedTab = ref(0);
+
+function changeTab(index) {
+  selectedTab.value = index;
+}
+
+const navigation = ref([
+  { name: 'My Account', icon: UserIcon, component: shallowRef(MyAccountTab) },
+  {
+    name: 'Notification',
+    icon: BellIcon,
+    component: shallowRef(NotificationTab),
+  },
+  { name: 'Billing', icon: CreditCardIcon, component: shallowRef(BillingTab) },
+]);
+</script>
+
 <template>
   <AuthenticatedLayout>
     <template #header>
@@ -41,7 +69,7 @@
                   </div>
                 </header>
                 <TabPanels>
-                  <TabPanel v-for="tab in navigation">
+                  <TabPanel v-for="tab in navigation" :key="tab.name">
                     <component :is="tab.component" />
                   </TabPanel>
                 </TabPanels>
@@ -53,31 +81,3 @@
     </div>
   </AuthenticatedLayout>
 </template>
-
-<script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import MainPageText from '@/Components/MainPageText.vue';
-import { BellIcon, CreditCardIcon, UserIcon } from '@heroicons/vue/20/solid';
-import { ref, shallowRef } from 'vue';
-import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
-import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
-import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
-import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
-
-const selectedTab = ref(0);
-
-function changeTab(index) {
-  selectedTab.value = index;
-}
-
-const navigation = ref([
-  { name: 'My Account', icon: UserIcon, component: shallowRef(MyAccountTab) },
-  {
-    name: 'Notification',
-    icon: BellIcon,
-    component: shallowRef(NotificationTab),
-  },
-  { name: 'Billing', icon: CreditCardIcon, component: shallowRef(BillingTab) },
-]);
-</script>

@@ -7,7 +7,7 @@ import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
 import InputError from '@/Components/UI/Forms/InputError.vue';
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 import DangerButton from '@/Components/UI/Button/DangerButton.vue';
-import Modal from '@/Components/Modal.vue';
+import AppModal from '@/Components/AppModal.vue';
 import TextArea from '@/Components/UI/Forms/TextArea.vue';
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
 
@@ -171,7 +171,7 @@ const deleteProgram = () => {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <Modal v-model="showDeleteModal">
+    <AppModal v-model="showDeleteModal">
       <div class="p-6">
         <h2 class="text-lg font-medium text-gray-900">
           Are you sure you want to delete this program?
@@ -189,6 +189,6 @@ const deleteProgram = () => {
           </DangerButton>
         </div>
       </div>
-    </Modal>
+    </AppModal>
   </AuthenticatedLayout>
 </template>

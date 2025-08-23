@@ -10,7 +10,7 @@ import {
 } from '@headlessui/vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline';
-import { usePage, router, Link } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { useNavigation } from '@/Stores/navigation.js';
 import { computed, ref } from 'vue';
 import NavbarLogo from '@/Components/Navigation/Navbar/NavbarLogo.vue';
@@ -211,16 +211,17 @@ const mobileNavLinkClasses = (navItemHref) => {
         >
           {{ mainNavigation.name }}
         </DisclosureButton>
-        <DisclosureButton
-          v-for="authNavigation in authNavigations"
-          v-if="!isLoggedIn"
-          :key="authNavigation.name"
-          as="a"
-          :href="authNavigation.href"
-          :class="mainNavLinkClasses(authNavigation.href)"
-        >
-          {{ authNavigation.name }}
-        </DisclosureButton>
+        <template v-if="!isLoggedIn">
+          <DisclosureButton
+            v-for="authNavigation in authNavigations"
+            :key="authNavigation.name"
+            as="a"
+            :href="authNavigation.href"
+            :class="mainNavLinkClasses(authNavigation.href)"
+          >
+            {{ authNavigation.name }}
+          </DisclosureButton>
+        </template>
       </div>
 
       <div

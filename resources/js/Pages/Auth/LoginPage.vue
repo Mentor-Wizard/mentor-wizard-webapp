@@ -1,5 +1,5 @@
 <script setup>
-import Checkbox from '@/Components/UI/Forms/Checkbox.vue';
+import CheckboxInput from '@/Components/UI/Forms/CheckboxInput.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/UI/Forms/InputError.vue';
 import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
@@ -15,6 +15,7 @@ defineProps({
   },
   status: {
     type: String,
+    required: true,
   },
 });
 
@@ -83,7 +84,10 @@ const submit = () => {
         <div class="mt-5 flex items-center justify-between">
           <div class="flex gap-3">
             <div class="flex h-6 shrink-0 items-center">
-              <Checkbox v-model:checked="form.remember" name="remember-me" />
+              <CheckboxInput
+                v-model:checked="form.remember"
+                name="remember-me"
+              />
             </div>
             <label for="remember-me" class="block text-sm/6 text-gray-900"
               >Remember me</label

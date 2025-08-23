@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { EllipsisVerticalIcon } from '@heroicons/vue/20/solid';
-import Modal from '@/Components/Modal.vue';
+import AppModal from '@/Components/AppModal.vue';
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 import DangerButton from '@/Components/UI/Button/DangerButton.vue';
 import { ref } from 'vue';
@@ -11,7 +11,7 @@ import { router } from '@inertiajs/vue3';
 const showDeleteModal = ref(false);
 const programToDelete = ref(null);
 
-const props = defineProps({
+defineProps({
   programs: {
     type: Object,
     default: null,
@@ -156,7 +156,7 @@ const deleteProgram = () => {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <Modal v-model="showDeleteModal">
+    <AppModal v-model="showDeleteModal">
       <div class="p-6">
         <h2 class="text-lg font-medium text-gray-900">
           Are you sure you want to delete this program?
@@ -172,6 +172,6 @@ const deleteProgram = () => {
           <DangerButton @click="deleteProgram"> Delete Program </DangerButton>
         </div>
       </div>
-    </Modal>
+    </AppModal>
   </AuthenticatedLayout>
 </template>

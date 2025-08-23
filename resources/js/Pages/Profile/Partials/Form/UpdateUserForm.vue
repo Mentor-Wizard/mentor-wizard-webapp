@@ -14,6 +14,7 @@ defineProps({
   },
   status: {
     type: String,
+    required: true,
   },
 });
 

@@ -1,8 +1,22 @@
+<script setup>
+import { ref } from 'vue';
+import { Dialog, DialogPanel } from '@headlessui/vue';
+import { XMarkIcon } from '@heroicons/vue/24/outline';
+import ApplicationLogo from '@/Components/UI/Logo/ApplicationLogo.vue';
+import { Link } from '@inertiajs/vue3';
+import { useNavigation } from '@/Stores/navigation.js';
+import AppNavbar from '@/Components/Navigation/Navbar/AppNavbar.vue';
+import AppFooter from '@/Components/Navigation/AppFooter.vue';
+
+const mobileMenuOpen = ref(false);
+const { landingNavigation: navigation } = useNavigation();
+</script>
+
 <template>
   <div class="bg-white">
     <!-- Header -->
     <header class="absolute inset-x-0 top-0 z-50">
-      <Navbar :transparent="true" />
+      <AppNavbar :transparent="true" />
       <Dialog
         class="lg:hidden"
         :open="mobileMenuOpen"
@@ -58,20 +72,6 @@
     </main>
 
     <!-- Footer -->
-    <Footer />
+    <AppFooter />
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { Dialog, DialogPanel } from '@headlessui/vue';
-import { XMarkIcon } from '@heroicons/vue/24/outline';
-import ApplicationLogo from '@/Components/UI/Logo/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
-import { useNavigation } from '@/Stores/navigation.js';
-import Navbar from '@/Components/Navigation/Navbar/Navbar.vue';
-import Footer from '@/Components/Navigation/Footer.vue';
-
-const mobileMenuOpen = ref(false);
-const { landingNavigation: navigation } = useNavigation();
-</script>

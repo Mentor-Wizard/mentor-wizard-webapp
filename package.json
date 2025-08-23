@@ -9,6 +9,7 @@
     },
     "devDependencies": {
         "@commitlint/config-conventional": "^19.8.1",
+        "@eslint/js": "^9.34.0",
         "@headlessui/vue": "^1.7.23",
         "@heroicons/vue": "^2.2.0",
         "@inertiajs/vue3": "^2.1.2",

@@ -2,7 +2,7 @@
 import LandingLayout from '@/Layouts/LandingLayout.vue';
 import { usePage } from '@inertiajs/vue3';
 import { StarIcon } from '@heroicons/vue/20/solid';
-import Pagination from '@/Components/Navigation/Pagination.vue';
+import AppPagination from '@/Components/Navigation/AppPagination.vue';
 import { computed } from 'vue';
 import LinkedinButton from '@/Components/UI/Button/LinkedinButton.vue';
 import TelegramButton from '@/Components/UI/Button/TelegramButton.vue';
@@ -172,7 +172,7 @@ const defaultAvatar = usePage().props.defaultAvatar;
                     </div>
                   </div>
                 </div>
-                <Pagination :data="reviews" />
+                <AppPagination :data="reviews" />
               </div>
             </div>
           </main>

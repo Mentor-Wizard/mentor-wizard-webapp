@@ -1,7 +1,7 @@
 <script setup>
 import InputError from '@/Components/UI/Forms/InputError.vue';
 import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import Modal from '@/Components/Modal.vue';
+import AppModal from '@/Components/AppModal.vue';
 import TextInput from '@/Components/UI/Forms/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
@@ -60,7 +60,7 @@ const closeModal = () => {
       </DangerButton>
     </div>
 
-    <Modal
+    <AppModal
       :model-value="confirmingUserDeletion"
       @update:model-value="closeModal"
     >
@@ -114,6 +114,6 @@ const closeModal = () => {
           Cancel
         </SecondaryButton>
       </div>
-    </Modal>
+    </AppModal>
   </div>
 </template>

@@ -50,12 +50,12 @@ defineProps({
               <Tab
                 v-for="(item, key) in options"
                 :key="key"
-                v-slot="{ selected }"
+                v-slot="{ itemSelected }"
                 :as="ListboxOption"
               >
                 <div
                   :class="[
-                    selected ?
+                    itemSelected ?
                       'bg-indigo-600 text-white outline-hidden'
                     : 'text-gray-900',
                     'relative cursor-default py-2 pr-9 pl-3 select-none',

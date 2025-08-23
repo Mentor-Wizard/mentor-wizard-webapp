@@ -15,7 +15,7 @@ class GetLoginPage
 
     public function handle(): Response
     {
-        return Inertia::render('Auth/Login', [
+        return Inertia::render('Auth/LoginPage', [
             'canResetPassword' => Route::has('password.request'),
             'status'           => session('status'),
         ]);

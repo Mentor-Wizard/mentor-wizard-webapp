@@ -7,6 +7,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 const props = defineProps({
   status: {
     type: String,
+    required: true,
   },
 });
 

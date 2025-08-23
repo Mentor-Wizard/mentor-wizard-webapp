@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 
-const props = defineProps({
+defineProps({
   data: {
     type: Object,
     required: true,
@@ -38,13 +38,15 @@ const props = defineProps({
               'border-indigo-500 text-indigo-600'
             : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
           ]"
-          v-html="link.label"
-        />
+        >
+          {{ link.label }}
+        </Link>
         <span
           v-else
           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-400"
-          v-html="link.label"
-        />
+        >
+          {{ link.label }}
+        </span>
       </template>
     </div>
 
