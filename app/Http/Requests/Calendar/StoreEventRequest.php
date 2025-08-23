@@ -76,7 +76,7 @@ class StoreEventRequest extends FormRequest
             $validated['toDate'].' '.$validated['toTime']
         );
 
-        $duration = $startDateTime->diffInSeconds($endDateTime);
+        $duration = (int) $startDateTime?->diffInSeconds($endDateTime);
         $eventType = match ($validated['type']) {
             'individual' => EventTypeEnum::INDIVIDUAL->value,
             'group'      => EventTypeEnum::GROUP->value,
@@ -92,7 +92,7 @@ class StoreEventRequest extends FormRequest
             'type'            => $eventType,
             'description'     => $validated['description'],
             'status'          => EventStatusEnum::CONFIRMED,
-            'date'            => $startDateTime->format('Y-m-d'),
+            'date'            => $startDateTime?->format('Y-m-d'),
         ];
     }
 

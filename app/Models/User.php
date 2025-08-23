@@ -359,18 +359,16 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         $currentDate = Carbon::now();
         $currentDatetimeStamp = $currentDate->timestamp;
         $events = $this->events()->where('start_date_time', '>', $currentDate)->orderBy('start_date_time')->get();
-        $previousEvent = null;
         if ($events->count() === 0) {
             return [];
         }
 
+        $previousEvent = null;
         foreach ($events as $event) {
             if (is_null($previousEvent)) {
                 if ($currentDatetimeStamp < $event->start_date_time->timestamp) {
                     $availableSlots[] = ['start' => $currentDatetimeStamp, 'end' => $event->start_date_time->timestamp];
                 }
-
-                $previousEvent = $event;
             } else {
                 $availableSlots[] = ['start' => $previousEvent->end_date_time->timestamp, 'end' => $event->start_date_time->timestamp];
             }

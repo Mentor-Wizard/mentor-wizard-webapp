@@ -159,4 +159,12 @@ describe('User Model', function (): void {
         expect($coachChats)->toBeInstanceOf(HasMany::class)
             ->and($coach->coachChats)->toHaveCount(0);
     });
+
+    it('returns available slots correctly', function (): void {
+        $user = User::factory()->create();
+
+        $slots = $user->getAvailableSlots();
+
+        expect($slots)->toBeArray();
+    });
 });

@@ -91,6 +91,42 @@ describe('Calendar Event Store Page', function (): void {
         $response->assertSessionHasErrors(['fromDate', 'description', 'title', 'type']);
     });
 
+    it('adds custom error when timeslot overlaps existing event', function (): void {
+        actingAs($this->user);
+        auth()->login($this->user);
+
+        // Create an existing future event for the user from 10:00 to 15:00 tomorrow
+        $tomorrow = Carbon::tomorrow();
+        $event = App\Models\Event::query()->create([
+            'unique_id'       => (string) str()->uuid(),
+            'title'           => 'Busy block',
+            'status'          => EventStatusEnum::CONFIRMED,
+            'start_date_time' => $tomorrow->copy()->setTime(10, 0),
+            'end_date_time'   => $tomorrow->copy()->setTime(15, 0),
+            'duration'        => 5 * 3600,
+            'date'            => $tomorrow->format('Y-m-d'),
+            'type'            => EventTypeEnum::INDIVIDUAL->value,
+            'description'     => 'Busy',
+        ]);
+        $event->users()->attach($this->user->getKey());
+
+        $payload = [
+            'title'       => 'Overlap attempt',
+            'fromDate'    => $tomorrow->format('Y-m-d'),
+            'fromTime'    => '11:00', // inside busy block
+            'toDate'      => $tomorrow->format('Y-m-d'),
+            'toTime'      => '12:00',
+            'type'        => EventTypeEnum::INDIVIDUAL->value,
+            'description' => 'Should fail due to overlap',
+        ];
+
+        $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $payload);
+
+        $response->assertSessionHasErrors([
+            'fromDate' => 'there are another events on this time',
+        ]);
+    });
+
     it('throws 403 when a non-mentor user tries to create an event', function (): void {
         actingAs($this->nonMentorUser);
         auth()->login($this->nonMentorUser);
