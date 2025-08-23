@@ -811,7 +811,7 @@ document.addEventListener('livewire:init', function () {
   <code-snippet name="Pest Example Asserting postJson Response" lang="php">
   it('returns all', function () { $response = $this->postJson('/api/docs', []);
 
-            $response->assertSuccessful();
+              $response->assertSuccessful();
 
     }); </code-snippet>
 
