@@ -1,0 +1,10 @@
+.ddev
+.github
+LICENSE.md
+composer.lock
+dist
+local
+public
+taskfile.yml
+.gitlab-ci.yml
+compose.yml
