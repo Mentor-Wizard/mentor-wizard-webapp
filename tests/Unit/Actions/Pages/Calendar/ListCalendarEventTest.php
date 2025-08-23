@@ -10,6 +10,7 @@ use App\Enums\RoleEnum;
 use App\Models\Event as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -54,7 +55,7 @@ describe('List Calendar Event Page', function (): void {
             'mode'     => 'Month view',
         ];
 
-        $request = new Illuminate\Http\Request($requestData);
+        $request = new Request($requestData);
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -105,7 +106,7 @@ describe('List Calendar Event Page', function (): void {
             'mode'     => 'Month view',
         ];
 
-        $request = new Illuminate\Http\Request($requestData);
+        $request = new Request($requestData);
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -149,7 +150,7 @@ describe('List Calendar Event Page', function (): void {
             'mode'     => 'Week view',
         ];
 
-        $request = new Illuminate\Http\Request($requestData);
+        $request = new Request($requestData);
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -210,7 +211,7 @@ describe('List Calendar Event Page', function (): void {
             'mode'     => 'Day view',
         ];
 
-        $request = new Illuminate\Http\Request($requestData);
+        $request = new Request($requestData);
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();

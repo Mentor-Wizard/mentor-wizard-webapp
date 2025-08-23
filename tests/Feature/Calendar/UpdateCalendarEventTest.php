@@ -26,7 +26,7 @@ describe('Calendar Event Edit Page', function (): void {
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
+            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 12:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
@@ -37,12 +37,13 @@ describe('Calendar Event Edit Page', function (): void {
     });
 
     it('updates event successfully', function (): void {
+        actingAs($this->user);
         $updateEventData = [
             'title'             => 'Default event',
-            'fromDate'          => Carbon::today()->addDays(2)->format('Y-m-d'),
-            'fromTime'          => '09:00',
-            'toDate'            => Carbon::today()->addDays(2)->format('Y-m-d'),
-            'toTime'            => '10:00',
+            'fromDate'          => Carbon::today()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '12:00',
+            'toDate'            => Carbon::today()->addDays(5)->format('Y-m-d'),
+            'toTime'            => '13:00',
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
         ];
@@ -54,9 +55,9 @@ describe('Calendar Event Edit Page', function (): void {
         $this->assertDatabaseHas('events', [
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::today()->addDays(2)->format('Y-m-d').' 09:00:00',
-            'end_date_time'     => Carbon::today()->addDays(2)->format('Y-m-d').' 10:00:00',
-            'date'              => Carbon::today()->addDays(2)->format('Y-m-d'),
+            'start_date_time'   => Carbon::today()->addDays(5)->format('Y-m-d').' 09:00:00',
+            'end_date_time'     => Carbon::today()->addDays(5)->format('Y-m-d').' 10:00:00',
+            'date'              => Carbon::today()->addDays(5)->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',

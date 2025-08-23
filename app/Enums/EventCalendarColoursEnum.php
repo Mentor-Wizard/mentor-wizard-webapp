@@ -27,6 +27,9 @@ enum EventCalendarColoursEnum: string
 
     public static function randomValue(): string
     {
-        return self::values()[array_rand(self::values())];
+        $values = self::values();
+        $randomIndex = random_int(0, count($values) - 1);
+
+        return $values[$randomIndex];
     }
 }

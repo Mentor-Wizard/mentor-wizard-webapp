@@ -65,6 +65,19 @@ describe('Delete Calendar Event Page', function (): void {
 
     });
 
+    it('returns 403 for non-mentor user', function (): void {
+        Auth::logout();
+        $viewer = User::factory()->create();
+        Auth::login($viewer);
+
+        $response = new DeleteCalendarPage()->handle($this->event->unique_id);
+
+        expect($response)
+            ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
+            ->and($response->getStatusCode())->toBe(403)
+            ->and($response->getData(true)['message'])->toBe('Only mentor can create events.');
+    });
+
     it("throws 403 forbidden when trying to delete another mentor's program", function (): void {
 
         $this->actingAs($this->anotherMentor);

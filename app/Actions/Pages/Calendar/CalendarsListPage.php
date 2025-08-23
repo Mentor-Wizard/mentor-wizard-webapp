@@ -20,7 +20,7 @@ class CalendarsListPage
 
     public function handle(Request $request): Response
     {
-        $data = $request?->all();
+        $data = $request->all();
         $timezone = $data['timezone'] ?? 'Europe/Kiev';
         $date = $data['date'] ?? Carbon::now('Europe/Kyiv')->format('Y-m-d');
         $mode = $data['mode'] ?? 'Month view';
@@ -33,10 +33,10 @@ class CalendarsListPage
             'locale'         => app()->getLocale(),
             'permissions'    => auth()->user()->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
             'events'         => match ($mode) {
-                'Month view'    => User::query()->find(auth()->id())->getMonthFormattedEvents($date, $timezone),
-                'Week view'     => User::query()->find(auth()->id())->getWeekFormattedEvents($date, $timezone),
-                'Day view'      => User::query()->find(auth()->id())->getDailyFormattedEvents($date, $timezone),
-                default         => User::query()->find(auth()->id())->getMonthFormattedEvents($date, $timezone)
+                'Month view'    => User::query()->find(auth()->id())?->getMonthFormattedEvents($date, $timezone),
+                'Week view'     => User::query()->find(auth()->id())?->getWeekFormattedEvents($date, $timezone),
+                'Day view'      => User::query()->find(auth()->id())?->getDailyFormattedEvents($date, $timezone),
+                default         => User::query()->find(auth()->id())?->getMonthFormattedEvents($date, $timezone)
             }]);
     }
 }

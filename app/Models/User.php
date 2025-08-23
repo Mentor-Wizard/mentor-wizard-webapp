@@ -154,13 +154,11 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         );
     }
 
-    //    private function getEvents(Carbon $startDate, Carbon $endDate)
-    //    {
-    //        return $this->events()
-    //            ->whereBetween('start_date_time',
-    //                [$startDate, $endDate])->orderBy('start_date_time', 'asc')->get();
-    //    }
-
+    /**
+     * Get formatted events for month view
+     *
+     * @return array{calendarView: array, hasEventsBefore: bool, hasEventsAfter: bool}
+     */
     public function getMonthFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
         $appTimezone = config('app.timezone');
@@ -371,6 +369,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
                 if ($currentDatetimeStamp < $event->start_date_time->timestamp) {
                     $availableSlots[] = ['start' => $currentDatetimeStamp, 'end' => $event->start_date_time->timestamp];
                 }
+
                 $previousEvent = $event;
             } else {
                 $availableSlots[] = ['start' => $previousEvent->end_date_time->timestamp, 'end' => $event->start_date_time->timestamp];
@@ -387,7 +386,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     public function checkAvailableSlots($startDateTime, $endDateTime): bool
     {
         $availableSlots = $this->getAvailableSlots();
-        if (count($availableSlots) === 0) {
+        if ($availableSlots === []) {
             return true;
         }
 

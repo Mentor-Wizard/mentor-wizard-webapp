@@ -169,6 +169,23 @@ describe('Store Calendar Event', function (): void {
 
         expect($attached)->toBeTrue();
     });
+
+    it('returns 403 for non-mentor user', function (): void {
+        // Log out mentor and login as a regular viewer without mentor role
+        Auth::logout();
+        $viewer = User::factory()->create();
+        Auth::login($viewer);
+
+        $request = Mockery::mock(StoreEventRequest::class);
+        $request->shouldReceive('getEventData')->never();
+
+        $response = (new StoreCalendarPage)->handle($request);
+
+        expect($response)
+            ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
+            ->and($response->getStatusCode())->toBe(403)
+            ->and($response->getData(true)['message'])->toBe('Only mentee can create events.');
+    });
 });
 
 function createAndAuthenticateMentorForCalendar(): User

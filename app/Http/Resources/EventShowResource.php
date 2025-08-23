@@ -15,6 +15,19 @@ class EventShowResource extends JsonResource
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
+     *
+     * @property string $time
+     * @property string $datetime
+     * @property string $href
+     * @property string $id
+     * @property string $name
+     * @property string $title
+     * @property string $fromDateFormatted
+     * @property string $fromDate
+     * @property string $toDateFormatted
+     * @property string $toTime
+     * @property string $duration
+     * @property string $description
      */
     #[Override]
     public function toArray(Request $request): array
