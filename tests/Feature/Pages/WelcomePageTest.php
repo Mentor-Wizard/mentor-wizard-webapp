@@ -13,8 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 covers(WelcomePage::class);
 
 beforeEach(function (): void {
-    $this->seed(RoleSeeder::class);
-    $this->seed(UserSeeder::class);
+    $this->seed([RoleSeeder::class, UserSeeder::class]);
 });
 it('returns a successful response', function (): void {
     $role = Role::findByName(RoleEnum::MENTOR->value);
