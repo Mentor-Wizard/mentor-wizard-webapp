@@ -1,7 +1,7 @@
 <script setup>
-import { useFooter } from '@/Stores/footer.js';
 import ApplicationLogo from '@/Components/UI/Logo/ApplicationLogo.vue';
 import MentorsList from '@/Components/UI/Table/MentorsList.vue';
+import { useFooter } from '@/Stores/footer.js';
 
 const footer = useFooter();
 </script>

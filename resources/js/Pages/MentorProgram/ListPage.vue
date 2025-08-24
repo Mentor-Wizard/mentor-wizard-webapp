@@ -1,12 +1,13 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { EllipsisVerticalIcon } from '@heroicons/vue/20/solid';
-import AppModal from '@/Components/AppModal.vue';
-import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
-import DangerButton from '@/Components/UI/Button/DangerButton.vue';
-import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+
+import AppModal from '@/Components/AppModal.vue';
+import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const showDeleteModal = ref(false);
 const programToDelete = ref(null);

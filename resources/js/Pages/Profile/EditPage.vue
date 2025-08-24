@@ -1,13 +1,14 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import MainPageText from '@/Components/MainPageText.vue';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
 import { BellIcon, CreditCardIcon, UserIcon } from '@heroicons/vue/20/solid';
 import { ref, shallowRef } from 'vue';
+
+import MainPageText from '@/Components/MainPageText.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
+import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
 import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
 import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
-import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
-import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
 
 const selectedTab = ref(0);
 

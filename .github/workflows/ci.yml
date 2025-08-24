@@ -74,9 +74,14 @@ jobs:
             }
           - {
               name: '🅿️ Prettier',
-              command: 'yarn exec prettier . -c',
+              command: 'yarn prettier',
               node: true,
             }
+          - {
+            name: '🔯 Eslint',
+            command: 'yarn eslint',
+            node: true,
+          }
 
     steps:
       - name: '🛎 Checkout'

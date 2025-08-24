@@ -1,7 +1,8 @@
 <script setup>
+import 'vue-tel-input/vue-tel-input.css';
+
 import { ref, watch } from 'vue';
 import { VueTelInput } from 'vue-tel-input';
-import 'vue-tel-input/vue-tel-input.css';
 
 const emit = defineEmits(['update:modelValue', 'update:country']);
 

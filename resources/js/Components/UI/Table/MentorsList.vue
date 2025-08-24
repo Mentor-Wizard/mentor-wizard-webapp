@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { EnvelopeIcon, UserIcon } from '@heroicons/vue/20/solid';
 import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
 import AppPagination from '@/Components/Navigation/AppPagination.vue';
 
 const page = usePage();

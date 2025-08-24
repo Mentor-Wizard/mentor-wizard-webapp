@@ -1,15 +1,16 @@
 <script setup>
-import InputError from '@/Components/UI/Forms/InputError.vue';
-import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import AppModal from '@/Components/AppModal.vue';
-import TextInput from '@/Components/UI/Forms/TextInput.vue';
+import { DialogTitle } from '@headlessui/vue';
+import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline/index.js';
 import { useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
-import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline/index.js';
-import { DialogTitle } from '@headlessui/vue';
-import SecondaryButton from '@/Components/UI/Button/SecondaryButton.vue';
-import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+
+import AppModal from '@/Components/AppModal.vue';
 import CloseButton from '@/Components/UI/Button/CloseButton.vue';
+import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+import SecondaryButton from '@/Components/UI/Button/SecondaryButton.vue';
+import InputError from '@/Components/UI/Forms/InputError.vue';
+import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
+import TextInput from '@/Components/UI/Forms/TextInput.vue';
 
 const confirmingUserDeletion = ref(false);
 const passwordInput = ref(null);

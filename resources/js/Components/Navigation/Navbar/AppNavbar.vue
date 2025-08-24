@@ -11,9 +11,10 @@ import {
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { useNavigation } from '@/Stores/navigation.js';
 import { computed, ref } from 'vue';
+
 import NavbarLogo from '@/Components/Navigation/Navbar/NavbarLogo.vue';
+import { useNavigation } from '@/Stores/navigation.js';
 
 defineProps({
   transparent: {

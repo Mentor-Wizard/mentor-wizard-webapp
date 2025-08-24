@@ -1,15 +1,16 @@
 <script setup>
-import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import TextInput from '@/Components/UI/Forms/TextInput.vue';
-import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import InputError from '@/Components/UI/Forms/InputError.vue';
-import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
-import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+import { computed, ref } from 'vue';
+
 import AppModal from '@/Components/AppModal.vue';
-import TextArea from '@/Components/UI/Forms/TextArea.vue';
+import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
+import InputError from '@/Components/UI/Forms/InputError.vue';
+import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
+import TextArea from '@/Components/UI/Forms/TextArea.vue';
+import TextInput from '@/Components/UI/Forms/TextInput.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
   program: {

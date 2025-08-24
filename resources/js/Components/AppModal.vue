@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
 import {
   Dialog,
   DialogPanel,
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
+import { onMounted, onUnmounted } from 'vue';
 
 const isOpen = defineModel({
   type: Boolean,

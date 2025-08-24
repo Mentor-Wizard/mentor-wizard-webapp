@@ -1,12 +1,13 @@
 <script setup>
-import { ref } from 'vue';
 import { Dialog, DialogPanel } from '@headlessui/vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
-import ApplicationLogo from '@/Components/UI/Logo/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
-import { useNavigation } from '@/Stores/navigation.js';
-import AppNavbar from '@/Components/Navigation/Navbar/AppNavbar.vue';
+import { ref } from 'vue';
+
 import AppFooter from '@/Components/Navigation/AppFooter.vue';
+import AppNavbar from '@/Components/Navigation/Navbar/AppNavbar.vue';
+import ApplicationLogo from '@/Components/UI/Logo/ApplicationLogo.vue';
+import { useNavigation } from '@/Stores/navigation.js';
 
 const mobileMenuOpen = ref(false);
 const { landingNavigation: navigation } = useNavigation();

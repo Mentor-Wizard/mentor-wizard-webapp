@@ -1,12 +1,13 @@
 <script setup>
-import LandingLayout from '@/Layouts/LandingLayout.vue';
-import { usePage } from '@inertiajs/vue3';
 import { StarIcon } from '@heroicons/vue/20/solid';
-import AppPagination from '@/Components/Navigation/AppPagination.vue';
+import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+
+import AppPagination from '@/Components/Navigation/AppPagination.vue';
 import LinkedinButton from '@/Components/UI/Button/LinkedinButton.vue';
 import TelegramButton from '@/Components/UI/Button/TelegramButton.vue';
 import WhatsappButton from '@/Components/UI/Button/WhatsappButton.vue';
+import LandingLayout from '@/Layouts/LandingLayout.vue';
 
 const mentor = usePage().props.mentor;
 const reviews = computed(() => usePage().props.reviews);

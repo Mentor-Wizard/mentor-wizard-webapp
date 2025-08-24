@@ -1,6 +1,6 @@
 <script setup>
-import AppNavbar from '@/Components/Navigation/Navbar/AppNavbar.vue';
 import AppFooter from '@/Components/Navigation/AppFooter.vue';
+import AppNavbar from '@/Components/Navigation/Navbar/AppNavbar.vue';
 </script>
 <template>
   <div>

@@ -1,13 +1,14 @@
 <script setup>
+import { Head, Link, useForm } from '@inertiajs/vue3';
+
+import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 import CheckboxInput from '@/Components/UI/Forms/CheckboxInput.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/UI/Forms/InputError.vue';
 import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 import TextInput from '@/Components/UI/Forms/TextInput.vue';
 import GithubLogo from '@/Components/UI/Logo/GithubLogo.vue';
 import GoogleLogo from '@/Components/UI/Logo/GoogleLogo.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
 
 defineProps({
   canResetPassword: {

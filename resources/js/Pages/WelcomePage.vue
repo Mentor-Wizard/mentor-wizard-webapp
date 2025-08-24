@@ -1,13 +1,14 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import LandingLayout from '@/Layouts/LandingLayout.vue';
+import { CheckIcon } from '@heroicons/vue/20/solid';
 import {
   ArrowPathIcon,
   CloudArrowUpIcon,
   FingerPrintIcon,
   LockClosedIcon,
 } from '@heroicons/vue/24/outline';
-import { CheckIcon } from '@heroicons/vue/20/solid';
+import { Head } from '@inertiajs/vue3';
+
+import LandingLayout from '@/Layouts/LandingLayout.vue';
 
 const features = [
   {
