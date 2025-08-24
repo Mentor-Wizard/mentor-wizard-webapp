@@ -3,7 +3,7 @@ import prettierConfig from '@vue/eslint-config-prettier';
 import globals from 'globals';
 import js from '@eslint/js';
 import oxlint from 'eslint-plugin-oxlint';
-import simpleImportSort from "eslint-plugin-simple-import-sort";
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
 export default [
   ...pluginVue.configs['flat/recommended'],
@@ -13,11 +13,11 @@ export default [
   {
     files: ['resources/js/**/*.{js,vue}'],
     plugins: {
-      "simple-import-sort": simpleImportSort,
+      'simple-import-sort': simpleImportSort,
     },
     rules: {
-      "simple-import-sort/imports": "error",
-      "simple-import-sort/exports": "error",
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
       'vue/block-order': [
         'error',
         {
