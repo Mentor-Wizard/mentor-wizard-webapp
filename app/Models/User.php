@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\EventCalendarColoursEnum;
 use App\Enums\RoleGuardEnum;
-use App\Http\Resources\EventResource;
+use App\Http\Resources\EventDayViewResource;
+use App\Http\Resources\EventMonthViewResource;
+use App\Http\Resources\EventWeekViewResource;
 use App\Observers\UserObserver;
 use Carbon\CarbonPeriod;
 use Database\Factories\UserFactory;
@@ -187,7 +188,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
             ->map(function (Collection $dateEvents) use ($date): array {
                 $payload = [
                     'date'   => $dateEvents->first()->start_date_time->format('Y-m-d'),
-                    'events' => EventResource::collection($dateEvents)->resolve(),
+                    'events' => EventMonthViewResource::collection($dateEvents)->resolve(),
                 ];
                 if (Carbon::parse($date)->isSameMonth($dateEvents->first()->start_date_time)) {
                     $payload['isCurrentMonth'] = true;
@@ -238,19 +239,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
         $events = $userEvents->whereBetween('start_date_time',
             [$startDate, $endDate])->orderBy('start_date_time')->get()
-            ->map(fn (Event $dayEvent): array => [
-                'id'            => $dayEvent->unique_id,
-                'dayNumber'     => (int) Carbon::parse($dayEvent->start_date_time)->format('w') + 1,
-                'time'          => Carbon::parse($dayEvent->start_date_time)->format('g:i A'),
-                'dateTime'      => Carbon::parse($dayEvent->start_date_time)->format('Y-m-d"T"H:i:s'),
-                'durationIndex' => (int) ($dayEvent->duration * 12 / 3600),
-                'startIndex'    => (int) ((((int) Carbon::parse($dayEvent->start_date_time)->format('H') * 3600
-                            + (int) Carbon::parse($dayEvent->start_date_time)->format('m') * 60
-                            + (int) Carbon::parse($dayEvent->start_date_time)->format('s')) * 6 / 3600) + 2),
-                'title'  => $dayEvent->title,
-                'href'   => $dayEvent->web_link,
-                'colour' => EventCalendarColoursEnum::randomValue(),
-            ]);
+            ->map(fn (Event $dayEvent): array => new EventWeekViewResource($dayEvent, $setTimeZone)->resolve());
         $daysEvents = $userEventsForCalendar->pluck('date')->unique()->toArray();
         $weekDays = CarbonPeriod::create($startDate, '1 day', $endDate);
         $calendarView = [];
@@ -303,18 +292,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
         $events = $dayEvents->whereBetween('start_date_time',
             [$todayDate, $tomorrowDate])->orderBy('start_date_time')->get()
-            ->map(fn (Event $dayEvent): array => [
-                'id'            => $dayEvent->unique_id,
-                'time'          => Carbon::parse($dayEvent->start_date_time)->format('g:i A'),
-                'dateTime'      => Carbon::parse($dayEvent->start_date_time)->format('Y-m-d"T"H:i:s'),
-                'durationIndex' => (int) ($dayEvent->duration * 12 / 3600),
-                'startIndex'    => (int) ((((int) Carbon::parse($dayEvent->start_date_time)->format('H') * 3600
-                            + (int) Carbon::parse($dayEvent->start_date_time)->format('m') * 60
-                            + (int) Carbon::parse($dayEvent->start_date_time)->format('s')) * 6 / 3600) + 2),
-                'title'  => $dayEvent->title,
-                'href'   => $dayEvent->web_link,
-                'colour' => EventCalendarColoursEnum::randomValue(),
-            ]);
+            ->map(fn (Event $dayEvent): array => new EventDayViewResource($dayEvent, $setTimeZone)->resolve());
         $daysEvents = $dailyEvents->pluck('date')->unique()->toArray();
 
         $calendarView = [];

@@ -8,6 +8,7 @@ use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
+use phpseclib3\Math\BigInteger;
 
 class EventShowResource extends JsonResource
 {
@@ -19,7 +20,7 @@ class EventShowResource extends JsonResource
      * @property string $time
      * @property string $datetime
      * @property string $href
-     * @property string $id
+     * @property BigInteger $id
      * @property string $name
      * @property string $title
      * @property string $fromDateFormatted
@@ -33,7 +34,7 @@ class EventShowResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'                => $this->unique_id,
+            'id'                => $this->id,
             'title'             => $this->title,
             'fromDateFormatted' => $this->start_date_time->format('Y-M-d'),
             'fromDate'          => $this->start_date_time->format('Y-m-d'),

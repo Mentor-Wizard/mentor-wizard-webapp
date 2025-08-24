@@ -56,7 +56,6 @@ describe('Event model', function (): void {
         $model = new Event;
 
         expect($model->getFillable())->toEqual([
-            'unique_id',
             'title',
             'status',
             'start_date_time',
@@ -77,7 +76,6 @@ describe('Event model', function (): void {
         $end = Carbon::create(2025, 8, 22, 10, 30, 0);
 
         $payload = [
-            'unique_id'         => (string) str()->uuid(),
             'title'             => 'Event Create Test',
             'status'            => EventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,

@@ -49,11 +49,11 @@ describe('Calendar Event Delete Page', function (): void {
         auth()->login($this->user);
 
         $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete', $this->event->unique_id));
+            ->delete(route('pages.calendar.delete', $this->event->getKey()));
         $response->assertRedirect(route('pages.calendar'));
 
         $this->assertDatabaseMissing('events', [
-            'unique_id' => $this->event->unique_id,
+            'id' => $this->event->getKey(),
         ]);
     });
 
@@ -62,7 +62,7 @@ describe('Calendar Event Delete Page', function (): void {
         auth()->login($this->nonMentorUser);
 
         $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete', $this->event->unique_id));
+            ->delete(route('pages.calendar.delete', $this->event->getKey()));
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 
@@ -71,7 +71,7 @@ describe('Calendar Event Delete Page', function (): void {
         auth()->login($this->anotherMentor);
 
         $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete', $this->event->unique_id));
+            ->delete(route('pages.calendar.delete', $this->event->getKey()));
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 });

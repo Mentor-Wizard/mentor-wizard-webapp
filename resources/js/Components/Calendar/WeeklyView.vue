@@ -35,11 +35,8 @@ const props = defineProps({
 
 <template>
     <div class="flex h-full flex-col">
-<!--        {{weekDays}}-->
-<!--        {{events.calendarView}}-->
         <div ref="container" class="isolate flex flex-auto flex-col overflow-auto bg-white">
             <div style="width: 165%" class="flex max-w-full flex-none flex-col sm:max-w-none md:max-w-full">
-<!--                {{events.calendarView}}-->
                 <div ref="containerNav" class="sticky top-0 z-30 flex-none bg-white shadow-sm ring-1 ring-black/5 sm:pr-8">
                     <div class="grid grid-cols-7 text-sm/6 text-gray-500 sm:hidden">
                         <div v-for="(day, dayIdx) in events.calendarView">

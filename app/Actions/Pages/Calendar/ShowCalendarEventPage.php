@@ -17,7 +17,7 @@ class ShowCalendarEventPage
 {
     use AsController;
 
-    public function handle(string $uuid): Response
+    public function handle(string $id): Response
     {
         return Inertia::render('Calendar/ShowEditEvent', [
             'canLogin'          => Route::has('login'),
@@ -26,7 +26,7 @@ class ShowCalendarEventPage
             'phpVersion'        => PHP_VERSION,
             'locale'            => app()->getLocale(),
             'permissions'       => auth()->user()->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
-            'event'             => EventShowResource::collection(Event::query()->where('unique_id', $uuid)->get())->resolve(),
+            'event'             => EventShowResource::collection(Event::query()->where('id', $id)->get())->resolve(),
         ]);
     }
 }

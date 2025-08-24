@@ -29,7 +29,6 @@ describe('EventShowResource', function (): void {
 
         expect($array)
             ->toHaveKeys(['id', 'title', 'fromDateFormatted', 'fromDate', 'fromTime', 'toDate', 'type', 'toDateFormatted', 'toTime', 'duration', 'href', 'description'])
-            ->and($array['id'])->toBe($event->unique_id)
             ->and($array['title'])->toBe('Show Resource Test')
             ->and($array['fromDateFormatted'])->toBe('2025-Aug-22')
             ->and($array['fromDate'])->toBe('2025-08-22')

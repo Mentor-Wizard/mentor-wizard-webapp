@@ -20,7 +20,7 @@ class EditCalendarPage
             return response()->json(['message' => 'Only mentee can create events.'], Response::HTTP_FORBIDDEN);
         }
 
-        Event::query()->where('unique_id', $id)->update([
+        Event::query()->where('id', $id)->update([
             ...$request->getEventData(),
         ]);
 

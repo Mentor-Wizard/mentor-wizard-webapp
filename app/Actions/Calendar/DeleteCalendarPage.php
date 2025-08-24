@@ -20,7 +20,7 @@ class DeleteCalendarPage
             return response()->json(['message' => 'Only mentor can create events.'], Response::HTTP_FORBIDDEN);
         }
 
-        $event = Event::query()->where('unique_id', $id)->first();
+        $event = Event::query()->where('id', $id)->first();
         if (! $event) {
             return response()->json(['message' => 'Event not found'], Response::HTTP_NOT_FOUND);
         }
@@ -30,7 +30,7 @@ class DeleteCalendarPage
             return response()->json(['message' => 'Attempt to delete event of other mentor'], Response::HTTP_FORBIDDEN);
         }
 
-        Event::query()->where('unique_id', $id)->delete();
+        Event::query()->where('id', $id)->delete();
 
         return Inertia::location(route('pages.calendar'));
     }

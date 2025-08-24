@@ -27,12 +27,11 @@ class EventFactory extends Factory
     public function definition(): array
     {
         $dateTime = fake()->dateTimeBetween('-5 month', '+5 month');
-        $duration = fake()->randomNumber(5, true) * 1800;
+        $duration = fake()->randomNumber(1, true) * 1800;
         $endTime = Carbon::parse($dateTime)->addSeconds($duration);
         $date = $dateTime->format('Y-m-d');
 
         return [
-            'unique_id'         => fake()->uuid(),
             'title'             => fake()->sentence(3),
             'status'            => fake()->randomElement(EventStatusEnum::values()),
             'start_date_time'   => $dateTime,

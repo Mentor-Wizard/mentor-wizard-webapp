@@ -76,7 +76,7 @@ class EditEventRequest extends FormRequest
             $validated['toDate'].' '.$validated['toTime']
         );
 
-        $duration = $startDateTime->diffInSeconds($endDateTime);
+        $duration = $startDateTime?->diffInSeconds($endDateTime);
         $eventType = match ($validated['type']) {
             'individual'        => EventTypeEnum::INDIVIDUAL->value,
             'group'             => EventTypeEnum::GROUP->value,
@@ -84,7 +84,6 @@ class EditEventRequest extends FormRequest
         };
 
         return [
-            'unique_id'         => (string) str()->uuid(),
             'title'             => $validated['title'],
             'start_date_time'   => $startDateTime,
             'end_date_time'     => $endDateTime,
@@ -92,7 +91,7 @@ class EditEventRequest extends FormRequest
             'type'              => $eventType,
             'description'       => $validated['description'],
             'status'            => EventStatusEnum::CONFIRMED,
-            'date'              => $startDateTime->format('Y-m-d'),
+            'date'              => $startDateTime?->format('Y-m-d'),
         ];
     }
 

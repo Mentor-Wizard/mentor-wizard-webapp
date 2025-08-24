@@ -110,7 +110,7 @@ describe('Update Calendar Event', function (): void {
         $start = Carbon::tomorrow()->setTime(13, 0, 0);
         $end = Carbon::tomorrow()->setTime(14, 30, 0);
         $payload = [
-            'unique_id'       => $this->event->unique_id,
+            'id'              => $this->event->getKey(),
             'title'           => 'Updated Title',
             'status'          => EventStatusEnum::CONFIRMED->value,
             'start_date_time' => $start,
@@ -125,13 +125,13 @@ describe('Update Calendar Event', function (): void {
         $request->shouldReceive('getEventData')->andReturn($payload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
-        $response = (new EditCalendarPage)->handle($request, $this->event->unique_id);
+        $response = (new EditCalendarPage)->handle($request, (string) $this->event->getKey());
 
         expect($response)
             ->toBeInstanceOf(Response::class)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar'));
 
-        $updated = EventModel::query()->where('unique_id', $this->event->unique_id)->first();
+        $updated = EventModel::query()->whereKey($this->event->getKey())->first();
         expect($updated)
             ->title->toBe('Updated Title')
             ->date->toBe($start->format('Y-m-d'))
@@ -148,7 +148,7 @@ describe('Update Calendar Event', function (): void {
         $request = Mockery::mock(EditEventRequest::class);
         $request->shouldReceive('getEventData')->never();
 
-        $response = (new EditCalendarPage)->handle($request, (string) str()->uuid());
+        $response = (new EditCalendarPage)->handle($request, (string) $this->event->getKey());
 
         expect($response)
             ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)

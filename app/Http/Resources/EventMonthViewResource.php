@@ -7,8 +7,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
+use phpseclib3\Math\BigInteger;
 
-class EventResource extends JsonResource
+class EventMonthViewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,7 +20,7 @@ class EventResource extends JsonResource
      * @property string $time
      * @property string $datetime
      * @property string $href
-     * @property string $id
+     * @property BigInteger $id
      */
     #[Override]
     public function toArray(Request $request): array
@@ -29,7 +30,7 @@ class EventResource extends JsonResource
             'time'     => $this->start_date_time->format('gA'),
             'datetime' => $this->start_date_time->format('Y-m-d\TH:i'),
             'href'     => $this->web_link,
-            'id'       => $this->unique_id,
+            'id'       => $this->id,
         ];
     }
 }

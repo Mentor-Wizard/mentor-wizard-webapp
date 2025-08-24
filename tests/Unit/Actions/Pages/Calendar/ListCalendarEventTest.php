@@ -67,17 +67,18 @@ describe('List Calendar Event Page', function (): void {
 
         expect($response)->toBeInstanceOf(Response::class)
             ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
-            ->and(Arr::get($result, 'props.canLogin'))->toBe(true)
-            ->and(Arr::get($result, 'props.canRegister'))->toBe(true)
+            ->and(Arr::get($result, 'props.canLogin'))->toBeTrue()
+            ->and(Arr::get($result, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($result, 'props.events.hasEventsBefore'))->toBeFalse()
             ->and(Arr::get($result, 'props.events.hasEventsAfter'))->toBeFalse()
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.name'))->toBe($this->data['title'])
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.datetime'))->toBe(Carbon::today()->endOfMonth()->endOfWeek()->format('Y-m-d').'T23:59')
+            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.datetime'))
+            ->toBe(Carbon::today()->endOfMonth()->endOfWeek()->format('Y-m-d').'T23:59')
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.time'))->toBe('11PM')
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.id'))->toBe($this->monthEvent->unique_id)
+            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.id'))->toBe($this->monthEvent->getKey())
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.date'))->toBe(Carbon::today()->endOfMonth()->endOfWeek()->format('Y-m-d'));
     });
 
@@ -129,7 +130,7 @@ describe('List Calendar Event Page', function (): void {
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.href'))->toBe($this->data['web_link'])
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.datetime'))->toBe(Carbon::today()->endOfMonth()->endOfWeek()->format('Y-m-d').'T23:59')
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.time'))->toBe('11PM')
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.id'))->toBe($this->monthEvent->unique_id)
+            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.id'))->toBe($this->monthEvent->getKey())
             ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.date'))->toBe(Carbon::today()->endOfMonth()->endOfWeek()->format('Y-m-d'));
     });
 
@@ -159,8 +160,8 @@ describe('List Calendar Event Page', function (): void {
         expect($response)->toBeInstanceOf(Response::class)
             ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
-            ->and(Arr::get($result, 'props.canLogin'))->toBe(true)
-            ->and(Arr::get($result, 'props.canRegister'))->toBe(true)
+            ->and(Arr::get($result, 'props.canLogin'))->toBeTrue()
+            ->and(Arr::get($result, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($result, 'props.events.events.0.dayNumber'))->toBe(1)
@@ -169,7 +170,7 @@ describe('List Calendar Event Page', function (): void {
             ->and(Arr::get($result, 'props.events.events.0.time'))->toBe('10:00 PM')
             ->and(Arr::get($result, 'props.events.events.0.startIndex'))->toBe(134)
             ->and(Arr::get($result, 'props.events.events.0.durationIndex'))->toBe(12)
-            ->and(Arr::get($result, 'props.events.events.0.id'))->toBe($this->weekEvent->unique_id)
+            ->and(Arr::get($result, 'props.events.events.0.id'))->toBe($this->weekEvent->getKey())
             ->and(Arr::get($result, 'props.events.events.0.colour'))->not()->toBeNull()
             ->and(Arr::get($result, 'props.events.calendarView'))->toBeArray()
             ->and(Arr::get($result, 'props.events.calendarView'))->toHaveCount(7)
@@ -219,8 +220,8 @@ describe('List Calendar Event Page', function (): void {
 
         expect($response)->toBeInstanceOf(Response::class)
             ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
-            ->and(Arr::get($result, 'props.canLogin'))->toBe(true)
-            ->and(Arr::get($result, 'props.canRegister'))->toBe(true)
+            ->and(Arr::get($result, 'props.canLogin'))->toBeTrue()
+            ->and(Arr::get($result, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($result, 'props.events.events.0.href'))->toBe($this->data['web_link'])
@@ -229,7 +230,7 @@ describe('List Calendar Event Page', function (): void {
             ->and(Arr::get($result, 'props.events.events.0.startIndex'))->toBe(134)
             ->and(Arr::get($result, 'props.events.events.0.durationIndex'))->toBe(12)
             ->and(Arr::get($result, 'props.events.events.0.title'))->toBe($this->data['title'])
-            ->and(Arr::get($result, 'props.events.events.0.id'))->toBe($this->dailyEvent->unique_id)
+            ->and(Arr::get($result, 'props.events.events.0.id'))->toBe($this->dailyEvent->getKey())
             ->and(Arr::get($result, 'props.events.events.0.colour'))->not()->toBeNull()
             ->and(Arr::get($result, 'props.events.calendarView'))->toBeArray()
             ->and(Arr::get($result, 'props.events.calendarView'))->toHaveCount(3)

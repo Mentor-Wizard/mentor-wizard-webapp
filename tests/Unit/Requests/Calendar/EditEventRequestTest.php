@@ -34,17 +34,11 @@ it('builds event data correctly for individual type', function (): void {
         ->and($result['title'])->toBe('Demo Event')
         ->and($result['start_date_time'])->toEqual($expectedStart)
         ->and($result['end_date_time'])->toEqual($expectedEnd)
-        ->and($result['duration'])->toBe($expectedStart->diffInSeconds($expectedEnd))
+        ->and($result['duration'])->toBe($expectedStart?->diffInSeconds($expectedEnd))
         ->and($result['type'])->toBe(EventTypeEnum::INDIVIDUAL->value)
         ->and($result['description'])->toBe('Some description')
         ->and($result['status'])->toBe(EventStatusEnum::CONFIRMED)
         ->and($result['date'])->toBe('2025-01-01');
-
-    // UUID v4 format (basic check for 36-char hex + dashes)
-    expect($result['unique_id'])
-        ->toBeString()
-        ->and(mb_strlen((string) $result['unique_id']))->toBe(36)
-        ->and((bool) preg_match('/^[0-9a-f-]{36}$/i', (string) $result['unique_id']))->toBeTrue();
 });
 
 it('builds event data correctly for group type', function (): void {
@@ -72,14 +66,9 @@ it('builds event data correctly for group type', function (): void {
         ->and($result['title'])->toBe('Group Session')
         ->and($result['start_date_time'])->toEqual($expectedStart)
         ->and($result['end_date_time'])->toEqual($expectedEnd)
-        ->and($result['duration'])->toBe($expectedStart->diffInSeconds($expectedEnd))
+        ->and($result['duration'])->toBe($expectedStart?->diffInSeconds($expectedEnd))
         ->and($result['type'])->toBe(EventTypeEnum::GROUP->value)
         ->and($result['description'])->toBe('Group event')
         ->and($result['status'])->toBe(EventStatusEnum::CONFIRMED)
         ->and($result['date'])->toBe('2025-02-10');
-
-    expect($result['unique_id'])
-        ->toBeString()
-        ->and(mb_strlen((string) $result['unique_id']))->toBe(36)
-        ->and((bool) preg_match('/^[0-9a-f-]{36}$/i', (string) $result['unique_id']))->toBeTrue();
 });

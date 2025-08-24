@@ -49,7 +49,7 @@ describe('Calendar Event Edit Page', function (): void {
         ];
 
         $response = $this->withoutMiddleware()
-            ->patch(route('pages.calendar.edit', $this->event->unique_id), $updateEventData);
+            ->patch(route('pages.calendar.edit', $this->event->getKey()), $updateEventData);
 
         $response->assertRedirect(route('pages.calendar'));
         $this->assertDatabaseHas('events', [
@@ -84,7 +84,7 @@ describe('Calendar Event Edit Page', function (): void {
             'description'       => Str::random(2001),
         ];
 
-        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->unique_id), $invalidData);
+        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->getKey()), $invalidData);
         $response->assertSessionHasErrors(['fromDate', 'description', 'title', 'type']);
 
         $invalidData = [
@@ -97,7 +97,7 @@ describe('Calendar Event Edit Page', function (): void {
             'description'       => Str::random(2001),
         ];
 
-        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->unique_id), $invalidData);
+        $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->getKey()), $invalidData);
         $response->assertSessionHasErrors(['fromDate', 'description', 'title', 'type']);
     });
 
@@ -115,7 +115,7 @@ describe('Calendar Event Edit Page', function (): void {
         ];
 
         $response = $this->withoutMiddleware()
-            ->patch(route('pages.calendar.edit', $this->event->unique_id), $eventData);
+            ->patch(route('pages.calendar.edit', $this->event->getKey()), $eventData);
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 });

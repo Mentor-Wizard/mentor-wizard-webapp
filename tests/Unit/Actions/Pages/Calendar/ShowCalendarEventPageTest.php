@@ -43,7 +43,7 @@ describe('Show Calendar Event Page', function (): void {
     it('renders ShowEditEvent component with mentor permissions and correct event payload', function (): void {
         auth()->login($this->mentor);
 
-        $response = new ShowCalendarEventPage()->handle($this->event->unique_id);
+        $response = new ShowCalendarEventPage()->handle((string) $this->event->getKey());
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -56,7 +56,7 @@ describe('Show Calendar Event Page', function (): void {
             ->and(Arr::get($page, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($page, 'props.permissions'))->toBe('edit')
             // Event payload is returned as an array via collection()->resolve()
-            ->and(Arr::get($page, 'props.event.0.id'))->toBe($this->event->unique_id)
+            ->and(Arr::get($page, 'props.event.0.id'))->toBe($this->event->getKey())
             ->and(Arr::get($page, 'props.event.0.title'))->toBe('Demo Event')
             ->and(Arr::get($page, 'props.event.0.fromDate'))->toBe($this->start->format('Y-m-d'))
             ->and(Arr::get($page, 'props.event.0.fromDateFormatted'))->toBe($this->start->format('Y-M-d'))
@@ -72,20 +72,20 @@ describe('Show Calendar Event Page', function (): void {
     it('renders ShowEditEvent component with viewer permissions for non-mentor users', function (): void {
         auth()->login($this->viewer);
 
-        $response = new ShowCalendarEventPage()->handle($this->event->unique_id);
+        $response = new ShowCalendarEventPage()->handle((string) $this->event->getKey());
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
         expect($response)->toBeInstanceOf(Response::class)
             ->and(Arr::get($page, 'component'))->toBe('Calendar/ShowEditEvent')
             ->and(Arr::get($page, 'props.permissions'))->toBe('view')
-            ->and(Arr::get($page, 'props.event.0.id'))->toBe($this->event->unique_id);
+            ->and(Arr::get($page, 'props.event.0.id'))->toBe($this->event->getKey());
     });
 
-    it('returns empty event array for non-existing uuid', function (): void {
+    it('returns empty event array for non-existing id', function (): void {
         auth()->login($this->mentor);
 
-        $response = new ShowCalendarEventPage()->handle((string) str()->uuid());
+        $response = new ShowCalendarEventPage()->handle((string) 999999999);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 

@@ -84,7 +84,6 @@ class StoreEventRequest extends FormRequest
         };
 
         return [
-            'unique_id'       => (string) str()->uuid(),
             'title'           => $validated['title'],
             'start_date_time' => $startDateTime,
             'end_date_time'   => $endDateTime,

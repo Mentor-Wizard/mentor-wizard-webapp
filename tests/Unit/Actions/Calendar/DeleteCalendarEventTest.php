@@ -46,7 +46,7 @@ describe('Delete Calendar Event Page', function (): void {
 
     it('deletes mentor program and returns redirect response', function (): void {
         $action = new DeleteCalendarPage;
-        $response = $action->handle($this->event->unique_id);
+        $response = $action->handle((string) $this->event->getKey());
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar'))
@@ -54,7 +54,7 @@ describe('Delete Calendar Event Page', function (): void {
     });
 
     it('throws exception when trying to delete non-existent event', function (): void {
-        $deletedEventId = $this->event->unique_id;
+        $deletedEventId = (string) $this->event->getKey();
         $this->event->delete();
 
         $response = new DeleteCalendarPage()->handle($deletedEventId);
@@ -70,7 +70,7 @@ describe('Delete Calendar Event Page', function (): void {
         $viewer = User::factory()->create();
         Auth::login($viewer);
 
-        $response = new DeleteCalendarPage()->handle($this->event->unique_id);
+        $response = new DeleteCalendarPage()->handle((string) $this->event->getKey());
 
         expect($response)
             ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
@@ -93,7 +93,7 @@ describe('Delete Calendar Event Page', function (): void {
             'mentor_program_id' => null,
         ]);
 
-        $response = new DeleteCalendarPage()->handle($this->event->unique_id);
+        $response = new DeleteCalendarPage()->handle((string) $this->event->getKey());
 
         expect($response)->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
             ->and($response->getStatusCode())->toBe(403)
