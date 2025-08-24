@@ -12,8 +12,8 @@ describe('EventCalendarColoursEnum', function (): void {
         $values = EventCalendarColoursEnum::values();
         $random = EventCalendarColoursEnum::randomValue();
 
-        $caseNames = array_map(fn ($caseName) => $caseName->name, EventCalendarColoursEnum::cases());
-        $caseValues = array_map(fn ($caseValue) => $caseValue->value, EventCalendarColoursEnum::cases());
+        $caseNames = array_map(fn (EventCalendarColoursEnum $caseName) => $caseName->name, EventCalendarColoursEnum::cases());
+        $caseValues = array_map(fn (EventCalendarColoursEnum $caseValue) => $caseValue->value, EventCalendarColoursEnum::cases());
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)

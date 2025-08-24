@@ -8,27 +8,23 @@ use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
-use phpseclib3\Math\BigInteger;
 
+/**
+ * @property-read int|string $id
+ * @property-read string $title
+ * @property-read \Illuminate\Support\Carbon $start_date_time
+ * @property-read \Illuminate\Support\Carbon $end_date_time
+ * @property-read string $type
+ * @property-read int $duration
+ * @property-read string $web_link
+ * @property-read string $description
+ */
 class EventShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
-     *
-     * @property string $time
-     * @property string $datetime
-     * @property string $href
-     * @property BigInteger $id
-     * @property string $name
-     * @property string $title
-     * @property string $fromDateFormatted
-     * @property string $fromDate
-     * @property string $toDateFormatted
-     * @property string $toTime
-     * @property string $duration
-     * @property string $description
      */
     #[Override]
     public function toArray(Request $request): array

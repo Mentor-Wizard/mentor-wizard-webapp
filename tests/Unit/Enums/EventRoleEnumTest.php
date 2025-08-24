@@ -11,8 +11,8 @@ describe('EventRoleEnum', function (): void {
         $names = EventRoleEnum::names();
         $values = EventRoleEnum::values();
 
-        $caseNames = array_map(fn ($case) => $case->name, EventRoleEnum::cases());
-        $caseValues = array_map(fn ($case) => $case->value, EventRoleEnum::cases());
+        $caseNames = array_map(fn (EventRoleEnum $case) => $case->name, EventRoleEnum::cases());
+        $caseValues = array_map(fn (EventRoleEnum $case) => $case->value, EventRoleEnum::cases());
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)

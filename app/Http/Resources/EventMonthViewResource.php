@@ -6,21 +6,21 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 use Override;
-use phpseclib3\Math\BigInteger;
 
+/**
+ * @property-read int|string $id
+ * @property-read string $title
+ * @property-read Carbon $start_date_time
+ * @property-read string $web_link
+ */
 class EventMonthViewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
-     *
-     * @property string $name
-     * @property string $time
-     * @property string $datetime
-     * @property string $href
-     * @property BigInteger $id
      */
     #[Override]
     public function toArray(Request $request): array

@@ -168,63 +168,15 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
      */
     public function getMonthFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
-        $appTimezone = config('app.timezone');
-        $setTimeZone = $timezone !== $appTimezone ? $timezone : null;
-        $startDate = Carbon::parse($date, $setTimeZone)->startOfMonth()->startOfWeek();
-        $endDate = Carbon::parse($date, $setTimeZone)->endOfMonth()->endOfWeek();
-        $period = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $dateConfig = $this->prepareDateConfiguration($date, $timezone);
+        $events = $this->getFormattedEventsForPeriod($dateConfig['startDate'], $dateConfig['endDate'], $date);
+        $calendarView = $this->buildCalendarView($dateConfig['monthDates'], $events);
 
-        $monthDates = $period->toArray();
-
-        $userEvents = $this->events();
-        $userEventsCheckAfter = clone $userEvents;
-        $userEventsCheckBefore = clone $userEvents;
-        $hasEventsBefore = false;
-        $hasEventsAfter = false;
-
-        $events = ($userEvents->whereBetween('start_date_time',
-            [$startDate, $endDate])->orderBy('start_date_time')->get()
-            ->groupBy('date')
-            ->map(function (Collection $dateEvents) use ($date): array {
-                $payload = [
-                    'date'   => $dateEvents->first()->start_date_time->format('Y-m-d'),
-                    'events' => EventMonthViewResource::collection($dateEvents)->resolve(),
-                ];
-                if (Carbon::parse($date)->isSameMonth($dateEvents->first()->start_date_time)) {
-                    $payload['isCurrentMonth'] = true;
-                }
-
-                if (Carbon::parse($date)->isSameDay($dateEvents->first()->start_date_time)) {
-                    $payload['isSelected'] = true;
-                }
-
-                if (Carbon::now()->isSameDay($dateEvents->first()->start_date_time)) {
-                    $payload['isToday'] = true;
-                }
-
-                return $payload;
-            })->toArray());
-
-        $calendarView = [];
-        foreach ($monthDates as $monthDate) {
-            if (! Arr::has($events, $monthDate->format('Y-m-d'))) {
-                $calendarView[] = ['date' => $monthDate->format('Y-m-d'), 'events' => []];
-            } else {
-                $calendarView[] = $events[$monthDate->format('Y-m-d')];
-            }
-        }
-
-        if ($userEventsCheckBefore->where('start_date_time', '<', $startDate)->count() > 0) {
-            $hasEventsBefore = true;
-        }
-
-        if ($userEventsCheckAfter->where('start_date_time', '>', $endDate->endOfDay())->get()->count() > 0) {
-            $hasEventsAfter = true;
-        }
-
-        return ['calendarView' => $calendarView,
-            'hasEventsBefore'  => $hasEventsBefore,
-            'hasEventsAfter'   => $hasEventsAfter];
+        return [
+            'calendarView'    => $calendarView,
+            'hasEventsBefore' => $this->hasEventsBeforeDate($dateConfig['startDate']),
+            'hasEventsAfter'  => $this->hasEventsAfterDate($dateConfig['endDate']),
+        ];
     }
 
     public function getWeekFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
@@ -273,60 +225,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     public function getDailyFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
-        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
-        $todayDate = Carbon::parse($date, $setTimeZone)->startOfDay();
-        $tomorrowDate = Carbon::parse($date, $setTimeZone)->addDay()->startOfDay();
-        $firstEvent = $this->events()->orderBy('start_date_time')->first();
-        $latestEvent = $this->events()->orderBy('start_date_time', 'desc')->latest()->first();
-
-        $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $date, $setTimeZone)->startOfMonth();
-        $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $date, $setTimeZone)->endOfMonth();
-        if ($todayDate->isAfter($endCalendarMonth)) {
-            $endCalendarMonth = Carbon::parse($todayDate, $setTimeZone)->endOfMonth();
-        }
-
-        $dayEvents = $this->events();
-        $dailyEvents = clone $dayEvents;
-        $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
-        $months = $period->toArray();
-
-        $events = $dayEvents->whereBetween('start_date_time',
-            [$todayDate, $tomorrowDate])->orderBy('start_date_time')->get()
-            ->map(fn (Event $dayEvent): array => new EventDayViewResource($dayEvent, $setTimeZone)->resolve());
-        $daysEvents = $dailyEvents->pluck('date')->unique()->toArray();
-
-        $calendarView = [];
-        foreach ($months as $month) {
-            $startDate = Carbon::parse($month, $setTimeZone)->startOfMonth()->startOfWeek();
-            $endDate = Carbon::parse($month, $setTimeZone)->endOfMonth()->endOfWeek();
-            $daysPeriod = CarbonPeriod::create($startDate, '1 day', $endDate);
-            $monthDates = $daysPeriod->toArray();
-
-            foreach ($monthDates as $monthDate) {
-                $payload = ['date' => $monthDate->format('Y-m-d')];
-                if (Carbon::parse($monthDate)->isSameMonth($todayDate)) {
-                    $payload['isCurrentMonth'] = true;
-                }
-
-                if (Carbon::parse($monthDate)->isSameDay($todayDate)) {
-                    $payload['isSelected'] = true;
-                }
-
-                if (Carbon::now()->isSameDay(Carbon::parse($monthDate))) {
-                    $payload['isToday'] = true;
-                }
-
-                if (in_array($monthDate->format('Y-m-d'), $daysEvents)) {
-                    $payload['hasEvent'] = true;
-                }
-
-                if (isset($calendarView[$month->format('Y-m')])) {
-                    $calendarView[$month->format('Y-m')][] = $payload;
-                } else {
-                    $calendarView[$month->format('Y-m')] = [$payload];
-                }
-            }
-        }
+        $dateConfig = $this->prepareDailyDateConfiguration($date, $timezone);
+        $events = $this->getDailyEvents($dateConfig['todayDate'], $dateConfig['tomorrowDate'], $timezone);
+        $calendarView = $this->buildDailyCalendarView($dateConfig['months'], $dateConfig['todayDate'], $dateConfig['daysEvents'], $timezone);
 
         return [
             'events'       => $events,
@@ -343,7 +244,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         $currentDate = Carbon::now();
         $currentDatetimeStamp = $currentDate->timestamp;
         $events = $this->events()->where('start_date_time', '>', $currentDate)->orderBy('start_date_time')->get();
-        if ($events->count() === 0) {
+        if ($events->isEmpty()) {
             return [];
         }
 
@@ -394,5 +295,166 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
         ];
+    }
+
+    private function prepareDateConfiguration(string $date, string $timezone): array
+    {
+        $appTimezone = config('app.timezone');
+        $setTimeZone = $timezone !== $appTimezone ? $timezone : null;
+        $startDate = Carbon::parse($date, $setTimeZone)->startOfMonth()->startOfWeek();
+        $endDate = Carbon::parse($date, $setTimeZone)->endOfMonth()->endOfWeek();
+        $period = CarbonPeriod::create($startDate, '1 day', $endDate);
+
+        return [
+            'startDate'  => $startDate,
+            'endDate'    => $endDate,
+            'monthDates' => $period->toArray(),
+        ];
+    }
+
+    private function getFormattedEventsForPeriod(Carbon $startDate, Carbon $endDate, string $date): array
+    {
+        return $this->events()
+            ->whereBetween('start_date_time', [$startDate, $endDate])
+            ->orderBy('start_date_time')
+            ->get()
+            ->groupBy('date')
+            ->map(fn (Collection $dateEvents): array => $this->formatDateEvents($dateEvents, $date))
+            ->toArray();
+    }
+
+    private function formatDateEvents(Collection $dateEvents, string $date): array
+    {
+        /** @var Event $firstEvent */
+        $firstEvent = $dateEvents->first();
+        $payload = [
+            'date'   => $firstEvent->start_date_time->format('Y-m-d'),
+            'events' => EventMonthViewResource::collection($dateEvents)->resolve(),
+        ];
+
+        $parsedDate = Carbon::parse($date);
+        $eventDate = $firstEvent->start_date_time;
+
+        if ($parsedDate->isSameMonth($eventDate)) {
+            $payload['isCurrentMonth'] = true;
+        }
+
+        if ($parsedDate->isSameDay($eventDate)) {
+            $payload['isSelected'] = true;
+        }
+
+        if (Carbon::now()->isSameDay($eventDate)) {
+            $payload['isToday'] = true;
+        }
+
+        return $payload;
+    }
+
+    private function buildCalendarView(array $monthDates, array $events): array
+    {
+        $calendarView = [];
+        foreach ($monthDates as $monthDate) {
+            $dateKey = $monthDate->format('Y-m-d');
+            $calendarView[] = Arr::has($events, $dateKey)
+                ? $events[$dateKey]
+                : ['date' => $dateKey, 'events' => []];
+        }
+
+        return $calendarView;
+    }
+
+    private function hasEventsBeforeDate(Carbon $startDate): bool
+    {
+        return $this->events()->where('start_date_time', '<', $startDate)->exists();
+    }
+
+    private function hasEventsAfterDate(Carbon $endDate): bool
+    {
+        return $this->events()->where('start_date_time', '>', $endDate->endOfDay())->exists();
+    }
+
+    private function prepareDailyDateConfiguration(string $date, string $timezone): array
+    {
+        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
+        $todayDate = Carbon::parse($date, $setTimeZone)->startOfDay();
+        $tomorrowDate = Carbon::parse($date, $setTimeZone)->addDay()->startOfDay();
+        $firstEvent = $this->events()->orderBy('start_date_time')->first();
+        $latestEvent = $this->events()->orderBy('start_date_time', 'desc')->latest()->first();
+
+        $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $date, $setTimeZone)->startOfMonth();
+        $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $date, $setTimeZone)->endOfMonth();
+        if ($todayDate->isAfter($endCalendarMonth)) {
+            $endCalendarMonth = Carbon::parse($todayDate, $setTimeZone)->endOfMonth();
+        }
+
+        $dailyEvents = clone $this->events();
+        $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
+
+        return [
+            'todayDate'    => $todayDate,
+            'tomorrowDate' => $tomorrowDate,
+            'months'       => $period->toArray(),
+            'daysEvents'   => $dailyEvents->pluck('date')->unique()->toArray(),
+        ];
+    }
+
+    private function getDailyEvents(Carbon $todayDate, Carbon $tomorrowDate, ?string $timezone): array
+    {
+        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
+
+        return $this->events()
+            ->whereBetween('start_date_time', [$todayDate, $tomorrowDate])
+            ->orderBy('start_date_time')
+            ->get()
+            ->map(fn (Event $dayEvent): array => new EventDayViewResource($dayEvent, $setTimeZone)->resolve())
+            ->toArray();
+    }
+
+    private function buildDailyCalendarView(array $months, Carbon $todayDate, array $daysEvents, ?string $timezone): array
+    {
+        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
+        $calendarView = [];
+
+        foreach ($months as $month) {
+            $startDate = Carbon::parse($month, $setTimeZone)->startOfMonth()->startOfWeek();
+            $endDate = Carbon::parse($month, $setTimeZone)->endOfMonth()->endOfWeek();
+            $daysPeriod = CarbonPeriod::create($startDate, '1 day', $endDate);
+            $monthDates = $daysPeriod->toArray();
+
+            foreach ($monthDates as $monthDate) {
+                $payload = $this->buildDayPayload($monthDate, $todayDate, $daysEvents);
+
+                if (isset($calendarView[$month->format('Y-m')])) {
+                    $calendarView[$month->format('Y-m')][] = $payload;
+                } else {
+                    $calendarView[$month->format('Y-m')] = [$payload];
+                }
+            }
+        }
+
+        return $calendarView;
+    }
+
+    private function buildDayPayload(Carbon $monthDate, Carbon $todayDate, array $daysEvents): array
+    {
+        $payload = ['date' => $monthDate->format('Y-m-d')];
+
+        if ($monthDate->isSameMonth($todayDate)) {
+            $payload['isCurrentMonth'] = true;
+        }
+
+        if ($monthDate->isSameDay($todayDate)) {
+            $payload['isSelected'] = true;
+        }
+
+        if (Carbon::now()->isSameDay($monthDate)) {
+            $payload['isToday'] = true;
+        }
+
+        if (in_array($monthDate->format('Y-m-d'), $daysEvents)) {
+            $payload['hasEvent'] = true;
+        }
+
+        return $payload;
     }
 }

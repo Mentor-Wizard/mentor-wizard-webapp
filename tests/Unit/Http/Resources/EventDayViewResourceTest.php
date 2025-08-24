@@ -12,8 +12,7 @@ mutates(EventDayViewResource::class);
 
 describe('EventDayViewResource', function (): void {
     it('maps event to day view payload with timezone-aware fields', function (): void {
-        // Fixed date that is in DST for Europe/Kyiv (EEST)
-        $start = Carbon::create(2025, 8, 24, 22, 0, 0, 'Europe/Kyiv'); // 22:00
+        $start = Carbon::create(2025, 8, 24, 22, 0, 0, 'Europe/Kyiv');
         $end = (clone $start)->addHour();
 
         /** @var Event $event */

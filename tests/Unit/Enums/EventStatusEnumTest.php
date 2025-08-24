@@ -11,8 +11,8 @@ describe('EventStatusEnum', function (): void {
         $names = EventStatusEnum::names();
         $values = EventStatusEnum::values();
 
-        $caseNames = array_map(fn ($caseName) => $caseName->name, EventStatusEnum::cases());
-        $caseValues = array_map(fn ($caseValue) => $caseValue->value, EventStatusEnum::cases());
+        $caseNames = array_map(fn (EventStatusEnum $caseName) => $caseName->name, EventStatusEnum::cases());
+        $caseValues = array_map(fn (EventStatusEnum $caseValue) => $caseValue->value, EventStatusEnum::cases());
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)
