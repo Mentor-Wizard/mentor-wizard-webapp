@@ -84,12 +84,12 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('filters by rate range using array params', function (): void {
-        $this->getJson('feat/mentor-profiles?filter[rate]=50,90')
+        $this->getJson('feat/mentor-profiles?filter[rate][min]=50&filter[rate][max]=90')
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonFragment(['title' => 'Laravel Guru'])
             ->assertJsonFragment(['title' => 'React Ninja']);
-        $this->getJson('feat/mentor-profiles?filter[rate]=0,50')
+        $this->getJson('feat/mentor-profiles?filter[rate][min]=0&filter[rate][max]=50')
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['title' => 'Python Master']);
@@ -97,16 +97,16 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('filters by cost range via related mentorPrograms using array params', function (): void {
-        $this->getJson('feat/mentor-profiles?filter[cost]=0,300')
+        $this->getJson('feat/mentor-profiles?filter[cost][min]=0&filter[cost][max]=300')
             ->assertOk()
             ->assertJsonCount(2, 'data');
 
-        $this->getJson('feat/mentor-profiles?filter[cost]=500,700')
+        $this->getJson('feat/mentor-profiles?filter[cost][min]=500&filter[cost][max]=700')
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['title' => 'Laravel Guru']);
 
-        $this->getJson('feat/mentor-profiles?filter[cost]=0,300')
+        $this->getJson('feat/mentor-profiles?filter[cost][min]=0&filter[cost][max]=300')
             ->assertOk()
             ->assertJsonCount(2, 'data');
     });

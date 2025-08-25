@@ -10,11 +10,17 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class TagLanguagesFilter implements Filter
 {
-    public function __invoke(Builder $query, $tags, string $property)
+    /**
+     * Expected: ?filter[languages]=PHP or ?filter[languages]=PHP,Go
+     *
+     * @param  array<int,string>|string  $tags  Comma-separated or array of language tags
+     * @param  non-empty-string  $property  Filter key (e.g., "languages")
+     */
+    public function __invoke(Builder $query, mixed $tags, string $property): void
     {
         $tags = is_array($tags) ? $tags : explode(',', (string) $tags);
 
-        return $query->whereHas('mentorTags', function (Builder $query) use ($tags): void {
+        $query->whereHas('mentorTags', function (Builder $query) use ($tags): void {
             $query->where('type', TagEnum::LANGUAGE)
                 ->whereIn('tag', $tags);
         });

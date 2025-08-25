@@ -50,4 +50,21 @@ describe('ListMentorProfilePage unit-ish filter coverage', function (): void {
             ->assertOk()
             ->assertJsonCount(1, 'data');
     });
+
+    it('filters by explicit rate and cost ranges', function (): void {
+        // rate: only max provided
+        $this->getJson('/unit/mentor-profiles?filter[rate][max]=80')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+
+        // rate: min & max
+        $this->getJson('/unit/mentor-profiles?filter[rate][min]=70&filter[rate][max]=95')
+            ->assertOk()
+            ->assertJsonCount(2, 'data');
+
+        // cost via related mentorPrograms
+        $this->getJson('/unit/mentor-profiles?filter[cost][min]=100&filter[cost][max]=200')
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+    });
 });

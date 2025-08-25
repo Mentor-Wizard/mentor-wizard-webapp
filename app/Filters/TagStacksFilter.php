@@ -10,9 +10,16 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class TagStacksFilter implements Filter
 {
-    public function __invoke(Builder $query, $tags, string $property): void
+    /**
+     * Expected: ?filter[stacks]=Laravel or ?filter[stacks]=Laravel,Symfony
+     *
+     * @param  array<int,string>|string  $tags  Comma-separated or array of stack tags
+     * @param  non-empty-string  $property  Filter key (e.g., "stacks")
+     */
+    public function __invoke(Builder $query, mixed $tags, string $property): void
     {
         $tags = is_array($tags) ? $tags : explode(',', (string) $tags);
+
         $query->whereHas('mentorTags', function (Builder $query) use ($tags): void {
             $query->where('type', TagEnum::STACK)
                 ->whereIn('tag', $tags);

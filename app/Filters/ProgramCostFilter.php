@@ -9,13 +9,25 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class ProgramCostFilter implements Filter
 {
-    public function __invoke(Builder $query, $cost, string $property)
+    use \App\Traits\ParsesNumericRange;
+
+    /**
+     * Expected: ?filter[program_cost][min]=10&filter[program_cost][max]=100
+     *
+     * @param  array{min?: string|int|float|null, max?: string|int|float|null}|mixed  $value
+     * @param  non-empty-string  $property  Column name to filter (e.g., "cost")
+     */
+    public function __invoke(Builder $query, mixed $value, string $property): void
     {
-        return $query->whereHas('mentorPrograms', function (Builder $query) use ($cost): void {
-            $query->whereBetween('cost', [
-                $cost[0] ?? 0,
-                $cost[1] ?? PHP_FLOAT_MAX,
-            ]);
+        $min = is_array($value) && array_key_exists('min', $value) ? $this->toFloatOrNull($value['min']) : null;
+        $max = is_array($value) && array_key_exists('max', $value) ? $this->toFloatOrNull($value['max']) : null;
+
+        [$min, $max] = $this->normalizeBounds($min, $max);
+
+        $query->whereHas('mentorPrograms', function (Builder $q) use ($min, $max): void {
+            $q->when($min !== null && $max !== null, fn (Builder $qq) => $qq->whereBetween('cost', [$min, $max]))
+                ->when($min !== null && $max === null, fn (Builder $qq) => $qq->where('cost', '>=', $min))
+                ->when($min === null && $max !== null, fn (Builder $qq) => $qq->where('cost', '<=', $max));
         });
     }
 }
