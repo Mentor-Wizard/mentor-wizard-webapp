@@ -9,6 +9,7 @@ use App\Http\Resources\EventDayViewResource;
 use App\Http\Resources\EventMonthViewResource;
 use App\Http\Resources\EventWeekViewResource;
 use App\Observers\UserObserver;
+use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
@@ -189,9 +190,15 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         $userEvents = $this->events();
         $userEventsForCalendar = clone $userEvents;
 
-        $events = $userEvents->whereBetween('start_date_time',
-            [$startDate, $endDate])->orderBy('start_date_time')->get()
-            ->map(fn (Event $dayEvent): array => new EventWeekViewResource($dayEvent, $setTimeZone)->resolve());
+        $eventsCollection = $userEvents->whereBetween('start_date_time',
+            [$startDate, $endDate])->orderBy('start_date_time')->get();
+
+        $events = [];
+        foreach ($eventsCollection as $dayEvent) {
+            /** @var Event $dayEvent */
+            $events[] = new EventWeekViewResource($dayEvent, $setTimeZone)->resolve();
+        }
+
         $daysEvents = $userEventsForCalendar->pluck('date')->unique()->toArray();
         $weekDays = CarbonPeriod::create($startDate, '1 day', $endDate);
         $calendarView = [];
@@ -250,6 +257,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
         $previousEvent = null;
         foreach ($events as $event) {
+            /** @var Event $event */
             if (is_null($previousEvent)) {
                 if ($currentDatetimeStamp < $event->start_date_time->timestamp) {
                     $availableSlots[] = ['start' => $currentDatetimeStamp, 'end' => $event->start_date_time->timestamp];
@@ -325,7 +333,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     private function formatDateEvents(Collection $dateEvents, string $date): array
     {
-        /** @var Event $firstEvent */
+        /** @var ?Event $firstEvent */
         $firstEvent = $dateEvents->first();
         $payload = [
             'date'   => $firstEvent->start_date_time->format('Y-m-d'),
@@ -378,7 +386,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
         $todayDate = Carbon::parse($date, $setTimeZone)->startOfDay();
         $tomorrowDate = Carbon::parse($date, $setTimeZone)->addDay()->startOfDay();
+        /** @var ?Event $firstEvent */
         $firstEvent = $this->events()->orderBy('start_date_time')->first();
+        /** @var ?Event $latestEvent */
         $latestEvent = $this->events()->orderBy('start_date_time', 'desc')->latest()->first();
 
         $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $date, $setTimeZone)->startOfMonth();
@@ -401,13 +411,18 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     private function getDailyEvents(Carbon $todayDate, Carbon $tomorrowDate, ?string $timezone): array
     {
         $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
-
-        return $this->events()
+        $eventsCollection = $this->events()
             ->whereBetween('start_date_time', [$todayDate, $tomorrowDate])
             ->orderBy('start_date_time')
-            ->get()
-            ->map(fn (Event $dayEvent): array => new EventDayViewResource($dayEvent, $setTimeZone)->resolve())
-            ->toArray();
+            ->get();
+
+        $events = [];
+        foreach ($eventsCollection as $dayEvent) {
+            /** @var Event $dayEvent */
+            $events[] = new EventDayViewResource($dayEvent, $setTimeZone)->resolve();
+        }
+
+        return $events;
     }
 
     private function buildDailyCalendarView(array $months, Carbon $todayDate, array $daysEvents, ?string $timezone): array
@@ -435,7 +450,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $calendarView;
     }
 
-    private function buildDayPayload(Carbon $monthDate, Carbon $todayDate, array $daysEvents): array
+    private function buildDayPayload(CarbonInterface $monthDate, Carbon $todayDate, array $daysEvents): array
     {
         $payload = ['date' => $monthDate->format('Y-m-d')];
 

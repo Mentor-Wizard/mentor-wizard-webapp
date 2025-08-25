@@ -132,7 +132,6 @@ describe('Store Calendar Event', function (): void {
         $end = Carbon::tomorrow()->setTime(10, 0, 0);
 
         $eventPayload = [
-            'unique_id'       => (string) str()->uuid(),
             'title'           => 'Planning',
             'status'          => EventStatusEnum::CONFIRMED->value,
             'start_date_time' => $start,

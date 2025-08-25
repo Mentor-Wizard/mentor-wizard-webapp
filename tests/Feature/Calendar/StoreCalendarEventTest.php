@@ -98,7 +98,6 @@ describe('Calendar Event Store Page', function (): void {
         // Create an existing future event for the user from 10:00 to 15:00 tomorrow
         $tomorrow = Carbon::tomorrow();
         $event = App\Models\Event::query()->create([
-            'unique_id'       => (string) str()->uuid(),
             'title'           => 'Busy block',
             'status'          => EventStatusEnum::CONFIRMED,
             'start_date_time' => $tomorrow->copy()->setTime(10, 0),
