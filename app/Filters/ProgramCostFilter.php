@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
+use App\Traits\ParsesNumericRange;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
 class ProgramCostFilter implements Filter
 {
-    use \App\Traits\ParsesNumericRange;
+    use ParsesNumericRange;
 
     /**
      * Expected: ?filter[program_cost][min]=10&filter[program_cost][max]=100

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
+use App\Traits\ParsesNumericRange;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
 class ProfileRateFilter implements Filter
 {
-    use \App\Traits\ParsesNumericRange;
+    use ParsesNumericRange;
 
     /**
      * Expected: ?filter[rate][min]=10&filter[rate][max]=100
