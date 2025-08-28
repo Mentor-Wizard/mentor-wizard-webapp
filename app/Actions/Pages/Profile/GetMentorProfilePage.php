@@ -29,7 +29,7 @@ class GetMentorProfilePage
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
-        return Inertia::render('Profile/Mentor', [
+        return Inertia::render('Profile/Mentor/View', [
             'mentor'        => UserResource::make($user)->resolve(),
             'reviews'       => $reviews,
             'defaultAvatar' => UserProfile::DEFAULT_AVATAR_URL,
