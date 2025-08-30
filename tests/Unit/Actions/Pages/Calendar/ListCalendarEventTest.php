@@ -87,7 +87,7 @@ describe('List Calendar Event Page', function (): void {
         auth()->login($this->user);
         $action = new CalendarsListPage;
 
-        $previousMonthDate = Carbon::today()->startOfMonth()->subDays(10);
+        $previousMonthDate = Carbon::today('Europe/Kyiv')->startOfMonth()->subDays(10);
         $this->data['start_date_time'] = $previousMonthDate->format('Y-m-d').' 22:00:00';
         $this->data['date'] = $previousMonthDate->format('Y-m-d');
 
@@ -139,7 +139,7 @@ describe('List Calendar Event Page', function (): void {
         auth()->login($this->user);
         $action = new CalendarsListPage;
 
-        $this->data['start_date_time'] = Carbon::today()->endOfWeek()->format('Y-m-d').' 22:00:00';
+        $this->data['start_date_time'] = Carbon::today('Europe/Kyiv')->endOfWeek()->format('Y-m-d').' 22:00:00';
         $this->data['date'] = Carbon::today()->endOfWeek()->format('Y-m-d');
 
         $this->weekEvent = EventModel::factory()->create($this->data);
