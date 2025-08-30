@@ -140,7 +140,7 @@ describe('List Calendar Event Page', function (): void {
         $action = new CalendarsListPage;
 
         $this->data['start_date_time'] = Carbon::today('Europe/Kyiv')->endOfWeek()->format('Y-m-d').' 22:00:00';
-        $this->data['date'] = Carbon::today()->endOfWeek()->format('Y-m-d');
+        $this->data['date'] = Carbon::today('Europe/Kyiv')->endOfWeek()->format('Y-m-d');
 
         $this->weekEvent = EventModel::factory()->create($this->data);
         $this->weekEvent->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
@@ -166,7 +166,7 @@ describe('List Calendar Event Page', function (): void {
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($result, 'props.events.events.0.dayNumber'))->toBe(1)
             ->and(Arr::get($result, 'props.events.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe(Carbon::today()->endOfWeek()->format('Y-m-d').'"EEST"22:00:00')
+            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe(Carbon::today('Europe/Kyiv')->endOfWeek()->format('Y-m-d').'"EEST"22:00:00')
             ->and(Arr::get($result, 'props.events.events.0.time'))->toBe('10:00 PM')
             ->and(Arr::get($result, 'props.events.events.0.startIndex'))->toBe(134)
             ->and(Arr::get($result, 'props.events.events.0.durationIndex'))->toBe(12)
