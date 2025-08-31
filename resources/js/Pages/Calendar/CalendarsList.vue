@@ -16,7 +16,7 @@ const todayDate = ref(new Date().toLocaleDateString(String
     month: 'short',
     year: 'numeric',
     weekday: 'long',
-    timeZone: 'Europe/Kyiv'
+    timeZone: 'UTC'
 }));
 const showCreatePage = ref(false);
 const permissions = ref(usePage().props.permissions)
@@ -51,7 +51,7 @@ const refreshData = () => {
         data: {
             'date': currentDate.value,
             'mode': currentTab.value,
-            'timezone': "Europe/Kyiv"
+            'timezone': "UTC"
         },
         preserveState: true,
         only: ['events'],
@@ -85,17 +85,7 @@ const openShowEditEventPage = (eventId) => {
             console.error('Failed to fetch calendar data:', errors);
         }
     });
-    //
-    // currentEventId.value = eventId;
-    // showEditEventPage.value = true;
-    // console.log(showEditEventPage.value);
 }
-// const closeShowEventsPage = () => {
-//     console.log("open show edit event page");
-//     currentEventId.value = null;
-//     showEditEventPage.value = false;
-// }
-
 const closeCreateEventPage = () => {
     showCreatePage.value = false;
 }

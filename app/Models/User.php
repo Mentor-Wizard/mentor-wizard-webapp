@@ -167,7 +167,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
      *
      * @return array{calendarView: array, hasEventsBefore: bool, hasEventsAfter: bool}
      */
-    public function getMonthFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
+    public function getMonthFormattedEvents(string $date): array
     {
         $dateConfig = $this->prepareDateConfiguration($date);
         $events = $this->getFormattedEventsForPeriod($dateConfig['startDate'], $dateConfig['endDate'], $date);
@@ -180,7 +180,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         ];
     }
 
-    public function getWeekFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
+    public function getWeekFormattedEvents(string $date): array
     {
         $appTimezone = config('app.timezone');
         $startDate = Carbon::parse($date, $appTimezone)->startOfWeek();
@@ -229,7 +229,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         ];
     }
 
-    public function getDailyFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
+    public function getDailyFormattedEvents(string $date): array
     {
         $dateConfig = $this->prepareDailyDateConfiguration($date);
         $events = $this->getDailyEvents($dateConfig['todayDate'], $dateConfig['tomorrowDate']);

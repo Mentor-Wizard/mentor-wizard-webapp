@@ -12,8 +12,7 @@ mutates(EventWeekViewResource::class);
 
 describe('EventWeekViewResource', function (): void {
     it('maps event to week view payload with dayNumber and timezone-aware fields', function (): void {
-        // Sunday, August 24, 2025 is a Sunday
-        $start = Carbon::create(2025, 8, 24, 22, 0, 0, 'Europe/Kyiv');
+        $start = Carbon::create(2025, 8, 24, 22, 0, 0);
         $end = (clone $start)->addHour();
 
         /** @var Event $event */
@@ -28,7 +27,7 @@ describe('EventWeekViewResource', function (): void {
             'description'     => 'Week view description',
         ]);
 
-        $resource = new EventWeekViewResource($event, 'Europe/Kyiv');
+        $resource = new EventWeekViewResource($event);
         $array = $resource->toArray(request());
 
         expect($array)
@@ -36,7 +35,7 @@ describe('EventWeekViewResource', function (): void {
             ->and($array['id'])->toBe($event->getKey())
             ->and($array['dayNumber'])->toBe(1) // Sunday -> 1
             ->and($array['time'])->toBe('10:00 PM')
-            ->and($array['dateTime'])->toBe('2025-08-24"EEST"22:00:00')
+            ->and($array['dateTime'])->toBe('2025-08-24"UTC"22:00:00')
             ->and($array['durationIndex'])->toBe(12)
             ->and($array['startIndex'])->toBe(134)
             ->and($array['title'])->toBe('Week Resource Test')

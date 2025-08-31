@@ -21,8 +21,8 @@ class CalendarsListPage
     public function handle(Request $request): Response
     {
         $data = $request->all();
-        $timezone = $data['timezone'] ?? 'Europe/Kiev';
-        $date = $data['date'] ?? Carbon::now('Europe/Kyiv')->format('Y-m-d');
+        $timezone = $data['timezone'] ?? 'UTC';
+        $date = $data['date'] ?? Carbon::now('UTC')->format('Y-m-d');
         $mode = $data['mode'] ?? 'Month view';
 
         return Inertia::render('Calendar/CalendarsList', [
