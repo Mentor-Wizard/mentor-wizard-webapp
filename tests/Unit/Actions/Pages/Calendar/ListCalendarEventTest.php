@@ -166,7 +166,7 @@ describe('List Calendar Event Page', function (): void {
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($result, 'props.events.events.0.dayNumber'))->toBe(1)
             ->and(Arr::get($result, 'props.events.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe(Carbon::today('Europe/Kyiv')->endOfWeek()->format('Y-m-d').'"EEST"22:00:00')
+            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe(Carbon::today('Europe/Kyiv')->endOfWeek()->format('Y-m-d').'"UTC"22:00:00')
             ->and(Arr::get($result, 'props.events.events.0.time'))->toBe('10:00 PM')
             ->and(Arr::get($result, 'props.events.events.0.startIndex'))->toBe(134)
             ->and(Arr::get($result, 'props.events.events.0.durationIndex'))->toBe(12)
@@ -185,21 +185,21 @@ describe('List Calendar Event Page', function (): void {
         auth()->login($this->user);
         $action = new CalendarsListPage;
 
-        $todayDate = Carbon::today();
+        $todayDate = Carbon::today('Europe/Kyiv');
         $this->data['start_date_time'] = $todayDate->format('Y-m-d').' 22:00:00';
         $this->data['date'] = $todayDate->format('Y-m-d');
 
         $this->dailyEvent = EventModel::factory()->create($this->data);
         $this->dailyEvent->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
 
-        $previousMonthDate = Carbon::today()->startOfMonth()->subDays(10);
+        $previousMonthDate = Carbon::today('Europe/Kyiv')->startOfMonth()->subDays(10);
         $this->data['start_date_time'] = $previousMonthDate->format('Y-m-d').' 22:00:00';
         $this->data['date'] = $previousMonthDate->format('Y-m-d');
 
         $this->previousMonthEvent = EventModel::factory()->create($this->data);
         $this->previousMonthEvent->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
 
-        $nextMonthDate = Carbon::today()->endOfMonth()->addDays(10);
+        $nextMonthDate = Carbon::today('Europe/Kyiv')->endOfMonth()->addDays(10);
         $this->data['start_date_time'] = $nextMonthDate->format('Y-m-d').' 22:00:00';
         $this->data['date'] = $nextMonthDate->format('Y-m-d');
 
@@ -225,7 +225,7 @@ describe('List Calendar Event Page', function (): void {
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($result, 'props.events.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe($todayDate->format('Y-m-d').'"EEST"22:00:00')
+            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe($todayDate->format('Y-m-d').'"UTC"22:00:00')
             ->and(Arr::get($result, 'props.events.events.0.time'))->toBe('10:00 PM')
             ->and(Arr::get($result, 'props.events.events.0.startIndex'))->toBe(134)
             ->and(Arr::get($result, 'props.events.events.0.durationIndex'))->toBe(12)

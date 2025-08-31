@@ -169,7 +169,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
      */
     public function getMonthFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
-        $dateConfig = $this->prepareDateConfiguration($date, $timezone);
+        $dateConfig = $this->prepareDateConfiguration($date);
         $events = $this->getFormattedEventsForPeriod($dateConfig['startDate'], $dateConfig['endDate'], $date);
         $calendarView = $this->buildCalendarView($dateConfig['monthDates'], $events);
 
@@ -183,10 +183,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function getWeekFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
         $appTimezone = config('app.timezone');
-        $setTimeZone = $timezone !== $appTimezone ? $timezone : null;
-        $startDate = Carbon::parse($date, $setTimeZone)->startOfWeek();
-        $endDate = Carbon::parse($date, $setTimeZone)->endOfWeek();
-        $todayDate = Carbon::parse($date, $setTimeZone);
+        $startDate = Carbon::parse($date, $appTimezone)->startOfWeek();
+        $endDate = Carbon::parse($date, $appTimezone)->endOfWeek();
+        $todayDate = Carbon::parse($date, $appTimezone);
         $userEvents = $this->events();
         $userEventsForCalendar = clone $userEvents;
 
@@ -196,7 +195,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         $events = [];
         foreach ($eventsCollection as $dayEvent) {
             /** @var Event $dayEvent */
-            $events[] = new EventWeekViewResource($dayEvent, $setTimeZone)->resolve();
+            $events[] = new EventWeekViewResource($dayEvent, $appTimezone)->resolve();
         }
 
         $daysEvents = $userEventsForCalendar->pluck('date')->unique()->toArray();
@@ -232,9 +231,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     public function getDailyFormattedEvents(string $date, string $timezone = 'Europe/Kyiv'): array
     {
-        $dateConfig = $this->prepareDailyDateConfiguration($date, $timezone);
-        $events = $this->getDailyEvents($dateConfig['todayDate'], $dateConfig['tomorrowDate'], $timezone);
-        $calendarView = $this->buildDailyCalendarView($dateConfig['months'], $dateConfig['todayDate'], $dateConfig['daysEvents'], $timezone);
+        $dateConfig = $this->prepareDailyDateConfiguration($date);
+        $events = $this->getDailyEvents($dateConfig['todayDate'], $dateConfig['tomorrowDate']);
+        $calendarView = $this->buildDailyCalendarView($dateConfig['months'], $dateConfig['todayDate'], $dateConfig['daysEvents']);
 
         return [
             'events'       => $events,
@@ -305,12 +304,11 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         ];
     }
 
-    private function prepareDateConfiguration(string $date, string $timezone): array
+    private function prepareDateConfiguration(string $date): array
     {
         $appTimezone = config('app.timezone');
-        $setTimeZone = $timezone !== $appTimezone ? $timezone : null;
-        $startDate = Carbon::parse($date, $setTimeZone)->startOfMonth()->startOfWeek();
-        $endDate = Carbon::parse($date, $setTimeZone)->endOfMonth()->endOfWeek();
+        $startDate = Carbon::parse($date, $appTimezone)->startOfMonth()->startOfWeek();
+        $endDate = Carbon::parse($date, $appTimezone)->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         return [
@@ -381,20 +379,20 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->events()->where('start_date_time', '>', $endDate->endOfDay())->exists();
     }
 
-    private function prepareDailyDateConfiguration(string $date, string $timezone): array
+    private function prepareDailyDateConfiguration(string $date): array
     {
-        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
-        $todayDate = Carbon::parse($date, $setTimeZone)->startOfDay();
-        $tomorrowDate = Carbon::parse($date, $setTimeZone)->addDay()->startOfDay();
+        $appTimezone = config('app.timezone');
+        $todayDate = Carbon::parse($date, $appTimezone)->startOfDay();
+        $tomorrowDate = Carbon::parse($date, $appTimezone)->addDay()->startOfDay();
         /** @var ?Event $firstEvent */
         $firstEvent = $this->events()->orderBy('start_date_time')->first();
         /** @var ?Event $latestEvent */
         $latestEvent = $this->events()->orderBy('start_date_time', 'desc')->latest()->first();
 
-        $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $date, $setTimeZone)->startOfMonth();
-        $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $date, $setTimeZone)->endOfMonth();
+        $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $date, $appTimezone)->startOfMonth();
+        $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $date, $appTimezone)->endOfMonth();
         if ($todayDate->isAfter($endCalendarMonth)) {
-            $endCalendarMonth = Carbon::parse($todayDate, $setTimeZone)->endOfMonth();
+            $endCalendarMonth = Carbon::parse($todayDate, $appTimezone)->endOfMonth();
         }
 
         $dailyEvents = clone $this->events();
@@ -408,9 +406,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         ];
     }
 
-    private function getDailyEvents(Carbon $todayDate, Carbon $tomorrowDate, ?string $timezone): array
+    private function getDailyEvents(Carbon $todayDate, Carbon $tomorrowDate): array
     {
-        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
+        $appTimezone = config('app.timezone');
         $eventsCollection = $this->events()
             ->whereBetween('start_date_time', [$todayDate, $tomorrowDate])
             ->orderBy('start_date_time')
@@ -419,20 +417,20 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         $events = [];
         foreach ($eventsCollection as $dayEvent) {
             /** @var Event $dayEvent */
-            $events[] = new EventDayViewResource($dayEvent, $setTimeZone)->resolve();
+            $events[] = new EventDayViewResource($dayEvent, $appTimezone)->resolve();
         }
 
         return $events;
     }
 
-    private function buildDailyCalendarView(array $months, Carbon $todayDate, array $daysEvents, ?string $timezone): array
+    private function buildDailyCalendarView(array $months, Carbon $todayDate, array $daysEvents): array
     {
-        $setTimeZone = $timezone !== config('app.timezone') ? $timezone : null;
+        $appTimeZone = config('app.timezone');
         $calendarView = [];
 
         foreach ($months as $month) {
-            $startDate = Carbon::parse($month, $setTimeZone)->startOfMonth()->startOfWeek();
-            $endDate = Carbon::parse($month, $setTimeZone)->endOfMonth()->endOfWeek();
+            $startDate = Carbon::parse($month, $appTimeZone)->startOfMonth()->startOfWeek();
+            $endDate = Carbon::parse($month, $appTimeZone)->endOfMonth()->endOfWeek();
             $daysPeriod = CarbonPeriod::create($startDate, '1 day', $endDate);
             $monthDates = $daysPeriod->toArray();
 
