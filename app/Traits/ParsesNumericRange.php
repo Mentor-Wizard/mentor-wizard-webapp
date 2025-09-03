@@ -13,7 +13,7 @@ trait ParsesNumericRange
      */
     protected function normalizeBounds(?float $min, ?float $max): array
     {
-        if ($min !== null && $max !== null && $min > $max) {
+        if (! is_null($min) && ! is_null($max) && $min > $max) {
             return [$max, $min];
         }
 
@@ -23,19 +23,16 @@ trait ParsesNumericRange
     /**
      * Cast mixed input to float or null.
      */
-    protected function toFloatOrNull(mixed $v): ?float
+    protected function toFloatOrNull(mixed $value): ?float
     {
-        if ($v === null) {
+        if (is_null($value) || empty($value)) {
             return null;
         }
 
-        if (is_string($v)) {
-            $v = mb_trim($v);
-            if ($v === '') {
-                return null;
-            }
+        if (is_string($value)) {
+            $value = mb_trim($value);
         }
 
-        return is_numeric($v) ? (float) $v : null;
+        return is_numeric($value) ? (float) $value : null;
     }
 }

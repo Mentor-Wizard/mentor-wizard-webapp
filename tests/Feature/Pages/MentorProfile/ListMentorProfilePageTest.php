@@ -8,15 +8,12 @@ use App\Models\MentorProfile;
 use App\Models\MentorProgram;
 use App\Models\MentorTag;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Facades\Route;
 
 mutates(ListMentorProfilePage::class);
 
 describe('ListMentorProfilePage filters and includes', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
-
-        Route::get('feat/mentor-profiles', ListMentorProfilePage::class);
 
         // Create profiles
         $this->profileA = MentorProfile::factory()->create(['title' => 'Laravel Guru', 'description' => 'Senior dev', 'rate' => 80.0]);
@@ -53,7 +50,7 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('lists all profiles by default (no filters)', function (): void {
-        $resp = $this->getJson('feat/mentor-profiles');
+        $resp = $this->getJson(route('page.profile-programs'));
         $resp->assertOk();
 
         $data = $resp->json('data');
@@ -61,35 +58,35 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('filters by title and description', function (): void {
-        $this->getJson('feat/mentor-profiles?filter[title]=Laravel')
+        $this->getJson(route('page.profile-programs', ['filter' => ['title' => 'Laravel']]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['title' => 'Laravel Guru']);
 
-        $this->getJson('feat/mentor-profiles?filter[description]=Frontend')
+        $this->getJson(route('page.profile-programs', ['filter' => ['description' => 'Frontend']]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['title' => 'React Ninja']);
     });
 
     it('filters by mentor program fields', function (): void {
-        $this->getJson('feat/mentor-profiles?filter[mentorPrograms.name]=Advanced&include=mentorPrograms')
+        $this->getJson(route('page.profile-programs', ['filter' => ['mentorPrograms.name' => 'Advanced'], 'include' => 'mentorPrograms']))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['name' => 'Advanced PHP']);
-        $this->getJson('feat/mentor-profiles?filter[mentorPrograms.description]=Python&include=mentorPrograms')
+        $this->getJson(route('page.profile-programs', ['filter' => ['mentorPrograms.description' => 'Python'], 'include' => 'mentorPrograms']))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['name' => 'Python Junior']);
     });
 
     it('filters by rate range using array params', function (): void {
-        $this->getJson('feat/mentor-profiles?filter[rate][min]=50&filter[rate][max]=90')
+        $this->getJson(route('page.profile-programs', ['filter' => ['rate' => ['min' => 50, 'max' => 90]]]))
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonFragment(['title' => 'Laravel Guru'])
             ->assertJsonFragment(['title' => 'React Ninja']);
-        $this->getJson('feat/mentor-profiles?filter[rate][min]=0&filter[rate][max]=50')
+        $this->getJson(route('page.profile-programs', ['filter' => ['rate' => ['min' => 0, 'max' => 50]]]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['title' => 'Python Master']);
@@ -97,32 +94,32 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('filters by cost range via related mentorPrograms using array params', function (): void {
-        $this->getJson('feat/mentor-profiles?filter[cost][min]=0&filter[cost][max]=300')
+        $this->getJson(route('page.profile-programs', ['filter' => ['cost' => ['min' => 0, 'max' => 300]]]))
             ->assertOk()
             ->assertJsonCount(2, 'data');
 
-        $this->getJson('feat/mentor-profiles?filter[cost][min]=500&filter[cost][max]=700')
+        $this->getJson(route('page.profile-programs', ['filter' => ['cost' => ['min' => 500, 'max' => 700]]]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonFragment(['title' => 'Laravel Guru']);
 
-        $this->getJson('feat/mentor-profiles?filter[cost][min]=0&filter[cost][max]=300')
+        $this->getJson(route('page.profile-programs', ['filter' => ['cost' => ['min' => 0, 'max' => 300]]]))
             ->assertOk()
             ->assertJsonCount(2, 'data');
     });
 
     it('filters by languages and stacks', function (): void {
-        $this->getJson('feat/mentor-profiles?filter[languages]=PHP')
+        $this->getJson(route('page.profile-programs', ['filter' => ['languages' => 'PHP']]))
             ->assertOk()
             ->assertJsonCount(2, 'data');
 
-        $this->getJson('feat/mentor-profiles?filter[stacks]=Laravel')
+        $this->getJson(route('page.profile-programs', ['filter' => ['stacks' => 'Laravel']]))
             ->assertOk()
             ->assertJsonCount(2, 'data');
     });
 
     it('supports includes for mentorPrograms and mentorTags', function (): void {
-        $resp = $this->getJson('feat/mentor-profiles?include=mentorPrograms,mentorTags');
+        $resp = $this->getJson(route('page.profile-programs', ['include' => 'mentorPrograms,mentorTags']));
         $resp->assertOk();
 
         $first = $resp->json('data.0');
@@ -130,7 +127,7 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('supports sorting by rate desc', function (): void {
-        $resp = $this->getJson('feat/mentor-profiles?sort=-rate');
+        $resp = $this->getJson(route('page.profile-programs', ['sort' => '-rate']));
         $resp->assertOk();
 
         $titles = array_column($resp->json('data'), 'title');
@@ -138,7 +135,7 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('supports sorting by id desc', function (): void {
-        $resp = $this->getJson('feat/mentor-profiles?sort=-id');
+        $resp = $this->getJson(route('page.profile-programs', ['sort' => '-id']));
         $resp->assertOk();
 
         $titles = array_column($resp->json('data'), 'title');
@@ -146,7 +143,7 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('supports sorting by experience_started_at asc', function (): void {
-        $resp = $this->getJson('feat/mentor-profiles?sort=experience_started_at');
+        $resp = $this->getJson(route('page.profile-programs', ['sort' => 'experience_started_at']));
         $resp->assertOk();
 
         $titles = array_column($resp->json('data'), 'title');

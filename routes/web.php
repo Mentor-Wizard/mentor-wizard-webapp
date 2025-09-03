@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 
-Route::get('profile-programs', ListMentorProfilePage::class);
+Route::get('profile-programs', ListMentorProfilePage::class)->name('page.profile-programs');
 
 Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
 
