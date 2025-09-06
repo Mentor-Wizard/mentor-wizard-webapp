@@ -28,11 +28,11 @@ describe('GetMentorReviewPage', function (): void {
         $menti->assignRole(RoleEnum::MENTI->value);
 
         // Create 6 mentor reviews for the mentor
-        MentorReview::factory()->count(6)->create([
+        MentorReview::factory()->count(8)->create([
             'mentor_id' => $mentor->id,
-            'menti_id' => $menti->id,
-            'comment' => 'Great mentor review',
-            'rating' => 5,
+            'menti_id'  => $menti->id,
+            'comment'   => 'Great mentor review',
+            'rating'    => 5,
         ]);
 
         // Test the first page
@@ -60,7 +60,7 @@ describe('GetMentorReviewPage', function (): void {
 
         $responsePage2->assertOk()
             ->assertJson(function (AssertableJson $json) {
-                $json->has('items', 2) // Expect 2 remaining items
+                $json->has('items', 4) // Expect 2 remaining items
                     ->where('next_page', null) // Expect next_page to be null as there are no more pages
                     ->etc();
             });

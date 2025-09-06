@@ -13,6 +13,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
 
+/**
+ * @property \App\Models\User $resource
+ * @property-read \App\Models\MentorProfile|null $mentorProfile
+ */
 class MentorProfilePageResource extends JsonResource
 {
     const int MENTOR_PER_PAGE = 4;
@@ -23,10 +27,10 @@ class MentorProfilePageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'             => $this->id,
-            'slug'           => $this->slug,
+            'id'             => $this->resource->id,
+            'slug'           => $this->resource->slug,
             'titleBlock'     => $this->titleBlock(),
-            'programsBlock'  => MentorProgramsResource::collection($this->mentorPrograms),
+            'programsBlock'  => MentorProgramsResource::collection($this->resource->mentorPrograms),
             'statisticBlock' => $this->statisticBlock(),
             'reviewBlock'    => MentorReviewResource::collectionWithMentor($this->reviewBlock(), $this->resource),
             'similarMentors' => SimilarMentorResource::collection($this->semilarMentor()),
@@ -35,18 +39,18 @@ class MentorProfilePageResource extends JsonResource
 
     private function titleBlock(): array
     {
-        $years = (int) $this->mentorProfile?->experience_started_at->diffInYears(now());
+        $years = (int) $this->resource->mentorProfile?->experience_started_at->diffInYears(now());
 
         return [
-            'name'        => trim($this->profile->name.' '.$this->profile->last_name),
-            'avatar'      => $this->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
-            'title'       => $this->mentorProfile?->title,
-            'description' => $this->mentorProfile?->description,
-            'rate'        => $this->mentorProfile?->rate,
-            'currency'    => $this->mentorProfile?->currency->symbol,
-            'languages'   => $this->mentorProfile?->languages->pluck('tag')->toArray(),
-            'stacks'      => $this->mentorProfile?->stacks->pluck('tag')->toArray(),
-            'rating'      => round($this->rating, 1),
+            'name'        => mb_trim($this->resource->profile->name.' '.$this->resource->profile->last_name),
+            'avatar'      => $this->resource->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
+            'title'       => $this->resource->mentorProfile?->title,
+            'description' => $this->resource->mentorProfile?->description,
+            'rate'        => $this->resource->mentorProfile?->rate,
+            'currency'    => $this->resource->mentorProfile?->currency->symbol,
+            'languages'   => $this->resource->mentorProfile?->languages->pluck('tag')->toArray(),
+            'stacks'      => $this->resource->mentorProfile?->stacks->pluck('tag')->toArray(),
+            'rating'      => round($this->resource->rating, 1),
             'reviews'     => $this->mentorReviews()->count(),
             'experience'  => $years.' '.trans_choice('messages.years', $years, ['count' => $years]),
             'mentiCount'  => $this->mentorSessions()->distinct('menti_id')->count(),

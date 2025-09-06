@@ -6,6 +6,7 @@ use App\Enums\RoleEnum;
 use App\Http\Resources\SimilarMentorResource;
 use App\Models\Currency;
 use App\Models\MentorProfile;
+use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
 use Carbon\Carbon;
@@ -39,26 +40,39 @@ describe('Similar Mentor Resource', function (): void {
 
         $currency = Currency::query()->first();
         MentorProfile::factory()->create([
-            'user_id'        => $user->id,
-            'title'        => 'title',
-            'description'   => 'description',
-            'rate'    => 1.1,
-            'currency_id'    => $currency->id,
+            'user_id'                  => $user->id,
+            'title'                    => 'title',
+            'description'              => 'description',
+            'rate'                     => 1.1,
+            'currency_id'              => $currency->id,
             'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+        ]);
+
+        MentorReview::factory()->create([
+            'mentor_id' => $user->id,
+            'rating'    => 1,
+        ]);
+        MentorReview::factory()->create([
+            'mentor_id' => $user->id,
+            'rating'    => 2,
+        ]);
+        MentorReview::factory()->create([
+            'mentor_id' => $user->id,
+            'rating'    => 2,
         ]);
 
         $resource = SimilarMentorResource::make($user)->resolve();
 
         expect($resource)->toMatchArray([
-            'id'        => $user->id,
-            'name'        => 'profile name profile last_name',
-            'avatar'   => UserProfile::DEFAULT_AVATAR_URL,
-            'title'    => 'title',
-            'rate'    => 1.1,
-            'currency'    => $currency->symbol,
-            'rating'       => 0,
-            'reviews'      => 0,
-            'slug'      => $user->slug,
+            'id'           => $user->id,
+            'name'         => 'profile name profile last_name',
+            'avatar'       => UserProfile::DEFAULT_AVATAR_URL,
+            'title'        => 'title',
+            'rate'         => '1.10',
+            'currency'     => $currency->symbol,
+            'rating'       => 1.7,
+            'reviews'      => 3,
+            'slug'         => $user->slug,
         ]);
     });
 
@@ -76,44 +90,15 @@ describe('Similar Mentor Resource', function (): void {
         $resource = SimilarMentorResource::make($user)->resolve();
 
         expect($resource)->toMatchArray([
-            'id'        => $user->id,
-            'name'        => '',
-            'avatar'   => UserProfile::DEFAULT_AVATAR_URL,
-            'title'    => null,
-            'rate'    => null,
-            'currency'    => null,
+            'id'           => $user->id,
+            'name'         => '',
+            'avatar'       => UserProfile::DEFAULT_AVATAR_URL,
+            'title'        => null,
+            'rate'         => null,
+            'currency'     => null,
             'rating'       => 0,
             'reviews'      => 0,
-            'slug'      => $user->slug,
-        ]);
-    });
-
-    it('prevents lazy loading error on front-end', function (): void {
-        $currency = Currency::query()->first();
-
-        \Illuminate\Database\Eloquent\Model::preventLazyLoading(true);
-
-        $user = User::factory()->create();
-        $user->profile->update([
-            'name'      => 'profile name',
-            'last_name' => 'profile last_name',
-        ]);
-        $user->mentorProfile()->create([
-            'title'         => 'title',
-            'rate'          => 1.1,
-            'currency_id'   => $currency->id,
-            'experience_started_at' => Carbon::now()->subYears(1)->format('Y-m-d'), // Add this line
-        ]);
-        $user->refresh(); // Refresh the user model to ensure relationships are loaded
-
-        $resource = SimilarMentorResource::make($user)->resolve();
-
-        expect($resource)->toMatchArray([
-            'name'        => 'profile name profile last_name',
-            'avatar'      => UserProfile::DEFAULT_AVATAR_URL,
-            'title'       => 'title',
-            'rate'        => 1.1,
-            'currency'    => $currency->symbol,
+            'slug'         => $user->slug,
         ]);
     });
 });

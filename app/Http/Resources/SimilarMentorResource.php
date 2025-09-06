@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
@@ -16,12 +15,12 @@ class SimilarMentorResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        //$this->resource->load('profile', 'mentorProfile');
+        $this->resource->load('profile', 'mentorProfile');
 
         return [
             'id'       => $this->resource->id,
-            'name'     => trim($this->resource->profile->name.' '.$this->resource->profile->last_name),
-            'avatar' => $this->resource->profile->avatar ?? UserProfile::DEFAULT_AVATAR_URL,
+            'name'     => mb_trim($this->resource->profile->name.' '.$this->resource->profile->last_name),
+            'avatar'   => $this->resource->profile->avatar,
             'title'    => $this->resource->mentorProfile?->title,
             'rate'     => $this->resource->mentorProfile?->rate,
             'currency' => $this->resource->mentorProfile?->currency->symbol,

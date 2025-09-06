@@ -32,9 +32,9 @@ class MentorProgramsResource extends JsonResource
     {
         return $this->mentorProgramBlocks()
             ->get()
-            ->map(fn($block): array => [
+            ->map(fn ($block): array => [
                 'id'          => $block->id,
-                'name'        => $block->id.'-'.$block->name,
+                'name'        => $block->name,
                 'description' => $block->description,
             ])->toArray();
     }

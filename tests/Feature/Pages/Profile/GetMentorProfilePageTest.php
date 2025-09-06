@@ -12,7 +12,6 @@ use App\Models\UserProfile;
 use Carbon\Carbon;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 
@@ -65,11 +64,11 @@ describe('Mentor Profile Page', function (): void {
         $currencies = Currency::query()->pluck('name', 'id')->toArray();
         $currency_id = array_key_first($currencies);
         MentorProfile::factory()->create([
-            'user_id'        => $mentor->id,
-            'title'        => 'title',
-            'description'   => 'description',
-            'rate'    => 1.1,
-            'currency_id'    => $currency_id,
+            'user_id'                  => $mentor->id,
+            'title'                    => 'title',
+            'description'              => 'description',
+            'rate'                     => 1.1,
+            'currency_id'              => $currency_id,
             'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 

@@ -21,7 +21,7 @@ class MentorReviewResource extends JsonResource
 
     public static function collectionWithMentor($resources, $mentor)
     {
-        return $resources->map(fn($item): static => new static($item, $mentor));
+        return $resources->map(fn ($item): static => new static($item, $mentor));
     }
 
     #[Override]
@@ -40,15 +40,15 @@ class MentorReviewResource extends JsonResource
             ->toArray();
 
         return [
-            'id' => $this->resource->id,
+            'id'    => $this->resource->id,
             'menti' => [
-                'id' => $this->resource->menti->id,
-                'username' => trim($this->resource->menti->profile->name.' '.$this->resource->menti->profile->last_name),
-                'avatar' => $this->resource->menti->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
+                'id'       => $this->resource->menti->id,
+                'username' => mb_trim($this->resource->menti->profile->name.' '.$this->resource->menti->profile->last_name),
+                'avatar'   => $this->resource->menti->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
             ],
-            'comment' => $this->resource->comment,
-            'rating' => $this->resource->rating,
-            'program' => implode(', ', $names),
+            'comment'    => $this->resource->comment,
+            'rating'     => $this->resource->rating,
+            'program'    => implode(', ', $names),
             'created_at' => $this->resource->created_at,
         ];
     }

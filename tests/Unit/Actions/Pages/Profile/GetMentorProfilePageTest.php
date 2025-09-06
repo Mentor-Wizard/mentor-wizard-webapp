@@ -39,11 +39,11 @@ describe('Mentor Page', function (): void {
         $currencies = Currency::query()->pluck('name', 'id')->toArray();
         $currency_id = array_key_first($currencies);
         MentorProfile::factory()->create([
-            'user_id'        => $user->id,
-            'title'        => 'title',
-            'description'   => 'description',
-            'rate'    => 1.1,
-            'currency_id'    => $currency_id,
+            'user_id'                  => $user->id,
+            'title'                    => 'title',
+            'description'              => 'description',
+            'rate'                     => 1.1,
+            'currency_id'              => $currency_id,
             'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 
