@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\RoleEnum;
+use App\Http\Resources\SimilarMentorResource;
+use App\Models\Currency;
+use App\Models\MentorProfile;
+use App\Models\User;
+use App\Models\UserProfile;
+use Carbon\Carbon;
+use Database\Seeders\CurrencySeeder;
+use Database\Seeders\RoleSeeder;
+use Spatie\Permission\Models\Role;
+
+covers(SimilarMentorResource::class);
+
+describe('Similar Mentor Resource', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+    });
+
+    it('correctly transforms user resource', function (): void {
+        $user = User::factory()->create([
+            'username' => 'Test User',
+            'email'    => 'test@example.com',
+        ]);
+        $user->profile->update([
+            'name'        => 'profile name',
+            'last_name'   => 'profile last_name',
+            'linkedin'    => 'profile linkedin',
+            'telegram'    => 'profile telegram',
+            'whatsapp'    => 'profile whatsapp',
+            'phone'       => 'profile phone',
+        ]);
+        $user->refresh();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $currency = Currency::query()->first();
+        MentorProfile::factory()->create([
+            'user_id'        => $user->id,
+            'title'        => 'title',
+            'description'   => 'description',
+            'rate'    => 1.1,
+            'currency_id'    => $currency->id,
+            'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+        ]);
+
+        $resource = SimilarMentorResource::make($user)->resolve();
+
+        expect($resource)->toMatchArray([
+            'name'        => 'profile name profile last_name',
+            'avatar'   => UserProfile::DEFAULT_AVATAR_URL,
+            'title'    => 'title',
+            'rate'    => '1.10',
+            'currency'    => $currency->symbol,
+            'rating'       => '0',
+            'reviews'      => 0,
+            'slug'      => $user->slug,
+        ]);
+    });
+});
