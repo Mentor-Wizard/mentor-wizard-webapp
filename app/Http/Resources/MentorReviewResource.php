@@ -21,7 +21,10 @@ class MentorReviewResource extends JsonResource
 
     public static function collectionWithMentor($resources, $mentor)
     {
-        return $resources->map(fn ($item): static => new static($item, $mentor));
+        return $resources->map(
+            // @phpstan-ignore-next-line
+            fn ($item): static => new static($item, $mentor)
+        );
     }
 
     #[Override]

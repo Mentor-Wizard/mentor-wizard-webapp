@@ -15,22 +15,22 @@ class MentorProgramsResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $this->load('currency', 'mentorProgramBlocks');
+        $this->resource->load('currency', 'mentorProgramBlocks');
 
         return [
-            'id'           => $this->id,
-            'name'         => $this->name,
-            'slug'         => $this->slug,
-            'description'  => $this->description,
-            'cost'         => $this->cost,
-            'currency'     => $this->currency->symbol,
+            'id'           => $this->resource->id,
+            'name'         => $this->resource->name,
+            'slug'         => $this->resource->slug,
+            'description'  => $this->resource->description,
+            'cost'         => $this->resource->cost,
+            'currency'     => $this->resource->currency->symbol,
             'blocks'       => $this->blocks(),
         ];
     }
 
     private function blocks()
     {
-        return $this->mentorProgramBlocks()
+        return $this->resource->mentorProgramBlocks()
             ->get()
             ->map(fn ($block): array => [
                 'id'          => $block->id,

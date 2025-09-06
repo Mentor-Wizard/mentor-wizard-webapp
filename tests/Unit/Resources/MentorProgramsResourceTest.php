@@ -55,7 +55,7 @@ describe('Mentor Programs Resource', function (): void {
         ])
             ->and($resource['blocks'])->toBeArray()
             ->toHaveCount(5)
-            ->each(fn ($block) => expect($block->value)->toHaveKeys([
+            ->each(fn ($block): \Pest\Mixins\Expectation => expect($block->value)->toHaveKeys([
                 'id',
                 'name',
                 'description',

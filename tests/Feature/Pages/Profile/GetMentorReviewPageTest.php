@@ -39,16 +39,16 @@ describe('GetMentorReviewPage', function (): void {
         $response = $this->getJson(route('page.mentor-review', ['user' => $mentor->slug]));
 
         $response->assertOk()
-            ->assertJson(function (AssertableJson $json) {
+            ->assertJson(function (AssertableJson $json): void {
                 $json->has('items', 4) // Expect 4 items per page (PER_PAGE = 4)
-                    ->has('items.0', function (AssertableJson $json) {
-                        $json->where('id', fn (int $id) => is_int($id))
+                    ->has('items.0', function (AssertableJson $json): void {
+                        $json->where('id', fn (int $id): true => is_int($id))
                             ->where('comment', 'Great mentor review')
                             ->where('rating', 5)
-                            ->where('menti.id', fn (int $id) => is_int($id))
-                            ->where('menti.username', fn (string $username) => is_string($username))
-                            ->where('menti.avatar', fn (?string $avatar) => is_string($avatar) || is_null($avatar))
-                            ->where('created_at', fn (string $date) => is_string($date))
+                            ->where('menti.id', fn (int $id): true => is_int($id))
+                            ->where('menti.username', fn (string $username): true => is_string($username))
+                            ->where('menti.avatar', fn (?string $avatar): bool => is_string($avatar) || is_null($avatar))
+                            ->where('created_at', fn (string $date): true => is_string($date))
                             ->etc();
                     })
                     ->where('next_page', 1) // Expect next_page to be 1 for the second page
@@ -59,7 +59,7 @@ describe('GetMentorReviewPage', function (): void {
         $responsePage2 = $this->getJson(route('page.mentor-review', ['user' => $mentor->slug, 'page' => 1]));
 
         $responsePage2->assertOk()
-            ->assertJson(function (AssertableJson $json) {
+            ->assertJson(function (AssertableJson $json): void {
                 $json->has('items', 4) // Expect 2 remaining items
                     ->where('next_page', null) // Expect next_page to be null as there are no more pages
                     ->etc();
@@ -69,7 +69,7 @@ describe('GetMentorReviewPage', function (): void {
         $responsePage3 = $this->getJson(route('page.mentor-review', ['user' => $mentor->slug, 'page' => 2]));
 
         $responsePage3->assertOk()
-            ->assertJson(function (AssertableJson $json) {
+            ->assertJson(function (AssertableJson $json): void {
                 $json->has('items', 0) // Expect 0 items
                     ->where('next_page', null) // Expect next_page to be null
                     ->etc();
