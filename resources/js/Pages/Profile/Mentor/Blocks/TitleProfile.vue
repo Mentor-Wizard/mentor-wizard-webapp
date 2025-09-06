@@ -44,7 +44,6 @@
                             </div>
                         </div>
                     </div>
-                  <!-- Теги технологій -->
                     <div class="flex flex-wrap gap-2 mb-4">
                         <span v-for="(stack, index) in data.stacks" :key="index"  class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">{{ stack }}</span>
                     </div>

@@ -27,7 +27,6 @@ const props = defineProps({
               <p class="text-gray-600 text-sm mb-3">{{ mentor.title }}</p>
 
               <div class="flex items-center mb-4">
-                  <!-- Зірки -->
                   <StarIcon v-for="rating in [0, 1, 2, 3, 4]" :key="rating"
                             :class="[3 > rating ? 'text-yellow-400' : 'text-gray-200', 'size-5 shrink-0']"
                             aria-hidden="true"/>

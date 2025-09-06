@@ -41,7 +41,6 @@ const props = defineProps({
             </div>
         </div>
 
-        <!-- Кнопка -->
         <button class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium mt-auto">
             Book Session
         </button>
