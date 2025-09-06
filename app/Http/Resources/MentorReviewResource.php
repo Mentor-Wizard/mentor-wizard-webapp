@@ -34,18 +34,22 @@ class MentorReviewResource extends JsonResource
             ->select('mentor_programs.name')
             ->join('mentor_program_blocks', 'mentor_program_block_progresses.mentor_program_block_id', '=', 'mentor_program_blocks.id')
             ->join('mentor_programs', 'mentor_program_blocks.mentor_program_id', '=', 'mentor_programs.id')
-            ->where('mentor_programs.mentor_id', $this->resource->mentor->id)
+            ->where('mentor_programs.mentor_id', $this->mentor->id)
             ->pluck('mentor_programs.name')
             ->unique()
             ->toArray();
 
         return [
-            'id'          => $this->resource->id,
-            'name'        => $this->resource->menti->profile->name.' '.$this->resource->menti->profile->last_name,
-            'avatar'      => $this->resource->menti->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
-            'comment'     => $this->resource->comment,
-            'rating'      => $this->resource->rating,
-            'program'     => implode(', ', $names),
+            'id' => $this->resource->id,
+            'menti' => [
+                'id' => $this->resource->menti->id,
+                'username' => $this->resource->menti->profile->name.' '.$this->resource->menti->profile->last_name,
+                'avatar' => $this->resource->menti->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
+            ],
+            'comment' => $this->resource->comment,
+            'rating' => $this->resource->rating,
+            'program' => implode(', ', $names),
+            'created_at' => $this->resource->created_at,
         ];
     }
 }

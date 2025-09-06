@@ -80,12 +80,12 @@
     <div v-if="model.length" class="lg:col-span-12 mt-4">
         <div v-for="review in model" :key="review.id" class="w-full pb-6">
             <div class="flex gap-3">
-                <img :src="review.avatar" :alt="review.name" class="aspect-square w-10 h-10 rounded-full object-cover shrink-0" />
+                <img :src="review.menti.avatar" :alt="review.menti.username" class="aspect-square w-10 h-10 rounded-full object-cover shrink-0" />
 
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-sm font-medium text-gray-900">
-                            {{ review.name }}
+                            {{ review.menti.username }}
                         </h3>
                         <span class="text-xs text-gray-400">2 weeks ago</span>
                     </div>

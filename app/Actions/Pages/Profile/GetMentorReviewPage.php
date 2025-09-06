@@ -24,16 +24,19 @@ class GetMentorReviewPage
 
         $page = (int) $request->input('page');
 
+        $reviews = $user->mentorReviews()
+            ->with('menti')
+            ->orderByDesc('created_at')
+            ->offset($page * self::PER_PAGE)
+            ->limit(self::PER_PAGE + 1)
+            ->get();
+
+        $hasMorePages = $reviews->count() > self::PER_PAGE;
+        $items = $reviews->take(self::PER_PAGE);
+
         return response()->json([
-            'items' => MentorReviewResource::collectionWithMentor(
-                $user->mentorReviews()
-                    ->offset($page * self::PER_PAGE)
-                    ->limit(self::PER_PAGE)
-                    ->orderByDesc('created_at')
-                    ->get(),
-                $user
-            ),
-            'next_page' => $page + 1,
+            'items' => MentorReviewResource::collectionWithMentor($items, $user),
+            'next_page' => $hasMorePages ? $page + 1 : null,
         ]);
     }
 }
