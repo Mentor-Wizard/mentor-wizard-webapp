@@ -1,9 +1,13 @@
 <script setup>
 
+import {GlobeAltIcon} from "@heroicons/vue/16/solid/index.js";
 </script>
 
 <template>
-  <div class="mt-10 text-center lg:col-start-8 lg:col-end-13 lg:row-start-1 lg:mt-9 xl:col-start-9">
+  <div class="mt-2">
+     <h3 class="text-lg font-semibold text-gray-900">Забронюй заняття</h3>
+  </div>
+  <div class="text-center lg:col-start-8 lg:col-end-13 lg:row-start-1 lg:mt-9 xl:col-start-9">
           <div class="flex items-center text-gray-900">
             <button type="button" class="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500">
               <span class="sr-only">Previous month</span>
@@ -156,7 +160,18 @@
               <time datetime="2022-02-06" class="mx-auto flex size-7 items-center justify-center rounded-full in-data-is-selected:not-in-data-is-today:bg-gray-900 in-data-is-selected:in-data-is-today:bg-indigo-600">6</time>
             </button>
           </div>
-          <button type="button" class="mt-8 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add event</button>
+        </div>
+
+        <div class="mt-4">
+          <h3 class="text-lg font-semibold text-gray-900">Available Time Slots - July 10</h3>
+          <div class="grid grid-cols-2 gap-4 mt-2">
+              <button v-for="i in [1,2,3,4]" class="py-2 px-4 border border-gray-600 text-gray-600 rounded-md hover:bg-gray-50 transition-colors duration-200">12:00 AM</button>
+          </div>
+          <div  class="mt-4 flex items-center">
+            <GlobeAltIcon class="w-4 h-4 text-gray-500" />
+            <p class="ms-2 text-gray-500">Times shows in your local timezone</p>
+          </div>
+          <button class="mt-4 w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">Book Consultation</button>
         </div>
 </template>
 

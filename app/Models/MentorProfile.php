@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property-read string $avatar URL of the avatar image
+ *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]
@@ -63,5 +64,12 @@ class MentorProfile extends Model
     public function stacks(): Attribute
     {
         return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'experience_started_at' => 'date',
+        ];
     }
 }
