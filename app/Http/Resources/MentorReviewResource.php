@@ -43,7 +43,7 @@ class MentorReviewResource extends JsonResource
             'id' => $this->resource->id,
             'menti' => [
                 'id' => $this->resource->menti->id,
-                'username' => $this->resource->menti->profile->name.' '.$this->resource->menti->profile->last_name,
+                'username' => trim($this->resource->menti->profile->name.' '.$this->resource->menti->profile->last_name),
                 'avatar' => $this->resource->menti->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
             ],
             'comment' => $this->resource->comment,

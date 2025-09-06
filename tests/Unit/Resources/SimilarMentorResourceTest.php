@@ -50,14 +50,70 @@ describe('Similar Mentor Resource', function (): void {
         $resource = SimilarMentorResource::make($user)->resolve();
 
         expect($resource)->toMatchArray([
+            'id'        => $user->id,
             'name'        => 'profile name profile last_name',
             'avatar'   => UserProfile::DEFAULT_AVATAR_URL,
             'title'    => 'title',
-            'rate'    => '1.10',
+            'rate'    => 1.1,
             'currency'    => $currency->symbol,
-            'rating'       => '0',
+            'rating'       => 0,
             'reviews'      => 0,
             'slug'      => $user->slug,
+        ]);
+    });
+
+    it('correctly transforms user resource with defaukt value', function (): void {
+        $user = User::factory()->create([
+            'username' => 'Test User',
+            'email'    => 'test@example.com',
+        ]);
+
+        $user->refresh();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $currency = Currency::query()->first();
+
+        $resource = SimilarMentorResource::make($user)->resolve();
+
+        expect($resource)->toMatchArray([
+            'id'        => $user->id,
+            'name'        => '',
+            'avatar'   => UserProfile::DEFAULT_AVATAR_URL,
+            'title'    => null,
+            'rate'    => null,
+            'currency'    => null,
+            'rating'       => 0,
+            'reviews'      => 0,
+            'slug'      => $user->slug,
+        ]);
+    });
+
+    it('prevents lazy loading error on front-end', function (): void {
+        $currency = Currency::query()->first();
+
+        \Illuminate\Database\Eloquent\Model::preventLazyLoading(true);
+
+        $user = User::factory()->create();
+        $user->profile->update([
+            'name'      => 'profile name',
+            'last_name' => 'profile last_name',
+        ]);
+        $user->mentorProfile()->create([
+            'title'         => 'title',
+            'rate'          => 1.1,
+            'currency_id'   => $currency->id,
+            'experience_started_at' => Carbon::now()->subYears(1)->format('Y-m-d'), // Add this line
+        ]);
+        $user->refresh(); // Refresh the user model to ensure relationships are loaded
+
+        $resource = SimilarMentorResource::make($user)->resolve();
+
+        expect($resource)->toMatchArray([
+            'name'        => 'profile name profile last_name',
+            'avatar'      => UserProfile::DEFAULT_AVATAR_URL,
+            'title'       => 'title',
+            'rate'        => 1.1,
+            'currency'    => $currency->symbol,
         ]);
     });
 });

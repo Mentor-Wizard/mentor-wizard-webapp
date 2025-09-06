@@ -38,7 +38,7 @@ class MentorProfilePageResource extends JsonResource
         $years = (int) $this->mentorProfile?->experience_started_at->diffInYears(now());
 
         return [
-            'name'        => $this->profile->name.' '.$this->profile->last_name,
+            'name'        => trim($this->profile->name.' '.$this->profile->last_name),
             'avatar'      => $this->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
             'title'       => $this->mentorProfile?->title,
             'description' => $this->mentorProfile?->description,

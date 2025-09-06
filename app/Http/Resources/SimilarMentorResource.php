@@ -16,12 +16,12 @@ class SimilarMentorResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $this->resource->load('profile', 'mentorProfile');
+        //$this->resource->load('profile', 'mentorProfile');
 
         return [
             'id'       => $this->resource->id,
-            'name'     => $this->resource->profile->name.' '.$this->resource->profile->last_name,
-            'avatar'   => $this->resource->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
+            'name'     => trim($this->resource->profile->name.' '.$this->resource->profile->last_name),
+            'avatar' => $this->resource->profile->avatar ?? UserProfile::DEFAULT_AVATAR_URL,
             'title'    => $this->resource->mentorProfile?->title,
             'rate'     => $this->resource->mentorProfile?->rate,
             'currency' => $this->resource->mentorProfile?->currency->symbol,
