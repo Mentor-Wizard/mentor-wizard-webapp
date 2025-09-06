@@ -54,6 +54,34 @@ describe('ParsesNumericRange trait', function (): void {
             $result = $this->instance->testNormalizeBounds(15.0, 15.0);
             expect($result)->toBe([15.0, 15.0]);
         });
+
+        it('does not swap when min equals max (boundary test for mutation)', function (): void {
+            $result = $this->instance->testNormalizeBounds(10.0, 10.0);
+            expect($result)->toBe([10.0, 10.0])
+                ->and($result[0])->toBe(10.0)
+                ->and($result[1])->toBe(10.0);
+        });
+
+        it('preserves order for boundary conditions around equality', function (): void {
+            expect($this->instance->testNormalizeBounds(5.0, 5.0))->toBe([5.0, 5.0]);
+            expect($this->instance->testNormalizeBounds(5.1, 5.0))->toBe([5.0, 5.1]);
+            expect($this->instance->testNormalizeBounds(5.0, 5.1))->toBe([5.0, 5.1]);
+
+            expect($this->instance->testNormalizeBounds(0.0, 0.0))->toBe([0.0, 0.0]);
+            expect($this->instance->testNormalizeBounds(-5.0, -5.0))->toBe([-5.0, -5.0]);
+        });
+
+        it('strictly follows greater-than logic not greater-or-equal', function (float $min, float $max): void {
+            $result = $this->instance->testNormalizeBounds($min, $max);
+
+            expect($result)->toBe([$min, $max], sprintf('Equal values %s, %s should not be swapped', $min, $max));
+        })->with([
+            'positive equal' => [1.0, 1.0],
+            'zero equal'     => [0.0, 0.0],
+            'negative equal' => [-1.0, -1.0],
+            'large equal'    => [100.0, 100.0],
+            'pi equal'       => [3.14159, 3.14159],
+        ]);
     });
 
     describe('toFloatOrNull method', function (): void {
