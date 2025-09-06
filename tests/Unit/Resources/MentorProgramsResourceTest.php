@@ -53,9 +53,10 @@ describe('Mentor Programs Resource', function (): void {
             'cost'        => 1.1,
             'currency'    => '₴',
         ])
-            ->and($resource['blocks'])->toBeArray()
+            ->and($resource['blocks'])
+            ->toBeArray()
             ->toHaveCount(5)
-            ->each(fn ($block): \Pest\Mixins\Expectation => expect($block->value)->toHaveKeys([
+            ->each(fn ($block) => $block->toHaveKeys([
                 'id',
                 'name',
                 'description',

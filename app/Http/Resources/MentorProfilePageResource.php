@@ -14,7 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
 
 /**
- * @property \App\Models\User $resource
+ * @property User $resource
  */
 class MentorProfilePageResource extends JsonResource
 {
@@ -25,7 +25,7 @@ class MentorProfilePageResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $this->resource;
         $user->loadMissing(['mentorProfile.currency', 'profile', 'mentorReviews', 'mentorSessions']);
 
@@ -43,7 +43,7 @@ class MentorProfilePageResource extends JsonResource
     private function titleBlock(User $user): array
     {
         // @phpstan-ignore-next-line
-        $years = $user->mentorProfile?->experience_started_at?->diffInYears(now()) ?? 0;
+        $years = (int) $user->mentorProfile?->experience_started_at?->diffInYears(now()) ?? 0;
 
         return [
             'name'        => mb_trim($user->profile->name.' '.$user->profile->last_name),

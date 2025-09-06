@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property-read string $avatar URL of the avatar image
- * @property-read \App\Models\Currency|null $currency
+ * @property-read Currency|null $currency
  * @property-read \Illuminate\Database\Eloquent\Collection $languages
  * @property-read \Illuminate\Database\Eloquent\Collection $stacks
  *
