@@ -21,6 +21,7 @@
         "concurrently": "^9.1.2",
         "laravel-echo": "^2.0.2",
         "laravel-vite-plugin": "^1.2.0",
+        "libphonenumber-js": "^1.12.15",
         "pinia": "^3.0.1",
         "postcss": "^8.5.3",
         "pusher-js": "^8.4.0",
