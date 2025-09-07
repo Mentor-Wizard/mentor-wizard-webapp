@@ -50,8 +50,8 @@ describe('StoreEventRequest Validation', function (): void {
                 'fromTime'    => '09:00',
                 'toTime'      => '10:00',
                 'description' => 'Daily standup',
-                // Must match Rule::in(EventTypeEnum::values())
-                'type' => EventTypeEnum::INDIVIDUAL->value,
+                'type'        => EventTypeEnum::INDIVIDUAL->value,
+                'timezone'    => 'Europe/Kyiv',
             ];
         },
         'multi day event' => function (): array {
@@ -66,6 +66,7 @@ describe('StoreEventRequest Validation', function (): void {
                 'toTime'      => '10:00',
                 'description' => 'Team building',
                 'type'        => EventTypeEnum::GROUP->value,
+                'timezone'    => 'Europe/Kyiv',
             ];
         },
     ]);
@@ -90,6 +91,7 @@ describe('StoreEventRequest Validation', function (): void {
             'toTime'      => '10:00',
             'description' => 'x',
             'type'        => EventTypeEnum::INDIVIDUAL->value,
+            'timezone'    => 'Europe/Kyiv',
         ], 'title'],
         'past fromDate' => fn (): array => [[
             'title'       => 'Past date',
@@ -99,15 +101,17 @@ describe('StoreEventRequest Validation', function (): void {
             'toTime'      => '10:00',
             'description' => 'x',
             'type'        => EventTypeEnum::INDIVIDUAL->value,
+            'timezone'    => 'Europe/Kyiv',
         ], 'fromDate'],
         'toTime before fromTime (same day)' => fn (): array => [[
-            'title'       => 'Wrong time',
-            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '10:00',
-            'toTime'      => '09:00',
-            'description' => 'x',
-            'type'        => EventTypeEnum::GROUP->value,
+            'title'           => 'Wrong time',
+            'fromDate'        => Carbon::tomorrow()->format('Y-m-d'),
+            'toDate'          => Carbon::tomorrow()->format('Y-m-d'),
+            'fromTime'        => '10:00',
+            'toTime'          => '09:00',
+            'description'     => 'x',
+            'type'            => EventTypeEnum::GROUP->value,
+            'timezone'        => 'Europe/Kyiv',
         ], 'toTime'],
         'invalid type' => fn (): array => [[
             'title'       => 'Type fail',
@@ -117,6 +121,7 @@ describe('StoreEventRequest Validation', function (): void {
             'toTime'      => '10:00',
             'description' => 'x',
             'type'        => 'Invalid',
+            'timezone'    => 'Europe/Kyiv',
         ], 'type'],
     ]);
 });
@@ -161,16 +166,19 @@ describe('Store Calendar Event', function (): void {
             ->date->toBe($start->format('Y-m-d'))
             ->duration->toBe((int) $start->diffInSeconds($end));
 
-        $attached = $event->users()
+        $pivot = $event->users()
             ->where('users.id', $this->user->getKey())
-            ->wherePivot('role', EventRoleEnum::HOST->value)
-            ->exists();
+            ->withPivot(['role', 'created_at', 'updated_at'])
+            ->first()?->pivot;
 
-        expect($attached)->toBeTrue();
+        expect($pivot)
+            ->not->toBeNull()
+            ->and($pivot->role)->toBe(EventRoleEnum::HOST->value)
+            ->and($pivot->created_at)->not->toBeNull()
+            ->and($pivot->updated_at)->not->toBeNull();
     });
 
     it('returns 403 for non-mentor user', function (): void {
-        // Log out mentor and login as a regular viewer without mentor role
         Auth::logout();
         $viewer = User::factory()->create();
         Auth::login($viewer);
@@ -183,7 +191,7 @@ describe('Store Calendar Event', function (): void {
         expect($response)
             ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
             ->and($response->getStatusCode())->toBe(403)
-            ->and($response->getData(true)['message'])->toBe('Only mentee can create events.');
+            ->and($response->getData(true)['message'])->toBe('Only mentor can create events.');
     });
 });
 

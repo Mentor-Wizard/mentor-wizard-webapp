@@ -17,7 +17,7 @@ class EditCalendarPage
     public function handle(EditEventRequest $request, string $id): Response
     {
         if (! auth()->user()->hasRole('mentor')) {
-            return response()->json(['message' => 'Only mentee can create events.'], Response::HTTP_FORBIDDEN);
+            return response()->json(['message' => 'Only mentor can create events.'], Response::HTTP_FORBIDDEN);
         }
 
         Event::query()->where('id', $id)->update([

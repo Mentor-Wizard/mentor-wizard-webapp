@@ -16,8 +16,8 @@ it('builds event data correctly for individual type', function (): void {
         'fromTime'    => '10:00',
         'toTime'      => '11:30',
         'description' => 'Some description',
-        // Note: Using lowercase here to assert mapping logic inside getEventData()
-        'type' => 'individual',
+        'type'        => 'individual',
+        'timezone'    => 'Europe/Kyiv',
     ];
 
     /** @var EditEventRequest|m\MockInterface $request */
@@ -50,6 +50,7 @@ it('builds event data correctly for group type', function (): void {
         'toTime'      => '10:00',
         'description' => 'Group event',
         'type'        => 'group',
+        'timezone'    => 'Europe/Kyiv',
     ];
 
     /** @var EditEventRequest|m\MockInterface $request */

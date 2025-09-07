@@ -21,15 +21,15 @@ import {
     UserGroupIcon
 } from '@heroicons/vue/24/outline'
 import {useForm} from "@inertiajs/vue3";
-
-interface EventFormData {
-    title: string;
-    fromDate: string;
-    toDate: string;
-    fromTime: string;
-    toTime: string;
-    type: 'Group' | 'Individual';
-}
+const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+// interface EventFormData {
+//     title: string;
+//     fromDate: string;
+//     toDate: string;
+//     fromTime: string;
+//     toTime: string;
+//     type: 'Group' | 'Individual';
+// }
 
 const errors = ref({
     "toDate": null,
@@ -55,7 +55,8 @@ let form = useForm({
     fromTime: '09:00',
     toTime: '10:00',
     type: 'Individual',
-    description: ''
+    description: '',
+    timezone: timeZone
 });
 
 // Event types

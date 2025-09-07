@@ -8,23 +8,24 @@ import {computed, ref} from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {router, usePage} from "@inertiajs/vue3";
 import CreateEvent from "@/Pages/Calendar/CreateEvent.vue";
-
+import {useCalendar} from "@/Stores/calendar.js";
+import { adjustDate } from "@/Stores/Calendar/helpers.js";
+import {storeToRefs} from "pinia";
 const locale = usePage().props.locale;
+const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
 const todayDate = ref(new Date().toLocaleDateString(String
 (locale || "uk-UA"), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
     weekday: 'long',
-    timeZone: 'UTC'
 }));
 const showCreatePage = ref(false);
 const permissions = ref(usePage().props.permissions)
 const daysData = ref(usePage().props.events);
-const hours = ["12AM", "1AM", "2AM", "3AM", "4AM", "5AM", "6AM", "7AM", "8AM", "9AM", "10AM", "11AM",
-    "12PM", "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM", "9PM", "10PM", "11PM"];
+const calendar = useCalendar();
+const { hours, weekDays } = storeToRefs(calendar);
 
-const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const currentTab = ref('Month view');
 const currentDate = ref(new Date());
 const isLoading = ref(false);
@@ -39,7 +40,8 @@ const changeTab = (tab: string) => {
     refreshData();
 }
 const scrollDate = (direction: string, date = null) => {
-    adjustDate(direction, date);
+    // currentDate, currentTab, direction, exactDate = null
+    adjustDate(currentDate.value, currentTab.value, direction,date);
     isLoading.value = true;
     refreshData();
 }
@@ -51,7 +53,7 @@ const refreshData = () => {
         data: {
             'date': currentDate.value,
             'mode': currentTab.value,
-            'timezone': "UTC"
+            'timezone': timeZone
         },
         preserveState: true,
         only: ['events'],
@@ -89,51 +91,6 @@ const openShowEditEventPage = (eventId) => {
 const closeCreateEventPage = () => {
     showCreatePage.value = false;
 }
-
-const adjustDate = (direction: string, exactDate: string | null) => {
-    const newDate = new Date(currentDate.value);
-    switch (currentTab.value) {
-        case 'Day view':
-            if (direction === 'previous') {
-                newDate.setDate(currentDate.value.getDate() - 1);
-            } else if (direction === 'next') {
-                newDate.setDate(currentDate.value.getDate() + 1);
-            } else if (direction === "exact date") {
-                newDate.setDate(new Date(exactDate).getDate());
-                newDate.setMonth(new Date(exactDate).getMonth());
-                newDate.setFullYear(new Date(exactDate).getFullYear());
-            }
-            break;
-        case 'Week view':
-            if (direction === 'previous') {
-                newDate.setDate(currentDate.value.getDate() - 7);
-            } else if (direction === 'next') {
-                newDate.setDate(currentDate.value.getDate() + 7);
-            } else if (direction === "exact date") {
-                newDate.setDate(new Date(exactDate).getDate());
-                newDate.setMonth(new Date(exactDate).getMonth());
-                newDate.setFullYear(new Date(exactDate).getFullYear());
-                currentTab.value = 'Day view';
-            }
-            break;
-        case 'Month view':
-            if (direction === 'previous') {
-                newDate.setMonth(currentDate.value.getMonth() - 1);
-            } else if (direction === 'next') {
-                newDate.setMonth(currentDate.value.getMonth() + 1);
-            } else if (direction === "exact date") {
-                newDate.setDate(new Date(exactDate).getDate());
-                newDate.setMonth(new Date(exactDate).getMonth());
-                newDate.setFullYear(new Date(exactDate).getFullYear());
-                currentTab.value = 'Day view';
-            }
-            break;
-        default:
-            console.error('Invalid unit specified');
-            return;
-    }
-    currentDate.value = newDate;
-};
 
 const formatWeekRange = () => {
     const d = new Date(currentDate.value);
@@ -185,10 +142,18 @@ const scrollButtonName = computed(() => {
                     <time datetime="2022-01-22" class="hidden sm:inline">{{ todayDate }}</time>
                 </h1>
             </div>
+            <!--                            class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"-->
+
             <div class="flex items-center">
                 <div class="relative flex items-center rounded-md bg-white shadow-xs md:items-stretch">
                     <button type="button" @click="scrollDate('previous')"
-                            class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50">
+                            :disabled="!daysData['hasEventsBefore']  && currentTab=='Month View'"
+                            :class="[
+                            'flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 focus:relative md:w-9 md:pr-0',
+                            daysData['hasEventsBefore']
+                            ? 'hover:text-gray-500 md:hover:bg-gray-50'
+                            : 'cursor-not-allowed'
+                            ]">
                         <span class="sr-only">Previous day</span>
                         <ChevronLeftIcon class="size-5" aria-hidden="true"/>
                     </button>
@@ -198,7 +163,14 @@ const scrollButtonName = computed(() => {
                     </button>
                     <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden"/>
                     <button type="button" @click="scrollDate('next')"
-                            class="flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50">
+                            :disabled="!daysData['hasEventsAfter'] && currentTab=='Month View'"
+                            :class="[
+                                'flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 focus:relative md:w-9 md:pl-0',
+                                daysData['hasEventsAfter']
+                                  ? 'hover:text-gray-500 md:hover:bg-gray-50'
+                                  : 'cursor-not-allowed'
+                              ]"
+                    >
                         <span class="sr-only">Next day</span>
                         <ChevronRightIcon class="size-5" aria-hidden="true"/>
                     </button>

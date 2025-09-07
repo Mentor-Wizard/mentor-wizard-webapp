@@ -23,7 +23,7 @@ import {
     UserGroupIcon
 } from '@heroicons/vue/24/outline'
 
-
+const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
 const mode = ref('show');
 const permissions = ref('permissions');
 const event = ref<EventFormData>({
@@ -34,8 +34,9 @@ const event = ref<EventFormData>({
     toDateFormatted: '',
     fromTime: '',
     toTime: '',
-    type: '',
-    description: ''
+    type: 'Individual',
+    description: '',
+    timezone: timeZone
 });
 
 
@@ -50,6 +51,7 @@ interface EventFormData {
     description: string;
     duration: string;
     type: 'Group' | 'Individual';
+    timeZone: string;
 }
 
 const changeMode = (newMode: string) => {
@@ -85,7 +87,8 @@ let form = useForm({
     fromTime: '09:00',
     toTime: '10:00',
     type: 'Individual',
-    description: ''
+    description: '',
+    timezone: timeZone
 });
 
 const eventTypes = [
@@ -95,7 +98,6 @@ const eventTypes = [
 
 onMounted(() => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
     const eventData = usePage().props.event;
 
     console.log(eventData);

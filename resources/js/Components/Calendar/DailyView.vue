@@ -60,9 +60,11 @@ const props = defineProps({
     },
     hours: {
         type: Array,
+        default: () => [],
     },
     weekDays: {
         type: Array,
+        default: () => [],
     }
 })
 
@@ -105,7 +107,8 @@ onMounted(() => {
             <div ref="container" class="flex flex-auto flex-col overflow-auto">
                 <div ref="containerNav"
                      class="sticky top-0 z-10 grid flex-none grid-cols-7 bg-white text-xs text-gray-500 shadow-sm ring-1 ring-black/5 md:hidden">
-                    <button v-for="weekDay in props.weekDays" type="button"
+
+                    <button v-for="weekDay in weekDays" type="button"
                             class="flex flex-col items-center pt-3 pb-1.5">
                         {{ weekDay }}
                     </button>
@@ -117,7 +120,7 @@ onMounted(() => {
                         <div class="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100"
                              style="grid-template-rows: repeat(48, minmax(3.5rem, 1fr))">
                             <div ref="containerOffset" class="row-end-1 h-7"></div>
-                            <div v-for="hour in props.hours" :key="hour">
+                            <div v-for="hour in hours" :key="hour">
                                 <div class="sticky left-0 -mt-2.5 -ml-14 w-14 pr-2 text-right text-xs/5 text-gray-400">
                                     {{ hour }}
                                 </div>
@@ -132,7 +135,7 @@ onMounted(() => {
                                 <li class="relative mt-px flex"
                                     :style="{ 'grid-row': `${event.startIndex} / span ${event.durationIndex}` }">
                                     <a
-                                        @click="props.openShowEditEventPage(event.id)"
+                                        @click="openShowEditEventPage(event.id)"
                                         :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-${event.colour}-50 p-2 text-xs/5 hover:bg-${event.colour}-100`">
                                         <p :class="`order-1 font-semibold text-${event.colour}-700`">
                                             {{ event.title }}</p>
@@ -161,7 +164,7 @@ onMounted(() => {
                     </button>
                 </div>
                 <div class="mt-6 grid grid-cols-7 text-center text-xs/6 text-gray-500">
-                    <div v-for="weekDay in props.weekDays">
+                    <div v-for="weekDay in weekDays">
                         {{ weekDay }}
                     </div>
                 </div>

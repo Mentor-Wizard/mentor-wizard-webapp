@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Calendar;
 
+use App\Actions\Calendar\Services\GetDailyEvents;
+use App\Actions\Calendar\Services\GetMonthEvents;
+use App\Actions\Calendar\Services\GetWeeklyEvents;
 use App\Enums\RoleEnum;
-use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -21,22 +23,32 @@ class CalendarsListPage
     public function handle(Request $request): Response
     {
         $data = $request->all();
-        $timezone = $data['timezone'] ?? 'UTC';
-        $date = $data['date'] ?? Carbon::now('UTC')->format('Y-m-d');
+        $timeZone = $data['timeZone'] ?? 'UTC';
+        $date = $data['date'] ?? Carbon::now($timeZone)->format('Y-m-d');
         $mode = $data['mode'] ?? 'Month view';
+        if (! auth()->user()) {
+            return Inertia::render('Auth/Login',
+                [
+                    'canLogin'          => Route::has('login'),
+                    'canRegister'       => Route::has('register'),
+                    'laravelVersion'    => Application::VERSION,
+                    'phpVersion'        => PHP_VERSION,
+                    'locale'            => app()->getLocale(),
+                ]
+            );
+        }
 
         return Inertia::render('Calendar/CalendarsList', [
-            'canLogin'       => Route::has('login'),
-            'canRegister'    => Route::has('register'),
-            'laravelVersion' => Application::VERSION,
-            'phpVersion'     => PHP_VERSION,
-            'locale'         => app()->getLocale(),
-            'permissions'    => auth()->user()->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
-            'events'         => match ($mode) {
-                'Month view'    => User::query()->find(auth()->id())?->getMonthFormattedEvents($date, $timezone),
-                'Week view'     => User::query()->find(auth()->id())?->getWeekFormattedEvents($date, $timezone),
-                'Day view'      => User::query()->find(auth()->id())?->getDailyFormattedEvents($date, $timezone),
-                default         => User::query()->find(auth()->id())?->getMonthFormattedEvents($date, $timezone)
+            'canLogin'          => Route::has('login'),
+            'canRegister'       => Route::has('register'),
+            'laravelVersion'    => Application::VERSION,
+            'phpVersion'        => PHP_VERSION,
+            'locale'            => app()->getLocale(),
+            'permissions'       => (auth()->user()?->hasRole(RoleEnum::MENTOR->value) === true) ? 'edit' : 'view',
+            'events'            => match ($mode) {
+                'Week view'     => new GetWeeklyEvents(auth()->user(), $date, $timeZone)->execute(),
+                'Day view'      => new GetDailyEvents(auth()->user(), $date, $timeZone)->execute(),
+                default         => new GetMonthEvents(auth()->user(), $date, $timeZone)->execute(),
             }]);
     }
 }

@@ -14,12 +14,12 @@ use Override;
  * @property-read int|string $id
  * @property-read string $title
  * @property-read string $web_link
- * @property-read \Illuminate\Support\Carbon $start_date_time
+ * @property-read Carbon $start_date_time
  * @property-read int $duration // in seconds
  */
 class EventWeekViewResource extends JsonResource
 {
-    public function __construct(mixed $resource, private readonly ?string $timezone = null)
+    public function __construct(mixed $resource, private readonly ?string $timezone)
     {
         parent::__construct($resource);
     }
@@ -27,10 +27,7 @@ class EventWeekViewResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $date = Carbon::parse($this->start_date_time);
-        if ($this->timezone !== null && $this->timezone !== '' && $this->timezone !== '0') {
-            $date = $date->clone()->setTimezone($this->timezone);
-        }
+        $date = Carbon::parse($this->start_date_time, 'UTC')->setTimezone($this->timezone);
 
         $timezoneAbbreviation = $date->format('T');
         $dateTime = $date->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$date->format('H:i:s');

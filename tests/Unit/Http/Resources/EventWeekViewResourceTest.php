@@ -27,17 +27,17 @@ describe('EventWeekViewResource', function (): void {
             'description'     => 'Week view description',
         ]);
 
-        $resource = new EventWeekViewResource($event);
+        $resource = new EventWeekViewResource($event, 'Europe/Kyiv');
         $array = $resource->toArray(request());
 
         expect($array)
             ->toHaveKeys(['id', 'dayNumber', 'time', 'dateTime', 'durationIndex', 'startIndex', 'title', 'href', 'colour'])
             ->and($array['id'])->toBe($event->getKey())
-            ->and($array['dayNumber'])->toBe(1) // Sunday -> 1
-            ->and($array['time'])->toBe('10:00 PM')
-            ->and($array['dateTime'])->toBe('2025-08-24"UTC"22:00:00')
+            ->and($array['dayNumber'])->toBe(2) // Sunday -> 1
+            ->and($array['time'])->toBe('1:00 AM')
+            ->and($array['dateTime'])->toBe('2025-08-25"EEST"01:00:00')
             ->and($array['durationIndex'])->toBe(12)
-            ->and($array['startIndex'])->toBe(134)
+            ->and($array['startIndex'])->toBe(8)
             ->and($array['title'])->toBe('Week Resource Test')
             ->and($array['href'])->toBe('https://example.com/week')
             ->and(in_array(Arr::get($array, 'colour'), EventCalendarColoursEnum::values(), true))->toBeTrue();

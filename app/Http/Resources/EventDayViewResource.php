@@ -19,7 +19,7 @@ use Override;
  */
 class EventDayViewResource extends JsonResource
 {
-    public function __construct(mixed $resource, private readonly ?string $timezone = null)
+    public function __construct(mixed $resource, private readonly ?string $timezone = 'UTC')
     {
         parent::__construct($resource);
     }
@@ -27,11 +27,7 @@ class EventDayViewResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $date = Carbon::parse($this->start_date_time);
-        if ($this->timezone !== null && $this->timezone !== '' && $this->timezone !== '0') {
-            $date = $date->clone()->setTimezone($this->timezone);
-        }
-
+        $date = Carbon::parse($this->start_date_time, 'UTC')->setTimezone($this->timezone);
         $timezoneAbbreviation = $date->format('T');
         $dateTime = $date->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$date->format('H:i:s');
 

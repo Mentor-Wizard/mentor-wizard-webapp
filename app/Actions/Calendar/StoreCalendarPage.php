@@ -18,7 +18,7 @@ class StoreCalendarPage
     public function handle(StoreEventRequest $request): Response
     {
         if (! auth()->user()->hasRole('mentor')) {
-            return response()->json(['message' => 'Only mentee can create events.'], Response::HTTP_FORBIDDEN);
+            return response()->json(['message' => 'Only mentor can create events.'], Response::HTTP_FORBIDDEN);
         }
 
         $event = Event::query()->create([

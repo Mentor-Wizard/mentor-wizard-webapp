@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
+use App\Actions\Calendar\Services\CheckAvailableSlots;
+use App\Actions\Calendar\Services\GetAvailableSlots;
 use App\Enums\EventStatusEnum;
 use App\Enums\EventTypeEnum;
 use Illuminate\Contracts\Validation\Validator;
@@ -58,7 +60,8 @@ class EditEventRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
-            if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'), $this->input('toDate'), $this->input('toTime'))) {
+            if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'),
+                $this->input('toDate'), $this->input('toTime'), $this->input('timezone'))) {
                 $validator->errors()->add('fromDate', 'there are another events on this time');
             }
         });
@@ -106,18 +109,21 @@ class EditEventRequest extends FormRequest
         }
     }
 
-    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime)
+    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime, string $timezone)
     {
         $this->validated();
         $startDateTimestamp = Carbon::createFromFormat(
             'Y-m-d H:i',
-            $fromDate.' '.$fromTime
+            $fromDate.' '.$fromTime,
+            $timezone
         )->timestamp;
         $endDateTimestamp = Carbon::createFromFormat(
             'Y-m-d H:i',
-            $toDate.' '.$toTime
+            $toDate.' '.$toTime,
+            $timezone
         )->timestamp;
+        $availableSlots = new GetAvailableSlots(auth()->user(), $timezone)->execute();
 
-        return auth()->user()->checkAvailableSlots($startDateTimestamp, $endDateTimestamp);
+        return new CheckAvailableSlots($availableSlots, $startDateTimestamp, $endDateTimestamp)->execute();
     }
 }

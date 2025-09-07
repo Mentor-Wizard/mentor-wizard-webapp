@@ -51,6 +51,7 @@ describe('EditEventRequest Validation', function (): void {
                 'toTime'      => '12:00',
                 'description' => 'Updated desc',
                 'type'        => EventTypeEnum::INDIVIDUAL->value,
+                'timezone'    => 'Europe/Kyiv',
             ];
         },
     ]);
@@ -75,6 +76,7 @@ describe('EditEventRequest Validation', function (): void {
             'toTime'      => '10:00',
             'description' => 'x',
             'type'        => EventTypeEnum::INDIVIDUAL->value,
+            'timezone'    => 'Europe/Kyiv',
         ], 'title'],
         'toTime before fromTime' => fn (): array => [[
             'title'       => 'Wrong time',
@@ -84,6 +86,7 @@ describe('EditEventRequest Validation', function (): void {
             'toTime'      => '09:00',
             'description' => 'x',
             'type'        => EventTypeEnum::GROUP->value,
+            'timezone'    => 'Europe/Kyiv',
         ], 'toTime'],
     ]);
 });
@@ -153,7 +156,7 @@ describe('Update Calendar Event', function (): void {
         expect($response)
             ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
             ->and($response->getStatusCode())->toBe(403)
-            ->and($response->getData(true)['message'])->toBe('Only mentee can create events.');
+            ->and($response->getData(true)['message'])->toBe('Only mentor can create events.');
     });
 });
 

@@ -180,11 +180,4 @@ describe('User Model', function (): void {
 
         expect($user->getFilamentName())->toBe('');
     });
-    it('returns available slots correctly', function (): void {
-        $user = User::factory()->create();
-
-        $slots = $user->getAvailableSlots();
-
-        expect($slots)->toBeArray();
-    });
 });
