@@ -2235,13 +2235,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libphonenumber-js@npm:^1.12.15":
-  version: 1.12.15
-  resolution: "libphonenumber-js@npm:1.12.15"
-  checksum: 10c0/d715c938f3e9a331b35f0dd93f5c194f7b19321b9e190b05ca76fab88df5c851936752f4354bea812df5d1d4f432a9133dc2c7199e444c7dbf89bb5b9cc75c3a
-  languageName: node
-  linkType: hard
-
 "lightningcss-darwin-arm64@npm:1.30.1":
   version: 1.30.1
   resolution: "lightningcss-darwin-arm64@npm:1.30.1"
@@ -3000,7 +2993,6 @@ __metadata:
     concurrently: "npm:^9.1.2"
     laravel-echo: "npm:^2.0.2"
     laravel-vite-plugin: "npm:^1.2.0"
-    libphonenumber-js: "npm:^1.12.15"
     pinia: "npm:^3.0.1"
     postcss: "npm:^8.5.3"
     pusher-js: "npm:^8.4.0"

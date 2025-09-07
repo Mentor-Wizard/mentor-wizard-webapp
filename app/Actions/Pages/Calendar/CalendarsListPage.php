@@ -38,13 +38,15 @@ class CalendarsListPage
             );
         }
 
+        $user = auth()->user();
+
         return Inertia::render('Calendar/CalendarsList', [
             'canLogin'          => Route::has('login'),
             'canRegister'       => Route::has('register'),
             'laravelVersion'    => Application::VERSION,
             'phpVersion'        => PHP_VERSION,
             'locale'            => app()->getLocale(),
-            'permissions'       => (auth()->user()?->hasRole(RoleEnum::MENTOR->value) === true) ? 'edit' : 'view',
+            'permissions'       => ($user->hasRole(RoleEnum::MENTOR->value) === true) ? 'edit' : 'view',
             'events'            => match ($mode) {
                 'Week view'     => new GetWeeklyEvents(auth()->user(), $date, $timeZone)->execute(),
                 'Day view'      => new GetDailyEvents(auth()->user(), $date, $timeZone)->execute(),
