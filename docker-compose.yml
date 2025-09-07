@@ -112,7 +112,7 @@ services:
             #            - ./docker/nginx/certs/:/etc/nginx/certs/
             - ./storage/logs/nginx/:/var/log/nginx/
         ports:
-            - "80:80"
+            - "8000:8000"
         #            - 443:443
         networks:
             - mw-webserver-network
