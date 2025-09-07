@@ -110,7 +110,7 @@ class StoreEventRequest extends FormRequest
         }
     }
 
-    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime, string $timezone)
+    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime, string $timezone): bool
     {
         $this->validated();
         $startDateTimestamp = Carbon::createFromFormat(

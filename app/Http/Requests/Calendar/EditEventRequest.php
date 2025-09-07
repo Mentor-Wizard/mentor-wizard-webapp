@@ -61,7 +61,7 @@ class EditEventRequest extends FormRequest
     {
         $validator->after(function ($validator): void {
             if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'),
-                $this->input('toDate'), $this->input('toTime'), $this->input('timezone'))) {
+                $this->input('toDate'), $this->input('toTime'), $this->input('timezone', 'Europe/Kyiv'))) {
                 $validator->errors()->add('fromDate', 'there are another events on this time');
             }
         });
@@ -109,7 +109,7 @@ class EditEventRequest extends FormRequest
         }
     }
 
-    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime, string $timezone)
+    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime, string $timezone): bool
     {
         $this->validated();
         $startDateTimestamp = Carbon::createFromFormat(
