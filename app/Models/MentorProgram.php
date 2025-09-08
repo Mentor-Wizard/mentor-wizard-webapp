@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -45,5 +46,10 @@ class MentorProgram extends Model
     public function mentorProgramBlocks(): HasMany
     {
         return $this->hasMany(MentorProgramBlock::class, 'mentor_program_id');
+    }
+
+    public function mentorProfiles(): BelongsToMany
+    {
+        return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_program');
     }
 }

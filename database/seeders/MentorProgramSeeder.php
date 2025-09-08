@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\RoleEnum;
-use App\Models\Currency;
+use App\Models\MentorProfile;
 use App\Models\MentorProgram;
+use App\Models\MentorTag;
 use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
@@ -18,16 +20,27 @@ class MentorProgramSeeder extends Seeder
      */
     public function run(): void
     {
-        $mentor = User::factory()->create(['username' => 'Test Mentor']);
-        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
-
-        $currencies = Currency::query()->pluck('id');
-
-        collect()->times(10, function () use ($mentor, $currencies): void {
-            MentorProgram::factory()->create([
-                'mentor_id'   => $mentor->id,
-                'currency_id' => $currencies->random(),
+        collect()->times(20, function (int $index): void {
+            $mentor = User::factory()->create([
+                'email'    => sprintf('mentor%d@example.com', $index),
+                'username' => 'Mentor '.$index,
             ]);
+
+            $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+            UserProfile::factory()
+                ->recycle($mentor)
+                ->create([
+                    'user_id' => $mentor->id,
+                ]);
+
+            MentorProfile::factory()
+                ->recycle($mentor)
+                ->has(MentorTag::factory()->count(fake()->numberBetween(1, 3)), 'mentorTags')
+                ->has(MentorProgram::factory()->count(fake()->numberBetween(2, 5)), 'mentorPrograms')
+                ->create([
+                    'user_id' => $mentor->id,
+                ]);
         });
 
     }

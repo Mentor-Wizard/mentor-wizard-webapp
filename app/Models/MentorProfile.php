@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * @property-read string $avatar URL of the avatar image
  *
+ * @TODO : Add visible properties after filters and frontend implementation
+ *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]
@@ -25,15 +27,6 @@ class MentorProfile extends Model
 
     protected $fillable = [
         'user_id',
-        'title',
-        'description',
-        'rate',
-        'currency_id',
-        'experience_started_at',
-    ];
-
-    protected $visible = [
-        'id',
         'title',
         'description',
         'rate',
@@ -56,12 +49,17 @@ class MentorProfile extends Model
         return $this->belongsToMany(MentorTag::class, 'mentor_profile_mentor_tag');
     }
 
-    public function languages(): Attribute
+    public function mentorPrograms(): BelongsToMany
+    {
+        return $this->belongsToMany(MentorProgram::class, 'mentor_profile_mentor_program');
+    }
+
+    protected function languages(): Attribute
     {
         return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
     }
 
-    public function stacks(): Attribute
+    protected function stacks(): Attribute
     {
         return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
     }
