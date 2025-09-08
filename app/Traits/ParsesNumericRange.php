@@ -13,11 +13,16 @@ trait ParsesNumericRange
      */
     protected function normalizeBounds(?float $min, ?float $max): array
     {
-        if (! is_null($min) && ! is_null($max) && $min > $max) {
+        if (! is_null($min) && ! is_null($max) && $this->shouldSwapValues($min, $max)) {
             return [$max, $min];
         }
 
         return [$min, $max];
+    }
+
+    protected function shouldSwapValues(float $min, float $max): bool
+    {
+        return $min > $max;
     }
 
     /**

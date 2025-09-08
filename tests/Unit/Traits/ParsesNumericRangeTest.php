@@ -82,6 +82,97 @@ describe('ParsesNumericRange trait', function (): void {
             'large equal'    => [100.0, 100.0],
             'pi equal'       => [3.14159, 3.14159],
         ]);
+
+        it('validates strict greater-than behavior using reference tracking', function (): void {
+            $min = 42.0;
+            $max = 42.0;
+
+            $result = $this->instance->testNormalizeBounds($min, $max);
+
+            expect($result)->toBe([$min, $max]);
+            expect($result)->toEqual([$min, $max]);
+            expect(array_values($result))->toBe([$min, $max]);
+            expect(count($result))->toBe(2);
+            expect($result[0])->toBe($min);
+            expect($result[1])->toBe($max);
+        });
+
+        it('checks boundary condition with microsecond precision', function (): void {
+            $value = 1.000000;
+            $identical = 1.000000;
+            $slightlyLarger = 1.000001;
+
+            $equalResult = $this->instance->testNormalizeBounds($value, $identical);
+            expect($equalResult)->toBe([$value, $identical]);
+
+            $largerResult = $this->instance->testNormalizeBounds($slightlyLarger, $value);
+            expect($largerResult)->toBe([$value, $slightlyLarger]);
+
+            $preciseEqual = $this->instance->testNormalizeBounds(1.0, 1.0);
+            expect($preciseEqual)->toBe([1.0, 1.0]);
+        });
+
+        it('kills the greater-than to greater-or-equal mutation via spying', function (): void {
+            $spy = new class
+            {
+                use ParsesNumericRange;
+
+                public array $swapDecisions = [];
+
+                public function testNormalizeBounds(?float $min, ?float $max): array
+                {
+                    return $this->normalizeBounds($min, $max);
+                }
+
+                protected function shouldSwapValues(float $min, float $max): bool
+                {
+                    $decision = $min > $max;
+                    $this->swapDecisions[] = [
+                        'min'      => $min,
+                        'max'      => $max,
+                        'decision' => $decision,
+                        'equal'    => $min === $max,
+                    ];
+
+                    return $decision;
+                }
+            };
+
+            $result1 = $spy->testNormalizeBounds(8.0, 8.0);
+            $result2 = $spy->testNormalizeBounds(9.0, 6.0);
+            $result3 = $spy->testNormalizeBounds(4.0, 12.0);
+
+            expect($spy->swapDecisions)->toHaveCount(3);
+
+            expect($spy->swapDecisions[0]['equal'])->toBeTrue();
+            expect($spy->swapDecisions[0]['decision'])->toBeFalse();
+
+            expect($spy->swapDecisions[1]['decision'])->toBeTrue();
+            expect($spy->swapDecisions[2]['decision'])->toBeFalse();
+
+            expect($result1)->toBe([8.0, 8.0]);
+            expect($result2)->toBe([6.0, 9.0]);
+            expect($result3)->toBe([4.0, 12.0]);
+        });
+
+        it('directly tests shouldSwapValues method to kill remaining mutation', function (): void {
+            $tester = new class
+            {
+                use ParsesNumericRange {
+                    shouldSwapValues as public;
+                }
+            };
+
+            expect($tester->shouldSwapValues(5.0, 5.0))->toBeFalse();
+            expect($tester->shouldSwapValues(10.0, 10.0))->toBeFalse();
+            expect($tester->shouldSwapValues(0.0, 0.0))->toBeFalse();
+
+            expect($tester->shouldSwapValues(7.0, 3.0))->toBeTrue();
+            expect($tester->shouldSwapValues(15.0, 10.0))->toBeTrue();
+
+            expect($tester->shouldSwapValues(2.0, 8.0))->toBeFalse();
+            expect($tester->shouldSwapValues(1.0, 100.0))->toBeFalse();
+        });
     });
 
     describe('toFloatOrNull method', function (): void {
