@@ -18,6 +18,7 @@
         </include>
         <exclude>
             <directory>app/Providers</directory>
+            <directory>app/Models</directory>
         </exclude>
     </source>
     <php>
