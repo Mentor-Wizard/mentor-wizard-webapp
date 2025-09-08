@@ -66,6 +66,31 @@ The project includes several useful Composer scripts:
 
 ## Testing Information
 
+### Models Testing Policy
+- DO NOT create unit tests for Laravel Eloquent models.
+- Rationale:
+  - Laravel's Eloquent ORM is extensively tested by the Laravel team
+  - Testing basic CRUD operations, relationships, and standard functionality provides no value
+  - Models are excluded from code coverage metrics (see phpunit.xml)
+- What NOT to test:
+  - Basic relationships (hasOne, hasMany, belongsTo, etc.)
+  - Simple CRUD operations (create, update, delete, find)
+  - Standard Eloquent functionality
+  - Factory creation without custom logic
+  - Basic fillable/guarded attributes
+  - Standard casting functionality
+- Exceptions — What TO test:
+  - Custom business logic methods
+  - Complex accessors/mutators with business rules
+  - Custom scopes with specific logic
+  - Observer behavior and side effects
+  - Mass assignment protection (if critical)
+- Where to test model functionality instead:
+  - Feature tests via HTTP endpoints and workflows
+  - Integration tests for model interactions
+  - Observer tests for event handlers
+  - Action/Service tests for business logic
+
 ### Framework
 - **Pest PHP** - Modern testing framework with BDD-style syntax
 - **Mutation Testing** with Infection for test quality assurance
