@@ -133,6 +133,7 @@ describe('Store Calendar Event', function (): void {
     });
 
     it('stores event, attaches host and redirects to calendar page', function (): void {
+        Carbon::setTestNow(Carbon::create(2025, 5, 1, 12, 0, 0, 'UTC'));
         $start = Carbon::tomorrow()->setTime(9, 0, 0);
         $end = Carbon::tomorrow()->setTime(10, 0, 0);
 
@@ -175,7 +176,9 @@ describe('Store Calendar Event', function (): void {
             ->not->toBeNull()
             ->and($pivot->role)->toBe(EventRoleEnum::HOST->value)
             ->and($pivot->created_at)->not->toBeNull()
-            ->and($pivot->updated_at)->not->toBeNull();
+            ->and($pivot->updated_at)->not->toBeNull()
+            ->and((string) $pivot->created_at)->toBe((string) now())
+            ->and((string) $pivot->updated_at)->toBe((string) now());
     });
 
     it('returns 403 for non-mentor user', function (): void {

@@ -78,4 +78,31 @@ describe('GetAvailableSlots Service', function (): void {
         expect($slot3['start'])->toBe($event2EndUtc->clone()->setTimezone($tz)->timestamp)
             ->and($slot3['end'])->toBe(Carbon::now($tz)->addMonths(2)->timestamp);
     });
+
+    it('does not create initial slot when first event starts exactly at current UTC time (strictly less than check)', function (): void {
+        Carbon::setTestNow(Carbon::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        $tz = 'Europe/Kyiv';
+        $user = User::factory()->create();
+
+        $eventStartUtc = Carbon::create(2025, 4, 1, 10, 0, 0, 'UTC');
+        $eventEndUtc = (clone $eventStartUtc)->addHour();
+
+        $event = Event::query()->create([
+            'title'           => 'E-now',
+            'status'          => 'confirmed',
+            'start_date_time' => $eventStartUtc,
+            'end_date_time'   => $eventEndUtc,
+            'duration'        => $eventEndUtc->diffInSeconds($eventStartUtc),
+            'date'            => $eventStartUtc->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+        $user->events()->attach($event->getKey());
+
+        $result = new GetAvailableSlots($user, $tz)->execute();
+
+        // Only two slots should exist: [E-now.end..now+2months]
+        expect($result)->toBeArray()->toHaveCount(1)
+            ->and($result[0]['start'])->toBe($eventEndUtc->clone()->setTimezone($tz)->timestamp)
+            ->and($result[0]['end'])->toBe(Carbon::now($tz)->addMonths(2)->timestamp);
+    });
 });

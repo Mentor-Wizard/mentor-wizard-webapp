@@ -10,6 +10,7 @@ use App\Enums\RoleEnum;
 use App\Models\Event as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Response;
@@ -70,6 +71,8 @@ describe('List Calendar Event Page', function (): void {
             ->and(Arr::get($result, 'props.canLogin'))->toBeTrue()
             ->and(Arr::get($result, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
+            ->and(Arr::get($result, 'props.laravelVersion'))->toBe(Application::VERSION)
+            ->and(Arr::get($result, 'props.phpVersion'))->toBe(PHP_VERSION)
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($result, 'props.events.hasEventsBefore'))->toBeFalse()
             ->and(Arr::get($result, 'props.events.hasEventsAfter'))->toBeFalse()

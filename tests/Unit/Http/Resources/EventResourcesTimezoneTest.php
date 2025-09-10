@@ -32,7 +32,9 @@ describe('Event Resources with timezone', function (): void {
 
         expect($array['time'])->toBe('1:00 AM')
             ->and($array['dayNumber'])->toBe(2)
-            ->and($array['dateTime'])->toBe('2025-08-25"EEST"01:00:00');
+            ->and($array['dateTime'])->toBe('2025-08-25"EEST"01:00:00')
+            ->and($array['durationIndex'])->toBe(12)
+            ->and($array['startIndex'])->toBe(8);
     });
 
     it('applies timezone adjustment for day view', function (): void {
@@ -55,6 +57,8 @@ describe('Event Resources with timezone', function (): void {
         $array = $resource->toArray(request());
 
         expect($array['time'])->toBe('1:00 AM')
-            ->and($array['dateTime'])->toBe('2025-08-25"EEST"01:00:00');
+            ->and($array['dateTime'])->toBe('2025-08-25"EEST"01:00:00')
+            ->and($array['durationIndex'])->toBe(12)
+            ->and($array['startIndex'])->toBe(8);
     });
 });
