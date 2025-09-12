@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 
-Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
-Route::get('review/{user:slug}', GetMentorReviewPage::class)->name('page.mentor-review');
+Route::get('mentor/{mentor:slug}', GetMentorProfilePage::class)->name('page.mentor');
+Route::get('review/{mentor:slug}', GetMentorReviewPage::class)->name('page.mentor-review');
 
 Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])

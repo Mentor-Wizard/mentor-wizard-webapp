@@ -37,7 +37,7 @@
     const page = ref(0)
     const fetchData = async (query) => {
       const { data } = await axios.get(route('page.mentor-review', {
-        user: props.slug,
+        mentor: props.slug,
       }), {
         params: { page: page.value }
       });

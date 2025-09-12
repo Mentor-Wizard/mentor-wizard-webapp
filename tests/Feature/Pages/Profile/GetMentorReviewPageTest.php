@@ -36,7 +36,7 @@ describe('GetMentorReviewPage', function (): void {
         ]);
 
         // Test the first page
-        $response = $this->getJson(route('page.mentor-review', ['user' => $mentor->slug]));
+        $response = $this->getJson(route('page.mentor-review', ['mentor' => $mentor->slug]));
 
         $response->assertOk()
             ->assertJson(function (AssertableJson $json): void {
@@ -56,7 +56,7 @@ describe('GetMentorReviewPage', function (): void {
             });
 
         // Test the second page
-        $responsePage2 = $this->getJson(route('page.mentor-review', ['user' => $mentor->slug, 'page' => 1]));
+        $responsePage2 = $this->getJson(route('page.mentor-review', ['mentor' => $mentor->slug, 'page' => 1]));
 
         $responsePage2->assertOk()
             ->assertJson(function (AssertableJson $json): void {
@@ -66,7 +66,7 @@ describe('GetMentorReviewPage', function (): void {
             });
 
         // Test an empty page (page 2, which should be empty)
-        $responsePage3 = $this->getJson(route('page.mentor-review', ['user' => $mentor->slug, 'page' => 2]));
+        $responsePage3 = $this->getJson(route('page.mentor-review', ['mentor' => $mentor->slug, 'page' => 2]));
 
         $responsePage3->assertOk()
             ->assertJson(function (AssertableJson $json): void {
@@ -78,7 +78,7 @@ describe('GetMentorReviewPage', function (): void {
 
     it('returns 404 if user is not a mentor', function (): void {
         $user = User::factory()->create(); // Not a mentor
-        $response = $this->getJson(route('page.mentor-review', ['user' => $user->slug]));
+        $response = $this->getJson(route('page.mentor-review', ['mentor' => $user->slug]));
         $response->assertNotFound();
     });
 });

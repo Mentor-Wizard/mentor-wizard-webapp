@@ -10,10 +10,11 @@ import SimilarMentors from "@/Pages/Profile/Mentor/Blocks/SimilarMentors.vue";
 import FooterMentor from "@/Pages/Profile/Mentor/Blocks/FooterMentor.vue";
 import AvailablePrograms from "@/Pages/Profile/Mentor/Blocks/AvailablePrograms.vue";
 import TitleProfile from "@/Pages/Profile/Mentor/Blocks/TitleProfile.vue";
+import {ref} from "vue";
 
 const mentor = usePage().props.mentor
 const defaultAvatar = usePage().props.defaultAvatar
-
+const reviewsArray = ref(Object.values(mentor.reviewBlock))
 </script>
 
 <template>
@@ -45,7 +46,7 @@ const defaultAvatar = usePage().props.defaultAvatar
                       <div class="mt-4 overflow-hidden bg-white shadow-xs sm:rounded-lg">
                         <main class="px-4 py-6 mx-auto max-w-2xl sm:px-6 lg:max-w-7xl lg:px-8">
                           <ReviewsMentor
-                            v-model="mentor.reviewBlock"
+                            v-model="reviewsArray"
                             :slug="mentor.slug"
                             :statistic="mentor.statisticBlock"
                           />

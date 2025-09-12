@@ -20,13 +20,13 @@ class GetMentorReviewPage
 
     const int EXTRA_PAGE = 1;
 
-    public function handle(User $user, Request $request): JsonResponse
+    public function handle(User $mentor, Request $request): JsonResponse
     {
-        throw_unless($user->hasRole(RoleEnum::MENTOR->value), new ModelNotFoundException);
+        throw_unless($mentor->hasRole(RoleEnum::MENTOR->value), new ModelNotFoundException);
 
         $page = $request->input('page');
 
-        $reviews = $user->mentorReviews()
+        $reviews = $mentor->mentorReviews()
             ->with('menti')
             ->orderByDesc('created_at')
             ->offset($page * self::PER_PAGE)
@@ -37,7 +37,7 @@ class GetMentorReviewPage
         $items = $reviews->take(self::PER_PAGE);
 
         return response()->json([
-            'items'     => MentorReviewResource::collectionWithMentor($items, $user),
+            'items'     => MentorReviewResource::collectionWithMentor($items, $mentor),
             'next_page' => $hasMorePages ? $page + 1 : null,
         ]);
     }

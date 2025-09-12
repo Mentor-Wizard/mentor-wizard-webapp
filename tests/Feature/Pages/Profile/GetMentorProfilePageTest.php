@@ -72,7 +72,7 @@ describe('Mentor Profile Page', function (): void {
             'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 
-        $this->get(route('page.mentor', ['user' => $mentor->slug]))
+        $this->get(route('page.mentor', ['mentor' => $mentor->slug]))
             ->assertInertia(fn (Assert $page): Assert => $page
                 ->component('Profile/Mentor/View')
                 ->where('mentor.titleBlock.name', 'Mentor profile name Mentor profile last_name')
@@ -91,7 +91,7 @@ describe('Mentor Profile Page', function (): void {
     });
 
     it('loads the mentor profile page with wrong slug', function (): void {
-        $this->get(route('page.mentor', ['user' => 'random-slug']))
+        $this->get(route('page.mentor', ['mentor' => 'random-slug']))
             ->assertNotFound();
     });
 });
