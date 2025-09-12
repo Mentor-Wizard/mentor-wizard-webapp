@@ -18,7 +18,7 @@ class CheckAvailableSlots
             $start = $slot['start'];
             $end = $slot['end'];
             if ($this->startDateTime >= $start && $this->endDateTime <= $end) {
-                return false;
+                return true;
             }
         }
 

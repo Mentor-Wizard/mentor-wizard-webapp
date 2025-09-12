@@ -27,25 +27,28 @@ describe('Calendar Event Edit Page', function (): void {
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
             'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Carbon::tomorrow()->format('Y-m-d').' 13:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null,
         ]);
         $this->event->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
     });
 
     it('updates event successfully', function (): void {
         actingAs($this->user);
+
         $updateEventData = [
+            'id'                => $this->event->getKey(),
             'title'             => 'Default event',
-            'fromDate'          => Carbon::today()->addDays(5)->format('Y-m-d'),
-            'fromTime'          => '12:00',
-            'toDate'            => Carbon::today()->addDays(5)->format('Y-m-d'),
-            'toTime'            => '13:00',
+            'fromDate'          => Carbon::today()->addDays(6)->format('Y-m-d'),
+            'fromTime'          => '14:00',
+            'toDate'            => Carbon::today()->addDays(6)->format('Y-m-d'),
+            'toTime'            => '16:00',
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
+            'timezone'          => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()
@@ -55,10 +58,10 @@ describe('Calendar Event Edit Page', function (): void {
         $this->assertDatabaseHas('events', [
             'title'             => 'Default event',
             'status'            => EventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::today()->addDays(5)->format('Y-m-d').' 09:00:00',
-            'end_date_time'     => Carbon::today()->addDays(5)->format('Y-m-d').' 10:00:00',
-            'date'              => Carbon::today()->addDays(5)->format('Y-m-d'),
-            'duration'          => 3600,
+            'start_date_time'   => Carbon::today()->addDays(6)->format('Y-m-d').' 14:00:00',
+            'end_date_time'     => Carbon::today()->addDays(6)->format('Y-m-d').' 16:00:00',
+            'date'              => Carbon::today()->addDays(6)->format('Y-m-d'),
+            'duration'          => 7200,
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
             'mentor_program_id' => null,
@@ -82,6 +85,7 @@ describe('Calendar Event Edit Page', function (): void {
             'toTime'            => '10:00',
             'type'              => 'individual',
             'description'       => Str::random(2001),
+            'timezone'          => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->getKey()), $invalidData);
@@ -95,6 +99,7 @@ describe('Calendar Event Edit Page', function (): void {
             'toTime'            => null,
             'type'              => 'individual',
             'description'       => Str::random(2001),
+            'timezone'          => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()->patch(route('pages.calendar.edit', $this->event->getKey()), $invalidData);
@@ -112,6 +117,7 @@ describe('Calendar Event Edit Page', function (): void {
             'toTime'            => '10:00',
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
+            'timezone'          => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()

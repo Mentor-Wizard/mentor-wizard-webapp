@@ -59,6 +59,61 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
             ->and($data['status'])->toBe(EventStatusEnum::CONFIRMED)
             ->and($data['duration'])->toBe(5400);
     });
+
+    it('returns 0 duration and null date when invalid datetime strings are provided (nullsafe operators)', function (): void {
+        // Here createFromFormat will return false for start datetime and true for end
+        $request = new class extends StoreEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Invalid',
+                    'fromDate'    => 'not-a-date',   // invalid
+                    'fromTime'    => 'xx:yy',        // invalid
+                    'toDate'      => Carbon::today()->format('Y-m-d'),
+                    'toTime'      => '01:00',
+                    'type'        => 'individual',
+                    'description' => 'Desc',
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        expect($data['duration'])->toBe(0) // (int) null becomes 0 if nullsafe is respected
+            ->and($data['date'])->toBeNull(); // nullsafe on ->format()
+    });
+
+    it('builds exact start/end when crossing midnight to ensure both date and time are concatenated', function (): void {
+        $today = Carbon::today();
+        $tomorrow = $today->copy()->addDay();
+
+        $request = new class($today, $tomorrow) extends StoreEventRequest
+        {
+            public function __construct(private readonly Carbon $today, private readonly Carbon $tomorrow) {}
+
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Cross Midnight',
+                    'fromDate'    => $this->today->format('Y-m-d'),
+                    'fromTime'    => '23:30',
+                    'toDate'      => $this->tomorrow->format('Y-m-d'),
+                    'toTime'      => '00:15',
+                    'type'        => 'group',
+                    'description' => 'Desc',
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        expect($data['start_date_time']->format('Y-m-d H:i'))->toBe($today->format('Y-m-d').' 23:30')
+            ->and($data['end_date_time']->format('Y-m-d H:i'))->toBe($tomorrow->format('Y-m-d').' 00:15')
+            ->and($data['duration'])->toBe(45 * 60);
+    });
 });
 
 describe('StoreEventRequest rules and messages', function (): void {
@@ -67,12 +122,13 @@ describe('StoreEventRequest rules and messages', function (): void {
         $rules = $request->rules();
 
         expect($rules)
-            ->toHaveKeys(['title', 'fromDate', 'toDate', 'fromTime', 'toTime', 'description', 'type'])
+            ->toHaveKeys(['title', 'fromDate', 'toDate', 'fromTime', 'toTime', 'description', 'type', 'timezone'])
             ->and($rules['title'])->toContain('required', 'string', 'max:255')
             ->and($rules['fromDate'])->toContain('required', 'date', 'after_or_equal:today')
             ->and($rules['toDate'])->toContain('required', 'date', 'after_or_equal:fromDate')
             ->and($rules['fromTime'])->toContain('required', 'date_format:H:i')
-            ->and($rules['toTime'])->toContain('required', 'date_format:H:i');
+            ->and($rules['toTime'])->toContain('required', 'date_format:H:i')
+            ->and($rules['timezone'])->toContain('required', 'string');
     });
 
     it('provides all expected messages', function (): void {

@@ -8,6 +8,7 @@ use App\Actions\Calendar\Services\CheckAvailableSlots;
 use App\Actions\Calendar\Services\GetAvailableSlots;
 use App\Enums\EventStatusEnum;
 use App\Enums\EventTypeEnum;
+use Exception;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
@@ -60,9 +61,23 @@ class EditEventRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
+            try {
+                Carbon::parse($this->input('fromDate'));
+                Carbon::parse($this->input('fromDate').' '.$this->input('fromTime'));
+            } catch (Exception) {
+                $validator->errors()->add('fromDate', 'fromDate is not valid');
+            }
+
+            try {
+                Carbon::parse($this->input('toDate'));
+                Carbon::parse($this->input('toDate').' '.$this->input('toTime'));
+            } catch (Exception) {
+                $validator->errors()->add('fromDate', 'toDate is not valid');
+            }
+
             if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'),
                 $this->input('toDate'), $this->input('toTime'), $this->input('timezone', 'Europe/Kyiv'))) {
-                $validator->errors()->add('fromDate', 'there are another events on this time');
+                //                $validator->errors()->add('fromDate', 'there are another events on this time');
             }
         });
     }

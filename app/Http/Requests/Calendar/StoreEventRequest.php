@@ -8,6 +8,7 @@ use App\Actions\Calendar\Services\CheckAvailableSlots;
 use App\Actions\Calendar\Services\GetAvailableSlots;
 use App\Enums\EventStatusEnum;
 use App\Enums\EventTypeEnum;
+use Exception;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
@@ -38,6 +39,20 @@ class StoreEventRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
+            try {
+                Carbon::parse($this->input('fromDate'));
+                Carbon::parse($this->input('fromDate').' '.$this->input('fromTime'));
+            } catch (Exception) {
+                $validator->errors()->add('fromDate', 'fromDate is not valid');
+            }
+
+            try {
+                Carbon::parse($this->input('toDate'));
+                Carbon::parse($this->input('toDate').' '.$this->input('toTime'));
+            } catch (Exception) {
+                $validator->errors()->add('fromDate', 'toDate is not valid');
+            }
+
             if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'),
                 $this->input('toDate'), $this->input('toTime'), $this->input('timezone', 'Europe/Kyiv'))) {
                 $validator->errors()->add('fromDate', 'there are another events on this time');
@@ -71,14 +86,28 @@ class StoreEventRequest extends FormRequest
     public function getEventData(): array
     {
         $validated = $this->validated();
-        $startDateTime = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $validated['fromDate'].' '.$validated['fromTime']
-        );
-        $endDateTime = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $validated['toDate'].' '.$validated['toTime']
-        );
+        try {
+            $startDateTime = Carbon::createFromFormat(
+                'Y-m-d H:i',
+                $validated['fromDate'].' '.$validated['fromTime']
+            );
+            $endDateTime = Carbon::createFromFormat(
+                'Y-m-d H:i',
+                $validated['toDate'].' '.$validated['toTime']
+            );
+
+        } catch (Exception) {
+            return [
+                'title'           => null,
+                'start_date_time' => null,
+                'end_date_time'   => null,
+                'duration'        => null,
+                'type'            => null,
+                'description'     => null,
+                'status'          => null,
+                'date'            => null,
+            ];
+        }
 
         $duration = (int) $startDateTime?->diffInSeconds($endDateTime);
         $eventType = match ($validated['type']) {
@@ -115,11 +144,14 @@ class StoreEventRequest extends FormRequest
         $this->validated();
         $startDateTimestamp = Carbon::createFromFormat(
             'Y-m-d H:i',
-            $fromDate.' '.$fromTime, $timezone)->timestamp;
+            $fromDate.' '.$fromTime,
+            $timezone
+        )->timestamp;
         $endDateTimestamp = Carbon::createFromFormat(
             'Y-m-d H:i',
             $toDate.' '.$toTime,
-            $timezone)->timestamp;
+            $timezone
+        )->timestamp;
         $availableSlots = new GetAvailableSlots(auth()->user(), $timezone)->execute();
 
         return new CheckAvailableSlots($availableSlots, $startDateTimestamp, $endDateTimestamp)->execute();
