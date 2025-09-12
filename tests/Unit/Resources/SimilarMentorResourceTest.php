@@ -112,10 +112,9 @@ describe('Similar Mentor Resource', function (): void {
         $mock->shouldAllowMockingProtectedMethods();
         $mock->shouldReceive('load')
             ->once()
-            ->with('profile', 'mentorProfile')
+            ->with('mentorProfile.currency')
             ->andReturn($mock);
 
-        $mock->setRelation('profile', $freshUser->profile);
         $mock->setRelation('mentorProfile', $freshUser->mentorProfile);
         $mock->id = $freshUser->id;
         $mock->slug = $freshUser->slug;

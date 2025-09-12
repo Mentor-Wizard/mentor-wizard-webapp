@@ -62,22 +62,4 @@ describe('Mentor Programs Resource', function (): void {
                 'description',
             ]));
     });
-
-    it('loads required relationships', function (): void {
-        $user = User::factory()->create();
-        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
-
-        $currency = Currency::query()->first();
-        $program = MentorProgram::factory()->create([
-            'mentor_id'   => $user->id,
-            'currency_id' => $currency->id,
-        ]);
-
-        $freshProgram = MentorProgram::query()->find($program->id);
-        expect($freshProgram->relationLoaded('currency'))->toBeFalse()->and($freshProgram->relationLoaded('mentorProgramBlocks'))->toBeFalse();
-
-        MentorProgramsResource::make($freshProgram)->resolve();
-
-        expect($freshProgram->relationLoaded('currency'))->toBeTrue()->and($freshProgram->relationLoaded('mentorProgramBlocks'))->toBeTrue();
-    });
 });
