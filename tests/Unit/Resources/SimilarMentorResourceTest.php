@@ -101,4 +101,25 @@ describe('Similar Mentor Resource', function (): void {
             'slug'         => $user->slug,
         ]);
     });
+
+    it('loads required relationships', function (): void {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $freshUser = User::query()->whereKey($user->id)->firstOrFail();
+
+        $mock = Mockery::mock($freshUser)->makePartial();
+        $mock->shouldAllowMockingProtectedMethods();
+        $mock->shouldReceive('load')
+            ->once()
+            ->with('profile', 'mentorProfile')
+            ->andReturn($mock);
+
+        $mock->setRelation('profile', $freshUser->profile);
+        $mock->setRelation('mentorProfile', $freshUser->mentorProfile);
+        $mock->id = $freshUser->id;
+        $mock->slug = $freshUser->slug;
+
+        SimilarMentorResource::make($mock)->resolve();
+    });
 });
