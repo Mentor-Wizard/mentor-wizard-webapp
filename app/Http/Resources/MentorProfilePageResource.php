@@ -36,7 +36,7 @@ class MentorProfilePageResource extends JsonResource
             'programsBlock'  => MentorProgramsResource::collection($user->mentorPrograms),
             'statisticBlock' => $this->statisticBlock($user),
             'reviewBlock'    => MentorReviewResource::collectionWithMentor($this->reviewBlock($user), $user),
-            'similarMentors' => SimilarMentorResource::collection($this->semilarMentor($user)),
+            'similarMentors' => SimilarMentorResource::collection($this->similarMentor($user)),
         ];
     }
 
@@ -79,7 +79,7 @@ class MentorProfilePageResource extends JsonResource
             ->take(GetMentorProfilePage::PER_PAGE);
     }
 
-    private function semilarMentor(User $user): Collection
+    private function similarMentor(User $user): Collection
     {
         return User::role(RoleEnum::MENTOR)->where('id', '<>', $user->id)->limit(self::MENTOR_PER_PAGE)->get();
     }
