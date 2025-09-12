@@ -35,6 +35,7 @@ describe('Calendar Event Store Page', function (): void {
             'toTime'            => '10:00',
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
+            'timezone'          => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()
@@ -72,6 +73,7 @@ describe('Calendar Event Store Page', function (): void {
             'toTime'            => '10:00',
             'type'              => 'individual',
             'description'       => Str::random(2001),
+            'timezone'          => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $invalidData);
@@ -117,6 +119,7 @@ describe('Calendar Event Store Page', function (): void {
             'toTime'      => '12:00',
             'type'        => EventTypeEnum::INDIVIDUAL->value,
             'description' => 'Should fail due to overlap',
+            'timezone'    => 'UTC',
         ];
 
         $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $payload);
@@ -137,6 +140,7 @@ describe('Calendar Event Store Page', function (): void {
             'toTime'            => '10:00',
             'type'              => EventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
+            'timezone'          => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()

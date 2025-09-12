@@ -18,16 +18,34 @@ describe('CheckAvailableSlots Service', function (): void {
         ];
 
         $service = new CheckAvailableSlots($slots, 1_100_000, 1_900_000);
+        expect($service->execute())->toBeTrue();
+    });
+
+    it('returns false when requested interval exceed max slot boundaries', function (): void {
+        $slots = [
+            ['start' => 1_000_000, 'end' => 1_900_000],
+        ];
+
+        $service = new CheckAvailableSlots($slots, 1_000_000, 2_000_000);
         expect($service->execute())->toBeFalse();
     });
 
-    it('returns false when requested interval equals slot boundaries', function (): void {
+    it('returns false when requested interval exceed min slot boundaries', function (): void {
+        $slots = [
+            ['start' => 1_100_000, 'end' => 2_000_000],
+        ];
+
+        $service = new CheckAvailableSlots($slots, 1_000_000, 2_000_000);
+        expect($service->execute())->toBeFalse();
+    });
+
+    it('returns true when requested interval exactly within slot boundaries', function (): void {
         $slots = [
             ['start' => 1_000_000, 'end' => 2_000_000],
         ];
 
         $service = new CheckAvailableSlots($slots, 1_000_000, 2_000_000);
-        expect($service->execute())->toBeFalse();
+        expect($service->execute())->toBeTrue();
     });
 
     it('returns false when requested interval does not fit any slot (default path)', function (): void {

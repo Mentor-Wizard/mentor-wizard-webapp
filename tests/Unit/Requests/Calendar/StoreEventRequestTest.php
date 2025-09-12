@@ -60,7 +60,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
             ->and($data['duration'])->toBe(5400);
     });
 
-    it('returns 0 duration and null date when invalid datetime strings are provided (nullsafe operators)', function (): void {
+    it('returns null values when invalid datetime strings are provided (nullsafe operators)', function (): void {
         // Here createFromFormat will return false for start datetime and true for end
         $request = new class extends StoreEventRequest
         {
@@ -81,8 +81,14 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
 
         $data = $request->getEventData();
 
-        expect($data['duration'])->toBe(0) // (int) null becomes 0 if nullsafe is respected
-            ->and($data['date'])->toBeNull(); // nullsafe on ->format()
+        expect($data['duration'])->toBeNull()
+            ->and($data['date'])->toBeNull()
+            ->and($data['title'])->toBeNull()
+            ->and($data['start_date_time'])->toBeNull()
+            ->and($data['end_date_time'])->toBeNull()
+            ->and($data['type'])->toBeNull()
+            ->and($data['description'])->toBeNull()
+            ->and($data['status'])->toBeNull();
     });
 
     it('builds exact start/end when crossing midnight to ensure both date and time are concatenated', function (): void {
