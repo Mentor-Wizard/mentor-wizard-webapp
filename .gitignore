@@ -21,7 +21,11 @@ npm-debug.log
 /.fleet
 /.idea
 /.nova
-/.vscode
+/.vscode/*
+!/.vscode/settings.json
+/.vscode/settings.json
+!/.vscode/mcp.json
+!/.vscode/guidelines.md
 /.zed
 .phpstorm.meta.php
 _ide_helper.php
