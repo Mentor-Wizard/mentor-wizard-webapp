@@ -19,6 +19,11 @@ class MentorTag extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'tag',
+        'type',
+    ];
+
     public function mentorProfiles(): BelongsToMany
     {
         return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_tag');
