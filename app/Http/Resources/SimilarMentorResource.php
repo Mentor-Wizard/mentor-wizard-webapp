@@ -15,7 +15,7 @@ class SimilarMentorResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $this->resource->load('profile', 'mentorProfile');
+        // $this->resource->load('mentorProfile.currency');
 
         return [
             'id'       => $this->resource->id,

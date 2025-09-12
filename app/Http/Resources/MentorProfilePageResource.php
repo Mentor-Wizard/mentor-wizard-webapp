@@ -28,6 +28,7 @@ class MentorProfilePageResource extends JsonResource
         /** @var User $user */
         $user = $this->resource;
         $user->loadMissing(['mentorProfile.currency', 'profile', 'mentorReviews', 'mentorSessions']);
+        $user->mentorPrograms->loadMissing('currency', 'mentorProgramBlocks');
 
         return [
             'id'             => $user->id,
@@ -81,6 +82,6 @@ class MentorProfilePageResource extends JsonResource
 
     private function similarMentor(User $user): Collection
     {
-        return User::role(RoleEnum::MENTOR)->where('id', '<>', $user->id)->limit(self::MENTOR_PER_PAGE)->get();
+        return User::role(RoleEnum::MENTOR)->with(['profile', 'mentorProfile.currency'])->where('id', '<>', $user->id)->limit(self::MENTOR_PER_PAGE)->get();
     }
 }

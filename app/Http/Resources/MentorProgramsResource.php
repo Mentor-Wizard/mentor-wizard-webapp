@@ -15,8 +15,6 @@ class MentorProgramsResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $this->resource->load('currency', 'mentorProgramBlocks');
-
         return [
             'id'           => $this->resource->id,
             'name'         => $this->resource->name,
