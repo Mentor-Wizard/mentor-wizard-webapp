@@ -69,27 +69,27 @@ The project includes several useful Composer scripts:
 ### Models Testing Policy
 - DO NOT create unit tests for Laravel Eloquent models.
 - Rationale:
-  - Laravel's Eloquent ORM is extensively tested by the Laravel team
-  - Testing basic CRUD operations, relationships, and standard functionality provides no value
-  - Models are excluded from code coverage metrics (see phpunit.xml)
+    - Laravel's Eloquent ORM is extensively tested by the Laravel team
+    - Testing basic CRUD operations, relationships, and standard functionality provides no value
+    - Models are excluded from code coverage metrics (see phpunit.xml)
 - What NOT to test:
-  - Basic relationships (hasOne, hasMany, belongsTo, etc.)
-  - Simple CRUD operations (create, update, delete, find)
-  - Standard Eloquent functionality
-  - Factory creation without custom logic
-  - Basic fillable/guarded attributes
-  - Standard casting functionality
+    - Basic relationships (hasOne, hasMany, belongsTo, etc.)
+    - Simple CRUD operations (create, update, delete, find)
+    - Standard Eloquent functionality
+    - Factory creation without custom logic
+    - Basic fillable/guarded attributes
+    - Standard casting functionality
 - Exceptions — What TO test:
-  - Custom business logic methods
-  - Complex accessors/mutators with business rules
-  - Custom scopes with specific logic
-  - Observer behavior and side effects
-  - Mass assignment protection (if critical)
+    - Custom business logic methods
+    - Complex accessors/mutators with business rules
+    - Custom scopes with specific logic
+    - Observer behavior and side effects
+    - Mass assignment protection (if critical)
 - Where to test model functionality instead:
-  - Feature tests via HTTP endpoints and workflows
-  - Integration tests for model interactions
-  - Observer tests for event handlers
-  - Action/Service tests for business logic
+    - Feature tests via HTTP endpoints and workflows
+    - Integration tests for model interactions
+    - Observer tests for event handlers
+    - Action/Service tests for business logic
 
 ### Framework
 - **Pest PHP** - Modern testing framework with BDD-style syntax
@@ -615,11 +615,11 @@ document.addEventListener('livewire:init', function () {
 - Tests should test all of the happy paths, failure paths, and weird paths.
 - Tests live in the `tests/Feature` and `tests/Unit` directories.
 - Pest tests look and behave like this:
-<code-snippet name="Basic Pest Test Example" lang="php">
-it('is true', function () {
-    expect(true)->toBeTrue();
-});
-</code-snippet>
+  <code-snippet name="Basic Pest Test Example" lang="php">
+  it('is true', function () {
+  expect(true)->toBeTrue();
+  });
+  </code-snippet>
 
 ### Running Tests
 - Always run tests in a Docker container.
@@ -633,13 +633,13 @@ it('is true', function () {
 
 ### Pest Assertions
 - When asserting status codes on a response, use the specific method like `assertForbidden` and `assertNotFound` instead of using `assertStatus(403)` or similar, e.g.:
-<code-snippet name="Pest Example Asserting postJson Response" lang="php">
-it('returns all', function () {
-    $response = $this->postJson('/api/docs', []);
+  <code-snippet name="Pest Example Asserting postJson Response" lang="php">
+  it('returns all', function () {
+  $response = $this->postJson('/api/docs', []);
 
-    $response->assertSuccessful();
-});
-</code-snippet>
+  $response->assertSuccessful();
+  });
+  </code-snippet>
 
 ### Mocking
 - Mocking can be very helpful when appropriate.
@@ -665,4 +665,4 @@ it('has emails', function (string $email) {
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
 - Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
-</laravel-boost-guidelines>
+  </laravel-boost-guidelines>
