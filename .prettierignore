@@ -1,11 +1,13 @@
+.cursor/guidelines.md
 .ddev
 .github
-LICENSE.md
-composer.lock
+.junie/guidelines.md
+.vscode/guidelines.md
 dist
 local
 public
-taskfile.yml
 .gitlab-ci.yml
+CLAUDE.md
 compose.yml
-.junie/guidelines.md
+composer.lock
+taskfile.yml
