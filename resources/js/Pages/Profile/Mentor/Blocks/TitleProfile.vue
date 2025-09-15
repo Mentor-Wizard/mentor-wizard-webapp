@@ -82,8 +82,8 @@
                 </div>
                 <div class="flex items-center justify-between">
                         <div class="flex items-baseline gap-1">
-                            <span class="text-2xl font-bold text-blue-600">від {{ data.rate }} {{ data.currency }}</span>
-                            <span class="text-gray-500">/за годину</span>
+                            <span class="text-2xl font-bold text-blue-600">from {{ data.rate }} {{ data.currency }}</span>
+                            <span class="text-gray-500">/hour</span>
                         </div>
                         <div class="flex gap-3">
                             <button class="flex items-center gap-2 px-4 py-2 border border-blue-400 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
