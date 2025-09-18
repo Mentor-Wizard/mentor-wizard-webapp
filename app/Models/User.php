@@ -26,6 +26,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $username
  *
  * run  * @mixin IdeHelperUser
+ * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
