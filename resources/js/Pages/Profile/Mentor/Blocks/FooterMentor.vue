@@ -44,7 +44,3 @@ import {AcademicCapIcon} from "@heroicons/vue/16/solid";
     </div>
 
 </template>
-
-<style scoped>
-
-</style>

@@ -174,7 +174,3 @@ import {GlobeAltIcon} from "@heroicons/vue/16/solid/index.js";
           <button class="mt-4 w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">Book Consultation</button>
         </div>
 </template>
-
-<style scoped>
-
-</style>
