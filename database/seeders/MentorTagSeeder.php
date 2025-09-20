@@ -13,9 +13,9 @@ class MentorTagSeeder extends Seeder
     public function run(): void
     {
         $skills = [
-            'Web розробка',
-            'Mobile розробка',
-            'Desktop розробка',
+            'Web development',
+            'Mobile development',
+            'Desktop development',
             'Game Development',
             'Embedded Systems',
             'Data Science',
