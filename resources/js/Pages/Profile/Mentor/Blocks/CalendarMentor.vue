@@ -5,7 +5,7 @@ import {GlobeAltIcon} from "@heroicons/vue/16/solid/index.js";
 
 <template>
   <div class="mt-2">
-     <h3 class="text-lg font-semibold text-gray-900">Забронюй заняття</h3>
+     <h3 class="text-lg font-semibold text-gray-900">Book a lesson</h3>
   </div>
   <div class="text-center lg:col-start-8 lg:col-end-13 lg:row-start-1 lg:mt-9 xl:col-start-9">
           <div class="flex items-center text-gray-900">

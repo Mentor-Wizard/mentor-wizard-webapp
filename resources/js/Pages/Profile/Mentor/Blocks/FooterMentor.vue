@@ -11,10 +11,10 @@ import {AcademicCapIcon} from "@heroicons/vue/16/solid";
               <MagnifyingGlassIcon class="w-8 h-8 text-white"/>
           </div>
 
-          <h2 class="text-xl font-semibold text-gray-900 mb-3">Знайди ментора</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-3">Find a mentor</h2>
 
           <p class="text-gray-600 text-sm leading-relaxed">
-              Шукай серед сотень перевірених експертів, фільтруй за спеціалізацією, ціною та рейтингом
+              Search among hundreds of verified experts, filter by specialization, price and rating
           </p>
       </div>
 
@@ -23,10 +23,10 @@ import {AcademicCapIcon} from "@heroicons/vue/16/solid";
               <CalendarIcon class="w-8 h-8 text-white"/>
           </div>
 
-          <h2 class="text-xl font-semibold text-gray-900 mb-3">Бронюй сесії</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-3">Book a session</h2>
 
           <p class="text-gray-600 text-sm leading-relaxed">
-              Обирай зручний час у календарі ментора та бронюй індивідуальні або групові сесії
+              Choose a convenient time on your mentor's calendar and book individual or group sessions
           </p>
       </div>
 
@@ -35,10 +35,10 @@ import {AcademicCapIcon} from "@heroicons/vue/16/solid";
               <AcademicCapIcon class="w-8 h-8 text-white"/>
           </div>
 
-          <h2 class="text-xl font-semibold text-gray-900 mb-3">Розвивайся</h2>
+          <h2 class="text-xl font-semibold text-gray-900 mb-3">Develop yourself</h2>
 
           <p class="text-gray-600 text-sm leading-relaxed">
-              Отримуй знання, завдання та зворотній зв'язок від експертів галузі для швидкого зростання
+              Get knowledge, challenges, and feedback from industry experts for rapid growth
           </p>
       </div>
     </div>

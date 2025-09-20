@@ -22,7 +22,7 @@
                 <img :src="data.avatar" alt="mentor.profile.name" class="aspect-square w-full object-cover rounded-2xl overflow-hidden" />
                 <div class="absolute top-2 right-2 bg-green-200 text-green-800 text-sm font-medium px-3 py-1 rounded-full shadow flex items-center gap-2">
                     <span class="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
-                    Є місця сьогодні
+                    There are places today
                 </div>
             </div>
 
@@ -52,30 +52,30 @@
                         <div class="flex items-center gap-2 text-gray-600">
                             <BriefcaseIcon class="w-8 h-8 text-gray-500" />
                             <div>
-                                <div class="text-sm text-gray-500">Досвід</div>
+                                <div class="text-sm text-gray-500">Experience</div>
                                 <div class="font-medium">{{ data.experience }}</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 text-gray-600">
                             <UserGroupIcon class="w-8 h-8 text-gray-500" />
                             <div>
-                                <div class="text-sm text-gray-500">Кількість студентів</div>
+                                <div class="text-sm text-gray-500">Number of students</div>
                                 <div class="font-medium">{{ data.mentiCount }}</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 text-gray-600">
                             <GlobeAltIcon class="w-8 h-8 text-gray-500" />
                             <div>
-                                <div class="text-sm text-gray-500">Мови</div>
+                                <div class="text-sm text-gray-500">Languages</div>
                                 <div v-for="(language, index) in data.languages" :key="index" class="font-medium">{{ language }}</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 text-gray-600">
                             <ClockIcon class="w-8 h-8 text-gray-500" />
                             <div>
-                                <div class="text-sm text-gray-500">Відповідає</div>
+                                <div class="text-sm text-gray-500">Responds in</div>
                                 <div class="font-medium">
-                                    < ніж за 2 години</div>
+                                    < 2 hours</div>
                             </div>
                         </div>
                     </div>
