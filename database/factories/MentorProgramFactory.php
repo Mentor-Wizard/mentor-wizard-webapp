@@ -23,7 +23,7 @@ class MentorProgramFactory extends Factory
     {
         return [
             'mentor_id'   => User::factory(),
-            'name'        => fake()->word(),
+            'name'        => fake()->sentence(3),
             'slug'        => fake()->slug(),
             'description' => fake()->sentence(20),
             'cost'        => fake()->randomFloat(2, 10, 1000),

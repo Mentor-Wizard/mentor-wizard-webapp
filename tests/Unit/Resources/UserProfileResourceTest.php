@@ -9,7 +9,9 @@ use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
-describe('Mentor Page', function (): void {
+covers(UserProfileResource::class);
+
+describe('User Profile Resource', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });

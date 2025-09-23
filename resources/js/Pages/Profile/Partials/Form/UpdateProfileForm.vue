@@ -11,30 +11,30 @@ import PhoneNumberInput from "@/Components/UI/Forms/PhoneNumberInput.vue";
 import {ref} from 'vue';
 
 defineProps({
-    mustVerifyEmail: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
+	mustVerifyEmail: {
+		type: Boolean,
+	},
+	status: {
+		type: String,
+	},
 });
 
 const user = usePage().props.auth.user;
 const profile = user?.profile;
 
 const form = useForm({
-    name: profile?.name,
-    last_name: profile?.last_name,
-    phone: profile?.phone,
-    linkedin: profile?.linkedin ?? '',
-    telegram: profile?.telegram ?? '',
-    whatsapp: profile?.whatsapp ?? '',
+	name: profile?.name,
+	last_name: profile?.last_name,
+	phone: profile?.phone,
+	linkedin: profile?.linkedin ?? '',
+	telegram: profile?.telegram ?? '',
+	whatsapp: profile?.whatsapp ?? '',
 });
 
 const submit = () => {
-    form.patch(route('profile.update'), {
-        forceFormData: true,
-    });
+	form.patch(route('profile.update'), {
+		forceFormData: true,
+	});
 };
 </script>
 

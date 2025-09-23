@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\Currency;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Seeder;
@@ -26,6 +27,8 @@ class UserSeeder extends Seeder
                     'telegram'      => fake()->userName,
                     'whatsapp'      => fake()->phoneNumber,
                     'phone'         => fake()->phoneNumber,
+                    'cost_per_hour' => fake()->randomFloat(2, 10, 100),
+                    'currency_id'   => Currency::query()->inRandomOrder()->value('id'),
                 ]
                 );
                 $name = urlencode($user->profile->name.' '.$user->profile->last_name);

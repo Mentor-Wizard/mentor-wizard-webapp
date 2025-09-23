@@ -44,7 +44,7 @@ describe('ProfileRateFilter Integration', function (): void {
 
         expect($results)->toHaveCount(2);
         $rates = $results->pluck('rate')->map(fn ($rate): float => (float) $rate)->sort()->values();
-        expect($rates->toArray())->toBe([50.0, 75.0]);
+        expect($rates->all())->toBe([50.0, 75.0]);
     });
 
     it('filters with min-only and max-only values', function (): void {
@@ -54,7 +54,7 @@ describe('ProfileRateFilter Integration', function (): void {
 
         expect($results1)->toHaveCount(2);
         $rates1 = $results1->pluck('rate')->map(fn ($rate): float => (float) $rate)->sort()->values();
-        expect($rates1->toArray())->toBe([50.0, 75.0]);
+        expect($rates1->all())->toBe([50.0, 75.0]);
 
         $query2 = MentorProfile::query();
         $this->filter->__invoke($query2, ['max' => '50'], 'rate');
@@ -62,7 +62,7 @@ describe('ProfileRateFilter Integration', function (): void {
 
         expect($results2)->toHaveCount(2);
         $rates2 = $results2->pluck('rate')->map(fn ($rate): float => (float) $rate)->sort()->values();
-        expect($rates2->toArray())->toBe([25.0, 50.0]);
+        expect($rates2->all())->toBe([25.0, 50.0]);
     });
 
     it('generates correct SQL with BETWEEN clause', function (): void {
