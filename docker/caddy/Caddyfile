@@ -1,0 +1,115 @@
+# Caddyfile with automatic SSL support
+# For development: use localhost or 127.0.0.1
+# For production: use your actual domain name
+
+# HTTP configuration for localhost development
+localhost, 127.0.0.1, :80 {
+    # Use FrankenPHP's native PHP server with worker support
+    php_server {
+        root /var/www/public
+        # Use Laravel's index.php as the entry point
+        # FrankenPHP will handle routing automatically
+    }
+
+    # Security headers
+    header {
+        # Remove server information
+        -Server
+
+        # Basic security headers
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer-when-downgrade
+    }
+
+    # Handle static assets with proper caching
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot
+    }
+    handle @static {
+        header Cache-Control "max-age=31536000, immutable"
+        file_server
+    }
+
+    # Logging for development
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}
+
+# HTTPS configuration with automatic SSL for domain names
+# Replace 'your-domain.com' with your actual domain
+# Caddy will automatically obtain and renew SSL certificates
+# your-domain.com {
+#     # Use FrankenPHP's native PHP server with worker support
+#     php_server {
+#         root /var/www/public
+#     }
+#
+#     # Enhanced security headers for production
+#     header {
+#         # Remove server information
+#         -Server
+#
+#         # Security headers
+#         X-Content-Type-Options nosniff
+#         X-Frame-Options DENY
+#         X-XSS-Protection "1; mode=block"
+#         Referrer-Policy strict-origin-when-cross-origin
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#     }
+#
+#     # Handle static assets with proper caching
+#     @static {
+#         file
+#         path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot
+#     }
+#     handle @static {
+#         header Cache-Control "max-age=31536000, immutable"
+#         file_server
+#     }
+#
+#     # Production logging
+#     log {
+#         output file /var/log/caddy/access.log {
+#             roll_size 100mb
+#             roll_keep 10
+#         }
+#         format json
+#         level WARN
+#     }
+# }
+
+# Self-signed certificate configuration for testing HTTPS locally
+# https://localhost {
+#     tls internal
+#
+#     php_server {
+#         root /var/www/public
+#     }
+#
+#     header {
+#         -Server
+#         X-Content-Type-Options nosniff
+#         X-Frame-Options DENY
+#         Referrer-Policy no-referrer-when-downgrade
+#     }
+#
+#     @static {
+#         file
+#         path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot
+#     }
+#     handle @static {
+#         header Cache-Control "max-age=31536000, immutable"
+#         file_server
+#     }
+#
+#     log {
+#         output stdout
+#         format console
+#         level INFO
+#     }
+# }
