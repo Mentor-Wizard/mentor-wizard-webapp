@@ -27,7 +27,7 @@ class MentorProgramBlockProgress extends Model
         'is_completed',
     ];
 
-    public function mentor_program_blocks(): BelongsTo
+    public function mentorProgramBlocks(): BelongsTo
     {
         return $this->belongsTo(MentorProgramBlock::class, 'mentor_program_block_id');
     }

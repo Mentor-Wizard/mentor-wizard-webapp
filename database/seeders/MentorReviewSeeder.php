@@ -19,7 +19,7 @@ class MentorReviewSeeder extends Seeder
             $mentors = $users->where('id', '!=', $menti->id)->shuffle()->take(20);
 
             foreach ($mentors as $mentor) {
-                for ($i = 0; $i < 20; $i++) {
+                for ($i = 0; $i < 10; $i++) {
                     MentorReview::query()->create([
                         'mentor_id' => $mentor->id,
                         'menti_id'  => $menti->id,

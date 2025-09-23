@@ -23,9 +23,12 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property-read UserProfile $profile
+ * @property-read MentorProfile|null $mentorProfile
+ * @property-read float $rating
  * @property string $username
  *
  * run  * @mixin IdeHelperUser
+ * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
@@ -93,7 +96,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     public function mentiProgramProgress(): ?HasOne
     {
-        return $this->hasOne(MentorProgramBlockProgress::class);
+        return $this->hasOne(MentorProgramBlockProgress::class, 'menti_id');
     }
 
     public function mentorReviews(): HasMany

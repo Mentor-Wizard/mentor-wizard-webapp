@@ -46,7 +46,7 @@ class HandleInertiaRequests extends Middleware
                 'avatar' => $request->user()?->profile?->avatar,
                 'roles'  => $request->user()?->getRoleNames(),
             ],
-            'ziggy'   => fn () => [
+            'ziggy'   => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],

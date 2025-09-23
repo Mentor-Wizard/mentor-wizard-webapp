@@ -169,6 +169,9 @@ DB_PASSWORD=test_mw_user_password
 
 ```bash
 docker compose exec app php artisan test
+docker compose exec app ./vendor/bin/pest --bail ### зупиняє запуск при першому невдалому тесті
+docker compose exec app ./vendor/bin/pest --dirty ### запускає тести тільки для файлів з незакоміченими змінами.
+docker compose exec app ./vendor/bin/pest --retry ### повторити лише ті тести, які впали в останньому прогоні.
 ```
 
 ### 2. Запуск аналізатора коду PHPStan
