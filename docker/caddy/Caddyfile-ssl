@@ -1,0 +1,58 @@
+# Caddyfile for HTTPS configuration with automatic SSL
+# Replace 'your-domain.com' with your actual domain name
+
+your-domain.com {
+    # Use FrankenPHP's native PHP server with worker support
+    php_server {
+        root /var/www/public
+        # Use Laravel's index.php as the entry point
+        # FrankenPHP will handle routing automatically
+    }
+
+    # Security headers
+    header {
+        # Remove server information
+        -Server
+
+        # Enhanced security headers for HTTPS
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+
+    # Handle static assets with proper caching
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.woff2 *.ttf *.eot
+    }
+    handle @static {
+        header Cache-Control "max-age=31536000, immutable"
+        file_server
+    }
+
+    # Enable automatic HTTPS with Let's Encrypt
+    # Caddy automatically obtains and renews SSL certificates
+    tls {
+        # Use Let's Encrypt for automatic SSL
+        # You can specify an email for notifications (optional)
+        # email your-email@domain.com
+    }
+
+    # Logging for production (less verbose)
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 100mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
+        level WARN
+    }
+}
+
+# Redirect HTTP to HTTPS automatically
+http://your-domain.com {
+    redir https://your-domain.com{uri} permanent
+}

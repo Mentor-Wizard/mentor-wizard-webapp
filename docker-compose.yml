@@ -39,7 +39,7 @@ services:
         restart: unless-stopped
         container_name: mw-app
         environment:
-            COMMAND: php artisan octane:start --watch --host=0.0.0.0 --port=8000 --verbose
+            COMMAND: php artisan octane:frankenphp --host=0.0.0.0 --port=80 --watch
             PROCESS: app
             XDEBUG_MODE: debug,coverage
         depends_on:
@@ -49,16 +49,21 @@ services:
                 condition: service_healthy
         volumes:
             - ./:/var/www
+            - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+            - caddy_data:/data
+            - caddy_config:/config
             - mw_app_composer_data:/.composer
             - mw_app_npm_data:/.npm
         ports:
+            - "80:80"
+            - "443:443"
+            - "443:443/udp"
             - "5173:5173"
         networks:
             - mw-db-network
-            - mw-webserver-network
             - mw-redis-network
         healthcheck:
-            test: curl -s http://localhost:8000/up >/dev/null || exit 1
+            test: curl -s http://localhost/up >/dev/null || exit 1
             interval: 5s
             timeout: 10s
             retries: 20
@@ -102,25 +107,6 @@ services:
             - mw-db-network
             - mw-redis-network
 
-    webserver:
-        image: nginx:1.26.0-alpine
-        container_name: mw-webserver
-        restart: unless-stopped
-        volumes:
-            - ./:/var/www
-            - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
-            #            - ./docker/nginx/certs/:/etc/nginx/certs/
-            - ./storage/logs/nginx/:/var/log/nginx/
-        ports:
-            - "8000:8000"
-        #            - 443:443
-        networks:
-            - mw-webserver-network
-        healthcheck:
-            test: curl -s http://localhost/up >/dev/null || exit 1
-            interval: 5s
-            timeout: 10s
-            retries: 20
 
     redis:
         image: redis:7.2.4-alpine
@@ -145,7 +131,7 @@ services:
             - '${FORWARD_MAILPIT_PORT:-1025}:1025'
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
         networks:
-            - mw-webserver-network
+            - mw-db-network
 
 volumes:
     db_data:
@@ -154,6 +140,12 @@ volumes:
     redis_data:
         driver: local
         name: mw_redis_data
+    caddy_data:
+        driver: local
+        name: mw_caddy_data
+    caddy_config:
+        driver: local
+        name: mw_caddy_config
     mw_app_composer_data:
         driver: local
         name: mw_app_composer_data
@@ -165,9 +157,6 @@ networks:
     mw-db-network:
         driver: bridge
         name: mw-db-network
-    mw-webserver-network:
-        driver: bridge
-        name: mw-webserver-network
     mw-redis-network:
         driver: bridge
         name: mw-redis-network

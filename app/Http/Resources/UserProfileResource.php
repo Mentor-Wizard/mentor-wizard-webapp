@@ -30,13 +30,13 @@ class UserProfileResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name'        => $this->name,
-            'last_name'   => $this->last_name,
-            'linkedin'    => $this->linkedin,
-            'telegram'    => $this->telegram,
-            'whatsapp'    => $this->whatsapp,
-            'phone'       => $this->phone,
-            'avatar'      => $this->avatar,
+            'name'        => $this->resource->name,
+            'last_name'   => $this->resource->last_name,
+            'linkedin'    => $this->resource->linkedin,
+            'telegram'    => $this->resource->telegram,
+            'whatsapp'    => $this->resource->whatsapp,
+            'phone'       => $this->resource->phone,
+            'avatar'      => $this->resource->avatar,
         ];
     }
 }

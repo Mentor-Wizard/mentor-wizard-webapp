@@ -17,14 +17,16 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
+            CurrencySeeder::class,
             UserSeeder::class,
             AdminSeeder::class,
             MentiSeeder::class,
             SuperAdminSeeder::class,
             CoachSeeder::class,
-            CurrencySeeder::class,
+            MentorTagSeeder::class,
             MentorProgramSeeder::class,
             EventSeeder::class,
+            MentorReviewSeeder::class,
         ]);
     }
 }
