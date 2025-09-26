@@ -143,7 +143,7 @@ class NoScriptTag implements Rule
     'required',
     'min:12',
     'confirmed',
-    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
+    'lax',
 ];
 
 // Перевірка на скомпрометовані паролі
