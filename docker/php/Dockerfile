@@ -50,7 +50,7 @@ RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory-limit.ini
 
 # Install Node.js tools
 RUN npm install -g corepack
-RUN corepack enable && corepack prepare yarn@4.9.4 --activate
+RUN corepack enable && corepack prepare yarn@4.10.3 --activate
 
 # Copy supervisor configuration
 COPY docker/php/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
