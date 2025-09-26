@@ -1,5 +1,6 @@
 <script setup>
 import { StarIcon } from '@heroicons/vue/20/solid/index.js';
+import axios from 'axios';
 import { ref } from 'vue';
 
 const model = defineModel({
@@ -41,7 +42,7 @@ const counts = [
 ];
 
 const page = ref(0);
-const fetchData = async (query) => {
+const fetchData = async () => {
   const { data } = await axios.get(
     route('page.mentor-review', {
       mentor: props.slug,
@@ -157,8 +158,8 @@ const fetchData = async (query) => {
     </div>
     <div class="flex items-center justify-center">
       <button
-        @click="fetchData"
         class="rounded-md border border-gray-600 px-4 py-2 text-gray-600 transition-colors duration-200 hover:bg-gray-50"
+        @click="fetchData"
       >
         Load More Reviews
       </button>

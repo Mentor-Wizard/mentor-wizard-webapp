@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({
+defineProps({
   data: {
     type: Object,
     required: true,
@@ -45,7 +45,7 @@ const props = defineProps({
       <div class="mb-6 space-y-3">
         <div
           v-for="block in program.blocks"
-          key="block.id"
+          :key="block.id"
           class="flex items-start"
         >
           <svg

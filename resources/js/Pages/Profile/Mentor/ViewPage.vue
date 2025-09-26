@@ -1,18 +1,18 @@
 <script setup>
-import LandingLayout from '@/Layouts/LandingLayout.vue';
 import { usePage } from '@inertiajs/vue3';
-import AboutMentor from '@/Pages/Profile/Mentor/Blocks/AboutMentor.vue';
-import CalendarMentor from '@/Pages/Profile/Mentor/Blocks/CalendarMentor.vue';
-import ContactMentor from '@/Pages/Profile/Mentor/Blocks/ContactMentor.vue';
-import ReviewsMentor from '@/Pages/Profile/Mentor/Blocks/ReviewsMentor.vue';
-import SimilarMentors from '@/Pages/Profile/Mentor/Blocks/SimilarMentors.vue';
-import FooterMentor from '@/Pages/Profile/Mentor/Blocks/FooterMentor.vue';
-import AvailablePrograms from '@/Pages/Profile/Mentor/Blocks/AvailablePrograms.vue';
-import TitleProfile from '@/Pages/Profile/Mentor/Blocks/TitleProfile.vue';
 import { ref } from 'vue';
 
+import LandingLayout from '@/Layouts/LandingLayout.vue';
+import AboutMentor from '@/Pages/Profile/Mentor/Blocks/AboutMentor.vue';
+import AvailablePrograms from '@/Pages/Profile/Mentor/Blocks/AvailablePrograms.vue';
+import CalendarMentor from '@/Pages/Profile/Mentor/Blocks/CalendarMentor.vue';
+import ContactMentor from '@/Pages/Profile/Mentor/Blocks/ContactMentor.vue';
+import FooterMentor from '@/Pages/Profile/Mentor/Blocks/FooterMentor.vue';
+import ReviewsMentor from '@/Pages/Profile/Mentor/Blocks/ReviewsMentor.vue';
+import SimilarMentors from '@/Pages/Profile/Mentor/Blocks/SimilarMentors.vue';
+import TitleProfile from '@/Pages/Profile/Mentor/Blocks/TitleProfile.vue';
+
 const mentor = usePage().props.mentor;
-const defaultAvatar = usePage().props.defaultAvatar;
 const reviewsArray = ref(Object.values(mentor.reviewBlock));
 </script>
 

@@ -1,14 +1,12 @@
 <script setup>
+import { useForm, usePage } from '@inertiajs/vue3';
+
+import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 import InputError from '@/Components/UI/Forms/InputError.vue';
 import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
-import TextInput from '@/Components/UI/Forms/TextInput.vue';
-import TextArea from '@/Components/UI/Forms/TextArea.vue';
-import { useForm, usePage } from '@inertiajs/vue3';
 import InputSuccess from '@/Components/UI/Forms/InputSuccess.vue';
 import PhoneNumberInput from '@/Components/UI/Forms/PhoneNumberInput.vue';
-
-import { ref } from 'vue';
+import TextInput from '@/Components/UI/Forms/TextInput.vue';
 
 defineProps({
   mustVerifyEmail: {
@@ -16,6 +14,7 @@ defineProps({
   },
   status: {
     type: String,
+    required: true,
   },
 });
 
@@ -48,7 +47,7 @@ const submit = () => {
         Add additional information about yourself.
       </p>
     </div>
-    <form @submit.prevent="submit" class="md:col-span-2">
+    <form class="md:col-span-2" @submit.prevent="submit">
       <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
         <div class="col-span-full">
           <InputLabel for="name" value="Name" />

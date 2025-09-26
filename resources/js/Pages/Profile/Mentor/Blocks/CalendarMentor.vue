@@ -525,6 +525,7 @@ import { GlobeAltIcon } from '@heroicons/vue/16/solid/index.js';
     <div class="mt-2 grid grid-cols-2 gap-4">
       <button
         v-for="i in [1, 2, 3, 4]"
+        :key="i"
         class="rounded-md border border-gray-600 px-4 py-2 text-gray-600 transition-colors duration-200 hover:bg-gray-50"
       >
         12:00 AM

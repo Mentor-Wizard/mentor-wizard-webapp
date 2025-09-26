@@ -1,6 +1,6 @@
 <script setup>
 import { IdentificationIcon } from '@heroicons/vue/24/solid/index.js';
-const props = defineProps({
+defineProps({
   title: {
     type: String,
     default: 'not defined',

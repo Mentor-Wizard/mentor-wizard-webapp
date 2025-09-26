@@ -1,12 +1,12 @@
 <script setup>
-import { StarIcon } from '@heroicons/vue/20/solid/index.js';
 import { BriefcaseIcon } from '@heroicons/vue/16/solid';
 import { UserGroupIcon } from '@heroicons/vue/16/solid';
 import { GlobeAltIcon } from '@heroicons/vue/16/solid';
 import { ClockIcon } from '@heroicons/vue/16/solid';
 import { BookmarkIcon } from '@heroicons/vue/16/solid';
+import { StarIcon } from '@heroicons/vue/20/solid/index.js';
 
-const props = defineProps({
+defineProps({
   data: {
     type: Object,
     required: true,
@@ -104,7 +104,7 @@ const props = defineProps({
               <ClockIcon class="h-8 w-8 text-gray-500" />
               <div>
                 <div class="text-sm text-gray-500">Responds in</div>
-                <div class="font-medium">< 2 hours</div>
+                <div class="font-medium">&lt; 2 hours</div>
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 <script setup>
 import { StarIcon } from '@heroicons/vue/20/solid/index.js';
 
-const props = defineProps({
+defineProps({
   data: {
     type: Object,
     required: true,
