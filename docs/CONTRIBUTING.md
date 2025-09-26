@@ -2,23 +2,30 @@
 
 ## Ласкаво просимо до команди Mentor Wizard!
 
-Дякуємо за інтерес до участі в розробці платформи менторингу. Цей документ допоможе вам швидко інтегруватися в команду та почати ефективно працювати над проектом.
+Дякуємо за інтерес до участі в розробці платформи менторингу. Цей документ
+допоможе вам швидко інтегруватися в команду та почати ефективно працювати над
+проектом.
 
 ## Перші кроки
 
 ### 1. Ознайомлення з проектом
 
 **Обов'язкова література:**
+
 - [README.md](../README.md) - загальний опис проекту
 - [CLAUDE.md](../CLAUDE.md) - налаштування для AI-асистентів
 - [docs/NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md) - конвенції кодування
-- [docs/ACTIONS_ARCHITECTURE.md](./ACTIONS_ARCHITECTURE.md) - архітектура Laravel Actions
-- [docs/FRONTEND_ARCHITECTURE.md](./FRONTEND_ARCHITECTURE.md) - Vue.js + Inertia.js
+- [docs/ACTIONS_ARCHITECTURE.md](./ACTIONS_ARCHITECTURE.md) - архітектура
+  Laravel Actions
+- [docs/FRONTEND_ARCHITECTURE.md](./FRONTEND_ARCHITECTURE.md) - Vue.js +
+  Inertia.js
 
 **Додаткові ресурси:**
+
 - [docs/TESTING_STRATEGY.md](./TESTING_STRATEGY.md) - підхід до тестування
 - [docs/SECURITY_GUIDELINES.md](./SECURITY_GUIDELINES.md) - безпека проекту
-- [docs/AUTHORIZATION_POLICIES.md](./AUTHORIZATION_POLICIES.md) - політики доступу
+- [docs/AUTHORIZATION_POLICIES.md](./AUTHORIZATION_POLICIES.md) - політики
+  доступу
 
 ### 2. Налаштування середовища розробки
 
@@ -105,6 +112,7 @@ git checkout -b bugfix/login-validation-error
 #### 2. Розробка
 
 **Обов'язкові кроки:**
+
 1. Прочитайте вимоги в issue/ticket
 2. Створіть/оновіть тести перед написанням коду (TDD)
 3. Впроваджуйте функцію відповідно до архітектури проекту
@@ -130,6 +138,7 @@ git commit -m "docs(api): update authentication endpoints"
 ```
 
 **Типи commit'ів:**
+
 - `feat` - нова функція
 - `fix` - виправлення бага
 - `docs` - документація
@@ -173,38 +182,46 @@ gh pr create --title "feat(auth): Add user avatar upload" --body "
 
 ```markdown
 ## Summary
+
 Короткий опис змін (1-2 речення)
 
 ## Changes
+
 - [ ] Список основних змін
 - [ ] Використовуйте чекбокси для tracking
 
 ## Testing
+
 - [ ] Unit тести написані/оновлені
 - [ ] Feature тести покривають новий функціонал
 - [ ] Мануальне тестування виконано
 
 ## Documentation
+
 - [ ] README оновлено (якщо потрібно)
 - [ ] API документація оновлена
 - [ ] Інлайн документація додана
 
 ## Breaking Changes
+
 Опишіть будь-які breaking changes
 
 ## Screenshots
+
 Додайте скріншоти для UI змін
 ```
 
 #### 3. Review Guidelines
 
 **Для авторів PR:**
+
 - Переконайтеся, що всі тести проходять
 - Перевірте, що код відповідає стандартам проекту
 - Додайте опис змін та контекст
 - Зробіть самостійний огляд коду перед створенням PR
 
 **Для reviewer'ів:**
+
 - Перевірте логіку та архітектуру
 - Переконайтеся в наявності тестів
 - Перевірте дотримання конвенцій
@@ -213,6 +230,7 @@ gh pr create --title "feat(auth): Add user avatar upload" --body "
 #### 4. Автоматизовані перевірки
 
 GitHub Actions автоматично перевіряє:
+
 - ✅ Код стиль (Laravel Pint)
 - ✅ Статичний аналіз (PHPStan)
 - ✅ Тести (Pest PHP)
@@ -302,8 +320,8 @@ const props = defineProps({
 const isEditing = ref(false);
 
 // ✅ Computed properties
-const displayName = computed(() =>
-    props.user.profile?.display_name || props.user.username
+const displayName = computed(
+    () => props.user.profile?.display_name || props.user.username,
 );
 
 // ✅ Form handling
@@ -321,7 +339,10 @@ const form = useForm({
         </header>
 
         <!-- ✅ Conditional rendering -->
-        <form v-if="canEdit && isEditing" @submit.prevent="form.put(`/users/${user.id}`)">
+        <form
+            v-if="canEdit && isEditing"
+            @submit.prevent="form.put(`/users/${user.id}`)"
+        >
             <!-- Form fields -->
         </form>
 
@@ -541,13 +562,13 @@ MentorProgram::query()
 ```vue
 <script setup>
 // ✅ Lazy loading компонентів
-const HeavyComponent = defineAsyncComponent(() =>
-    import('./HeavyComponent.vue')
+const HeavyComponent = defineAsyncComponent(
+    () => import('./HeavyComponent.vue'),
 );
 
 // ✅ Обчислювані властивості для дорогих операцій
 const filteredPrograms = computed(() =>
-    props.programs.filter(p => p.is_active && p.price <= maxPrice.value)
+    props.programs.filter((p) => p.is_active && p.price <= maxPrice.value),
 );
 </script>
 
@@ -609,6 +630,7 @@ class UpdateMentorProgram
 ### Mentorship Program
 
 Для нових контрибуторів доступна програма менторства:
+
 - Призначення mentor'а з досвідченої команди
 - Weekly 1-on-1 сесії
 - Code review з детальним поясненням
@@ -619,6 +641,7 @@ class UpdateMentorProgram
 ### Versioning
 
 Проект використовує **Semantic Versioning**:
+
 - `MAJOR.MINOR.PATCH` (наприклад, 1.2.3)
 - Breaking changes → MAJOR
 - Нові features → MINOR
@@ -634,6 +657,8 @@ class UpdateMentorProgram
 
 ## Дякую за ваш внесок!
 
-Кожен внесок, великий чи малий, робить Mentor Wizard кращим для всієї спільноти менторів та учнів. Ваша робота допомагає людям розвиватися професійно та особисто.
+Кожен внесок, великий чи малий, робить Mentor Wizard кращим для всієї спільноти
+менторів та учнів. Ваша робота допомагає людям розвиватися професійно та
+особисто.
 
 **Happy coding!** 🚀

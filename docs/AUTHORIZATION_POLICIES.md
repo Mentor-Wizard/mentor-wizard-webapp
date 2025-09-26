@@ -2,7 +2,9 @@
 
 ## Огляд
 
-У проекті використовується комплексна система авторизації, що базується на Laravel Policies та пакеті Spatie Laravel Permission для управління ролями та дозволами.
+У проекті використовується комплексна система авторизації, що базується на
+Laravel Policies та пакеті Spatie Laravel Permission для управління ролями та
+дозволами.
 
 ## Структура авторизації
 
@@ -64,6 +66,7 @@ class MentorProgramPolicy
 ```
 
 **Правила доступу:**
+
 - Тільки власник програми (ментор) може її оновлювати
 - Тільки власник програми (ментор) може її видаляти
 
@@ -101,18 +104,19 @@ Route::delete('mentor-program/{mentorProgram:slug}', DeleteMentorProgram::class)
 ### Створення нових політик
 
 1. **Використовуйте Artisan команду:**
-   ```bash
-   php artisan make:policy PostPolicy --model=Post
-   ```
+
+    ```bash
+    php artisan make:policy PostPolicy --model=Post
+    ```
 
 2. **Розміщення:** Всі політики розміщуються в `app/Policies/`
 
 3. **Структура методів:**
-   - `viewAny()` - перегляд списку ресурсів
-   - `view()` - перегляд конкретного ресурсу
-   - `create()` - створення нового ресурсу
-   - `update()` - оновлення ресурсу
-   - `delete()` - видалення ресурсу
+    - `viewAny()` - перегляд списку ресурсів
+    - `view()` - перегляд конкретного ресурсу
+    - `create()` - створення нового ресурсу
+    - `update()` - оновлення ресурсу
+    - `delete()` - видалення ресурсу
 
 ### Приклад повної політики
 
@@ -161,7 +165,8 @@ class PostPolicy
 
 ### Реєстрація політик
 
-Laravel автоматично виявляє політики за конвенцією іменування, але можна явно зареєструвати їх у `bootstrap/app.php`:
+Laravel автоматично виявляє політики за конвенцією іменування, але можна явно
+зареєструвати їх у `bootstrap/app.php`:
 
 ```php
 use App\Models\Post;
@@ -231,12 +236,8 @@ return Inertia::render('Posts/Show', [
 ```vue
 <template>
     <div>
-        <button v-if="can.update" @click="editPost">
-            Редагувати
-        </button>
-        <button v-if="can.delete" @click="deletePost">
-            Видалити
-        </button>
+        <button v-if="can.update" @click="editPost">Редагувати</button>
+        <button v-if="can.delete" @click="deletePost">Видалити</button>
     </div>
 </template>
 
@@ -244,7 +245,7 @@ return Inertia::render('Posts/Show', [
 defineProps({
     post: Object,
     can: Object,
-})
+});
 </script>
 ```
 
@@ -300,15 +301,16 @@ if ($user->hasAllRoles(['mentor', 'verified'])) {
 ### Безпека
 
 1. **Завжди перевіряйте дозволи на рівні роутів** - це перша лінія захисту
-2. **Не покладайтеся тільки на frontend перевірки** - завжди валідуйте на backend
+2. **Не покладайтеся тільки на frontend перевірки** - завжди валідуйте на
+   backend
 
 ### Продуктивність
 
 1. **Кешуйте ролі та дозволи** - Spatie Permission автоматично кешує їх
 2. **Використовуйте eager loading** для ролей та дозволів при необхідності:
-   ```php
-   $users = User::with('roles', 'permissions')->get();
-   ```
+    ```php
+    $users = User::with('roles', 'permissions')->get();
+    ```
 
 ### Тестування
 
@@ -360,4 +362,5 @@ Route::patch('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::cla
     ->name('mentor-program.update');
 ```
 
-Така структура забезпечує багаторівневий захист: спочатку перевіряється авторизація, потім роль, а потім конкретні дозволи через політику.
+Така структура забезпечує багаторівневий захист: спочатку перевіряється
+авторизація, потім роль, а потім конкретні дозволи через політику.

@@ -5,11 +5,14 @@
 
 # Mentor Wizard
 
-Mentor Wizard - це сучасний веб-застосунок, розроблений на базі фреймворку Laravel, що виконує управління менторами та студентами для освіти, наповнений функціоналом сучасного веб-додатка.
+Mentor Wizard - це сучасний веб-застосунок, розроблений на базі фреймворку
+Laravel, що виконує управління менторами та студентами для освіти, наповнений
+функціоналом сучасного веб-додатка.
 
 ## Вимоги
 
 Для розгортання проєкту локально на вашому комп'ютері необхідно мати:
+
 - PHP v8.4 або новішу версію
 - Composer
 - PostgreSQL
@@ -93,6 +96,7 @@ docker compose exec app yarn install
 ```
 
 Це налаштує наступні hooks:
+
 - **pre-commit**: Запускає Rector і Pint для виправлення коду
 - **commit-msg**: Валідує повідомлення комітів з commitlint
 - **pre-push**: Валідує назви гілок
@@ -115,18 +119,22 @@ docker compose exec app php artisan storage:link
 
 ## Laravel Boost MCP Setup
 
-Цей проект налаштовано для роботи з Laravel Boost MCP сервером, який надає потужні інструменти для розробки через Model Context Protocol.
+Цей проект налаштовано для роботи з Laravel Boost MCP сервером, який надає
+потужні інструменти для розробки через Model Context Protocol.
 
 ### Налаштування MCP
 
-MCP конфігурація вже включена в проект у файлі `.junie/mcp/mcp.json`. Щоб використовувати Laravel Boost:
+MCP конфігурація вже включена в проект у файлі `.junie/mcp/mcp.json`. Щоб
+використовувати Laravel Boost:
 
 1. Переконайтеся, що Docker контейнери запущені:
+
 ```bash
 docker compose up -d
 ```
 
 2. MCP сервер автоматично використовуватиме наступну команду для підключення:
+
 ```bash
 docker exec -i mw-app php /var/www/artisan boost:mcp
 ```
@@ -136,7 +144,8 @@ docker exec -i mw-app php /var/www/artisan boost:mcp
 Laravel Boost надає наступні інструменти для розробки:
 
 - **База даних**: `database-query`, `database-schema`, `database-connections`
-- **Конфігурація**: `get-config`, `list-available-config-keys`, `list-available-env-vars`
+- **Конфігурація**: `get-config`, `list-available-config-keys`,
+  `list-available-env-vars`
 - **Artisan**: `list-artisan-commands`
 - **Відлагодження**: `tinker`, `last-error`, `read-log-entries`, `browser-logs`
 - **URL генерація**: `get-absolute-url`
@@ -146,7 +155,9 @@ Laravel Boost надає наступні інструменти для розр
 
 ### Використання з IDE
 
-Для використання з підтримуваними IDE (як-от Claude Desktop, Cursor тощо), переконайтеся, що MCP клієнт налаштовано на використання конфігурації з `.junie/mcp/mcp.json`.
+Для використання з підтримуваними IDE (як-от Claude Desktop, Cursor тощо),
+переконайтеся, що MCP клієнт налаштовано на використання конфігурації з
+`.junie/mcp/mcp.json`.
 
 ## Тестування
 
@@ -155,6 +166,7 @@ Laravel Boost надає наступні інструменти для розр
 Скопіюйте `.env.example` в `.env.testing`.
 
 Замніть в `.env.testing` блок з підключенням до БД:
+
 ```dotenv
 DB_CONNECTION=pgsql
 DB_HOST=mw-db-test
@@ -188,23 +200,26 @@ docker compose exec app ./vendor/bin/phpstan analyse --memory-limit=2G
 
 ```bash
 docker compose exec app php artisan test --coverage
-docker compose exec app ./vendor/bin/pest --coverage 
+docker compose exec app ./vendor/bin/pest --coverage
 ```
 
 ### 4. Мутаційні тести
 
 **Всі тести мають бути покриті мутаційними тестами.**
 
-Щоб додати мутаційні тести обовʼязково додавайте метод `covers(...)` до ваших тестів.
+Щоб додати мутаційні тести обовʼязково додавайте метод `covers(...)` до ваших
+тестів.
 
 Наприклад:
+
 ```php
 covers(TodoController::class); // or mutates(TodoController::class);
- 
+
 it('list todos', function () {
     $this->getJson('/todos')->assertStatus(200);
 });
 ```
+
 Детальніше [тут](https://pestphp.com/docs/mutation-testing).
 
 Щоб запустити тестування з мутаціями, виконайте:
@@ -212,7 +227,9 @@ it('list todos', function () {
 ```bash
 docker compose exec app php artisan test --mutate --covered-only --min=100
 ```
+
 Або в паралельному режимі:
+
 ```bash
 docker compose exec app php artisan test --mutate --covered-only --min=100 --parallel
 docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100
@@ -240,7 +257,8 @@ docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --m
     ddev artisan key:generate; ddev artisan migrate
     ```
 
-- Для коректної роботи `octane` та `reverb` налаштуйте наступні змінні у [`.env`](.env):
+- Для коректної роботи `octane` та `reverb` налаштуйте наступні змінні у
+  [`.env`](.env):
 
     ```dotenv
     OCTANE_HTTPS=true
@@ -252,7 +270,8 @@ docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --m
 
 ### Тестування
 
-- Для запуску тестування потрібно увімкнути `Xdebug` (він вимкнений за замовчуванням):
+- Для запуску тестування потрібно увімкнути `Xdebug` (він вимкнений за
+  замовчуванням):
 
     ```sh
     ddev xdebug on
@@ -261,22 +280,29 @@ docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --m
 ## Найменування
 
 ### Назви гілок
+
 Вимоги описані у файлі
 
 ```
 .validate-branch-namerc.json
 ```
+
 Автовалідація імен гілок Git перед пушем їх у віддалений репозиторій
-[validate-branch-name](https://www.npmjs.com/package/validate-branch-name) package
+[validate-branch-name](https://www.npmjs.com/package/validate-branch-name)
+package
 
 ### Конвенція для комітів
-Кожне повідомлення коміту має відповідати [конвенції комітів](https://www.conventionalcommits.org/).
 
-Автоматична перевірка повідомлень комітів виконується через `commit-msg` git-хук. Усі налаштування описані у файлі
+Кожне повідомлення коміту має відповідати
+[конвенції комітів](https://www.conventionalcommits.org/).
+
+Автоматична перевірка повідомлень комітів виконується через `commit-msg`
+git-хук. Усі налаштування описані у файлі
 
 ## Мерж-коміт із напівлінійною історією
 
-Використовуйте лінійну історію git. Детальніше читайте у [документації](https://docs.gitlab.com/ee/user/project/merge_requests/methods/#merge-commit-with-semi-linear-history).
+Використовуйте лінійну історію git. Детальніше читайте у
+[документації](https://docs.gitlab.com/ee/user/project/merge_requests/methods/#merge-commit-with-semi-linear-history).
 
 ## Ліцензія
 

@@ -39,7 +39,7 @@ describe('WelcomePage Action', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Welcome')
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('WelcomePage')
             ->and(Arr::get($resultData->getData(), 'page.props'))->toMatchArray([
                 'canLogin'       => true,
                 'canRegister'    => true,

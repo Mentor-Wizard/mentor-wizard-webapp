@@ -1,0 +1,13 @@
+.cursor/guidelines.md
+.ddev
+.github
+.junie/guidelines.md
+.vscode/guidelines.md
+dist
+local
+public
+.gitlab-ci.yml
+CLAUDE.md
+compose.yml
+composer.lock
+taskfile.yml
