@@ -23,7 +23,7 @@ class ListMentorProgramPage
             ->get()
             ->toArray();
 
-        return Inertia::render('MentorProgram/List', [
+        return Inertia::render('MentorProgram/ListPage', [
             'programs' => $programs,
         ]);
     }

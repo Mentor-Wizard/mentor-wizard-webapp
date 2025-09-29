@@ -65,7 +65,7 @@ RUN echo "pcov.enabled=1" >> /usr/local/etc/php/conf.d/docker-php-ext-pcov.ini &
 
 # Install Node.js tools
 RUN npm install -g corepack
-RUN corepack enable && corepack prepare yarn@4.6.0 --activate
+RUN corepack enable && corepack prepare yarn@4.10.3 --activate
 
 # Copy supervisor configuration
 COPY docker/php/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

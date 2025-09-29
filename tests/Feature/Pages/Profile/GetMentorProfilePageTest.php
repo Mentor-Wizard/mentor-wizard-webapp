@@ -74,7 +74,7 @@ describe('Mentor Profile Page', function (): void {
 
         $this->get(route('page.mentor', ['mentor' => $mentor->slug]))
             ->assertInertia(fn (Assert $page): Assert => $page
-                ->component('Profile/Mentor/View')
+                ->component('Profile/Mentor/ViewPage')
                 ->where('mentor.titleBlock.name', 'Mentor profile name Mentor profile last_name')
                 ->where('mentor.titleBlock.avatar', UserProfile::DEFAULT_AVATAR_URL)
                 ->where('mentor.titleBlock.title', 'title')

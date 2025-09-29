@@ -29,7 +29,7 @@ describe('GetLoginPage Action', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Auth/Login')
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Auth/LoginPage')
             ->and(Arr::get($resultData->getData(), 'page.props'))->toEqual([
                 'canResetPassword' => true,
                 'status'           => 'test_message',
@@ -53,7 +53,7 @@ describe('GetLoginPage Action', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Auth/Login')
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Auth/LoginPage')
             ->and(Arr::get($resultData->getData(), 'page.props'))->toEqual([
                 'canResetPassword' => false,
                 'status'           => 'test_message',

@@ -2,9 +2,11 @@
 
 ## Вимоги до коду
 
-Перед створенням pull request, переконайтесь, що код проходить **усі автоматичні перевірки**.
+Перед створенням pull request, переконайтесь, що код проходить **усі автоматичні
+перевірки**.
 
-На проєкті використовуються інструменти статичного аналізу та форматування, зокрема:
+На проєкті використовуються інструменти статичного аналізу та форматування,
+зокрема:
 
 - [Pint](//github.com/laravel/pint)
 - [PHPStan](//github.com/larastan/larastan)
@@ -14,66 +16,66 @@
 
 - Запуск перевірки на **code style**:
 
-  ```sh
-  composer pint
-  ```
+    ```sh
+    composer pint
+    ```
 
-  aбо
+    aбо
 
-  ```sh
-  ./vendor/bin/pint . --test
-  ```
+    ```sh
+    ./vendor/bin/pint . --test
+    ```
 
 - Виправлення **code style**:
 
-  ```sh
-  composer pint:fix
-  ```
+    ```sh
+    composer pint:fix
+    ```
 
-  aбо
+    aбо
 
-  ```sh
-  ./vendor/bin/pint .
-  ```
+    ```sh
+    ./vendor/bin/pint .
+    ```
 
 ### PHPStan
 
 - Запуск перевірки:
 
-  ```sh
-  composer phpstan
-  ```
+    ```sh
+    composer phpstan
+    ```
 
-  aбо
+    aбо
 
-  ```sh
-  ./vendor/bin/phpstan analyse
-  ```
+    ```sh
+    ./vendor/bin/phpstan analyse
+    ```
 
 ### Rector
 
 - Запуск перевірки:
 
-  ```sh
-  composer rector
-  ```
+    ```sh
+    composer rector
+    ```
 
-  aбо
+    aбо
 
-  ```sh
-  ./vendor/bin/rector process --dry-run
-  ```
+    ```sh
+    ./vendor/bin/rector process --dry-run
+    ```
 
 - Виправлення коду:
 
-  ```sh
-  composer rector:fix
-  ```
+    ```sh
+    composer rector:fix
+    ```
 
-  aбо
+    aбо
 
-  ```sh
-  ./vendor/bin/rector process
-  ```
+    ```sh
+    ./vendor/bin/rector process
+    ```
 
 Усі знайдені помилки мають бути виправлені до об'єднання коду в основну гілку.

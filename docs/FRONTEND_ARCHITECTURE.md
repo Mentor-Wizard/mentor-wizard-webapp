@@ -2,7 +2,10 @@
 
 ## Огляд
 
-Проект використовує сучасну frontend архітектуру з **Vue.js 3** та **Inertia.js** для створення SPA (Single Page Application) без необхідності окремого API. Це забезпечує швидкість розробки Laravel з інтерактивністю сучасних frontend фреймворків.
+Проект використовує сучасну frontend архітектуру з **Vue.js 3** та
+**Inertia.js** для створення SPA (Single Page Application) без необхідності
+окремого API. Це забезпечує швидкість розробки Laravel з інтерактивністю
+сучасних frontend фреймворків.
 
 ## Технологічний стек
 
@@ -10,14 +13,14 @@
 
 ```json
 {
-  "vue": "^3.5.13",                    // Vue.js 3 з Composition API
-  "@inertiajs/vue3": "^2.0.3",         // Inertia.js для Vue 3
-  "pinia": "^3.0.1",                   // State management
-  "tailwindcss": "^4.1",               // CSS framework
-  "@headlessui/vue": "^1.7.23",        // Headless UI компоненти
-  "@heroicons/vue": "^2.2.0",          // Іконки
-  "vite": "^7.0.0",                    // Build tool
-  "laravel-vite-plugin": "^1.2.0"      // Laravel інтеграція
+    "vue": "^3.5.13", // Vue.js 3 з Composition API
+    "@inertiajs/vue3": "^2.0.3", // Inertia.js для Vue 3
+    "pinia": "^3.0.1", // State management
+    "tailwindcss": "^4.1", // CSS framework
+    "@headlessui/vue": "^1.7.23", // Headless UI компоненти
+    "@heroicons/vue": "^2.2.0", // Іконки
+    "vite": "^7.0.0", // Build tool
+    "laravel-vite-plugin": "^1.2.0" // Laravel інтеграція
 }
 ```
 
@@ -41,6 +44,7 @@ Laravel Backend          Inertia.js          Vue.js Frontend
 ```
 
 **Переваги:**
+
 - Немає необхідності в API
 - Швидка розробка
 - SEO дружній
@@ -83,7 +87,7 @@ resources/js/
 // resources/js/app.js
 import { createInertiaApp } from '@inertiajs/vue3';
 import { createApp, h } from 'vue';
-import { createPinia } from "pinia";
+import { createPinia } from 'pinia';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 createInertiaApp({
@@ -94,9 +98,9 @@ createInertiaApp({
         ),
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
-            .use(plugin)          // Inertia.js plugin
-            .use(createPinia())   // State management
-            .use(ZiggyVue)        // Laravel routes
+            .use(plugin) // Inertia.js plugin
+            .use(createPinia()) // State management
+            .use(ZiggyVue) // Laravel routes
             .mount(el);
     },
 });
@@ -123,7 +127,7 @@ const selectedProgram = ref(null);
 
 // Computed properties
 const filteredPrograms = computed(() => {
-    return props.mentorPrograms.filter(program => program.is_active);
+    return props.mentorPrograms.filter((program) => program.is_active);
 });
 
 // Methods
@@ -142,7 +146,7 @@ onMounted(() => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl">Dashboard</h2>
+            <h2 class="text-xl font-semibold">Dashboard</h2>
         </template>
 
         <div class="py-12">
@@ -184,7 +188,7 @@ const emit = defineEmits(['click']);
         :type="type"
         :disabled="disabled"
         @click="emit('click', $event)"
-        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+        class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-blue-700 focus:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none active:bg-blue-900"
         :class="{
             'opacity-25': disabled,
         }"
@@ -234,7 +238,7 @@ defineExpose({ focus });
         :placeholder="placeholder"
         :required="required"
         @input="emit('update:modelValue', $event.target.value)"
-        class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
     />
 </template>
 ```
@@ -259,25 +263,30 @@ const page = usePage();
     <div>
         <div class="min-h-screen bg-gray-100">
             <!-- Navigation -->
-            <nav class="bg-white border-b border-gray-100">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between h-16">
+            <nav class="border-b border-gray-100 bg-white">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex h-16 justify-between">
                         <!-- Logo -->
-                        <div class="shrink-0 flex items-center">
+                        <div class="flex shrink-0 items-center">
                             <Link :href="route('pages.dashboard')">
                                 <ApplicationLogo class="block h-9 w-auto" />
                             </Link>
                         </div>
 
                         <!-- Navigation Links -->
-                        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                            <NavLink :href="route('pages.dashboard')" :active="route().current('pages.dashboard')">
+                        <div
+                            class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
+                        >
+                            <NavLink
+                                :href="route('pages.dashboard')"
+                                :active="route().current('pages.dashboard')"
+                            >
                                 Dashboard
                             </NavLink>
                         </div>
 
                         <!-- Settings Dropdown -->
-                        <div class="hidden sm:flex sm:items-center sm:ms-6">
+                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <Dropdown align="right" width="48">
                                 <template #trigger>
                                     <button class="inline-flex items-center">
@@ -289,7 +298,11 @@ const page = usePage();
                                     <DropdownLink :href="route('profile.edit')">
                                         Profile
                                     </DropdownLink>
-                                    <DropdownLink :href="route('logout')" method="post" as="button">
+                                    <DropdownLink
+                                        :href="route('logout')"
+                                        method="post"
+                                        as="button"
+                                    >
                                         Log Out
                                     </DropdownLink>
                                 </template>
@@ -301,7 +314,7 @@ const page = usePage();
 
             <!-- Page Heading -->
             <header class="bg-white shadow" v-if="$slots.header">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>
@@ -389,7 +402,7 @@ router.get('/users');
 // POST з даними
 router.post('/users', {
     name: 'John Doe',
-    email: 'john@example.com'
+    email: 'john@example.com',
 });
 
 // PUT/PATCH оновлення
@@ -405,7 +418,7 @@ router.post('/users', userData, {
     },
     onError: (errors) => {
         console.log('Validation errors:', errors);
-    }
+    },
 });
 ```
 
@@ -473,11 +486,11 @@ router.reload({ except: ['largeDataSet'] });
 /* Custom компоненти */
 @layer components {
     .btn-primary {
-        @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded;
+        @apply rounded bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700;
     }
 
     .form-input {
-        @apply block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500;
+        @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
     }
 }
 ```
@@ -515,19 +528,12 @@ export default {
 
 ```vue
 <script setup>
-import {
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuItems,
-} from '@headlessui/vue';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 </script>
 
 <template>
     <Menu as="div" class="relative inline-block text-left">
-        <MenuButton class="btn-primary">
-            Options
-        </MenuButton>
+        <MenuButton class="btn-primary"> Options </MenuButton>
 
         <transition
             enter-active-class="transition duration-100 ease-out"
@@ -537,12 +543,16 @@ import {
             leave-from-class="transform scale-100 opacity-100"
             leave-to-class="transform scale-95 opacity-0"
         >
-            <MenuItems class="absolute right-0 mt-2 w-56 origin-top-right bg-white shadow-lg">
+            <MenuItems
+                class="absolute right-0 mt-2 w-56 origin-top-right bg-white shadow-lg"
+            >
                 <MenuItem v-slot="{ active }">
                     <button
                         :class="[
-                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                            'group flex w-full items-center px-2 py-2 text-sm'
+                            active ?
+                                'bg-gray-100 text-gray-900'
+                            :   'text-gray-700',
+                            'group flex w-full items-center px-2 py-2 text-sm',
                         ]"
                     >
                         Edit
@@ -558,11 +568,7 @@ import {
 
 ```vue
 <script setup>
-import {
-    UserIcon,
-    CogIcon,
-    ChevronDownIcon
-} from '@heroicons/vue/24/outline';
+import { UserIcon, CogIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 // або solid версії:
 // import { UserIcon } from '@heroicons/vue/24/solid';
 </script>
@@ -591,7 +597,10 @@ window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-    wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.io`,
+    wsHost:
+        import.meta.env.VITE_PUSHER_HOST ?
+            import.meta.env.VITE_PUSHER_HOST
+        :   `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.io`,
     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
@@ -609,10 +618,9 @@ const messages = ref([]);
 
 onMounted(() => {
     // Слухання приватного каналу
-    window.Echo.private(`chat.${props.chatId}`)
-        .listen('MessageSent', (e) => {
-            messages.value.push(e.message);
-        });
+    window.Echo.private(`chat.${props.chatId}`).listen('MessageSent', (e) => {
+        messages.value.push(e.message);
+    });
 
     // Слухання присутності
     window.Echo.join(`chat.${props.chatId}`)
@@ -668,8 +676,8 @@ describe('PrimaryButton', () => {
     it('renders button with correct text', () => {
         const wrapper = mount(PrimaryButton, {
             slots: {
-                default: 'Click me'
-            }
+                default: 'Click me',
+            },
         });
 
         expect(wrapper.text()).toBe('Click me');
@@ -687,8 +695,8 @@ describe('PrimaryButton', () => {
     it('is disabled when disabled prop is true', () => {
         const wrapper = mount(PrimaryButton, {
             props: {
-                disabled: true
-            }
+                disabled: true,
+            },
         });
 
         expect(wrapper.find('button').attributes('disabled')).toBeDefined();
@@ -804,7 +812,9 @@ import { Head } from '@inertiajs/vue3';
 
 // SEO метадані
 const pageTitle = computed(() => `${props.mentor.name} - Mentor Profile`);
-const pageDescription = computed(() => `Learn from ${props.mentor.name}. ${props.mentor.bio}`);
+const pageDescription = computed(
+    () => `Learn from ${props.mentor.name}. ${props.mentor.bio}`,
+);
 </script>
 
 <template>
@@ -817,4 +827,5 @@ const pageDescription = computed(() => `Learn from ${props.mentor.name}. ${props
 </template>
 ```
 
-Ця архітектура забезпечує масштабований, підтримуваний та продуктивний frontend для Mentor Wizard платформи.
+Ця архітектура забезпечує масштабований, підтримуваний та продуктивний frontend
+для Mentor Wizard платформи.
