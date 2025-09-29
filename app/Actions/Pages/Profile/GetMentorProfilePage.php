@@ -22,7 +22,7 @@ class GetMentorProfilePage
     {
         throw_unless($mentor->hasRole(RoleEnum::MENTOR->value), new ModelNotFoundException);
 
-        return Inertia::render('Profile/Mentor/View', [
+        return Inertia::render('Profile/Mentor/ViewPage', [
             'mentor'        => MentorProfilePageResource::make($mentor),
         ]);
     }

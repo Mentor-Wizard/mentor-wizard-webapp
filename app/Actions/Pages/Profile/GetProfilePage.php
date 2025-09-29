@@ -18,7 +18,7 @@ class GetProfilePage
     {
         $user = auth()->user();
 
-        return Inertia::render('Profile/Edit', [
+        return Inertia::render('Profile/EditPage', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail, // @pest-mutate-ignore
             'status'          => session('status'),
             'avatar'          => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,

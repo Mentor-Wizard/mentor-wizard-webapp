@@ -1,28 +1,28 @@
 <script setup>
-import {IdentificationIcon} from "@heroicons/vue/24/solid/index.js";
-const props = defineProps({
+import { IdentificationIcon } from '@heroicons/vue/24/solid/index.js';
+defineProps({
   title: {
     type: String,
-    default: 'not defined'
+    default: 'not defined',
   },
   description: {
     type: String,
-    default: 'not defined'
+    default: 'not defined',
   },
 });
 </script>
 
 <template>
-<div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4">
     <h3 class="text-lg font-semibold text-gray-900">About</h3>
     <span>
       {{ description }}
     </span>
 
-    <h3 class="text-lg font-semibold text-gray-900 mt-2">Position</h3>
+    <h3 class="mt-2 text-lg font-semibold text-gray-900">Position</h3>
     <span class="flex items-center gap-2">
-      <IdentificationIcon class="w-8 h-8 text-blue-600"/>
+      <IdentificationIcon class="h-8 w-8 text-blue-600" />
       {{ title }}
     </span>
-</div>
+  </div>
 </template>

@@ -16,6 +16,6 @@ describe('GetRegistrationPage Action', function (): void {
         $responseData = $response->toResponse(request())->getOriginalContent();
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($responseData->getData(), 'page.component'))->toBe('Auth/Register');
+            ->and(Arr::get($responseData->getData(), 'page.component'))->toBe('Auth/RegisterPage');
     });
 });

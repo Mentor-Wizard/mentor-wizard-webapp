@@ -11,6 +11,8 @@ webserver_type: generic
 xdebug_enabled: false
 corepack_enable: true
 ddev_version_constraint: '>= v1.24.3'
+upload_dirs:
+  - ../storage/app/public
 webimage_extra_packages:
   - 'php${DDEV_PHP_VERSION}-swoole'
 web_extra_daemons:
@@ -45,5 +47,6 @@ hooks:
         ddev add-on list --installed | grep -q 'gebruederheitz/ddev-taskfile' || ddev add-on get gebruederheitz/ddev-taskfile > /dev/null
   post-start:
     - composer: install
+    - exec: yarn install
   post-import-db:
     - exec: php artisan migrate --force --ansi
