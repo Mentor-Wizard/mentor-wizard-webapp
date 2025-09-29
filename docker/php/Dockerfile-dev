@@ -44,9 +44,9 @@ RUN \
     pecl install redis && \
     docker-php-ext-enable redis
 
-# Install Xdebug for development
-RUN pecl install xdebug && \
-    docker-php-ext-enable xdebug
+# Install Xdebug and PCOV for development
+RUN pecl install xdebug pcov && \
+    docker-php-ext-enable xdebug pcov
 
 # Configure PHP settings
 RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory-limit.ini
@@ -58,6 +58,10 @@ RUN echo "xdebug.mode=debug,coverage" >> /usr/local/etc/php/conf.d/docker-php-ex
     echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
     echo "xdebug.discover_client_host=true" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
     echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+# Configure PCOV for coverage (alternative to Xdebug)
+RUN echo "pcov.enabled=1" >> /usr/local/etc/php/conf.d/docker-php-ext-pcov.ini && \
+    echo "pcov.directory=/var/www" >> /usr/local/etc/php/conf.d/docker-php-ext-pcov.ini
 
 # Install Node.js tools
 RUN npm install -g corepack
