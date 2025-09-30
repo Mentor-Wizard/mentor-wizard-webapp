@@ -228,7 +228,7 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - **Database Soft Deletes**: Prefer Eloquent soft deletes over raw queries
 
 ### Performance Considerations
-- **Laravel Octane**: Uses Swoole for high-performance application server
+- **Laravel Octane**: Uses FrankenPHP for high-performance application server
 - **Redis**: Used for caching, sessions, and queue management
 - **Database**: PostgreSQL with proper indexing
 - **Asset Optimization**: Image optimization tools included in Docker setup
@@ -249,7 +249,7 @@ The project uses GitHub Actions with:
 ### Environment-Specific Notes
 - **Local Development**: Use Docker Compose for consistent environment
 - **Testing**: Separate PostgreSQL instance for tests
-- **Production**: Optimized for Laravel Octane with Swoole
+- **Production**: Optimized for Laravel Octane with FrankenPHP
 - **Debugging**: Xdebug available in development, Telescope for application debugging
 
 ### Common Commands
