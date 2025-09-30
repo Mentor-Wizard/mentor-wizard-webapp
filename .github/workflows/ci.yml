@@ -27,12 +27,12 @@ jobs:
     if: github.event_name != 'pull_request'
 
     steps:
-    - name: '🗑 Delete workflow runs'
-      uses: Mattraks/delete-workflow-runs@v2
-      with:
-        retain_days: 7
-        keep_minimum_runs: 1
-        delete_workflow_pattern: ci.yml
+      - name: '🗑 Delete workflow runs'
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          retain_days: 7
+          keep_minimum_runs: 1
+          delete_workflow_pattern: ci.yml
 
   lints:
     name: '🪄 Lints | ${{ matrix.command.name }}'
@@ -58,27 +58,34 @@ jobs:
       matrix:
         command:
           - {
-            name: '🔍 PHPStan',
-            command: './vendor/bin/phpstan analyse --no-progress --error-format=github --memory-limit=2G',
-            php: true,
-            node: false,
-          }
+              name: '🔍 PHPStan',
+              command: './vendor/bin/phpstan analyse --no-progress --error-format=github --memory-limit=2G',
+              php: true,
+            }
           - {
-            name: '🧽 Laravel Pint',
-            command: './vendor/bin/pint --test --cache-file=var/cache/pint/pint.cache --ansi --format=checkstyle | cs2pr',
-            php: true,
-            node: false,
-          }
+              name: '🧽 Laravel Pint',
+              command: './vendor/bin/pint --test --cache-file=var/cache/pint/pint.cache --ansi --format=checkstyle | cs2pr',
+              php: true,
+            }
           - {
-            name: '🏠 Rector',
-            command: './vendor/bin/rector process --dry-run --no-progress-bar --output-format=github --ansi',
-            php: true,
-            node: false,
+              name: '🏠 Rector',
+              command: './vendor/bin/rector process --dry-run --no-progress-bar --output-format=github --ansi',
+              php: true,
+            }
+          - {
+              name: '🅿️ Prettier',
+              command: 'yarn prettier',
+              node: true,
+            }
+          - {
+            name: '🔯 Eslint',
+            command: 'yarn eslint',
+            node: true,
           }
 
     steps:
       - name: '🛎 Checkout'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: '⚙️ Prepare environment'
         uses: ./.github/actions/setup-environment
@@ -113,17 +120,17 @@ jobs:
       matrix:
         command:
           - {
-            name: '🧬 Pest',
-            command: ./vendor/bin/pest --coverage --compact --coverage-clover coverage/coverage-clover.xml
-          }
+              name: '🧬 Pest',
+              command: ./vendor/bin/pest --coverage --compact --coverage-clover coverage/coverage-clover.xml,
+            }
           - {
-            name: '🦠 Mutation',
-            command: ./vendor/bin/pest --mutate --covered-only --min=100
-          }
+              name: '🦠 Mutation',
+              command: ./vendor/bin/pest --mutate --covered-only --min=100,
+            }
 
     steps:
       - name: '🛎 Checkout'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: '⚙️ Prepare environment'
         uses: ./.github/actions/setup-environment

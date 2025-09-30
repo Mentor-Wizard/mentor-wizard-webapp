@@ -3,7 +3,10 @@
     "description": "The skeleton application for the Laravel framework.",
     "license": "MIT",
     "type": "project",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "require": {
         "php": "^8.4",
         "filament/filament": "~4.0",

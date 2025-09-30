@@ -44,7 +44,7 @@ describe('List Mentor Program', function (): void {
         $result = $resultData->getData()['page'];
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('MentorProgram/List')
+            ->and(Arr::get($result, 'component'))->toBe('MentorProgram/ListPage')
             ->and(Arr::get($result, 'props.programs.0.name'))->toBe($this->data['name'])
             ->and(Arr::get($result, 'props.programs.0.slug'))->toBe($this->data['slug'])
             ->and(Arr::get($result, 'props.programs.0.cost'))->toBe($this->data['cost'])

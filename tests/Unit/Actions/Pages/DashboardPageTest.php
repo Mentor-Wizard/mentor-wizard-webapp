@@ -21,7 +21,7 @@ describe('DashboardPage Action', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Dashboard')
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('DashboardPage')
             ->and(Arr::get($resultData->getData(), 'page.props'))->toBeEmpty();
     });
 });

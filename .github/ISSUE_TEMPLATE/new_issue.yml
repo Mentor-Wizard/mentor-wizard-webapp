@@ -1,29 +1,29 @@
-name: "📝 Task"
-description: "Стандартний шаблон для задач у проєкті"
-title: "[Task]: "
-labels: ["task", "development"]
+name: '📝 Task'
+description: 'Стандартний шаблон для задач у проєкті'
+title: '[Task]: '
+labels: ['task', 'development']
 assignees:
   - your-github-username
 body:
   - type: dropdown
     id: role
     attributes:
-      label: "🎭 Роль"
-      description: "Хто ініціює цю задачу?"
+      label: '🎭 Роль'
+      description: 'Хто ініціює цю задачу?'
       options:
-        - "👤 User (Користувач)"
-        - "👨‍💻 Developer (Розробник)"
-        - "🛠️ DevOps (Інфраструктура)"
-        - "🧪 QA (Тестувальник)"
-        - "📊 Product Manager (Менеджер продукту)"
+        - '👤 User (Користувач)'
+        - '👨‍💻 Developer (Розробник)'
+        - '🛠️ DevOps (Інфраструктура)'
+        - '🧪 QA (Тестувальник)'
+        - '📊 Product Manager (Менеджер продукту)'
     validations:
       required: true
 
   - type: textarea
     id: task_description
     attributes:
-      label: "📝 Опис задачі"
-      description: "Опиши завдання згідно з вибраною роллю"
+      label: '📝 Опис задачі'
+      description: 'Опиши завдання згідно з вибраною роллю'
       placeholder: |
         - **User Story**: Як користувач, я хочу...
         - **Developer Task**: Необхідно реалізувати...
@@ -37,8 +37,8 @@ body:
   - type: textarea
     id: technical_details
     attributes:
-      label: "🔧 Технічні деталі"
-      description: "Опис технічної реалізації (якщо потрібно)"
+      label: '🔧 Технічні деталі'
+      description: 'Опис технічної реалізації (якщо потрібно)'
       placeholder: |
         -
       render: markdown
@@ -46,8 +46,8 @@ body:
   - type: textarea
     id: acceptance_criteria
     attributes:
-      label: "✅ Критерії виконання"
-      description: "Що повинно бути реалізовано?"
+      label: '✅ Критерії виконання'
+      description: 'Що повинно бути реалізовано?'
       default: |
         - label: "🔹 Код відповідає стандартам"
           required: true
@@ -60,6 +60,6 @@ body:
     id: related_issues
     attributes:
       label: "🔗 Пов'язані Issue/PR"
-      description: "Посилання на інші Issue чи PR, що мають відношення до цієї задачі"
-      placeholder: "Наприклад: #123, #456"
+      description: 'Посилання на інші Issue чи PR, що мають відношення до цієї задачі'
+      placeholder: 'Наприклад: #123, #456'
 
