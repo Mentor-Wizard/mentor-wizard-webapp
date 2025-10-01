@@ -140,6 +140,8 @@ localhost, 127.0.0.1, :80 {
 
 ### Docker Compose Integration
 
+The application uses `docker-compose.yml` as the configuration file:
+
 ```yaml
 app:
     environment:
