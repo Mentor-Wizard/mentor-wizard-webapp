@@ -4,19 +4,26 @@ declare(strict_types=1);
 
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Enums\RoleEnum;
+use App\Models\Currency;
+use App\Models\MentorProfile;
 use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
+use Carbon\Carbon;
+use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 
 mutates(GetMentorProfilePage::class);
 
 describe('Mentor Profile Page', function (): void {
-    it('loads the mentor profile page', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+        $this->seed(CurrencySeeder::class);
+    });
+
+    it('loads the mentor profile page', function (): void {
         $mentor = User::factory()->create([
             'username' => 'Mentor User',
             'email'    => 'mentor@example.com',
@@ -54,54 +61,37 @@ describe('Mentor Profile Page', function (): void {
             'rating'    => 5,
         ]);
 
-        $this->get(route('page.mentor', ['user' => $mentor->slug]))
-            ->assertInertia(fn (Assert $page): AssertableJson => $page
-                ->component('Profile/Mentor')
-                ->has('mentor', fn (Assert $mentorData): AssertableJson => $mentorData
-                    ->where('username', 'Mentor User')
-                    ->where('email', 'mentor@example.com')
-                    ->where('rating', 5)
-                    ->has('profile', fn (Assert $profile): AssertableJson => $profile
-                        ->where('name', 'Mentor profile name')
-                        ->where('last_name', 'Mentor profile last_name')
-                        ->where('linkedin', 'Mentor profile linkedin')
-                        ->where('telegram', 'Mentor profile telegram')
-                        ->where('whatsapp', 'Mentor profile whatsapp')
-                        ->where('phone', 'Mentor profile phone')
-                        ->where('avatar', UserProfile::DEFAULT_AVATAR_URL)
-                        ->etc()
-                    )
-                    ->etc()
-                )
-                ->has('reviews.data', 1)
-                ->has('reviews.data.0', fn (Assert $review): AssertableJson => $review
-                    ->where('mentor_id', $mentor->id)
-                    ->where('menti_id', $menti->id)
-                    ->where('comment', 'Perfect')
-                    ->where('rating', 5)
-                    ->has('menti', fn (Assert $mentiData): AssertableJson => $mentiData
-                        ->where('id', $menti->id)
-                        ->where('username', 'Menti User')
-                        ->where('email', 'menti@example.com')
-                        ->has('profile', fn (Assert $profile): AssertableJson => $profile
-                            ->where('name', 'Menti profile name')
-                            ->where('last_name', 'Menti profile last_name')
-                            ->where('linkedin', 'Menti profile linkedin')
-                            ->where('telegram', 'Menti profile telegram')
-                            ->where('whatsapp', 'Menti profile whatsapp')
-                            ->where('phone', 'Menti profile phone')
-                            ->etc()
-                        )
-                        ->etc()
-                    )
-                    ->etc()
-                )
-                ->where('defaultAvatar', UserProfile::DEFAULT_AVATAR_URL)
+        $currencies = Currency::query()->pluck('name', 'id')->toArray();
+        $currency_id = array_key_first($currencies);
+        MentorProfile::factory()->create([
+            'user_id'                  => $mentor->id,
+            'title'                    => 'title',
+            'description'              => 'description',
+            'rate'                     => 1.1,
+            'currency_id'              => $currency_id,
+            'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+        ]);
+
+        $this->get(route('page.mentor', ['mentor' => $mentor->slug]))
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('Profile/Mentor/ViewPage')
+                ->where('mentor.titleBlock.name', 'Mentor profile name Mentor profile last_name')
+                ->where('mentor.titleBlock.avatar', UserProfile::DEFAULT_AVATAR_URL)
+                ->where('mentor.titleBlock.title', 'title')
+                ->where('mentor.titleBlock.description', 'description')
+                ->where('mentor.titleBlock.rate', '1.10')
+                ->where('mentor.titleBlock.experience', '5 years')
+                ->where('mentor.statisticBlock.star_5', 1)
+                ->where('mentor.statisticBlock.star_4', 0)
+                ->where('mentor.statisticBlock.star_3', 0)
+                ->where('mentor.statisticBlock.star_2', 0)
+                ->where('mentor.statisticBlock.star_1', 0)
+                ->etc()
             );
     });
 
     it('loads the mentor profile page with wrong slug', function (): void {
-        $this->get(route('page.mentor', ['user' => 'random-slug']))
+        $this->get(route('page.mentor', ['mentor' => 'random-slug']))
             ->assertNotFound();
     });
 });

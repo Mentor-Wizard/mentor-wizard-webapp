@@ -14,6 +14,6 @@ class GetRegistrationPage
 
     public function handle(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/RegisterPage');
     }
 }

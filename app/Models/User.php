@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\RoleGuardEnum;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -22,12 +23,14 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property-read UserProfile $profile
+ * @property-read MentorProfile|null $mentorProfile
+ * @property-read float $rating
  * @property string $username
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
-class User extends Authenticatable implements HasMedia, MustVerifyEmail
+class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 {
     use HasFactory;
     use HasRoles;
@@ -91,7 +94,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
 
     public function mentiProgramProgress(): ?HasOne
     {
-        return $this->hasOne(MentorProgramBlockProgress::class);
+        return $this->hasOne(MentorProgramBlockProgress::class, 'menti_id');
     }
 
     public function mentorReviews(): HasMany
@@ -134,7 +137,12 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return $this->hasMany(Chat::class, 'coach_id');
     }
 
-    public function rating(): Attribute
+    public function getFilamentName(): string
+    {
+        return $this->username ?? '';
+    }
+
+    protected function rating(): Attribute
     {
         return Attribute::make(
             get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
