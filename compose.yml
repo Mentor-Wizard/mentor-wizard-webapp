@@ -60,6 +60,8 @@ services:
             - "443:443/udp"
             - "5173:5173"
             - "9003:9003"
+        extra_hosts:
+            - "host.docker.internal:172.17.0.1"
         networks:
             - mw-db-network
             - mw-redis-network
