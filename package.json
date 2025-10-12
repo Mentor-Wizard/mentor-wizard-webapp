@@ -50,5 +50,13 @@
     "packageManager": "yarn@4.10.3",
     "engines": {
         "yarn": ">= 4.10.3"
+    },
+    "dependencies": {
+        "@tiptap/extension-link": "^3.6.6",
+        "@tiptap/extension-list": "^3.6.6",
+        "@tiptap/extensions": "^3.6.6",
+        "@tiptap/pm": "^3.6.6",
+        "@tiptap/starter-kit": "^3.6.6",
+        "@tiptap/vue-3": "^3.6.6"
     }
 }
