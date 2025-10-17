@@ -2,23 +2,23 @@
 import {Editor, EditorContent} from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import {onBeforeUnmount, onMounted, onUnmounted, ref} from 'vue'
-import Link from '@tiptap/extension-link'
 import { ListBulletIcon } from '@heroicons/vue/24/outline'
 import { CodeBracketIcon } from '@heroicons/vue/24/outline'
 import { FaceSmileIcon } from '@heroicons/vue/24/outline'
 import { PaperClipIcon } from '@heroicons/vue/24/outline'
 import { PaperAirplaneIcon } from '@heroicons/vue/24/outline'
+import { TrashIcon } from '@heroicons/vue/24/outline'
 import { Placeholder } from '@tiptap/extensions'
+
+import {useCaseFileType} from "../useCaseFileType.js";
+
+const {getColorByFileName, getIconByFileName} = useCaseFileType()
 
 const editor = new Editor({
   extensions: [
     StarterKit,
     Placeholder.configure({
       placeholder: 'Write something …',
-    }),
-    Link.configure({
-      openOnClick: false,
-      validate: href => /^https?:\/\//.test(href),
     }),
   ],
   content: '',
@@ -29,9 +29,7 @@ const toggleItalic = () => editor.chain().focus().toggleItalic().run()
 const toggleBulletList = () => editor.chain().focus().toggleBulletList().run()
 const toggleCodeBlock = () => editor.chain().focus().toggleCodeBlock().run()
 
-// 3. Функція для встановлення/видалення посилання
 const setLink = () => {
-  // Якщо посилання вже активне, видаляємо його
   if (editor.isActive('link')) {
     editor.chain().focus().unsetLink().run()
     return
@@ -86,21 +84,35 @@ const sendMessage = () => {
   console.log('Send message:', html)
   editor.commands.clearContent()
 }
-const addFiles = () => {
-  alert('addFiles')
-}
 
 onBeforeUnmount(() => {
   editor.destroy()
 })
 const closeEmojiPicker = (event) => {
-  const popup = document.querySelector('.emojiPopup2') // клас твого попапу
-  const toggleButton = document.querySelector('.emojiToggle') // кнопка відкриття
+  const popup = document.querySelector('.emojiPopup2')
+  const toggleButton = document.querySelector('.emojiToggle')
 
-  // Якщо клік **не на попапі** і **не на кнопці**
   if (popup && !popup.contains(event.target) && toggleButton && !toggleButton.contains(event.target)) {
     showEmojiPicker.value = false
   }
+}
+
+const filesForm = ref([])
+
+const fileInput = ref(null);
+const addFiles = () => {
+  fileInput.value.click();
+};
+const handleFileChange = (event) => {
+  const files = event.target.files
+  if (!files) return
+
+  const newFiles = Array.from(files)
+  filesForm.value = [...filesForm.value, ...newFiles]
+  console.log(filesForm.value )
+}
+const removeFile = (index) => {
+  filesForm.value = filesForm.value.filter((_, i) => i !== index)
 }
 
 onMounted(() => {
@@ -156,7 +168,23 @@ onUnmounted(() => {
     </div>
   </div>
 
+  <input
+    type="file"
+    ref="fileInput"
+    @change="handleFileChange"
+    multiple
+    style="display: none"
+  />
 
+  <div v-for="(file, index) in filesForm" :key="index" class="flex justify-between items-center">
+      <div class="flex items-center">
+          <component :is="getIconByFileName(file.name)" class="h-6 w-6 translate-y-1" :class="getColorByFileName(file.name)" />
+          <p class="text-sm text-gray-800">{{ file.name }}</p>
+      </div>
+      <button @click="removeFile(index)" class="cursor-pointer">
+          <TrashIcon class="h-4 w-4 text-red-400 hover:text-red-600" />
+      </button>
+   </div>
 </template>
 
 <style scoped>

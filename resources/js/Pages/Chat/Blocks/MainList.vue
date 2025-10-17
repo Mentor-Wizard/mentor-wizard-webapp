@@ -4,10 +4,12 @@ import {PhoneIcon} from "@heroicons/vue/20/solid";
 import {CalendarIcon} from "@heroicons/vue/20/solid";
 import { EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
 import TiptapInput from "@/Pages/Chat/Blocks/TiptapInput.vue";
+import ChatList from "@/Pages/Chat/Blocks/ChatList.vue";
+
 </script>
 
 <template>
-  <header class="flex-shrink-0 p-4">
+  <header class="flex-shrink-0">
     <div class="flex justify-between">
         <div class="flex items-start p-2 max-w-md mt-2">
             <div class="relative">
@@ -30,29 +32,15 @@ import TiptapInput from "@/Pages/Chat/Blocks/TiptapInput.vue";
             <EllipsisVerticalIcon class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400" aria-hidden="true" />
         </div>
     </div>
-</header>
-
-
-
-<section class="flex-1 overflow-auto bg-white">
-    <div class="max-w-4xl mx-auto p-6">
-        <h2 class="text-lg font-semibold mb-4">Основний вміст</h2>
-        <div v-for="i in 30" :key="i" class="mb-6">
-            <h3 class="font-medium">Розділ {{ i }}</h3>
-            <p class="text-sm text-gray-700">
-                Це приклад тексту для демонстрації прокрутки. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.
-            </p>
-        </div>
-    </div>
-</section>
-
-
-
-<footer class="flex-shrink-0 bg-white border-t border-gray-200 p-4 shadow-sm">
-    <div class="max-w-4xl mx-auto text-sm text-gray-600">
-        <TiptapInput/>
-    </div>
-</footer>
+  </header>
+  <section class="flex-1 bg-white overflow-auto">
+    <ChatList />
+  </section>
+  <footer class="flex-shrink-0 bg-white border-t border-gray-200 p-4 shadow-sm">
+      <div class="max-w-4xl mx-auto text-sm text-gray-600">
+          <TiptapInput />
+      </div>
+  </footer>
 </template>
 
 <style scoped>

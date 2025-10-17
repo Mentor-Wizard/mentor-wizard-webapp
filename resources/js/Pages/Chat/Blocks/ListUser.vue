@@ -21,6 +21,15 @@ const navigation = ref([
 
 const messageSortList = ['Resent', 'New', 'Name']
 const messageSortBy = ref(1)
+
+// TODO - fake files. After connecting to the backend, you need to delete
+const users = ref([
+  {id: 1, name: 'Sara Conor', online: true, active: true, last: '1 day ago',message: 'I\'ve completed the assignment you sent yesterday I\'ve completed '},
+  {id: 2, name: 'John McClane', online: false, active: false, last: '1 day ago',message: 'I\'ve completed the assignment you sent yesterday I\'ve completed '},
+  {id: 3, name: 'Macaulay Carson', online: true, active: false, last: '1 day ago',message: 'I\'ve completed the assignment you sent yesterday I\'ve completed '},
+  {id: 4, name: 'John Wick', online: false, active: false, last: '1 day ago',message: 'I\'ve completed the assignment you sent yesterday I\'ve completed '},
+  ]
+)
 </script>
 
 <template>
@@ -84,23 +93,23 @@ const messageSortBy = ref(1)
     />
  </div>
 
-  <div class="flex items-start p-2 bg-white rounded-lg shadow-sm border border-gray-200 max-w-md mt-2">
+  <div v-for="user in users" :key="user.id" class="flex items-start p-2 rounded-lg shadow-sm border border-gray-200 max-w-md mt-2" :class="user.active ? 'bg-gray-100' : 'bg-white'">
     <div class="relative">
         <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Sarah Johnson" class="w-12 h-12 rounded-full" />
         <!-- Status online -->
-        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-600 border-2 border-white rounded-full"></span>
+        <span class="absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full" :class="user.online ? 'bg-green-600' : 'bg-gray-300'"></span>
     </div>
 
     <div class="ml-4 flex-1">
         <div class="flex items-center justify-between">
-            <h4 class="font-semibold text-[0.75rem] text-gray-900">Sarah Johnson</h4>
-            <span class="text-[0.75rem] text-gray-500">1h ago</span>
+            <h4 class="font-semibold text-[0.75rem] text-gray-900">{{ user.name }}</h4>
+            <span class="text-[0.75rem] text-gray-500">{{ user.last }}</span>
         </div>
         <p class="mt-1 text-[0.75rem] text-gray-800 line-clamp-2">
-            I've completed the assignment you sent yesterday I've completed the assignment you sent yesterday
+            {{ user.message }}
         </p>
     </div>
-</div>
+  </div>
 
 </template>
 
