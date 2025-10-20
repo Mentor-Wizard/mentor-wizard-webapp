@@ -1,9 +1,9 @@
 <script setup>
 import {
-  VideoCameraIcon,
-  PhoneIcon,
   CalendarIcon,
-  EllipsisVerticalIcon
+  EllipsisVerticalIcon,
+  PhoneIcon,
+  VideoCameraIcon,
 } from '@heroicons/vue/20/solid';
 
 import ChatList from '@/Pages/Chat/Blocks/ChatList.vue';

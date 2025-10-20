@@ -1,18 +1,17 @@
 <script setup>
 import {
-  ListBulletIcon,
   CodeBracketIcon,
   FaceSmileIcon,
-  PaperClipIcon,
+  ListBulletIcon,
   PaperAirplaneIcon,
-  TrashIcon
+  PaperClipIcon,
+  TrashIcon,
 } from '@heroicons/vue/24/outline';
 import { Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
-import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
 import emojiList from 'unicode-emoji-json';
-
+import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
 
 import { useCaseFileType } from '../useCaseFileType.js';
 

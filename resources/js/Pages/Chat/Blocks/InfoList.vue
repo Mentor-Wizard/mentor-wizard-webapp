@@ -1,19 +1,19 @@
 <script setup>
 import {
-  CalendarIcon,
-  UserIcon,
-  EllipsisVerticalIcon,
-  PencilIcon,
-  VideoCameraIcon,
+  ArchiveBoxIcon,
   ArrowDownTrayIcon,
-  FolderIcon,
   BoltIcon,
-  ShareIcon,
-  CodeBracketIcon,
   CalendarDaysIcon,
+  CalendarIcon,
   ChartBarIcon,
+  CodeBracketIcon,
+  EllipsisVerticalIcon,
+  FolderIcon,
   NoSymbolIcon,
-  ArchiveBoxIcon
+  PencilIcon,
+  ShareIcon,
+  UserIcon,
+  VideoCameraIcon,
 } from '@heroicons/vue/24/solid';
 import { ref } from 'vue';
 
