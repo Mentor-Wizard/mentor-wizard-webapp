@@ -49,6 +49,7 @@ const buttonClass = (active) =>
 
 const showEmojiPicker = ref(false);
 const emojis = Object.keys(emojiList);
+const emojiPickerContainer = ref(null);
 
 const toggleEmojiPicker = () => {
   showEmojiPicker.value = !showEmojiPicker.value;
@@ -65,18 +66,10 @@ const sendMessage = () => {
   editor.commands.clearContent();
 };
 
-onBeforeUnmount(() => {
-  editor.destroy();
-});
 const closeEmojiPicker = (event) => {
-  const popup = document.querySelector('.emojiPopup2');
-  const toggleButton = document.querySelector('.emojiToggle');
-
   if (
-    popup
-    && !popup.contains(event.target)
-    && toggleButton
-    && !toggleButton.contains(event.target)
+    emojiPickerContainer.value
+    && !emojiPickerContainer.value.contains(event.target)
   ) {
     showEmojiPicker.value = false;
   }
@@ -98,6 +91,10 @@ const handleFileChange = (event) => {
 const removeFile = (index) => {
   filesForm.value = filesForm.value.filter((_, i) => i !== index);
 };
+
+onBeforeUnmount(() => {
+  editor.destroy();
+});
 
 onMounted(() => {
   document.addEventListener('click', closeEmojiPicker);
@@ -143,7 +140,7 @@ onUnmounted(() => {
       </button>
     </div>
 
-    <div class="flex items-end gap-2">
+    <div ref="emojiPickerContainer" class="flex items-end gap-2">
       <div
         class="max-h-[150px] min-h-[40px] flex-1 overflow-auto rounded-lg bg-white p-2"
       >

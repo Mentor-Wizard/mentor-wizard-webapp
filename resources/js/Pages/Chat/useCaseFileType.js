@@ -1,6 +1,6 @@
 import CodeIcon from '@/Components/UI/Icons/CodeIcon.vue';
-import DefaultIcon from '@/Components/UI/Icons/DefaultIcon.vue';
 import DocIcon from '@/Components/UI/Icons/DocIcon.vue';
+import FileIcon from '@/Components/UI/Icons/FileIcon.vue';
 import PdfIcon from '@/Components/UI/Icons/PdfIcon.vue';
 import PngIcon from '@/Components/UI/Icons/PngIcon.vue';
 export function useCaseFileType() {
@@ -42,7 +42,7 @@ export function useCaseFileType() {
       case 'docx':
         return DocIcon;
       default:
-        return DefaultIcon;
+        return FileIcon;
     }
   }
 
