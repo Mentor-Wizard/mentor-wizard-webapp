@@ -94,7 +94,6 @@ const handleFileChange = (event) => {
 
   const newFiles = Array.from(files);
   filesForm.value = [...filesForm.value, ...newFiles];
-  console.log(filesForm.value);
 };
 const removeFile = (index) => {
   filesForm.value = filesForm.value.filter((_, i) => i !== index);
