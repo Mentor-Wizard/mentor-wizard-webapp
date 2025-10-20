@@ -79,20 +79,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/cli@npm:^20.0.0":
-  version: 20.0.0
-  resolution: "@commitlint/cli@npm:20.0.0"
+"@commitlint/cli@npm:^20.1.0":
+  version: 20.1.0
+  resolution: "@commitlint/cli@npm:20.1.0"
   dependencies:
     "@commitlint/format": "npm:^20.0.0"
     "@commitlint/lint": "npm:^20.0.0"
-    "@commitlint/load": "npm:^20.0.0"
+    "@commitlint/load": "npm:^20.1.0"
     "@commitlint/read": "npm:^20.0.0"
     "@commitlint/types": "npm:^20.0.0"
     tinyexec: "npm:^1.0.0"
     yargs: "npm:^17.0.0"
   bin:
     commitlint: ./cli.js
-  checksum: 10c0/d9f6b7e155be73804884a8cd218eddc78ca0fa082461968ccc6ba04b38fc548afa4101e0c00c6a285c35ae31bdf499c0d1e48a72742ab6679c7fe268bf2c3d88
+  checksum: 10c0/ce3914947e6ab9ad658c52e697e4b1e1dac7c80313253a4f9fdfa9a1fb10df9e6cc06d89f7daae4b6a2d157b967f28cc39856c8a6bf11a4a4ed653d011b3f81a
   languageName: node
   linkType: hard
 
@@ -169,13 +169,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/load@npm:^20.0.0":
-  version: 20.0.0
-  resolution: "@commitlint/load@npm:20.0.0"
+"@commitlint/load@npm:^20.1.0":
+  version: 20.1.0
+  resolution: "@commitlint/load@npm:20.1.0"
   dependencies:
     "@commitlint/config-validator": "npm:^20.0.0"
     "@commitlint/execute-rule": "npm:^20.0.0"
-    "@commitlint/resolve-extends": "npm:^20.0.0"
+    "@commitlint/resolve-extends": "npm:^20.1.0"
     "@commitlint/types": "npm:^20.0.0"
     chalk: "npm:^5.3.0"
     cosmiconfig: "npm:^9.0.0"
@@ -183,7 +183,7 @@ __metadata:
     lodash.isplainobject: "npm:^4.0.6"
     lodash.merge: "npm:^4.6.2"
     lodash.uniq: "npm:^4.5.0"
-  checksum: 10c0/d0b02e6b943db0f7a2892e63fdd5c8f5015c02caee7c3f6c20324870a40b9ed49fd4a5aa6e9e5b7d4270ff1446c6972c4f01043f727a6f9bc1663144b8197ca1
+  checksum: 10c0/cabbd8311605afd2a9437b7bb9174c2307453ed6a8ff5bee4738470efcc316c998c7e0660b5342e191e20962af0ab76bc608ce5812e23b1a0207fe60e9dd238f
   languageName: node
   linkType: hard
 
@@ -218,9 +218,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@commitlint/resolve-extends@npm:^20.0.0":
-  version: 20.0.0
-  resolution: "@commitlint/resolve-extends@npm:20.0.0"
+"@commitlint/resolve-extends@npm:^20.1.0":
+  version: 20.1.0
+  resolution: "@commitlint/resolve-extends@npm:20.1.0"
   dependencies:
     "@commitlint/config-validator": "npm:^20.0.0"
     "@commitlint/types": "npm:^20.0.0"
@@ -228,7 +228,7 @@ __metadata:
     import-meta-resolve: "npm:^4.0.0"
     lodash.mergewith: "npm:^4.6.2"
     resolve-from: "npm:^5.0.0"
-  checksum: 10c0/22b744cfbfdf38af90c6472f9d3a348a467c1ce3ef752342e3571fc9a07ee26ddeef16fb9fe4b5ace0894feb4e749987093bfc45d1ec4b8912d02dd7f4ec677f
+  checksum: 10c0/d5b30a5266310070d729eafb2ca5aaac9426de8d978dc5f459f41cc6d5d726b00bb5892f3a65f80ebf728752465e2fdb3cb4738118a65004beace675a72f4081
   languageName: node
   linkType: hard
 
@@ -635,28 +635,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@inertiajs/core@npm:2.2.0":
-  version: 2.2.0
-  resolution: "@inertiajs/core@npm:2.2.0"
+"@inertiajs/core@npm:2.2.4":
+  version: 2.2.4
+  resolution: "@inertiajs/core@npm:2.2.4"
   dependencies:
     "@types/lodash-es": "npm:^4.17.12"
     axios: "npm:^1.12.2"
     lodash-es: "npm:^4.17.21"
     qs: "npm:^6.14.0"
-  checksum: 10c0/76e7e0e8c07b5e0b49134a343bc894047ca04eb97196e631aea71e425165802f2f09afc87ec9ef009d8814fd4fc5ab0a57c3f36dd197f9a8c57840e1820e40c9
+  checksum: 10c0/88f814c9764b0cca8aacd467c424ac765a25f526d903299de881f563d7b6bb83e3b718224d5aac11dd3f8d5d7e89564c475d4545711acf7db2a78f10ea810987
   languageName: node
   linkType: hard
 
-"@inertiajs/vue3@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@inertiajs/vue3@npm:2.2.0"
+"@inertiajs/vue3@npm:^2.2.4":
+  version: 2.2.4
+  resolution: "@inertiajs/vue3@npm:2.2.4"
   dependencies:
-    "@inertiajs/core": "npm:2.2.0"
+    "@inertiajs/core": "npm:2.2.4"
     "@types/lodash-es": "npm:^4.17.12"
     lodash-es: "npm:^4.17.21"
   peerDependencies:
     vue: ^3.0.0
-  checksum: 10c0/a54889d73526d85122c694cb33cf8799b022a880a84bd098f795c61d5864447e2120d88cd7f9e99d1a7543d74eda78d99fba521a5d3c8fe378e3f96858b2b435
+  checksum: 10c0/808bee2fe2c6d8e9d6b655b42fd08376c5a5b2ba344eb5168a66a8dd380e17470dd96c81363bd81134b2e5fc8a928f1879512cb5f880444e872e47d953e61203
   languageName: node
   linkType: hard
 
@@ -760,58 +760,58 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oxlint/darwin-arm64@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/darwin-arm64@npm:1.18.0"
+"@oxlint/darwin-arm64@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/darwin-arm64@npm:1.19.0"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@oxlint/darwin-x64@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/darwin-x64@npm:1.18.0"
+"@oxlint/darwin-x64@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/darwin-x64@npm:1.19.0"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@oxlint/linux-arm64-gnu@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/linux-arm64-gnu@npm:1.18.0"
+"@oxlint/linux-arm64-gnu@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/linux-arm64-gnu@npm:1.19.0"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@oxlint/linux-arm64-musl@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/linux-arm64-musl@npm:1.18.0"
+"@oxlint/linux-arm64-musl@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/linux-arm64-musl@npm:1.19.0"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@oxlint/linux-x64-gnu@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/linux-x64-gnu@npm:1.18.0"
+"@oxlint/linux-x64-gnu@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/linux-x64-gnu@npm:1.19.0"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@oxlint/linux-x64-musl@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/linux-x64-musl@npm:1.18.0"
+"@oxlint/linux-x64-musl@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/linux-x64-musl@npm:1.19.0"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@oxlint/win32-arm64@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/win32-arm64@npm:1.18.0"
+"@oxlint/win32-arm64@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/win32-arm64@npm:1.19.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@oxlint/win32-x64@npm:1.18.0":
-  version: 1.18.0
-  resolution: "@oxlint/win32-x64@npm:1.18.0"
+"@oxlint/win32-x64@npm:1.19.0":
+  version: 1.19.0
+  resolution: "@oxlint/win32-x64@npm:1.19.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -1757,15 +1757,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commitlint@npm:^20.0.0":
-  version: 20.0.0
-  resolution: "commitlint@npm:20.0.0"
+"commitlint@npm:^20.1.0":
+  version: 20.1.0
+  resolution: "commitlint@npm:20.1.0"
   dependencies:
-    "@commitlint/cli": "npm:^20.0.0"
+    "@commitlint/cli": "npm:^20.1.0"
     "@commitlint/types": "npm:^20.0.0"
   bin:
     commitlint: cli.js
-  checksum: 10c0/021754d58f5680eb23135ab1cb05d8b7e5c7e7206eeacb5131b5998560249cd46e333b639b381b2d4bc8ed2cb5786e49528625c2e3c296a36c9f0e66a1f366f7
+  checksum: 10c0/c3e85c70ce8bffff85e89aa7a07f2676f4a9825814425133d760dead7883ce2ff812b3347683c426a649237fdbbb5c777cb0773f1099f16764c26a288d123b87
   languageName: node
   linkType: hard
 
@@ -2212,12 +2212,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-oxlint@npm:^1.18.0":
-  version: 1.18.0
-  resolution: "eslint-plugin-oxlint@npm:1.18.0"
+"eslint-plugin-oxlint@npm:^1.19.0":
+  version: 1.19.0
+  resolution: "eslint-plugin-oxlint@npm:1.19.0"
   dependencies:
     jsonc-parser: "npm:^3.3.1"
-  checksum: 10c0/f71fe583037c462302b3d362938b81bad85d6be45ac14cc5e96a87b5621fa09b80eb130df9c9ebece21c2e62f65b4aa7062e73f2228e010ae337f38abe1e0295
+  checksum: 10c0/caeea23adfcd21ca09a49497c403b0c743f75d25cb67dcbfb92ae8a3ea6c3b4985e1ee246b2e37feacb18b389ae616c18bc026c8614318f139beccc8cb40a081
   languageName: node
   linkType: hard
 
@@ -2980,13 +2980,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"laravel-echo@npm:^2.2.3":
-  version: 2.2.3
-  resolution: "laravel-echo@npm:2.2.3"
+"laravel-echo@npm:^2.2.4":
+  version: 2.2.4
+  resolution: "laravel-echo@npm:2.2.4"
   peerDependencies:
     pusher-js: "*"
     socket.io-client: "*"
-  checksum: 10c0/fccea49e2b83c6627a1e904cb320404d582d495d52381ee0cfe76c271f2f60547ab949dff6cec86a98fb259dc2f9d5a057cf1e53ad700a1e77c31bf3b66cdaca
+  checksum: 10c0/aacfe0900a33033137ab38efeec0a910489d9dafdf989abfc66268bf35aabbb177116ad4437913ef524b590592896475f6b7031a78810ea1bae0312e09260bdd
   languageName: node
   linkType: hard
 
@@ -3014,10 +3014,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libphonenumber-js@npm:^1.12.22":
-  version: 1.12.22
-  resolution: "libphonenumber-js@npm:1.12.22"
-  checksum: 10c0/e7b126f11cec4b68c909b2907cbdf53324e718cddf916a5e9ccb47de3d82678d26af03da7e95e4525425ee11747d540e608f80a92b4d54f9150d71cc820ee5ef
+"libphonenumber-js@npm:^1.12.23":
+  version: 1.12.23
+  resolution: "libphonenumber-js@npm:1.12.23"
+  checksum: 10c0/56ebabdcae6cb4a4da536788c52c231858532e9cc729a0d5dd24d7cd0610f8baf09ed240b9f60fd108d73e54ea1d094f6e90f2a887c0c2c08af2bc53039753fc
   languageName: node
   linkType: hard
 
@@ -3517,18 +3517,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oxlint@npm:^1.18.0":
-  version: 1.18.0
-  resolution: "oxlint@npm:1.18.0"
+"oxlint@npm:^1.19.0":
+  version: 1.19.0
+  resolution: "oxlint@npm:1.19.0"
   dependencies:
-    "@oxlint/darwin-arm64": "npm:1.18.0"
-    "@oxlint/darwin-x64": "npm:1.18.0"
-    "@oxlint/linux-arm64-gnu": "npm:1.18.0"
-    "@oxlint/linux-arm64-musl": "npm:1.18.0"
-    "@oxlint/linux-x64-gnu": "npm:1.18.0"
-    "@oxlint/linux-x64-musl": "npm:1.18.0"
-    "@oxlint/win32-arm64": "npm:1.18.0"
-    "@oxlint/win32-x64": "npm:1.18.0"
+    "@oxlint/darwin-arm64": "npm:1.19.0"
+    "@oxlint/darwin-x64": "npm:1.19.0"
+    "@oxlint/linux-arm64-gnu": "npm:1.19.0"
+    "@oxlint/linux-arm64-musl": "npm:1.19.0"
+    "@oxlint/linux-x64-gnu": "npm:1.19.0"
+    "@oxlint/linux-x64-musl": "npm:1.19.0"
+    "@oxlint/win32-arm64": "npm:1.19.0"
+    "@oxlint/win32-x64": "npm:1.19.0"
   peerDependencies:
     oxlint-tsgolint: ">=0.2.0"
   dependenciesMeta:
@@ -3554,7 +3554,7 @@ __metadata:
   bin:
     oxc_language_server: bin/oxc_language_server
     oxlint: bin/oxlint
-  checksum: 10c0/a8922b7cf0a7921237945b0eedf41e9a47db51784a667092cffede9038227a5a5e2e409e6fc237a0c061aaee3b2a8a20e63de5fb324deec17ca5db64bf34f84e
+  checksum: 10c0/3be4f4826ae182727104cdb8ee57f3dd5944db42227097e0fef2f04d437af73c8b23b71a86c7f2afb888f1bf95a04d96dfe1b2391bdb162c8cc470da25ae9b98
   languageName: node
   linkType: hard
 
@@ -3994,7 +3994,7 @@ __metadata:
     "@eslint/js": "npm:^9.36.0"
     "@headlessui/vue": "npm:^1.7.23"
     "@heroicons/vue": "npm:^2.2.0"
-    "@inertiajs/vue3": "npm:^2.2.0"
+    "@inertiajs/vue3": "npm:^2.2.4"
     "@tailwindcss/forms": "npm:^0.5.10"
     "@tailwindcss/postcss": "npm:^4.1.13"
     "@tailwindcss/vite": "npm:^4.1.13"
@@ -4003,18 +4003,18 @@ __metadata:
     "@vue/server-renderer": "npm:^3.5.22"
     axios: "npm:^1.12.2"
     chokidar: "npm:^4.0.3"
-    commitlint: "npm:^20.0.0"
+    commitlint: "npm:^20.1.0"
     concurrently: "npm:^9.2.1"
     eslint: "npm:^9.36.0"
     eslint-config-prettier: "npm:^10.1.8"
-    eslint-plugin-oxlint: "npm:^1.18.0"
+    eslint-plugin-oxlint: "npm:^1.19.0"
     eslint-plugin-prettier-vue: "npm:^5.0.0"
     eslint-plugin-simple-import-sort: "npm:^12.1.1"
     eslint-plugin-vue: "npm:^10.5.0"
-    laravel-echo: "npm:^2.2.3"
+    laravel-echo: "npm:^2.2.4"
     laravel-vite-plugin: "npm:^2.0.1"
-    libphonenumber-js: "npm:^1.12.22"
-    oxlint: "npm:^1.18.0"
+    libphonenumber-js: "npm:^1.12.23"
+    oxlint: "npm:^1.19.0"
     pinia: "npm:^3.0.3"
     postcss: "npm:^8.5.6"
     prettier: "npm:3.6.2"
