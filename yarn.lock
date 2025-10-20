@@ -4654,6 +4654,7 @@ __metadata:
     pusher-js: "npm:^8.4.0"
     socket.io-client: "npm:^4.8.1"
     tailwindcss: "npm:^4.1.13"
+    unicode-emoji-json: "npm:^0.8.0"
     vite: "npm:^7.1.7"
     vue: "npm:^3.5.22"
     vue-eslint-parser: "npm:^10.2.0"
@@ -5056,6 +5057,13 @@ __metadata:
   version: 7.10.0
   resolution: "undici-types@npm:7.10.0"
   checksum: 10c0/8b00ce50e235fe3cc601307f148b5e8fb427092ee3b23e8118ec0a5d7f68eca8cee468c8fc9f15cbb2cf2a3797945ebceb1cbd9732306a1d00e0a9b6afa0f635
+  languageName: node
+  linkType: hard
+
+"unicode-emoji-json@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "unicode-emoji-json@npm:0.8.0"
+  checksum: 10c0/6a075cbcfd245ad3976047a6b3fccd1401c6bca6035082fe9844838ad5b1d4bd83c574ffeb8a9b0a56d1efaacd62c4a03609e0b5beb39797ca44fc84130a42d9
   languageName: node
   linkType: hard
 
