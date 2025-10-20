@@ -59,7 +59,7 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
 Route::middleware('auth')
     ->prefix('chat')
     ->group(function (): void {
-        Route::get('list', GetChatPage::class)->name('chat.list');
+        Route::get('list', GetChatPage::class)->name('page.chat.list');
     });
 
 require __DIR__.'/auth.php';

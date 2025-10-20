@@ -1,10 +1,12 @@
 <script setup>
-import { ListBulletIcon } from '@heroicons/vue/24/outline';
-import { CodeBracketIcon } from '@heroicons/vue/24/outline';
-import { FaceSmileIcon } from '@heroicons/vue/24/outline';
-import { PaperClipIcon } from '@heroicons/vue/24/outline';
-import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
-import { TrashIcon } from '@heroicons/vue/24/outline';
+import {
+  ListBulletIcon,
+  CodeBracketIcon,
+  FaceSmileIcon,
+  PaperClipIcon,
+  PaperAirplaneIcon,
+  TrashIcon
+} from '@heroicons/vue/24/outline';
 import { Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';

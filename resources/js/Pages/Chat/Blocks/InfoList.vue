@@ -1,18 +1,20 @@
 <script setup>
-import { CalendarIcon } from '@heroicons/vue/24/solid/index.js';
-import { UserIcon } from '@heroicons/vue/24/solid/index.js';
-import { EllipsisVerticalIcon } from '@heroicons/vue/24/solid/index.js';
-import { PencilIcon } from '@heroicons/vue/24/solid/index.js';
-import { VideoCameraIcon } from '@heroicons/vue/24/solid/index.js';
-import { ArrowDownTrayIcon } from '@heroicons/vue/24/solid/index.js';
-import { FolderIcon } from '@heroicons/vue/24/solid/index.js';
-import { BoltIcon } from '@heroicons/vue/24/solid/index.js';
-import { ShareIcon } from '@heroicons/vue/24/solid/index.js';
-import { CodeBracketIcon } from '@heroicons/vue/24/solid/index.js';
-import { CalendarDaysIcon } from '@heroicons/vue/24/solid/index.js';
-import { ChartBarIcon } from '@heroicons/vue/24/solid/index.js';
-import { NoSymbolIcon } from '@heroicons/vue/24/solid/index.js';
-import { ArchiveBoxIcon } from '@heroicons/vue/24/solid/index.js';
+import {
+  CalendarIcon,
+  UserIcon,
+  EllipsisVerticalIcon,
+  PencilIcon,
+  VideoCameraIcon,
+  ArrowDownTrayIcon,
+  FolderIcon,
+  BoltIcon,
+  ShareIcon,
+  CodeBracketIcon,
+  CalendarDaysIcon,
+  ChartBarIcon,
+  NoSymbolIcon,
+  ArchiveBoxIcon
+} from '@heroicons/vue/24/solid';
 import { ref } from 'vue';
 
 import { useCaseFileType } from '../useCaseFileType.js';

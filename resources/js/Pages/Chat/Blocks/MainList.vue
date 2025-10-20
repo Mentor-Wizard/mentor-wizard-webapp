@@ -1,8 +1,10 @@
 <script setup>
-import { VideoCameraIcon } from '@heroicons/vue/20/solid';
-import { PhoneIcon } from '@heroicons/vue/20/solid';
-import { CalendarIcon } from '@heroicons/vue/20/solid';
-import { EllipsisVerticalIcon } from '@heroicons/vue/24/outline';
+import {
+  VideoCameraIcon,
+  PhoneIcon,
+  CalendarIcon,
+  EllipsisVerticalIcon
+} from '@heroicons/vue/20/solid';
 
 import ChatList from '@/Pages/Chat/Blocks/ChatList.vue';
 import TiptapInput from '@/Pages/Chat/Blocks/TiptapInput.vue';
