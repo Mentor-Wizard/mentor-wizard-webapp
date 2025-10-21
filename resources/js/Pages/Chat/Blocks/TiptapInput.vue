@@ -1,4 +1,5 @@
 <script setup>
+import { TransitionChild, TransitionRoot } from '@headlessui/vue';
 import {
   CodeBracketIcon,
   FaceSmileIcon,
@@ -11,7 +12,7 @@ import { Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import emojiList from 'unicode-emoji-json';
-import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 
 import { useCaseFileType } from '../useCaseFileType.js';
 
@@ -38,9 +39,7 @@ const setLink = () => {
     return;
   }
   const url = window.prompt('URL посилання:');
-  if (url === null || url === '') {
-    return;
-  }
+  if (!url) return;
   editor.chain().focus().setLink({ href: url }).run();
 };
 
@@ -49,59 +48,50 @@ const buttonClass = (active) =>
 
 const showEmojiPicker = ref(false);
 const emojis = Object.keys(emojiList);
-const emojiPickerContainer = ref(null);
 
 const toggleEmojiPicker = () => {
   showEmojiPicker.value = !showEmojiPicker.value;
 };
 
-const selectEmoji = async (emoji) => {
-  // Отримуємо позицію курсора
+const selectEmoji = (emoji) => {
   editor.chain().focus().insertContent(emoji).run();
+  showEmojiPicker.value = false;
+};
+
+const filesForm = ref([]);
+const fileInput = ref(null);
+
+const addFiles = () => fileInput.value.click();
+
+const handleFileChange = (event) => {
+  const files = event.target.files;
+  if (!files) return;
+  const newFiles = Array.from(files);
+  filesForm.value = [...filesForm.value, ...newFiles];
+  event.target.value = null;
+};
+
+const removeFile = (index) => {
+  filesForm.value = filesForm.value.filter((_, i) => i !== index);
 };
 
 const sendMessage = () => {
   const html = editor.getHTML();
   console.log('Send message:', html);
-  editor.commands.clearContent();
-};
-
-const closeEmojiPicker = (event) => {
-  if (
-    emojiPickerContainer.value
-    && !emojiPickerContainer.value.contains(event.target)
-  ) {
-    showEmojiPicker.value = false;
+  if (filesForm.value.length > 0) {
+    console.log(
+      'Attached files:',
+      filesForm.value.map((f) => f.name),
+    );
   }
-};
 
-const filesForm = ref([]);
-
-const fileInput = ref(null);
-const addFiles = () => {
-  fileInput.value.click();
-};
-const handleFileChange = (event) => {
-  const files = event.target.files;
-  if (!files) return;
-
-  const newFiles = Array.from(files);
-  filesForm.value = [...filesForm.value, ...newFiles];
-};
-const removeFile = (index) => {
-  filesForm.value = filesForm.value.filter((_, i) => i !== index);
+  editor.commands.clearContent();
+  filesForm.value = [];
+  showEmojiPicker.value = false;
 };
 
 onBeforeUnmount(() => {
   editor.destroy();
-});
-
-onMounted(() => {
-  document.addEventListener('click', closeEmojiPicker);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeEmojiPicker);
 });
 </script>
 
@@ -126,66 +116,83 @@ onUnmounted(() => {
         :class="buttonClass(editor.isActive('bulletList'))"
         @click="toggleBulletList"
       >
-        <ListBulletIcon
-          class="pointer-events-none col-start-1 row-start-1 size-5 self-center"
-        />
+        <ListBulletIcon class="size-5 self-center" />
       </button>
       <button
         :class="buttonClass(editor.isActive('codeBlock'))"
         @click="toggleCodeBlock"
       >
-        <CodeBracketIcon
-          class="pointer-events-none col-start-1 row-start-1 size-5 self-center"
-        />
+        <CodeBracketIcon class="size-5 self-center" />
       </button>
     </div>
 
-    <div ref="emojiPickerContainer" class="flex items-end gap-2">
+    <div class="relative flex items-end gap-2">
       <div
         class="max-h-[150px] min-h-[40px] flex-1 overflow-auto rounded-lg bg-white p-2"
       >
         <EditorContent :editor="editor" />
       </div>
+
       <button
-        class="emojiToggle relative mb-2 rounded px-1 py-1 text-gray-600 hover:bg-blue-100"
+        class="mb-2 rounded px-1 py-1 text-gray-600 hover:bg-blue-100"
         @click="toggleEmojiPicker"
       >
-        <FaceSmileIcon
-          class="size-5 cursor-pointer self-center hover:text-blue-600"
-        />
-        <!-- Emoji Popup -->
-        <div
-          v-show="showEmojiPicker"
-          class="emojiPopup2 absolute right-0 bottom-full z-50 mb-2 max-h-96 w-80 overflow-auto rounded border bg-white p-3 shadow-lg"
-        >
-          <div class="emojiPopupContent flex flex-wrap gap-1">
-            <span
-              v-for="emoji in emojis"
-              :key="emoji"
-              class="emoji cursor-pointer text-lg"
-              @click="selectEmoji(emoji)"
-            >
-              {{ emoji }}
-            </span>
-          </div>
-        </div>
+        <FaceSmileIcon class="size-5 cursor-pointer hover:text-blue-600" />
       </button>
+
       <button
         class="mb-2 rounded px-1 py-1 text-gray-600 hover:bg-blue-100"
         @click="addFiles"
       >
-        <PaperClipIcon
-          class="col-start-1 row-start-1 size-5 cursor-pointer self-center hover:text-blue-600"
-        />
+        <PaperClipIcon class="size-5 cursor-pointer hover:text-blue-600" />
       </button>
+
       <button
         class="mb-2 rounded px-1 py-1 text-gray-600 hover:bg-blue-100"
+        :disabled="editor.isEmpty && filesForm.length === 0"
         @click="sendMessage"
       >
         <PaperAirplaneIcon
-          class="col-start-1 row-start-1 size-5 cursor-pointer self-center text-blue-600 hover:text-blue-800"
+          class="size-5 cursor-pointer text-blue-600 hover:text-blue-800"
         />
       </button>
+
+      <TransitionRoot :show="showEmojiPicker" as="template">
+        <TransitionChild
+          as="div"
+          class="absolute right-0 bottom-full z-50 mb-2 origin-bottom-right"
+          enter="ease-out duration-200"
+          enter-from="opacity-0 scale-95"
+          enter-to="opacity-100 scale-100"
+          leave="ease-in duration-150"
+          leave-from="opacity-100 scale-100"
+          leave-to="opacity-0 scale-95"
+          @click.stop
+        >
+          <div
+            class="max-h-96 w-80 overflow-auto rounded-lg border bg-white p-3 shadow-lg ring-1 ring-black/5"
+          >
+            <div class="flex flex-wrap gap-1">
+              <span
+                v-for="(emoji, index) in emojis"
+                :key="index"
+                class="emoji cursor-pointer text-lg"
+                @click="selectEmoji(emoji)"
+              >
+                {{ emoji }}
+              </span>
+            </div>
+          </div>
+        </TransitionChild>
+      </TransitionRoot>
+
+      <Teleport to="body">
+        <div
+          v-if="showEmojiPicker"
+          class="fixed inset-0 z-40"
+          @click="showEmojiPicker = false"
+        />
+      </Teleport>
     </div>
   </div>
 
@@ -194,25 +201,28 @@ onUnmounted(() => {
     type="file"
     multiple
     style="display: none"
+    accept="*"
     @change="handleFileChange"
   />
 
-  <div
-    v-for="(file, index) in filesForm"
-    :key="index"
-    class="flex items-center justify-between"
-  >
-    <div class="flex items-center">
-      <component
-        :is="getIconByFileName(file.name)"
-        class="h-6 w-6 translate-y-1"
-        :class="getColorByFileName(file.name)"
-      />
-      <p class="text-sm text-gray-800">{{ file.name }}</p>
+  <div class="mt-2 space-y-1">
+    <div
+      v-for="(file, index) in filesForm"
+      :key="index"
+      class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-2"
+    >
+      <div class="flex items-center gap-2">
+        <component
+          :is="getIconByFileName(file.name)"
+          class="h-6 w-6 flex-shrink-0 translate-y-1"
+          :class="getColorByFileName(file.name)"
+        />
+        <p class="max-w-xs truncate text-sm text-gray-800">{{ file.name }}</p>
+      </div>
+      <button class="flex-shrink-0 cursor-pointer" @click="removeFile(index)">
+        <TrashIcon class="h-4 w-4 text-red-400 hover:text-red-600" />
+      </button>
     </div>
-    <button class="cursor-pointer" @click="removeFile(index)">
-      <TrashIcon class="h-4 w-4 text-red-400 hover:text-red-600" />
-    </button>
   </div>
 </template>
 
@@ -243,16 +253,16 @@ onUnmounted(() => {
   display: block;
 }
 
-::v-deep(.tiptap ul li p)::before {
+::v-deep(.tiptap ul li p) {
+  display: inline-block;
+  margin-left: 1.2em;
+}
+
+::v-deep(.tiptap ul li::before) {
   content: '•';
   position: absolute;
   left: 0;
   color: black;
-}
-
-::v-deep(.tiptap ul li p) {
-  display: block;
-  margin-left: 1.2em;
 }
 
 ::v-deep(.tiptap a) {
@@ -261,37 +271,15 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.emojiToggle {
-  position: relative;
-  cursor: pointer;
-}
-
-.emojiPopup2 {
-  position: absolute;
-  bottom: 35px;
-  right: 0;
-  z-index: 100;
-}
-
-.emojiPopupContent {
-  padding: 10px;
-  max-height: 200px;
-  max-width: 500px;
-  overflow-y: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-}
-
 .emoji {
   font-size: 20px;
   cursor: pointer;
   padding: 5px;
   border-radius: 4px;
   transition: background-color 0.2s;
+}
 
-  &:hover {
-    background-color: #f0f0f0;
-  }
+.emoji:hover {
+  background-color: #f0f0f0;
 }
 </style>
