@@ -77,7 +77,8 @@ const removeFile = (index) => {
 
 // TODO - send data to backend
 const sendMessage = () => {
-  const html = editor.getHTML();
+  // get data from editor
+  // const html = editor.getHTML();
   if (filesForm.value.length > 0) {
     // TODO - attach files to request
   }
