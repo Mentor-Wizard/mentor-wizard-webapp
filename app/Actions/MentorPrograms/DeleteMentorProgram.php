@@ -17,12 +17,12 @@ class DeleteMentorProgram
 
     public function handle(Request $request, MentorProgram $mentorProgram): RedirectResponse
     {
-        throw_unless($mentorProgram->exists, new ModelNotFoundException('Mentor program not found.'));
+        throw_unless($mentorProgram->exists, ModelNotFoundException::class, 'Mentor program not found.');
 
         abort_if($request->user()->cannot('delete', $mentorProgram), Response::HTTP_FORBIDDEN, 'Unauthorized action.');
 
         $mentorProgram->delete();
 
-        return redirect()->route('mentor-program.list');
+        return to_route('mentor-program.list');
     }
 }

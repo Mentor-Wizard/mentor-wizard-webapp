@@ -22,13 +22,12 @@ class GetMentorReviewPage
 
     public function handle(User $mentor, Request $request): JsonResponse
     {
-        throw_unless($mentor->hasRole(RoleEnum::MENTOR->value), new ModelNotFoundException);
+        throw_unless($mentor->hasRole(RoleEnum::MENTOR->value), ModelNotFoundException::class);
 
         $page = $request->input('page');
 
         $reviews = $mentor->mentorReviews()
-            ->with('menti')
-            ->orderByDesc('created_at')
+            ->with('menti')->latest()
             ->offset($page * self::PER_PAGE)
             ->limit(self::PER_PAGE + self::EXTRA_PAGE)
             ->get();

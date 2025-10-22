@@ -42,13 +42,13 @@ describe('GetMentorReviewPage', function (): void {
             ->assertJson(function (AssertableJson $json): void {
                 $json->has('items', 4) // Expect 4 items per page (PER_PAGE = 4)
                     ->has('items.0', function (AssertableJson $json): void {
-                        $json->where('id', fn (int $id): true => is_int($id))
+                        $json->where('id', is_int(...))
                             ->where('comment', 'Great mentor review')
                             ->where('rating', 5)
-                            ->where('menti.id', fn (int $id): true => is_int($id))
-                            ->where('menti.username', fn (string $username): true => is_string($username))
+                            ->where('menti.id', is_int(...))
+                            ->where('menti.username', is_string(...))
                             ->where('menti.avatar', fn (?string $avatar): bool => is_string($avatar) || is_null($avatar))
-                            ->where('created_at', fn (string $date): true => is_string($date))
+                            ->where('created_at', is_string(...))
                             ->etc();
                     })
                     ->where('next_page', 1) // Expect next_page to be 1 for the second page

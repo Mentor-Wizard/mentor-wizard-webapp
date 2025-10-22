@@ -30,7 +30,7 @@ describe('Create Mentor Program', function (): void {
         Currency::query()->delete();
 
         $action = new CreateMentorProgramPage;
-        expect(fn (): Response => $action->handle())->toThrow(Exception::class, 'Currencies table is empty');
+        expect($action->handle(...))->toThrow(Exception::class, 'Currencies table is empty');
     });
 
     it('contains required page structure', function (): void {

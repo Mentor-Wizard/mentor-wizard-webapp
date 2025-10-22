@@ -8,7 +8,6 @@ use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\User;
 use App\Models\UserProfile;
-use Carbon\Carbon;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -44,7 +43,7 @@ describe('Mentor Page', function (): void {
             'description'              => 'description',
             'rate'                     => 1.1,
             'currency_id'              => $currency_id,
-            'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+            'experience_started_at'    => Illuminate\Support\Facades\Date::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 
         $user->refresh();

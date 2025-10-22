@@ -108,7 +108,7 @@ describe('Update Main User', function (): void {
             ->and($updatedUser->profile->getMedia('avatar'))->toHaveCount(1);
     });
 
-    it('throws validation exception for invalid data', function ($invalidData): void {
+    it('throws validation exception for invalid data', function (array $invalidData): void {
         $user = User::factory()->create();
         Auth::login($user);
 
