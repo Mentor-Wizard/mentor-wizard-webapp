@@ -75,14 +75,11 @@ const removeFile = (index) => {
   filesForm.value = filesForm.value.filter((_, i) => i !== index);
 };
 
+// TODO - send data to backend
 const sendMessage = () => {
   const html = editor.getHTML();
-  console.log('Send message:', html);
   if (filesForm.value.length > 0) {
-    console.log(
-      'Attached files:',
-      filesForm.value.map((f) => f.name),
-    );
+    // TODO - attach files to request
   }
 
   editor.commands.clearContent();
