@@ -37,6 +37,9 @@ class MentorProgramBlock extends Model
         return $this->belongsTo(MentorProgram::class, 'id');
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

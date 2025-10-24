@@ -51,6 +51,9 @@ class MentorSession extends Model
         return $this->hasOne(MentorSessionNote::class);
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

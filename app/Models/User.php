@@ -64,6 +64,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         'remember_token',
     ];
 
+    /**
+     * @var string[]
+     */
     protected array $guard_name = [
         'web',
         RoleGuardEnum::USER->value,

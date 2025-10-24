@@ -122,6 +122,9 @@ describe('Update Main User', function (): void {
     ])->throws(Error::class);
 });
 
+/**
+ * @param  array<string, mixed>  $data
+ */
 function mockUpdateUserRequest(array $data, User $user): UpdateUserRequest|MockInterface
 {
     $request = Mockery::mock(UpdateUserRequest::class);
@@ -134,6 +137,9 @@ function mockUpdateUserRequest(array $data, User $user): UpdateUserRequest|MockI
     return $request;
 }
 
+/**
+ * @param  array<string, mixed>  $data
+ */
 function mockUpdateUserRequestWithAvatar(array $data, User $user, UploadedFile $avatar): UpdateUserRequest|MockInterface
 {
     $request = Mockery::mock(UpdateUserRequest::class);

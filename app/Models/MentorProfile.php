@@ -67,6 +67,9 @@ class MentorProfile extends Model
         return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

@@ -37,6 +37,9 @@ class MentorProgramBlockProgress extends Model
         return $this->belongsTo(User::class, 'menti_id');
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

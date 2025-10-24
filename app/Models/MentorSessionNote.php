@@ -29,6 +29,9 @@ class MentorSessionNote extends Model
         return $this->belongsTo(MentorSession::class);
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

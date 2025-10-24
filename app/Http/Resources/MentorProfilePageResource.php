@@ -41,6 +41,9 @@ class MentorProfilePageResource extends JsonResource
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function titleBlock(User $user): array
     {
         // @phpstan-ignore-next-line
@@ -62,6 +65,9 @@ class MentorProfilePageResource extends JsonResource
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function statisticBlock(User $user): array
     {
         return [

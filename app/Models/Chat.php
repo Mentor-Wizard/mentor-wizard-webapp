@@ -49,6 +49,9 @@ class Chat extends Model
         return $this->hasMany(ChatMessage::class);
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
