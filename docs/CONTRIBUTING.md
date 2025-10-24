@@ -60,9 +60,54 @@ docker compose exec app php artisan key:generate
 # 6. Запуск міграцій
 docker compose exec app php artisan migrate
 
-# 7. Запуск frontend збірки
+# 7. Створення symlink для storage
+docker compose exec app php artisan storage:link
+
+# 8. Запуск frontend збірки
 docker compose exec app yarn dev
+
+# 9. Налаштування Git hooks
+./setup-git-hooks.sh
 ```
+
+#### Налаштування Git Hooks
+
+Проект використовує автоматизовані Git hooks для забезпечення якості коду:
+
+```bash
+# Запустіть скрипт налаштування
+./setup-git-hooks.sh
+```
+
+Це налаштує наступні hooks:
+
+**pre-commit:**
+
+- Автоматично запускає Rector для модернізації коду
+- Виконує Laravel Pint для форматування коду
+- Виправляє стиль коду перед commit'ом
+
+**commit-msg:**
+
+- Валідує повідомлення комітів згідно
+  [Conventional Commits](https://www.conventionalcommits.org/)
+- Перевіряє формат: `type(scope): description`
+- Приклади валідних повідомлень:
+    - `feat(auth): add user avatar upload`
+    - `fix(mentor): resolve program validation`
+    - `docs(api): update authentication endpoints`
+
+**pre-push:**
+
+- Валідує назви гілок перед push'ем
+- Перевіряє відповідність конвенціям найменування
+- Дозволені префікси: `feature/`, `bugfix/`, `hotfix/`, `release/`
+
+Якщо hook блокує ваш commit або push, перевірте:
+
+1. Формат вашого commit message
+2. Назву вашої гілки
+3. Чи код відповідає стандартам проекту
 
 #### Перевірка налаштування
 
@@ -116,7 +161,7 @@ git checkout -b bugfix/login-validation-error
 1. Прочитайте вимоги в issue/ticket
 2. Створіть/оновіть тести перед написанням коду (TDD)
 3. Впроваджуйте функцію відповідно до архітектури проекту
-4. Перевірте код качкою статичним аналізом
+4. Перевірте код статичним аналізом
 
 ```bash
 # Перевірка перед commit'ом
@@ -358,10 +403,73 @@ const form = useForm({
 
 ### Тестування
 
-#### Обов'язкові тести
+Проект використовує **Pest PHP** для тестування з обов'язковим **mutation
+testing** для критичних компонентів.
+
+#### Налаштування тестового середовища
+
+Перед початком тестування скопіюйте `.env.example` в `.env.testing` та
+налаштуйте підключення до тестової БД:
+
+```bash
+# Скопіюйте environment для тестів
+cp .env.example .env.testing
+```
+
+Замініть в `.env.testing` блок з підключенням до БД:
+
+```dotenv
+DB_CONNECTION=pgsql
+DB_HOST=mw-db-test
+DB_DATABASE=test_mw_db
+DB_USERNAME=test_mw_user
+DB_PASSWORD=test_mw_user_password
+```
+
+#### Запуск тестів
+
+```bash
+# Запуск всіх тестів
+docker compose exec app php artisan test
+
+# Запуск конкретного файлу
+docker compose exec app php artisan test tests/Feature/Auth/LoginTest.php
+
+# Запуск з фільтром
+docker compose exec app php artisan test --filter=testName
+
+# Корисні опції Pest
+docker compose exec app ./vendor/bin/pest --bail      # Зупинка на першій помилці
+docker compose exec app ./vendor/bin/pest --dirty     # Тести тільки змінених файлів
+docker compose exec app ./vendor/bin/pest --retry     # Повтор невдалих тестів
+```
+
+#### Тести з покриттям
+
+```bash
+# Coverage звіт
+docker compose exec app php artisan test --coverage
+docker compose exec app ./vendor/bin/pest --coverage
+
+# З мінімальним порогом
+docker compose exec app ./vendor/bin/pest --coverage --min=80
+```
+
+#### Мутаційні тести
+
+**Всі Unit тести мають бути покриті мутаційними тестами.** Обов'язково додавайте
+метод `covers()` або `mutates()` до ваших тестів:
 
 ```php
-// ✅ Unit тест для Action
+<?php
+
+declare(strict_types=1);
+
+// Вказуємо який клас покривається цим тестом
+covers(StoreMentorProgram::class);
+// Або використовуйте mutates() для більш строгої перевірки
+// mutates(StoreMentorProgram::class);
+
 it('creates mentor program successfully', function (): void {
     $mentor = User::factory()->create();
     $mentor->assignRole('mentor');
@@ -385,8 +493,68 @@ it('creates mentor program successfully', function (): void {
         ->and($result->mentor_id)
         ->toBe($mentor->getKey());
 });
+```
 
-// ✅ Feature тест
+**Запуск мутаційних тестів:**
+
+```bash
+# З мінімальним mutation score 100%
+docker compose exec app php artisan test --mutate --covered-only --min=100
+
+# В паралельному режимі (швидше)
+docker compose exec app php artisan test --mutate --covered-only --min=100 --parallel
+docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100
+```
+
+Детальніше про мутаційне тестування:
+[Pest Mutation Testing](https://pestphp.com/docs/mutation-testing)
+
+#### Статичний аналіз коду
+
+```bash
+# PHPStan аналіз
+docker compose exec app ./vendor/bin/phpstan analyse --memory-limit=2G
+
+# Перевірка стилю коду
+docker compose exec app ./vendor/bin/pint --test
+
+# Виправлення стилю коду
+docker compose exec app ./vendor/bin/pint
+```
+
+#### Приклади тестів
+
+**Unit тест для Action:**
+
+```php
+covers(StoreMentorProgram::class);
+
+it('creates mentor program successfully', function (): void {
+    $mentor = User::factory()->create();
+    $mentor->assignRole('mentor');
+
+    $programData = [
+        'title' => 'Test Program',
+        'description' => 'Test Description',
+        'price' => 1000,
+    ];
+
+    $action = new StoreMentorProgram();
+    $result = $action->handle(
+        new StoreMentorProgramRequest($programData),
+        $mentor
+    );
+
+    expect($result)
+        ->toBeInstanceOf(MentorProgram::class)
+        ->and($result->title)->toBe('Test Program')
+        ->and($result->mentor_id)->toBe($mentor->getKey());
+});
+```
+
+**Feature тест:**
+
+```php
 it('allows mentor to create program via HTTP', function (): void {
     $mentor = User::factory()->create();
     $mentor->assignRole('mentor');
@@ -612,6 +780,25 @@ class UpdateMentorProgram
 }
 ```
 
+## Релізний цикл
+
+### Versioning
+
+Проект використовує **Semantic Versioning**:
+
+- `MAJOR.MINOR.PATCH` (наприклад, 1.2.3)
+- Breaking changes → MAJOR
+- Нові features → MINOR
+- Bug fixes → PATCH
+
+### Release Process
+
+1. **Feature freeze** - зупинка нових features
+2. **Testing phase** - інтенсивне тестування
+3. **Release candidate** - RC версія для тестування
+4. **Production release** - фінальний реліз
+5. **Post-release monitoring** - моніторинг після релізу
+
 ## Спільнота та підтримка
 
 ### Канали зв'язку
@@ -626,15 +813,6 @@ class UpdateMentorProgram
 - **Питайте конкретно** - надайте контекст та деталі
 - **Допомагайте іншим** - відповідайте на питання коли можете
 - **Дотримуйтесь Code of Conduct**
-
-### Mentorship Program
-
-Для нових контрибуторів доступна програма менторства:
-
-- Призначення mentor'а з досвідченої команди
-- Weekly 1-on-1 сесії
-- Code review з детальним поясненням
-- Поступове збільшення складності завдань
 
 ## Релізний цикл
 

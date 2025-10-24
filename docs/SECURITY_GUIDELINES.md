@@ -146,7 +146,7 @@ class NoScriptTag implements Rule
     'required',
     'min:12',
     'confirmed',
-    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
+    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/',
 ];
 
 // Перевірка на скомпрометовані паролі
@@ -171,7 +171,7 @@ use Illuminate\Validation\Rules\Password;
 'expire_on_close' => true,
 'encrypt' => true,
 'http_only' => true,
-'same_site' => 'strict',
+'same_site' => 'lax',
 'secure' => env('SESSION_SECURE_COOKIE', true), // HTTPS only
 ```
 

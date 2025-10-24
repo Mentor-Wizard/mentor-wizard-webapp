@@ -107,7 +107,7 @@ docker/
 2. **Build production image**:
 
     ```bash
-    # Update docker-compose.yml to use Dockerfile instead of Dockerfile-dev
+    # Update compose.yml to use Dockerfile instead of Dockerfile-dev
     docker compose build app
     ```
 
@@ -139,6 +139,8 @@ localhost, 127.0.0.1, :80 {
 ```
 
 ### Docker Compose Integration
+
+The application uses `compose.yml` as the configuration file:
 
 ```yaml
 app:
