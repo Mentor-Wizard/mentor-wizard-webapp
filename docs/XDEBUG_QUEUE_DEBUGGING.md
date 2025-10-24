@@ -148,7 +148,7 @@ php artisan queue:work --tries=1 --max-jobs=1
 1. **Settings → PHP → CLI Interpreter**
     - Add new `From Docker, Vagrant...`
     - Select `Docker Compose`
-    - Configuration files: `./docker-compose.yml`
+    - Configuration files: `./compose.yml`
     - Service: `app`
 
 2. Створіть **Run Configuration**:
