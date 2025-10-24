@@ -44,7 +44,7 @@ describe('Similar Mentor Resource', function (): void {
             'description'              => 'description',
             'rate'                     => 1.1,
             'currency_id'              => $currency->id,
-            'experience_started_at'    => Illuminate\Support\Facades\Date::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+            'experience_started_at'    => Date::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 
         MentorReview::factory()->create([
