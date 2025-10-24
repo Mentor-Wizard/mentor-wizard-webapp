@@ -1,0 +1,455 @@
+### Mentor Wizard Web Application - HTTP Client
+### JetBrains HTTP Client file for testing application endpoints
+###
+### Environment Variables:
+### - {{baseUrl}}: Application base URL (default: http://localhost)
+### - {{csrfToken}}: CSRF token extracted from XSRF-TOKEN cookie
+### - {{sessionCookie}}: Session cookie from login
+###
+### IMPORTANT: Before making POST/PATCH/DELETE requests:
+### 1. First, make a GET request to any page (e.g., "Get CSRF Token" below)
+### 2. The response will set XSRF-TOKEN cookie (URL-encoded)
+### 3. Copy the XSRF-TOKEN cookie value and URL-decode it
+### 4. Set the decoded value to {{csrfToken}} variable
+### 5. Then make your POST/PATCH/DELETE request
+###
+### Alternative: Use the http-client.env.json file to manage tokens automatically
+
+@baseUrl = http://localhost
+@csrfToken =
+@sessionCookie =
+
+###############################################################################
+### Public Pages
+###############################################################################
+
+### Welcome Page
+GET {{baseUrl}}/
+Accept: text/html
+
+###
+
+### List Mentor Profiles
+GET {{baseUrl}}/profile-programs
+Accept: text/html
+
+###
+
+### Get Mentor Profile by Slug
+GET {{baseUrl}}/mentor/john-doe
+Accept: text/html
+
+###
+
+### Get Mentor Review Page by Slug
+GET {{baseUrl}}/review/john-doe
+Accept: text/html
+
+###
+
+###############################################################################
+### CSRF Token Setup (Run This First!)
+###############################################################################
+
+### Get CSRF Token
+### This request will set the XSRF-TOKEN cookie
+### After running this, check the response cookies for XSRF-TOKEN
+### Copy its value (URL-encoded), decode it, and set {{csrfToken}} variable
+### Example: If cookie is "abc%3D%3D", decode to "abc==" and set @csrfToken = abc==
+GET {{baseUrl}}/register
+Accept: text/html
+
+> {%
+    // Automatically extract and decode XSRF-TOKEN from response cookies
+    const xsrfCookie = response.headers.valuesOf("Set-Cookie")
+        .find(cookie => cookie.startsWith("XSRF-TOKEN="));
+
+    if (xsrfCookie) {
+        const tokenMatch = xsrfCookie.match(/XSRF-TOKEN=([^;]+)/);
+        if (tokenMatch) {
+            const encodedToken = tokenMatch[1];
+            const decodedToken = decodeURIComponent(encodedToken);
+            client.global.set("csrfToken", decodedToken);
+            console.log("CSRF Token extracted and set: " + decodedToken);
+        }
+    }
+%}
+
+###
+
+###############################################################################
+### Authentication - Guest Routes
+###############################################################################
+
+### Get Registration Page (Alternative to Get CSRF Token)
+GET {{baseUrl}}/register
+Accept: text/html
+
+###
+
+### Register New User
+### IMPORTANT: Run "Get CSRF Token" request first to set {{csrfToken}}
+POST {{baseUrl}}/register
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: XSRF-TOKEN={{csrfToken}}
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+
+###
+
+### Get Login Page
+GET {{baseUrl}}/login
+Accept: text/html
+
+###
+
+### Login User
+POST {{baseUrl}}/login
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "email": "user@example.com",
+  "password": "password",
+  "remember": true
+}
+
+###
+
+### Get Forgot Password Page
+GET {{baseUrl}}/forgot-password
+Accept: text/html
+
+###
+
+### Request Password Reset
+POST {{baseUrl}}/forgot-password
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "email": "user@example.com"
+}
+
+###
+
+### Get Reset Password Page (with token)
+GET {{baseUrl}}/reset-password/sample-token-here?email=user@example.com
+Accept: text/html
+
+###
+
+### Create New Password
+POST {{baseUrl}}/reset-password
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+
+{
+  "token": "sample-token-here",
+  "email": "user@example.com",
+  "password": "newpassword123",
+  "password_confirmation": "newpassword123"
+}
+
+###
+
+### Socialite Redirect (GitHub)
+GET {{baseUrl}}/auth/redirect/github
+Accept: text/html
+
+###
+
+### Socialite Redirect (Google)
+GET {{baseUrl}}/auth/redirect/google
+Accept: text/html
+
+###
+
+### Socialite Callback (handled by OAuth provider)
+# GET {{baseUrl}}/auth/callback/{driver}
+
+###############################################################################
+### Authentication - Authenticated Routes
+###############################################################################
+
+### Get Email Verification Notice
+GET {{baseUrl}}/verify-email
+Accept: text/html
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### Send Email Verification Notification
+POST {{baseUrl}}/email/verification-notification
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### Verify Email (with signed URL)
+# GET {{baseUrl}}/verify-email/{id}/{hash}?expires={timestamp}&signature={signature}
+
+###
+
+### Get Confirm Password Page
+GET {{baseUrl}}/confirm-password
+Accept: text/html
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### Confirm Password
+POST {{baseUrl}}/confirm-password
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+{
+  "password": "password"
+}
+
+###
+
+### Update Password
+PUT {{baseUrl}}/password
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+{
+  "current_password": "oldpassword",
+  "password": "newpassword123",
+  "password_confirmation": "newpassword123"
+}
+
+###
+
+### Logout
+POST {{baseUrl}}/logout
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+###############################################################################
+### Dashboard & Profile - Authenticated Routes
+###############################################################################
+
+### Get Dashboard Page
+GET {{baseUrl}}/dashboard
+Accept: text/html
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### Update User
+PATCH {{baseUrl}}/user
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+{
+  "name": "Updated Name",
+  "email": "updated@example.com"
+}
+
+###
+
+### Get Profile Edit Page
+GET {{baseUrl}}/profile
+Accept: text/html
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### Update User Profile
+PATCH {{baseUrl}}/profile
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+{
+  "name": "Updated Name",
+  "email": "updated@example.com",
+  "bio": "My updated bio"
+}
+
+###
+
+### Delete User Profile
+DELETE {{baseUrl}}/profile
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+{
+  "password": "password"
+}
+
+###
+
+###############################################################################
+### Mentor Programs - Mentor Role Required
+###############################################################################
+
+### Get Create Mentor Program Page
+GET {{baseUrl}}/mentor-program/create
+Accept: text/html
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### Create Mentor Program
+POST {{baseUrl}}/mentor-program
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+{
+  "title": "My Mentor Program",
+  "description": "A comprehensive mentoring program for developers",
+  "slug": "my-mentor-program",
+  "price": 99.99,
+  "duration_weeks": 12,
+  "max_mentees": 10
+}
+
+###
+
+### Get Edit Mentor Program Page
+GET {{baseUrl}}/mentor-program/my-mentor-program/edit
+Accept: text/html
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### Update Mentor Program
+PATCH {{baseUrl}}/mentor-program/my-mentor-program
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+{
+  "title": "Updated Mentor Program",
+  "description": "Updated description",
+  "price": 149.99,
+  "duration_weeks": 16,
+  "max_mentees": 15
+}
+
+###
+
+### Delete Mentor Program
+DELETE {{baseUrl}}/mentor-program/my-mentor-program
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+Accept: application/json
+X-CSRF-TOKEN: {{csrfToken}}
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+### List Mentor Programs
+GET {{baseUrl}}/mentor-program/list
+Accept: text/html
+Cookie: laravel_session={{sessionCookie}}
+
+###
+
+###############################################################################
+### Health Check
+###############################################################################
+
+### Application Health Check
+GET {{baseUrl}}/up
+Accept: application/json
+
+###
+
+###############################################################################
+### USAGE GUIDE
+###############################################################################
+###
+### How to Use This HTTP Client File:
+###
+### STEP 1: Get CSRF Token (Required for all POST/PATCH/DELETE requests)
+###    - Run the "Get CSRF Token" request in the "CSRF Token Setup" section
+###    - The response handler script will automatically extract the XSRF-TOKEN
+###      cookie and set the {{csrfToken}} variable
+###    - You can verify this in the HTTP Client environment variables
+###
+### STEP 2: Register or Login
+###    - To register: Use "Register New User" (already has CSRF token configured)
+###    - To login: Use "Login User" (already has CSRF token configured)
+###    - After successful login, extract the laravel_session cookie value
+###    - Manually set: @sessionCookie = <your-session-cookie-value>
+###
+### STEP 3: Make Authenticated Requests
+###    - All authenticated requests already include proper Cookie headers
+###    - They will use {{sessionCookie}} and {{csrfToken}} variables
+###
+### Important Notes:
+###
+### • CSRF Protection:
+###   - All POST/PATCH/DELETE requests require both:
+###     * X-CSRF-TOKEN header with the token value
+###     * XSRF-TOKEN cookie with the same token value
+###   - The "Get CSRF Token" request handles this automatically
+###
+### • Authentication:
+###   - Authenticated routes require the laravel_session cookie
+###   - You must manually extract and set {{sessionCookie}} after login
+###
+### • Request Headers:
+###   - X-Requested-With: XMLHttpRequest (for AJAX requests)
+###   - Accept: application/json (for JSON responses)
+###   - Content-Type: application/json (for JSON payloads)
+###
+### • Inertia.js Requests (optional):
+###   - Add X-Inertia: true header
+###   - Add X-Inertia-Version: {version} header
+###
+### • Permissions:
+###   - Mentor routes require 'mentor' role assigned to the user
+###   - Some routes may require specific permissions
+###
+### • File Uploads:
+###   - Not included in this file
+###   - Use Content-Type: multipart/form-data
+###   - Adjust request format accordingly
+###
+###############################################################################
