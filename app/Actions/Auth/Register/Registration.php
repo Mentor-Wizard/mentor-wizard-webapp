@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Auth\Register;
 
 use App\Http\Requests\Auth\Register\RegistrationRequest;
+use App\Jobs\ProcessNewUserRegistration;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -27,6 +28,20 @@ class Registration
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Dispatch background job to process user registration
+        // This job contains bugs that require XDebug to debug
+        $metadata = [
+            'registration_source' => $request->get('source', 'web'),
+            'settings'            => [
+                'locale' => [
+                    'language' => $request->get('language', 'en'),
+                ],
+                'override' => true,
+            ],
+        ];
+
+        ProcessNewUserRegistration::dispatch($user, $metadata);
 
         return redirect()->route('pages.dashboard');
     }

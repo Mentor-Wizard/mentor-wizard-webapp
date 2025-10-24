@@ -2,23 +2,30 @@
 
 ## Ласкаво просимо до команди Mentor Wizard!
 
-Дякуємо за інтерес до участі в розробці платформи менторингу. Цей документ допоможе вам швидко інтегруватися в команду та почати ефективно працювати над проектом.
+Дякуємо за інтерес до участі в розробці платформи менторингу. Цей документ
+допоможе вам швидко інтегруватися в команду та почати ефективно працювати над
+проектом.
 
 ## Перші кроки
 
 ### 1. Ознайомлення з проектом
 
 **Обов'язкова література:**
+
 - [README.md](../README.md) - загальний опис проекту
 - [CLAUDE.md](../CLAUDE.md) - налаштування для AI-асистентів
 - [docs/NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md) - конвенції кодування
-- [docs/ACTIONS_ARCHITECTURE.md](./ACTIONS_ARCHITECTURE.md) - архітектура Laravel Actions
-- [docs/FRONTEND_ARCHITECTURE.md](./FRONTEND_ARCHITECTURE.md) - Vue.js + Inertia.js
+- [docs/ACTIONS_ARCHITECTURE.md](./ACTIONS_ARCHITECTURE.md) - архітектура
+  Laravel Actions
+- [docs/FRONTEND_ARCHITECTURE.md](./FRONTEND_ARCHITECTURE.md) - Vue.js +
+  Inertia.js
 
 **Додаткові ресурси:**
+
 - [docs/TESTING_STRATEGY.md](./TESTING_STRATEGY.md) - підхід до тестування
 - [docs/SECURITY_GUIDELINES.md](./SECURITY_GUIDELINES.md) - безпека проекту
-- [docs/AUTHORIZATION_POLICIES.md](./AUTHORIZATION_POLICIES.md) - політики доступу
+- [docs/AUTHORIZATION_POLICIES.md](./AUTHORIZATION_POLICIES.md) - політики
+  доступу
 
 ### 2. Налаштування середовища розробки
 
@@ -75,24 +82,29 @@ docker compose exec app yarn dev
 Це налаштує наступні hooks:
 
 **pre-commit:**
+
 - Автоматично запускає Rector для модернізації коду
 - Виконує Laravel Pint для форматування коду
 - Виправляє стиль коду перед commit'ом
 
 **commit-msg:**
-- Валідує повідомлення комітів згідно [Conventional Commits](https://www.conventionalcommits.org/)
+
+- Валідує повідомлення комітів згідно
+  [Conventional Commits](https://www.conventionalcommits.org/)
 - Перевіряє формат: `type(scope): description`
 - Приклади валідних повідомлень:
-  - `feat(auth): add user avatar upload`
-  - `fix(mentor): resolve program validation`
-  - `docs(api): update authentication endpoints`
+    - `feat(auth): add user avatar upload`
+    - `fix(mentor): resolve program validation`
+    - `docs(api): update authentication endpoints`
 
 **pre-push:**
+
 - Валідує назви гілок перед push'ем
 - Перевіряє відповідність конвенціям найменування
 - Дозволені префікси: `feature/`, `bugfix/`, `hotfix/`, `release/`
 
 Якщо hook блокує ваш commit або push, перевірте:
+
 1. Формат вашого commit message
 2. Назву вашої гілки
 3. Чи код відповідає стандартам проекту
@@ -145,6 +157,7 @@ git checkout -b bugfix/login-validation-error
 #### 2. Розробка
 
 **Обов'язкові кроки:**
+
 1. Прочитайте вимоги в issue/ticket
 2. Створіть/оновіть тести перед написанням коду (TDD)
 3. Впроваджуйте функцію відповідно до архітектури проекту
@@ -170,6 +183,7 @@ git commit -m "docs(api): update authentication endpoints"
 ```
 
 **Типи commit'ів:**
+
 - `feat` - нова функція
 - `fix` - виправлення бага
 - `docs` - документація
@@ -213,38 +227,46 @@ gh pr create --title "feat(auth): Add user avatar upload" --body "
 
 ```markdown
 ## Summary
+
 Короткий опис змін (1-2 речення)
 
 ## Changes
+
 - [ ] Список основних змін
 - [ ] Використовуйте чекбокси для tracking
 
 ## Testing
+
 - [ ] Unit тести написані/оновлені
 - [ ] Feature тести покривають новий функціонал
 - [ ] Мануальне тестування виконано
 
 ## Documentation
+
 - [ ] README оновлено (якщо потрібно)
 - [ ] API документація оновлена
 - [ ] Інлайн документація додана
 
 ## Breaking Changes
+
 Опишіть будь-які breaking changes
 
 ## Screenshots
+
 Додайте скріншоти для UI змін
 ```
 
 #### 3. Review Guidelines
 
 **Для авторів PR:**
+
 - Переконайтеся, що всі тести проходять
 - Перевірте, що код відповідає стандартам проекту
 - Додайте опис змін та контекст
 - Зробіть самостійний огляд коду перед створенням PR
 
 **Для reviewer'ів:**
+
 - Перевірте логіку та архітектуру
 - Переконайтеся в наявності тестів
 - Перевірте дотримання конвенцій
@@ -253,6 +275,7 @@ gh pr create --title "feat(auth): Add user avatar upload" --body "
 #### 4. Автоматизовані перевірки
 
 GitHub Actions автоматично перевіряє:
+
 - ✅ Код стиль (Laravel Pint)
 - ✅ Статичний аналіз (PHPStan)
 - ✅ Тести (Pest PHP)
@@ -342,8 +365,8 @@ const props = defineProps({
 const isEditing = ref(false);
 
 // ✅ Computed properties
-const displayName = computed(() =>
-    props.user.profile?.display_name || props.user.username
+const displayName = computed(
+    () => props.user.profile?.display_name || props.user.username,
 );
 
 // ✅ Form handling
@@ -361,7 +384,10 @@ const form = useForm({
         </header>
 
         <!-- ✅ Conditional rendering -->
-        <form v-if="canEdit && isEditing" @submit.prevent="form.put(`/users/${user.id}`)">
+        <form
+            v-if="canEdit && isEditing"
+            @submit.prevent="form.put(`/users/${user.id}`)"
+        >
             <!-- Form fields -->
         </form>
 
@@ -377,11 +403,13 @@ const form = useForm({
 
 ### Тестування
 
-Проект використовує **Pest PHP** для тестування з обов'язковим **mutation testing** для критичних компонентів.
+Проект використовує **Pest PHP** для тестування з обов'язковим **mutation
+testing** для критичних компонентів.
 
 #### Налаштування тестового середовища
 
-Перед початком тестування скопіюйте `.env.example` в `.env.testing` та налаштуйте підключення до тестової БД:
+Перед початком тестування скопіюйте `.env.example` в `.env.testing` та
+налаштуйте підключення до тестової БД:
 
 ```bash
 # Скопіюйте environment для тестів
@@ -389,6 +417,7 @@ cp .env.example .env.testing
 ```
 
 Замініть в `.env.testing` блок з підключенням до БД:
+
 ```dotenv
 DB_CONNECTION=pgsql
 DB_HOST=mw-db-test
@@ -428,7 +457,8 @@ docker compose exec app ./vendor/bin/pest --coverage --min=80
 
 #### Мутаційні тести
 
-**Всі Unit тести мають бути покриті мутаційними тестами.** Обов'язково додавайте метод `covers()` або `mutates()` до ваших тестів:
+**Всі Unit тести мають бути покриті мутаційними тестами.** Обов'язково додавайте
+метод `covers()` або `mutates()` до ваших тестів:
 
 ```php
 <?php
@@ -476,7 +506,8 @@ docker compose exec app php artisan test --mutate --covered-only --min=100 --par
 docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100
 ```
 
-Детальніше про мутаційне тестування: [Pest Mutation Testing](https://pestphp.com/docs/mutation-testing)
+Детальніше про мутаційне тестування:
+[Pest Mutation Testing](https://pestphp.com/docs/mutation-testing)
 
 #### Статичний аналіз коду
 
@@ -494,6 +525,7 @@ docker compose exec app ./vendor/bin/pint
 #### Приклади тестів
 
 **Unit тест для Action:**
+
 ```php
 covers(StoreMentorProgram::class);
 
@@ -521,6 +553,7 @@ it('creates mentor program successfully', function (): void {
 ```
 
 **Feature тест:**
+
 ```php
 it('allows mentor to create program via HTTP', function (): void {
     $mentor = User::factory()->create();
@@ -697,13 +730,13 @@ MentorProgram::query()
 ```vue
 <script setup>
 // ✅ Lazy loading компонентів
-const HeavyComponent = defineAsyncComponent(() =>
-    import('./HeavyComponent.vue')
+const HeavyComponent = defineAsyncComponent(
+    () => import('./HeavyComponent.vue'),
 );
 
 // ✅ Обчислювані властивості для дорогих операцій
 const filteredPrograms = computed(() =>
-    props.programs.filter(p => p.is_active && p.price <= maxPrice.value)
+    props.programs.filter((p) => p.is_active && p.price <= maxPrice.value),
 );
 </script>
 
@@ -752,6 +785,7 @@ class UpdateMentorProgram
 ### Versioning
 
 Проект використовує **Semantic Versioning**:
+
 - `MAJOR.MINOR.PATCH` (наприклад, 1.2.3)
 - Breaking changes → MAJOR
 - Нові features → MINOR
@@ -785,6 +819,7 @@ class UpdateMentorProgram
 ### Versioning
 
 Проект використовує **Semantic Versioning**:
+
 - `MAJOR.MINOR.PATCH` (наприклад, 1.2.3)
 - Breaking changes → MAJOR
 - Нові features → MINOR
@@ -800,6 +835,8 @@ class UpdateMentorProgram
 
 ## Дякую за ваш внесок!
 
-Кожен внесок, великий чи малий, робить Mentor Wizard кращим для всієї спільноти менторів та учнів. Ваша робота допомагає людям розвиватися професійно та особисто.
+Кожен внесок, великий чи малий, робить Mentor Wizard кращим для всієї спільноти
+менторів та учнів. Ваша робота допомагає людям розвиватися професійно та
+особисто.
 
 **Happy coding!** 🚀
