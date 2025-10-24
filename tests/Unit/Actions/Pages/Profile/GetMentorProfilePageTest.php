@@ -55,7 +55,7 @@ describe('Mentor Page', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/Mentor/View/Page')
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/Mentor/ViewPage')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.slug'))->toBe('test-user')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.titleBlock.name'))->toBe('profile name profile last_name')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.titleBlock.avatar'))->toBe(UserProfile::DEFAULT_AVATAR_URL)
