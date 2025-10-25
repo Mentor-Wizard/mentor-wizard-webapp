@@ -9,7 +9,7 @@ parameters:
   paths:
     - app
     - database
-  level: 5
+  level: 7
   cognitive_complexity:
     class: 85
     function: 8

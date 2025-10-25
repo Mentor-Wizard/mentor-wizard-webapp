@@ -11,13 +11,25 @@ enum CurrencyEnum: string
     case EUR = '€';
     case GBP = '£';
 
+    /**
+     * @return array<int, string>
+     */
     public static function names(): array
     {
-        return array_column(self::cases(), 'name');
+        /** @var array<int, string> $names */
+        $names = array_column(self::cases(), 'name');
+
+        return $names;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function values(): array
     {
-        return array_column(self::cases(), 'value');
+        /** @var array<int, string> $values */
+        $values = array_column(self::cases(), 'value');
+
+        return $values;
     }
 }

@@ -24,11 +24,17 @@ class MentorReview extends Model
         'rating',
     ];
 
+    /**
+     * @return BelongsTo<User, MentorReview>
+     */
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    /**
+     * @return BelongsTo<User, MentorReview>
+     */
     public function menti(): BelongsTo
     {
         return $this->belongsTo(User::class, 'menti_id');

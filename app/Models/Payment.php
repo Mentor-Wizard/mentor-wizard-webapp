@@ -32,6 +32,9 @@ class Payment extends Model
         'issue_bank_name',
     ];
 
+    /**
+     * @return BelongsTo<MentorSession, Payment>
+     */
     public function mentorSession(): BelongsTo
     {
         return $this->belongsTo(MentorSession::class, 'mentor_session_id');

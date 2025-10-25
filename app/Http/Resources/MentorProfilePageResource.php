@@ -22,6 +22,9 @@ class MentorProfilePageResource extends JsonResource
 
     public static $wrap;
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Override]
     public function toArray(Request $request): array
     {
@@ -79,6 +82,9 @@ class MentorProfilePageResource extends JsonResource
         ];
     }
 
+    /**
+     * @return Collection<int, \App\Models\MentorReview>
+     */
     private function reviewBlock(User $user): Collection
     {
         return $user->mentorReviews
@@ -86,6 +92,9 @@ class MentorProfilePageResource extends JsonResource
             ->take(GetMentorProfilePage::PER_PAGE);
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     private function similarMentor(User $user): Collection
     {
         return User::role(RoleEnum::MENTOR)

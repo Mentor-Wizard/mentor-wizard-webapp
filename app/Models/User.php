@@ -33,7 +33,9 @@ use Spatie\Permission\Traits\HasRoles;
 #[UseFactory(UserFactory::class)]
 class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 {
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use HasRoles;
     use InteractsWithMedia;
     use Notifiable;
@@ -87,46 +89,73 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         'media',
     ];
 
+    /**
+     * @return HasOne<UserProfile, User>
+     */
     public function profile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
     }
 
+    /**
+     * @return HasOne<MentorProfile, User>|null
+     */
     public function mentorProfile(): ?HasOne
     {
         return $this->hasOne(MentorProfile::class);
     }
 
+    /**
+     * @return HasOne<MentorProgramBlockProgress, User>|null
+     */
     public function mentiProgramProgress(): ?HasOne
     {
         return $this->hasOne(MentorProgramBlockProgress::class, 'menti_id');
     }
 
+    /**
+     * @return HasMany<MentorReview, User>
+     */
     public function mentorReviews(): HasMany
     {
         return $this->hasMany(MentorReview::class, 'mentor_id');
     }
 
+    /**
+     * @return HasMany<MentorReview, User>
+     */
     public function reviewsByMenti(): HasMany
     {
         return $this->hasMany(MentorReview::class, 'menti_id');
     }
 
+    /**
+     * @return HasMany<MentorProgram, User>
+     */
     public function mentorPrograms(): HasMany
     {
         return $this->hasMany(MentorProgram::class, 'mentor_id');
     }
 
+    /**
+     * @return HasMany<MentorSession, User>
+     */
     public function mentorSessions(): HasMany
     {
         return $this->hasMany(MentorSession::class, 'mentor_id');
     }
 
+    /**
+     * @return HasMany<MentorSession, User>
+     */
     public function mentiSessions(): HasMany
     {
         return $this->hasMany(MentorSession::class, 'menti_id');
     }
 
+    /**
+     * @return HasMany<Chat, User>
+     */
     public function mentorChats(): HasMany
     {
         return $this->hasMany(Chat::class, 'mentor_id');
@@ -134,9 +163,13 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     public function mentiChats(): HasMany
     {
+        // @phpstan-ignore-next-line
         return $this->hasMany(Chat::class, 'menti_id');
     }
 
+    /**
+     * @return HasMany<Chat, User>
+     */
     public function coachChats(): HasMany
     {
         return $this->hasMany(Chat::class, 'coach_id');
@@ -147,6 +180,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->username ?? '';
     }
 
+    /**
+     * @return Attribute<float, never>
+     */
     protected function rating(): Attribute
     {
         return Attribute::make(

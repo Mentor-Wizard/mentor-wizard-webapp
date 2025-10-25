@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Filters;
 
 use App\Enums\TagEnum;
+use App\Models\MentorProfile;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
+/**
+ * @implements Filter<MentorProfile>
+ */
 class TagLanguagesFilter implements Filter
 {
     /**

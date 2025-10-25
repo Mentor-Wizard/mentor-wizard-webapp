@@ -29,21 +29,33 @@ class Chat extends Model
         'coach_id',
     ];
 
+    /**
+     * @return BelongsTo<User, Chat>
+     */
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    /**
+     * @return BelongsTo<User, Chat>
+     */
     public function menti(): BelongsTo
     {
         return $this->belongsTo(User::class, 'menti_id');
     }
 
+    /**
+     * @return BelongsTo<User, Chat>
+     */
     public function coach(): BelongsTo
     {
         return $this->belongsTo(User::class, 'coach_id');
     }
 
+    /**
+     * @return HasMany<ChatMessage, Chat>
+     */
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);

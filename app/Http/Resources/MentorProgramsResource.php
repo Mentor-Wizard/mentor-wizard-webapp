@@ -29,7 +29,10 @@ class MentorProgramsResource extends JsonResource
         ];
     }
 
-    private function blocks()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function blocks(): array
     {
         return $this->resource->mentorProgramBlocks()
             ->get()

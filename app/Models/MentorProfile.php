@@ -8,6 +8,7 @@ use App\Enums\TagEnum;
 use Database\Factories\MentorProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * @property-read string $avatar URL of the avatar image
  * @property-read Currency|null $currency
- * @property-read \Illuminate\Database\Eloquent\Collection $languages
- * @property-read \Illuminate\Database\Eloquent\Collection $stacks
+ * @property-read EloquentCollection<int, MentorTag> $languages
+ * @property-read EloquentCollection<int, MentorTag> $stacks
  *
  * @TODO : Add visible properties after filters and frontend implementation
  *
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[UseFactory(MentorProfileFactory::class)]
 class MentorProfile extends Model
 {
+    /** @use HasFactory<MentorProfileFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -37,34 +39,58 @@ class MentorProfile extends Model
         'experience_started_at',
     ];
 
+    /**
+     * @return BelongsTo<User, MentorProfile>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function currency(): ?BelongsTo
+    /**
+     * @return BelongsTo<Currency, MentorProfile>
+     */
+    public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'currency_id');
     }
 
+    /**
+     * @return BelongsToMany<MentorTag, MentorProfile>
+     */
     public function mentorTags(): BelongsToMany
     {
         return $this->belongsToMany(MentorTag::class, 'mentor_profile_mentor_tag');
     }
 
+    /**
+     * @return BelongsToMany<MentorProgram, MentorProfile>
+     */
     public function mentorPrograms(): BelongsToMany
     {
         return $this->belongsToMany(MentorProgram::class, 'mentor_profile_mentor_program');
     }
 
+    /**
+     * @return Attribute<EloquentCollection<int, MentorTag>, never>
+     */
     protected function languages(): Attribute
     {
-        return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
+        /** @var Attribute<EloquentCollection<int, MentorTag>, never> $attribute */
+        $attribute = Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
+
+        return $attribute;
     }
 
+    /**
+     * @return Attribute<EloquentCollection<int, MentorTag>, never>
+     */
     protected function stacks(): Attribute
     {
-        return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
+        /** @var Attribute<EloquentCollection<int, MentorTag>, never> $attribute */
+        $attribute = Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
+
+        return $attribute;
     }
 
     /**

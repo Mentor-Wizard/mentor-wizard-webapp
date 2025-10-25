@@ -24,6 +24,9 @@ class MentorSessionNote extends Model
         'notes',
     ];
 
+    /**
+     * @return BelongsTo<MentorSession, MentorSessionNote>
+     */
     public function mentorSession(): BelongsTo
     {
         return $this->belongsTo(MentorSession::class);

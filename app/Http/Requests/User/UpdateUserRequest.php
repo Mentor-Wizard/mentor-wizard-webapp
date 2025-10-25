@@ -14,10 +14,11 @@ class UpdateUserRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, array<int|string, ValidationRule|string>|ValidationRule|string>
      */
     public function rules(): array
     {
+
         return [
             'username'        => [
                 'required',

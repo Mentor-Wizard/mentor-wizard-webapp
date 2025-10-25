@@ -31,21 +31,33 @@ class MentorSession extends Model
         'cost',
     ];
 
+    /**
+     * @return BelongsTo<User, MentorSession>
+     */
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    /**
+     * @return BelongsTo<User, MentorSession>
+     */
     public function menti(): BelongsTo
     {
         return $this->belongsTo(User::class, 'menti_id');
     }
 
+    /**
+     * @return HasOne<Payment, MentorSession>
+     */
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
     }
 
+    /**
+     * @return HasOne<MentorSessionNote, MentorSession>
+     */
     public function mentorSessionNote(): HasOne
     {
         return $this->hasOne(MentorSessionNote::class);

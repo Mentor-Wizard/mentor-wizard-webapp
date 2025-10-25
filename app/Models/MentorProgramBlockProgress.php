@@ -27,11 +27,17 @@ class MentorProgramBlockProgress extends Model
         'is_completed',
     ];
 
+    /**
+     * @return BelongsTo<MentorProgramBlock, MentorProgramBlockProgress>
+     */
     public function mentorProgramBlocks(): BelongsTo
     {
         return $this->belongsTo(MentorProgramBlock::class, 'mentor_program_block_id');
     }
 
+    /**
+     * @return BelongsTo<User, MentorProgramBlockProgress>
+     */
     public function menti(): BelongsTo
     {
         return $this->belongsTo(User::class, 'menti_id');
