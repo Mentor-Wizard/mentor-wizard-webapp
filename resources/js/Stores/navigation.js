@@ -1,7 +1,6 @@
 import { usePage } from '@inertiajs/vue3';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 
 export const useNavigation = defineStore('navigation', () => {
   const page = usePage();
@@ -9,7 +8,7 @@ export const useNavigation = defineStore('navigation', () => {
   const isMentor = computed(() => userRoles.value.includes('mentor'));
 
   const landingNavigation = ref([
-    { name: 'Product', href: '#' },
+    { name: 'Find Mentors', href: route('pages.mentors') },
     { name: 'Features', href: '#' },
     { name: 'Marketplace', href: '#' },
     { name: 'Company', href: '#' },
