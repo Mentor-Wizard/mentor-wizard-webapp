@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\Mentor\ListMentorPage;
+use App\Actions\Pages\Mentor\MentorsListPage;
 use Illuminate\Http\Request;
 use Inertia\Testing\AssertableInertia;
 
-mutates(ListMentorPage::class);
+mutates(MentorsListPage::class);
 
 describe('ListMentorPage', function (): void {
     it('renders the mentor list page', function (): void {
-        $action = new ListMentorPage;
+        $action = new MentorsListPage;
         $request = Request::create('/mentors', 'GET');
 
         $response = $action->handle($request);
@@ -29,7 +29,7 @@ describe('ListMentorPage', function (): void {
     });
 
     it('accepts filter parameters from request', function (): void {
-        $action = new ListMentorPage;
+        $action = new MentorsListPage;
         $request = Request::create('/mentors', 'GET', [
             'expertise'    => ['web-dev', 'mobile-dev'],
             'experience'   => ['senior'],

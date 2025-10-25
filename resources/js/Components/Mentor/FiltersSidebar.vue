@@ -60,6 +60,13 @@ watch(
   { deep: true },
 );
 
+// TODO: Виправити ініціалізацію фільтрів з URL параметрів
+// Проблема: При переході за URL (наприклад /mentors?experience[0]=entry&priceMax=125&priceMin=55&ratings[0]=5)
+// фільтри не відмічаються у формі. URL → UI синхронізація не працює коректно.
+// Можливі причини:
+// - Race condition при ініціалізації (watch спрацьовує раніше ніж ListPage встановлює значення)
+// - Некоректний парсинг Laravel масивів формату experience[0]=value
+// - Проблема з immediate: true та timing оновлення refs
 // Watch for changes from parent (URL updates)
 watch(
   () => props.modelValue,

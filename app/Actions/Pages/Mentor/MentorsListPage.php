@@ -9,7 +9,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class ListMentorPage
+class MentorsListPage
 {
     use AsController;
 
@@ -18,7 +18,7 @@ class ListMentorPage
         // TODO: Implement actual mentor filtering logic
         // This is a placeholder that will be replaced with real database queries
 
-        return Inertia::render('Mentor/ListPage', [
+        return Inertia::render('Mentor/MentorsListPage', [
             'mentors' => [],
             'total'   => 0,
         ]);

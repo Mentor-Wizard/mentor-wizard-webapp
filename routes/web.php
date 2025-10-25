@@ -7,7 +7,7 @@ use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Pages\Chat\GetChatPage;
 use App\Actions\Pages\DashboardPage;
-use App\Actions\Pages\Mentor\ListMentorPage;
+use App\Actions\Pages\Mentor\MentorsListPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 
-Route::get('mentors', ListMentorPage::class)->name('pages.mentors');
+Route::get('mentors', MentorsListPage::class)->name('pages.mentors');
 
 Route::get('profile-programs', ListMentorProfilePage::class)->name('page.profile-programs');
 
