@@ -7,8 +7,12 @@ const model = defineModel({
 });
 
 const options = defineProps({
-  currencies: {
+  list: {
     type: Object,
+    required: true,
+  },
+  placeholder: {
+    type: String,
     required: true,
   },
 });
@@ -19,8 +23,8 @@ onMounted(() => {
   if (select.value.hasAttribute('autofocus')) {
     select.value.focus();
   }
-  if (!model.value && options.currencies.length > 0) {
-    model.value = options.currencies[0].value;
+  if (!model.value && options.list.length > 0) {
+    model.value = options.list[0].value;
   }
 });
 
@@ -37,8 +41,8 @@ defineExpose({
     class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
     required
   >
-    <option value="" disabled>Select currency</option>
-    <option v-for="(value, id) in currencies" :key="id" :value="id">
+    <option value="" disabled>{{ placeholder }}</option>
+    <option v-for="(value, id) in list" :key="id" :value="id">
       {{ value }}
     </option>
   </select>

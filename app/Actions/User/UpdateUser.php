@@ -35,6 +35,6 @@ class UpdateUser
             AddAvatar::run($user, $request->file('avatar'));
         }
 
-        return redirect()->route('profile.edit');
+        return to_route('profile.edit');
     }
 }

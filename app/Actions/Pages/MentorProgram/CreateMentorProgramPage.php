@@ -18,7 +18,7 @@ class CreateMentorProgramPage
     {
         $currencies = Currency::query()->pluck('name', 'id');
 
-        throw_if($currencies->isEmpty(), new Exception('Currencies table is empty'));
+        throw_if($currencies->isEmpty(), Exception::class, 'Currencies table is empty');
 
         return Inertia::render('MentorProgram/CreateOrEdit', [
             'currencies' => $currencies,

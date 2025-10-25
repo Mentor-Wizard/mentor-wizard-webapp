@@ -42,6 +42,36 @@ describe('RegistrationRequest Validation', function (): void {
                 ->and($validator->errors()->get('username'))->toHaveCount(1);
         });
 
+        it('fails when username is too long', function (): void {
+            $data = [
+                'username'              => str_repeat('A', 256),
+                'email'                 => 'test@example.com',
+                'password'              => 'StrongPassword123!',
+                'password_confirmation' => 'StrongPassword123!',
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->get('username'))->toHaveCount(1);
+        });
+
+        it('fails when username is not string', function (): void {
+            $data = [
+                'username'              => 1234567890,
+                'email'                 => 'test@example.com',
+                'password'              => 'StrongPassword123!',
+                'password_confirmation' => 'StrongPassword123!',
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->get('username'))->toHaveCount(1);
+        });
+
         it('fails when username is missing', function (): void {
             $data = [
                 'email'                 => 'test@example.com',

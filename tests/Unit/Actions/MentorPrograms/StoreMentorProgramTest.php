@@ -43,7 +43,7 @@ describe('StoreMentorProgramRequest Validation', function (): void {
 
         expect($request->authorize())->toBeTrue();
         expect($request->rules())->toBeArray();
-        expect(fn () => $request->validateResolved())->not->toThrow(ValidationException::class);
+        expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
     });
 
     it('fails validation with missing required fields', function (): void {

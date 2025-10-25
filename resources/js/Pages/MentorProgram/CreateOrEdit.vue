@@ -132,7 +132,8 @@ const deleteProgram = () => {
                         <SelectField
                           id="currency_id"
                           v-model="form.currency_id"
-                          :currencies="currencies"
+                          :list="currencies"
+                          :placeholder="'Select currency'"
                           required
                         />
                         <InputError
