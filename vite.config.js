@@ -32,5 +32,14 @@ export default defineConfig({
     port: 5173,
     origin: devServerUrl,
     cors: true,
+    watch: {
+      ignored: [
+        '**/vendor/**',
+        '**/storage/**',
+        '**/node_modules/**',
+        '**/.git/**',
+      ],
+      usePolling: false,
+    },
   },
 });
