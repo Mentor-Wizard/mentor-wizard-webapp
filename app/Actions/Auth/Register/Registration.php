@@ -28,6 +28,6 @@ class Registration
 
         Auth::login($user);
 
-        return redirect()->route('pages.dashboard');
+        return to_route('pages.dashboard');
     }
 }
