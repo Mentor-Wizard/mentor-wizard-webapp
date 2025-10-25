@@ -1,12 +1,18 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true,
+  },
   expertiseOptions: Array,
   experienceOptions: Array,
   ratings: Array,
   availabilityOptions: Array,
 });
+
+const emit = defineEmits(['update:modelValue']);
 
 const expertiseSearch = ref('');
 const selectedExpertise = ref([]);
@@ -16,10 +22,70 @@ const priceMax = ref(200);
 const selectedRatings = ref([]);
 const selectedAvailability = ref([]);
 
+// Flag to prevent circular updates
+let isUpdatingFromParent = false;
+
 const filteredExpertise = computed(() =>
   props.expertiseOptions.filter((option) =>
     option.label.toLowerCase().includes(expertiseSearch.value.toLowerCase()),
   ),
+);
+
+// Watch for changes and emit to parent
+watch(
+  [
+    selectedExpertise,
+    selectedExperience,
+    priceMin,
+    priceMax,
+    selectedRatings,
+    selectedAvailability,
+  ],
+  () => {
+    // Don't emit if we're updating from parent
+    if (isUpdatingFromParent) {
+      return;
+    }
+
+    const updatedFilters = {
+      expertise: selectedExpertise.value,
+      experience: selectedExperience.value,
+      priceMin: priceMin.value,
+      priceMax: priceMax.value,
+      ratings: selectedRatings.value,
+      availability: selectedAvailability.value,
+    };
+    emit('update:modelValue', updatedFilters);
+  },
+  { deep: true },
+);
+
+// Watch for changes from parent (URL updates)
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    isUpdatingFromParent = true;
+
+    // Update all refs with new values from parent
+    selectedExpertise.value =
+      Array.isArray(newValue.expertise) ? [...newValue.expertise] : [];
+    selectedExperience.value =
+      Array.isArray(newValue.experience) ? [...newValue.experience] : [];
+    priceMin.value =
+      typeof newValue.priceMin === 'number' ? newValue.priceMin : 0;
+    priceMax.value =
+      typeof newValue.priceMax === 'number' ? newValue.priceMax : 200;
+    selectedRatings.value =
+      Array.isArray(newValue.ratings) ? [...newValue.ratings] : [];
+    selectedAvailability.value =
+      Array.isArray(newValue.availability) ? [...newValue.availability] : [];
+
+    // Reset flag after Vue updates
+    setTimeout(() => {
+      isUpdatingFromParent = false;
+    }, 0);
+  },
+  { deep: true, immediate: true },
 );
 
 const clearFilters = () => {
@@ -46,8 +112,8 @@ const clearFilters = () => {
         <div class="p-4">
           <div class="relative">
             <input
-              type="text"
               v-model="expertiseSearch"
+              type="text"
               placeholder="Search expertise..."
               class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm text-gray-900 placeholder-gray-500 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
             />

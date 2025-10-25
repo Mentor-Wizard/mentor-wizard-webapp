@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { usePage, Head } from '@inertiajs/vue3';
+import { ref, watch, onMounted } from 'vue';
+import { router, usePage, Head } from '@inertiajs/vue3';
 
 import LandingLayout from '@/Layouts/LandingLayout.vue';
 import FiltersSidebar from '@/Components/Mentor/FiltersSidebar.vue';
@@ -78,38 +78,140 @@ const filters = ref({
   availability: [],
 });
 
+// Debounce timer for price range
+let priceDebounceTimer = null;
+let isInitializing = true;
+
+// Initialize filters from URL IMMEDIATELY (before component mount)
+initializeFiltersFromUrl();
+
+// Allow watch to run after Vue's next tick
 onMounted(() => {
+  // Use nextTick to ensure all child components have processed initial props
+  setTimeout(() => {
+    isInitializing = false;
+  }, 0);
+});
+
+// Watch filters and update URL
+watch(
+  filters,
+  (newFilters, oldFilters) => {
+    // Skip update during initialization
+    if (isInitializing) {
+      return;
+    }
+
+    // Check if price changed (for debouncing)
+    const priceChanged =
+      newFilters.priceMin !== oldFilters?.priceMin
+      || newFilters.priceMax !== oldFilters?.priceMax;
+
+    if (priceChanged) {
+      // Debounce price range changes
+      if (priceDebounceTimer) {
+        clearTimeout(priceDebounceTimer);
+      }
+
+      priceDebounceTimer = setTimeout(() => {
+        updateUrl();
+      }, 500);
+    } else {
+      // Update URL immediately for other filters
+      updateUrl();
+    }
+  },
+  { deep: true },
+);
+
+// Watch sort and view changes
+watch([sortBy, page], () => {
+  if (isInitializing) {
+    return;
+  }
+  updateUrl();
+});
+
+function initializeFiltersFromUrl() {
   const query = usePage().props.ziggy.query ?? {};
 
   filters.value = {
     expertise: parseArray(query.expertise),
     experience: parseArray(query.experience),
-    priceMin: parseInt(query.priceMin) || 0,
-    priceMax: parseInt(query.priceMax) || 200,
-    ratings: parseArray(query.ratings),
+    priceMin: parseInt(query.priceMin, 10) || 0,
+    priceMax: parseInt(query.priceMax, 10) || 200,
+    ratings: parseArray(query.ratings).map((r) => parseInt(r, 10)),
     availability: parseArray(query.availability),
   };
 
-  page.value = parseInt(query.page) || 1;
+  page.value = parseInt(query.page, 10) || 1;
   sortBy.value = query.sort || 'relevance';
+}
 
-  fetchMentors();
-});
+function updateUrl() {
+  const params = buildUrlParams();
 
-function fetchMentors() {
-  let result = [...experts];
+  router.get(route('pages.mentors'), params, {
+    preserveState: true,
+    preserveScroll: true,
+    only: ['mentors', 'total'],
+    replace: true,
+  });
+}
 
-  // TODO: фільтри, сортування, пагінація
+function buildUrlParams() {
+  const params = {};
 
-  total.value = result.length;
+  // Add array filters only if they have values
+  if (filters.value.expertise.length > 0) {
+    params.expertise = filters.value.expertise;
+  }
 
-  const pageSize = 2;
-  const start = (page.value - 1) * pageSize;
-  mentors.value = result.slice(start, start + pageSize);
+  if (filters.value.experience.length > 0) {
+    params.experience = filters.value.experience;
+  }
+
+  if (filters.value.ratings.length > 0) {
+    params.ratings = filters.value.ratings;
+  }
+
+  if (filters.value.availability.length > 0) {
+    params.availability = filters.value.availability;
+  }
+
+  // Add price filters only if they differ from defaults
+  if (filters.value.priceMin !== 0) {
+    params.priceMin = filters.value.priceMin;
+  }
+
+  if (filters.value.priceMax !== 200) {
+    params.priceMax = filters.value.priceMax;
+  }
+
+  // Add sort if not default
+  if (sortBy.value !== 'relevance') {
+    params.sort = sortBy.value;
+  }
+
+  // Add page if not first
+  if (page.value !== 1) {
+    params.page = page.value;
+  }
+
+  return params;
 }
 
 function parseArray(value) {
-  if (!value) return [];
+  if (!value) {
+    return [];
+  }
+
+  // Handle object with numeric keys (Laravel array format: {0: "entry", 1: "mid"})
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    return Object.values(value);
+  }
+
+  // Handle single value or already an array
   return Array.isArray(value) ? value : [value];
 }
 </script>
@@ -124,7 +226,7 @@ function parseArray(value) {
           <span
             class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600"
           >
-            {{ mentors.total }} mentors available
+            {{ total }} mentors available
           </span>
         </div>
 
