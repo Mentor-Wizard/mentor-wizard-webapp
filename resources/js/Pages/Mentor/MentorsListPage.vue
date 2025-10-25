@@ -1,10 +1,10 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
-import { router, usePage, Head } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref, watch } from 'vue';
 
-import LandingLayout from '@/Layouts/LandingLayout.vue';
 import FiltersSidebar from '@/Components/Mentor/FiltersSidebar.vue';
 import MentorCard from '@/Components/Mentor/MentorCard.vue';
+import LandingLayout from '@/Layouts/LandingLayout.vue';
 // import Pagination from '@/Components/Mentor/Pagination.vue';
 
 const expertiseOptions = [
@@ -35,13 +35,95 @@ const availabilityOptions = [
   { value: 'tomorrow', label: 'Available tomorrow' },
 ];
 
+/**
+ * Mapping between expertise option values and actual mentor tags.
+ * Used for case-insensitive filtering of mentors by expertise.
+ */
+const expertiseTagsMap = {
+  'web-dev': [
+    'react',
+    'node.js',
+    'typescript',
+    'javascript',
+    'graphql',
+    'aws',
+    'docker',
+    'mongodb',
+    'next.js',
+    'vue',
+    'angular',
+    'webpack',
+    'python',
+    'django',
+    'postgresql',
+    'kubernetes',
+  ],
+  'mobile-dev': [
+    'swift',
+    'ios',
+    'swiftui',
+    'android',
+    'kotlin',
+    'react native',
+    'flutter',
+  ],
+  'data-science': [
+    'python',
+    'tensorflow',
+    'pytorch',
+    'scikit-learn',
+    'pandas',
+    'sql',
+    'deep learning',
+    'machine learning',
+    'r',
+    'numpy',
+  ],
+  'ux-ui': [
+    'figma',
+    'adobe xd',
+    'ux design',
+    'ui design',
+    'design systems',
+    'prototyping',
+    'user research',
+    'sketch',
+    'invision',
+  ],
+  'digital-marketing': [
+    'seo',
+    'sem',
+    'google analytics',
+    'facebook ads',
+    'content marketing',
+    'social media',
+  ],
+  'product-mgmt': [
+    'product strategy',
+    'roadmapping',
+    'agile',
+    'scrum',
+    'jira',
+    'user stories',
+  ],
+};
+
 const mentors = ref([
   {
     id: 1,
     name: 'Michael Anderson',
     title: 'Senior Web Developer & Instructor',
     price: '85',
-    tags: ['web-dev', 'react', 'node'],
+    tags: [
+      'React',
+      'Node.js',
+      'TypeScript',
+      'GraphQL',
+      'AWS',
+      'Docker',
+      'MongoDB',
+      'Next.js',
+    ],
     rating: 5,
     reviews: 432,
     experience: 12,
@@ -55,7 +137,7 @@ const mentors = ref([
     name: 'Sarah Johnson',
     title: 'UX/UI Design Lead',
     price: '65',
-    tags: ['ux-ui', 'figma'],
+    tags: ['Figma', 'Adobe XD'],
     rating: 4,
     reviews: 187,
     experience: 8,
@@ -69,7 +151,7 @@ const mentors = ref([
     name: 'David Chen',
     title: 'Full Stack Engineer & Mentor',
     price: '95',
-    tags: ['web-dev', 'python', 'docker'],
+    tags: ['Python', 'Django', 'PostgreSQL', 'Docker', 'Kubernetes'],
     rating: 5,
     reviews: 324,
     experience: 10,
@@ -83,7 +165,14 @@ const mentors = ref([
     name: 'Emily Rodriguez',
     title: 'Product Designer & Design Systems',
     price: '75',
-    tags: ['ux-ui', 'design-systems', 'figma'],
+    tags: [
+      'UX Design',
+      'UI Design',
+      'Figma',
+      'Design Systems',
+      'Prototyping',
+      'User Research',
+    ],
     rating: 5,
     reviews: 256,
     experience: 9,
@@ -97,7 +186,7 @@ const mentors = ref([
     name: 'James Miller',
     title: 'Mobile Developer & iOS Expert',
     price: '90',
-    tags: ['mobile-dev', 'swift', 'ios'],
+    tags: ['Swift', 'iOS', 'SwiftUI'],
     rating: 4,
     reviews: 198,
     experience: 11,
@@ -111,7 +200,15 @@ const mentors = ref([
     name: 'Sophia Martinez',
     title: 'Data Scientist & ML Engineer',
     price: '100',
-    tags: ['data-science', 'python', 'machine-learning'],
+    tags: [
+      'Python',
+      'TensorFlow',
+      'PyTorch',
+      'Scikit-learn',
+      'Pandas',
+      'SQL',
+      'Deep Learning',
+    ],
     rating: 5,
     reviews: 412,
     experience: 8,
@@ -122,7 +219,6 @@ const mentors = ref([
   },
 ]);
 
-const total = ref(mentors.value.length);
 const page = ref(1);
 const sortBy = ref('relevance');
 const view = ref('grid');
@@ -135,6 +231,142 @@ const filters = ref({
   ratings: [],
   availability: [],
 });
+
+/**
+ * Checks if a mentor matches the selected expertise areas.
+ * Uses case-insensitive matching against the expertiseTagsMap.
+ *
+ * @param {Object} mentor - The mentor object with a tags array
+ * @param {Array<string>} selectedExpertise - Array of selected expertise option values (e.g., ['web-dev', 'mobile-dev'])
+ * @returns {boolean} - True if no expertise filters are selected OR mentor matches at least one expertise area
+ *
+ * @example
+ * // Returns true if mentor has React or Node.js tags
+ * matchesExpertise(mentor, ['web-dev'])
+ */
+function matchesExpertise(mentor, selectedExpertise) {
+  if (selectedExpertise.length === 0) {
+    return true;
+  }
+
+  return selectedExpertise.some((expertise) => {
+    const expertiseTags = expertiseTagsMap[expertise] || [];
+    return mentor.tags.some((tag) =>
+      expertiseTags.some((expertiseTag) =>
+        tag.toLowerCase().includes(expertiseTag.toLowerCase()),
+      ),
+    );
+  });
+}
+
+/**
+ * Checks if a mentor's experience level matches the selected experience ranges.
+ * Maps experience level options to year ranges.
+ *
+ * @param {Object} mentor - The mentor object with an experience property (years)
+ * @param {Array<string>} selectedExperience - Array of selected experience levels (e.g., ['entry', 'senior'])
+ * @returns {boolean} - True if no experience filters are selected OR mentor matches at least one experience range
+ *
+ * @example
+ * // Returns true if mentor has 5 years experience (mid level: 4-7 years)
+ * matchesExperience(mentor, ['mid'])
+ */
+function matchesExperience(mentor, selectedExperience) {
+  if (selectedExperience.length === 0) {
+    return true;
+  }
+
+  const experienceRanges = {
+    entry: { min: 1, max: 3 },
+    mid: { min: 4, max: 7 },
+    senior: { min: 8, max: 12 },
+    expert: { min: 12, max: Infinity },
+  };
+
+  return selectedExperience.some((level) => {
+    const range = experienceRanges[level];
+    return mentor.experience >= range.min && mentor.experience <= range.max;
+  });
+}
+
+/**
+ * Checks if a mentor's price falls within the specified range.
+ *
+ * @param {Object} mentor - The mentor object with a price property (string)
+ * @param {number} priceMin - Minimum price in the range
+ * @param {number} priceMax - Maximum price in the range
+ * @returns {boolean} - True if mentor's price is within the specified range (inclusive)
+ *
+ * @example
+ * // Returns true if mentor's price is between $50 and $100
+ * matchesPrice(mentor, 50, 100)
+ */
+function matchesPrice(mentor, priceMin, priceMax) {
+  const mentorPrice = parseInt(mentor.price, 10);
+  return mentorPrice >= priceMin && mentorPrice <= priceMax;
+}
+
+/**
+ * Checks if a mentor's rating meets the minimum selected rating.
+ * If multiple ratings are selected, uses the lowest value as the threshold.
+ *
+ * @param {Object} mentor - The mentor object with a rating property (number)
+ * @param {Array<number>} selectedRatings - Array of selected rating thresholds (e.g., [4, 5])
+ * @returns {boolean} - True if no rating filters are selected OR mentor's rating >= minimum selected rating
+ *
+ * @example
+ * // Returns true if mentor has rating of 4.0 or higher
+ * matchesRating(mentor, [4, 5])
+ */
+function matchesRating(mentor, selectedRatings) {
+  if (selectedRatings.length === 0) {
+    return true;
+  }
+
+  const minRating = Math.min(...selectedRatings);
+  return mentor.rating >= minRating;
+}
+
+/**
+ * Checks if a mentor's availability matches any of the selected availability options.
+ *
+ * @param {Object} mentor - The mentor object with an availability property (string)
+ * @param {Array<string>} selectedAvailability - Array of selected availability options (e.g., ['today', 'tomorrow'])
+ * @returns {boolean} - True if no availability filters are selected OR mentor matches at least one availability option
+ *
+ * @example
+ * // Returns true if mentor is available today
+ * matchesAvailability(mentor, ['today'])
+ */
+function matchesAvailability(mentor, selectedAvailability) {
+  if (selectedAvailability.length === 0) {
+    return true;
+  }
+
+  return selectedAvailability.includes(mentor.availability);
+}
+
+/**
+ * Filters mentors based on all selected filter criteria.
+ * Returns mentors that match ALL active filter categories (AND logic).
+ */
+const filteredMentors = computed(() => {
+  return mentors.value.filter((mentor) => {
+    return (
+      matchesExpertise(mentor, filters.value.expertise)
+      && matchesExperience(mentor, filters.value.experience)
+      && matchesPrice(mentor, filters.value.priceMin, filters.value.priceMax)
+      && matchesRating(mentor, filters.value.ratings)
+      && matchesAvailability(mentor, filters.value.availability)
+    );
+  });
+});
+
+/**
+ * Total count of filtered mentors.
+ * Updates reactively when filters change.
+ */
+const total = computed(() => filteredMentors.value.length);
 
 // Debounce timer for price range
 let priceDebounceTimer = null;
@@ -368,6 +600,14 @@ function parseArray(value) {
 
         <section class="lg:col-span-3">
           <div
+            v-if="filteredMentors.length === 0"
+            class="mt-8 text-center text-gray-500"
+          >
+            No mentors found with current filters
+          </div>
+
+          <div
+            v-else
             :class="
               view === 'grid' ?
                 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3'
@@ -375,18 +615,11 @@ function parseArray(value) {
             "
           >
             <MentorCard
-              v-for="mentor in mentors"
+              v-for="mentor in filteredMentors"
               :key="mentor.id"
               :mentor="mentor"
               :view="view"
             />
-          </div>
-
-          <div
-            v-if="mentors.length === 0"
-            class="mt-8 text-center text-gray-500"
-          >
-            No mentors found with current filters
           </div>
 
           <!--          <Pagination :total="total" v-model:page="page" />-->

@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/vue3';
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
 export const useNavigation = defineStore('navigation', () => {
   const page = usePage();

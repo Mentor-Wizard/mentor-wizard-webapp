@@ -40,8 +40,8 @@ defineProps({
       />
     </div>
 
-    <div class="space-y-3 p-4">
-      <div class="flex items-start justify-between gap-2">
+    <div class="flex flex-col p-4">
+      <div class="mb-3 flex items-start justify-between gap-2">
         <h3 class="text-lg leading-tight font-semibold text-gray-900">
           {{ mentor.name }}
         </h3>
@@ -50,19 +50,24 @@ defineProps({
         </p>
       </div>
 
-      <p class="text-sm leading-relaxed text-gray-600">{{ mentor.title }}</p>
+      <p class="mb-3 text-sm leading-relaxed text-gray-600">
+        {{ mentor.title }}
+      </p>
 
-      <div class="flex flex-wrap gap-2">
-        <span
-          v-for="tag in mentor.tags"
-          :key="tag"
-          class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
-        >
-          {{ tag }}
-        </span>
+      <!-- Tags container with fixed height for 3 rows -->
+      <div class="mb-3 h-[84px] overflow-hidden">
+        <div class="flex flex-wrap gap-2">
+          <span
+            v-for="tag in mentor.tags"
+            :key="tag"
+            class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+          >
+            {{ tag }}
+          </span>
+        </div>
       </div>
 
-      <div class="flex items-center text-sm">
+      <div class="mb-3 flex items-center text-sm">
         <span class="text-yellow-400">
           {{ '★'.repeat(Math.min(Math.max(mentor.rating, 0), 5)) }}
         </span>
@@ -74,12 +79,13 @@ defineProps({
         </span>
       </div>
 
-      <div class="text-sm text-gray-600">
+      <div class="mb-3 text-sm text-gray-600">
         {{ mentor.experience }}+ years experience
       </div>
 
+      <!-- Button pushed to bottom with mt-auto -->
       <button
-        class="w-full rounded-lg bg-blue-600 py-2.5 text-base font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+        class="mt-auto w-full rounded-lg bg-blue-600 py-2.5 text-base font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
       >
         View Profile
       </button>
