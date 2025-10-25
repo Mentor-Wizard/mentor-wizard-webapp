@@ -16,6 +16,7 @@ export const useNavigation = defineStore('navigation', () => {
 
   const authenticatedNavigation = computed(() => {
     const base = [
+      { name: 'Find Mentors', href: route('pages.mentors') },
       { name: 'Dashboard', href: route('pages.dashboard') },
       { name: 'Team', href: '#' },
       { name: 'Projects', href: '#' },

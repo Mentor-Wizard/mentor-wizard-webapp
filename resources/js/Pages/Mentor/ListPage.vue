@@ -229,7 +229,7 @@ function parseArray(value) {
             No mentors found with current filters
           </div>
 
-<!--          <Pagination :total="total" v-model:page="page" />-->
+          <!--          <Pagination :total="total" v-model:page="page" />-->
         </section>
       </main>
     </div>
