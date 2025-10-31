@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Currency;
+use App\Models\MentorSession;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,6 +22,7 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
+            'mentor_session_id'  => MentorSession::factory(),
             'order_reference'    => fake()->sentence(20),
             'amount'             => fake()->numberBetween(1, 100),
             'currency'           => Currency::factory(),
