@@ -26,7 +26,8 @@
         "spatie/laravel-medialibrary": "^11.17.3",
         "spatie/laravel-permission": "^6.23",
         "spatie/laravel-query-builder": "^6.3.6",
-        "tightenco/ziggy": "^2.6"
+        "tightenco/ziggy": "^2.6",
+        "wayforpay/php-sdk": "^1.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",

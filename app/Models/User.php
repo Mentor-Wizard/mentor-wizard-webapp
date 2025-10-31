@@ -26,7 +26,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read MentorProfile|null $mentorProfile
  * @property-read float $rating
  * @property string $username
- *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
