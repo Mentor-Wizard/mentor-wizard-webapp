@@ -46,7 +46,7 @@ defineProps({
           {{ mentor.name }}
         </h3>
         <p class="font-bold whitespace-nowrap text-blue-600">
-          ${{ mentor.price }}/hr
+          {{ mentor.currency.symbol }}{{ mentor.price }}/hr
         </p>
       </div>
 
@@ -54,7 +54,6 @@ defineProps({
         {{ mentor.title }}
       </p>
 
-      <!-- Tags container with fixed height for 3 rows -->
       <div class="mb-3 h-[84px] overflow-hidden">
         <div class="flex flex-wrap gap-2">
           <span
@@ -68,14 +67,19 @@ defineProps({
       </div>
 
       <div class="mb-3 flex items-center text-sm">
-        <span class="text-yellow-400">
-          {{ '★'.repeat(Math.min(Math.max(mentor.rating, 0), 5)) }}
-        </span>
-        <span class="text-gray-300">
-          {{ '★'.repeat(5 - Math.min(Math.max(mentor.rating, 0), 5)) }}
-        </span>
+        <div
+          class="stars relative inline-block h-5 w-[5rem] overflow-hidden text-gray-300"
+        >
+          ★★★★★
+          <div
+            class="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
+            :style="{ width: (mentor.rating / 5) * 100 + '%' }"
+          >
+            ★★★★★
+          </div>
+        </div>
         <span class="ml-2 text-gray-700">
-          {{ mentor.rating }}.0 ({{ mentor.reviews }} reviews)
+          {{ mentor.rating }} ({{ mentor.reviews }} reviews)
         </span>
       </div>
 
@@ -83,7 +87,6 @@ defineProps({
         {{ mentor.experience }}+ years experience
       </div>
 
-      <!-- Button pushed to bottom with mt-auto -->
       <button
         class="mt-auto w-full rounded-lg bg-blue-600 py-2.5 text-base font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
       >

@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Mentor;
 
+use App\Enums\TagEnum;
+use App\Filters\ProfileRateFilter;
+use App\Filters\ProgramCostFilter;
+use App\Filters\TagLanguagesFilter;
+use App\Filters\TagStacksFilter;
+use App\Models\MentorProfile;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class MentorsListPage
 {
@@ -16,11 +24,56 @@ class MentorsListPage
     public function handle(Request $request): Response
     {
         // TODO: Implement actual mentor filtering logic
-        // This is a placeholder that will be replaced with real database queries
+        $mentors = QueryBuilder::for(MentorProfile::class)
+            ->with(['mentorPrograms', 'mentorTags', 'user.profile', 'currency'])
+            ->with(['user' => function ($query) {
+                $query->withCount('mentorReviews');
+            }])
+            ->allowedIncludes(['mentorPrograms', 'mentorTags', 'currency'])
+            ->allowedFilters([
+                'title',
+                'description',
+                'mentorPrograms.name',
+                'mentorPrograms.description',
+                AllowedFilter::custom('rate', new ProfileRateFilter),
+                AllowedFilter::custom('cost', new ProgramCostFilter),
+                AllowedFilter::custom('languages', new TagLanguagesFilter),
+                AllowedFilter::custom('stacks', new TagStacksFilter),
+            ])
+            ->allowedSorts(['id', 'rate', 'experience_started_at'])
+            ->paginate(12)
+            ->appends($request->query())
+            ->through(function ($mentor) {
+                $user = $mentor->user;
+                $profile = $user?->profile;
+
+                return [
+                    'id' => $mentor->id,
+                    'name' => trim($profile->name . ' ' . $profile->last_name),
+                    'title' => $mentor->title,
+                    'price' =>  $mentor->rate ?? $profile?->cost_per_hour,
+                    'currency' => [
+                        'code' => $mentor->currency->name,
+                        'symbol' => $mentor->currency->symbol,
+                    ],
+                    'tags' => $mentor->mentorTags
+                        ->where('type', TagEnum::STACK)
+                        ->pluck('tag')
+                        ->toArray(),
+                    'rating' => $user->rating ? round($user->rating, 1) : 0,
+                    'reviews' => $user->mentor_reviews_count ?? 0,
+                    'experience' => $mentor->experience_started_at
+                        ? now()->diff($mentor->experience_started_at)->y
+                        : 0,
+                    'image' => $profile->avatar,
+                    'availability' => 'today',
+                    'availabilityLabel' => 'Available now',
+                ];
+            });
+
 
         return Inertia::render('Mentor/MentorsListPage', [
-            'mentors' => [],
-            'total'   => 0,
+            'mentors' => $mentors,
         ]);
     }
 }

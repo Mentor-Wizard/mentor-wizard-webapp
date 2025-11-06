@@ -10,6 +10,7 @@ const props = defineProps({
   experienceOptions: Array,
   ratings: Array,
   availabilityOptions: Array,
+  currencyOptions: Array,
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -21,6 +22,7 @@ const priceMin = ref(0);
 const priceMax = ref(200);
 const selectedRatings = ref([]);
 const selectedAvailability = ref([]);
+const selectedCurrency = ref('USD');
 
 // Flag to prevent circular updates
 let isUpdatingFromParent = false;
@@ -40,6 +42,7 @@ watch(
     priceMax,
     selectedRatings,
     selectedAvailability,
+    selectedCurrency,
   ],
   () => {
     // Don't emit if we're updating from parent
@@ -54,6 +57,7 @@ watch(
       priceMax: priceMax.value,
       ratings: selectedRatings.value,
       availability: selectedAvailability.value,
+      currency: selectedCurrency.value,
     };
     emit('update:modelValue', updatedFilters);
   },
@@ -86,6 +90,8 @@ watch(
       Array.isArray(newValue.ratings) ? [...newValue.ratings] : [];
     selectedAvailability.value =
       Array.isArray(newValue.availability) ? [...newValue.availability] : [];
+    selectedCurrency.value =
+      newValue.currency || 'USD';
 
     // Reset flag after Vue updates
     setTimeout(() => {
@@ -103,6 +109,7 @@ const clearFilters = () => {
   priceMax.value = 200;
   selectedRatings.value = [];
   selectedAvailability.value = [];
+  selectedCurrency.value = 'USD';
 };
 </script>
 
@@ -195,11 +202,25 @@ const clearFilters = () => {
         </h3>
 
         <div class="p-4">
-          <div
-            class="mb-4 flex justify-between text-base font-medium text-gray-700"
-          >
-            <span>${{ priceMin }}</span>
-            <span>${{ priceMax }}+</span>
+          <div class="mb-4">
+            <select
+              id="currency"
+              v-model="selectedCurrency"
+              class="block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 focus:border-blue-600 focus:ring-blue-600"
+            >
+              <option
+                v-for="(currency, i) in currencyOptions"
+                :key="i"
+                :value="currency.value"
+              >
+                {{ currency.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-4 flex justify-between text-base font-medium text-gray-700">
+            <span>{{ selectedCurrency }} {{ priceMin }}</span>
+            <span>{{ selectedCurrency }} {{ priceMax }}+</span>
           </div>
 
           <div class="relative h-2">
@@ -231,9 +252,9 @@ const clearFilters = () => {
           </div>
 
           <div class="mt-5 flex justify-between text-sm text-gray-500">
-            <span>$0</span>
-            <span>$100</span>
-            <span>$200+</span>
+            <span>{{ selectedCurrency }} 0</span>
+            <span>{{ selectedCurrency }} 100</span>
+            <span>{{ selectedCurrency }} 200+</span>
           </div>
         </div>
       </div>

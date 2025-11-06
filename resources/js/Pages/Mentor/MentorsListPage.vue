@@ -35,6 +35,12 @@ const availabilityOptions = [
   { value: 'tomorrow', label: 'Available tomorrow' },
 ];
 
+const currencyOptions = [
+  { value: 'USD', label: 'USD ($)' },
+  { value: 'EUR', label: 'EUR (€)' },
+  { value: 'GBP', label: 'GBP (£)' },
+  { value: 'UAH', label: 'UAH (₴)' },
+];
 /**
  * Mapping between expertise option values and actual mentor tags.
  * Used for case-insensitive filtering of mentors by expertise.
@@ -108,116 +114,7 @@ const expertiseTagsMap = {
   ],
 };
 
-const mentors = ref([
-  {
-    id: 1,
-    name: 'Michael Anderson',
-    title: 'Senior Web Developer & Instructor',
-    price: '85',
-    tags: [
-      'React',
-      'Node.js',
-      'TypeScript',
-      'GraphQL',
-      'AWS',
-      'Docker',
-      'MongoDB',
-      'Next.js',
-    ],
-    rating: 5,
-    reviews: 432,
-    experience: 12,
-    image:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-    availability: 'today',
-    availabilityLabel: 'Available now',
-  },
-  {
-    id: 2,
-    name: 'Sarah Johnson',
-    title: 'UX/UI Design Lead',
-    price: '65',
-    tags: ['Figma', 'Adobe XD'],
-    rating: 4,
-    reviews: 187,
-    experience: 8,
-    image:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
-    availability: 'tomorrow',
-    availabilityLabel: 'Available tomorrow',
-  },
-  {
-    id: 3,
-    name: 'David Chen',
-    title: 'Full Stack Engineer & Mentor',
-    price: '95',
-    tags: ['Python', 'Django', 'PostgreSQL', 'Docker', 'Kubernetes'],
-    rating: 5,
-    reviews: 324,
-    experience: 10,
-    image:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
-    availability: 'booked',
-    availabilityLabel: 'Booked until 7/10',
-  },
-  {
-    id: 4,
-    name: 'Emily Rodriguez',
-    title: 'Product Designer & Design Systems',
-    price: '75',
-    tags: [
-      'UX Design',
-      'UI Design',
-      'Figma',
-      'Design Systems',
-      'Prototyping',
-      'User Research',
-    ],
-    rating: 5,
-    reviews: 256,
-    experience: 9,
-    image:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-    availability: 'today',
-    availabilityLabel: 'Available now',
-  },
-  {
-    id: 5,
-    name: 'James Miller',
-    title: 'Mobile Developer & iOS Expert',
-    price: '90',
-    tags: ['Swift', 'iOS', 'SwiftUI'],
-    rating: 4,
-    reviews: 198,
-    experience: 11,
-    image:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
-    availability: 'tomorrow',
-    availabilityLabel: 'Available tomorrow',
-  },
-  {
-    id: 6,
-    name: 'Sophia Martinez',
-    title: 'Data Scientist & ML Engineer',
-    price: '100',
-    tags: [
-      'Python',
-      'TensorFlow',
-      'PyTorch',
-      'Scikit-learn',
-      'Pandas',
-      'SQL',
-      'Deep Learning',
-    ],
-    rating: 5,
-    reviews: 412,
-    experience: 8,
-    image:
-      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=400&fit=crop',
-    availability: 'today',
-    availabilityLabel: 'Available now',
-  },
-]);
+const mentors = computed(() => usePage().props.mentors?.data || []);
 
 const page = ref(1);
 const sortBy = ref('relevance');
@@ -595,6 +492,7 @@ function parseArray(value) {
             :experience-options="experienceOptions"
             :ratings="ratings"
             :availability-options="availabilityOptions"
+            :currency-options="currencyOptions"
           />
         </aside>
 
