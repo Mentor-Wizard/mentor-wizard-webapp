@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -22,7 +23,7 @@ class MentorReviewResource extends JsonResource
     }
 
     /**
-     * @param  EloquentCollection<int, \App\Models\MentorReview>  $resources
+     * @param  EloquentCollection<int, MentorReview>  $resources
      * @return Collection<int, static>
      */
     public static function collectionWithMentor(EloquentCollection $resources, User $mentor): Collection

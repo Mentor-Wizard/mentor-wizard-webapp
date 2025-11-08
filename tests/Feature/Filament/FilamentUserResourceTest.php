@@ -13,6 +13,7 @@ use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Filament\Facades\Filament;
+use Filament\Resources\Pages\PageRegistration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -148,8 +149,8 @@ describe('Filament UserResource', function (): void {
         $pages = UserResource::getPages();
 
         expect($pages)->toHaveKeys(['index', 'create', 'edit'])
-            ->and($pages['index'])->toBeInstanceOf(\Filament\Resources\Pages\PageRegistration::class)
-            ->and($pages['create'])->toBeInstanceOf(\Filament\Resources\Pages\PageRegistration::class)
-            ->and($pages['edit'])->toBeInstanceOf(\Filament\Resources\Pages\PageRegistration::class);
+            ->and($pages['index'])->toBeInstanceOf(PageRegistration::class)
+            ->and($pages['create'])->toBeInstanceOf(PageRegistration::class)
+            ->and($pages['edit'])->toBeInstanceOf(PageRegistration::class);
     });
 });

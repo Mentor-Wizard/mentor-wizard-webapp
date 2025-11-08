@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Enums\RoleEnum;
+use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Collection;
@@ -83,7 +84,7 @@ class MentorProfilePageResource extends JsonResource
     }
 
     /**
-     * @return Collection<int, \App\Models\MentorReview>
+     * @return Collection<int, MentorReview>
      */
     private function reviewBlock(User $user): Collection
     {

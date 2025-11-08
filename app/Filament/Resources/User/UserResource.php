@@ -167,7 +167,7 @@ class UserResource extends Resource
                                 return '';
                             }
 
-                            return ucwords($tag->tag).' ('.ucfirst($tag->type->value).')';
+                            return ucwords((string) $tag->tag).' ('.ucfirst((string) $tag->type->value).')';
                         })
                         ->helperText('Select existing tags from the available options.'),
                 ])

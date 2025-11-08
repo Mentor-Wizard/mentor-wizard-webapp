@@ -24,6 +24,9 @@ return RectorConfig::configure()
     ->withComposerBased(
         laravel: true,
     )
+    ->withImportNames(
+        removeUnusedImports: true,
+    )
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
@@ -49,7 +52,7 @@ return RectorConfig::configure()
         // LaravelSetList::LARAVEL_STATIC_TO_INJECTION,
         LaravelSetList::LARAVEL_TESTING,
     ])
-    ->withParallel(100, 4, 25)
+    ->withParallel()
     ->withCache(
         __DIR__.'/var/cache/rector',
         FileCacheStorage::class,
