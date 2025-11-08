@@ -76,10 +76,7 @@ class MentorProfile extends Model
      */
     protected function languages(): Attribute
     {
-        /** @var Attribute<EloquentCollection<int, MentorTag>, never> $attribute */
-        $attribute = Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
-
-        return $attribute;
+        return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::LANGUAGE)->get());
     }
 
     /**
@@ -87,10 +84,7 @@ class MentorProfile extends Model
      */
     protected function stacks(): Attribute
     {
-        /** @var Attribute<EloquentCollection<int, MentorTag>, never> $attribute */
-        $attribute = Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
-
-        return $attribute;
+        return Attribute::get(fn () => $this->mentorTags()->where('type', TagEnum::STACK)->get());
     }
 
     /**

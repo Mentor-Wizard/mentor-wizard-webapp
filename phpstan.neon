@@ -12,5 +12,5 @@ parameters:
     function: 8
   checkOctaneCompatibility: true
   tmpDir: ./var/cache/phpstan
-  scanFiles:
-    - _ide_helper_models.php
+  ignoreErrors:
+    - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper#'

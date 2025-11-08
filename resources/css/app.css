@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@source "../views";
+@source '../views';
 
 @theme {
     --font-sans: InterVariable, sans-serif;

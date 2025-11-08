@@ -8,7 +8,6 @@ use App\Filament\Resources\User\Pages\CreateUser;
 use App\Filament\Resources\User\Pages\EditUser;
 use App\Filament\Resources\User\Pages\ListUsers;
 use App\Filament\Resources\User\Tables\UsersTable;
-use App\Models\MentorTag;
 use App\Models\User;
 use BackedEnum;
 use Exception;
@@ -159,16 +158,6 @@ class UserResource extends Resource
                         ->multiple()
                         ->searchable()
                         ->preload()
-                        ->getOptionLabelUsing(function (int|string $value): string {
-                            /** @var MentorTag|null $tag */
-                            $tag = MentorTag::query()->find($value);
-
-                            if ($tag === null) {
-                                return '';
-                            }
-
-                            return ucwords((string) $tag->tag).' ('.ucfirst((string) $tag->type->value).')';
-                        })
                         ->helperText('Select existing tags from the available options.'),
                 ])
                 ->visible(function (?User $record): bool {
