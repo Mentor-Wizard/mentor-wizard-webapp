@@ -30,7 +30,7 @@ class Chat extends Model
     ];
 
     /**
-     * @return BelongsTo<User, Chat>
+     * @return BelongsTo<User, $this>
      */
     public function mentor(): BelongsTo
     {
@@ -38,7 +38,7 @@ class Chat extends Model
     }
 
     /**
-     * @return BelongsTo<User, Chat>
+     * @return BelongsTo<User, $this>
      */
     public function menti(): BelongsTo
     {
@@ -46,7 +46,7 @@ class Chat extends Model
     }
 
     /**
-     * @return BelongsTo<User, Chat>
+     * @return BelongsTo<User, $this>
      */
     public function coach(): BelongsTo
     {
@@ -54,7 +54,7 @@ class Chat extends Model
     }
 
     /**
-     * @return HasMany<ChatMessage, Chat>
+     * @return HasMany<ChatMessage, $this>
      */
     public function messages(): HasMany
     {

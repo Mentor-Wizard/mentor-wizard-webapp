@@ -3,9 +3,6 @@ includes:
   - vendor/tomasvotruba/cognitive-complexity/config/extension.neon
 
 parameters:
-  checkOctaneCompatibility: true
-  noEnvCallsOutsideOfConfig: true
-  checkModelAppends: true
   paths:
     - app
     - database
@@ -13,6 +10,7 @@ parameters:
   cognitive_complexity:
     class: 85
     function: 8
+  checkOctaneCompatibility: true
   tmpDir: ./var/cache/phpstan
-  ignoreErrors:
-    - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper#'
+  scanFiles:
+    - _ide_helper_models.php

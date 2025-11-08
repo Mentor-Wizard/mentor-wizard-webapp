@@ -32,7 +32,7 @@ class MentorSession extends Model
     ];
 
     /**
-     * @return BelongsTo<User, MentorSession>
+     * @return BelongsTo<User, $this>
      */
     public function mentor(): BelongsTo
     {
@@ -40,7 +40,7 @@ class MentorSession extends Model
     }
 
     /**
-     * @return BelongsTo<User, MentorSession>
+     * @return BelongsTo<User, $this>
      */
     public function menti(): BelongsTo
     {
@@ -48,7 +48,7 @@ class MentorSession extends Model
     }
 
     /**
-     * @return HasOne<Payment, MentorSession>
+     * @return HasOne<Payment, $this>
      */
     public function payment(): HasOne
     {
@@ -56,7 +56,7 @@ class MentorSession extends Model
     }
 
     /**
-     * @return HasOne<MentorSessionNote, MentorSession>
+     * @return HasOne<MentorSessionNote, $this>
      */
     public function mentorSessionNote(): HasOne
     {

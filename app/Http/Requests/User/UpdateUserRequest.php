@@ -8,17 +8,17 @@ use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 class UpdateUserRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, array<int|string, ValidationRule|string>|ValidationRule|string>
+     * @return array<string, array<int|string, ValidationRule|Unique|string>|ValidationRule|string>
      */
     public function rules(): array
     {
-
         return [
             'username'        => [
                 'required',

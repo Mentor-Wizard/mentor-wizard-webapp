@@ -25,7 +25,7 @@ class MentorSessionNote extends Model
     ];
 
     /**
-     * @return BelongsTo<MentorSession, MentorSessionNote>
+     * @return BelongsTo<MentorSession, $this>
      */
     public function mentorSession(): BelongsTo
     {

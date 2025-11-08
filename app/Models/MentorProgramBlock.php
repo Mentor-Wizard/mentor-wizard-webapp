@@ -28,19 +28,19 @@ class MentorProgramBlock extends Model
     ];
 
     /**
-     * @return HasOne<MentorProgramBlockProgress, MentorProgramBlock>
+     * @return HasOne<MentorProgramBlockProgress, $this>
      */
     public function mentorProgramBlockProgress(): HasOne
     {
-        return $this->HasOne(MentorProgramBlockProgress::class, 'id');
+        return $this->hasOne(MentorProgramBlockProgress::class, 'mentor_program_block_id', 'id');
     }
 
     /**
-     * @return BelongsTo<MentorProgram, MentorProgramBlock>
+     * @return BelongsTo<MentorProgram, $this>
      */
     public function mentorProgram(): BelongsTo
     {
-        return $this->belongsTo(MentorProgram::class, 'id');
+        return $this->belongsTo(MentorProgram::class, 'mentor_program_id');
     }
 
     /**

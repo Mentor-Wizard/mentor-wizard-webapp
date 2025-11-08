@@ -26,7 +26,7 @@ class MentorTag extends Model
     ];
 
     /**
-     * @return BelongsToMany<MentorProfile, MentorTag>
+     * @return BelongsToMany<MentorProfile, $this>
      */
     public function mentorProfiles(): BelongsToMany
     {

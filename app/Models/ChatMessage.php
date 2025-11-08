@@ -27,7 +27,7 @@ class ChatMessage extends Model
     ];
 
     /**
-     * @return BelongsTo<Chat, ChatMessage>
+     * @return BelongsTo<Chat, $this>
      */
     public function chat(): BelongsTo
     {

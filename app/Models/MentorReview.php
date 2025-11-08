@@ -25,7 +25,7 @@ class MentorReview extends Model
     ];
 
     /**
-     * @return BelongsTo<User, MentorReview>
+     * @return BelongsTo<User, $this>
      */
     public function mentor(): BelongsTo
     {
@@ -33,7 +33,7 @@ class MentorReview extends Model
     }
 
     /**
-     * @return BelongsTo<User, MentorReview>
+     * @return BelongsTo<User, $this>
      */
     public function menti(): BelongsTo
     {

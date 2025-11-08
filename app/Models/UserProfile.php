@@ -66,7 +66,7 @@ class UserProfile extends Model implements HasMedia
     ];
 
     /**
-     * @return BelongsTo<User, UserProfile>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -74,7 +74,7 @@ class UserProfile extends Model implements HasMedia
     }
 
     /**
-     * @return BelongsTo<Currency, UserProfile>
+     * @return BelongsTo<Currency, $this>
      */
     public function currency(): BelongsTo
     {
@@ -95,6 +95,9 @@ class UserProfile extends Model implements HasMedia
             ->singleFile();
     }
 
+    /**
+     * @return Attribute<non-empty-string, never>
+     */
     protected function avatar(): Attribute
     {
         return Attribute::get(fn (): string => $this->getFirstMediaUrl('avatar') !== '' ? $this->getFirstMediaUrl('avatar') : self::DEFAULT_AVATAR_URL);

@@ -90,7 +90,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     ];
 
     /**
-     * @return HasOne<UserProfile, User>
+     * @return HasOne<UserProfile, $this>
      */
     public function profile(): HasOne
     {
@@ -98,23 +98,23 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasOne<MentorProfile, User>|null
+     * @return HasOne<MentorProfile, $this>
      */
-    public function mentorProfile(): ?HasOne
+    public function mentorProfile(): HasOne
     {
         return $this->hasOne(MentorProfile::class);
     }
 
     /**
-     * @return HasOne<MentorProgramBlockProgress, User>|null
+     * @return HasOne<MentorProgramBlockProgress, $this>
      */
-    public function mentiProgramProgress(): ?HasOne
+    public function mentiProgramProgress(): HasOne
     {
         return $this->hasOne(MentorProgramBlockProgress::class, 'menti_id');
     }
 
     /**
-     * @return HasMany<MentorReview, User>
+     * @return HasMany<MentorReview, $this>
      */
     public function mentorReviews(): HasMany
     {
@@ -122,7 +122,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasMany<MentorReview, User>
+     * @return HasMany<MentorReview, $this>
      */
     public function reviewsByMenti(): HasMany
     {
@@ -130,7 +130,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasMany<MentorProgram, User>
+     * @return HasMany<MentorProgram, $this>
      */
     public function mentorPrograms(): HasMany
     {
@@ -138,7 +138,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasMany<MentorSession, User>
+     * @return HasMany<MentorSession, $this>
      */
     public function mentorSessions(): HasMany
     {
@@ -146,7 +146,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasMany<MentorSession, User>
+     * @return HasMany<MentorSession, $this>
      */
     public function mentiSessions(): HasMany
     {
@@ -154,21 +154,23 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasMany<Chat, User>
+     * @return HasMany<Chat, $this>
      */
     public function mentorChats(): HasMany
     {
         return $this->hasMany(Chat::class, 'mentor_id');
     }
 
+    /**
+     * @return HasMany<Chat, $this>
+     */
     public function mentiChats(): HasMany
     {
-        // @phpstan-ignore-next-line
         return $this->hasMany(Chat::class, 'menti_id');
     }
 
     /**
-     * @return HasMany<Chat, User>
+     * @return HasMany<Chat, $this>
      */
     public function coachChats(): HasMany
     {

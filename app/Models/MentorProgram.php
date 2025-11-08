@@ -34,7 +34,7 @@ class MentorProgram extends Model
     ];
 
     /**
-     * @return BelongsTo<User, MentorProgram>
+     * @return BelongsTo<User, $this>
      */
     public function mentor(): BelongsTo
     {
@@ -42,7 +42,7 @@ class MentorProgram extends Model
     }
 
     /**
-     * @return BelongsTo<Currency, MentorProgram>
+     * @return BelongsTo<Currency, $this>
      */
     public function currency(): BelongsTo
     {
@@ -50,7 +50,7 @@ class MentorProgram extends Model
     }
 
     /**
-     * @return HasMany<MentorProgramBlock, MentorProgram>
+     * @return HasMany<MentorProgramBlock, $this>
      */
     public function mentorProgramBlocks(): HasMany
     {
@@ -58,7 +58,7 @@ class MentorProgram extends Model
     }
 
     /**
-     * @return BelongsToMany<MentorProfile, MentorProgram>
+     * @return BelongsToMany<MentorProfile, $this>
      */
     public function mentorProfiles(): BelongsToMany
     {

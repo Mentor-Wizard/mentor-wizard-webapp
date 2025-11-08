@@ -33,7 +33,7 @@ class Payment extends Model
     ];
 
     /**
-     * @return BelongsTo<MentorSession, Payment>
+     * @return BelongsTo<MentorSession, $this>
      */
     public function mentorSession(): BelongsTo
     {

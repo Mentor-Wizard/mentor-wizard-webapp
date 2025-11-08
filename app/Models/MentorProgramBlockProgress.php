@@ -28,7 +28,7 @@ class MentorProgramBlockProgress extends Model
     ];
 
     /**
-     * @return BelongsTo<MentorProgramBlock, MentorProgramBlockProgress>
+     * @return BelongsTo<MentorProgramBlock, $this>
      */
     public function mentorProgramBlocks(): BelongsTo
     {
@@ -36,7 +36,7 @@ class MentorProgramBlockProgress extends Model
     }
 
     /**
-     * @return BelongsTo<User, MentorProgramBlockProgress>
+     * @return BelongsTo<User, $this>
      */
     public function menti(): BelongsTo
     {
