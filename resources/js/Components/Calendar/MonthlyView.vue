@@ -3,6 +3,7 @@ import {
     ClockIcon,
 } from '@heroicons/vue/20/solid'
 import {computed} from "vue";
+import {router} from "@inertiajs/vue3";
 
 const props = defineProps({
     days: {
@@ -42,7 +43,7 @@ const selectedDay = computed(() => {
                 <div class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-6 lg:gap-px">
                     <div v-for="day in days.calendarView" :key="day.date"
                          @click = "scrollDate('exact date',day.date)"
-                         :disabled = "!day.events || (day.events.length === 0)"
+                         @disabled = "!day.events || (day.events.length === 0)"
                          :class="[day.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-500', 'relative px-3 py-2']">
                         <time :datetime="day.date"
                               :class="day.isToday ? 'flex size-6 items-center justify-center rounded-full bg-indigo-600 font-semibold text-white' : undefined">
@@ -51,8 +52,7 @@ const selectedDay = computed(() => {
                         <ol v-if="day.events && (day.events.length > 0)"
                             class="mt-2">
                             <li v-for="event in day.events.slice(0, 2)" :key="event.id">
-<!--                                :href="event.href"-->
-                                <a  class="group flex">
+                                <a  class="group flex"  @click.prevent.stop="props.openShowEditEventPage(event.id)">
                                     <p class="flex-auto truncate font-medium text-gray-900 group-hover:text-indigo-600">
                                         {{ event.name }}
                                     </p>
@@ -104,9 +104,9 @@ const selectedDay = computed(() => {
                         </time>
                     </div>
                     <a
-                       @click="props.openShowEditEventPage(event.id)"
+                       @click.prevent.stop="props.openShowEditEventPage(event.id)"
                        class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-xs ring-1 ring-gray-300 ring-inset group-hover:opacity-100 hover:ring-gray-400 focus:opacity-100"
-                    >Edit<span class="sr-only">, {{ event.title }}</span></a
+                    >Edit<span class="sr-only"> {{ event.title }}</span></a
                     >
                 </li>
             </ol>

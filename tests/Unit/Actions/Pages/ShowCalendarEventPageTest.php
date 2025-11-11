@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Enums\RoleEnum;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Response as InertiaResponse;
 use Spatie\Permission\Models\Role;
@@ -23,10 +24,11 @@ describe('ShowCalendarEventPage', function (): void {
     });
 
     it('includes base props, permissions and event payload', function (): void {
-        /** @var Event $event */
-        $event = Event::factory()->create();
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::factory()->create();
 
-        $response = (new ShowCalendarEventPage)->handle((string) $event->getKey());
+        $request = new Request(['timezone' => 'UTC']);
+        $response = (new ShowCalendarEventPage)->handle($event, $request);
 
         expect($response)->toBeInstanceOf(InertiaResponse::class);
         $props = inertiaProps($response);

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\Services\GetMonthEvents;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Services\Calendar\GetMonthEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 
-mutates(GetMonthEvents::class);
+mutates(GetMonthEventsService::class);
 
-describe('GetMonthEvents Service', function (): void {
+describe('GetMonthEventsService Service', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -27,9 +27,9 @@ describe('GetMonthEvents Service', function (): void {
         $startUtc = Carbon::create(2025, 2, 10, 10, 0, 0, 'UTC');
         $endUtc = (clone $startUtc)->addHour();
 
-        /** @var Event $event */
-        $event = Event::query()->create([
-            'title'           => 'Test Event',
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::query()->create([
+            'title'           => 'Test CalendarEvent',
             'status'          => 'confirmed',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
@@ -38,9 +38,9 @@ describe('GetMonthEvents Service', function (): void {
             'type'            => 'individual',
         ]);
 
-        $user->events()->attach($event->getKey());
+        $user->calendarEvents()->attach($event->getKey());
 
-        $result = new GetMonthEvents($user, '2025-02-10', $tz)->execute();
+        $result = new GetMonthEventsService($user, '2025-02-10', $tz)->execute();
 
         expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
 

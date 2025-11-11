@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
-use App\Actions\Calendar\Services\CheckAvailableSlots;
-use App\Actions\Calendar\Services\GetAvailableSlots;
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
+use App\Services\Calendar\CheckTimeSlotReservedService;
 use Exception;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,13 +25,15 @@ class EditEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'         => ['required', 'string', 'max:255'],
-            'fromDate'      => ['required', 'date', 'after_or_equal:today'],
-            'toDate'        => ['required', 'date', 'after_or_equal:fromDate'],
-            'fromTime'      => ['required', 'date_format:H:i'],
-            'toTime'        => ['required', 'date_format:H:i', 'after:fromTime'],
-            'description'   => ['max:2000'],
-            'type'          => ['required', Rule::in(EventTypeEnum::values())],
+            'title'       => ['required', 'string', 'max:255'],
+            'fromDate'    => ['required', 'date', 'after_or_equal:today'],
+            'toDate'      => ['required', 'date', 'after_or_equal:fromDate'],
+            'fromTime'    => ['required', 'date_format:H:i'],
+            'toTime'      => ['required', 'date_format:H:i', 'after:fromTime'],
+            'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
+            'description' => ['max:2000'],
+            'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
+            'timezone'    => ['required', 'string'],
         ];
     }
 
@@ -39,22 +41,22 @@ class EditEventRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required'            => 'Event title is required.',
-            'title.max'                 => 'Event title cannot exceed 255 characters.',
-            'fromDate.required'         => 'Start date is required.',
-            'fromDate.date'             => 'Start date must be a valid date.',
-            'fromDate.after_or_equal'   => 'Start date cannot be in the past.',
-            'toDate.required'           => 'End date is required.',
-            'toDate.date'               => 'End date must be a valid date.',
-            'toDate.after_or_equal'     => 'End date must be on or after the start date.',
-            'fromTime.required'         => 'Start time is required.',
-            'fromTime.date_format'      => 'Start time must be in HH:MM format.',
-            'toTime.required'           => 'End time is required.',
-            'toTime.date_format'        => 'End time must be in HH:MM format.',
-            'toTime.after'              => 'End time must be after start time.',
-            'description.max'           => 'Description cannot exceed 2000 characters.',
-            'type.required'             => 'Event type is required.',
-            'type.in'                   => 'Event type must be either individual or group.',
+            'title.required'          => 'CalendarEvent title is required.',
+            'title.max'               => 'CalendarEvent title cannot exceed 255 characters.',
+            'fromDate.required'       => 'Start date is required.',
+            'fromDate.date'           => 'Start date must be a valid date.',
+            'fromDate.after_or_equal' => 'Start date cannot be in the past.',
+            'toDate.required'         => 'End date is required.',
+            'toDate.date'             => 'End date must be a valid date.',
+            'toDate.after_or_equal'   => 'End date must be on or after the start date.',
+            'fromTime.required'       => 'Start time is required.',
+            'fromTime.date_format'    => 'Start time must be in HH:MM format.',
+            'toTime.required'         => 'End time is required.',
+            'toTime.date_format'      => 'End time must be in HH:MM format.',
+            'toTime.after'            => 'End time must be after start time.',
+            'description.max'         => 'Description cannot exceed 2000 characters.',
+            'type.required'           => 'CalendarEvent type is required.',
+            'type.in'                 => 'CalendarEvent type must be either individual or group.',
         ];
     }
 
@@ -75,9 +77,16 @@ class EditEventRequest extends FormRequest
                 $validator->errors()->add('fromDate', 'toDate is not valid');
             }
 
-            if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'),
-                $this->input('toDate'), $this->input('toTime'), $this->input('timezone', 'Europe/Kyiv'))) {
-                //                $validator->errors()->add('fromDate', 'there are another events on this time');
+            $isWithinAvailableSlots = new CheckTimeSlotReservedService(
+                $this->input('fromDate'),
+                $this->input('fromTime'),
+                $this->input('toDate'),
+                $this->input('toTime'),
+                $this->input('timezone', 'UTC'),
+                auth()->user(), [$this->input('id')])->execute();
+
+            if (! $isWithinAvailableSlots) {
+                $validator->errors()->add('fromDate', 'there are another events on this time');
             }
         });
     }
@@ -85,31 +94,35 @@ class EditEventRequest extends FormRequest
     public function getEventData(): array
     {
         $validated = $this->validated();
+
         $startDateTime = Carbon::createFromFormat(
             'Y-m-d H:i',
-            $validated['fromDate'].' '.$validated['fromTime']
-        );
+            $validated['fromDate'].' '.$validated['fromTime'],
+            $validated['timezone']
+        )?->setTimezone('UTC');
         $endDateTime = Carbon::createFromFormat(
             'Y-m-d H:i',
-            $validated['toDate'].' '.$validated['toTime']
-        );
+            $validated['toDate'].' '.$validated['toTime'],
+            $validated['timezone']
+        )?->setTimezone('UTC');
 
         $duration = $startDateTime?->diffInSeconds($endDateTime);
         $eventType = match ($validated['type']) {
-            'individual'        => EventTypeEnum::INDIVIDUAL->value,
-            'group'             => EventTypeEnum::GROUP->value,
-            default             => EventTypeEnum::INDIVIDUAL->value,
+            'individual' => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'group'      => CalendarEventTypeEnum::GROUP->value,
+            default      => CalendarEventTypeEnum::INDIVIDUAL->value,
         };
 
         return [
-            'title'             => $validated['title'],
-            'start_date_time'   => $startDateTime,
-            'end_date_time'     => $endDateTime,
-            'duration'          => $duration,
-            'type'              => $eventType,
-            'description'       => $validated['description'],
-            'status'            => EventStatusEnum::CONFIRMED,
-            'date'              => $startDateTime?->format('Y-m-d'),
+            'title'           => $validated['title'],
+            'start_date_time' => $startDateTime,
+            'end_date_time'   => $endDateTime,
+            'duration'        => $duration,
+            'type'            => $eventType,
+            'colour'          => $validated['colour'],
+            'description'     => $validated['description'],
+            'status'          => CalendarEventStatusEnum::CONFIRMED,
+            'date'            => $startDateTime?->format('Y-m-d'),
         ];
     }
 
@@ -122,23 +135,5 @@ class EditEventRequest extends FormRequest
                 return;
             }
         }
-    }
-
-    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime, string $timezone): bool
-    {
-        $this->validated();
-        $startDateTimestamp = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $fromDate.' '.$fromTime,
-            $timezone
-        )->timestamp;
-        $endDateTimestamp = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $toDate.' '.$toTime,
-            $timezone
-        )->timestamp;
-        $availableSlots = new GetAvailableSlots(auth()->user(), $timezone)->execute();
-
-        return new CheckAvailableSlots($availableSlots, $startDateTimestamp, $endDateTimestamp)->execute();
     }
 }

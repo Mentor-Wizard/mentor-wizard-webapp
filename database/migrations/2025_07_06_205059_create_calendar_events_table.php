@@ -13,15 +13,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('events', function (Blueprint $table): void {
+        Schema::create('calendar_events', function (Blueprint $table): void {
             $table->id();
-            $table->uuid('unique_id');
             $table->string('title');
             $table->string('status')->nullable();
             $table->dateTime('start_date_time');
-            $table->integer('duration')->nullable();
+            $table->dateTime('end_date_time');
+            $table->date('date');
+            $table->integer('duration');
             $table->string('type');
-            $table->string('web_link');
+            $table->string('web_link')->nullable();
             $table->text('description')->nullable();
             $table->foreignId('mentor_program_id')->nullable()->constrained();
             $table->timestamps();
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('events');
+        Schema::dropIfExists('calendar_events');
     }
 };

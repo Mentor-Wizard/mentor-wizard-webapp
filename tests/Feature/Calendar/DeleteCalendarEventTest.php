@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventRoleEnum;
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\Event as EventModel;
+use App\Models\CalendarEvent as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
 
-describe('Calendar Event Delete Page', function (): void {
+describe('Calendar CalendarEvent Delete Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
@@ -27,32 +27,38 @@ describe('Calendar Event Delete Page', function (): void {
         $this->nonMentorUser = User::factory()->create();
 
         auth()->login($this->user);
-        auth()->login($this->anotherMentor);
-        auth()->login($this->nonMentorUser);
-
+        actingAs($this->user);
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
-            'status'            => EventStatusEnum::CONFIRMED,
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
-            'type'              => EventTypeEnum::INDIVIDUAL->value,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
             'mentor_program_id' => null,
         ]);
-        $this->event->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
 
+        $this->event->calendarEventUsers()->attach($this->user->getKey(), ['role' => CalendarEventRoleEnum::HOST,
+            'colour'                                                              => 'blue']);
+
+        auth()->login($this->anotherMentor);
+        auth()->login($this->nonMentorUser);
     });
 
     it('event deleted successfully', function (): void {
         actingAs($this->user);
         auth()->login($this->user);
 
-        $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete', $this->event->getKey()));
-        $response->assertRedirect(route('pages.calendar'));
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $this->event->getKey()),
+                [
+                    '_token' => csrf_token(),
+                ]);
 
-        $this->assertDatabaseMissing('events', [
+        $response->assertRedirect(route('pages.calendar.index'));
+
+        $this->assertDatabaseMissing('calendar_events', [
             'id' => $this->event->getKey(),
         ]);
     });
@@ -61,8 +67,11 @@ describe('Calendar Event Delete Page', function (): void {
         actingAs($this->nonMentorUser);
         auth()->login($this->nonMentorUser);
 
-        $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete', $this->event->getKey()));
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $this->event->getKey()),
+                [
+                    '_token' => csrf_token(),
+                ]);
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 
@@ -70,8 +79,11 @@ describe('Calendar Event Delete Page', function (): void {
         actingAs($this->anotherMentor);
         auth()->login($this->anotherMentor);
 
-        $response = $this->withoutMiddleware()
-            ->delete(route('pages.calendar.delete', $this->event->getKey()));
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $this->event->getKey()),
+                [
+                    '_token' => csrf_token(),
+                ]);
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 });

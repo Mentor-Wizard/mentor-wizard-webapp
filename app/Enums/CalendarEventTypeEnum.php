@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum EventStatusEnum: string
+enum CalendarEventTypeEnum: string
 {
-    case PENDING_MENTOR_CONFIRMATION = 'Pending Mentor Confirmation';
-    case PENDING_PAYMENT = 'Pending Payment';
-    case CONFIRMED = 'Confirmed';
-    case FINISHED = 'Finished';
-    case CANCELLED = 'Cancelled';
+    case INDIVIDUAL = 'Individual';
+    case GROUP = 'Group';
 
     public static function names(): array
     {

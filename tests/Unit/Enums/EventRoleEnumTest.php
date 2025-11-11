@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventRoleEnum;
+use App\Enums\CalendarEventRoleEnum;
 
-mutates(EventRoleEnum::class);
+mutates(CalendarEventRoleEnum::class);
 
-describe('EventRoleEnum', function (): void {
+describe('CalendarEventRoleEnum', function (): void {
     it('returns all names and values', function (): void {
-        $names = EventRoleEnum::names();
-        $values = EventRoleEnum::values();
+        $names = CalendarEventRoleEnum::names();
+        $values = CalendarEventRoleEnum::values();
 
-        $caseNames = array_map(fn (EventRoleEnum $case) => $case->name, EventRoleEnum::cases());
-        $caseValues = array_map(fn (EventRoleEnum $case) => $case->value, EventRoleEnum::cases());
+        $caseNames = array_map(fn (CalendarEventRoleEnum $case) => $case->name, CalendarEventRoleEnum::cases());
+        $caseValues = array_map(fn (CalendarEventRoleEnum $case) => $case->value, CalendarEventRoleEnum::cases());
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)
@@ -23,7 +23,7 @@ describe('EventRoleEnum', function (): void {
     });
 
     it('contains required roles', function (): void {
-        expect(EventRoleEnum::values())
+        expect(CalendarEventRoleEnum::values())
             ->toContain('Host')
             ->toContain('Co-Host')
             ->toContain('Menti')

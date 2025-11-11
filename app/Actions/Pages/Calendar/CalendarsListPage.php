@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Calendar;
 
-use App\Actions\Calendar\Services\GetDailyEvents;
-use App\Actions\Calendar\Services\GetMonthEvents;
-use App\Actions\Calendar\Services\GetWeeklyEvents;
+use App\Enums\CalendarEventColoursEnum;
 use App\Enums\RoleEnum;
+use App\Services\Calendar\GetDailyEventsService;
+use App\Services\Calendar\GetMonthEventsService;
+use App\Services\Calendar\GetWeeklyEventsService;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -22,22 +23,9 @@ class CalendarsListPage
 
     public function handle(Request $request): Response
     {
-        $data = $request->all();
-        $timeZone = $data['timeZone'] ?? 'UTC';
-        $date = $data['date'] ?? Carbon::now($timeZone)->format('Y-m-d');
-        $mode = $data['mode'] ?? 'Month view';
-        if (! auth()->user()) {
-            return Inertia::render('Auth/Login',
-                [
-                    'canLogin'          => Route::has('login'),
-                    'canRegister'       => Route::has('register'),
-                    'laravelVersion'    => Application::VERSION,
-                    'phpVersion'        => PHP_VERSION,
-                    'locale'            => app()->getLocale(),
-                ]
-            );
-        }
-
+        $timezone = $request->get('timezone');
+        $date = $request->get('date') ?? Carbon::now($timezone)->format('Y-m-d');
+        $mode = $request->get('mode') ?? 'Month view';
         $user = auth()->user();
 
         return Inertia::render('Calendar/CalendarsList', [
@@ -46,11 +34,12 @@ class CalendarsListPage
             'laravelVersion'    => Application::VERSION,
             'phpVersion'        => PHP_VERSION,
             'locale'            => app()->getLocale(),
-            'permissions'       => ($user->hasRole(RoleEnum::MENTOR->value) === true) ? 'edit' : 'view',
+            'permissions'       => $user?->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
+            'availableColours'  => CalendarEventColoursEnum::values(),
             'events'            => match ($mode) {
-                'Week view'     => new GetWeeklyEvents(auth()->user(), $date, $timeZone)->execute(),
-                'Day view'      => new GetDailyEvents(auth()->user(), $date, $timeZone)->execute(),
-                default         => new GetMonthEvents(auth()->user(), $date, $timeZone)->execute(),
+                'Day view'      => $timezone && $user ? new GetDailyEventsService($user, $date, $timezone)->execute() : [],
+                'Week view'     => $timezone && $user ? new GetWeeklyEventsService($user, $date, $timezone)->execute() : [],
+                default         => $timezone && $user ? new GetMonthEventsService($user, $date, $timezone)->execute() : [],
             }]);
     }
 }

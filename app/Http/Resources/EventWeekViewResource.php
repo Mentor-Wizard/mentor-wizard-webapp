@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Enums\EventCalendarColoursEnum;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -27,6 +26,8 @@ class EventWeekViewResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
+        $user = $this->additional['user'] ?? null;
+
         $date = Carbon::parse($this->start_date_time, 'UTC')->setTimezone($this->timezone);
 
         $timezoneAbbreviation = $date->format('T');
@@ -37,7 +38,7 @@ class EventWeekViewResource extends JsonResource
             + ((int) $date->format('s'));
 
         return [
-            'id'            => $this->id,
+            'id'            => $this->getRouteKey(),
             'dayNumber'     => (int) $date->format('w') + 1,
             'time'          => $date->format('g:i A'),
             'dateTime'      => $dateTime,
@@ -45,7 +46,7 @@ class EventWeekViewResource extends JsonResource
             'startIndex'    => (int) (($secondsSinceMidnight * 6 / 3600) + 2),
             'title'         => $this->title,
             'href'          => $this->web_link,
-            'colour'        => EventCalendarColoursEnum::randomValue(),
+            'colour'        => $this->calendarEventUsers?->where('id', '=', $user->getKey())?->first()?->pivot?->colour,
         ];
     }
 }

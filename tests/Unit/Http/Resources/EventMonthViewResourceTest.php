@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Resources\EventMonthViewResource;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use Illuminate\Support\Carbon;
 
 mutates(EventMonthViewResource::class);
@@ -14,8 +14,7 @@ describe('EventMonthViewResource', function (): void {
         $start = Carbon::create(2025, 8, 31, 23, 59, 0);
         $end = (clone $start)->addMinutes(30);
 
-        /** @var Event $event */
-        $event = Event::factory()->create([
+        $event = CalendarEvent::factory()->create([
             'title'           => 'Month Resource Test',
             'start_date_time' => $start,
             'end_date_time'   => $end,
@@ -26,7 +25,7 @@ describe('EventMonthViewResource', function (): void {
             'description'     => 'Month view description',
         ]);
 
-        $resource = new EventMonthViewResource($event);
+        $resource = new EventMonthViewResource($event)->additional(['timeZone' => 'UTC']);
         $array = $resource->toArray(request());
 
         expect($array)

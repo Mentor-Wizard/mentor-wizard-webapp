@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\DeleteCalendarPage;
-use App\Actions\Calendar\EditCalendarPage;
-use App\Actions\Calendar\StoreCalendarPage;
+use App\Actions\Calendar\DeleteCalendarEvent;
+use App\Actions\Calendar\EditCalendarEvent;
+use App\Actions\Calendar\StoreCalendarEvent;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
@@ -15,7 +15,6 @@ use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
 use App\Actions\Pages\Profile\GetMentorProfilePage;
-use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\ListMentorProfilePage;
 use App\Actions\Pages\WelcomePage;
@@ -28,8 +27,7 @@ Route::get('/', WelcomePage::class)->name('pages.welcome');
 
 Route::get('profile-programs', ListMentorProfilePage::class)->name('page.profile-programs');
 
-Route::get('mentor/{mentor:slug}', GetMentorProfilePage::class)->name('page.mentor');
-Route::get('review/{mentor:slug}', GetMentorReviewPage::class)->name('page.mentor-review');
+Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
 
 Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])
@@ -60,19 +58,23 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
         ->name('mentor-program.list');
 });
 
-Route::get('calendar', CalendarsListPage::class)
-    ->middleware(['auth', 'verified'])
-    ->name('pages.calendar');
-Route::get('calendar/event/{id}', ShowCalendarEventPage::class)
-    ->middleware(['auth', 'verified'])
-    ->name('pages.calendar.show');
-Route::middleware(['auth', 'role:mentor'])->group(function (): void {
-    Route::post('calendar/event/store', StoreCalendarPage::class)
-        ->name('pages.calendar.store');
-    Route::patch('calendar/event/edit/{id}', EditCalendarPage::class)
-        ->name('pages.calendar.edit');
-    Route::delete('calendar/event/delete/{id}', DeleteCalendarPage::class)
-        ->name('pages.calendar.delete');
+Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('/', CalendarsListPage::class)
+        ->name('pages.calendar.index');
+    Route::get('calendar-event/{calendarEvent:id}', ShowCalendarEventPage::class)
+        ->can('view', 'calendarEvent')
+        ->name('pages.calendar.show');
+    Route::middleware(['role:mentor'])->group(function (): void {
+        Route::post('calendar-event/store', StoreCalendarEvent::class)
+            ->can('create', 'calendarEvent')
+            ->name('pages.calendar.store');
+        Route::patch('calendar-event/edit/{calendarEvent:id}', EditCalendarEvent::class)
+            ->can('update', 'calendarEvent')
+            ->name('pages.calendar.edit');
+        Route::delete('calendar-event/delete/{calendarEvent}', DeleteCalendarEvent::class)
+            ->can('delete', 'calendarEvent')
+            ->name('pages.calendar.delete');
+    });
 });
 
 require __DIR__.'/auth.php';

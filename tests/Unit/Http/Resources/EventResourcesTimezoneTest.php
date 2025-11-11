@@ -2,21 +2,25 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventRoleEnum;
+use App\Enums\RoleEnum;
 use App\Http\Resources\EventDayViewResource;
 use App\Http\Resources\EventWeekViewResource;
-use App\Models\Event;
+use App\Models\CalendarEvent;
+use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
+use Spatie\Permission\Models\Role;
 
 mutates(EventDayViewResource::class);
 mutates(EventWeekViewResource::class);
 
-describe('Event Resources with timezone', function (): void {
+describe('CalendarEvent Resources with timezone', function (): void {
     it('applies timezone adjustment for week view', function (): void {
         $startUtc = Carbon::create(2025, 8, 24, 22, 0, 0, 'UTC');
         $endUtc = (clone $startUtc)->addHour();
 
-        /** @var Event $event */
-        $event = Event::factory()->create([
+        $event = CalendarEvent::factory()->create([
             'title'           => 'TZ Week',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
@@ -26,8 +30,16 @@ describe('Event Resources with timezone', function (): void {
             'web_link'        => 'https://example.com/tz-week',
             'description'     => 'tz',
         ]);
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
-        $resource = new EventWeekViewResource($event, 'Europe/Kyiv');
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            ['role'      => CalendarEventRoleEnum::HOST,
+                'colour' => 'blue']);
+
+        $resource = new EventWeekViewResource($event, 'Europe/Kyiv')->additional(['user' => $this->user]);
+
         $array = $resource->toArray(request());
 
         expect($array['time'])->toBe('1:00 AM')
@@ -41,8 +53,8 @@ describe('Event Resources with timezone', function (): void {
         $startUtc = Carbon::create(2025, 8, 24, 22, 0, 0, 'UTC');
         $endUtc = (clone $startUtc)->addHour();
 
-        /** @var Event $event */
-        $event = Event::factory()->create([
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::factory()->create([
             'title'           => 'TZ Day',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,

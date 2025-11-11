@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Calendar;
 
+use App\Enums\CalendarEventColoursEnum;
 use App\Enums\RoleEnum;
 use App\Http\Resources\EventShowResource;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,16 +19,23 @@ class ShowCalendarEventPage
 {
     use AsController;
 
-    public function handle(string $id): Response
+    public function handle(CalendarEvent $calendarEvent, Request $request): Response
     {
+        $timezone = $request->query('timezone');
+
         return Inertia::render('Calendar/ShowEditEvent', [
-            'canLogin'          => Route::has('login'),
-            'canRegister'       => Route::has('register'),
-            'laravelVersion'    => Application::VERSION,
-            'phpVersion'        => PHP_VERSION,
-            'locale'            => app()->getLocale(),
-            'permissions'       => auth()->user()->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
-            'event'             => EventShowResource::collection(Event::query()->where('id', $id)->get())->resolve(),
+            'canLogin'         => Route::has('login'),
+            'canRegister'      => Route::has('register'),
+            'laravelVersion'   => Application::VERSION,
+            'phpVersion'       => PHP_VERSION,
+            'locale'           => app()->getLocale(),
+            'availableColours' => CalendarEventColoursEnum::values(),
+            'permissions'      => auth()->user()->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
+            'event'            => new EventShowResource($calendarEvent->load('calendarEventUsers'))
+                ->additional(['user' => auth()->user(),
+                    'timezone'       => $timezone,
+                ])
+                ->resolve(),
         ]);
     }
 }

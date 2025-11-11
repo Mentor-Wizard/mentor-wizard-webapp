@@ -62,7 +62,7 @@ class MentorTagSeeder extends Seeder
             'VS Code', 'PhpStorm', 'IntelliJ IDEA', 'Eclipse', 'Android Studio', 'Xcode',
 
             'OOP', 'FP', 'MVC', 'MVVM', 'Clean Architecture', 'DDD',
-            'Microservices', 'Monolithic Architecture', 'Serverless', 'Event-Driven Architecture',
+            'Microservices', 'Monolithic Architecture', 'Serverless', 'CalendarEvent-Driven Architecture',
 
             'OWASP', 'JWT', 'OAuth2', 'OpenID Connect',
             'HTTPS / SSL / TLS', 'CSRF Protection', 'XSS Protection',

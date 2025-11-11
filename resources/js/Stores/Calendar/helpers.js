@@ -10,6 +10,8 @@ export const adjustDate = (currentDate, currentTab, direction, exactDate = null)
     const newDate = new Date(currentDate);
     let newTab = currentTab;
 
+    console.log(currentTab);
+
     switch (currentTab) {
         case 'Day view':
             if (direction === 'previous') {

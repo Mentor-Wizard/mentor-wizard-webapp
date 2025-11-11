@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventTypeEnum;
+use App\Enums\CalendarEventTypeEnum;
 
-mutates(EventTypeEnum::class);
+mutates(CalendarEventTypeEnum::class);
 
-describe('EventTypeEnum', function (): void {
+describe('CalendarEventTypeEnum', function (): void {
     it('returns all names and values', function (): void {
-        $names = EventTypeEnum::names();
-        $values = EventTypeEnum::values();
+        $names = CalendarEventTypeEnum::names();
+        $values = CalendarEventTypeEnum::values();
 
-        $caseNames = array_map(fn (EventTypeEnum $case) => $case->name, EventTypeEnum::cases());
-        $caseValues = array_map(fn (EventTypeEnum $case) => $case->value, EventTypeEnum::cases());
+        $caseNames = array_map(fn (CalendarEventTypeEnum $case) => $case->name, CalendarEventTypeEnum::cases());
+        $caseValues = array_map(fn (CalendarEventTypeEnum $case) => $case->value, CalendarEventTypeEnum::cases());
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)
@@ -23,7 +23,7 @@ describe('EventTypeEnum', function (): void {
     });
 
     it('contains required types', function (): void {
-        expect(EventTypeEnum::values())
+        expect(CalendarEventTypeEnum::values())
             ->toContain('Individual')
             ->toContain('Group');
     });

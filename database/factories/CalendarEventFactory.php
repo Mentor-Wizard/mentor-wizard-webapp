@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
-class EventFactory extends Factory
+class CalendarEventFactory extends Factory
 {
     /**
      * The current password being used by the factory.
@@ -33,12 +33,12 @@ class EventFactory extends Factory
 
         return [
             'title'             => fake()->sentence(3),
-            'status'            => fake()->randomElement(EventStatusEnum::values()),
+            'status'            => fake()->randomElement(CalendarEventStatusEnum::values()),
             'start_date_time'   => $dateTime,
             'end_date_time'     => $endTime,
             'date'              => $date,
             'duration'          => $duration,
-            'type'              => fake()->randomElement(EventTypeEnum::values()),
+            'type'              => fake()->randomElement(CalendarEventTypeEnum::values()),
             'web_link'          => fake()->url(),
             'description'       => fake()->text(),
         ];

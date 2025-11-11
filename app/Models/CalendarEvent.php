@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Policies\CalendarEventPolicy;
 use Database\Factories\CurrencyFactory;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -22,12 +24,15 @@ use Illuminate\Support\Carbon;
  * @property string|null $description
  * @property int|null $mentor_program_id
  *
- * @mixin IdeHelperEvent
+ * @mixin IdeHelperCalendarEvent
  */
-class Event extends Model
+#[UsePolicy(CalendarEventPolicy::class)]
+class CalendarEvent extends Model
 {
     /** @use HasFactory<CurrencyFactory> */
     use HasFactory;
+
+    const MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET = 6;
 
     protected $fillable = [
         'title',
@@ -42,9 +47,11 @@ class Event extends Model
         'mentor_program_id',
     ];
 
-    public function users(): BelongsToMany
+    public function calendarEventUsers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withTimestamps();
+        return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
+            ->withPivot('colour')
+            ->withTimestamps();
     }
 
     /**

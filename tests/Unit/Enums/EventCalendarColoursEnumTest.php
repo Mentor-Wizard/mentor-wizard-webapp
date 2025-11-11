@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventCalendarColoursEnum;
+use App\Enums\CalendarEventColoursEnum;
 
-mutates(EventCalendarColoursEnum::class);
+mutates(CalendarEventColoursEnum::class);
 
-describe('EventCalendarColoursEnum', function (): void {
+describe('CalendarEventColoursEnum', function (): void {
     it('returns all names and values and a valid random value', function (): void {
-        $names = EventCalendarColoursEnum::names();
-        $values = EventCalendarColoursEnum::values();
-        $random = EventCalendarColoursEnum::randomValue();
+        $names = CalendarEventColoursEnum::names();
+        $values = CalendarEventColoursEnum::values();
+        $random = CalendarEventColoursEnum::randomValue();
 
-        $caseNames = array_map(fn (EventCalendarColoursEnum $caseName) => $caseName->name, EventCalendarColoursEnum::cases());
-        $caseValues = array_map(fn (EventCalendarColoursEnum $caseValue) => $caseValue->value, EventCalendarColoursEnum::cases());
+        $caseNames = array_map(fn (CalendarEventColoursEnum $caseName) => $caseName->name, CalendarEventColoursEnum::cases());
+        $caseValues = array_map(fn (CalendarEventColoursEnum $caseValue) => $caseValue->value, CalendarEventColoursEnum::cases());
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)

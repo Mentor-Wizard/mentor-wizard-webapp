@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventColoursEnum;
 use App\Http\Requests\Calendar\StoreEventRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Carbon;
 
 mutates(StoreEventRequest::class);
@@ -17,7 +19,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
 
         $this->prepareRequest = function (StoreEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Illuminate\Routing\Redirector::class));
+            $request->setRedirector(app(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });
@@ -32,7 +34,8 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'fromTime'    => '09:15',
             'toTime'      => '10:45',
             'description' => 'desc',
-            'type'        => 'Group', // should map to EventTypeEnum::GROUP
+            'type'        => 'Group', // should map to CalendarEventTypeEnum::GROUP
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
             'timezone'    => 'UTC',
         ];
 

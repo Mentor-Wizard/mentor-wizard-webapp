@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventStatusEnum;
+use App\Enums\CalendarEventStatusEnum;
 
-mutates(EventStatusEnum::class);
+mutates(CalendarEventStatusEnum::class);
 
-describe('EventStatusEnum', function (): void {
+describe('CalendarEventStatusEnum', function (): void {
     it('returns all names and values', function (): void {
-        $names = EventStatusEnum::names();
-        $values = EventStatusEnum::values();
+        $names = CalendarEventStatusEnum::names();
+        $values = CalendarEventStatusEnum::values();
 
-        $caseNames = array_map(fn (EventStatusEnum $caseName) => $caseName->name, EventStatusEnum::cases());
-        $caseValues = array_map(fn (EventStatusEnum $caseValue) => $caseValue->value, EventStatusEnum::cases());
+        $caseNames = array_map(fn (CalendarEventStatusEnum $caseName) => $caseName->name, CalendarEventStatusEnum::cases());
+        $caseValues = array_map(fn (CalendarEventStatusEnum $caseValue) => $caseValue->value, CalendarEventStatusEnum::cases());
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)
@@ -23,7 +23,7 @@ describe('EventStatusEnum', function (): void {
     });
 
     it('contains required statuses', function (): void {
-        expect(EventStatusEnum::values())
+        expect(CalendarEventStatusEnum::values())
             ->toContain('Pending Mentor Confirmation')
             ->toContain('Pending Payment')
             ->toContain('Confirmed')

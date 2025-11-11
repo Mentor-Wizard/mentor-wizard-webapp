@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\Services\GetDailyEvents;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Services\Calendar\GetDailyEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 
-mutates(GetDailyEvents::class);
+mutates(GetDailyEventsService::class);
 
-describe('GetDailyEvents Service', function (): void {
+describe('GetDailyEventsService Service', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -26,9 +26,9 @@ describe('GetDailyEvents Service', function (): void {
         $start = Carbon::create(2025, 3, 5, 14, 0, 0, 'UTC');
         $end = (clone $start)->addMinutes(90);
 
-        /** @var Event $event */
-        $event = Event::query()->create([
-            'title'           => 'Daily Event',
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::query()->create([
+            'title'           => 'Daily CalendarEvent',
             'status'          => 'confirmed',
             'start_date_time' => $start,
             'end_date_time'   => $end,
@@ -37,9 +37,9 @@ describe('GetDailyEvents Service', function (): void {
             'type'            => 'group',
         ]);
 
-        $user->events()->attach($event->getKey());
+        $user->calendarEvents()->attach($event->getKey());
 
-        $result = new GetDailyEvents($user, '2025-03-05', $tz)->execute();
+        $result = new GetDailyEventsService($user, '2025-03-05', $tz)->execute();
 
         expect($result)->toHaveKeys(['events', 'calendarView']);
 

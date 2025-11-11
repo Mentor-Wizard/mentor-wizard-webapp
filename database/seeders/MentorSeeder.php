@@ -38,5 +38,6 @@ class MentorSeeder extends Seeder
                     ->usingFileName('avatar.png')
                     ->toMediaCollection('avatar');
             });
+
     }
 }

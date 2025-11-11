@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\RoleEnum;
+use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Policies\CalendarEventPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
@@ -39,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
-
+        Gate::policy(CalendarEvent::class, CalendarEventPolicy::class);
         Vite::prefetch(concurrency: 3);
     }
 

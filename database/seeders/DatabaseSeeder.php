@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             CoachSeeder::class,
             MentorTagSeeder::class,
             MentorProgramSeeder::class,
-            EventSeeder::class,
+            CalendarEventSeeder::class,
             MentorReviewSeeder::class,
         ]);
     }

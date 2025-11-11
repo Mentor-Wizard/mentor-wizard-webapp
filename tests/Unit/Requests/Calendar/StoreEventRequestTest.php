@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\StoreEventRequest;
 use Illuminate\Support\Carbon;
 
 mutates(StoreEventRequest::class);
 
 describe('StoreEventRequest getEventData type mapping', function (): void {
-    it('maps "individual" to EventTypeEnum::INDIVIDUAL value', function (): void {
+    it('maps "individual" to CalendarEventTypeEnum::INDIVIDUAL value', function (): void {
         $request = new class extends StoreEventRequest
         {
             public function validated($key = null, $default = null): array
@@ -23,6 +24,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
                     'toTime'      => '10:00',
                     'type'        => 'individual',
                     'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
                     'timezone'    => 'Europe/Kyiv',
                 ];
             }
@@ -30,12 +32,12 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
 
         $data = $request->getEventData();
 
-        expect($data['type'])->toBe(EventTypeEnum::INDIVIDUAL->value)
-            ->and($data['status'])->toBe(EventStatusEnum::CONFIRMED)
+        expect($data['type'])->toBe(CalendarEventTypeEnum::INDIVIDUAL->value)
+            ->and($data['status'])->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->and($data['duration'])->toBe(3600);
     });
 
-    it('maps "group" to EventTypeEnum::GROUP value', function (): void {
+    it('maps "group" to CalendarEventTypeEnum::GROUP value', function (): void {
         $request = new class extends StoreEventRequest
         {
             public function validated($key = null, $default = null): array
@@ -48,6 +50,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
                     'toTime'      => '12:30',
                     'type'        => 'group',
                     'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
                     'timezone'    => 'Europe/Kyiv',
                 ];
             }
@@ -55,8 +58,8 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
 
         $data = $request->getEventData();
 
-        expect($data['type'])->toBe(EventTypeEnum::GROUP->value)
-            ->and($data['status'])->toBe(EventStatusEnum::CONFIRMED)
+        expect($data['type'])->toBe(CalendarEventTypeEnum::GROUP->value)
+            ->and($data['status'])->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->and($data['duration'])->toBe(5400);
     });
 
@@ -74,6 +77,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
                     'toTime'      => '01:00',
                     'type'        => 'individual',
                     'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
                     'timezone'    => 'UTC',
                 ];
             }
@@ -81,14 +85,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
 
         $data = $request->getEventData();
 
-        expect($data['duration'])->toBeNull()
-            ->and($data['date'])->toBeNull()
-            ->and($data['title'])->toBeNull()
-            ->and($data['start_date_time'])->toBeNull()
-            ->and($data['end_date_time'])->toBeNull()
-            ->and($data['type'])->toBeNull()
-            ->and($data['description'])->toBeNull()
-            ->and($data['status'])->toBeNull();
+        expect($data)->toBeEmpty();
     });
 
     it('builds exact start/end when crossing midnight to ensure both date and time are concatenated', function (): void {
@@ -109,6 +106,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
                     'toTime'      => '00:15',
                     'type'        => 'group',
                     'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
                     'timezone'    => 'UTC',
                 ];
             }
@@ -152,6 +150,7 @@ describe('StoreEventRequest rules and messages', function (): void {
                 'toDate.date',
                 'toDate.after_or_equal',
                 'fromTime.required',
+                'colour.required',
                 'fromTime.date_format',
                 'toTime.required',
                 'toTime.date_format',

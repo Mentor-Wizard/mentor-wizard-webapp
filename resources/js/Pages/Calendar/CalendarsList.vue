@@ -4,15 +4,17 @@ import MonthlyView from "@/Components/Calendar/MonthlyView.vue";
 import WeeklyView from "@/Components/Calendar/WeeklyView.vue";
 import {Menu, MenuButton, MenuItem, MenuItems} from "@headlessui/vue";
 import {ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, EllipsisHorizontalIcon} from "@heroicons/vue/20/solid";
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {router, usePage} from "@inertiajs/vue3";
 import CreateEvent from "@/Pages/Calendar/CreateEvent.vue";
 import {useCalendar} from "@/Stores/calendar.js";
-import { adjustDate } from "@/Stores/Calendar/helpers.js";
+import {adjustDate} from "@/Stores/Calendar/helpers.js";
 import {storeToRefs} from "pinia";
+
 const locale = usePage().props.locale;
-const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+
+const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone);
 const todayDate = ref(new Date().toLocaleDateString(String
 (locale || "uk-UA"), {
     day: 'numeric',
@@ -24,7 +26,7 @@ const showCreatePage = ref(false);
 const permissions = ref(usePage().props.permissions)
 const daysData = ref(usePage().props.events);
 const calendar = useCalendar();
-const { hours, weekDays } = storeToRefs(calendar);
+const {hours, weekDays} = storeToRefs(calendar);
 
 const currentTab = ref('Month view');
 const currentDate = ref(new Date());
@@ -40,26 +42,30 @@ const changeTab = (tab: string) => {
     refreshData();
 }
 const scrollDate = (direction: string, date = null) => {
+    console.log("scroll date");
+    console.log(date);
     // currentDate, currentTab, direction, exactDate = null
-    adjustDate(currentDate.value, currentTab.value, direction,date);
+    let adjustInfo = adjustDate(currentDate.value, currentTab.value, direction, date);
+    currentDate.value = adjustInfo.date;
+    currentTab.value = adjustInfo.tab;
+
     isLoading.value = true;
     refreshData();
 }
 
 const refreshData = () => {
-    console.log(permissions.value);
-    router.visit(route('pages.calendar'), {
+    router.visit(route('pages.calendar.index'), {
         method: 'get',
         data: {
             'date': currentDate.value,
             'mode': currentTab.value,
-            'timezone': timeZone
+            'timezone': timezone.value
         },
         preserveState: true,
         only: ['events'],
         onSuccess: (page) => {
             daysData.value = page.props.events;
-            permissions.value = page.props.permissions??'view';
+            permissions.value = page.props.permissions ?? 'view';
             isLoading.value = false;
         },
         onError: (errors) => {
@@ -76,7 +82,12 @@ const openShowEditEventPage = (eventId) => {
     console.log(eventId);
     console.log("open show edit event page");
 
-    router.visit(route('pages.calendar.show',{ id: eventId }), {
+
+    console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)
+    router.visit(route('pages.calendar.show',
+        {
+            calendarEvent: eventId,
+            timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone)}), {
         method: 'get',
         preserveState: true,
         // only: ['events'],
@@ -88,6 +99,7 @@ const openShowEditEventPage = (eventId) => {
         }
     });
 }
+
 const closeCreateEventPage = () => {
     showCreatePage.value = false;
 }
@@ -132,19 +144,24 @@ const scrollButtonName = computed(() => {
     }
 })
 
+onMounted(() => {
+    refreshData();
+});
+
 </script>
 <template>
     <AuthenticatedLayout>
         <header class="flex flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
             <div>
                 <h1 class="text-base font-semibold text-gray-900">
-                    <time datetime="2022-01-22" class="sm:hidden">{{ todayDate }}</time>
-                    <time datetime="2022-01-22" class="hidden sm:inline">{{ todayDate }}</time>
+                    <time datetime="2022-01-22" class="sm:hidden">{{ todayDate + ' (' + timezone + ')' }}</time>
+                    <time datetime="2022-01-22" class="sm:hidden">{{ todayDate + ' (' + timezone + ')' }}</time>
+                    <time datetime="2022-01-22" class="hidden sm:inline">{{ todayDate + ' (' + timezone + ')' }}</time>
                 </h1>
             </div>
             <!--                            class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"-->
 
-            <div class="flex items-center">
+            <div class="flex items-center" v-if="timezone">
                 <div class="relative flex items-center rounded-md bg-white shadow-xs md:items-stretch">
                     <button type="button" @click="scrollDate('previous')"
                             :disabled="!daysData['hasEventsBefore']  && currentTab=='Month View'"
@@ -278,21 +295,21 @@ const scrollButtonName = computed(() => {
         <MonthlyView
             :days="daysData"
             :scrollDate="scrollDate"
-            :openShowEditEventPage = "openShowEditEventPage"
+            :openShowEditEventPage="openShowEditEventPage"
             v-if="currentTab === 'Month view'"/>
         <WeeklyView
             :events="daysData"
             :scrollDate="scrollDate"
             :hours="hours"
             :weekDays="weekDays"
-            :openShowEditEventPage = "openShowEditEventPage"
+            :openShowEditEventPage="openShowEditEventPage"
             v-if="currentTab === 'Week view'"/>
         <DailyView
             :days="daysData"
             :hours="hours"
             :weekDays="weekDays"
             :scrollDate="scrollDate"
-            :openShowEditEventPage = "openShowEditEventPage"
+            :openShowEditEventPage="openShowEditEventPage"
             v-if="currentTab === 'Day view'"/>
     </AuthenticatedLayout>
 </template>

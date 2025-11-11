@@ -2,21 +2,22 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\EditEventRequest;
 use Illuminate\Support\Carbon;
 use Mockery as m;
 
 it('builds event data correctly for individual type', function (): void {
     $validated = [
-        'title'       => 'Demo Event',
+        'title'       => 'Demo CalendarEvent',
         'fromDate'    => '2025-01-01',
         'toDate'      => '2025-01-01',
         'fromTime'    => '10:00',
         'toTime'      => '11:30',
         'description' => 'Some description',
         'type'        => 'individual',
+        'colour'      => 'blue',
         'timezone'    => 'Europe/Kyiv',
     ];
 
@@ -26,18 +27,18 @@ it('builds event data correctly for individual type', function (): void {
 
     $result = $request->getEventData();
 
-    $expectedStart = Carbon::createFromFormat('Y-m-d H:i', '2025-01-01 10:00');
-    $expectedEnd = Carbon::createFromFormat('Y-m-d H:i', '2025-01-01 11:30');
+    $expectedStart = Carbon::createFromFormat('Y-m-d H:i', '2025-01-01 10:00', 'Europe/Kyiv');
+    $expectedEnd = Carbon::createFromFormat('Y-m-d H:i', '2025-01-01 11:30', 'Europe/Kyiv');
 
     expect($result)
         ->toBeArray()
-        ->and($result['title'])->toBe('Demo Event')
-        ->and($result['start_date_time'])->toEqual($expectedStart)
-        ->and($result['end_date_time'])->toEqual($expectedEnd)
+        ->and($result['title'])->toBe('Demo CalendarEvent')
+        ->and($result['start_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedStart)
+        ->and($result['end_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedEnd)
         ->and($result['duration'])->toBe($expectedStart?->diffInSeconds($expectedEnd))
-        ->and($result['type'])->toBe(EventTypeEnum::INDIVIDUAL->value)
+        ->and($result['type'])->toBe(CalendarEventTypeEnum::INDIVIDUAL->value)
         ->and($result['description'])->toBe('Some description')
-        ->and($result['status'])->toBe(EventStatusEnum::CONFIRMED)
+        ->and($result['status'])->toBe(CalendarEventStatusEnum::CONFIRMED)
         ->and($result['date'])->toBe('2025-01-01');
 });
 
@@ -50,6 +51,7 @@ it('builds event data correctly for group type', function (): void {
         'toTime'      => '10:00',
         'description' => 'Group event',
         'type'        => 'group',
+        'colour'      => 'blue',
         'timezone'    => 'Europe/Kyiv',
     ];
 
@@ -59,17 +61,17 @@ it('builds event data correctly for group type', function (): void {
 
     $result = $request->getEventData();
 
-    $expectedStart = Carbon::createFromFormat('Y-m-d H:i', '2025-02-10 09:15');
-    $expectedEnd = Carbon::createFromFormat('Y-m-d H:i', '2025-02-10 10:00');
+    $expectedStart = Carbon::createFromFormat('Y-m-d H:i', '2025-02-10 09:15', 'Europe/Kyiv');
+    $expectedEnd = Carbon::createFromFormat('Y-m-d H:i', '2025-02-10 10:00', 'Europe/Kyiv');
 
     expect($result)
         ->toBeArray()
         ->and($result['title'])->toBe('Group Session')
-        ->and($result['start_date_time'])->toEqual($expectedStart)
-        ->and($result['end_date_time'])->toEqual($expectedEnd)
+        ->and($result['start_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedStart)
+        ->and($result['end_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedEnd)
         ->and($result['duration'])->toBe($expectedStart?->diffInSeconds($expectedEnd))
-        ->and($result['type'])->toBe(EventTypeEnum::GROUP->value)
+        ->and($result['type'])->toBe(CalendarEventTypeEnum::GROUP->value)
         ->and($result['description'])->toBe('Group event')
-        ->and($result['status'])->toBe(EventStatusEnum::CONFIRMED)
+        ->and($result['status'])->toBe(CalendarEventStatusEnum::CONFIRMED)
         ->and($result['date'])->toBe('2025-02-10');
 });

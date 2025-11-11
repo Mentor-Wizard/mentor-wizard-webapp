@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Enums\EventCalendarColoursEnum;
+use App\Enums\CalendarEventColoursEnum;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -43,7 +43,7 @@ class EventDayViewResource extends JsonResource
             'startIndex'    => (int) (($secondsSinceMidnight * 6 / 3600) + 2),
             'title'         => $this->title,
             'href'          => $this->web_link,
-            'colour'        => EventCalendarColoursEnum::randomValue(),
+            'colour'        => CalendarEventColoursEnum::randomValue(),
         ];
     }
 }

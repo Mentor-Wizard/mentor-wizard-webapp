@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\Services\GetDailyEvents;
-use App\Actions\Calendar\Services\GetMonthEvents;
-use App\Actions\Calendar\Services\GetWeeklyEvents;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Services\Calendar\GetDailyEventsService;
+use App\Services\Calendar\GetMonthEventsService;
+use App\Services\Calendar\GetWeeklyEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 
@@ -24,7 +24,7 @@ it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) 
 
     $date = '2025-01-15'; // Wednesday
 
-    $result = new GetWeeklyEvents($user, $date, $tz)->execute();
+    $result = new GetWeeklyEventsService($user, $date, $tz)->execute();
 
     expect($result)
         ->toHaveKeys(['events', 'calendarView']);
@@ -51,8 +51,7 @@ it('includes empty day entries with events key for month calendar and sets flags
     $startUtc = Carbon::create(2025, 2, 10, 10, 0, 0, 'UTC');
     $endUtc = (clone $startUtc)->addHour();
 
-    /** @var Event $event */
-    $event = Event::query()->create([
+    $event = CalendarEvent::query()->create([
         'title'           => 'Test Event',
         'status'          => 'confirmed',
         'start_date_time' => $startUtc,
@@ -62,9 +61,9 @@ it('includes empty day entries with events key for month calendar and sets flags
         'type'            => 'individual',
     ]);
 
-    $user->events()->attach($event->getKey());
+    $user->calendarEvents()->attach($event->getKey());
 
-    $result = new GetMonthEvents($user, '2025-02-10', $tz)->execute();
+    $result = new GetMonthEventsService($user, '2025-02-10', $tz)->execute();
 
     expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
 
@@ -101,8 +100,7 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
     $start = Carbon::create(2025, 3, 5, 14, 0, 0, 'UTC');
     $end = (clone $start)->addMinutes(90);
 
-    /** @var Event $event */
-    $event = Event::query()->create([
+    $event = CalendarEvent::query()->create([
         'title'           => 'Daily Event',
         'status'          => 'confirmed',
         'start_date_time' => $start,
@@ -112,9 +110,9 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
         'type'            => 'group',
     ]);
 
-    $user->events()->attach($event->getKey());
+    $user->calendarEvents()->attach($event->getKey());
 
-    $result = new GetDailyEvents($user, '2025-03-05', $tz)->execute();
+    $result = new GetDailyEventsService($user, '2025-03-05', $tz)->execute();
 
     expect($result)->toHaveKeys(['events', 'calendarView']);
 

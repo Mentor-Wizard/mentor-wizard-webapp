@@ -2,22 +2,23 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\StoreCalendarPage;
-use App\Enums\EventRoleEnum;
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Actions\Calendar\StoreCalendarEvent;
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\StoreEventRequest;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\Response;
 
-mutates(StoreCalendarPage::class);
+mutates(StoreCalendarEvent::class);
 
 describe('StoreEventRequest Validation', function (): void {
     beforeEach(function (): void {
@@ -50,7 +51,8 @@ describe('StoreEventRequest Validation', function (): void {
                 'fromTime'    => '09:00',
                 'toTime'      => '10:00',
                 'description' => 'Daily standup',
-                'type'        => EventTypeEnum::INDIVIDUAL->value,
+                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'      => CalendarEventColoursEnum::BLUE->value,
                 'timezone'    => 'Europe/Kyiv',
             ];
         },
@@ -65,7 +67,8 @@ describe('StoreEventRequest Validation', function (): void {
                 'fromTime'    => '09:00',
                 'toTime'      => '10:00',
                 'description' => 'Team building',
-                'type'        => EventTypeEnum::GROUP->value,
+                'type'        => CalendarEventTypeEnum::GROUP->value,
+                'colour'      => CalendarEventColoursEnum::GREEN->value,
                 'timezone'    => 'Europe/Kyiv',
             ];
         },
@@ -90,7 +93,8 @@ describe('StoreEventRequest Validation', function (): void {
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
-            'type'        => EventTypeEnum::INDIVIDUAL->value,
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
             'timezone'    => 'Europe/Kyiv',
         ], 'title'],
         'past fromDate' => fn (): array => [[
@@ -100,7 +104,8 @@ describe('StoreEventRequest Validation', function (): void {
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
-            'type'        => EventTypeEnum::INDIVIDUAL->value,
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
             'timezone'    => 'Europe/Kyiv',
         ], 'fromDate'],
         'toTime before fromTime (same day)' => fn (): array => [[
@@ -110,7 +115,8 @@ describe('StoreEventRequest Validation', function (): void {
             'fromTime'        => '10:00',
             'toTime'          => '09:00',
             'description'     => 'x',
-            'type'            => EventTypeEnum::GROUP->value,
+            'type'            => CalendarEventTypeEnum::GROUP->value,
+            'colour'          => CalendarEventColoursEnum::BLUE->value,
             'timezone'        => 'Europe/Kyiv',
         ], 'toTime'],
         'invalid type' => fn (): array => [[
@@ -121,12 +127,13 @@ describe('StoreEventRequest Validation', function (): void {
             'toTime'      => '10:00',
             'description' => 'x',
             'type'        => 'Invalid',
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
             'timezone'    => 'Europe/Kyiv',
         ], 'type'],
     ]);
 });
 
-describe('Store Calendar Event', function (): void {
+describe('Store Calendar CalendarEvent', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendar();
@@ -139,62 +146,67 @@ describe('Store Calendar Event', function (): void {
 
         $eventPayload = [
             'title'           => 'Planning',
-            'status'          => EventStatusEnum::CONFIRMED->value,
+            'status'          => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time' => $start,
             'end_date_time'   => $end,
             'duration'        => $start->diffInSeconds($end),
             'date'            => $start->format('Y-m-d'),
-            'type'            => EventTypeEnum::INDIVIDUAL->value,
+            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'     => 'Sprint planning',
+            'colour'          => CalendarEventColoursEnum::BLUE->value,
         ];
 
         $request = Mockery::mock(StoreEventRequest::class);
         $request->shouldReceive('getEventData')->andReturn($eventPayload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
-        $response = (new StoreCalendarPage)->handle($request);
+        $response = (new StoreCalendarEvent)->handle($request);
 
         expect($response)
-            ->toBeInstanceOf(Response::class)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar'));
+            ->toBeInstanceOf(RedirectResponse::class)
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
 
-        expect(Event::query()->count())->toBe(1);
+        expect(CalendarEvent::query()->count())->toBe(1);
 
-        $event = Event::query()->latest('id')->first();
+        $event = CalendarEvent::query()->latest('id')->first();
         expect($event)
             ->title->toBe('Planning')
-            ->status->toBe(EventStatusEnum::CONFIRMED->value)
+            ->status->toBe(CalendarEventStatusEnum::CONFIRMED->value)
             ->date->toBe($start->format('Y-m-d'))
             ->duration->toBe((int) $start->diffInSeconds($end));
 
-        $pivot = $event->users()
+        $pivot = $event->calendarEventUsers()
             ->where('users.id', $this->user->getKey())
-            ->withPivot(['role', 'created_at', 'updated_at'])
+            ->withPivot(['role', 'colour', 'created_at', 'updated_at'])
             ->first()?->pivot;
 
         expect($pivot)
             ->not->toBeNull()
-            ->and($pivot->role)->toBe(EventRoleEnum::HOST->value)
-            ->and($pivot->created_at)->not->toBeNull()
-            ->and($pivot->updated_at)->not->toBeNull()
-            ->and((string) $pivot->created_at)->toBe((string) now())
-            ->and((string) $pivot->updated_at)->toBe((string) now());
+            ->and($pivot->role)->toBe(CalendarEventRoleEnum::HOST->value)
+            ->and($pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
+
+        // Verify timestamps are explicitly set in the database
+        $pivotRecord = Illuminate\Support\Facades\DB::table('calendar_event_user')
+            ->where('calendar_event_id', $event->getKey())
+            ->where('user_id', $this->user->getKey())
+            ->first();
+
+        expect($pivotRecord->created_at)->not->toBeNull();
+        expect($pivotRecord->updated_at)->not->toBeNull();
+        expect((string) Carbon::parse($pivotRecord->created_at))->toBe((string) now());
+        expect((string) Carbon::parse($pivotRecord->updated_at))->toBe((string) now());
     });
 
-    it('returns 403 for non-mentor user', function (): void {
+    it('aborts with 403 for non-mentor user', function (): void {
         Auth::logout();
         $viewer = User::factory()->create();
         Auth::login($viewer);
 
         $request = Mockery::mock(StoreEventRequest::class);
-        $request->shouldReceive('getEventData')->never();
+        $request->shouldReceive('user')->andReturn($viewer);
 
-        $response = (new StoreCalendarPage)->handle($request);
-
-        expect($response)
-            ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
-            ->and($response->getStatusCode())->toBe(403)
-            ->and($response->getData(true)['message'])->toBe('Only mentor can create events.');
+        expect(fn (): RedirectResponse => (new StoreCalendarEvent)->handle($request))
+            ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
     });
 });
 

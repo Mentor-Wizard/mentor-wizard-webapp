@@ -2,20 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar\Services;
+namespace App\Services\Calendar;
 
 use App\Http\Resources\EventDayViewResource;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Carbon;
 
-class GetDailyEvents
+class GetDailyEventsService
 {
     private array $calendarView = [];
 
-    public function __construct(private readonly User $user, private readonly string $date, private readonly string $timezone = 'Europe/Kyiv') {}
+    public function __construct(private readonly User $user, private readonly string $date,
+        private readonly string $timezone = 'UTC') {}
 
     public function execute(): array
     {
@@ -33,19 +34,21 @@ class GetDailyEvents
     {
         $todayDate = Carbon::parse($this->date, $this->timezone)->startOfDay();
         $tomorrowDate = Carbon::parse($this->date, $this->timezone)->addDay()->startOfDay();
-        /** @var ?Event $firstEvent */
-        $firstEvent = $this->user->events()->orderBy('start_date_time')->first();
-        /** @var ?Event $latestEvent */
-        $latestEvent = $this->user->events()->orderBy('start_date_time', 'desc')->latest()->first();
+        /** @var ?CalendarEvent $firstEvent */
+        $firstEvent = $this->user->calendarEvents()->orderBy('start_date_time')->first();
+        /** @var ?CalendarEvent $latestEvent */
+        $latestEvent = $this->user->calendarEvents()->orderBy('start_date_time', 'desc')->latest()->first();
 
-        $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $this->date, 'UTC')->setTimezone($this->timezone)->startOfMonth();
-        $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $this->date, 'UTC')->setTimezone($this->timezone)->endOfMonth();
+        $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->startOfMonth();
+        $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->endOfMonth();
         if ($todayDate->isAfter($endCalendarMonth)) {
-            //            $endCalendarMonth = Carbon::parse($todayDate, $this->timezone)->endOfMonth();
-            $endCalendarMonth = $todayDate->endOfMonth();
+            $endCalendarMonth = (clone $todayDate)->endOfMonth();
         }
 
-        $dailyEvents = clone $this->user->events();
+        $dailyEvents = clone $this->user->calendarEvents()->tap(fn ($collection) => $collection->each(
+            fn ($event): string => $event->date = Carbon::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+        ));
+
         $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
 
         return [
@@ -56,19 +59,18 @@ class GetDailyEvents
         ];
     }
 
-    /**
-     * @return list
-     */
     private function getDailyEvents(Carbon $todayDate, Carbon $tomorrowDate): array
     {
-        $eventsCollection = $this->user->events()
-            ->whereBetween('start_date_time', [$todayDate->setTimezone('UTC'), $tomorrowDate->setTimezone('UTC')])
+        $todayDateUTC = (clone $todayDate)->setTimezone('UTC');
+        $tomorrowDateUTC = (clone $tomorrowDate)->setTimezone('UTC');
+        $eventsCollection = $this->user->calendarEvents()
+            ->whereBetween('start_date_time', [$todayDateUTC, $tomorrowDateUTC])
             ->orderBy('start_date_time')
             ->get();
 
         $events = [];
         foreach ($eventsCollection as $dayEvent) {
-            /** @var Event $dayEvent */
+            /** @var CalendarEvent $dayEvent */
             $events[] = new EventDayViewResource($dayEvent, $this->timezone)->resolve();
         }
 

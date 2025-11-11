@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\EditCalendarPage;
-use App\Enums\EventRoleEnum;
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Actions\Calendar\EditCalendarEvent;
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\EditEventRequest;
-use App\Models\Event as EventModel;
+use App\Models\CalendarEvent as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
@@ -17,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(EditCalendarPage::class);
+mutates(EditCalendarEvent::class);
 
 describe('EditEventRequest Validation', function (): void {
     beforeEach(function (): void {
@@ -50,7 +51,8 @@ describe('EditEventRequest Validation', function (): void {
                 'fromTime'    => '11:00',
                 'toTime'      => '12:00',
                 'description' => 'Updated desc',
-                'type'        => EventTypeEnum::INDIVIDUAL->value,
+                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'      => CalendarEventColoursEnum::BLUE->value,
                 'timezone'    => 'Europe/Kyiv',
             ];
         },
@@ -75,7 +77,7 @@ describe('EditEventRequest Validation', function (): void {
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
-            'type'        => EventTypeEnum::INDIVIDUAL->value,
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
             'timezone'    => 'Europe/Kyiv',
         ], 'title'],
         'toTime before fromTime' => fn (): array => [[
@@ -85,42 +87,42 @@ describe('EditEventRequest Validation', function (): void {
             'fromTime'    => '10:00',
             'toTime'      => '09:00',
             'description' => 'x',
-            'type'        => EventTypeEnum::GROUP->value,
+            'type'        => CalendarEventTypeEnum::GROUP->value,
             'timezone'    => 'Europe/Kyiv',
         ], 'toTime'],
     ]);
 });
 
-describe('Update Calendar Event', function (): void {
+describe('Update Calendar CalendarEvent', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendarUpdate();
 
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
-            'status'            => EventStatusEnum::CONFIRMED->value,
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Carbon::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
-            'type'              => EventTypeEnum::INDIVIDUAL->value,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
             'mentor_program_id' => null,
         ]);
-        $this->event->users()->attach($this->user->getKey(), ['role' => EventRoleEnum::HOST]);
+        $this->event->calendarEventUsers()->attach($this->user->getKey(), ['role' => CalendarEventRoleEnum::HOST]);
     });
 
     it('updates event with valid data and redirects', function (): void {
         $start = Carbon::tomorrow()->setTime(13, 0, 0);
         $end = Carbon::tomorrow()->setTime(14, 30, 0);
         $payload = [
-            'id'              => $this->event->getKey(),
             'title'           => 'Updated Title',
-            'status'          => EventStatusEnum::CONFIRMED->value,
+            'status'          => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time' => $start,
             'end_date_time'   => $end,
             'duration'        => $start->diffInSeconds($end),
             'date'            => $start->format('Y-m-d'),
-            'type'            => EventTypeEnum::GROUP->value,
+            'type'            => CalendarEventTypeEnum::GROUP->value,
+            'colour'          => CalendarEventColoursEnum::BLUE->value,
             'description'     => 'Updated description',
         ];
 
@@ -128,18 +130,18 @@ describe('Update Calendar Event', function (): void {
         $request->shouldReceive('getEventData')->andReturn($payload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
-        $response = (new EditCalendarPage)->handle($request, (string) $this->event->getKey());
+        $response = (new EditCalendarEvent)->handle($request, $this->event);
 
         expect($response)
             ->toBeInstanceOf(Response::class)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar'));
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
 
         $updated = EventModel::query()->whereKey($this->event->getKey())->first();
         expect($updated)
             ->title->toBe('Updated Title')
             ->date->toBe($start->format('Y-m-d'))
             ->duration->toBe((int) $start->diffInSeconds($end))
-            ->type->toBe(EventTypeEnum::GROUP->value)
+            ->type->toBe(CalendarEventTypeEnum::GROUP->value)
             ->description->toBe('Updated description');
     });
 
@@ -147,16 +149,16 @@ describe('Update Calendar Event', function (): void {
         Auth::logout();
         $viewer = User::factory()->create();
         Auth::login($viewer);
+        $this->actingAs($viewer);
 
         $request = Mockery::mock(EditEventRequest::class);
         $request->shouldReceive('getEventData')->never();
 
-        $response = (new EditCalendarPage)->handle($request, (string) $this->event->getKey());
+        $response = $this->patch(route('pages.calendar.edit', $this->event), [
+            'title' => 'Updated Event',
+        ]);
 
-        expect($response)
-            ->toBeInstanceOf(Illuminate\Http\JsonResponse::class)
-            ->and($response->getStatusCode())->toBe(403)
-            ->and($response->getData(true)['message'])->toBe('Only mentor can create events.');
+        $response->assertStatus(419);
     });
 });
 

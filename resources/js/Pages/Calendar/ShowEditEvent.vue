@@ -36,11 +36,13 @@ const event = ref<EventFormData>({
     toTime: '',
     type: 'Individual',
     description: '',
-    timezone: timeZone
+    colour: '',
+    timezone: ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC')
 });
 
 
 interface EventFormData {
+    id: string;
     title: string;
     fromDate: string;
     fromDateFormatted: string;
@@ -51,11 +53,11 @@ interface EventFormData {
     description: string;
     duration: string;
     type: 'Group' | 'Individual';
+    colour: string;
     timeZone: string;
 }
 
 const changeMode = (newMode: string) => {
-    console.log(newMode)
     mode.value = newMode;
 }
 
@@ -77,10 +79,12 @@ const errors = ref({
     "fromDate": null,
     "toTime": null,
     "title": null,
+    'colour': null,
     'description': null
 });
 
 let form = useForm({
+    id: '',
     title: '',
     fromDate: '',
     toDate: '',
@@ -88,8 +92,12 @@ let form = useForm({
     toTime: '10:00',
     type: 'Individual',
     description: '',
+    colour: '',
     timezone: timeZone
 });
+const availableColours = ref([]);
+const availableColoursScheme = ref({});
+const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 
 const eventTypes = [
     {value: 'Individual', label: 'Individual', icon: UserIcon},
@@ -99,20 +107,27 @@ const eventTypes = [
 onMounted(() => {
     const now = new Date();
     const eventData = usePage().props.event;
+    availableColours.value = usePage().props.availableColours;
+    availableColoursScheme.value = availableColours.value.reduce((acc, c) => {
+        acc[c] = `bg-${c}-500`;
+        return acc;
+    }, {} as Record<string, string>);
 
-    console.log(eventData);
-    if (eventData && eventData.length > 0) {
-        event.value = eventData[0];
+
+    if (eventData) {
+        event.value = eventData;
         permissions.value = usePage().props.permissions;
 
         Object.assign(form, {
-            title: eventData[0].title || '',
-            fromDate: eventData[0].fromDate || '',
-            toDate: eventData[0].toDate || '',
-            fromTime: eventData[0].fromTime || '',
-            toTime: eventData[0].toTime || '',
-            type: eventData[0].type || '',
-            description: eventData[0].description || ''
+            id: eventData.id || '',
+            title: eventData.title || '',
+            fromDate: eventData.fromDate || '',
+            toDate: eventData.toDate || '',
+            fromTime: eventData.fromTime || '',
+            toTime: eventData.toTime || '',
+            type: eventData.type || '',
+            colour: eventData.colour || '',
+            description: eventData.description || ''
         });
     }
 });
@@ -126,11 +141,20 @@ const isFormValid = computed(() => {
         form.fromDate &&
         form.toDate &&
         form.fromTime &&
+        form.colour &&
         form.toTime;
 });
 
 const validateForm = () => {
-    errors.value = {fromTime: null, fromDate: null, title: null, toDate: null, toTime: null, description: null};
+    errors.value = {
+        fromTime: null,
+        fromDate: null,
+        title: null,
+        toDate: null,
+        toTime: null,
+        colour: null,
+        description: null
+    };
 
     if (!form.title.trim()) {
         errors.value.title = 'Title is required';
@@ -164,7 +188,6 @@ const validateForm = () => {
             errors.value.toDate = 'End date/time must be after start date/time';
         }
     }
-    console.log(errors.value);
     let errorStatus = false;
 
     Object.keys(errors.value).forEach(key => {
@@ -198,7 +221,7 @@ const handleSubmit = () => {
 
 const handleClose = () => {
     console.log('close')
-    router.visit(route('pages.calendar'), {})
+    router.visit(route('pages.calendar.index'), {})
 };
 
 watch(() => form.fromDate, (newFromDate) => {
@@ -354,6 +377,122 @@ watch(() => form.fromTime, (newFromTime) => {
                                             </Listbox>
                                         </div>
 
+
+                                        <div v-if="availableColours">
+                                            <label class="block text-sm font-medium leading-6 text-gray-900">
+                                                Color
+                                            </label>
+                                            <Listbox v-model="form.colour">
+                                                <div class="relative mt-2">
+                                                    <ListboxButton
+                                                        class="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300">
+                                                    <span
+                                                        class="flex items-center">
+                                                            <span
+                                                                class="inline-block h-4 w-6 rounded border border-gray-300 mr-2 align-middle"
+                                                                :class="availableColoursScheme[form.colour]"
+                                                            />
+                                                            <span class="block truncate">{{
+                                                                    capitalize(form.colour)
+                                                                }}</span>
+                                                        <span></span>
+                                                    </span>
+                                                        <span
+                                                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                                            <ChevronUpDownIcon class="h-5 w-5 text-gray-400"
+                                                                               aria-hidden="true"/>
+                                                        </span>
+                                                    </ListboxButton>
+                                                    <transition
+                                                        leave-active-class="transition duration-100 ease-in"
+                                                        leave-from-class="opacity-100"
+                                                        leave-to-class="opacity-0">
+                                                        <ListboxOptions
+                                                            class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm z-10">
+                                                            <ListboxOption
+                                                                v-for="availableColour in availableColours"
+                                                                :key="availableColour"
+                                                                v-slot="{ active, selected }"
+                                                                :value="availableColour"
+                                                                as="template"
+                                                            >
+                                                                <li :class="[active ? 'bg-amber-100 text-amber-900' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-10 pr-4']">
+                                                                    <span
+                                                                        :class="[selected ? 'font-medium' : 'font-normal', 'flex items-center truncate']">
+                                                                        <span
+                                                                            class="inline-block h-4 w-6 rounded border border-gray-300 mr-2 align-middle"
+                                                                            :class="availableColoursScheme[availableColour]"
+                                                                        />
+                                                                        <span class="align-middle">{{
+                                                                                capitalize(availableColour) || 'No color'
+                                                                            }}</span>
+                                                                    </span>
+                                                                    <span v-if="selected"
+                                                                          class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                                                              <CheckIcon class="h-5 w-5" aria-hidden="true"/>
+                                                           </span>
+                                                                </li>
+                                                            </ListboxOption>
+                                                        </ListboxOptions>
+                                                    </transition>
+                                                </div>
+                                            </Listbox>
+                                        </div>
+
+<!--                                        <div>-->
+<!--                                            <label class="block text-sm font-medium leading-6 text-gray-900">-->
+<!--                                                Color-->
+<!--                                            </label>-->
+<!--                                            -->
+<!--                                            <Listbox v-model="form.type">-->
+<!--                                                <div class="relative mt-2">-->
+<!--                                                    <ListboxButton-->
+<!--                                                        class="relative w-full cursor-default rounded-lg bg-white pl-2 py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm border border-gray-300">-->
+<!--                                                    <span-->
+<!--                                                        class="flex items-center">-->
+<!--                                                            <component :is="selectedEventType?.icon"-->
+<!--                                                                       class="h-5 w-5 text-gray-400 mr-3"/>-->
+<!--                                                            <span class="block truncate">{{-->
+<!--                                                                    selectedEventType?.label-->
+<!--                                                                }}</span>-->
+<!--                                                    </span>-->
+<!--                                                        <span-->
+<!--                                                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">-->
+<!--                                                            <ChevronUpDownIcon class="h-5 w-5 text-gray-400"-->
+<!--                                                                               aria-hidden="true"/>-->
+<!--                                                        </span>-->
+<!--                                                    </ListboxButton>-->
+<!--                                                    <transition-->
+<!--                                                        leave-active-class="transition duration-100 ease-in"-->
+<!--                                                        leave-from-class="opacity-100"-->
+<!--                                                        leave-to-class="opacity-0">-->
+<!--                                                        <ListboxOptions-->
+<!--                                                            class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white pl-2 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm z-10">-->
+<!--                                                            <ListboxOption-->
+<!--                                                                v-for="type in eventTypes"-->
+<!--                                                                :key="type.value"-->
+<!--                                                                v-slot="{ active, selected }"-->
+<!--                                                                :value="type.value"-->
+<!--                                                                as="template"-->
+<!--                                                            >-->
+<!--                                                                <li :class="[active ? 'bg-amber-100 text-amber-900' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-10 pr-4']">-->
+<!--                                                          <span-->
+<!--                                                              :class="[selected ? 'font-medium' : 'font-normal', 'flex items-center truncate']">-->
+<!--                                                              <component :is="type.icon" class="h-5 w-5 mr-3"/>-->
+<!--                                                                {{ type.label }}-->
+<!--                                                          </span>-->
+<!--                                                                    <span v-if="selected"-->
+<!--                                                                          class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">-->
+<!--                                                              <CheckIcon class="h-5 w-5" aria-hidden="true"/>-->
+<!--                                                           </span>-->
+<!--                                                                </li>-->
+<!--                                                            </ListboxOption>-->
+<!--                                                        </ListboxOptions>-->
+<!--                                                    </transition>-->
+<!--                                                </div>-->
+<!--                                            </Listbox>-->
+<!--                                        </div>-->
+
                                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
                                                 <label for="from-date"
@@ -438,65 +577,8 @@ watch(() => form.fromTime, (newFromTime) => {
                                 </div>
                             </div>
 
-                            <!--                            <div v-if="mode === 'show'" class="sm:flex sm:items-start">-->
-                            <!--                                <div class="mt-3 text-center sm:ml-0 sm:mt-0 sm:text-left w-full">-->
-                            <!--                                    <DialogTitle as="h3" class="text-base font-semibold leading-6 text-gray-900 mb-4">-->
-                            <!--                                        Event Record-->
-                            <!--                                    </DialogTitle>-->
-                            <!--                                        <div>-->
-                            <!--                                            <label for="title"-->
-                            <!--                                                   class="block text-sm font-medium leading-6 text-gray-900">-->
-                            <!--                                                Event Title-->
-                            <!--                                            </label>-->
-                            <!--                                            <div class="mt-2">-->
-                            <!--                                                {{event.title}}-->
-                            <!--                                            </div>-->
-                            <!--                                        </div>-->
-                            <!--                                        <div>-->
-                            <!--                                            <label for="title"-->
-                            <!--                                                   class="block text-sm font-medium leading-6 text-gray-900">-->
-                            <!--                                                Description-->
-                            <!--                                            </label>-->
-                            <!--                                            <div class="mt-2">-->
-                            <!--                                                {{event.description}}-->
-                            <!--                                            </div>-->
-                            <!--                                        </div>-->
-                            <!--                                        <div>-->
-                            <!--                                            <label class="block text-sm font-medium leading-6 text-gray-900">-->
-                            <!--                                                Event Type-->
-                            <!--                                            </label>-->
-                            <!--                                            <div class="relative mt-2">-->
-                            <!--                                             {{event.type}}-->
-                            <!--                                        </div>-->
-                            <!--                                        </div>-->
-
-                            <!--                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">-->
-                            <!--                                            <div>-->
-                            <!--                                                <label for="from-date"-->
-                            <!--                                                       class="block text-sm font-medium leading-6 text-gray-900">-->
-                            <!--                                                    <CalendarIcon class="inline h-4 w-4 mr-1"/>-->
-                            <!--                                                    From Date-->
-                            <!--                                                </label>-->
-                            <!--                                                <div class="mt-2">-->
-                            <!--                                                    {{event.fromDate}}-->
-                            <!--                                                </div>-->
-                            <!--                                            </div>-->
-
-                            <!--                                            <div>-->
-                            <!--                                                <label for="to-date"-->
-                            <!--                                                       class="block text-sm font-medium leading-6 text-gray-900">-->
-                            <!--                                                    <CalendarIcon class="inline h-4 w-4 mr-1"/>-->
-                            <!--                                                    To Date-->
-                            <!--                                                </label>-->
-                            <!--                                                <div class="mt-2">-->
-                            <!--                                                   {{event.toDate}}-->
-                            <!--                                                </div>-->
-                            <!--                                            </div>-->
-                            <!--                                        </div>-->
-                            <!--                                </div>-->
-                            <!--                            </div>-->
-
                             <div v-if="mode === 'show'" class="sm:flex sm:items-start">
+
                                 <div class="mt-3 text-center sm:ml-0 sm:mt-0 sm:text-left w-full">
                                     <DialogTitle as="h3"
                                                  class="text-lg font-semibold leading-6 text-gray-900 mb-6 pb-2 border-b border-gray-200">
@@ -505,7 +587,7 @@ watch(() => form.fromTime, (newFromTime) => {
                                     </DialogTitle>
 
                                     <div class="space-y-6">
-                                        <!-- Event Title -->
+                                        <!-- CalendarEvent Title -->
                                         <div
                                             class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 border border-indigo-100">
                                             <div class="flex items-center mb-2">
@@ -521,7 +603,27 @@ watch(() => form.fromTime, (newFromTime) => {
                                                 {{ event.title || 'No title provided' }}</p>
                                         </div>
 
-                                        <!-- Event Type -->
+                                        <div v-if="availableColours">
+                                            <label class="block text-sm font-medium leading-6 text-gray-900">
+                                                Color
+                                            </label>
+                                            <Listbox v-model="form.colour">
+                                                <div class="relative mt-2">
+                                                        <span
+                                                            class="flex items-center">
+                                                                <span
+                                                                    class="inline-block h-4 w-6 rounded border border-gray-300 mr-2 align-middle"
+                                                                    :class="availableColoursScheme[form.colour]"
+                                                                />
+                                                                <span class="block truncate">{{
+                                                                        capitalize(form.colour)
+                                                                    }}</span>
+                                                        </span>
+                                                </div>
+                                            </Listbox>
+                                        </div>
+
+                                        <!-- CalendarEvent Type -->
                                         <div class="flex items-start space-x-3">
                                             <div class="flex-shrink-0">
                                                 <div
@@ -534,12 +636,13 @@ watch(() => form.fromTime, (newFromTime) => {
                                             <div class="min-w-0 flex-1">
                                                 <h4 class="text-sm font-medium text-gray-700">Event Type</h4>
                                                 <div class="mt-1">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                              :class="event.type === 'Individual' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'">
-                            <UserIcon v-if="event.type === 'Individual'" class="h-3 w-3 mr-1"/>
-                            <UserGroupIcon v-else class="h-3 w-3 mr-1"/>
-                            {{ event.type || 'Not specified' }}
-                        </span>
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                                :class="event.type === 'Individual' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'">
+                                                <UserIcon v-if="event.type === 'Individual'" class="h-3 w-3 mr-1"/>
+                                                <UserGroupIcon v-else class="h-3 w-3 mr-1"/>
+                                                {{ event.type || 'Not specified' }}
+                                            </span>
                                                 </div>
                                             </div>
                                         </div>

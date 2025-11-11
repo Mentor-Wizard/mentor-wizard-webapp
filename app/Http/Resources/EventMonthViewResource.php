@@ -25,12 +25,14 @@ class EventMonthViewResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
+        $timezone = $this->additional['timeZone'] ?? 'UTC';
+
         return [
             'name'     => $this->title,
-            'time'     => $this->start_date_time->format('gA'),
-            'datetime' => $this->start_date_time->format('Y-m-d\TH:i'),
+            'time'     => $this->start_date_time->setTimezone($timezone)->format('gA'),
+            'datetime' => $this->start_date_time->setTimezone($timezone)->format('Y-m-d\TH:i'),
             'href'     => $this->web_link,
-            'id'       => $this->id,
+            'id'       => $this->getKey(),
         ];
     }
 }

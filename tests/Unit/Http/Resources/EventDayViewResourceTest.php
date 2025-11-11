@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventCalendarColoursEnum;
+use App\Enums\CalendarEventColoursEnum;
 use App\Http\Resources\EventDayViewResource;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
@@ -15,8 +15,7 @@ describe('EventDayViewResource', function (): void {
         $start = Carbon::now()->addDays(2)->setTime(22, 0, 0, 0);
         $end = (clone $start)->addHour();
 
-        /** @var Event $event */
-        $event = Event::factory()->create([
+        $event = CalendarEvent::factory()->create([
             'title'           => 'Day Resource Test',
             'start_date_time' => $start,
             'end_date_time'   => $end,
@@ -39,6 +38,6 @@ describe('EventDayViewResource', function (): void {
             ->and($array['startIndex'])->toBe(134)
             ->and($array['title'])->toBe('Day Resource Test')
             ->and($array['href'])->toBe('https://example.com/day')
-            ->and(in_array(Arr::get($array, 'colour'), EventCalendarColoursEnum::values(), true))->toBeTrue();
+            ->and(in_array(Arr::get($array, 'colour'), CalendarEventColoursEnum::values(), true))->toBeTrue();
     });
 });

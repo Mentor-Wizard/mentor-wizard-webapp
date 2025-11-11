@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
-use App\Actions\Calendar\Services\CheckAvailableSlots;
-use App\Actions\Calendar\Services\GetAvailableSlots;
-use App\Enums\EventStatusEnum;
-use App\Enums\EventTypeEnum;
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
+use App\Services\Calendar\CheckTimeSlotReservedService;
 use Exception;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -30,8 +30,9 @@ class StoreEventRequest extends FormRequest
             'toDate'      => ['required', 'date', 'after_or_equal:fromDate'],
             'fromTime'    => ['required', 'date_format:H:i'],
             'toTime'      => ['required', 'date_format:H:i', 'after:fromTime'],
+            'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
             'description' => ['max:2000'],
-            'type'        => ['required', Rule::in(EventTypeEnum::values())],
+            'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
             'timezone'    => ['required', 'string'],
         ];
     }
@@ -53,8 +54,14 @@ class StoreEventRequest extends FormRequest
                 $validator->errors()->add('fromDate', 'toDate is not valid');
             }
 
-            if (! $this->checkAvailableSlots($this->input('fromDate'), $this->input('fromTime'),
-                $this->input('toDate'), $this->input('toTime'), $this->input('timezone', 'Europe/Kyiv'))) {
+            $isWithinAvailableSlots = new CheckTimeSlotReservedService(
+                $this->input('fromDate'),
+                $this->input('fromTime'),
+                $this->input('toDate'),
+                $this->input('toTime'),
+                $this->input('timezone', 'UTC'), auth()->user())->execute();
+
+            if (! $isWithinAvailableSlots) {
                 $validator->errors()->add('fromDate', 'there are another events on this time');
             }
         });
@@ -64,8 +71,8 @@ class StoreEventRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required'          => 'Event title is required.',
-            'title.max'               => 'Event title cannot exceed 255 characters.',
+            'title.required'          => 'CalendarEvent title is required.',
+            'title.max'               => 'CalendarEvent title cannot exceed 255 characters.',
             'fromDate.required'       => 'Start date is required.',
             'fromDate.date'           => 'Start date must be a valid date.',
             'fromDate.after_or_equal' => 'Start date cannot be in the past.',
@@ -73,47 +80,41 @@ class StoreEventRequest extends FormRequest
             'toDate.date'             => 'End date must be a valid date.',
             'toDate.after_or_equal'   => 'End date must be on or after the start date.',
             'fromTime.required'       => 'Start time is required.',
+            'colour.required'         => 'Colour is required.',
             'fromTime.date_format'    => 'Start time must be in HH:MM format.',
             'toTime.required'         => 'End time is required.',
             'toTime.date_format'      => 'End time must be in HH:MM format.',
             'toTime.after'            => 'End time must be after start time.',
             'description.max'         => 'Description cannot exceed 2000 characters.',
-            'type.required'           => 'Event type is required.',
-            'type.in'                 => 'Event type must be either individual or group.',
+            'type.required'           => 'CalendarEvent type is required.',
+            'type.in'                 => 'CalendarEvent type must be either individual or group.',
         ];
     }
 
     public function getEventData(): array
     {
         $validated = $this->validated();
+
         try {
             $startDateTime = Carbon::createFromFormat(
                 'Y-m-d H:i',
-                $validated['fromDate'].' '.$validated['fromTime']
-            );
+                $validated['fromDate'].' '.$validated['fromTime'],
+                $validated['timezone']
+            )?->setTimezone('UTC');
             $endDateTime = Carbon::createFromFormat(
                 'Y-m-d H:i',
-                $validated['toDate'].' '.$validated['toTime']
-            );
-
+                $validated['toDate'].' '.$validated['toTime'],
+                $validated['timezone']
+            )?->setTimezone('UTC');
         } catch (Exception) {
-            return [
-                'title'           => null,
-                'start_date_time' => null,
-                'end_date_time'   => null,
-                'duration'        => null,
-                'type'            => null,
-                'description'     => null,
-                'status'          => null,
-                'date'            => null,
-            ];
+            return [];
         }
 
         $duration = (int) $startDateTime?->diffInSeconds($endDateTime);
         $eventType = match ($validated['type']) {
-            'individual' => EventTypeEnum::INDIVIDUAL->value,
-            'group'      => EventTypeEnum::GROUP->value,
-            default      => EventTypeEnum::INDIVIDUAL->value,
+            'individual' => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'group'      => CalendarEventTypeEnum::GROUP->value,
+            default      => CalendarEventTypeEnum::INDIVIDUAL->value,
         };
 
         return [
@@ -122,8 +123,9 @@ class StoreEventRequest extends FormRequest
             'end_date_time'   => $endDateTime,
             'duration'        => $duration,
             'type'            => $eventType,
+            'colour'          => $validated['colour'],
             'description'     => $validated['description'],
-            'status'          => EventStatusEnum::CONFIRMED,
+            'status'          => CalendarEventStatusEnum::CONFIRMED,
             'date'            => $startDateTime?->format('Y-m-d'),
         ];
     }
@@ -137,23 +139,5 @@ class StoreEventRequest extends FormRequest
                 return;
             }
         }
-    }
-
-    private function checkAvailableSlots(string $fromDate, string $fromTime, string $toDate, string $toTime, string $timezone): bool
-    {
-        $this->validated();
-        $startDateTimestamp = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $fromDate.' '.$fromTime,
-            $timezone
-        )->timestamp;
-        $endDateTimestamp = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $toDate.' '.$toTime,
-            $timezone
-        )->timestamp;
-        $availableSlots = new GetAvailableSlots(auth()->user(), $timezone)->execute();
-
-        return new CheckAvailableSlots($availableSlots, $startDateTimestamp, $endDateTimestamp)->execute();
     }
 }

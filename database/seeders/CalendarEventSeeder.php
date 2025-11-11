@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\EventRoleEnum;
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleEnum;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class EventSeeder extends Seeder
+class CalendarEventSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -20,16 +20,16 @@ class EventSeeder extends Seeder
         $mentors = User::query()->role(RoleEnum::MENTOR)->get();
         $menti = User::query()->role(RoleEnum::MENTI)->get();
 
-        Event::factory()
+        CalendarEvent::factory()
             ->count(500)
             ->create()
             ->each(function ($event) use ($mentors, $menti): void {
-                $mentors->random(1)->first()->events()->attach($event, [
-                    'role' => EventRoleEnum::HOST,
+                $mentors->random(1)->first()->calendarEvents()->attach($event, [
+                    'role' => CalendarEventRoleEnum::HOST,
                 ]);
                 $menti->random(1, 3)->each(function ($user) use ($event): void {
-                    $user->events()->attach($event, [
-                        'role' => EventRoleEnum::MENTI,
+                    $user->calendarEvents()->attach($event, [
+                        'role' => CalendarEventRoleEnum::MENTI,
                     ]);
                 });
             });

@@ -2,21 +2,25 @@
 
 declare(strict_types=1);
 
-use App\Enums\EventCalendarColoursEnum;
+use App\Enums\CalendarEventColoursEnum;
 use App\Http\Resources\EventWeekViewResource;
-use App\Models\Event;
-use Illuminate\Support\Arr;
+use App\Models\CalendarEvent;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 
 mutates(EventWeekViewResource::class);
 
 describe('EventWeekViewResource', function (): void {
     it('maps event to week view payload with dayNumber and timezone-aware fields', function (): void {
+        $this->seed(RoleSeeder::class);
+
         $start = Carbon::create(2025, 8, 24, 22, 0, 0);
         $end = (clone $start)->addHour();
 
-        /** @var Event $event */
-        $event = Event::factory()->create([
+        $user = App\Models\User::factory()->create();
+
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::factory()->create([
             'title'           => 'Week Resource Test',
             'start_date_time' => $start,
             'end_date_time'   => $end,
@@ -27,7 +31,11 @@ describe('EventWeekViewResource', function (): void {
             'description'     => 'Week view description',
         ]);
 
-        $resource = new EventWeekViewResource($event, 'Europe/Kyiv');
+        $event->calendarEventUsers()->attach($user->getKey(), [
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $resource = new EventWeekViewResource($event, 'Europe/Kyiv')->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         expect($array)
@@ -40,6 +48,6 @@ describe('EventWeekViewResource', function (): void {
             ->and($array['startIndex'])->toBe(8)
             ->and($array['title'])->toBe('Week Resource Test')
             ->and($array['href'])->toBe('https://example.com/week')
-            ->and(in_array(Arr::get($array, 'colour'), EventCalendarColoursEnum::values(), true))->toBeTrue();
+            ->and($array['colour'])->toBe(CalendarEventColoursEnum::BLUE->value);
     });
 });

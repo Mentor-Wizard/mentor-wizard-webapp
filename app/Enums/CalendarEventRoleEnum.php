@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum EventTypeEnum: string
+enum CalendarEventRoleEnum: string
 {
-    case INDIVIDUAL = 'Individual';
-    case GROUP = 'Group';
+    case HOST = 'Host';
+    case COHOST = 'Co-Host';
+    case MENTI = 'Menti';
+    case MODERATOR = 'Moderator';
 
     public static function names(): array
     {

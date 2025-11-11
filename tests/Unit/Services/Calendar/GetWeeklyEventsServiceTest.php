@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\Services\GetWeeklyEvents;
 use App\Models\User;
+use App\Services\Calendar\GetWeeklyEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 
-mutates(GetWeeklyEvents::class);
+mutates(GetWeeklyEventsService::class);
 
-describe('GetWeeklyEvents Service', function (): void {
+describe('GetWeeklyEventsService Service', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -24,7 +24,7 @@ describe('GetWeeklyEvents Service', function (): void {
 
         $date = '2025-01-15'; // Wednesday
 
-        $result = new GetWeeklyEvents($user, $date, $tz)->execute();
+        $result = new GetWeeklyEventsService($user, $date, $tz)->execute();
 
         expect($result)
             ->toHaveKeys(['events', 'calendarView']);

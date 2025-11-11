@@ -134,9 +134,11 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->hasMany(Chat::class, 'menti_id');
     }
 
-    public function events(): BelongsToMany
+    public function calendarEvents(): BelongsToMany
     {
-        return $this->belongsToMany(Event::class)->withTimestamps();
+        return $this->belongsToMany(CalendarEvent::class, 'calendar_event_user', 'user_id')
+            ->withPivot('colour')
+            ->withTimestamps();
     }
 
     public function coachChats(): HasMany

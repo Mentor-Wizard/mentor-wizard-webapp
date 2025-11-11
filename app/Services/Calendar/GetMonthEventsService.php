@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar\Services;
+namespace App\Services\Calendar;
 
 use App\Http\Resources\EventMonthViewResource;
-use App\Models\Event;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
-class GetMonthEvents
+class GetMonthEventsService
 {
     private array $calendarView = [];
 
-    public function __construct(private readonly User $user, private readonly string $date, private readonly string $timezone = 'Europe/Kyiv') {}
+    public function __construct(private readonly User $user, private readonly string $date, private readonly string $timezone = 'UTC') {}
 
     public function execute(): array
     {
@@ -46,13 +46,15 @@ class GetMonthEvents
 
     private function getFormattedEventsForPeriod(Carbon $startDate, Carbon $endDate): array
     {
-        return $this->user->events()
+        $caledarEvents = $this->user->calendarEvents()
             ->whereBetween('start_date_time', [$startDate, $endDate])
             ->orderBy('start_date_time')
-            ->get()
-            ->groupBy('date')
-            ->map(fn (Collection $dateEvents): array => $this->formatDateEvents($dateEvents))
-            ->toArray();
+            ->get()->tap(fn ($collection) => $collection->each(
+                fn ($event): string => $event->date = Carbon::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+            ));
+
+        return $caledarEvents->groupBy('date')->map(fn (Collection $dateEvents): array => $this->formatDateEvents($dateEvents))->toArray();
+
     }
 
     private function buildCalendarView(array $monthDates, array $events): array
@@ -69,11 +71,13 @@ class GetMonthEvents
 
     private function formatDateEvents(Collection $dateEvents): array
     {
-        /** @var ?Event $firstEvent */
+        /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $dateEvents->first();
+        $dateEvents->map(fn (CalendarEvent $event): string => $event->timezone = $this->timezone);
         $payload = [
-            'date'   => $firstEvent->start_date_time->format('Y-m-d'),
-            'events' => EventMonthViewResource::collection($dateEvents)->resolve(),
+            'date'   => $firstEvent->start_date_time->setTimezone($this->timezone)->format('Y-m-d'),
+            'events' => EventMonthViewResource::collection($dateEvents)
+                ->resolve(),
         ];
 
         $parsedDate = Carbon::parse($this->date, $this->timezone);
@@ -96,11 +100,11 @@ class GetMonthEvents
 
     private function hasEventsBeforeDate(Carbon $startDate): bool
     {
-        return $this->user->events()->where('start_date_time', '<', $startDate)->exists();
+        return $this->user->calendarEvents()->where('start_date_time', '<', $startDate->setTimezone('UTC'))->exists();
     }
 
     private function hasEventsAfterDate(Carbon $endDate): bool
     {
-        return $this->user->events()->where('start_date_time', '>', $endDate->endOfDay())->exists();
+        return $this->user->calendarEvents()->where('start_date_time', '>', $endDate->setTimezone('UTC')->endOfDay())->exists();
     }
 }

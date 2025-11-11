@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum EventRoleEnum: string
+enum CalendarEventStatusEnum: string
 {
-    case HOST = 'Host';
-    case COHOST = 'Co-Host';
-    case MENTI = 'Menti';
-    case MODERATOR = 'Moderator';
+    case PENDING_MENTOR_CONFIRMATION = 'Pending Mentor Confirmation';
+    case PENDING_PAYMENT = 'Pending Payment';
+    case CONFIRMED = 'Confirmed';
+    case FINISHED = 'Finished';
+    case CANCELLED = 'Cancelled';
 
     public static function names(): array
     {
