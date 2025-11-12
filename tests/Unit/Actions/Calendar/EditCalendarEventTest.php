@@ -47,6 +47,7 @@ describe('EditCalendarEvent', function (): void {
 
         // Update event with new colour for current user
         $data = [
+            'id'          => $event->getKey(),
             'title'       => 'Updated Event',
             'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
             'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
