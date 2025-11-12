@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Resources\EventShowResource;
 use App\Models\CalendarEvent;
+use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
@@ -16,7 +17,7 @@ describe('EventShowResource', function (): void {
         $start = Date::create(2025, 8, 22, 9, 30, 0);
         $end = Date::create(2025, 8, 22, 11, 0, 0);
 
-        $user = App\Models\User::factory()->create();
+        $user = User::factory()->create();
 
         $event = CalendarEvent::factory()->create([
             'title'           => 'Show Resource Test',
@@ -57,7 +58,7 @@ describe('EventShowResource', function (): void {
         $start = Date::create(2025, 8, 22, 9, 30, 0);
         $end = Date::create(2025, 8, 22, 11, 0, 0);
 
-        $user = App\Models\User::factory()->create();
+        $user = User::factory()->create();
 
         $event = CalendarEvent::factory()->create([
             'title'           => 'Default TZ Event',
@@ -91,7 +92,7 @@ describe('EventShowResource', function (): void {
         $start = Date::create(2025, 8, 22, 9, 30, 0);
         $end = Date::create(2025, 8, 22, 11, 0, 0);
 
-        $user = App\Models\User::factory()->create();
+        $user = User::factory()->create();
 
         $event = CalendarEvent::factory()->create([
             'title'           => 'No User Event',

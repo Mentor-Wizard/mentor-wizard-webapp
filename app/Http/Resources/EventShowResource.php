@@ -46,7 +46,7 @@ class EventShowResource extends JsonResource
             'duration'          => CarbonInterval::seconds($this->duration)->cascade()->format('%H:%I'),
             'href'              => $this->web_link,
             'description'       => $this->description,
-            'colour'            => $this->resource->calendarEventUsers?->where('id', '=', $user->getKey())?->first()?->pivot?->colour,
+            'colour'            => $this->resource->calendarEventUsers?->where('id', '=', $user?->getKey())?->first()?->pivot?->colour,
         ];
     }
 }
