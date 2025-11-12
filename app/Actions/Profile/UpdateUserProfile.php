@@ -18,6 +18,6 @@ class UpdateUserProfile
 
         $user->profile->update($request->validated());
 
-        return redirect()->route('profile.edit');
+        return to_route('profile.edit');
     }
 }

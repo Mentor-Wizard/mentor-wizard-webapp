@@ -92,7 +92,7 @@ describe('LoginRequest Authentication', function (): void {
                 ->with('throttle_key')
                 ->once();
 
-            expect(fn () => $request->authenticate())
+            expect($request->authenticate(...))
                 ->toThrow(ValidationException::class);
         });
     });
@@ -121,7 +121,7 @@ describe('LoginRequest Authentication', function (): void {
 
             Event::fake();
 
-            expect(fn () => $request->ensureIsNotRateLimited())
+            expect($request->ensureIsNotRateLimited(...))
                 ->toThrow(ValidationException::class);
 
             Event::assertDispatched(Lockout::class);

@@ -17,6 +17,6 @@ class DeleteMentorProgramPage
     {
         $mentorProgram->delete();
 
-        return redirect()->route('mentor-program.create');
+        return to_route('mentor-program.create');
     }
 }
