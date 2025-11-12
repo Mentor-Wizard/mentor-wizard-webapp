@@ -6,6 +6,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Services\Calendar\GetDailyEventsService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 
 mutates(GetDailyEventsService::class);
 
@@ -15,14 +16,14 @@ describe('GetDailyEventsService Service', function (): void {
     });
 
     it('builds daily calendar grouped by month and appends days, marking flags correctly via service', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 3, 5, 8, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0, 'UTC'));
         $tz = 'UTC';
 
         /** @var User $user */
         $user = User::factory()->create();
 
         // Create an event on the selected day so hasEvent can be asserted
-        $start = Illuminate\Support\Facades\Date::create(2025, 3, 5, 14, 0, 0, 'UTC');
+        $start = Date::create(2025, 3, 5, 14, 0, 0, 'UTC');
         $end = (clone $start)->addMinutes(90);
 
         /** @var CalendarEvent $event */

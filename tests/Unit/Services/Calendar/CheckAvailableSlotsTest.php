@@ -6,6 +6,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 
 mutates(CheckTimeSlotReservedService::class);
 
@@ -15,7 +16,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     });
 
     it('returns true when user has no future events (no conflicts)', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $user = User::factory()->create();
 
         $service = new CheckTimeSlotReservedService(
@@ -31,12 +32,12 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     });
 
     it('returns true when requested interval fits entirely within an available slot', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
-        $event1StartUtc = Illuminate\Support\Facades\Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -64,12 +65,12 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     });
 
     it('returns false when requested interval overlaps with existing event', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
-        $event1StartUtc = Illuminate\Support\Facades\Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -97,14 +98,14 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     });
 
     it('returns true when requested slot is between two events', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create two events
-        $event1StartUtc = Illuminate\Support\Facades\Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
         $event1EndUtc = (clone $event1StartUtc)->addHour();
-        $event2StartUtc = Illuminate\Support\Facades\Date::create(2025, 4, 1, 15, 0, 0, 'UTC');
+        $event2StartUtc = Date::create(2025, 4, 1, 15, 0, 0, 'UTC');
         $event2EndUtc = (clone $event2StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -141,12 +142,12 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     });
 
     it('excludes specified events when checking availability', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
-        $event1StartUtc = Illuminate\Support\Facades\Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([

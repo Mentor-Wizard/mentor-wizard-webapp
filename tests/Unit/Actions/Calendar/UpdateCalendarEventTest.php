@@ -9,10 +9,11 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\EditEventRequest;
-use App\Models\CalendarEvent as EventModel;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,7 +42,7 @@ describe('EditEventRequest Validation', function (): void {
         expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
     })->with([
         'single day event' => function (): array {
-            $tomorrow = Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d');
+            $tomorrow = Date::tomorrow()->format('Y-m-d');
 
             return [
                 'title'       => 'Updated Standup',
@@ -71,8 +72,8 @@ describe('EditEventRequest Validation', function (): void {
     })->with([
         'empty title' => fn (): array => [[
             'title'       => '',
-            'fromDate'    => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
-            'toDate'      => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
+            'toDate'      => Date::tomorrow()->format('Y-m-d'),
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
@@ -81,8 +82,8 @@ describe('EditEventRequest Validation', function (): void {
         ], 'title'],
         'toTime before fromTime' => fn (): array => [[
             'title'       => 'Wrong time',
-            'fromDate'    => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
-            'toDate'      => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
+            'toDate'      => Date::tomorrow()->format('Y-m-d'),
             'fromTime'    => '10:00',
             'toTime'      => '09:00',
             'description' => 'x',
@@ -97,11 +98,11 @@ describe('Update Calendar CalendarEvent', function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendarUpdate();
 
-        $this->event = EventModel::factory()->create([
+        $this->event = CalendarEvent::factory()->create([
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d').' 09:00:00',
-            'date'              => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -111,8 +112,8 @@ describe('Update Calendar CalendarEvent', function (): void {
     });
 
     it('updates event with valid data and redirects', function (): void {
-        $start = Illuminate\Support\Facades\Date::tomorrow()->setTime(13, 0, 0);
-        $end = Illuminate\Support\Facades\Date::tomorrow()->setTime(14, 30, 0);
+        $start = Date::tomorrow()->setTime(13, 0, 0);
+        $end = Date::tomorrow()->setTime(14, 30, 0);
         $payload = [
             'title'           => 'Updated Title',
             'status'          => CalendarEventStatusEnum::CONFIRMED->value,
@@ -135,7 +136,7 @@ describe('Update Calendar CalendarEvent', function (): void {
             ->toBeInstanceOf(Response::class)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
 
-        $updated = EventModel::query()->whereKey($this->event->getKey())->first();
+        $updated = CalendarEvent::query()->whereKey($this->event->getKey())->first();
         expect($updated)
             ->title->toBe('Updated Title')
             ->date->toBe($start->format('Y-m-d'))
@@ -158,6 +159,44 @@ describe('Update Calendar CalendarEvent', function (): void {
         ]);
 
         $response->assertStatus(403);
+    });
+
+    it('throws exception when event does not exist', function (): void {
+        $nonExistentEvent = new CalendarEvent;
+        $nonExistentEvent->exists = false;
+
+        $request = Mockery::mock(EditEventRequest::class);
+        $request->shouldReceive('getEventData')->never();
+
+        expect(fn (): Response => (new EditCalendarEvent)->handle($request, $nonExistentEvent))
+            ->toThrow(Illuminate\Database\Eloquent\ModelNotFoundException::class, 'Calendar Event not found.');
+    });
+
+    it('syncs user colour correctly', function (): void {
+        $start = Date::tomorrow()->setTime(13, 0, 0);
+        $end = Date::tomorrow()->setTime(14, 30, 0);
+        $payload = [
+            'title'           => 'Updated Title',
+            'status'          => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => $start->diffInSeconds($end),
+            'date'            => $start->format('Y-m-d'),
+            'type'            => CalendarEventTypeEnum::GROUP->value,
+            'colour'          => CalendarEventColoursEnum::GREEN->value,
+            'description'     => 'Updated description',
+        ];
+
+        $request = Mockery::mock(EditEventRequest::class);
+        $request->shouldReceive('getEventData')->andReturn($payload);
+        $request->shouldReceive('user')->andReturn(Auth::user());
+
+        (new EditCalendarEvent)->handle($request, $this->event);
+
+        // Verify colour was synced to pivot table
+        $pivot = $this->event->calendarEventUsers()->where('user_id', $this->user->getKey())->first()?->pivot;
+        expect($pivot)->not->toBeNull()
+            ->and($pivot->colour)->toBe(CalendarEventColoursEnum::GREEN->value);
     });
 });
 

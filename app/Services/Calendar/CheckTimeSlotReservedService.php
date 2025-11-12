@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Calendar;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Date;
 
-class CheckTimeSlotReservedService
+readonly class CheckTimeSlotReservedService
 {
-    public function __construct(private readonly string $fromDate, private readonly string $fromTime,
-        private readonly string $toDate, private readonly string $toTime, private readonly string $timezone,
-        private readonly User $user, private readonly array $excludeEvents = []) {}
+    public function __construct(private string $fromDate, private string $fromTime,
+        private string $toDate, private string $toTime, private string $timezone,
+        private User $user, private array $excludeEvents = []) {}
 
     public function execute(): bool
     {
@@ -20,12 +21,12 @@ class CheckTimeSlotReservedService
             return true;
         }
 
-        $startDate = \Illuminate\Support\Facades\Date::createFromFormat(
+        $startDate = Date::createFromFormat(
             'Y-m-d H:i',
             $this->fromDate.' '.$this->fromTime,
             $this->timezone
         );
-        $endDate = \Illuminate\Support\Facades\Date::createFromFormat(
+        $endDate = Date::createFromFormat(
             'Y-m-d H:i',
             $this->toDate.' '.$this->toTime,
             $this->timezone

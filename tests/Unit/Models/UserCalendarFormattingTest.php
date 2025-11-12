@@ -8,6 +8,7 @@ use App\Services\Calendar\GetDailyEventsService;
 use App\Services\Calendar\GetMonthEventsService;
 use App\Services\Calendar\GetWeeklyEventsService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
@@ -15,7 +16,7 @@ beforeEach(function (): void {
 
 it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) using service', function (): void {
     // Freeze time to ensure deterministic behaviour
-    Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
+    Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
     $tz = 'UTC';
 
     /** @var User $user */
@@ -40,14 +41,14 @@ it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) 
 
 it('includes empty day entries with events key for month calendar and sets flags for event day using service (timezone aware)', function (): void {
     // Set application now to UTC, but test conversion by using Europe/Kyiv for building
-    Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 2, 10, 9, 0, 0, 'UTC'));
+    Date::setTestNow(Date::create(2025, 2, 10, 9, 0, 0, 'UTC'));
     $tz = 'Europe/Kyiv';
 
     /** @var User $user */
     $user = User::factory()->create();
 
     // Create an event for today in UTC (will be converted in resource/service as needed)
-    $startUtc = Illuminate\Support\Facades\Date::create(2025, 2, 10, 10, 0, 0, 'UTC');
+    $startUtc = Date::create(2025, 2, 10, 10, 0, 0, 'UTC');
     $endUtc = (clone $startUtc)->addHour();
 
     $event = CalendarEvent::query()->create([
@@ -89,14 +90,14 @@ it('includes empty day entries with events key for month calendar and sets flags
 });
 
 it('builds daily calendar grouped by month and appends days, marking flags correctly via service', function (): void {
-    Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 3, 5, 8, 0, 0, 'UTC'));
+    Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0, 'UTC'));
     $tz = 'UTC';
 
     /** @var User $user */
     $user = User::factory()->create();
 
     // Create an event on the selected day so hasEvent can be asserted
-    $start = Illuminate\Support\Facades\Date::create(2025, 3, 5, 14, 0, 0, 'UTC');
+    $start = Date::create(2025, 3, 5, 14, 0, 0, 'UTC');
     $end = (clone $start)->addMinutes(90);
 
     $event = CalendarEvent::query()->create([

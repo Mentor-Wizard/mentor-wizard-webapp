@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\User;
 use App\Services\Calendar\GetWeeklyEventsService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 
 mutates(GetWeeklyEventsService::class);
 
@@ -15,7 +16,7 @@ describe('GetWeeklyEventsService Service', function (): void {
 
     it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) using service', function (): void {
         // Freeze time to ensure deterministic behaviour
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
         $tz = 'UTC';
 
         /** @var User $user */

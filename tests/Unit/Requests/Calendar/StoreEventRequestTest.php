@@ -7,6 +7,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\StoreEventRequest;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\Date;
 
 mutates(StoreEventRequest::class);
 
@@ -18,9 +19,9 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
             {
                 return [
                     'title'       => 'Test',
-                    'fromDate'    => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
+                    'fromDate'    => Date::today()->format('Y-m-d'),
                     'fromTime'    => '09:00',
-                    'toDate'      => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
+                    'toDate'      => Date::today()->format('Y-m-d'),
                     'toTime'      => '10:00',
                     'type'        => 'individual',
                     'description' => 'Desc',
@@ -44,9 +45,9 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
             {
                 return [
                     'title'       => 'Test',
-                    'fromDate'    => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
+                    'fromDate'    => Date::today()->format('Y-m-d'),
                     'fromTime'    => '11:00',
-                    'toDate'      => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
+                    'toDate'      => Date::today()->format('Y-m-d'),
                     'toTime'      => '12:30',
                     'type'        => 'group',
                     'description' => 'Desc',
@@ -73,7 +74,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
                     'title'       => 'Invalid',
                     'fromDate'    => 'not-a-date',   // invalid
                     'fromTime'    => 'xx:yy',        // invalid
-                    'toDate'      => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
+                    'toDate'      => Date::today()->format('Y-m-d'),
                     'toTime'      => '01:00',
                     'type'        => 'individual',
                     'description' => 'Desc',
@@ -89,7 +90,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
     });
 
     it('builds exact start/end when crossing midnight to ensure both date and time are concatenated', function (): void {
-        $today = Illuminate\Support\Facades\Date::today();
+        $today = Date::today();
         $tomorrow = $today->copy()->addDay();
 
         $request = new class($today, $tomorrow) extends StoreEventRequest
@@ -126,12 +127,15 @@ describe('StoreEventRequest rules and messages', function (): void {
         $rules = $request->rules();
 
         expect($rules)
-            ->toHaveKeys(['title', 'fromDate', 'toDate', 'fromTime', 'toTime', 'description', 'type', 'timezone'])
+            ->toHaveKeys(['title', 'fromDate', 'toDate', 'fromTime', 'toTime', 'description', 'type', 'timezone', 'colour'])
             ->and($rules['title'])->toContain('required', 'string', 'max:255')
             ->and($rules['fromDate'])->toContain('required', 'date', 'after_or_equal:today')
             ->and($rules['toDate'])->toContain('required', 'date', 'after_or_equal:fromDate')
             ->and($rules['fromTime'])->toContain('required', 'date_format:H:i')
-            ->and($rules['toTime'])->toContain('required', 'date_format:H:i')
+            ->and($rules['toTime'])->toContain('required', 'date_format:H:i', 'after:fromTime')
+            ->and($rules['colour'])->toContain('required')
+            ->and($rules['description'])->toContain('max:2000')
+            ->and($rules['type'])->toContain('required')
             ->and($rules['timezone'])->toContain('required', 'string');
     });
 
@@ -159,5 +163,35 @@ describe('StoreEventRequest rules and messages', function (): void {
                 'type.required',
                 'type.in',
             ]);
+    });
+
+    it('validates that toTime must be after fromTime', function (): void {
+        $request = new StoreEventRequest;
+        $rules = $request->rules();
+
+        expect($rules['toTime'])->toContain('after:fromTime');
+    });
+
+    it('validates colour is in allowed values', function (): void {
+        $request = new StoreEventRequest;
+        $rules = $request->rules();
+
+        expect($rules['colour'])->toHaveCount(2)
+            ->and($rules['colour'][0])->toBe('required');
+    });
+
+    it('validates type is in allowed values', function (): void {
+        $request = new StoreEventRequest;
+        $rules = $request->rules();
+
+        expect($rules['type'])->toHaveCount(2)
+            ->and($rules['type'][0])->toBe('required');
+    });
+
+    it('validates description max length is 2000', function (): void {
+        $request = new StoreEventRequest;
+        $rules = $request->rules();
+
+        expect($rules['description'])->toContain('max:2000');
     });
 });

@@ -11,6 +11,7 @@ use App\Services\Calendar\GetMonthEventsService;
 use App\Services\Calendar\GetWeeklyEventsService;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,7 +24,7 @@ class CalendarsListPage
     public function handle(Request $request): Response
     {
         $timezone = $request->get('timezone');
-        $date = $request->get('date') ?? \Illuminate\Support\Facades\Date::now($timezone)->format('Y-m-d');
+        $date = $request->get('date') ?? Date::now($timezone)->format('Y-m-d');
         $mode = $request->get('mode') ?? 'Month view';
         $user = auth()->user();
 

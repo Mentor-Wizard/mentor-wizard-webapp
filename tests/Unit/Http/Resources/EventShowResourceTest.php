@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Resources\EventShowResource;
 use App\Models\CalendarEvent;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 
 mutates(EventShowResource::class);
 
@@ -12,8 +13,8 @@ describe('EventShowResource', function (): void {
     it('maps event to detailed payload', function (): void {
         $this->seed(RoleSeeder::class);
 
-        $start = Illuminate\Support\Facades\Date::create(2025, 8, 22, 9, 30, 0);
-        $end = Illuminate\Support\Facades\Date::create(2025, 8, 22, 11, 0, 0);
+        $start = Date::create(2025, 8, 22, 9, 30, 0);
+        $end = Date::create(2025, 8, 22, 11, 0, 0);
 
         $user = App\Models\User::factory()->create();
 
@@ -48,5 +49,90 @@ describe('EventShowResource', function (): void {
             ->and($array['href'])->toBe('https://example.com/show')
             ->and($array['description'])->toBe('Desc')
             ->and($array['colour'])->toBe(App\Enums\CalendarEventColoursEnum::BLUE->value);
+    });
+
+    it('uses default UTC timezone when timezone is not provided', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 22, 9, 30, 0);
+        $end = Date::create(2025, 8, 22, 11, 0, 0);
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Default TZ Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => $start?->diffInSeconds($end),
+            'date'            => $start?->format('Y-m-d'),
+            'type'            => 'individual',
+            'web_link'        => 'https://example.com/default',
+            'description'     => 'Test',
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), [
+            'colour' => App\Enums\CalendarEventColoursEnum::GREEN->value,
+        ]);
+
+        // Don't provide timezone in additional
+        $resource = new EventShowResource($event)->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // Should use UTC as default
+        expect($array['fromDate'])->toBe('2025-08-22')
+            ->and($array['fromTime'])->toBe('09:30')
+            ->and($array['toDate'])->toBe('2025-08-22')
+            ->and($array['toTime'])->toBe('11:00');
+    });
+
+    it('returns null colour when user is not attached to event', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 22, 9, 30, 0);
+        $end = Date::create(2025, 8, 22, 11, 0, 0);
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'No User Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => $start?->diffInSeconds($end),
+            'date'            => $start?->format('Y-m-d'),
+            'type'            => 'individual',
+            'web_link'        => 'https://example.com/nouser',
+            'description'     => 'Test',
+        ]);
+
+        // Don't attach user to event
+
+        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => 'UTC']);
+        $array = $resource->toArray(request());
+
+        expect($array['colour'])->toBeNull();
+    });
+
+    it('returns null colour when user is null', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 22, 9, 30, 0);
+        $end = Date::create(2025, 8, 22, 11, 0, 0);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Null User Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => $start?->diffInSeconds($end),
+            'date'            => $start?->format('Y-m-d'),
+            'type'            => 'individual',
+            'web_link'        => 'https://example.com/nulluser',
+            'description'     => 'Test',
+        ]);
+
+        // Don't provide user in additional
+        $resource = new EventShowResource($event)->additional(['timezone' => 'UTC']);
+        $array = $resource->toArray(request());
+
+        expect($array['colour'])->toBeNull();
     });
 });

@@ -11,6 +11,7 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Date;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
@@ -25,8 +26,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         $this->viewer = User::factory()->create();
 
-        $this->start = Illuminate\Support\Facades\Date::parse(Illuminate\Support\Facades\Date::today()->addDays(1)->format('Y-m-d').' 09:30:00');
-        $this->end = Illuminate\Support\Facades\Date::parse(Illuminate\Support\Facades\Date::today()->addDays(1)->format('Y-m-d').' 11:00:00');
+        $this->start = Date::parse(Date::today()->addDays(1)->format('Y-m-d').' 09:30:00');
+        $this->end = Date::parse(Date::today()->addDays(1)->format('Y-m-d').' 11:00:00');
 
         $this->event = EventModel::factory()->create([
             'title'             => 'Demo CalendarEvent',

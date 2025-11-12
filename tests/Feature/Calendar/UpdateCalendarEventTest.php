@@ -10,6 +10,7 @@ use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
@@ -26,9 +27,9 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
         $this->event = CalendarEvent::factory()->create([
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d').' 12:00:00',
-            'end_date_time'     => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d').' 13:00:00',
-            'date'              => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -42,9 +43,9 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
 
         $updateEventData = [
             'title'             => 'Default event',
-            'fromDate'          => Illuminate\Support\Facades\Date::today()->addDays(6)->format('Y-m-d'),
+            'fromDate'          => Date::today()->addDays(6)->format('Y-m-d'),
             'fromTime'          => '14:00',
-            'toDate'            => Illuminate\Support\Facades\Date::today()->addDays(6)->format('Y-m-d'),
+            'toDate'            => Date::today()->addDays(6)->format('Y-m-d'),
             'toTime'            => '16:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -63,9 +64,9 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
         $this->assertDatabaseHas('calendar_events', [
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Illuminate\Support\Facades\Date::today()->addDays(6)->format('Y-m-d').' 12:00:00',
-            'end_date_time'     => Illuminate\Support\Facades\Date::today()->addDays(6)->format('Y-m-d').' 14:00:00',
-            'date'              => Illuminate\Support\Facades\Date::today()->addDays(6)->format('Y-m-d'),
+            'start_date_time'   => Date::today()->addDays(6)->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::today()->addDays(6)->format('Y-m-d').' 14:00:00',
+            'date'              => Date::today()->addDays(6)->format('Y-m-d'),
             'duration'          => 7200,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -84,9 +85,9 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
 
         $invalidData = [
             'title'             => Str::random(256),
-            'fromDate'          => Illuminate\Support\Facades\Date::today()->addDays(2)->format('Y-m-d'),
+            'fromDate'          => Date::today()->addDays(2)->format('Y-m-d'),
             'fromTime'          => '09:00',
-            'toDate'            => Illuminate\Support\Facades\Date::today()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::today()->addDays(2)->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => 'invalid_type',
             'description'       => Str::random(2001),
@@ -108,9 +109,9 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
 
         $eventData = [
             'title'             => 'Default event',
-            'fromDate'          => Illuminate\Support\Facades\Date::today()->addDays(2)->format('Y-m-d'),
+            'fromDate'          => Date::today()->addDays(2)->format('Y-m-d'),
             'fromTime'          => '09:00',
-            'toDate'            => Illuminate\Support\Facades\Date::today()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::today()->addDays(2)->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',

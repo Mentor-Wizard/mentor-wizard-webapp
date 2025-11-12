@@ -14,6 +14,7 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
@@ -41,7 +42,7 @@ describe('StoreEventRequest Validation', function (): void {
         expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
     })->with([
         'single day event' => function (): array {
-            $tomorrow = Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d');
+            $tomorrow = Date::tomorrow()->format('Y-m-d');
 
             return [
                 'title'       => 'Standup',
@@ -56,8 +57,8 @@ describe('StoreEventRequest Validation', function (): void {
             ];
         },
         'multi day event' => function (): array {
-            $tomorrow = Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d');
-            $dayAfter = Illuminate\Support\Facades\Date::tomorrow()->addDay()->format('Y-m-d');
+            $tomorrow = Date::tomorrow()->format('Y-m-d');
+            $dayAfter = Date::tomorrow()->addDay()->format('Y-m-d');
 
             return [
                 'title'       => 'Hackathon',
@@ -87,8 +88,8 @@ describe('StoreEventRequest Validation', function (): void {
     })->with([
         'empty title' => fn (): array => [[
             'title'       => '',
-            'fromDate'    => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
-            'toDate'      => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
+            'toDate'      => Date::tomorrow()->format('Y-m-d'),
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
@@ -98,8 +99,8 @@ describe('StoreEventRequest Validation', function (): void {
         ], 'title'],
         'past fromDate' => fn (): array => [[
             'title'       => 'Past date',
-            'fromDate'    => Illuminate\Support\Facades\Date::yesterday()->format('Y-m-d'),
-            'toDate'      => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'fromDate'    => Date::yesterday()->format('Y-m-d'),
+            'toDate'      => Date::tomorrow()->format('Y-m-d'),
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
@@ -109,8 +110,8 @@ describe('StoreEventRequest Validation', function (): void {
         ], 'fromDate'],
         'toTime before fromTime (same day)' => fn (): array => [[
             'title'           => 'Wrong time',
-            'fromDate'        => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
-            'toDate'          => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'fromDate'        => Date::tomorrow()->format('Y-m-d'),
+            'toDate'          => Date::tomorrow()->format('Y-m-d'),
             'fromTime'        => '10:00',
             'toTime'          => '09:00',
             'description'     => 'x',
@@ -120,8 +121,8 @@ describe('StoreEventRequest Validation', function (): void {
         ], 'toTime'],
         'invalid type' => fn (): array => [[
             'title'       => 'Type fail',
-            'fromDate'    => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
-            'toDate'      => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
+            'toDate'      => Date::tomorrow()->format('Y-m-d'),
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
@@ -139,9 +140,9 @@ describe('Store Calendar CalendarEvent', function (): void {
     });
 
     it('stores event, attaches host and redirects to calendar page', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 5, 1, 12, 0, 0, 'UTC'));
-        $start = Illuminate\Support\Facades\Date::tomorrow()->setTime(9, 0, 0);
-        $end = Illuminate\Support\Facades\Date::tomorrow()->setTime(10, 0, 0);
+        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, 'UTC'));
+        $start = Date::tomorrow()->setTime(9, 0, 0);
+        $end = Date::tomorrow()->setTime(10, 0, 0);
 
         $eventPayload = [
             'title'           => 'Planning',
@@ -192,8 +193,8 @@ describe('Store Calendar CalendarEvent', function (): void {
 
         expect($pivotRecord->created_at)->not->toBeNull();
         expect($pivotRecord->updated_at)->not->toBeNull();
-        expect((string) Illuminate\Support\Facades\Date::parse($pivotRecord->created_at))->toBe((string) now());
-        expect((string) Illuminate\Support\Facades\Date::parse($pivotRecord->updated_at))->toBe((string) now());
+        expect((string) Date::parse($pivotRecord->created_at))->toBe((string) now());
+        expect((string) Date::parse($pivotRecord->updated_at))->toBe((string) now());
     });
 
     it('aborts with 403 for non-mentor user', function (): void {

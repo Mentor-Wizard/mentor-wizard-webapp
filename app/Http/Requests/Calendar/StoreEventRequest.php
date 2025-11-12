@@ -11,6 +11,7 @@ use App\Services\Calendar\CheckTimeSlotReservedService;
 use Exception;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
 use Override;
 
@@ -40,15 +41,15 @@ class StoreEventRequest extends FormRequest
     {
         $validator->after(function ($validator): void {
             try {
-                \Illuminate\Support\Facades\Date::parse($this->input('fromDate'));
-                \Illuminate\Support\Facades\Date::parse($this->input('fromDate').' '.$this->input('fromTime'));
+                Date::parse($this->input('fromDate'));
+                Date::parse($this->input('fromDate').' '.$this->input('fromTime'));
             } catch (Exception) {
                 $validator->errors()->add('fromDate', 'fromDate is not valid');
             }
 
             try {
-                \Illuminate\Support\Facades\Date::parse($this->input('toDate'));
-                \Illuminate\Support\Facades\Date::parse($this->input('toDate').' '.$this->input('toTime'));
+                Date::parse($this->input('toDate'));
+                Date::parse($this->input('toDate').' '.$this->input('toTime'));
             } catch (Exception) {
                 $validator->errors()->add('fromDate', 'toDate is not valid');
             }
@@ -95,12 +96,12 @@ class StoreEventRequest extends FormRequest
         $validated = $this->validated();
 
         try {
-            $startDateTime = \Illuminate\Support\Facades\Date::createFromFormat(
+            $startDateTime = Date::createFromFormat(
                 'Y-m-d H:i',
                 $validated['fromDate'].' '.$validated['fromTime'],
                 $validated['timezone']
             )?->setTimezone('UTC');
-            $endDateTime = \Illuminate\Support\Facades\Date::createFromFormat(
+            $endDateTime = Date::createFromFormat(
                 'Y-m-d H:i',
                 $validated['toDate'].' '.$validated['toTime'],
                 $validated['timezone']
@@ -132,8 +133,8 @@ class StoreEventRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->has(['fromDate', 'toDate', 'fromTime', 'toTime'])) {
-            $fromDateTime = \Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
-            $toDateTime = \Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
+            $fromDateTime = Date::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
+            $toDateTime = Date::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
             if ($this->fromDate === $this->toDate && $this->toTime <= $this->fromTime) {
                 return;
             }

@@ -7,6 +7,7 @@ use App\Http\Requests\Calendar\StoreEventRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Date;
 
 mutates(StoreEventRequest::class);
 
@@ -24,12 +25,12 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('builds correct event payload including duration and type mapping', function (): void {
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
             'title'       => 'Payload Build',
-            'fromDate'    => Illuminate\Support\Facades\Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => Illuminate\Support\Facades\Date::now()->addDays(2)->format('Y-m-d'),
+            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
             'fromTime'    => '09:15',
             'toTime'      => '10:45',
             'description' => 'desc',
@@ -50,7 +51,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
         expect($payload)
             ->toHaveKeys(['title', 'start_date_time', 'end_date_time', 'duration', 'type', 'description', 'status', 'date'])
             ->and($payload['title'])->toBe('Payload Build')
-            ->and($payload['date'])->toBe(Illuminate\Support\Facades\Date::now()->addDays(2)->format('Y-m-d'))
+            ->and($payload['date'])->toBe(Date::now()->addDays(2)->format('Y-m-d'))
             ->and($payload['duration'])->toBe(90 * 60);
     });
 });

@@ -6,6 +6,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Services\Calendar\GetMonthEventsService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 
 mutates(GetMonthEventsService::class);
 
@@ -16,14 +17,14 @@ describe('GetMonthEventsService Service', function (): void {
 
     it('includes empty day entries with events key for month calendar and sets flags for event day using service (timezone aware)', function (): void {
         // Set application now to UTC, but test conversion by using Europe/Kyiv for building
-        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 2, 10, 9, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 2, 10, 9, 0, 0, 'UTC'));
         $tz = 'Europe/Kyiv';
 
         /** @var User $user */
         $user = User::factory()->create();
 
         // Create an event for today in UTC (will be converted in resource/service as needed)
-        $startUtc = Illuminate\Support\Facades\Date::create(2025, 2, 10, 10, 0, 0, 'UTC');
+        $startUtc = Date::create(2025, 2, 10, 10, 0, 0, 'UTC');
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */

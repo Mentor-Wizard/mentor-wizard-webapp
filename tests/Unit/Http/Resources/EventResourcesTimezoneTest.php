@@ -9,6 +9,7 @@ use App\Http\Resources\EventWeekViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 use Spatie\Permission\Models\Role;
 
 mutates(EventDayViewResource::class);
@@ -16,7 +17,7 @@ mutates(EventWeekViewResource::class);
 
 describe('CalendarEvent Resources with timezone', function (): void {
     it('applies timezone adjustment for week view', function (): void {
-        $startUtc = Illuminate\Support\Facades\Date::create(2025, 8, 24, 22, 0, 0, 'UTC');
+        $startUtc = Date::create(2025, 8, 24, 22, 0, 0, 'UTC');
         $endUtc = (clone $startUtc)->addHour();
 
         $event = CalendarEvent::factory()->create([
@@ -49,7 +50,7 @@ describe('CalendarEvent Resources with timezone', function (): void {
     });
 
     it('applies timezone adjustment for day view', function (): void {
-        $startUtc = Illuminate\Support\Facades\Date::create(2025, 8, 24, 22, 0, 0, 'UTC');
+        $startUtc = Date::create(2025, 8, 24, 22, 0, 0, 'UTC');
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */
