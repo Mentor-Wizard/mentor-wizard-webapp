@@ -20,7 +20,7 @@ describe('User Page', function (): void {
         $this->actingAs($user)
             ->get(route('profile.edit'))
             ->assertInertia(fn (Assert $page): AssertableJson => $page
-                ->component('Profile/Edit')
+                ->component('Profile/EditPage')
                 ->has('mustVerifyEmail')
                 ->where('status', null)
                 ->has('avatar')
@@ -46,7 +46,7 @@ describe('User Page', function (): void {
 
         $response = $this->get(route('profile.edit'));
 
-        $response->assertInertia(fn ($page) => $page->component('Profile/Edit')
+        $response->assertInertia(fn ($page) => $page->component('Profile/EditPage')
             ->has('avatar')
             ->where('avatar', $avatarUrl)
         );

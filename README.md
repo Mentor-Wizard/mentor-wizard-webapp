@@ -5,279 +5,129 @@
 
 # Mentor Wizard
 
-Mentor Wizard - це сучасний веб-застосунок, розроблений на базі фреймворку Laravel, що виконує управління менторами та студентами для освіти, наповнений функціоналом сучасного веб-додатка.
+Mentor Wizard - сучасна платформа для менторингу, побудована на Laravel 12,
+Vue.js та Inertia.js. Система забезпечує повноцінне управління менторськими
+програмами, сесіями, профілями та комунікацією між менторами та учнями.
 
-## Вимоги
+## 🚀 Основні можливості
 
-Для розгортання проєкту локально на вашому комп'ютері необхідно мати:
-- PHP v8.4 або новішу версію
-- Composer
-- PostgreSQL
-- Redis
-- Node.js та Yarn
+- 👥 **Управління профілями** - менторів та учнів
+- 📚 **Менторські програми** - створення, публікація, управління
+- 💬 **Чат-система** - комунікація в реальному часі
+- ⭐ **Система рейтингів** - відгуки та оцінки
+- 🔐 **Автентифікація** - стандартна та через соціальні мережі (OAuth)
+- 🎨 **Сучасний UI** - з використанням Tailwind CSS та Inertia.js
 
-## Установка
+## 🛠 Технологічний стек
 
-Виконайте наступні кроки, щоб налаштувати проєкт локально:
+### Backend
 
-### 1. Клонування репозиторію
+- **Laravel 12** - PHP фреймворк
+- **Laravel Octane** (FrankenPHP) - високопродуктивний сервер
+- **PostgreSQL 17** - база даних
+- **Redis 7.2+** - кешування та черги
 
-Склонуйте репозиторій проєкту:
+### Frontend
+
+- **Vue.js 3** - прогресивний JavaScript фреймворк
+- **Inertia.js** - modern monolith архітектура
+- **Tailwind CSS** - utility-first CSS фреймворк
+- **Yarn 4.6.0** - менеджер пакетів
+
+### Інструменти розробки
+
+- **Pest PHP** - фреймворк для тестування
+- **PHPStan** - статичний аналізатор
+- **Laravel Pint** - форматування коду
+- **Rector** - автоматична модернізація коду
+- **Docker** - контейнеризація
+
+## 📋 Вимоги
+
+- **PHP 8.4+**
+- **Composer**
+- **Node.js 22+** з **Yarn 4.10+**
+- **Docker & Docker Compose**
+- **PostgreSQL 17**
+- **Redis 7.2+**
+
+## ⚡ Швидкий старт
+
+Детальні інструкції з налаштування та розгортання проєкту доступні у
+**[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md#2-налаштування-середовища-розробки)**.
+
+## 📖 Документація
+
+Детальна документація доступна в директорії `docs/`:
+
+- **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** - гід для контриб'юторів
+- **[ACTIONS_ARCHITECTURE.md](docs/ACTIONS_ARCHITECTURE.md)** - архітектура
+  Laravel Actions
+- **[FRONTEND_ARCHITECTURE.md](docs/FRONTEND_ARCHITECTURE.md)** - архітектура
+  Vue.js + Inertia.js
+- **[TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md)** - стратегія тестування
+- **[SECURITY_GUIDELINES.md](docs/SECURITY_GUIDELINES.md)** - рекомендації з
+  безпеки
+- **[AUTHORIZATION_POLICIES.md](docs/AUTHORIZATION_POLICIES.md)** - політики
+  авторизації
+- **[NAMING_CONVENTIONS.md](docs/NAMING_CONVENTIONS.md)** - конвенції іменування
+
+## 🤝 Для контриб'юторів
+
+Ознайомтеся з **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)** для детальних
+інструкцій щодо:
+
+- Налаштування середовища розробки та Git hooks
+- Workflow розробки (Git Flow)
+- Тестування (unit, feature, mutation tests)
+- Стандарти якості коду
+- Процес code review та створення pull requests
+
+### Конвенції
+
+**Назви гілок:**
+
+- `feature/*` - нові функції
+- `bugfix/*` - виправлення багів
+- `hotfix/*` - критичні виправлення
+
+**Commit повідомлення:** Використовуємо
+[Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat(auth): add user avatar upload
+fix(mentor): resolve program validation
+docs(api): update authentication endpoints
+```
+
+**Git merge стратегія:** Використовуємо merge commit з напівлінійною історією.
+Детальніше у
+[документації GitLab](https://docs.gitlab.com/ee/user/project/merge_requests/methods/#merge-commit-with-semi-linear-history).
+
+## 🔧 Laravel Boost MCP
+
+Проект налаштовано для роботи з Laravel Boost MCP сервером для AI-асистентів
+(Claude, Cursor тощо):
 
 ```bash
-git clone git@github.com:Mentor-Wizard/mentor-wizard-webapp.git
-cd mentor-wizard-webapp
+# MCP конфігурація
+.junie/mcp/mcp.json
 ```
 
-### 2. Запуск контейнерів Docker
+**Доступні інструменти:**
 
-Виконайте команду:
+- Database queries, schema, connections
+- Config та environment variables
+- Artisan commands
+- Tinker для debugging
+- Log entries та browser logs
+- Routes та URL generation
+- Documentation search
 
-```bash
-docker compose up -d
-```
+## 📝 Ліцензія
 
-### ~~3. Встановлення локальних SSL сертифікатів~~
+Проєкт ліцензовано за [MIT License](https://opensource.org/licenses/MIT).
 
-```bash
-docker compose exec app openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./docker/nginx/certs/ssl.key -out ./docker/nginx/certs/ssl.crt -subj "/C=UA/ST=Kyiv/L=Kyiv/O=Company/OU=IT Department/CN=localhost"
+---
 
-```
-
-### 4. Установка залежностей Laravel
-
-Виконайте команду:
-
-```bash
-docker compose exec -it app composer install
-```
-
-### 5. Скопіюйте .env файл
-
-Виконайте команду:
-
-```bash
-docker compose exec -it app cp .env.example .env
-```
-
-### 6. Згенеруйте ключ для Laravel
-
-Виконайте команду:
-
-```bash
-docker compose exec app php artisan key:generate
-```
-
-### 7. Запустіть міграцію
-
-Виконайте команду:
-
-```bash
-docker compose exec app php artisan migrate
-```
-
-### 8. Встановіть залежності NodeJS
-
-Виконайте команду:
-
-```bash
-docker compose exec app yarn install
-```
-
-### 9. Налаштування Git hooks
-
-Виконайте команду для налаштування спільних Git hooks:
-
-```bash
-./setup-git-hooks.sh
-```
-
-Це налаштує наступні hooks:
-- **pre-commit**: Запускає Rector і Pint для виправлення коду
-- **commit-msg**: Валідує повідомлення комітів з commitlint
-- **pre-push**: Валідує назви гілок
-
-### 10. Компіляція frontend
-
-Виконайте команду:
-
-```bash
-docker compose exec app yarn dev
-```
-
-### 11. Опублікувати доступ до public папки
-
-Виконайте команду:
-
-```bash
-docker compose exec app php artisan storage:link
-```
-
-## Laravel Boost MCP Setup
-
-Цей проект налаштовано для роботи з Laravel Boost MCP сервером, який надає потужні інструменти для розробки через Model Context Protocol.
-
-### Налаштування MCP
-
-MCP конфігурація вже включена в проект у файлі `.junie/mcp/mcp.json`. Щоб використовувати Laravel Boost:
-
-1. Переконайтеся, що Docker контейнери запущені:
-```bash
-docker compose up -d
-```
-
-2. MCP сервер автоматично використовуватиме наступну команду для підключення:
-```bash
-docker exec -i mw-app php /var/www/artisan boost:mcp
-```
-
-### Доступні інструменти Laravel Boost
-
-Laravel Boost надає наступні інструменти для розробки:
-
-- **База даних**: `database-query`, `database-schema`, `database-connections`
-- **Конфігурація**: `get-config`, `list-available-config-keys`, `list-available-env-vars`
-- **Artisan**: `list-artisan-commands`
-- **Відлагодження**: `tinker`, `last-error`, `read-log-entries`, `browser-logs`
-- **URL генерація**: `get-absolute-url`
-- **Маршрути**: `list-routes`
-- **Документація**: `search-docs` - пошук документації для встановлених пакетів
-- **Інформація про застосунок**: `application-info`
-
-### Використання з IDE
-
-Для використання з підтримуваними IDE (як-от Claude Desktop, Cursor тощо), переконайтеся, що MCP клієнт налаштовано на використання конфігурації з `.junie/mcp/mcp.json`.
-
-## Тестування
-
-Перед початком тестування виконайте наступні налаштування.
-
-Скопіюйте `.env.example` в `.env.testing`.
-
-Замніть в `.env.testing` блок з підключенням до БД:
-```dotenv
-DB_CONNECTION=pgsql
-DB_HOST=mw-db-test
-DB_DATABASE=test_mw_db
-DB_USERNAME=test_mw_user
-DB_PASSWORD=test_mw_user_password
-```
-
-### 1. Запуск тестів
-
-Щоб запустити тестування, виконайте:
-
-```bash
-docker compose exec app php artisan test
-docker compose exec app ./vendor/bin/pest --bail ### зупиняє запуск при першому невдалому тесті
-docker compose exec app ./vendor/bin/pest --dirty ### запускає тести тільки для файлів з незакоміченими змінами.
-docker compose exec app ./vendor/bin/pest --retry ### повторити лише ті тести, які впали в останньому прогоні.
-```
-
-### 2. Запуск аналізатора коду PHPStan
-
-Щоб запустити аналізатор, виконайте:
-
-```bash
-docker compose exec app ./vendor/bin/phpstan analyse --memory-limit=2G
-```
-
-### 3. Запуск тестів з coverage
-
-Щоб запустити тестування, виконайте:
-
-```bash
-docker compose exec app php artisan test --coverage
-docker compose exec app ./vendor/bin/pest --coverage 
-```
-
-### 4. Мутаційні тести
-
-**Всі тести мають бути покриті мутаційними тестами.**
-
-Щоб додати мутаційні тести обовʼязково додавайте метод `covers(...)` до ваших тестів.
-
-Наприклад:
-```php
-covers(TodoController::class); // or mutates(TodoController::class);
- 
-it('list todos', function () {
-    $this->getJson('/todos')->assertStatus(200);
-});
-```
-Детальніше [тут](https://pestphp.com/docs/mutation-testing).
-
-Щоб запустити тестування з мутаціями, виконайте:
-
-```bash
-docker compose exec app php artisan test --mutate --covered-only --min=100
-```
-Або в паралельному режимі:
-```bash
-docker compose exec app php artisan test --mutate --covered-only --min=100 --parallel
-docker compose exec app ./vendor/bin/pest --mutate --covered-only --parallel --min=100
-```
-
-## DDEV Інсталяція
-
-### Вимоги
-
-- [DDEV](//ddev.readthedocs.io/en/stable/users/install/ddev-installation)
-- [Docker Compose](//docs.docker.com/compose/install)
-
-### Інсталяція
-
-- Запуск DDEV. Це збілдить всі неодхідні конетйнери згідно налаштувань у
-  [`.ddev/config.yaml`](.ddev/config.yaml)
-
-    ```sh
-    ddev start
-    ```
-
-- Згенеруйте ключ для Laravel та запустіть міграції:
-
-    ```sh
-    ddev artisan key:generate; ddev artisan migrate
-    ```
-
-- Для коректної роботи `octane` та `reverb` налаштуйте наступні змінні у [`.env`](.env):
-
-    ```dotenv
-    OCTANE_HTTPS=true
-
-    REVERB_HOST=${DDEV_HOSTNAME}
-    REVERB_PORT=8443
-    REVERB_SCHEME=https
-    ```
-
-### Тестування
-
-- Для запуску тестування потрібно увімкнути `Xdebug` (він вимкнений за замовчуванням):
-
-    ```sh
-    ddev xdebug on
-    ```
-
-## Найменування
-
-### Назви гілок
-Вимоги описані у файлі
-
-```
-.validate-branch-namerc.json
-```
-Автовалідація імен гілок Git перед пушем їх у віддалений репозиторій
-[validate-branch-name](https://www.npmjs.com/package/validate-branch-name) package
-
-### Конвенція для комітів
-Кожне повідомлення коміту має відповідати [конвенції комітів](https://www.conventionalcommits.org/).
-
-Автоматична перевірка повідомлень комітів виконується через `commit-msg` git-хук. Усі налаштування описані у файлі
-
-## Мерж-коміт із напівлінійною історією
-
-Використовуйте лінійну історію git. Детальніше читайте у [документації](https://docs.gitlab.com/ee/user/project/merge_requests/methods/#merge-commit-with-semi-linear-history).
-
-## Ліцензія
-
-Цей проєкт ліцензований за ліцензією [MIT](https://opensource.org/licenses/MIT).
+**Зроблено з ❤️ командою Mentor Wizard**

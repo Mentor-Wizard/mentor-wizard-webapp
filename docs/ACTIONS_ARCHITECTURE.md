@@ -2,7 +2,9 @@
 
 ## Огляд
 
-Проект використовує **Laravel Actions** як основну архітектурну парадигму для організації бізнес-логіки. Це альтернатива традиційним Controller'ам, яка забезпечує кращу організацію коду та повторне використання логіки.
+Проект використовує **Laravel Actions** як основну архітектурну парадигму для
+організації бізнес-логіки. Це альтернатива традиційним Controller'ам, яка
+забезпечує кращу організацію коду та повторне використання логіки.
 
 ## Чому Laravel Actions?
 
@@ -16,7 +18,8 @@
 
 ### Пакет
 
-Використовується **lorisleiva/laravel-actions** - найпопулярніше рішення для Laravel.
+Використовується **lorisleiva/laravel-actions** - найпопулярніше рішення для
+Laravel.
 
 ```json
 "lorisleiva/laravel-actions": "^2.9"
@@ -80,6 +83,7 @@ class Login
 ```
 
 **Характеристики:**
+
 - Назва: дієслово (Login, Register, UpdateUser)
 - Один трейт: `AsController`
 - Фокус на бізнес-логіці
@@ -112,6 +116,7 @@ class DashboardPage
 ```
 
 **Характеристики:**
+
 - Назва: закінчується на `Page`
 - Повертає `Inertia\Response`
 - Відповідає за підготовку даних для frontend'у
@@ -154,6 +159,7 @@ class StoreMentorProgramPage
 ```
 
 **Коли використовувати:**
+
 - Прості CRUD операції
 - Коли після дії потрібен редирект
 - Коли логіка не потребує повторного використання
@@ -294,7 +300,8 @@ ShowDashboard     // непослідовність
 
 ### Принцип групування
 
-Actions групуються за **бізнес-доменами** з винятком Page Actions, які живуть в окремому неймспейсі:
+Actions групуються за **бізнес-доменами** з винятком Page Actions, які живуть в
+окремому неймспейсі:
 
 ```
 ✅ Правильно (поточна структура проекту):
@@ -784,21 +791,24 @@ class ProcessOrder
 ### Поширені проблеми
 
 1. **Action не знайдений в роутах**
-   ```php
-   // Перевірте неймспейс та назву класу
-   Route::post('login', \App\Actions\Auth\Login\Login::class);
-   ```
+
+    ```php
+    // Перевірте неймспейс та назву класу
+    Route::post('login', \App\Actions\Auth\Login\Login::class);
+    ```
 
 2. **Dependency Injection не працює**
-   ```php
-   // Перевірте, що сервіс зареєстрований в Service Container
-   $this->app->bind(PaymentService::class, StripePaymentService::class);
-   ```
+
+    ```php
+    // Перевірте, що сервіс зареєстрований в Service Container
+    $this->app->bind(PaymentService::class, StripePaymentService::class);
+    ```
 
 3. **Валідація не спрацьовує**
-   ```php
-   // Перевірте, що використовується правильний Form Request
-   public function handle(CorrectRequest $request) // не Request
-   ```
+    ```php
+    // Перевірте, що використовується правильний Form Request
+    public function handle(CorrectRequest $request) // не Request
+    ```
 
-Архітектура Laravel Actions забезпечує чистий, тестований та масштабований код для Mentor Wizard проекту.
+Архітектура Laravel Actions забезпечує чистий, тестований та масштабований код
+для Mentor Wizard проекту.

@@ -9,7 +9,6 @@ use App\Models\MentorProfile;
 use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
-use Carbon\Carbon;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
@@ -45,7 +44,7 @@ describe('Similar Mentor Resource', function (): void {
             'description'              => 'description',
             'rate'                     => 1.1,
             'currency_id'              => $currency->id,
-            'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+            'experience_started_at'    => Date::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 
         MentorReview::factory()->create([

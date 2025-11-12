@@ -9,7 +9,6 @@ use App\Models\MentorProfile;
 use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
-use Carbon\Carbon;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -69,12 +68,12 @@ describe('Mentor Profile Page', function (): void {
             'description'              => 'description',
             'rate'                     => 1.1,
             'currency_id'              => $currency_id,
-            'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+            'experience_started_at'    => Date::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 
         $this->get(route('page.mentor', ['mentor' => $mentor->slug]))
             ->assertInertia(fn (Assert $page): Assert => $page
-                ->component('Profile/Mentor/View')
+                ->component('Profile/Mentor/ViewPage')
                 ->where('mentor.titleBlock.name', 'Mentor profile name Mentor profile last_name')
                 ->where('mentor.titleBlock.avatar', UserProfile::DEFAULT_AVATAR_URL)
                 ->where('mentor.titleBlock.title', 'title')

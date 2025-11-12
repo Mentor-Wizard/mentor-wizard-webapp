@@ -3,7 +3,9 @@
 ## Загальні принципи
 
 ### Неймспейси (Namespaces)
-Всі класи проєкту використовують базовий неймспейс `App` і слідують структурі директорій:
+
+Всі класи проєкту використовують базовий неймспейс `App` і слідують структурі
+директорій:
 
 ```
 App\                          # Базовий неймспейс застосунку
@@ -22,7 +24,9 @@ App\                          # Базовий неймспейс застосу
 ```
 
 ### Строге типування
+
 Всі PHP файли **обов'язково** повинні містити декларацію строгих типів:
+
 ```php
 <?php
 
@@ -32,6 +36,7 @@ declare(strict_types=1);
 ## Структура Actions (Дії)
 
 ### Конвенції іменування Actions
+
 Actions організовані за доменами та функціональністю:
 
 ```
@@ -49,19 +54,23 @@ App\Actions\
 ```
 
 ### Іменування Action класів
+
 - **Page Actions** (відображення сторінок): закінчуються на `Page`
-  - `GetLoginPage` - отримання сторінки входу
-  - `DashboardPage` - сторінка дашборду
-  - `CreateMentorProgramPage` - сторінка створення програми
+    - `GetLoginPage` - отримання сторінки входу
+    - `DashboardPage` - сторінка дашборду
+    - `CreateMentorProgramPage` - сторінка створення програми
 
 - **Business Actions** (бізнес операції): дієслово + іменник
-  - `Login` - операція входу
-  - `Registration` - операція реєстрації
-  - `UpdateUser` - оновлення користувача
-  - `DeleteMentorProgram` - видалення програми ментора
+    - `Login` - операція входу
+    - `Registration` - операція реєстрації
+    - `UpdateUser` - оновлення користувача
+    - `DeleteMentorProgram` - видалення програми ментора
 
 ### Трейти для Actions
-Базові Action класи використовують трейт `AsController` від `lorisleiva/laravel-actions`:
+
+Базові Action класи використовують трейт `AsController` від
+`lorisleiva/laravel-actions`:
+
 ```php
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -75,18 +84,23 @@ class Login
     }
 }
 ```
-Але, якщо Action клас не являється контроллером, слід використовувати відповідний трейт від `lorisleiva/laravel-actions`.
+
+Але, якщо Action клас не являється контроллером, слід використовувати
+відповідний трейт від `lorisleiva/laravel-actions`.
 
 ## Сервісні класи
 
 ### Коли використовувати Services замість Actions
-В даному проєкті **пріоритет віддається Actions** за патерном Laravel Actions. Сервісні класи використовуються тільки у специфічних випадках:
+
+В даному проєкті **пріоритет віддається Actions** за патерном Laravel Actions.
+Сервісні класи використовуються тільки у специфічних випадках:
 
 1. **Інтеграція з зовнішніми API** (платіжні системи, email сервіси)
 2. **Складна бізнес-логіка**, що не підходить для Actions
 3. **Utility класи** для роботи з файлами, датами, форматуванням
 
 ### Структура Services (за потреби)
+
 ```
 App\Services\
 ├── Payment\                  # Платіжні сервіси
@@ -104,12 +118,14 @@ App\Services\
 ```
 
 ### Конвенції іменування Services
+
 - **Назва**: `{Призначення}Service`
-  - `PaymentService` - робота з платежами
-  - `NotificationService` - сповіщення
-  - `FileUploadService` - завантаження файлів
+    - `PaymentService` - робота з платежами
+    - `NotificationService` - сповіщення
+    - `FileUploadService` - завантаження файлів
 
 ### Приклад структури Service класу
+
 ```php
 <?php
 
@@ -140,6 +156,7 @@ class StripeService
 ```
 
 ### Реєстрація Services в Service Container
+
 ```php
 // app/Providers/AppServiceProvider.php
 public function register(): void
@@ -154,6 +171,7 @@ public function register(): void
 ```
 
 ### Використання Services в Actions
+
 ```php
 class ProcessPaymentAction
 {
@@ -176,13 +194,16 @@ class ProcessPaymentAction
 ## Структура моделей
 
 ### Конвенції іменування моделей
+
 Моделі використовують однину в назві та PascalCase:
+
 - `User` - користувач
 - `MentorProgram` - програма ментора
 - `MentorProfile` - профіль ментора
 - `ChatMessage` - повідомлення чату
 
 ### Attributes і константи в моделях
+
 ```php
 class User extends Authenticatable
 {
@@ -202,7 +223,9 @@ class User extends Authenticatable
 ```
 
 ### Observers і Factory
+
 Моделі використовують PHP 8 атрибути для конфігурації:
+
 ```php
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
@@ -212,7 +235,9 @@ class User extends Authenticatable
 ## HTTP компоненти
 
 ### Request класи
+
 Request класи організовані за доменами і операціями:
+
 ```
 App\Http\Requests\
 ├── Auth\
@@ -231,7 +256,9 @@ App\Http\Requests\
 ```
 
 ### API Resources
+
 API Resources мають суфікс `Resource`:
+
 - `MentorProfilePageResource`
 - `MentorProgramsResource`
 - `UserProfileResource`
@@ -239,6 +266,7 @@ API Resources мають суфікс `Resource`:
 ## Filament компоненти
 
 ### Структура Filament Resources
+
 ```
 App\Filament\Resources\
 └── User\                     # Ресурс по домену
@@ -254,6 +282,7 @@ App\Filament\Resources\
 ```
 
 ### Конвенції Filament
+
 - Ресурси: `{Model}Resource` - `UserResource`
 - Сторінки: `{Action}{Model}` - `CreateUser`, `EditUser`, `ListUsers`
 - Схеми: `{Model}Form` - `UserForm`
@@ -262,7 +291,9 @@ App\Filament\Resources\
 ## Енуми (Enums)
 
 ### Іменування Enums
+
 Всі енуми мають суфікс `Enum`:
+
 - `CurrencyEnum`
 - `RoleEnum`
 - `RoleGuardEnum`
@@ -270,6 +301,7 @@ App\Filament\Resources\
 - `TagEnum`
 
 ### Структура Enum
+
 ```php
 enum RoleEnum: string
 {
@@ -282,22 +314,29 @@ enum RoleEnum: string
 ## Фільтри і допоміжні класи
 
 ### Фільтри
+
 Фільтри іменуються за призначенням + `Filter`:
+
 - `ProfileRateFilter` - фільтр за рейтингом профілю
 - `ProgramCostFilter` - фільтр за вартістю програми
 - `TagLanguagesFilter` - фільтр за мовами в тегах
 
 ### Трейти
+
 Трейти описують поведінку і іменуються дієсловом:
+
 - `ParsesNumericRange` - парсить числовий діапазон
 
 ### Support класи
+
 Допоміжні класи в `App\Support\` організовані за призначенням:
+
 - `App\Support\MediaLibrary\PathGenerator`
 
 ## Providers (Постачальники послуг)
 
 ### Структура Providers
+
 ```
 App\Providers\
 ├── AppServiceProvider       # Основний постачальник
@@ -307,12 +346,14 @@ App\Providers\
 ```
 
 ### Конвенції Providers
+
 - Всі провайдери закінчуються на `ServiceProvider` або `Provider`
 - Filament провайдери мають суфікс `PanelProvider`
 
 ## Маршрутизація (Routes)
 
 ### Структура файлів маршрутів
+
 ```
 routes/
 ├── web.php          # Основні веб-маршрути
@@ -324,12 +365,14 @@ routes/
 ### Конвенції іменування маршрутів
 
 #### Публічні сторінки
+
 ```php
 Route::get('/', WelcomePage::class)->name('pages.welcome');
 Route::get('mentor/{mentor:slug}', GetMentorProfilePage::class)->name('page.mentor');
 ```
 
 #### Автентифікація (без префіксу в назві)
+
 ```php
 Route::get('login', GetLoginPage::class)->name('login');
 Route::post('login', Login::class)->name('login.attempt');
@@ -337,6 +380,7 @@ Route::get('register', GetRegistrationPage::class)->name('register');
 ```
 
 #### Ресурсні маршрути
+
 ```php
 Route::get('mentor-program/create', CreateMentorProgramPage::class)
     ->name('mentor-program.create');
@@ -349,6 +393,7 @@ Route::patch('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::cla
 ### Групування маршрутів
 
 #### За middleware
+
 ```php
 Route::middleware('auth')->group(function (): void {
     // Маршрути для автентифікованих користувачів
@@ -360,6 +405,7 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
 ```
 
 #### За префіксом
+
 ```php
 Route::prefix('auth')->group(function (): void {
     Route::get('redirect/{driver}', SocialiteRedirect::class)
@@ -368,7 +414,9 @@ Route::prefix('auth')->group(function (): void {
 ```
 
 ### Model Binding
+
 Використовується Route Model Binding з slug:
+
 ```php
 Route::get('mentor/{mentor:slug}', GetMentorProfilePage::class);
 Route::patch('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::class);
@@ -377,6 +425,7 @@ Route::patch('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::cla
 ## Конфігураційні файли
 
 ### Організація конфігурацій
+
 Конфігураційні файли в `config/` дотримуються стандартної структури Laravel:
 
 ```
@@ -404,6 +453,7 @@ config/
 ```
 
 ### Використання environment змінних
+
 ```php
 // В конфігураційних файлах
 'name' => env('APP_NAME', 'Laravel'),
@@ -417,6 +467,7 @@ config('app.debug')       // НЕ env('APP_DEBUG')
 ## Vue.js компоненти (Frontend)
 
 ### Структура компонентів
+
 ```
 resources/js/
 ├── Components/
@@ -440,12 +491,15 @@ resources/js/
 ```
 
 ### Іменування Vue компонентів
+
 - **PascalCase** для назв файлів: `SecondaryButton.vue`, `TextInput.vue`
 - **Групування** за функціональністю: `UI/Button/`, `UI/Forms/`
 - **Лейаути**: закінчуються на `Layout` - `AuthenticatedLayout.vue`
 
 ### Сторінки Inertia.js
+
 Сторінки організовані за доменами:
+
 - `Pages/Auth/Login.vue` - сторінка входу
 - `Pages/Profile/Edit.vue` - редагування профілю
 - `Pages/MentorProgram/List.vue` - список програм
@@ -453,25 +507,32 @@ resources/js/
 ## Observers і Policies
 
 ### Observers
+
 Спостерігачі іменуються за моделлю + `Observer`:
+
 - `UserObserver`
 - `MentorProgramObserver`
 - `ChatObserver`
 
 ### Policies
+
 Політики іменуються за моделлю + `Policy`:
+
 - `MentorProgramPolicy`
 
 ## Загальні правила коду
 
 ### Властивості та методи класу
+
 1. **Константи** - в SCREAMING_SNAKE_CASE
 2. **Властивості** - в camelCase
 3. **Методи** - в camelCase
 4. **Класи** - в PascalCase
 
 ### Документація
+
 Використовуємо PHPDoc для складних випадків:
+
 ```php
 /**
  * @property-read UserProfile $profile
@@ -485,7 +546,9 @@ class User extends Authenticatable
 ```
 
 ### Return типи
+
 Всі методи мають явні return типи:
+
 ```php
 public function handle(LoginRequest $request): RedirectResponse
 public function profile(): HasOne
@@ -495,12 +558,16 @@ public function getFilamentName(): string
 ## Рекомендації по архітектурі
 
 ### Actions vs Services vs Controllers
+
 1. **Actions** (пріоритет) - для всієї бізнес-логіки та відображення сторінок
 2. **Services** - тільки для зовнішніх інтеграцій та складних utility функцій
-3. **Controllers** - не використовуються, замість них Actions з трейтом `AsController`
+3. **Controllers** - не використовуються, замість них Actions з трейтом
+   `AsController`
 
 ### Dependency Injection
+
 Використовуємо конструктор або метод injection:
+
 ```php
 // Конструктор injection для Services
 public function __construct(
@@ -511,4 +578,5 @@ public function __construct(
 public function handle(LoginRequest $request, UserService $userService): RedirectResponse
 ```
 
-Ця документація описує основні конвенції кодування проєкту Mentor Wizard. При розробці нових функцій слідуйте цим правилам для підтримки консистентності коду.
+Ця документація описує основні конвенції кодування проєкту Mentor Wizard. При
+розробці нових функцій слідуйте цим правилам для підтримки консистентності коду.

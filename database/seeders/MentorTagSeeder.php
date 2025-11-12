@@ -120,6 +120,5 @@ class MentorTagSeeder extends Seeder
 
         DB::table('mentor_tags')->insert($dataSkill);
         DB::table('mentor_tags')->insert($dataLanguage);
-
     }
 }

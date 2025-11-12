@@ -39,6 +39,6 @@ class SocialiteCallback
 
         Auth::login($user);
 
-        return redirect()->route('pages.welcome');
+        return to_route('pages.welcome');
     }
 }

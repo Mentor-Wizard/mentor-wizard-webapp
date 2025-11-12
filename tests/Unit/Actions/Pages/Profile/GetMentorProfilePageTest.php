@@ -8,7 +8,6 @@ use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\User;
 use App\Models\UserProfile;
-use Carbon\Carbon;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -44,7 +43,7 @@ describe('Mentor Page', function (): void {
             'description'              => 'description',
             'rate'                     => 1.1,
             'currency_id'              => $currency_id,
-            'experience_started_at'    => Carbon::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
+            'experience_started_at'    => Date::now()->subYears(5)->subMonths(6)->format('Y-m-d'),
         ]);
 
         $user->refresh();
@@ -55,7 +54,7 @@ describe('Mentor Page', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/Mentor/View')
+            ->and(Arr::get($resultData->getData(), 'page.component'))->toBe('Profile/Mentor/ViewPage')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.slug'))->toBe('test-user')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.titleBlock.name'))->toBe('profile name profile last_name')
             ->and(Arr::get($resultData->getData(), 'page.props.mentor.titleBlock.avatar'))->toBe(UserProfile::DEFAULT_AVATAR_URL)

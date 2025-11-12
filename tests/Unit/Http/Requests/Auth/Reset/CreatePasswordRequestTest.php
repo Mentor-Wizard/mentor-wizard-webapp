@@ -58,6 +58,21 @@ describe('CreatePasswordRequest Validation', function (): void {
                 ->and($validator->errors()->get('email'))->toHaveCount(1);
         });
 
+        it('fails validation with email is empty', function (): void {
+            $request = new CreatePasswordRequest;
+
+            $data = [
+                'token'                 => 'valid-token-123',
+                'password'              => 'StrongPassword123!',
+                'password_confirmation' => 'StrongPassword123!',
+            ];
+
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->get('email'))->toHaveCount(1);
+        });
+
         it('fails validation when password is not confirmed', function (): void {
             $request = new CreatePasswordRequest;
 

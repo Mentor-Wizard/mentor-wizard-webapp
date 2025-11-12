@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\DeleteCalendarEvent;
-use App\Actions\Calendar\EditCalendarEvent;
-use App\Actions\Calendar\StoreCalendarEvent;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Pages\Calendar\CalendarsListPage;
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
+use App\Actions\Pages\Chat\GetChatPage;
 use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
 use App\Actions\Pages\Profile\GetMentorProfilePage;
+use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\ListMentorProfilePage;
 use App\Actions\Pages\WelcomePage;
@@ -27,7 +26,8 @@ Route::get('/', WelcomePage::class)->name('pages.welcome');
 
 Route::get('profile-programs', ListMentorProfilePage::class)->name('page.profile-programs');
 
-Route::get('mentor/{user:slug}', GetMentorProfilePage::class)->name('page.mentor');
+Route::get('mentor/{mentor:slug}', GetMentorProfilePage::class)->name('page.mentor');
+Route::get('review/{mentor:slug}', GetMentorReviewPage::class)->name('page.mentor-review');
 
 Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])
@@ -76,5 +76,11 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
             ->name('pages.calendar.delete');
     });
 });
+
+Route::middleware('auth')
+    ->prefix('chat')
+    ->group(function (): void {
+        Route::get('list', GetChatPage::class)->name('page.chat.list');
+    });
 
 require __DIR__.'/auth.php';

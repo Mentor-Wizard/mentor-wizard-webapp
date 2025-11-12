@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use Database\Seeders\MentorTagSeeder;
 use Illuminate\Database\Eloquent\Model;
 
-arch()->preset()->php();
+arch()->preset()->php()->ignoring(
+    MentorTagSeeder::class, // Include suspicious characters.
+);
 arch()->preset()->security()->ignoring(['md5', 'sha1']);
 
 arch()

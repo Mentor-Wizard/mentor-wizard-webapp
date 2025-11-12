@@ -18,7 +18,7 @@ class WelcomePage
 
     public function handle(): Response
     {
-        return Inertia::render('Welcome', [
+        return Inertia::render('WelcomePage', [
             'canLogin'       => Route::has('login'),
             'canRegister'    => Route::has('register'),
             'laravelVersion' => Application::VERSION,

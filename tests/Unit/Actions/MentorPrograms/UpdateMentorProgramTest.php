@@ -38,7 +38,7 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
 
         expect($request->authorize())->toBeTrue();
         expect($request->rules())->toBeArray();
-        expect(fn () => $request->validateResolved())->not->toThrow(ValidationException::class);
+        expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
     })->with([
         'full valid data' => fn (): array => [
             'name'        => 'Valid Program Name',

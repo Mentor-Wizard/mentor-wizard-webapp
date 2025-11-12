@@ -1,0 +1,8 @@
+{
+    "experimentalTernaries": true,
+    "experimentalOperatorPosition": "start",
+    "singleQuote": true,
+    "arrowParens": "always",
+    "proseWrap": "always",
+    "plugins": ["prettier-plugin-tailwindcss"]
+}

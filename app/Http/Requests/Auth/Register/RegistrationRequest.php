@@ -27,7 +27,7 @@ class RegistrationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string|max:255|min:5',
+            'username' => ['required', 'string', 'max:255', 'min:5'],
             'email'    => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];

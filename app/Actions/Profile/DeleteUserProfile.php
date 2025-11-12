@@ -22,6 +22,6 @@ class DeleteUserProfile
 
         $user->delete();
 
-        return redirect()->route('login');
+        return to_route('login');
     }
 }
