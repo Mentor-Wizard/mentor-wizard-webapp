@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
+import { computed, onMounted, ref } from 'vue';
 
 const container = ref(null);
 const containerNav = ref(null);
@@ -15,8 +15,10 @@ const checkNextMonthEvents = () => {
       formattedDate.setMonth(formattedDate.getMonth() + 1),
     ).toISOString(),
   );
-  existNextMonthEvents.value =
-    !!props.days?.calendarView?.hasOwnProperty(nextMonth);
+  existNextMonthEvents.value = !!Object.prototype.hasOwnProperty.call(
+    props.days?.calendarView,
+    nextMonth,
+  );
 };
 
 const checkPreviousMonthEvents = () => {
@@ -26,8 +28,10 @@ const checkPreviousMonthEvents = () => {
       formattedDate.setMonth(formattedDate.getMonth() - 1),
     ).toISOString(),
   );
-  existPreviousMonthEvents.value =
-    !!props.days?.calendarView?.hasOwnProperty(previousMonth);
+  existPreviousMonthEvents.value = !!Object.prototype.hasOwnProperty.call(
+    props.days?.calendarView,
+    previousMonth,
+  );
 };
 
 const shownMonth = ref(new Date().toISOString().split('T')[0].slice(0, 7));
@@ -58,9 +62,11 @@ const props = defineProps({
   },
   openShowEditEventPage: {
     type: Function,
+    default: () => {},
   },
   scrollDate: {
     type: Function,
+    default: () => {},
   },
   hours: {
     type: Array,
@@ -124,6 +130,7 @@ onMounted(() => {
         >
           <button
             v-for="weekDay in weekDays"
+            :key="weekDay"
             type="button"
             class="flex flex-col items-center pt-3 pb-1.5"
           >
@@ -156,7 +163,7 @@ onMounted(() => {
                 grid-template-rows: 1.75rem repeat(288, minmax(0, 1fr)) auto;
               "
             >
-              <template v-for="event in days.events">
+              <template v-for="event in days.events" :key="event.id">
                 <li
                   class="relative mt-px flex"
                   :style="{
@@ -164,8 +171,8 @@ onMounted(() => {
                   }"
                 >
                   <a
-                    @click="openShowEditEventPage(event.id)"
                     :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-${event.colour}-50 p-2 text-xs/5 hover:bg-${event.colour}-100`"
+                    @click="openShowEditEventPage(event.id)"
                   >
                     <p
                       :class="`order-1 font-semibold text-${event.colour}-700`"
@@ -193,8 +200,8 @@ onMounted(() => {
           <button
             v-if="existPreviousMonthEvents"
             type="button"
-            @click="scrollMonth('previous')"
             class="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
+            @click="scrollMonth('previous')"
           >
             <span class="sr-only">Previous month</span>
             <ChevronLeftIcon class="size-5" aria-hidden="true" />
@@ -205,15 +212,15 @@ onMounted(() => {
           <button
             v-if="existNextMonthEvents"
             type="button"
-            @click="scrollMonth('next')"
             class="-m-1.5 flex flex-none items-center justify-center p-1.5 text-gray-400 hover:text-gray-500"
+            @click="scrollMonth('next')"
           >
             <span class="sr-only">Next month</span>
             <ChevronRightIcon class="size-5" aria-hidden="true" />
           </button>
         </div>
         <div class="mt-6 grid grid-cols-7 text-center text-xs/6 text-gray-500">
-          <div v-for="weekDay in weekDays">
+          <div v-for="weekDay in weekDays" :key="weekDay">
             {{ weekDay }}
           </div>
         </div>
@@ -225,7 +232,6 @@ onMounted(() => {
             v-for="(day, dayIdx) in getShownMonth"
             :key="day.date"
             type="button"
-            @click="scrollDate('exact date', day.date)"
             :disabled="!day.hasEvent"
             :class="[
               'py-1.5 hover:bg-gray-100 focus:z-10',
@@ -245,6 +251,7 @@ onMounted(() => {
               dayIdx === days.length - 7 && 'rounded-bl-lg',
               dayIdx === days.length - 1 && 'rounded-br-lg',
             ]"
+            @click="scrollDate('exact date', day.date)"
           >
             <time
               :datetime="day.date"

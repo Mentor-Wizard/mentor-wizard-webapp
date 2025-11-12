@@ -47,12 +47,15 @@ class GetMonthEventsService
 
     private function getFormattedEventsForPeriod(CarbonInterface $startDate, CarbonInterface $endDate): array
     {
+        /** @var Collection<int, CalendarEvent> $caledarEvents */
         $caledarEvents = $this->user->calendarEvents()
             ->whereBetween('start_date_time', [$startDate, $endDate])
             ->orderBy('start_date_time')
-            ->get()->tap(fn ($collection) => $collection->each(
-                fn ($event): string => $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
-            ));
+            ->get();
+
+        $caledarEvents->each(function (CalendarEvent $event): void {
+            $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');
+        });
 
         return $caledarEvents->groupBy('date')->map($this->formatDateEvents(...))->all();
 
@@ -74,10 +77,10 @@ class GetMonthEventsService
     {
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $dateEvents->first();
-        $dateEvents->map(fn (CalendarEvent $event): string => $event->timezone = $this->timezone);
         $payload = [
             'date'   => $firstEvent->start_date_time->setTimezone($this->timezone)->format('Y-m-d'),
             'events' => EventMonthViewResource::collection($dateEvents)
+                ->additional(['timeZone' => $this->timezone])
                 ->resolve(),
         ];
 

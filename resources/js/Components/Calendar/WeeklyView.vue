@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const container = ref(null);
 const containerNav = ref(null);
@@ -28,9 +28,11 @@ const props = defineProps({
   },
   openShowEditEventPage: {
     type: Function,
+    default: () => {},
   },
   scrollDate: {
     type: Function,
+    default: () => {},
   },
 });
 </script>
@@ -50,12 +52,12 @@ const props = defineProps({
           class="sticky top-0 z-30 flex-none bg-white shadow-sm ring-1 ring-black/5 sm:pr-8"
         >
           <div class="grid grid-cols-7 text-sm/6 text-gray-500 sm:hidden">
-            <div v-for="(day, dayIdx) in events.calendarView">
+            <div v-for="(day, dayIdx) in events.calendarView" :key="day.date">
               <button
                 type="button"
-                @click="scrollDate('exact date', day.date)"
                 :disabled="!day.hasEvents"
                 class="flex flex-col items-center pt-2 pb-3"
+                @click="scrollDate('exact date', day.date)"
               >
                 {{ props?.weekDays[dayIdx]?.slice(0, 1) }}
                 <span
@@ -70,10 +72,10 @@ const props = defineProps({
             class="-mr-px hidden grid-cols-7 divide-x divide-gray-100 border-r border-gray-100 text-sm/6 text-gray-500 sm:grid"
           >
             <div class="col-end-1 w-14" />
-            <div v-for="(day, dayIdx) in events.calendarView">
+            <div v-for="(day, dayIdx) in events.calendarView" :key="day.date">
               <span
-                @click="scrollDate('exact date', day.date)"
                 :disabled="!day.hasEvents"
+                @click="scrollDate('exact date', day.date)"
                 >{{ props.weekDays[dayIdx] }}
                 <span
                   class="items-center justify-center font-semibold text-gray-900"
@@ -126,7 +128,7 @@ const props = defineProps({
                 grid-template-rows: 1.75rem repeat(288, minmax(0, 1fr)) auto;
               "
             >
-              <template v-for="event in events.events">
+              <template v-for="event in events.events" :key="event.id">
                 <li
                   :class="`relative mt-px flex sm:col-start-${event.dayNumber}`"
                   :style="{
@@ -134,8 +136,8 @@ const props = defineProps({
                   }"
                 >
                   <a
-                    @click="props.openShowEditEventPage(event.id)"
                     :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-${event.colour}-50 p-2 text-xs/5 hover:bg-${event.colour}-100`"
+                    @click="props.openShowEditEventPage(event.id)"
                   >
                     <p
                       :class="`order-1 font-semibold text-${event.colour}-700`"

@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import DailyView from '@/Components/Calendar/DailyView.vue';
-import MonthlyView from '@/Components/Calendar/MonthlyView.vue';
-import WeeklyView from '@/Components/Calendar/WeeklyView.vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import {
   ChevronDownIcon,
@@ -9,13 +6,17 @@ import {
   ChevronRightIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/vue/20/solid';
-import { computed, onMounted, ref } from 'vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { router, usePage } from '@inertiajs/vue3';
+import { storeToRefs } from 'pinia';
+import { computed, onMounted, ref } from 'vue';
+
+import DailyView from '@/Components/Calendar/DailyView.vue';
+import MonthlyView from '@/Components/Calendar/MonthlyView.vue';
+import WeeklyView from '@/Components/Calendar/WeeklyView.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import CreateEvent from '@/Pages/Calendar/CreateEvent.vue';
 import { useCalendar } from '@/Stores/calendar.js';
 import { adjustDate } from '@/Stores/Calendar/helpers.js';
-import { storeToRefs } from 'pinia';
 
 const locale = usePage().props.locale;
 
@@ -186,13 +187,12 @@ onMounted(() => {
       </div>
       <!--                            class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"-->
 
-      <div class="flex items-center" v-if="timezone">
+      <div v-if="timezone" class="flex items-center">
         <div
           class="relative flex items-center rounded-md bg-white shadow-xs md:items-stretch"
         >
           <button
             type="button"
-            @click="scrollDate('previous')"
             :disabled="
               !daysData['hasEventsBefore'] && currentTab == 'Month View'
             "
@@ -202,6 +202,7 @@ onMounted(() => {
                 'hover:text-gray-500 md:hover:bg-gray-50'
               : 'cursor-not-allowed',
             ]"
+            @click="scrollDate('previous')"
           >
             <span class="sr-only">Previous day</span>
             <ChevronLeftIcon class="size-5" aria-hidden="true" />
@@ -215,7 +216,6 @@ onMounted(() => {
           <span class="relative -mx-px h-5 w-px bg-gray-300 md:hidden" />
           <button
             type="button"
-            @click="scrollDate('next')"
             :disabled="
               !daysData['hasEventsAfter'] && currentTab == 'Month View'
             "
@@ -225,6 +225,7 @@ onMounted(() => {
                 'hover:text-gray-500 md:hover:bg-gray-50'
               : 'cursor-not-allowed',
             ]"
+            @click="scrollDate('next')"
           >
             <span class="sr-only">Next day</span>
             <ChevronRightIcon class="size-5" aria-hidden="true" />
@@ -257,37 +258,37 @@ onMounted(() => {
                 <div class="py-1">
                   <MenuItem v-slot="{ active }">
                     <a
-                      @click="changeTab('Day view')"
                       :class="[
                         active ?
                           'bg-gray-100 text-gray-900 outline-hidden'
                         : 'text-gray-700',
                         'block px-4 py-2 text-sm',
                       ]"
+                      @click="changeTab('Day view')"
                       >Day view</a
                     >
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
                     <a
-                      @click="changeTab('Week view')"
                       :class="[
                         active ?
                           'bg-gray-100 text-gray-900 outline-hidden'
                         : 'text-gray-700',
                         'block px-4 py-2 text-sm',
                       ]"
+                      @click="changeTab('Week view')"
                       >Week view</a
                     >
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
                     <a
-                      @click="changeTab('Month view')"
                       :class="[
                         active ?
                           'bg-gray-100 text-gray-900 outline-hidden'
                         : 'text-gray-700',
                         'block px-4 py-2 text-sm',
                       ]"
+                      @click="changeTab('Month view')"
                       >Month view</a
                     >
                   </MenuItem>
@@ -297,10 +298,10 @@ onMounted(() => {
           </Menu>
           <div class="ml-6 h-6 w-px bg-gray-300" />
           <button
-            type="button"
             v-if="permissions === 'edit'"
-            @click="openCreateEventPage()"
+            type="button"
             class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            @click="openCreateEventPage()"
           >
             Add event
           </button>
@@ -342,13 +343,13 @@ onMounted(() => {
               <div class="py-1">
                 <MenuItem v-slot="{ active }">
                   <a
-                    @click="setTodayDate()"
                     :class="[
                       active ?
                         'bg-gray-100 text-gray-900 outline-hidden'
                       : 'text-gray-700',
                       'block px-4 py-2 text-sm',
                     ]"
+                    @click="setTodayDate()"
                     >Go to today</a
                   >
                 </MenuItem>
@@ -356,37 +357,37 @@ onMounted(() => {
               <div class="py-1">
                 <MenuItem v-slot="{ active }">
                   <a
-                    @click="changeTab('Day view')"
                     :class="[
                       active ?
                         'bg-gray-100 text-gray-900 outline-hidden'
                       : 'text-gray-700',
                       'block px-4 py-2 text-sm',
                     ]"
+                    @click="changeTab('Day view')"
                     >Day view</a
                   >
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <a
-                    @click="changeTab('Week view')"
                     :class="[
                       active ?
                         'bg-gray-100 text-gray-900 outline-hidden'
                       : 'text-gray-700',
                       'block px-4 py-2 text-sm',
                     ]"
+                    @click="changeTab('Week view')"
                     >Week view</a
                   >
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <a
-                    @click="changeTab('Month view')"
                     :class="[
                       active ?
                         'bg-gray-100 text-gray-900 outline-hidden'
                       : 'text-gray-700',
                       'block px-4 py-2 text-sm',
                     ]"
+                    @click="changeTab('Month view')"
                     >Month view</a
                   >
                 </MenuItem>
@@ -398,30 +399,30 @@ onMounted(() => {
     </header>
     <CreateEvent
       :open="showCreatePage"
-      :closeCreateEventPage="closeCreateEventPage"
+      :close-create-event-page="closeCreateEventPage"
     />
 
     <MonthlyView
-      :days="daysData"
-      :scrollDate="scrollDate"
-      :openShowEditEventPage="openShowEditEventPage"
       v-if="currentTab === 'Month view'"
+      :days="daysData"
+      :scroll-date="scrollDate"
+      :open-show-edit-event-page="openShowEditEventPage"
     />
     <WeeklyView
-      :events="daysData"
-      :scrollDate="scrollDate"
-      :hours="hours"
-      :weekDays="weekDays"
-      :openShowEditEventPage="openShowEditEventPage"
       v-if="currentTab === 'Week view'"
+      :events="daysData"
+      :scroll-date="scrollDate"
+      :hours="hours"
+      :week-days="weekDays"
+      :open-show-edit-event-page="openShowEditEventPage"
     />
     <DailyView
+      v-if="currentTab === 'Day view'"
       :days="daysData"
       :hours="hours"
-      :weekDays="weekDays"
-      :scrollDate="scrollDate"
-      :openShowEditEventPage="openShowEditEventPage"
-      v-if="currentTab === 'Day view'"
+      :week-days="weekDays"
+      :scroll-date="scrollDate"
+      :open-show-edit-event-page="openShowEditEventPage"
     />
   </AuthenticatedLayout>
 </template>

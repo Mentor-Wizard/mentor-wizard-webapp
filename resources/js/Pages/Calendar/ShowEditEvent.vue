@@ -1,27 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-
 import {
   Dialog,
   DialogPanel,
   DialogTitle,
-  TransitionChild,
-  TransitionRoot,
   Listbox,
   ListboxButton,
-  ListboxOptions,
   ListboxOption,
+  ListboxOptions,
+  TransitionChild,
+  TransitionRoot,
 } from '@headlessui/vue';
 import {
-  XMarkIcon,
-  ChevronUpDownIcon,
-  CheckIcon,
   CalendarIcon,
+  CheckIcon,
+  ChevronUpDownIcon,
   ClockIcon,
-  UserIcon,
   UserGroupIcon,
+  UserIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline';
+import { router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
 const mode = ref('show');
@@ -104,7 +103,6 @@ const eventTypes = [
 ];
 
 onMounted(() => {
-  const now = new Date();
   const eventData = usePage().props.event;
   availableColours.value = usePage().props.availableColours;
   availableColoursScheme.value = availableColours.value.reduce(
@@ -213,7 +211,7 @@ const handleSubmit = () => {
       onError: (serverErrors) => {
         console.log('Server validation errors:', serverErrors);
         Object.keys(serverErrors).forEach((field) => {
-          if (errors.value.hasOwnProperty(field)) {
+          if (Object.prototype.hasOwnProperty.call(errors.value, field)) {
             errors.value[field] = serverErrors[field];
           }
         });
@@ -304,7 +302,7 @@ watch(
                     Edit Event
                   </DialogTitle>
 
-                  <form @submit.prevent="handleSubmit" class="space-y-4">
+                  <form class="space-y-4" @submit.prevent="handleSubmit">
                     <div>
                       <label
                         for="title"
@@ -958,25 +956,25 @@ watch(
               <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                 <button
                   v-if="mode === 'show' && permissions == 'edit'"
-                  @click="changeMode('edit')"
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  @click="changeMode('edit')"
                 >
                   Edit Event
                 </button>
                 <button
                   v-if="permissions == 'edit'"
-                  @click="deleteEvent()"
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  @click="deleteEvent()"
                 >
                   Delete Event
                 </button>
                 <button
                   v-if="mode === 'edit' && permissions == 'edit'"
-                  @click="changeMode('show')"
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  @click="changeMode('show')"
                 >
                   Show Event
                 </button>

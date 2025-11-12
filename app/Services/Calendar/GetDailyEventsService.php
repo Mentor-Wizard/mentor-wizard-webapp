@@ -45,9 +45,11 @@ class GetDailyEventsService
             $endCalendarMonth = (clone $todayDate)->endOfMonth();
         }
 
-        $dailyEvents = clone $this->user->calendarEvents()->tap(fn ($collection) => $collection->each(
-            fn ($event): string => $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
-        ));
+        /** @var \Illuminate\Database\Eloquent\Collection<int, CalendarEvent> $dailyEvents */
+        $dailyEvents = $this->user->calendarEvents()->get();
+        $dailyEvents->each(function (CalendarEvent $event): void {
+            $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');
+        });
 
         $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
 

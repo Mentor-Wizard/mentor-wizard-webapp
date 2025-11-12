@@ -1,7 +1,6 @@
 <script setup>
 import { ClockIcon } from '@heroicons/vue/20/solid';
 import { computed } from 'vue';
-import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
   days: {
@@ -10,15 +9,19 @@ const props = defineProps({
   },
   scrollDate: {
     type: Function,
+    default: () => {},
   },
   openShowEditEventPage: {
     type: Function,
+    default: () => {},
   },
   hours: {
     type: Array,
+    default: () => [],
   },
   weekDays: {
     type: Array,
+    default: () => [],
   },
 });
 
@@ -34,7 +37,11 @@ const selectedDay = computed(() => {
       <div
         class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs/6 font-semibold text-gray-700 lg:flex-none"
       >
-        <div v-for="weekDay in props.weekDays" class="bg-white py-2">
+        <div
+          v-for="weekDay in props.weekDays"
+          :key="weekDay"
+          class="bg-white py-2"
+        >
           <div class="bg-white py-2">
             {{ weekDay.slice(0, 1)
             }}<span class="sr-only sm:not-sr-only">{{
@@ -50,12 +57,12 @@ const selectedDay = computed(() => {
           <div
             v-for="day in days.calendarView"
             :key="day.date"
-            @click="scrollDate('exact date', day.date)"
-            @disabled="!day.events || day.events.length === 0"
             :class="[
               day.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-500',
               'relative px-3 py-2',
             ]"
+            @click="scrollDate('exact date', day.date)"
+            @disabled="!day.events || day.events.length === 0"
           >
             <time
               :datetime="day.date"
@@ -99,7 +106,6 @@ const selectedDay = computed(() => {
             v-for="day in days.calendarView"
             :key="day.date"
             type="button"
-            @click="scrollDate('exact date', day.date)"
             :disabled="!day.events || day.events.length === 0"
             :class="[
               day.isCurrentMonth ? 'bg-white' : 'bg-gray-50',
@@ -116,6 +122,7 @@ const selectedDay = computed(() => {
                 && 'text-gray-500',
               'flex h-14 flex-col px-3 py-2 hover:bg-gray-100 focus:z-10',
             ]"
+            @click="scrollDate('exact date', day.date)"
           >
             <time
               :datetime="day.date"
@@ -166,8 +173,8 @@ const selectedDay = computed(() => {
             </time>
           </div>
           <a
-            @click.prevent.stop="props.openShowEditEventPage(event.id)"
             class="ml-6 flex-none self-center rounded-md bg-white px-3 py-2 font-semibold text-gray-900 opacity-0 shadow-xs ring-1 ring-gray-300 ring-inset group-hover:opacity-100 hover:ring-gray-400 focus:opacity-100"
+            @click.prevent.stop="props.openShowEditEventPage(event.id)"
             >Edit<span class="sr-only"> {{ event.title }}</span></a
           >
         </li>

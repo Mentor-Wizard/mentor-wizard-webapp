@@ -39,11 +39,13 @@ class GetWeeklyEventsService
                 ->resolve();
         }
 
-        $userEventsForCalendar->tap(fn ($collection) => $collection->each(
-            fn ($event): string => $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
-        ));
+        /** @var \Illuminate\Database\Eloquent\Collection<int, CalendarEvent> $eventsForCalendar */
+        $eventsForCalendar = $userEventsForCalendar->get();
+        $eventsForCalendar->each(function (CalendarEvent $event): void {
+            $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');
+        });
 
-        $daysEvents = $userEventsForCalendar->pluck('date')->unique()->toArray();
+        $daysEvents = $eventsForCalendar->pluck('date')->unique()->toArray();
         $weekDays = CarbonPeriod::create($startDate, '1 day', $endDate);
         foreach ($weekDays as $weekDay) {
             $this->buildWeekPayload($weekDay, $daysEvents, $todayDate);

@@ -1,3 +1,43 @@
+<script setup>
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
+import {
+  BellIcon,
+  CalendarIcon,
+  CreditCardIcon,
+  UserIcon,
+} from '@heroicons/vue/20/solid';
+import { ref, shallowRef } from 'vue';
+
+import MainPageText from '@/Components/MainPageText.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
+import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
+import CalendarTab from '@/Pages/Profile/Tab/CalendarTab.vue';
+import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
+import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
+
+defineOptions({
+  name: 'ProfileEdit',
+});
+
+const selectedTab = ref(0);
+
+function changeTab(index) {
+  selectedTab.value = index;
+}
+
+const navigation = ref([
+  { name: 'My Account', icon: UserIcon, component: shallowRef(MyAccountTab) },
+  {
+    name: 'Notification',
+    icon: BellIcon,
+    component: shallowRef(NotificationTab),
+  },
+  { name: 'Billing', icon: CreditCardIcon, component: shallowRef(BillingTab) },
+  { name: 'Calendar', icon: CalendarIcon, component: shallowRef(CalendarTab) },
+]);
+</script>
+
 <template>
   <AuthenticatedLayout>
     <template #header>
@@ -8,12 +48,12 @@
         <div class="py-12">
           <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white p-8 shadow-xs sm:rounded-lg">
-              <TabGroup :selectedIndex="selectedTab" @change="changeTab">
+              <TabGroup :selected-index="selectedTab" @change="changeTab">
                 <h1 class="sr-only">Account Settings</h1>
                 <header class="border-b border-white/5">
                   <MobileTabSelect
-                    :options="navigation"
                     v-model="selectedTab"
+                    :options="navigation"
                   />
                   <div class="hidden sm:block">
                     <TabList class="border-b border-gray-200">
@@ -41,7 +81,7 @@
                   </div>
                 </header>
                 <TabPanels>
-                  <TabPanel v-for="tab in navigation">
+                  <TabPanel v-for="tab in navigation" :key="tab.name">
                     <component :is="tab.component" />
                   </TabPanel>
                 </TabPanels>
@@ -53,38 +93,3 @@
     </div>
   </AuthenticatedLayout>
 </template>
-
-<script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import MainPageText from '@/Components/MainPageText.vue';
-import {
-  BellIcon,
-  CreditCardIcon,
-  UserIcon,
-  CalendarIcon,
-} from '@heroicons/vue/20/solid';
-import { ref, shallowRef } from 'vue';
-import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
-import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
-import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
-import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
-import CalendarTab from '@/Pages/Profile/Tab/CalendarTab.vue';
-
-const selectedTab = ref(0);
-
-function changeTab(index) {
-  selectedTab.value = index;
-}
-
-const navigation = ref([
-  { name: 'My Account', icon: UserIcon, component: shallowRef(MyAccountTab) },
-  {
-    name: 'Notification',
-    icon: BellIcon,
-    component: shallowRef(NotificationTab),
-  },
-  { name: 'Billing', icon: CreditCardIcon, component: shallowRef(BillingTab) },
-  { name: 'Calendar', icon: CalendarIcon, component: shallowRef(CalendarTab) },
-]);
-</script>

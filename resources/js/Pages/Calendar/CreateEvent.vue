@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
 import {
   Dialog,
   DialogPanel,
   DialogTitle,
-  TransitionChild,
-  TransitionRoot,
   Listbox,
   ListboxButton,
-  ListboxOptions,
   ListboxOption,
+  ListboxOptions,
+  TransitionChild,
+  TransitionRoot,
 } from '@headlessui/vue';
 import {
-  XMarkIcon,
-  ChevronUpDownIcon,
-  CheckIcon,
   CalendarIcon,
+  CheckIcon,
+  ChevronUpDownIcon,
   ClockIcon,
-  UserIcon,
   UserGroupIcon,
+  UserIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import { useForm, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref, watch } from 'vue';
 const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
 // interface EventFormData {
 //     title: string;
@@ -46,9 +46,11 @@ const props = defineProps({
   },
   closeCreateEventPage: {
     type: Function,
+    default: () => {},
   },
   availableColors: {
     type: Array,
+    default: () => [],
   },
 });
 
@@ -175,7 +177,7 @@ const handleSubmit = () => {
       onError: (serverErrors) => {
         console.log('Server validation errors:', serverErrors);
         Object.keys(serverErrors).forEach((field) => {
-          if (errors.value.hasOwnProperty(field)) {
+          if (Object.prototype.hasOwnProperty.call(errors.value, field)) {
             errors.value[field] = serverErrors[field];
           }
         });
@@ -276,7 +278,7 @@ watch(
                     Create New Event
                   </DialogTitle>
 
-                  <form @submit.prevent="handleSubmit" class="space-y-4">
+                  <form class="space-y-4" @submit.prevent="handleSubmit">
                     <div>
                       <label
                         for="title"
