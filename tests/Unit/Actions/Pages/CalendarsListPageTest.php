@@ -7,7 +7,6 @@ use App\Enums\RoleEnum;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Response as InertiaResponse;
 use Spatie\Permission\Models\Role;
@@ -38,7 +37,7 @@ describe('CalendarsListPage', function (): void {
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
         Auth::login($user);
 
-        $date = Carbon::now('UTC')->format('Y-m-d');
+        $date = Illuminate\Support\Facades\Date::now('UTC')->format('Y-m-d');
 
         $action = new CalendarsListPage;
 

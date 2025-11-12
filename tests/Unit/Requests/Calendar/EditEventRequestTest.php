@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\EditEventRequest;
-use Illuminate\Support\Carbon;
 use Mockery as m;
 
 it('builds event data correctly for individual type', function (): void {
@@ -27,8 +26,8 @@ it('builds event data correctly for individual type', function (): void {
 
     $result = $request->getEventData();
 
-    $expectedStart = Carbon::createFromFormat('Y-m-d H:i', '2025-01-01 10:00', 'Europe/Kyiv');
-    $expectedEnd = Carbon::createFromFormat('Y-m-d H:i', '2025-01-01 11:30', 'Europe/Kyiv');
+    $expectedStart = Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', '2025-01-01 10:00', 'Europe/Kyiv');
+    $expectedEnd = Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', '2025-01-01 11:30', 'Europe/Kyiv');
 
     expect($result)
         ->toBeArray()
@@ -61,8 +60,8 @@ it('builds event data correctly for group type', function (): void {
 
     $result = $request->getEventData();
 
-    $expectedStart = Carbon::createFromFormat('Y-m-d H:i', '2025-02-10 09:15', 'Europe/Kyiv');
-    $expectedEnd = Carbon::createFromFormat('Y-m-d H:i', '2025-02-10 10:00', 'Europe/Kyiv');
+    $expectedStart = Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', '2025-02-10 09:15', 'Europe/Kyiv');
+    $expectedEnd = Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', '2025-02-10 10:00', 'Europe/Kyiv');
 
     expect($result)
         ->toBeArray()

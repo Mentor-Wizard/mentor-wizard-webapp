@@ -11,7 +11,6 @@ use App\Services\Calendar\CheckTimeSlotReservedService;
 use Exception;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Override;
 
@@ -64,15 +63,15 @@ class EditEventRequest extends FormRequest
     {
         $validator->after(function ($validator): void {
             try {
-                Carbon::parse($this->input('fromDate'));
-                Carbon::parse($this->input('fromDate').' '.$this->input('fromTime'));
+                \Illuminate\Support\Facades\Date::parse($this->input('fromDate'));
+                \Illuminate\Support\Facades\Date::parse($this->input('fromDate').' '.$this->input('fromTime'));
             } catch (Exception) {
                 $validator->errors()->add('fromDate', 'fromDate is not valid');
             }
 
             try {
-                Carbon::parse($this->input('toDate'));
-                Carbon::parse($this->input('toDate').' '.$this->input('toTime'));
+                \Illuminate\Support\Facades\Date::parse($this->input('toDate'));
+                \Illuminate\Support\Facades\Date::parse($this->input('toDate').' '.$this->input('toTime'));
             } catch (Exception) {
                 $validator->errors()->add('fromDate', 'toDate is not valid');
             }
@@ -95,12 +94,12 @@ class EditEventRequest extends FormRequest
     {
         $validated = $this->validated();
 
-        $startDateTime = Carbon::createFromFormat(
+        $startDateTime = \Illuminate\Support\Facades\Date::createFromFormat(
             'Y-m-d H:i',
             $validated['fromDate'].' '.$validated['fromTime'],
             $validated['timezone']
         )?->setTimezone('UTC');
-        $endDateTime = Carbon::createFromFormat(
+        $endDateTime = \Illuminate\Support\Facades\Date::createFromFormat(
             'Y-m-d H:i',
             $validated['toDate'].' '.$validated['toTime'],
             $validated['timezone']
@@ -129,8 +128,8 @@ class EditEventRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->has(['fromDate', 'toDate', 'fromTime', 'toTime'])) {
-            $fromDateTime = Carbon::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
-            $toDateTime = Carbon::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
+            $fromDateTime = \Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
+            $toDateTime = \Illuminate\Support\Facades\Date::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
             if ($this->fromDate === $this->toDate && $this->toTime <= $this->fromTime) {
                 return;
             }

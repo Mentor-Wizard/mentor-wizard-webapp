@@ -32,6 +32,6 @@ class StoreCalendarEvent
             'colour' => $colour,
         ]);
 
-        return redirect()->route('pages.calendar.index');
+        return to_route('pages.calendar.index');
     }
 }

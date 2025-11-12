@@ -18,9 +18,9 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
             {
                 return [
                     'title'       => 'Test',
-                    'fromDate'    => Carbon::today()->format('Y-m-d'),
+                    'fromDate'    => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
                     'fromTime'    => '09:00',
-                    'toDate'      => Carbon::today()->format('Y-m-d'),
+                    'toDate'      => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
                     'toTime'      => '10:00',
                     'type'        => 'individual',
                     'description' => 'Desc',
@@ -44,9 +44,9 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
             {
                 return [
                     'title'       => 'Test',
-                    'fromDate'    => Carbon::today()->format('Y-m-d'),
+                    'fromDate'    => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
                     'fromTime'    => '11:00',
-                    'toDate'      => Carbon::today()->format('Y-m-d'),
+                    'toDate'      => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
                     'toTime'      => '12:30',
                     'type'        => 'group',
                     'description' => 'Desc',
@@ -73,7 +73,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
                     'title'       => 'Invalid',
                     'fromDate'    => 'not-a-date',   // invalid
                     'fromTime'    => 'xx:yy',        // invalid
-                    'toDate'      => Carbon::today()->format('Y-m-d'),
+                    'toDate'      => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
                     'toTime'      => '01:00',
                     'type'        => 'individual',
                     'description' => 'Desc',
@@ -89,7 +89,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
     });
 
     it('builds exact start/end when crossing midnight to ensure both date and time are concatenated', function (): void {
-        $today = Carbon::today();
+        $today = Illuminate\Support\Facades\Date::today();
         $tomorrow = $today->copy()->addDay();
 
         $request = new class($today, $tomorrow) extends StoreEventRequest

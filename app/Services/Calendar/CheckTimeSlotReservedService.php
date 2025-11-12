@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Calendar;
 
 use App\Models\User;
-use Carbon\Carbon;
 
 class CheckTimeSlotReservedService
 {
@@ -21,22 +20,17 @@ class CheckTimeSlotReservedService
             return true;
         }
 
-        $startDate = Carbon::createFromFormat(
+        $startDate = \Illuminate\Support\Facades\Date::createFromFormat(
             'Y-m-d H:i',
             $this->fromDate.' '.$this->fromTime,
             $this->timezone
         );
-        $endDate = Carbon::createFromFormat(
+        $endDate = \Illuminate\Support\Facades\Date::createFromFormat(
             'Y-m-d H:i',
             $this->toDate.' '.$this->toTime,
             $this->timezone
         );
-        foreach ($availableSlots as $slot) {
-            if ($startDate?->greaterThanOrEqualTo($slot['start']) && $endDate?->lessThanOrEqualTo($slot['end'])) {
-                return true;
-            }
-        }
 
-        return false;
+        return array_any($availableSlots, fn ($slot): bool => $startDate?->greaterThanOrEqualTo($slot['start']) && $endDate?->lessThanOrEqualTo($slot['end']));
     }
 }

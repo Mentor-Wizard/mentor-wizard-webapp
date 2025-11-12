@@ -17,7 +17,7 @@ class EditCalendarEvent
 
     public function handle(EditEventRequest $request, CalendarEvent $calendarEvent): Response
     {
-        throw_unless($calendarEvent->exists, new ModelNotFoundException('Calendar Event not found.'));
+        throw_unless($calendarEvent->exists, ModelNotFoundException::class, 'Calendar Event not found.');
 
         $validatedData = $request->getEventData();
         $colour = Arr::get($validatedData, 'colour');
@@ -30,6 +30,6 @@ class EditCalendarEvent
             'colour' => $colour,
         ], false);
 
-        return redirect()->route('pages.calendar.index');
+        return to_route('pages.calendar.index');
     }
 }

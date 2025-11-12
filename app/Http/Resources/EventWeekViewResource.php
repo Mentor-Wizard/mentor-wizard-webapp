@@ -28,7 +28,7 @@ class EventWeekViewResource extends JsonResource
     {
         $user = $this->additional['user'] ?? null;
 
-        $date = Carbon::parse($this->start_date_time, 'UTC')->setTimezone($this->timezone);
+        $date = \Illuminate\Support\Facades\Date::parse($this->start_date_time, 'UTC')->setTimezone($this->timezone);
 
         $timezoneAbbreviation = $date->format('T');
         $dateTime = $date->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$date->format('H:i:s');

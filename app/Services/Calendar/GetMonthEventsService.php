@@ -33,8 +33,8 @@ class GetMonthEventsService
 
     private function prepareDateConfiguration(): array
     {
-        $startDate = Carbon::parse($this->date, $this->timezone)->startOfMonth()->startOfWeek();
-        $endDate = Carbon::parse($this->date, $this->timezone)->endOfMonth()->endOfWeek();
+        $startDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->startOfMonth()->startOfWeek();
+        $endDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         return [
@@ -50,10 +50,10 @@ class GetMonthEventsService
             ->whereBetween('start_date_time', [$startDate, $endDate])
             ->orderBy('start_date_time')
             ->get()->tap(fn ($collection) => $collection->each(
-                fn ($event): string => $event->date = Carbon::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+                fn ($event): string => $event->date = \Illuminate\Support\Facades\Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
             ));
 
-        return $caledarEvents->groupBy('date')->map(fn (Collection $dateEvents): array => $this->formatDateEvents($dateEvents))->toArray();
+        return $caledarEvents->groupBy('date')->map($this->formatDateEvents(...))->all();
 
     }
 
@@ -80,7 +80,7 @@ class GetMonthEventsService
                 ->resolve(),
         ];
 
-        $parsedDate = Carbon::parse($this->date, $this->timezone);
+        $parsedDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone);
         $eventDate = $firstEvent->start_date_time;
 
         if ($parsedDate->isSameMonth($eventDate)) {
@@ -91,7 +91,7 @@ class GetMonthEventsService
             $payload['isSelected'] = true;
         }
 
-        if (Carbon::now()->isSameDay($eventDate)) {
+        if (\Illuminate\Support\Facades\Date::now()->isSameDay($eventDate)) {
             $payload['isToday'] = true;
         }
 

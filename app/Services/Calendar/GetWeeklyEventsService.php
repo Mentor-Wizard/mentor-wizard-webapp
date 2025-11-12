@@ -21,11 +21,11 @@ class GetWeeklyEventsService
 
     public function execute(): array
     {
-        $startDate = Carbon::parse($this->date, $this->timezone)->startOfWeek();
+        $startDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->startOfWeek();
         $startUTCDate = (clone $startDate)->setTimezone('UTC');
-        $endDate = Carbon::parse($this->date, $this->timezone)->endOfWeek();
+        $endDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->endOfWeek();
         $endUTCDate = (clone $endDate)->setTimezone('UTC');
-        $todayDate = Carbon::parse($this->date, $this->timezone);
+        $todayDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone);
         $userEvents = $this->user->calendarEvents()->with('calendarEventUsers');
         $userEventsForCalendar = clone $userEvents;
 
@@ -40,7 +40,7 @@ class GetWeeklyEventsService
         }
 
         $userEventsForCalendar->tap(fn ($collection) => $collection->each(
-            fn ($event): string => $event->date = Carbon::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+            fn ($event): string => $event->date = \Illuminate\Support\Facades\Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
         ));
 
         $daysEvents = $userEventsForCalendar->pluck('date')->unique()->toArray();
@@ -69,7 +69,7 @@ class GetWeeklyEventsService
             $payload['isSelected'] = true;
         }
 
-        if (Carbon::now($this->timezone)->isSameDay($weekDay)) {
+        if (\Illuminate\Support\Facades\Date::now($this->timezone)->isSameDay($weekDay)) {
             $payload['isToday'] = true;
         }
 

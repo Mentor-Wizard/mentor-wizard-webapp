@@ -32,21 +32,21 @@ class GetDailyEventsService
 
     private function prepareDailyDateConfiguration(): array
     {
-        $todayDate = Carbon::parse($this->date, $this->timezone)->startOfDay();
-        $tomorrowDate = Carbon::parse($this->date, $this->timezone)->addDay()->startOfDay();
+        $todayDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->startOfDay();
+        $tomorrowDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->addDay()->startOfDay();
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $this->user->calendarEvents()->orderBy('start_date_time')->first();
         /** @var ?CalendarEvent $latestEvent */
         $latestEvent = $this->user->calendarEvents()->orderBy('start_date_time', 'desc')->latest()->first();
 
-        $startCalendarMonth = Carbon::parse($firstEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->startOfMonth();
-        $endCalendarMonth = Carbon::parse($latestEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->endOfMonth();
+        $startCalendarMonth = \Illuminate\Support\Facades\Date::parse($firstEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->startOfMonth();
+        $endCalendarMonth = \Illuminate\Support\Facades\Date::parse($latestEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->endOfMonth();
         if ($todayDate->isAfter($endCalendarMonth)) {
             $endCalendarMonth = (clone $todayDate)->endOfMonth();
         }
 
         $dailyEvents = clone $this->user->calendarEvents()->tap(fn ($collection) => $collection->each(
-            fn ($event): string => $event->date = Carbon::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+            fn ($event): string => $event->date = \Illuminate\Support\Facades\Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
         ));
 
         $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
@@ -80,8 +80,8 @@ class GetDailyEventsService
     private function buildDailyCalendarView(array $months, Carbon $todayDate, array $daysEvents): void
     {
         foreach ($months as $month) {
-            $startDate = Carbon::parse($month, $this->timezone)->startOfMonth()->startOfWeek();
-            $endDate = Carbon::parse($month, $this->timezone)->endOfMonth()->endOfWeek();
+            $startDate = \Illuminate\Support\Facades\Date::parse($month, $this->timezone)->startOfMonth()->startOfWeek();
+            $endDate = \Illuminate\Support\Facades\Date::parse($month, $this->timezone)->endOfMonth()->endOfWeek();
             $daysPeriod = CarbonPeriod::create($startDate, '1 day', $endDate);
             $monthDates = $daysPeriod->toArray();
 
@@ -108,7 +108,7 @@ class GetDailyEventsService
             $payload['isSelected'] = true;
         }
 
-        if (Carbon::now($this->timezone)->isSameDay($monthDate)) {
+        if (\Illuminate\Support\Facades\Date::now($this->timezone)->isSameDay($monthDate)) {
             $payload['isToday'] = true;
         }
 

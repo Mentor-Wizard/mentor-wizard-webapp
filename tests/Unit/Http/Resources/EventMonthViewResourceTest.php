@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 use App\Http\Resources\EventMonthViewResource;
 use App\Models\CalendarEvent;
-use Illuminate\Support\Carbon;
 
 mutates(EventMonthViewResource::class);
 
 describe('EventMonthViewResource', function (): void {
     it('maps event to month view payload (name, time, datetime, href, id)', function (): void {
         // Use end-of-month evening to mirror existing page assertions (11PM formatting)
-        $start = Carbon::create(2025, 8, 31, 23, 59, 0);
+        $start = Illuminate\Support\Facades\Date::create(2025, 8, 31, 23, 59, 0);
         $end = (clone $start)->addMinutes(30);
 
         $event = CalendarEvent::factory()->create([

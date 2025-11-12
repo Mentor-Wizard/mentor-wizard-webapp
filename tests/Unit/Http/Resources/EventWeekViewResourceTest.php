@@ -6,7 +6,6 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Http\Resources\EventWeekViewResource;
 use App\Models\CalendarEvent;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Carbon;
 
 mutates(EventWeekViewResource::class);
 
@@ -14,7 +13,7 @@ describe('EventWeekViewResource', function (): void {
     it('maps event to week view payload with dayNumber and timezone-aware fields', function (): void {
         $this->seed(RoleSeeder::class);
 
-        $start = Carbon::create(2025, 8, 24, 22, 0, 0);
+        $start = Illuminate\Support\Facades\Date::create(2025, 8, 24, 22, 0, 0);
         $end = (clone $start)->addHour();
 
         $user = App\Models\User::factory()->create();

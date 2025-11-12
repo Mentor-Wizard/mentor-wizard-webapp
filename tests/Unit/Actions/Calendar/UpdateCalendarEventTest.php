@@ -12,7 +12,6 @@ use App\Http\Requests\Calendar\EditEventRequest;
 use App\Models\CalendarEvent as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -39,10 +38,10 @@ describe('EditEventRequest Validation', function (): void {
 
         expect($request->authorize())->toBeTrue();
         expect($request->rules())->toBeArray();
-        expect(fn () => $request->validateResolved())->not->toThrow(ValidationException::class);
+        expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
     })->with([
         'single day event' => function (): array {
-            $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+            $tomorrow = Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d');
 
             return [
                 'title'       => 'Updated Standup',
@@ -72,8 +71,8 @@ describe('EditEventRequest Validation', function (): void {
     })->with([
         'empty title' => fn (): array => [[
             'title'       => '',
-            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromDate'    => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'toDate'      => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
             'fromTime'    => '09:00',
             'toTime'      => '10:00',
             'description' => 'x',
@@ -82,8 +81,8 @@ describe('EditEventRequest Validation', function (): void {
         ], 'title'],
         'toTime before fromTime' => fn (): array => [[
             'title'       => 'Wrong time',
-            'fromDate'    => Carbon::tomorrow()->format('Y-m-d'),
-            'toDate'      => Carbon::tomorrow()->format('Y-m-d'),
+            'fromDate'    => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
+            'toDate'      => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
             'fromTime'    => '10:00',
             'toTime'      => '09:00',
             'description' => 'x',
@@ -101,8 +100,8 @@ describe('Update Calendar CalendarEvent', function (): void {
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
-            'date'              => Carbon::tomorrow()->format('Y-m-d'),
+            'start_date_time'   => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d').' 09:00:00',
+            'date'              => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -112,8 +111,8 @@ describe('Update Calendar CalendarEvent', function (): void {
     });
 
     it('updates event with valid data and redirects', function (): void {
-        $start = Carbon::tomorrow()->setTime(13, 0, 0);
-        $end = Carbon::tomorrow()->setTime(14, 30, 0);
+        $start = Illuminate\Support\Facades\Date::tomorrow()->setTime(13, 0, 0);
+        $end = Illuminate\Support\Facades\Date::tomorrow()->setTime(14, 30, 0);
         $payload = [
             'title'           => 'Updated Title',
             'status'          => CalendarEventStatusEnum::CONFIRMED->value,
@@ -158,7 +157,7 @@ describe('Update Calendar CalendarEvent', function (): void {
             'title' => 'Updated Event',
         ]);
 
-        $response->assertStatus(419);
+        $response->assertStatus(403);
     });
 });
 

@@ -16,7 +16,7 @@ describe('GetAvailableSlotsService Service', function (): void {
     });
 
     it('returns empty array when user has no future events', function (): void {
-        Carbon::setTestNow(Carbon::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $user = User::factory()->create();
 
         $slots = new GetAvailableSlotsService($user, 'Europe/Kyiv')->execute();
@@ -26,15 +26,15 @@ describe('GetAvailableSlotsService Service', function (): void {
 
     it('builds available slots between events using timezone conversion', function (): void {
         $tz = 'Europe/Kyiv';
-        Carbon::setTestNow(Carbon::now($tz)->setTime(10, 0, 0));
+        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::now($tz)->setTime(10, 0, 0));
 
         /** @var User $user */
         $user = User::factory()->create();
 
         // Create two future events in UTC
-        $event1StartUtc = Carbon::now($tz)->addDay()->setTime(12, 0, 0);
+        $event1StartUtc = Illuminate\Support\Facades\Date::now($tz)->addDay()->setTime(12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour()->setTime(14, 0, 0);
-        $event2StartUtc = Carbon::now($tz)->addDay()->setTime(12, 0, 0);
+        $event2StartUtc = Illuminate\Support\Facades\Date::now($tz)->addDay()->setTime(12, 0, 0);
         $event2EndUtc = (clone $event2StartUtc)->setTime(14, 0, 0);
 
         $event1 = CalendarEvent::query()->create([
@@ -65,7 +65,7 @@ describe('GetAvailableSlotsService Service', function (): void {
         // Slot 1 start is now in tz; end is E1 start in tz
         $slot1 = $result[0];
 
-        expect($slot1['start']->equalTo(Carbon::now($tz)
+        expect($slot1['start']->equalTo(Illuminate\Support\Facades\Date::now($tz)
             ->setTime(10, 0, 0)->setTimezone($tz)))->toBeTrue()
             ->and($slot1['end']->equalTo($event1StartUtc->clone()->setTimezone($tz)))->toBeTrue();
 
@@ -77,16 +77,16 @@ describe('GetAvailableSlotsService Service', function (): void {
         // Slot 3 ends at now+2 months in tz
         $slot3 = $result[2];
         expect($slot3['start']->equalTo($event2EndUtc->clone()->setTimezone($tz)))->toBeTrue()
-            ->and($slot3['end']->equalTo(Carbon::now($tz)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)
+            ->and($slot3['end']->equalTo(Illuminate\Support\Facades\Date::now($tz)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)
                 ->setTime(10, 0, 0)))->toBeTrue();
     });
 
     it('creates initial slot when first event starts after current UTC time', function (): void {
         $tz = 'Europe/Kyiv';
-        Carbon::setTestNow(Carbon::now($tz)->setTime(10, 0, 0));
+        Illuminate\Support\Facades\Date::setTestNow(Illuminate\Support\Facades\Date::now($tz)->setTime(10, 0, 0));
         $user = User::factory()->create();
 
-        $eventStartUtc = Carbon::now($tz)->addDay()->setTime(12, 0, 0);
+        $eventStartUtc = Illuminate\Support\Facades\Date::now($tz)->addDay()->setTime(12, 0, 0);
         //        $eventStartUtc = Carbon::create(2025, 4, 1, 10, 0, 1, 'UTC');
         $eventEndUtc = (clone $eventStartUtc)->addHour();
 
@@ -107,14 +107,14 @@ describe('GetAvailableSlotsService Service', function (): void {
         expect($result)->toBeArray()->toHaveCount(2);
 
         expect($result[0]['start']
-            ->equalTo(Carbon::now($tz)->setTime(10, 0, 0)))->toBeTrue()
+            ->equalTo(Illuminate\Support\Facades\Date::now($tz)->setTime(10, 0, 0)))->toBeTrue()
             ->and($result[0]['end']
                 ->equalTo($eventStartUtc->clone()->setTimezone($tz)))->toBeTrue();
 
         expect($result[1]['start']
             ->equalTo($eventEndUtc->clone()->setTimezone($tz)))->toBeTrue()
             ->and($result[1]['end']
-                ->equalTo(Carbon::now($tz)
+                ->equalTo(Illuminate\Support\Facades\Date::now($tz)
                     ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)))->toBeTrue();
     });
 });

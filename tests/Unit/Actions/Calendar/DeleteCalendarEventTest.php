@@ -11,7 +11,6 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 
@@ -34,8 +33,8 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
         $this->event = CalendarEvent::factory()->create([
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
-            'date'              => Carbon::tomorrow()->format('Y-m-d'),
+            'start_date_time'   => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d').' 09:00:00',
+            'date'              => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -87,8 +86,8 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
         $anotherMentorEvent = CalendarEvent::factory()->create([
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
-            'date'              => Carbon::tomorrow()->format('Y-m-d'),
+            'start_date_time'   => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d').' 09:00:00',
+            'date'              => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',

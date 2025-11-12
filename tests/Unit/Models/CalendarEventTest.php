@@ -10,7 +10,6 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Carbon;
 
 mutates(CalendarEvent::class);
 
@@ -20,8 +19,8 @@ describe('CalendarEvent model', function (): void {
     });
 
     it('casts start_date_time and end_date_time as Carbon instances', function (): void {
-        $start = Carbon::create(2025, 8, 21, 9, 15, 0);
-        $end = Carbon::create(2025, 8, 21, 10, 45, 0);
+        $start = Illuminate\Support\Facades\Date::create(2025, 8, 21, 9, 15, 0);
+        $end = Illuminate\Support\Facades\Date::create(2025, 8, 21, 10, 45, 0);
 
         $event = CalendarEvent::factory()->create([
             'start_date_time' => $start,
@@ -72,8 +71,8 @@ describe('CalendarEvent model', function (): void {
     it('can be created with mass assignable attributes', function (): void {
         $program = MentorProgram::factory()->create();
 
-        $start = Carbon::create(2025, 8, 22, 9, 0, 0);
-        $end = Carbon::create(2025, 8, 22, 10, 30, 0);
+        $start = Illuminate\Support\Facades\Date::create(2025, 8, 22, 9, 0, 0);
+        $end = Illuminate\Support\Facades\Date::create(2025, 8, 22, 10, 30, 0);
 
         $payload = [
             'title'             => 'CalendarEvent Create Test',

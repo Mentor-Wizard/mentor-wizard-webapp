@@ -9,7 +9,6 @@ use App\Enums\RoleEnum;
 use App\Models\CalendarEvent as EventModel;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -31,8 +30,8 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::tomorrow()->format('Y-m-d').' 09:00:00',
-            'date'              => Carbon::tomorrow()->format('Y-m-d'),
+            'start_date_time'   => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d').' 09:00:00',
+            'date'              => Illuminate\Support\Facades\Date::tomorrow()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',

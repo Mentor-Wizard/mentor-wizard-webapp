@@ -6,7 +6,6 @@ namespace App\Services\Calendar;
 
 use App\Models\CalendarEvent;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 
 class GetAvailableSlotsService
 {
@@ -14,10 +13,10 @@ class GetAvailableSlotsService
 
     public function __construct(private readonly User $user, private readonly string $timezone, private readonly array $excludeEvents = []) {}
 
-    public function execute()
+    public function execute(): array
     {
-        $currentDate = Carbon::now();
-        $currentDateTimezone = Carbon::now($this->timezone);
+        $currentDate = \Illuminate\Support\Facades\Date::now();
+        $currentDateTimezone = \Illuminate\Support\Facades\Date::now($this->timezone);
 
         $events = $this->user->calendarEvents()
             ->where('start_date_time', '>=', $currentDate)->orderBy('start_date_time')
@@ -45,7 +44,7 @@ class GetAvailableSlotsService
         }
 
         $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
-            'end'                          => Carbon::now($this->timezone)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
+            'end'                          => \Illuminate\Support\Facades\Date::now($this->timezone)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
 
         return $this->availableSlots;
     }

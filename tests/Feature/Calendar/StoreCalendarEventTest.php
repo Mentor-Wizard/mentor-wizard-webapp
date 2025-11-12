@@ -9,7 +9,6 @@ use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -32,9 +31,9 @@ describe('Calendar CalendarEvent Store Page', function (): void {
 
         $eventData = [
             'title'              => 'Default event',
-            'fromDate'           => Carbon::today()->format('Y-m-d'),
+            'fromDate'           => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
             'fromTime'           => '09:00',
-            'toDate'             => Carbon::today()->format('Y-m-d'),
+            'toDate'             => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
             'toTime'             => '10:00',
             'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'        => 'Test description',
@@ -50,9 +49,9 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $this->assertDatabaseHas('calendar_events', [
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Carbon::today()->format('Y-m-d').' 07:00:00',
-            'end_date_time'     => Carbon::today()->format('Y-m-d').' 08:00:00',
-            'date'              => Carbon::today()->format('Y-m-d'),
+            'start_date_time'   => Illuminate\Support\Facades\Date::today()->format('Y-m-d').' 07:00:00',
+            'end_date_time'     => Illuminate\Support\Facades\Date::today()->format('Y-m-d').' 08:00:00',
+            'date'              => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
             'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -105,7 +104,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         auth()->login($this->user);
 
         // Create an existing future event for the user from 10:00 to 15:00 tomorrow
-        $tomorrow = Carbon::tomorrow();
+        $tomorrow = Illuminate\Support\Facades\Date::tomorrow();
         $event = App\Models\CalendarEvent::query()->create([
             'title'           => 'Busy block',
             'status'          => CalendarEventStatusEnum::CONFIRMED,
@@ -142,9 +141,9 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         auth()->login($this->nonMentorUser);
         $eventData = [
             'title'             => 'Default event',
-            'fromDate'          => Carbon::today()->format('Y-m-d'),
+            'fromDate'          => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
             'fromTime'          => '09:00',
-            'toDate'            => Carbon::today()->format('Y-m-d'),
+            'toDate'            => Illuminate\Support\Facades\Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',

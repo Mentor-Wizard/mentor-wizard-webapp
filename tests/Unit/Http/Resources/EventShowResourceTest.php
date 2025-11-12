@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Http\Resources\EventShowResource;
 use App\Models\CalendarEvent;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Carbon;
 
 mutates(EventShowResource::class);
 
@@ -13,8 +12,8 @@ describe('EventShowResource', function (): void {
     it('maps event to detailed payload', function (): void {
         $this->seed(RoleSeeder::class);
 
-        $start = Carbon::create(2025, 8, 22, 9, 30, 0);
-        $end = Carbon::create(2025, 8, 22, 11, 0, 0);
+        $start = Illuminate\Support\Facades\Date::create(2025, 8, 22, 9, 30, 0);
+        $end = Illuminate\Support\Facades\Date::create(2025, 8, 22, 11, 0, 0);
 
         $user = App\Models\User::factory()->create();
 
