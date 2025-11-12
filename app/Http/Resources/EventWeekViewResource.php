@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Date;
 use Override;
 
 /**
  * @property-read int|string $id
  * @property-read string $title
  * @property-read string $web_link
- * @property-read Carbon $start_date_time
+ * @property-read CarbonInterface $start_date_time
  * @property-read int $duration // in seconds
  */
 class EventWeekViewResource extends JsonResource
@@ -28,7 +29,7 @@ class EventWeekViewResource extends JsonResource
     {
         $user = $this->additional['user'] ?? null;
 
-        $date = \Illuminate\Support\Facades\Date::parse($this->start_date_time, 'UTC')->setTimezone($this->timezone);
+        $date = Date::parse($this->start_date_time)->setTimezone($this->timezone);
 
         $timezoneAbbreviation = $date->format('T');
         $dateTime = $date->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$date->format('H:i:s');
@@ -38,7 +39,7 @@ class EventWeekViewResource extends JsonResource
             + ((int) $date->format('s'));
 
         return [
-            'id'            => $this->getRouteKey(),
+            'id'            => $this->resource->getKey(),
             'dayNumber'     => (int) $date->format('w') + 1,
             'time'          => $date->format('g:i A'),
             'dateTime'      => $dateTime,
@@ -46,7 +47,7 @@ class EventWeekViewResource extends JsonResource
             'startIndex'    => (int) (($secondsSinceMidnight * 6 / 3600) + 2),
             'title'         => $this->title,
             'href'          => $this->web_link,
-            'colour'        => $this->calendarEventUsers?->where('id', '=', $user->getKey())?->first()?->pivot?->colour,
+            'colour'        => $this->resource->calendarEventUsers?->where('id', '=', $user->getKey())?->first()?->pivot?->colour,
         ];
     }
 }

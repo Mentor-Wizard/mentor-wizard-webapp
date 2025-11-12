@@ -9,7 +9,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 
 class GetDailyEventsService
 {
@@ -32,21 +32,21 @@ class GetDailyEventsService
 
     private function prepareDailyDateConfiguration(): array
     {
-        $todayDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->startOfDay();
-        $tomorrowDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->addDay()->startOfDay();
+        $todayDate = Date::parse($this->date, $this->timezone)->startOfDay();
+        $tomorrowDate = Date::parse($this->date, $this->timezone)->addDay()->startOfDay();
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $this->user->calendarEvents()->orderBy('start_date_time')->first();
         /** @var ?CalendarEvent $latestEvent */
         $latestEvent = $this->user->calendarEvents()->orderBy('start_date_time', 'desc')->latest()->first();
 
-        $startCalendarMonth = \Illuminate\Support\Facades\Date::parse($firstEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->startOfMonth();
-        $endCalendarMonth = \Illuminate\Support\Facades\Date::parse($latestEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->endOfMonth();
+        $startCalendarMonth = Date::parse($firstEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->startOfMonth();
+        $endCalendarMonth = Date::parse($latestEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->endOfMonth();
         if ($todayDate->isAfter($endCalendarMonth)) {
             $endCalendarMonth = (clone $todayDate)->endOfMonth();
         }
 
         $dailyEvents = clone $this->user->calendarEvents()->tap(fn ($collection) => $collection->each(
-            fn ($event): string => $event->date = \Illuminate\Support\Facades\Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+            fn ($event): string => $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
         ));
 
         $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
@@ -59,7 +59,7 @@ class GetDailyEventsService
         ];
     }
 
-    private function getDailyEvents(Carbon $todayDate, Carbon $tomorrowDate): array
+    private function getDailyEvents(CarbonInterface $todayDate, CarbonInterface $tomorrowDate): array
     {
         $todayDateUTC = (clone $todayDate)->setTimezone('UTC');
         $tomorrowDateUTC = (clone $tomorrowDate)->setTimezone('UTC');
@@ -77,11 +77,11 @@ class GetDailyEventsService
         return $events;
     }
 
-    private function buildDailyCalendarView(array $months, Carbon $todayDate, array $daysEvents): void
+    private function buildDailyCalendarView(array $months, CarbonInterface $todayDate, array $daysEvents): void
     {
         foreach ($months as $month) {
-            $startDate = \Illuminate\Support\Facades\Date::parse($month, $this->timezone)->startOfMonth()->startOfWeek();
-            $endDate = \Illuminate\Support\Facades\Date::parse($month, $this->timezone)->endOfMonth()->endOfWeek();
+            $startDate = Date::parse($month, $this->timezone)->startOfMonth()->startOfWeek();
+            $endDate = Date::parse($month, $this->timezone)->endOfMonth()->endOfWeek();
             $daysPeriod = CarbonPeriod::create($startDate, '1 day', $endDate);
             $monthDates = $daysPeriod->toArray();
 
@@ -96,7 +96,7 @@ class GetDailyEventsService
         }
     }
 
-    private function buildDayPayload(CarbonInterface $monthDate, Carbon $todayDate, array $daysEvents): array
+    private function buildDayPayload(CarbonInterface $monthDate, CarbonInterface $todayDate, array $daysEvents): array
     {
         $payload = ['date' => $monthDate->format('Y-m-d')];
 
@@ -108,7 +108,7 @@ class GetDailyEventsService
             $payload['isSelected'] = true;
         }
 
-        if (\Illuminate\Support\Facades\Date::now($this->timezone)->isSameDay($monthDate)) {
+        if (Date::now($this->timezone)->isSameDay($monthDate)) {
             $payload['isToday'] = true;
         }
 

@@ -9,7 +9,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 
 class GetWeeklyEventsService
 {
@@ -21,11 +21,11 @@ class GetWeeklyEventsService
 
     public function execute(): array
     {
-        $startDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->startOfWeek();
+        $startDate = Date::parse($this->date, $this->timezone)->startOfWeek();
         $startUTCDate = (clone $startDate)->setTimezone('UTC');
-        $endDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->endOfWeek();
+        $endDate = Date::parse($this->date, $this->timezone)->endOfWeek();
         $endUTCDate = (clone $endDate)->setTimezone('UTC');
-        $todayDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone);
+        $todayDate = Date::parse($this->date, $this->timezone);
         $userEvents = $this->user->calendarEvents()->with('calendarEventUsers');
         $userEventsForCalendar = clone $userEvents;
 
@@ -40,7 +40,7 @@ class GetWeeklyEventsService
         }
 
         $userEventsForCalendar->tap(fn ($collection) => $collection->each(
-            fn ($event): string => $event->date = \Illuminate\Support\Facades\Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+            fn ($event): string => $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
         ));
 
         $daysEvents = $userEventsForCalendar->pluck('date')->unique()->toArray();
@@ -57,7 +57,7 @@ class GetWeeklyEventsService
         ];
     }
 
-    private function buildWeekPayload(CarbonInterface $weekDay, array $daysEvents, Carbon $todayDate): void
+    private function buildWeekPayload(CarbonInterface $weekDay, array $daysEvents, CarbonInterface $todayDate): void
     {
 
         $payload = ['date' => $weekDay->format('Y-m-d')];
@@ -69,7 +69,7 @@ class GetWeeklyEventsService
             $payload['isSelected'] = true;
         }
 
-        if (\Illuminate\Support\Facades\Date::now($this->timezone)->isSameDay($weekDay)) {
+        if (Date::now($this->timezone)->isSameDay($weekDay)) {
             $payload['isToday'] = true;
         }
 

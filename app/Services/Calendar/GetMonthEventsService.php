@@ -7,10 +7,11 @@ namespace App\Services\Calendar;
 use App\Http\Resources\EventMonthViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 
 class GetMonthEventsService
 {
@@ -33,8 +34,8 @@ class GetMonthEventsService
 
     private function prepareDateConfiguration(): array
     {
-        $startDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->startOfMonth()->startOfWeek();
-        $endDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone)->endOfMonth()->endOfWeek();
+        $startDate = Date::parse($this->date, $this->timezone)->startOfMonth()->startOfWeek();
+        $endDate = Date::parse($this->date, $this->timezone)->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         return [
@@ -44,13 +45,13 @@ class GetMonthEventsService
         ];
     }
 
-    private function getFormattedEventsForPeriod(Carbon $startDate, Carbon $endDate): array
+    private function getFormattedEventsForPeriod(CarbonInterface $startDate, CarbonInterface $endDate): array
     {
         $caledarEvents = $this->user->calendarEvents()
             ->whereBetween('start_date_time', [$startDate, $endDate])
             ->orderBy('start_date_time')
             ->get()->tap(fn ($collection) => $collection->each(
-                fn ($event): string => $event->date = \Illuminate\Support\Facades\Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
+                fn ($event): string => $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d')
             ));
 
         return $caledarEvents->groupBy('date')->map($this->formatDateEvents(...))->all();
@@ -80,7 +81,7 @@ class GetMonthEventsService
                 ->resolve(),
         ];
 
-        $parsedDate = \Illuminate\Support\Facades\Date::parse($this->date, $this->timezone);
+        $parsedDate = Date::parse($this->date, $this->timezone);
         $eventDate = $firstEvent->start_date_time;
 
         if ($parsedDate->isSameMonth($eventDate)) {
@@ -91,19 +92,19 @@ class GetMonthEventsService
             $payload['isSelected'] = true;
         }
 
-        if (\Illuminate\Support\Facades\Date::now()->isSameDay($eventDate)) {
+        if (Date::now()->isSameDay($eventDate)) {
             $payload['isToday'] = true;
         }
 
         return $payload;
     }
 
-    private function hasEventsBeforeDate(Carbon $startDate): bool
+    private function hasEventsBeforeDate(CarbonInterface $startDate): bool
     {
         return $this->user->calendarEvents()->where('start_date_time', '<', $startDate->setTimezone('UTC'))->exists();
     }
 
-    private function hasEventsAfterDate(Carbon $endDate): bool
+    private function hasEventsAfterDate(CarbonInterface $endDate): bool
     {
         return $this->user->calendarEvents()->where('start_date_time', '>', $endDate->setTimezone('UTC')->endOfDay())->exists();
     }

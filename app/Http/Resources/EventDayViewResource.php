@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Enums\CalendarEventColoursEnum;
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Date;
 use Override;
 
 /**
  * @property-read int|string $id
  * @property-read string $title
  * @property-read string $web_link
- * @property-read Carbon $start_date_time
+ * @property-read CarbonInterface $start_date_time
  * @property-read int $duration /
  */
 class EventDayViewResource extends JsonResource
@@ -27,7 +28,7 @@ class EventDayViewResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $date = \Illuminate\Support\Facades\Date::parse($this->start_date_time, 'UTC')->setTimezone($this->timezone);
+        $date = Date::parse($this->start_date_time)->setTimezone($this->timezone);
         $timezoneAbbreviation = $date->format('T');
         $dateTime = $date->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$date->format('H:i:s');
 
@@ -36,7 +37,7 @@ class EventDayViewResource extends JsonResource
             + ((int) $date->format('s'));
 
         return [
-            'id'            => $this->id,
+            'id'            => $this->resource->getKey(),
             'time'          => $date->format('g:i A'),
             'dateTime'      => $dateTime,
             'durationIndex' => (int) ($this->duration * 12 / 3600),

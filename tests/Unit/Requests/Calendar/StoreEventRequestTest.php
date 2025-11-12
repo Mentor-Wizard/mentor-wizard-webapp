@@ -6,7 +6,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\StoreEventRequest;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonInterface;
 
 mutates(StoreEventRequest::class);
 
@@ -94,7 +94,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
 
         $request = new class($today, $tomorrow) extends StoreEventRequest
         {
-            public function __construct(private readonly Carbon $today, private readonly Carbon $tomorrow) {}
+            public function __construct(private readonly CarbonInterface $today, private readonly CarbonInterface $tomorrow) {}
 
             public function validated($key = null, $default = null): array
             {
