@@ -153,4 +153,165 @@ describe('EventWeekViewResource', function (): void {
 
         expect($array['colour'])->toBeNull();
     });
+
+    it('verifies exact secondsSinceMidnight calculation with specific time', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Test at 14:30:45
+        $start = Date::create(2025, 8, 24, 14, 30, 45);
+        $end = (clone $start)->addMinutes(15);
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Exact Time Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 900,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 14*3600 + 30*60 + 45 = 50400 + 1800 + 45 = 52245
+        // startIndex = (52245 * 6 / 3600) + 2 = 87.075 + 2 = 89 (truncated)
+        expect($array['startIndex'])->toBe(89)
+            ->and($array['durationIndex'])->toBe(3); // 900 * 12 / 3600 = 3
+    });
+
+    it('verifies exact calculation at midnight', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Test at exactly midnight 00:00:00
+        $start = Date::create(2025, 8, 24, 0, 0, 0);
+        $end = (clone $start)->addMinutes(30);
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Midnight Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1800,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::GREEN->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 0*3600 + 0*60 + 0 = 0
+        // startIndex = (0 * 6 / 3600) + 2 = 0 + 2 = 2
+        expect($array['startIndex'])->toBe(2)
+            ->and($array['durationIndex'])->toBe(6); // 1800 * 12 / 3600 = 6
+    });
+
+    it('verifies exact calculation with zero duration', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 24, 8, 0, 0);
+        $end = clone $start; // Same time, zero duration
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Zero Duration Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 0,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::RED->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // durationIndex = 0 * 12 / 3600 = 0
+        expect($array['durationIndex'])->toBe(0);
+    });
+
+    it('verifies dayNumber calculation for Sunday', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Sunday - 2025-08-24
+        $start = Date::create(2025, 8, 24, 10, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Sunday Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // Sunday: format('w') = 0, so dayNumber = 0 + 1 = 1
+        expect($array['dayNumber'])->toBe(1);
+    });
+
+    it('verifies dayNumber calculation for Saturday', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Saturday - 2025-08-30
+        $start = Date::create(2025, 8, 30, 10, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Saturday Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::YELLOW->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // Saturday: format('w') = 6, so dayNumber = 6 + 1 = 7
+        expect($array['dayNumber'])->toBe(7);
+    });
+
+    it('verifies integer casting for all calculated values', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Use times that result in fractional calculations
+        $start = Date::create(2025, 8, 24, 13, 27, 33);
+        $end = (clone $start)->addMinutes(47);
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Fractional Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 2820, // 47 minutes
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::PURPLE->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // Verify all are integers
+        expect($array['dayNumber'])->toBeInt()
+            ->and($array['startIndex'])->toBeInt()
+            ->and($array['durationIndex'])->toBeInt();
+    });
 });

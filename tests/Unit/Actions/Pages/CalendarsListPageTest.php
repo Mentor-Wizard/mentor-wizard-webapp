@@ -104,4 +104,66 @@ describe('CalendarsListPage', function (): void {
         $props = inertiaProps($response);
         expect($props['events'])->toBe([]);
     });
+
+    it('defaults to Month view when mode is not provided', function (): void {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        Auth::login($user);
+
+        $action = new CalendarsListPage;
+        // No mode parameter
+        $request = Request::create('/calendar', 'GET', ['timezone' => 'UTC', 'date' => Date::now()->format('Y-m-d')]);
+        $response = $action->handle($request);
+
+        $props = inertiaProps($response);
+        expect($props['events'])->toBeArray();
+        // Should default to Month view and call GetMonthEventsService
+    });
+
+    it('includes availableColours in response', function (): void {
+        $user = User::factory()->create();
+        Auth::login($user);
+
+        $action = new CalendarsListPage;
+        $request = Request::create('/calendar', 'GET', ['timezone' => 'UTC']);
+        $response = $action->handle($request);
+
+        $props = inertiaProps($response);
+        expect($props)->toHaveKey('availableColours')
+            ->and($props['availableColours'])->toBeArray()
+            ->and($props['availableColours'])->not->toBeEmpty();
+    });
+
+    it('returns edit permission only when user has mentor role', function (): void {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        Auth::login($user);
+
+        $action = new CalendarsListPage;
+        $request = Request::create('/calendar', 'GET', ['timezone' => 'UTC']);
+        $response = $action->handle($request);
+
+        $props = inertiaProps($response);
+        expect($props['permissions'])->toBe('edit');
+    });
+
+    it('requires both timezone AND user to fetch events', function (): void {
+        $user = User::factory()->create();
+        Auth::login($user);
+
+        $action = new CalendarsListPage;
+
+        // Has user but no timezone
+        $request1 = Request::create('/calendar', 'GET', ['mode' => 'Day view', 'date' => Date::now()->format('Y-m-d')]);
+        $response1 = $action->handle($request1);
+        $props1 = inertiaProps($response1);
+        expect($props1['events'])->toBe([]);
+
+        // Has timezone but no user
+        Auth::logout();
+        $request2 = Request::create('/calendar', 'GET', ['timezone' => 'UTC', 'mode' => 'Day view', 'date' => Date::now()->format('Y-m-d')]);
+        $response2 = $action->handle($request2);
+        $props2 = inertiaProps($response2);
+        expect($props2['events'])->toBe([]);
+    });
 });

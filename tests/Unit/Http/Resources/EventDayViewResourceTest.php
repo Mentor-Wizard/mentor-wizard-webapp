@@ -101,4 +101,127 @@ describe('EventDayViewResource', function (): void {
         expect($array['startIndex'])->toBe(53)
             ->and($array['durationIndex'])->toBe(9); // 2700 * 12 / 3600 = 9
     });
+
+    it('verifies exact calculation with seconds included', function (): void {
+        // Test at 14:30:45
+        $start = Date::create(2025, 8, 24, 14, 30, 45);
+        $end = (clone $start)->addMinutes(15);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Exact Time Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 900,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 14*3600 + 30*60 + 45 = 50400 + 1800 + 45 = 52245
+        // startIndex = (52245 * 6 / 3600) + 2 = 87.075 + 2 = 89 (truncated)
+        expect($array['startIndex'])->toBe(89)
+            ->and($array['durationIndex'])->toBe(3); // 900 * 12 / 3600 = 3
+    });
+
+    it('verifies exact calculation at midnight', function (): void {
+        // Test at exactly midnight 00:00:00
+        $start = Date::create(2025, 8, 24, 0, 0, 0);
+        $end = (clone $start)->addMinutes(30);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Midnight Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1800,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 0*3600 + 0*60 + 0 = 0
+        // startIndex = (0 * 6 / 3600) + 2 = 0 + 2 = 2
+        expect($array['startIndex'])->toBe(2)
+            ->and($array['durationIndex'])->toBe(6); // 1800 * 12 / 3600 = 6
+    });
+
+    it('verifies exact calculation with zero duration', function (): void {
+        $start = Date::create(2025, 8, 24, 8, 0, 0);
+        $end = clone $start; // Same time, zero duration
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Zero Duration Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 0,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // durationIndex = 0 * 12 / 3600 = 0
+        expect($array['durationIndex'])->toBe(0);
+    });
+
+    it('verifies integer casting for all calculated values', function (): void {
+        // Use times that result in fractional calculations
+        $start = Date::create(2025, 8, 24, 13, 27, 33);
+        $end = (clone $start)->addMinutes(47);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Fractional Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 2820, // 47 minutes
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // Verify all are integers
+        expect($array['startIndex'])->toBeInt()
+            ->and($array['durationIndex'])->toBeInt();
+    });
+
+    it('uses timezone from constructor parameter', function (): void {
+        $start = Date::create(2025, 8, 24, 22, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Timezone Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'Europe/Kyiv');
+        $array = $resource->toArray(request());
+
+        // In Europe/Kyiv timezone, 22:00 UTC becomes 01:00 EEST next day
+        expect($array['dateTime'])->toContain('EEST')
+            ->and($array['time'])->toBe('1:00 AM');
+    });
+
+    it('defaults to UTC when no timezone provided', function (): void {
+        $start = Date::create(2025, 8, 24, 15, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Default Timezone Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event); // No timezone parameter
+        $array = $resource->toArray(request());
+
+        expect($array['dateTime'])->toContain('UTC')
+            ->and($array['time'])->toBe('3:00 PM');
+    });
 });
