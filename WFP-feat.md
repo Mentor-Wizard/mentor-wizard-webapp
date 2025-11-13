@@ -89,7 +89,7 @@ payments:
   account2account
 - Додати `rectoken` (varchar, nullable) - токен для регулярних платежів
 - Додати `is_regular` (boolean, default false) - чи є регулярним
-- Додати `parent_payment_id` (bigint, nullable, FK) - зв'язок з батьківським
+- Додати `parent_payment_id` (bigint, nullable, FK) - зв'язок з батьківськимЮ
   платежем (для refund)
 - Додати `metadata` (json, nullable) - додаткові дані
 - Змінити `mentor_session_id` на nullable - для платежів без сесій

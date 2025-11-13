@@ -22,6 +22,10 @@ return new class extends Migration
                 ->restrictOnDelete()
                 ->restrictOnUpdate();
 
+            $table->string('reason')->nullable()->change();
+            $table->string('reason_code')->nullable()->change();
+            $table->string('issue_bank_name')->nullable()->change();
+
             $table->string('transaction_id')->nullable()->unique()->after('id');
             $table->string('payment_type')->after('transaction_status');
             $table->integer('refund_amount')->nullable()->after('amount');
@@ -80,6 +84,10 @@ return new class extends Migration
                 'parent_payment_id',
                 'metadata',
             ]);
+
+            $table->string('reason')->nullable(false)->change();
+            $table->string('reason_code')->nullable(false)->change();
+            $table->string('issue_bank_name')->nullable(false)->change();
 
             $table->unsignedBigInteger('mentor_session_id')
                 ->nullable(false)
