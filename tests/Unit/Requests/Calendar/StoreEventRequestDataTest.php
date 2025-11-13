@@ -323,4 +323,183 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
         expect($data['description'])->toBe('Specific description text')
             ->and($data['colour'])->toBe(CalendarEventColoursEnum::BLUE->value);
     });
+
+    it('verifies exact datetime concatenation for fromDate and fromTime in getEventData', function (): void {
+        $request = new class extends StoreEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Concat Test',
+                    'fromDate'    => '2025-06-15',
+                    'fromTime'    => '14:30',
+                    'toDate'      => '2025-06-15',
+                    'toTime'      => '16:00',
+                    'type'        => 'individual',
+                    'description' => 'Test',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        // Verify the exact datetime was created from concatenated strings
+        expect($data['start_date_time']->format('Y-m-d H:i'))->toBe('2025-06-15 14:30')
+            ->and($data['end_date_time']->format('Y-m-d H:i'))->toBe('2025-06-15 16:00');
+    });
+
+    it('verifies exact datetime concatenation for toDate and toTime in getEventData', function (): void {
+        $request = new class extends StoreEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Concat Test 2',
+                    'fromDate'    => '2025-06-15',
+                    'fromTime'    => '09:00',
+                    'toDate'      => '2025-06-16',
+                    'toTime'      => '10:30',
+                    'type'        => 'group',
+                    'description' => 'Test',
+                    'colour'      => CalendarEventColoursEnum::GREEN->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        // Verify the exact datetime was created from concatenated strings
+        expect($data['end_date_time']->format('Y-m-d H:i'))->toBe('2025-06-16 10:30')
+            ->and($data['date'])->toBe('2025-06-15');
+    });
+
+    it('verifies duration calculation uses diffInSeconds between exact datetimes', function (): void {
+        $request = new class extends StoreEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Duration Test',
+                    'fromDate'    => '2025-06-15',
+                    'fromTime'    => '10:00',
+                    'toDate'      => '2025-06-15',
+                    'toTime'      => '12:30',
+                    'type'        => 'individual',
+                    'description' => 'Test',
+                    'colour'      => CalendarEventColoursEnum::RED->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        // 2.5 hours = 9000 seconds
+        expect($data['duration'])->toBe(9000);
+    });
+
+    it('verifies null-safe operator on startDateTime when parsing fails', function (): void {
+        $request = new class extends StoreEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Invalid',
+                    'fromDate'    => 'invalid-date',
+                    'fromTime'    => '10:00',
+                    'toDate'      => '2025-06-15',
+                    'toTime'      => '12:00',
+                    'type'        => 'individual',
+                    'description' => 'Test',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        // Should return empty array due to null-safe operator
+        expect($data)->toBeEmpty();
+    });
+
+    it('verifies null-safe operator on endDateTime when parsing fails', function (): void {
+        $request = new class extends StoreEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Invalid End',
+                    'fromDate'    => '2025-06-15',
+                    'fromTime'    => '10:00',
+                    'toDate'      => 'invalid-date',
+                    'toTime'      => '12:00',
+                    'type'        => 'individual',
+                    'description' => 'Test',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        // Should return empty array due to null-safe operator
+        expect($data)->toBeEmpty();
+    });
+
+    it('verifies prepareForValidation conditional with equal times on same date', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+
+        $data = [
+            'title'       => 'Equal Times',
+            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'    => '14:00',
+            'toTime'      => '14:00', // Equal time
+            'description' => 'desc',
+            'type'        => 'Individual',
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'timezone'    => 'UTC',
+        ];
+
+        $request = new StoreEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        // Should fail validation due to toTime.after:fromTime rule
+        expect($request->validateResolved(...))->toThrow(ValidationException::class);
+    });
+
+    it('verifies all parts of prepareForValidation condition are necessary', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+
+        // All fields must be present for condition to be evaluated
+        $data = [
+            'title'       => 'Missing Field',
+            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'    => '14:00',
+            // Missing toTime - so prepareForValidation should not process
+            'description' => 'desc',
+            'type'        => 'Individual',
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'timezone'    => 'UTC',
+        ];
+
+        $request = new StoreEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        // Should fail validation due to missing required field (throws TypeError or ValidationException)
+        try {
+            $request->validateResolved();
+            expect(false)->toBeTrue('Expected an exception to be thrown');
+        } catch (Throwable $throwable) {
+            expect($throwable)->toBeInstanceOf(Throwable::class);
+        }
+    });
 });

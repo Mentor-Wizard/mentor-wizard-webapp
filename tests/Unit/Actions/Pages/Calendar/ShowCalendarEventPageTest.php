@@ -85,4 +85,53 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($page, 'props.permissions'))->toBe('view')
             ->and(Arr::get($page, 'props.event.id'))->toBe($this->event->getKey());
     });
+
+    it('includes availableColours in response props', function (): void {
+        auth()->login($this->mentor);
+
+        $request = new Request(['timezone' => 'UTC']);
+        $response = new ShowCalendarEventPage()->handle($this->event, $request);
+        $resultData = $response->toResponse(request())->getOriginalContent();
+        $page = $resultData->getData()['page'];
+
+        expect(Arr::get($page, 'props.availableColours'))
+            ->toBeArray()
+            ->not->toBeEmpty();
+    });
+
+    it('passes user and timezone to EventShowResource which affects event payload', function (): void {
+        auth()->login($this->mentor);
+
+        // Create event at 22:00 UTC
+        $start = Date::parse(Date::today()->format('Y-m-d').' 22:00:00');
+        $end = Date::parse(Date::today()->format('Y-m-d').' 23:00:00');
+
+        $eventAtNight = EventModel::factory()->create([
+            'title'             => 'Night Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => $start->format('Y-m-d H:i:s'),
+            'end_date_time'     => $end->format('Y-m-d H:i:s'),
+            'date'              => $start->format('Y-m-d'),
+            'duration'          => $start->diffInSeconds($end),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'web_link'          => 'https://example.com/night',
+            'description'       => 'Night Event',
+        ]);
+
+        $eventAtNight->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'colour' => App\Enums\CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        // Test with Asia/Tokyo timezone (UTC+9)
+        $requestTokyo = new Request(['timezone' => 'Asia/Tokyo']);
+        $responseTokyo = new ShowCalendarEventPage()->handle($eventAtNight, $requestTokyo);
+        $resultDataTokyo = $responseTokyo->toResponse(request())->getOriginalContent();
+        $pageTokyo = $resultDataTokyo->getData()['page'];
+
+        // Verify timezone affects the time display
+        expect(Arr::get($pageTokyo, 'props.event.fromTime'))->not->toBe('22:00');
+
+        // Verify user is passed and colour is retrieved
+        expect(Arr::get($pageTokyo, 'props.event.colour'))->toBe(App\Enums\CalendarEventColoursEnum::BLUE->value);
+    });
 });

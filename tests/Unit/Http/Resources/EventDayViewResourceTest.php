@@ -224,4 +224,173 @@ describe('EventDayViewResource', function (): void {
         expect($array['dateTime'])->toContain('UTC')
             ->and($array['time'])->toBe('3:00 PM');
     });
+
+    it('verifies exact multipliers in secondsSinceMidnight calculation (3600, 60, 1)', function (): void {
+        // Use 01:01:01 to test all three components
+        $start = Date::create(2025, 8, 24, 1, 1, 1);
+        $end = (clone $start)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Multiplier Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 1*3600 + 1*60 + 1 = 3661
+        // startIndex = (3661 * 6 / 3600) + 2 = 6.1016... + 2 = 8 (truncated)
+        expect($array['startIndex'])->toBe(8);
+    });
+
+    it('verifies exact durationIndex formula (duration * 12 / 3600)', function (): void {
+        $start = Date::create(2025, 8, 24, 10, 0, 0);
+        $end = (clone $start)->addMinutes(25); // 1500 seconds
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Duration Formula Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1500,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // durationIndex = 1500 * 12 / 3600 = 18000 / 3600 = 5
+        expect($array['durationIndex'])->toBe(5);
+    });
+
+    it('verifies exact startIndex formula ((seconds * 6 / 3600) + 2)', function (): void {
+        $start = Date::create(2025, 8, 24, 6, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'StartIndex Formula Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 6*3600 = 21600
+        // startIndex = (21600 * 6 / 3600) + 2 = 36 + 2 = 38
+        expect($array['startIndex'])->toBe(38);
+    });
+
+    it('verifies the +2 constant in startIndex calculation', function (): void {
+        // Test at a time where removing +2 would give wrong result
+        $start = Date::create(2025, 8, 24, 0, 10, 0);
+        $end = (clone $start)->addMinutes(30);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Plus Two Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1800,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 0*3600 + 10*60 + 0 = 600
+        // startIndex = (600 * 6 / 3600) + 2 = 1 + 2 = 3
+        // Without +2, it would be 1
+        expect($array['startIndex'])->toBe(3);
+    });
+
+    it('verifies integer casts prevent decimal values', function (): void {
+        // Use time that creates fractional intermediate values
+        $start = Date::create(2025, 8, 24, 2, 33, 47);
+        $end = (clone $start)->addMinutes(17);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Integer Cast Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1020,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // All values must be integers, not floats
+        expect($array['startIndex'])->toBeInt()
+            ->and($array['durationIndex'])->toBeInt()
+            // Verify exact values to catch off-by-one from missing casts
+            ->and($array['startIndex'])->toBe(17) // (9227 * 6 / 3600) + 2 = 15.378... + 2 = 17
+            ->and($array['durationIndex'])->toBe(3); // 1020 * 12 / 3600 = 3.4 = 3
+    });
+
+    it('verifies hour component integer cast in secondsSinceMidnight', function (): void {
+        // Specific time to test hour conversion
+        $start = Date::create(2025, 8, 24, 5, 0, 0);
+        $end = (clone $start)->addMinutes(30);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Hour Cast Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1800,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 5*3600 = 18000
+        // startIndex = (18000 * 6 / 3600) + 2 = 30 + 2 = 32
+        expect($array['startIndex'])->toBe(32);
+    });
+
+    it('verifies minute component integer cast in secondsSinceMidnight', function (): void {
+        // Specific time to test minute conversion
+        $start = Date::create(2025, 8, 24, 0, 45, 0);
+        $end = (clone $start)->addMinutes(15);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Minute Cast Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 900,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 0*3600 + 45*60 + 0 = 2700
+        // startIndex = (2700 * 6 / 3600) + 2 = 4.5 + 2 = 6 (truncated)
+        expect($array['startIndex'])->toBe(6);
+    });
+
+    it('verifies second component integer cast in secondsSinceMidnight', function (): void {
+        // Specific time to test second conversion
+        $start = Date::create(2025, 8, 24, 0, 0, 59);
+        $end = (clone $start)->addMinutes(10);
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Second Cast Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $resource = new EventDayViewResource($event, 'UTC');
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 0*3600 + 0*60 + 59 = 59
+        // startIndex = (59 * 6 / 3600) + 2 = 0.0983... + 2 = 2 (truncated)
+        expect($array['startIndex'])->toBe(2);
+    });
 });

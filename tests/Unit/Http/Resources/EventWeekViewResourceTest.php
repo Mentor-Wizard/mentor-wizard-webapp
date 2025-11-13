@@ -314,4 +314,189 @@ describe('EventWeekViewResource', function (): void {
             ->and($array['startIndex'])->toBeInt()
             ->and($array['durationIndex'])->toBeInt();
     });
+
+    it('verifies exact multipliers in secondsSinceMidnight calculation (3600, 60, 1)', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Use 01:01:01 to test all three components
+        $start = Date::create(2025, 8, 24, 1, 1, 1);
+        $end = (clone $start)->addHour();
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Multiplier Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 1*3600 + 1*60 + 1 = 3661
+        // startIndex = (3661 * 6 / 3600) + 2 = 6.1016... + 2 = 8 (truncated)
+        expect($array['startIndex'])->toBe(8);
+    });
+
+    it('verifies exact durationIndex formula (duration * 12 / 3600)', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 24, 10, 0, 0);
+        $end = (clone $start)->addMinutes(25); // 1500 seconds
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Duration Formula Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1500,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::GREEN->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // durationIndex = 1500 * 12 / 3600 = 18000 / 3600 = 5
+        expect($array['durationIndex'])->toBe(5);
+    });
+
+    it('verifies exact startIndex formula ((seconds * 6 / 3600) + 2)', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 24, 6, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'StartIndex Formula Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::RED->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 6*3600 = 21600
+        // startIndex = (21600 * 6 / 3600) + 2 = 36 + 2 = 38
+        expect($array['startIndex'])->toBe(38);
+    });
+
+    it('verifies the +2 constant in startIndex calculation', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Test at a time where removing +2 would give wrong result
+        $start = Date::create(2025, 8, 24, 0, 10, 0);
+        $end = (clone $start)->addMinutes(30);
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Plus Two Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 1800,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::YELLOW->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // secondsSinceMidnight = 0*3600 + 10*60 + 0 = 600
+        // startIndex = (600 * 6 / 3600) + 2 = 1 + 2 = 3
+        // Without +2, it would be 1
+        expect($array['startIndex'])->toBe(3);
+    });
+
+    it('verifies the +1 in dayNumber calculation (format w + 1)', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Sunday is 0, should become 1
+        $start = Date::create(2025, 8, 24, 10, 0, 0); // Sunday
+        $end = (clone $start)->addHour();
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'DayNumber Plus One Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // Sunday: format('w') = 0, dayNumber = 0 + 1 = 1
+        // Without +1, it would be 0
+        expect($array['dayNumber'])->toBe(1);
+    });
+
+    it('verifies null-safe operator chain on colour retrieval', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 24, 10, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $user = App\Models\User::factory()->create();
+        $otherUser = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Null Safe Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        // Attach different user, not the one in additional
+        $event->calendarEventUsers()->attach($otherUser->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // Should be null because user not found in relationship
+        expect($array['colour'])->toBeNull();
+    });
+
+    it('verifies colour is retrieved correctly when user is attached', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 24, 10, 0, 0);
+        $end = (clone $start)->addHour();
+
+        $user = App\Models\User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Colour Retrieval Test',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => 3600,
+            'date'            => $start->format('Y-m-d'),
+        ]);
+
+        $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::PURPLE->value]);
+
+        $resource = new EventWeekViewResource($event, 'UTC')->additional(['user' => $user]);
+        $array = $resource->toArray(request());
+
+        // Should get exact colour from pivot
+        expect($array['colour'])->toBe(CalendarEventColoursEnum::PURPLE->value);
+    });
 });

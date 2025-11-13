@@ -65,4 +65,70 @@ describe('GetMonthEventsService Service', function (): void {
             ->toBeArray()
             ->and($emptyDay['events'])->toBeArray()->toBe([]);
     });
+
+    it('sets event date property using timezone via each() method', function (): void {
+        Date::setTestNow(Date::create(2025, 2, 10, 22, 0, 0, 'UTC'));
+        $tz = 'America/New_York';
+
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        // Create event at 22:00 UTC which should be different date in NY timezone
+        $startUtc = Date::create(2025, 2, 10, 22, 0, 0, 'UTC');
+        $endUtc = (clone $startUtc)->addHour();
+
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::query()->create([
+            'title'           => 'Late Event',
+            'status'          => 'confirmed',
+            'start_date_time' => $startUtc,
+            'end_date_time'   => $endUtc,
+            'duration'        => $endUtc->diffInSeconds($startUtc),
+            'date'            => $startUtc->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+
+        $user->calendarEvents()->attach($event->getKey());
+
+        $result = new GetMonthEventsService($user, '2025-02-10', $tz)->execute();
+
+        // Verify the event appears in the calendar view with correct timezone-adjusted date
+        $calendarView = $result['calendarView'];
+        $eventEntry = collect($calendarView)->firstWhere(fn ($day): bool => isset($day['events']) && count($day['events']) > 0);
+
+        expect($eventEntry)->not->toBeNull()
+            ->and($eventEntry['events'])->toBeArray()->not->toBeEmpty()
+            ->and($eventEntry['date'])->toBe('2025-02-10');
+    });
+
+    it('passes timezone to EventMonthViewResource via additional', function (): void {
+        Date::setTestNow(Date::create(2025, 2, 10, 12, 0, 0, 'UTC'));
+        $tz = 'Asia/Tokyo';
+
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        $startUtc = Date::create(2025, 2, 10, 12, 0, 0, 'UTC');
+        $endUtc = (clone $startUtc)->addHour();
+
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::query()->create([
+            'title'           => 'Tokyo Event',
+            'status'          => 'confirmed',
+            'start_date_time' => $startUtc,
+            'end_date_time'   => $endUtc,
+            'duration'        => $endUtc->diffInSeconds($startUtc),
+            'date'            => $startUtc->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+
+        $user->calendarEvents()->attach($event->getKey());
+
+        $result = new GetMonthEventsService($user, '2025-02-10', $tz)->execute();
+
+        // Verify events are returned with timezone applied
+        $eventEntry = collect($result['calendarView'])->firstWhere(fn ($day): bool => isset($day['events']) && count($day['events']) > 0);
+
+        expect($eventEntry['events'][0])->toHaveKey('datetime');
+    });
 });

@@ -136,4 +136,107 @@ describe('EventShowResource', function (): void {
 
         expect($array['colour'])->toBeNull();
     });
+
+    it('returns null colour when calendarEventUsers relationship is null', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 22, 9, 30, 0);
+        $end = Date::create(2025, 8, 22, 11, 0, 0);
+
+        $user = User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'No Relationship Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => $start?->diffInSeconds($end),
+            'date'            => $start?->format('Y-m-d'),
+            'type'            => 'individual',
+            'web_link'        => 'https://example.com/norel',
+            'description'     => 'Test',
+        ]);
+
+        // Create resource without eager loading calendarEventUsers
+        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => 'UTC']);
+        $array = $resource->toArray(request());
+
+        expect($array['colour'])->toBeNull();
+    });
+
+    it('uses provided timezone to format dates differently', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        // Create event at 22:00 UTC
+        $start = Date::create(2025, 8, 22, 22, 0, 0, 'UTC');
+        $end = Date::create(2025, 8, 22, 23, 30, 0, 'UTC');
+
+        $user = User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Timezone Test Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => $start?->diffInSeconds($end),
+            'date'            => $start?->format('Y-m-d'),
+            'type'            => 'individual',
+            'web_link'        => 'https://example.com/tz',
+            'description'     => 'Test',
+        ]);
+
+        // Test with Asia/Tokyo timezone (UTC+9)
+        $resourceTokyo = new EventShowResource($event)->additional(['user' => $user, 'timezone' => 'Asia/Tokyo']);
+        $arrayTokyo = $resourceTokyo->toArray(request());
+
+        // In Tokyo, 22:00 UTC = 07:00 next day
+        expect($arrayTokyo['fromTime'])->toBe('07:00')
+            ->and($arrayTokyo['fromDate'])->toBe('2025-08-23');
+
+        // Test with America/New_York timezone (UTC-4)
+        $resourceNY = new EventShowResource($event)->additional(['user' => $user, 'timezone' => 'America/New_York']);
+        $arrayNY = $resourceNY->toArray(request());
+
+        // In New York, 22:00 UTC = 18:00 same day
+        expect($arrayNY['fromTime'])->toBe('18:00')
+            ->and($arrayNY['fromDate'])->toBe('2025-08-22');
+    });
+
+    it('handles null at each step of calendarEventUsers chain', function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $start = Date::create(2025, 8, 22, 9, 30, 0);
+        $end = Date::create(2025, 8, 22, 11, 0, 0);
+
+        $user = User::factory()->create();
+        $user2 = User::factory()->create();
+
+        $event = CalendarEvent::factory()->create([
+            'title'           => 'Chain Test Event',
+            'start_date_time' => $start,
+            'end_date_time'   => $end,
+            'duration'        => $start?->diffInSeconds($end),
+            'date'            => $start?->format('Y-m-d'),
+            'type'            => 'individual',
+            'web_link'        => 'https://example.com/chain',
+            'description'     => 'Test',
+        ]);
+
+        // Attach a different user with a colour, but query with user who isn't attached
+        $event->calendarEventUsers()->attach($user2->getKey(), [
+            'colour' => App\Enums\CalendarEventColoursEnum::RED->value,
+        ]);
+
+        // Test with user who isn't in the relationship
+        $resource = new EventShowResource($event->fresh())->additional(['user' => $user, 'timezone' => 'UTC']);
+        $array = $resource->toArray(request());
+
+        // Should be null because where() filters out the attached user
+        expect($array['colour'])->toBeNull();
+
+        // Test with the attached user
+        $resource2 = new EventShowResource($event->fresh())->additional(['user' => $user2, 'timezone' => 'UTC']);
+        $array2 = $resource2->toArray(request());
+
+        // Should have the colour
+        expect($array2['colour'])->toBe(App\Enums\CalendarEventColoursEnum::RED->value);
+    });
 });
