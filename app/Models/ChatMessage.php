@@ -26,11 +26,17 @@ class ChatMessage extends Model
         'is_read',
     ];
 
+    /**
+     * @return BelongsTo<Chat, $this>
+     */
     public function chat(): BelongsTo
     {
         return $this->belongsTo(Chat::class);
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

@@ -24,11 +24,17 @@ class MentorSessionNote extends Model
         'notes',
     ];
 
+    /**
+     * @return BelongsTo<MentorSession, $this>
+     */
     public function mentorSession(): BelongsTo
     {
         return $this->belongsTo(MentorSession::class);
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

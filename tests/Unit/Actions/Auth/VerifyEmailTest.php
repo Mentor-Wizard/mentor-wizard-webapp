@@ -47,6 +47,6 @@ describe('VerifyEmail Action', function (): void {
             ->toContain(route('pages.dashboard'))
             ->toContain('verified=1');
 
-        Event::assertDispatched(Verified::class, fn (Verified $event): bool => $event->user === $user);
+        Event::assertDispatched(fn (Verified $event): bool => $event->user === $user);
     });
 });
