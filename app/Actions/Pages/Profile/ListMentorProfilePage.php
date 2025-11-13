@@ -9,6 +9,7 @@ use App\Filters\ProgramCostFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
 use App\Models\MentorProfile;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -17,7 +18,10 @@ class ListMentorProfilePage
 {
     use AsController;
 
-    public function handle()
+    /**
+     * @return LengthAwarePaginator<int, MentorProfile>
+     */
+    public function handle(): LengthAwarePaginator
     {
         return QueryBuilder::for(MentorProfile::class)
             ->allowedIncludes(['mentorPrograms', 'mentorTags'])

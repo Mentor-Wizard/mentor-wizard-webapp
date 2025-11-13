@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 mutates(DeleteMentorProgram::class);
 
@@ -67,7 +68,7 @@ describe('Destroy Mentor Program', function (): void {
 
         try {
             (new DeleteMentorProgram)->handle($this->request, $anotherMentorProgram);
-        } catch (Symfony\Component\HttpKernel\Exception\HttpException $httpException) {
+        } catch (HttpException $httpException) {
             expect($httpException->getStatusCode())->toBe(Response::HTTP_FORBIDDEN)
                 ->and($httpException->getMessage())->toBe('Unauthorized action.');
 

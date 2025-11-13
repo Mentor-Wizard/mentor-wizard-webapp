@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\MentorProgramBlock;
+use App\Models\MentorProgramBlockProgress;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MentorProgramBlockProgress>
+ * @extends Factory<MentorProgramBlockProgress>
  */
 class MentorProgramBlockProgressFactory extends Factory
 {
