@@ -11,20 +11,20 @@ use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Date;
 
-class GetWeeklyEventsService
+class GetWeeklyCalendarEventsService
 {
     private array $calendarView = [];
 
     private array $calendarEvents = [];
 
-    public function __construct(private readonly User $user, private readonly string $date, private readonly string $timezone = 'UTC') {}
+    public function __construct(private readonly User $user, private readonly CarbonInterface $date, private readonly string $timezone) {}
 
-    public function execute(): array
+    public function getWeeklyCalendarEvents(): array
     {
-        $startDate = Date::parse($this->date, $this->timezone)->startOfWeek();
-        $startUTCDate = (clone $startDate)->setTimezone('UTC');
-        $endDate = Date::parse($this->date, $this->timezone)->endOfWeek();
-        $endUTCDate = (clone $endDate)->setTimezone('UTC');
+        $startDate = $this->date->startOfWeek();
+        $startUTCDate = (clone $startDate)->setTimezone(config('app.timezone'));
+        $endDate = $this->date->endOfWeek();
+        $endUTCDate = (clone $endDate)->setTimezone(config('app.timezone'));
         $todayDate = Date::parse($this->date, $this->timezone);
         $userEvents = $this->user->calendarEvents()->with('calendarEventUsers');
         $userEventsForCalendar = clone $userEvents;

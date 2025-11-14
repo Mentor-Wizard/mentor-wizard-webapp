@@ -75,16 +75,16 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.laravelVersion'))->toBe(Application::VERSION)
             ->and(Arr::get($result, 'props.phpVersion'))->toBe(PHP_VERSION)
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
-            ->and(Arr::get($result, 'props.events.hasEventsBefore'))->toBeFalse()
-            ->and(Arr::get($result, 'props.events.hasEventsAfter'))->toBeFalse()
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.name'))->toBe($this->data['title'])
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.datetime'))
+            ->and(Arr::get($result, 'props.calendarEvents.hasEventsBefore'))->toBeFalse()
+            ->and(Arr::get($result, 'props.calendarEvents.hasEventsAfter'))->toBeFalse()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.name'))->toBe($this->data['title'])
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.href'))->toBe($this->data['web_link'])
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.datetime'))
             ->toBe(Date::today()->endOfMonth()->endOfWeek()->setTime(19, 59, 0)
                 ->setTimezone('Europe/Kyiv')->format('Y-m-d\TH:i'))
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.time'))->toBe('9PM')
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.id'))->toBe($this->monthEvent->getKey())
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.date'))->toBe(Date::today()->endOfMonth()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.time'))->toBe('9PM')
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.id'))->toBe($this->monthEvent->getKey())
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.date'))->toBe(Date::today()->endOfMonth()
             ->endOfWeek()->setTime(19, 59, 0)->setTimezone('Europe/Kyiv')->format('Y-m-d'));
     });
 
@@ -130,15 +130,15 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
-            ->and(Arr::get($result, 'props.events.hasEventsBefore'))->toBeTrue()
-            ->and(Arr::get($result, 'props.events.hasEventsAfter'))->toBeTrue()
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.name'))->toBe($this->data['title'])
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.datetime'))->toBe(Date::today()->endOfMonth()->endOfWeek()
+            ->and(Arr::get($result, 'props.calendarEvents.hasEventsBefore'))->toBeTrue()
+            ->and(Arr::get($result, 'props.calendarEvents.hasEventsAfter'))->toBeTrue()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.name'))->toBe($this->data['title'])
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.href'))->toBe($this->data['web_link'])
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.datetime'))->toBe(Date::today()->endOfMonth()->endOfWeek()
             ->setTime(19, 59, 0)->setTimezone('Europe/Kyiv')->format('Y-m-d\TH:i'))
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.time'))->toBe('9PM')
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.events.0.id'))->toBe($this->monthEvent->getKey())
-            ->and(Arr::get($result, 'props.events.calendarView.'.$difference.'.date'))
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.time'))->toBe('9PM')
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.calendarEvents.0.id'))->toBe($this->monthEvent->getKey())
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.date'))
             ->toBe(Date::today()->endOfMonth()->endOfWeek()->setTime(19, 59, 0)
                 ->setTimezone('Europe/Kyiv')->format('Y-m-d'));
     });
@@ -149,7 +149,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $action = new CalendarsListPage;
 
         $eventDate = Date::today('Europe/Kyiv')->endOfWeek()->setTime(22, 0, 0);
-        $this->data['start_date_time'] = $eventDate->copy()->setTimezone('UTC')->format('Y-m-d H:i:s');
+        $this->data['start_date_time'] = $eventDate->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s');
         $this->data['date'] = $eventDate->format('Y-m-d');
 
         $this->weekEvent = CalendarEvent::factory()->create($this->data);
@@ -181,20 +181,20 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
-            ->and(Arr::get($result, 'props.events.events.0.dayNumber'))->toBe($expectedDayNumber)
-            ->and(Arr::get($result, 'props.events.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe($eventDate->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$eventDate->format('H:i:s'))
-            ->and(Arr::get($result, 'props.events.events.0.time'))->toBe('10:00 PM')
-            ->and(Arr::get($result, 'props.events.events.0.startIndex'))->toBe(134)
-            ->and(Arr::get($result, 'props.events.events.0.durationIndex'))->toBe(12)
-            ->and(Arr::get($result, 'props.events.events.0.id'))->toBe($this->weekEvent->getKey())
-            ->and(Arr::get($result, 'props.events.events.0.colour'))->not()->toBeNull()
-            ->and(Arr::get($result, 'props.events.calendarView'))->toBeArray()
-            ->and(Arr::get($result, 'props.events.calendarView'))->toHaveCount(7)
-            ->and(Arr::get($result, 'props.events.calendarView.0.date'))->toBe($weekStartDate->format('Y-m-d'))
-            ->and(Arr::get($result, 'props.events.calendarView.6.date'))->toBe($weekEndDate->format('Y-m-d'))
-            ->and(Arr::get($result, 'props.events.calendarView.6.hasEvent'))->tobeTrue()
-            ->and(Arr::get($result, 'props.events.calendarView.6.isCurrentMonth'))->tobeTrue();
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.dayNumber'))->toBe($expectedDayNumber)
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.href'))->toBe($this->data['web_link'])
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.dateTime'))->toBe($eventDate->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$eventDate->format('H:i:s'))
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.time'))->toBe('10:00 PM')
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.startIndex'))->toBe(134)
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.durationIndex'))->toBe(12)
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.id'))->toBe($this->weekEvent->getKey())
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.colour'))->not()->toBeNull()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView'))->toBeArray()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView'))->toHaveCount(7)
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.0.date'))->toBe($weekStartDate->format('Y-m-d'))
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.6.date'))->toBe($weekEndDate->format('Y-m-d'))
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.6.hasEvent'))->tobeTrue()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.6.isCurrentMonth'))->tobeTrue();
     });
 
     it('renders Daily View of Calendar CalendarEvent list page', function (): void {
@@ -203,21 +203,21 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $action = new CalendarsListPage;
 
         $todayDate = Date::today('Europe/Kyiv')->setTime(22, 0, 0);
-        $this->data['start_date_time'] = $todayDate->copy()->setTimezone('UTC')->format('Y-m-d H:i:s');
+        $this->data['start_date_time'] = $todayDate->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s');
         $this->data['date'] = $todayDate->format('Y-m-d');
 
         $this->dailyEvent = CalendarEvent::factory()->create($this->data);
         $this->dailyEvent->calendarEventUsers()->attach($this->user->getKey(), ['role' => CalendarEventRoleEnum::HOST, 'colour' => CalendarEventColoursEnum::BLUE->value]);
 
         $previousMonthDate = Date::today('Europe/Kyiv')->startOfMonth()->subDays(10)->setTime(22, 0, 0);
-        $this->data['start_date_time'] = $previousMonthDate->copy()->setTimezone('UTC')->format('Y-m-d H:i:s');
+        $this->data['start_date_time'] = $previousMonthDate->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s');
         $this->data['date'] = $previousMonthDate->format('Y-m-d');
 
         $this->previousMonthEvent = CalendarEvent::factory()->create($this->data);
         $this->previousMonthEvent->calendarEventUsers()->attach($this->user->getKey(), ['role' => CalendarEventRoleEnum::HOST, 'colour' => CalendarEventColoursEnum::BLUE->value]);
 
         $nextMonthDate = Date::today('Europe/Kyiv')->endOfMonth()->addDays(10)->setTime(22, 0, 0);
-        $this->data['start_date_time'] = $nextMonthDate->copy()->setTimezone('UTC')->format('Y-m-d H:i:s');
+        $this->data['start_date_time'] = $nextMonthDate->copy()->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s');
         $this->data['date'] = $nextMonthDate->format('Y-m-d');
 
         $this->nextMonthEvent = CalendarEvent::factory()->create($this->data);
@@ -244,20 +244,20 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('edit')
-            ->and(Arr::get($result, 'props.events.events.0.href'))->toBe($this->data['web_link'])
-            ->and(Arr::get($result, 'props.events.events.0.dateTime'))->toBe($todayDate->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$todayDate->format('H:i:s'))
-            ->and(Arr::get($result, 'props.events.events.0.time'))->toBe('10:00 PM')
-            ->and(Arr::get($result, 'props.events.events.0.startIndex'))->toBe(134)
-            ->and(Arr::get($result, 'props.events.events.0.durationIndex'))->toBe(12)
-            ->and(Arr::get($result, 'props.events.events.0.title'))->toBe($this->data['title'])
-            ->and(Arr::get($result, 'props.events.events.0.id'))->toBe($this->dailyEvent->getKey())
-            ->and(Arr::get($result, 'props.events.events.0.colour'))->not()->toBeNull()
-            ->and(Arr::get($result, 'props.events.calendarView'))->toBeArray()
-            ->and(Arr::get($result, 'props.events.calendarView'))->toHaveCount(3)
-            ->and(Arr::get($result, 'props.events.calendarView.'.$previousMonthDate->format('Y-m')))->toBeArray()
-            ->and(Arr::get($result, 'props.events.calendarView.'.$nextMonthDate->format('Y-m')))->toBeArray()
-            ->and(Arr::get($result, 'props.events.calendarView.'.Date::today('Europe/Kyiv')->format('Y-m')))->toBeArray()
-            ->and(Arr::get($result, 'props.events.calendarView.'.Date::today('Europe/Kyiv')->format('Y-m')))->toContainEqual([
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.href'))->toBe($this->data['web_link'])
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.dateTime'))->toBe($todayDate->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$todayDate->format('H:i:s'))
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.time'))->toBe('10:00 PM')
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.startIndex'))->toBe(134)
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.durationIndex'))->toBe(12)
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.title'))->toBe($this->data['title'])
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.id'))->toBe($this->dailyEvent->getKey())
+            ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.colour'))->not()->toBeNull()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView'))->toBeArray()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView'))->toHaveCount(3)
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$previousMonthDate->format('Y-m')))->toBeArray()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$nextMonthDate->format('Y-m')))->toBeArray()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.Date::today('Europe/Kyiv')->format('Y-m')))->toBeArray()
+            ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.Date::today('Europe/Kyiv')->format('Y-m')))->toContainEqual([
                 'date'           => Date::today('Europe/Kyiv')->format('Y-m-d'),
                 'isCurrentMonth' => true,
                 'isSelected'     => true,

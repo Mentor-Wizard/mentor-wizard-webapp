@@ -13,13 +13,13 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 
-class GetMonthEventsService
+class GetMonthCalendarEventsService
 {
     private array $calendarView = [];
 
-    public function __construct(private readonly User $user, private readonly string $date, private readonly string $timezone = 'UTC') {}
+    public function __construct(private readonly User $user, private readonly CarbonInterface $date, private readonly string $timezone = 'UTC') {}
 
-    public function execute(): array
+    public function getMonthCalendarEvents(): array
     {
         $dateConfig = $this->prepareDateConfiguration();
         $events = $this->getFormattedEventsForPeriod($dateConfig['startDate'], $dateConfig['endDate']);
@@ -34,8 +34,8 @@ class GetMonthEventsService
 
     private function prepareDateConfiguration(): array
     {
-        $startDate = Date::parse($this->date, $this->timezone)->startOfMonth()->startOfWeek();
-        $endDate = Date::parse($this->date, $this->timezone)->endOfMonth()->endOfWeek();
+        $startDate = $this->date->startOfMonth()->startOfWeek();
+        $endDate = $this->date->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         return [

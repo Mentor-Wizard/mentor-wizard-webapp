@@ -62,7 +62,7 @@ const selectedDay = computed(() => {
               'relative px-3 py-2',
             ]"
             @click="scrollDate('exact date', day.date)"
-            @disabled="!day.events || day.events.length === 0"
+            @disabled="!day.calendarEvents || day.calendarEvents.length === 0"
           >
             <time
               :datetime="day.date"
@@ -74,8 +74,14 @@ const selectedDay = computed(() => {
             >
               {{ day?.date?.split('-').pop().replace(/^0/, '') }}
             </time>
-            <ol v-if="day.events && day.events.length > 0" class="mt-2">
-              <li v-for="event in day.events.slice(0, 2)" :key="event.id">
+            <ol
+              v-if="day.calendarEvents && day.calendarEvents.length > 0"
+              class="mt-2"
+            >
+              <li
+                v-for="event in day.calendarEvents.slice(0, 2)"
+                :key="event.id"
+              >
                 <a
                   class="group flex"
                   @click.prevent.stop="props.openShowEditEventPage(event.id)"
@@ -93,8 +99,8 @@ const selectedDay = computed(() => {
                   </time>
                 </a>
               </li>
-              <li v-if="day.events.length > 2" class="text-gray-500">
-                + {{ day.events.length - 2 }} more
+              <li v-if="day.calendarEvents.length > 2" class="text-gray-500">
+                + {{ day.calendarEvents.length - 2 }} more
               </li>
             </ol>
           </div>
@@ -106,7 +112,7 @@ const selectedDay = computed(() => {
             v-for="day in days.calendarView"
             :key="day.date"
             type="button"
-            :disabled="!day.events || day.events.length === 0"
+            :disabled="!day.calendarEvents || day.calendarEvents.length === 0"
             :class="[
               day.isCurrentMonth ? 'bg-white' : 'bg-gray-50',
               (day.isSelected || day.isToday) && 'font-semibold',
@@ -137,14 +143,17 @@ const selectedDay = computed(() => {
               {{ day?.date?.split('-').pop().replace(/^0/, '') }}
             </time>
             <span class="sr-only"
-              >{{ day.events ? day.events.length : '-' }} events</span
+              >{{
+                day.calendarEvents ? day.calendarEvents.length : '-'
+              }}
+              events</span
             >
             <span
-              v-if="day.events && day.events.length > 0"
+              v-if="day.calendarEvents && day.calendarEvents.length > 0"
               class="-mx-0.5 mt-auto flex flex-wrap-reverse"
             >
               <span
-                v-for="event in day.events"
+                v-for="event in day.calendarEvents"
                 :key="event.id"
                 class="mx-0.5 mb-1 size-1.5 rounded-full bg-gray-400"
               />
@@ -153,12 +162,15 @@ const selectedDay = computed(() => {
         </div>
       </div>
     </div>
-    <div v-if="selectedDay?.events?.length > 0" class="px-4 py-10 sm:px-6">
+    <div
+      v-if="selectedDay?.calendarEvents?.length > 0"
+      class="px-4 py-10 sm:px-6"
+    >
       <ol
         class="divide-y divide-gray-100 overflow-hidden rounded-lg bg-white text-sm shadow-sm ring-1 ring-black/5"
       >
         <li
-          v-for="event in selectedDay.events"
+          v-for="event in selectedDay.calendarEvents"
           :key="event.id"
           class="group flex p-4 pr-6 focus-within:bg-gray-50 hover:bg-gray-50"
         >

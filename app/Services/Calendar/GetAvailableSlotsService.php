@@ -14,7 +14,7 @@ class GetAvailableSlotsService
 
     public function __construct(private readonly User $user, private readonly string $timezone, private readonly array $excludeEvents = []) {}
 
-    public function execute(): array
+    public function getAvailableSlots(): array
     {
         $currentDate = Date::now();
         $currentDateTimezone = Date::now($this->timezone);
@@ -22,6 +22,7 @@ class GetAvailableSlotsService
         $events = $this->user->calendarEvents()
             ->where('start_date_time', '>=', $currentDate)->orderBy('start_date_time')
             ->whereKeyNot($this->excludeEvents)
+            ->limit(100)
             ->get();
 
         if ($events->isEmpty()) {

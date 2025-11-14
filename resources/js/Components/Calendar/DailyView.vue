@@ -163,7 +163,7 @@ onMounted(() => {
                 grid-template-rows: 1.75rem repeat(288, minmax(0, 1fr)) auto;
               "
             >
-              <template v-for="event in days.events" :key="event.id">
+              <template v-for="event in days.calendarEvents" :key="event.id">
                 <li
                   class="relative mt-px flex"
                   :style="{

@@ -22,14 +22,6 @@ import {
 import { useForm, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref, watch } from 'vue';
 const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
-// interface EventFormData {
-//     title: string;
-//     fromDate: string;
-//     toDate: string;
-//     fromTime: string;
-//     toTime: string;
-//     type: 'Group' | 'Individual';
-// }
 
 const errors = ref({
   toDate: null,

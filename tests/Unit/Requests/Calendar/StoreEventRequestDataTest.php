@@ -3,22 +3,22 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarEventColoursEnum;
-use App\Http\Requests\Calendar\StoreEventRequest;
+use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
 
-mutates(StoreEventRequest::class);
+mutates(StoreCalendarEventRequest::class);
 
-describe('StoreEventRequest getEventData and validator extras', function (): void {
+describe('StoreCalendarEventRequest getEventData and validator extras', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
         auth()->login($this->user);
 
-        $this->prepareRequest = function (StoreEventRequest $request): void {
+        $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(app(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
@@ -40,7 +40,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -71,7 +71,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -99,7 +99,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -126,7 +126,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -153,7 +153,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -188,7 +188,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -216,7 +216,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -239,7 +239,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -265,7 +265,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -275,7 +275,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('getEventData handles null datetime objects gracefully', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -300,7 +300,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('getEventData uses description from validated data', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -325,7 +325,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('verifies exact datetime concatenation for fromDate and fromTime in getEventData', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -351,7 +351,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('verifies exact datetime concatenation for toDate and toTime in getEventData', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -377,7 +377,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('verifies duration calculation uses diffInSeconds between exact datetimes', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -402,7 +402,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('verifies null-safe operator on startDateTime when parsing fails', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -427,7 +427,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
     });
 
     it('verifies null-safe operator on endDateTime when parsing fails', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -466,7 +466,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 
@@ -490,7 +490,7 @@ describe('StoreEventRequest getEventData and validator extras', function (): voi
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 

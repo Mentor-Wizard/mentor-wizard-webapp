@@ -8,7 +8,7 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
-use App\Http\Requests\Calendar\StoreEventRequest;
+use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -20,12 +20,12 @@ use Spatie\Permission\Models\Role;
 
 mutates(StoreCalendarEvent::class);
 
-describe('StoreEventRequest Validation', function (): void {
+describe('StoreCalendarEventRequest Validation', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendar();
 
-        $this->prepareRequest = function (StoreEventRequest $request): void {
+        $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(app(Illuminate\Routing\Redirector::class));
             $request->setUserResolver(fn () => $this->user);
@@ -33,7 +33,7 @@ describe('StoreEventRequest Validation', function (): void {
     });
 
     it('validates with correct data', function (array $validData): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($validData);
         ($this->prepareRequest)($request);
 
@@ -75,7 +75,7 @@ describe('StoreEventRequest Validation', function (): void {
     ]);
 
     it('fails validation with invalid data', function (array $invalidData, string $errorField): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $request->merge($invalidData);
         ($this->prepareRequest)($request);
 
@@ -140,7 +140,7 @@ describe('Store Calendar CalendarEvent', function (): void {
     });
 
     it('stores event, attaches host and redirects to calendar page', function (): void {
-        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, config('app.timezone')));
         $start = Date::tomorrow()->setTime(9, 0, 0);
         $end = Date::tomorrow()->setTime(10, 0, 0);
 
@@ -156,7 +156,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             'colour'          => CalendarEventColoursEnum::BLUE->value,
         ];
 
-        $request = Mockery::mock(StoreEventRequest::class);
+        $request = Mockery::mock(StoreCalendarEventRequest::class);
         $request->shouldReceive('getEventData')->andReturn($eventPayload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
@@ -202,7 +202,7 @@ describe('Store Calendar CalendarEvent', function (): void {
         $viewer = User::factory()->create();
         Auth::login($viewer);
 
-        $request = Mockery::mock(StoreEventRequest::class);
+        $request = Mockery::mock(StoreCalendarEventRequest::class);
         $request->shouldReceive('user')->andReturn($viewer);
 
         expect(fn (): RedirectResponse => (new StoreCalendarEvent)->handle($request))

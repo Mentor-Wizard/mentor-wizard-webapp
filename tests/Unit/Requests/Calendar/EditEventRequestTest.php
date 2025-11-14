@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
-use App\Http\Requests\Calendar\EditEventRequest;
+use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use Illuminate\Support\Facades\Date;
 use Mockery as m;
 
@@ -21,8 +21,8 @@ it('builds event data correctly for individual type', function (): void {
         'timezone'    => 'Europe/Kyiv',
     ];
 
-    /** @var EditEventRequest|m\MockInterface $request */
-    $request = m::mock(EditEventRequest::class)->makePartial();
+    /** @var EditCalendarEventRequest|m\MockInterface $request */
+    $request = m::mock(EditCalendarEventRequest::class)->makePartial();
     $request->shouldReceive('validated')->once()->andReturn($validated);
 
     $result = $request->getEventData();
@@ -55,8 +55,8 @@ it('builds event data correctly for group type', function (): void {
         'timezone'    => 'Europe/Kyiv',
     ];
 
-    /** @var EditEventRequest|m\MockInterface $request */
-    $request = m::mock(EditEventRequest::class)->makePartial();
+    /** @var EditCalendarEventRequest|m\MockInterface $request */
+    $request = m::mock(EditCalendarEventRequest::class)->makePartial();
     $request->shouldReceive('validated')->once()->andReturn($validated);
 
     $result = $request->getEventData();

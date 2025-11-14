@@ -16,7 +16,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     });
 
     it('returns true when user has no future events (no conflicts)', function (): void {
-        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $user = User::factory()->create();
 
         $service = new CheckTimeSlotReservedService(
@@ -28,16 +28,16 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             user: $user
         );
 
-        expect($service->execute())->toBeTrue();
+        expect($service->isSlotAvailable())->toBeTrue();
     });
 
     it('returns true when requested interval fits entirely within an available slot', function (): void {
-        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
-        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -61,16 +61,16 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             user: $user
         );
 
-        expect($service->execute())->toBeTrue();
+        expect($service->isSlotAvailable())->toBeTrue();
     });
 
     it('returns false when requested interval overlaps with existing event', function (): void {
-        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
-        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -94,18 +94,18 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             user: $user
         );
 
-        expect($service->execute())->toBeFalse();
+        expect($service->isSlotAvailable())->toBeFalse();
     });
 
     it('returns true when requested slot is between two events', function (): void {
-        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create two events
-        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
-        $event2StartUtc = Date::create(2025, 4, 1, 15, 0, 0, 'UTC');
+        $event2StartUtc = Date::create(2025, 4, 1, 15, 0, 0);
         $event2EndUtc = (clone $event2StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -138,16 +138,16 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             user: $user
         );
 
-        expect($service->execute())->toBeTrue();
+        expect($service->isSlotAvailable())->toBeTrue();
     });
 
     it('excludes specified events when checking availability', function (): void {
-        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
         $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
-        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0, 'UTC');
+        $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -172,6 +172,6 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             excludeEvents: [$event1->getKey()]
         );
 
-        expect($service->execute())->toBeTrue();
+        expect($service->isSlotAvailable())->toBeTrue();
     });
 });

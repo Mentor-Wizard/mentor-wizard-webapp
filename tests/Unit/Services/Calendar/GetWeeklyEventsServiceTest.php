@@ -3,31 +3,31 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use App\Services\Calendar\GetWeeklyEventsService;
+use App\Services\Calendar\GetWeeklyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
-mutates(GetWeeklyEventsService::class);
+mutates(GetWeeklyCalendarEventsService::class);
 
-describe('GetWeeklyEventsService Service', function (): void {
+describe('GetWeeklyCalendarEventsService Service', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
     it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) using service', function (): void {
         // Freeze time to ensure deterministic behaviour
-        Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
-        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0));
+        $tz = config('app.timezone');
 
         /** @var User $user */
         $user = User::factory()->create();
 
         $date = '2025-01-15'; // Wednesday
-
-        $result = new GetWeeklyEventsService($user, $date, $tz)->execute();
+        $checkedDate = Date::parse($date);
+        $result = new GetWeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
 
         expect($result)
-            ->toHaveKeys(['events', 'calendarView']);
+            ->toHaveKeys(['calendarEvents', 'calendarView']);
 
         $entryForSelected = collect($result['calendarView'])
             ->firstWhere('date', $date);
@@ -40,7 +40,7 @@ describe('GetWeeklyEventsService Service', function (): void {
     });
 
     it('sets event date property using timezone via each() method and only marks correct dates with hasEvent', function (): void {
-        Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0));
         // Use timezone that shifts the date
         $tz = 'America/Los_Angeles'; // UTC-8
 
@@ -49,7 +49,7 @@ describe('GetWeeklyEventsService Service', function (): void {
 
         // Create event at 01:00 UTC on Jan 14
         // In LA timezone (UTC-8), this is 17:00 (5pm) on Jan 13
-        $start = Date::create(2025, 1, 14, 1, 0, 0, 'UTC');
+        $start = Date::create(2025, 1, 14, 1, 0, 0);
         $end = (clone $start)->addHour();
 
         $event = App\Models\CalendarEvent::query()->create([
@@ -63,8 +63,8 @@ describe('GetWeeklyEventsService Service', function (): void {
         ]);
 
         $user->calendarEvents()->attach($event->getKey());
-
-        $result = new GetWeeklyEventsService($user, '2025-01-15', $tz)->execute();
+        $checkedDate = Date::parse('2025-01-15');
+        $result = new GetWeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
 
         $calendar = $result['calendarView'];
 
@@ -81,13 +81,13 @@ describe('GetWeeklyEventsService Service', function (): void {
     });
 
     it('returns calendarView with sequential numeric keys via array_values', function (): void {
-        Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
-        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0));
+        $tz = config('app.timezone');
 
         /** @var User $user */
         $user = User::factory()->create();
-
-        $result = new GetWeeklyEventsService($user, '2025-01-15', $tz)->execute();
+        $checkedDate = Date::parse('2025-01-15');
+        $result = new GetWeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
 
         $calendarView = $result['calendarView'];
 

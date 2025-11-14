@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Calendar\EditCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
-use App\Http\Requests\Calendar\EditEventRequest;
+use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -19,7 +19,7 @@ describe('EditCalendarEvent', function (): void {
         $this->user = User::factory()->create();
         auth()->login($this->user);
 
-        $this->prepareRequest = function (EditEventRequest $request): void {
+        $this->prepareRequest = function (EditCalendarEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(app(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
@@ -27,7 +27,7 @@ describe('EditCalendarEvent', function (): void {
     });
 
     it('syncs user relationship without detaching other users', function (): void {
-        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
 
         // Create event with two users attached
         $otherUser = User::factory()->create();
@@ -56,10 +56,10 @@ describe('EditCalendarEvent', function (): void {
             'description' => 'Updated desc',
             'type'        => 'Individual',
             'colour'      => CalendarEventColoursEnum::RED->value,
-            'timezone'    => 'UTC',
+            'timezone'    => config('app.timezone'),
         ];
 
-        $request = new EditEventRequest;
+        $request = new EditCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
         $request->validateResolved();
@@ -82,7 +82,7 @@ describe('EditCalendarEvent', function (): void {
     });
 
     it('updates event details correctly', function (): void {
-        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
 
         $event = CalendarEvent::factory()->create([
             'title'           => 'Original Title',
@@ -104,10 +104,10 @@ describe('EditCalendarEvent', function (): void {
             'description' => 'Updated description',
             'type'        => 'Group',
             'colour'      => CalendarEventColoursEnum::PURPLE->value,
-            'timezone'    => 'UTC',
+            'timezone'    => config('app.timezone'),
         ];
 
-        $request = new EditEventRequest;
+        $request = new EditCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
         $request->validateResolved();
@@ -135,10 +135,10 @@ describe('EditCalendarEvent', function (): void {
             'description' => 'desc',
             'type'        => 'Individual',
             'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'timezone'    => 'UTC',
+            'timezone'    => config('app.timezone'),
         ];
 
-        $request = new EditEventRequest;
+        $request = new EditCalendarEventRequest;
         $request->merge($data);
         ($this->prepareRequest)($request);
 

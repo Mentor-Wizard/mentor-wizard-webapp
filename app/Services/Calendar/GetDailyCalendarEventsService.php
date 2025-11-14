@@ -11,14 +11,14 @@ use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Date;
 
-class GetDailyEventsService
+class GetDailyCalendarEventsService
 {
     private array $calendarView = [];
 
-    public function __construct(private readonly User $user, private readonly string $date,
+    public function __construct(private readonly User $user, private readonly CarbonInterface $date,
         private readonly string $timezone = 'UTC') {}
 
-    public function execute(): array
+    public function getDailyCalendarEvents(): array
     {
         $dateConfig = $this->prepareDailyDateConfiguration();
         $events = $this->getDailyEvents($dateConfig['todayDate'], $dateConfig['tomorrowDate']);
@@ -32,8 +32,8 @@ class GetDailyEventsService
 
     private function prepareDailyDateConfiguration(): array
     {
-        $todayDate = Date::parse($this->date, $this->timezone)->startOfDay();
-        $tomorrowDate = Date::parse($this->date, $this->timezone)->addDay()->startOfDay();
+        $todayDate = $this->date->startOfDay();
+        $tomorrowDate = $this->date->addDay()->startOfDay();
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $this->user->calendarEvents()->orderBy('start_date_time')->first();
         /** @var ?CalendarEvent $latestEvent */

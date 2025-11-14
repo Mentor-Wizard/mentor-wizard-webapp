@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventColoursEnum;
 use App\Http\Resources\EventShowResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
@@ -31,10 +32,10 @@ describe('EventShowResource', function (): void {
         ]);
 
         $event->calendarEventUsers()->attach($user->getKey(), [
-            'colour' => App\Enums\CalendarEventColoursEnum::BLUE->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => 'UTC']);
+        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => config('app.timezone')]);
         $array = $resource->toArray(request());
 
         expect($array)
@@ -49,10 +50,10 @@ describe('EventShowResource', function (): void {
             ->and($array['duration'])->toBe('01:30')
             ->and($array['href'])->toBe('https://example.com/show')
             ->and($array['description'])->toBe('Desc')
-            ->and($array['colour'])->toBe(App\Enums\CalendarEventColoursEnum::BLUE->value);
+            ->and($array['colour'])->toBe(CalendarEventColoursEnum::BLUE->value);
     });
 
-    it('uses default UTC timezone when timezone is not provided', function (): void {
+    it('uses default timezone when timezone is not provided', function (): void {
         $this->seed(RoleSeeder::class);
 
         $start = Date::create(2025, 8, 22, 9, 30, 0);
@@ -72,7 +73,7 @@ describe('EventShowResource', function (): void {
         ]);
 
         $event->calendarEventUsers()->attach($user->getKey(), [
-            'colour' => App\Enums\CalendarEventColoursEnum::GREEN->value,
+            'colour' => CalendarEventColoursEnum::GREEN->value,
         ]);
 
         // Don't provide timezone in additional
@@ -107,7 +108,7 @@ describe('EventShowResource', function (): void {
 
         // Don't attach user to event
 
-        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => 'UTC']);
+        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => config('app.timezone')]);
         $array = $resource->toArray(request());
 
         expect($array['colour'])->toBeNull();
@@ -131,7 +132,7 @@ describe('EventShowResource', function (): void {
         ]);
 
         // Don't provide user in additional
-        $resource = new EventShowResource($event)->additional(['timezone' => 'UTC']);
+        $resource = new EventShowResource($event)->additional(['timezone' => config('app.timezone')]);
         $array = $resource->toArray(request());
 
         expect($array['colour'])->toBeNull();
@@ -157,7 +158,7 @@ describe('EventShowResource', function (): void {
         ]);
 
         // Create resource without eager loading calendarEventUsers
-        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => 'UTC']);
+        $resource = new EventShowResource($event)->additional(['user' => $user, 'timezone' => config('app.timezone')]);
         $array = $resource->toArray(request());
 
         expect($array['colour'])->toBeNull();
@@ -167,8 +168,8 @@ describe('EventShowResource', function (): void {
         $this->seed(RoleSeeder::class);
 
         // Create event at 22:00 UTC
-        $start = Date::create(2025, 8, 22, 22, 0, 0, 'UTC');
-        $end = Date::create(2025, 8, 22, 23, 30, 0, 'UTC');
+        $start = Date::create(2025, 8, 22, 22, 0, 0);
+        $end = Date::create(2025, 8, 22, 23, 30, 0);
 
         $user = User::factory()->create();
 
@@ -222,21 +223,21 @@ describe('EventShowResource', function (): void {
 
         // Attach a different user with a colour, but query with user who isn't attached
         $event->calendarEventUsers()->attach($user2->getKey(), [
-            'colour' => App\Enums\CalendarEventColoursEnum::RED->value,
+            'colour' => CalendarEventColoursEnum::RED->value,
         ]);
 
         // Test with user who isn't in the relationship
-        $resource = new EventShowResource($event->fresh())->additional(['user' => $user, 'timezone' => 'UTC']);
+        $resource = new EventShowResource($event->fresh())->additional(['user' => $user, 'timezone' => config('app.timezone')]);
         $array = $resource->toArray(request());
 
         // Should be null because where() filters out the attached user
         expect($array['colour'])->toBeNull();
 
         // Test with the attached user
-        $resource2 = new EventShowResource($event->fresh())->additional(['user' => $user2, 'timezone' => 'UTC']);
+        $resource2 = new EventShowResource($event->fresh())->additional(['user' => $user2, 'timezone' => config('app.timezone')]);
         $array2 = $resource2->toArray(request());
 
         // Should have the colour
-        expect($array2['colour'])->toBe(App\Enums\CalendarEventColoursEnum::RED->value);
+        expect($array2['colour'])->toBe(CalendarEventColoursEnum::RED->value);
     });
 });

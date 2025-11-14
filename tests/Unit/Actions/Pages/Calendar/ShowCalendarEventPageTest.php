@@ -45,7 +45,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
     it('renders ShowEditEvent component with mentor permissions and correct event payload', function (): void {
         auth()->login($this->mentor);
 
-        $request = new Request(['timezone' => 'UTC']);
+        $request = new Request(['timezone' => config('app.timezone')]);
         $response = new ShowCalendarEventPage()->handle($this->event, $request);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
@@ -75,7 +75,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
     it('renders ShowEditEvent component with viewer permissions for non-mentor users', function (): void {
         auth()->login($this->viewer);
 
-        $request = new Request(['timezone' => 'UTC']);
+        $request = new Request(['timezone' => config('app.timezone')]);
         $response = new ShowCalendarEventPage()->handle($this->event, $request);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
@@ -89,7 +89,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
     it('includes availableColours in response props', function (): void {
         auth()->login($this->mentor);
 
-        $request = new Request(['timezone' => 'UTC']);
+        $request = new Request(['timezone' => config('app.timezone')]);
         $response = new ShowCalendarEventPage()->handle($this->event, $request);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
@@ -102,7 +102,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
     it('passes user and timezone to EventShowResource which affects event payload', function (): void {
         auth()->login($this->mentor);
 
-        // Create event at 22:00 UTC
+        // Create event at 22:00 default timezone
         $start = Date::parse(Date::today()->format('Y-m-d').' 22:00:00');
         $end = Date::parse(Date::today()->format('Y-m-d').' 23:00:00');
 

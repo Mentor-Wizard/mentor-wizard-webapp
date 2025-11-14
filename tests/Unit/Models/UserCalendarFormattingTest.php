@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Models\CalendarEvent;
 use App\Models\User;
-use App\Services\Calendar\GetDailyEventsService;
-use App\Services\Calendar\GetMonthEventsService;
-use App\Services\Calendar\GetWeeklyEventsService;
+use App\Services\Calendar\GetDailyCalendarEventsService;
+use App\Services\Calendar\GetMonthCalendarEventsService;
+use App\Services\Calendar\GetWeeklyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
@@ -16,15 +16,15 @@ beforeEach(function (): void {
 
 it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) using service', function (): void {
     // Freeze time to ensure deterministic behaviour
-    Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0, 'UTC'));
-    $tz = 'UTC';
+    Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0));
+    $tz = config('app.timezone');
 
     /** @var User $user */
     $user = User::factory()->create();
 
-    $date = '2025-01-15'; // Wednesday
+    $date = Date::parse('2025-01-15'); // Wednesday
 
-    $result = new GetWeeklyEventsService($user, $date, $tz)->execute();
+    $result = new GetWeeklyCalendarEventsService($user, $date, $tz)->getWeeklyCalendarEvents();
 
     expect($result)
         ->toHaveKeys(['events', 'calendarView']);
@@ -41,14 +41,14 @@ it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) 
 
 it('includes empty day entries with events key for month calendar and sets flags for event day using service (timezone aware)', function (): void {
     // Set application now to UTC, but test conversion by using Europe/Kyiv for building
-    Date::setTestNow(Date::create(2025, 2, 10, 9, 0, 0, 'UTC'));
+    Date::setTestNow(Date::create(2025, 2, 10, 9, 0, 0));
     $tz = 'Europe/Kyiv';
 
     /** @var User $user */
     $user = User::factory()->create();
 
     // Create an event for today in UTC (will be converted in resource/service as needed)
-    $startUtc = Date::create(2025, 2, 10, 10, 0, 0, 'UTC');
+    $startUtc = Date::create(2025, 2, 10, 10, 0, 0);
     $endUtc = (clone $startUtc)->addHour();
 
     $event = CalendarEvent::query()->create([
@@ -63,7 +63,8 @@ it('includes empty day entries with events key for month calendar and sets flags
 
     $user->calendarEvents()->attach($event->getKey());
 
-    $result = new GetMonthEventsService($user, '2025-02-10', $tz)->execute();
+    $date = Date::parse('2025-02-10');
+    $result = new GetMonthCalendarEventsService($user, $date, $tz)->getMonthCalendarEvents();
 
     expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
 
@@ -90,14 +91,14 @@ it('includes empty day entries with events key for month calendar and sets flags
 });
 
 it('builds daily calendar grouped by month and appends days, marking flags correctly via service', function (): void {
-    Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0, 'UTC'));
-    $tz = 'UTC';
+    Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0));
+    $tz = config('app.timezone');
 
     /** @var User $user */
     $user = User::factory()->create();
 
     // Create an event on the selected day so hasEvent can be asserted
-    $start = Date::create(2025, 3, 5, 14, 0, 0, 'UTC');
+    $start = Date::create(2025, 3, 5, 14, 0, 0);
     $end = (clone $start)->addMinutes(90);
 
     $event = CalendarEvent::query()->create([
@@ -111,8 +112,8 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
     ]);
 
     $user->calendarEvents()->attach($event->getKey());
-
-    $result = new GetDailyEventsService($user, '2025-03-05', $tz)->execute();
+    $date = Date::parse('2025-03-05');
+    $result = new GetDailyCalendarEventsService($user, $date, $tz)->getDailyCalendarEvents();
 
     expect($result)->toHaveKeys(['events', 'calendarView']);
 

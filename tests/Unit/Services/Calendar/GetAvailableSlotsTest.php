@@ -20,7 +20,7 @@ describe('GetAvailableSlotsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $user = User::factory()->create();
 
-        $slots = new GetAvailableSlotsService($user, 'Europe/Kyiv')->execute();
+        $slots = new GetAvailableSlotsService($user, 'Europe/Kyiv')->getAvailableSlots();
 
         expect($slots)->toBeArray()->toBeEmpty();
     });
@@ -58,7 +58,7 @@ describe('GetAvailableSlotsService Service', function (): void {
         ]);
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
 
-        $result = new GetAvailableSlotsService($user, $tz)->execute();
+        $result = new GetAvailableSlotsService($user, $tz)->getAvailableSlots();
 
         // We expect 3 slots: [now..E1.start], [E1.end..E2.start], [E2.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(3);
@@ -102,7 +102,7 @@ describe('GetAvailableSlotsService Service', function (): void {
         ]);
         $user->calendarEvents()->attach($event->getKey());
 
-        $result = new GetAvailableSlotsService($user, $tz)->execute();
+        $result = new GetAvailableSlotsService($user, $tz)->getAvailableSlots();
 
         // Two slots should exist: [now..E-future.start], [E-future.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(2);

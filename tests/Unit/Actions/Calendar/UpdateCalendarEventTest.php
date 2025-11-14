@@ -8,7 +8,7 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
-use App\Http\Requests\Calendar\EditEventRequest;
+use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -20,12 +20,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(EditCalendarEvent::class);
 
-describe('EditEventRequest Validation', function (): void {
+describe('EditCalendarEventRequest Validation', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendarUpdate();
 
-        $this->prepareRequest = function (EditEventRequest $request): void {
+        $this->prepareRequest = function (EditCalendarEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(app(Illuminate\Routing\Redirector::class));
             $request->setUserResolver(fn () => $this->user);
@@ -33,7 +33,7 @@ describe('EditEventRequest Validation', function (): void {
     });
 
     it('validates with correct data', function (array $validData): void {
-        $request = new EditEventRequest;
+        $request = new EditCalendarEventRequest;
         $request->merge($validData);
         ($this->prepareRequest)($request);
 
@@ -59,7 +59,7 @@ describe('EditEventRequest Validation', function (): void {
     ]);
 
     it('fails validation with invalid data', function (array $invalidData, string $errorField): void {
-        $request = new EditEventRequest;
+        $request = new EditCalendarEventRequest;
         $request->merge($invalidData);
         ($this->prepareRequest)($request);
 
@@ -126,7 +126,7 @@ describe('Update Calendar CalendarEvent', function (): void {
             'description'     => 'Updated description',
         ];
 
-        $request = Mockery::mock(EditEventRequest::class);
+        $request = Mockery::mock(EditCalendarEventRequest::class);
         $request->shouldReceive('getEventData')->andReturn($payload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
@@ -151,7 +151,7 @@ describe('Update Calendar CalendarEvent', function (): void {
         Auth::login($viewer);
         $this->actingAs($viewer);
 
-        $request = Mockery::mock(EditEventRequest::class);
+        $request = Mockery::mock(EditCalendarEventRequest::class);
         $request->shouldReceive('getEventData')->never();
 
         $response = $this->patch(route('pages.calendar.edit', $this->event), [
@@ -165,7 +165,7 @@ describe('Update Calendar CalendarEvent', function (): void {
         $nonExistentEvent = new CalendarEvent;
         $nonExistentEvent->exists = false;
 
-        $request = Mockery::mock(EditEventRequest::class);
+        $request = Mockery::mock(EditCalendarEventRequest::class);
         $request->shouldReceive('getEventData')->never();
 
         expect(fn (): Response => (new EditCalendarEvent)->handle($request, $nonExistentEvent))
@@ -187,7 +187,7 @@ describe('Update Calendar CalendarEvent', function (): void {
             'description'     => 'Updated description',
         ];
 
-        $request = Mockery::mock(EditEventRequest::class);
+        $request = Mockery::mock(EditCalendarEventRequest::class);
         $request->shouldReceive('getEventData')->andReturn($payload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 

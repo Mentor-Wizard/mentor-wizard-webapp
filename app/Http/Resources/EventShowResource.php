@@ -31,7 +31,7 @@ class EventShowResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = $this->additional['user'] ?? null;
-        $timezone = $this->additional['timezone'] ?? 'UTC';
+        $timezone = $this->additional['timezone'] ?? config('app.timezone');
 
         return [
             'id'                => $this->resource->getKey(),

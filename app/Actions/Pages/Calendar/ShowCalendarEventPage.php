@@ -31,7 +31,7 @@ class ShowCalendarEventPage
             'locale'           => app()->getLocale(),
             'availableColours' => CalendarEventColoursEnum::values(),
             'permissions'      => auth()->user()->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
-            'event'            => new EventShowResource($calendarEvent->load('calendarEventUsers'))
+            'calendarEvent'    => new EventShowResource($calendarEvent->load('calendarEventUsers'))
                 ->additional(['user' => auth()->user(),
                     'timezone'       => $timezone,
                 ])

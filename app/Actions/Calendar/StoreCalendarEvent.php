@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Calendar;
 
 use App\Enums\CalendarEventRoleEnum;
-use App\Http\Requests\Calendar\StoreEventRequest;
+use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -15,7 +15,7 @@ class StoreCalendarEvent
 {
     use AsController;
 
-    public function handle(StoreEventRequest $request): RedirectResponse
+    public function handle(StoreCalendarEventRequest $request): RedirectResponse
     {
 
         abort_if($request->user()->cannot('create', CalendarEvent::class), Response::HTTP_FORBIDDEN, 'Unauthorized action.');

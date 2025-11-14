@@ -20,7 +20,7 @@ export const useNavigation = defineStore('navigation', () => {
       { name: 'Dashboard', href: route('pages.dashboard') },
       { name: 'Team', href: '#' },
       { name: 'Projects', href: '#' },
-      { name: 'Calendar', href: '#' },
+      { name: 'Calendar', href: route('pages.calendar.index') },
     ];
     if (isMentor.value) {
       base.push({

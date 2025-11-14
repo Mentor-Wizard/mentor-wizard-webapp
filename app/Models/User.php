@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
@@ -139,7 +140,20 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     {
         return $this->belongsToMany(CalendarEvent::class, 'calendar_event_user', 'user_id')
             ->withPivot('colour')
+            ->withPivot('role')
             ->withTimestamps();
+    }
+
+    public function hostedCalendarEvents(): BelongsToMany
+    {
+        return $this->calendarEvents()
+            ->wherePivot('role', CalendarEventRoleEnum::HOST);
+    }
+
+    public function participatingCalendarEvents(): BelongsToMany
+    {
+        return $this->calendarEvents()
+            ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT);
     }
 
     public function coachChats(): HasMany
@@ -158,12 +172,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
             get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
         );
     }
-
-    /**
-     * Get formatted events for month view
-     *
-     * @return array{calendarView: array, hasEventsBefore: bool, hasEventsAfter: bool}
-     */
 
     /**
      * Get the attributes that should be cast.

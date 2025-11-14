@@ -5,15 +5,15 @@ declare(strict_types=1);
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
-use App\Http\Requests\Calendar\StoreEventRequest;
+use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 
-mutates(StoreEventRequest::class);
+mutates(StoreCalendarEventRequest::class);
 
-describe('StoreEventRequest getEventData type mapping', function (): void {
+describe('StoreCalendarEventRequest getEventData type mapping', function (): void {
     it('maps "individual" to CalendarEventTypeEnum::INDIVIDUAL value', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -39,7 +39,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
     });
 
     it('maps "group" to CalendarEventTypeEnum::GROUP value', function (): void {
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -66,7 +66,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
 
     it('returns null values when invalid datetime strings are provided (nullsafe operators)', function (): void {
         // Here createFromFormat will return false for start datetime and true for end
-        $request = new class extends StoreEventRequest
+        $request = new class extends StoreCalendarEventRequest
         {
             public function validated($key = null, $default = null): array
             {
@@ -93,7 +93,7 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
         $today = Date::today();
         $tomorrow = $today->copy()->addDay();
 
-        $request = new class($today, $tomorrow) extends StoreEventRequest
+        $request = new class($today, $tomorrow) extends StoreCalendarEventRequest
         {
             public function __construct(private readonly CarbonInterface $today, private readonly CarbonInterface $tomorrow) {}
 
@@ -121,9 +121,9 @@ describe('StoreEventRequest getEventData type mapping', function (): void {
     });
 });
 
-describe('StoreEventRequest rules and messages', function (): void {
+describe('StoreCalendarEventRequest rules and messages', function (): void {
     it('provides all expected validation rules', function (): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $rules = $request->rules();
 
         expect($rules)
@@ -140,7 +140,7 @@ describe('StoreEventRequest rules and messages', function (): void {
     });
 
     it('provides all expected messages', function (): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $messages = $request->messages();
 
         expect($messages)
@@ -166,14 +166,14 @@ describe('StoreEventRequest rules and messages', function (): void {
     });
 
     it('validates that toTime must be after fromTime', function (): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $rules = $request->rules();
 
         expect($rules['toTime'])->toContain('after:fromTime');
     });
 
     it('validates colour is in allowed values', function (): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $rules = $request->rules();
 
         expect($rules['colour'])->toHaveCount(2)
@@ -181,7 +181,7 @@ describe('StoreEventRequest rules and messages', function (): void {
     });
 
     it('validates type is in allowed values', function (): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $rules = $request->rules();
 
         expect($rules['type'])->toHaveCount(2)
@@ -189,7 +189,7 @@ describe('StoreEventRequest rules and messages', function (): void {
     });
 
     it('validates description max length is 2000', function (): void {
-        $request = new StoreEventRequest;
+        $request = new StoreCalendarEventRequest;
         $rules = $request->rules();
 
         expect($rules['description'])->toContain('max:2000');

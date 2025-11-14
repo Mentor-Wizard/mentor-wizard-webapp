@@ -20,7 +20,7 @@ use Override;
  */
 class EventDayViewResource extends JsonResource
 {
-    public function __construct(mixed $resource, private readonly ?string $timezone = 'UTC')
+    public function __construct(mixed $resource, private readonly ?string $timezone)
     {
         parent::__construct($resource);
     }

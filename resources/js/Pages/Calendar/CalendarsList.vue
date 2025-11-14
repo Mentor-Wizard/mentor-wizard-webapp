@@ -9,7 +9,17 @@ import {
 import { router, usePage } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
+interface Props {
+  calendarEvents: CalendarEvent[];
+  timezone: string;
+  currentView: 'day' | 'week' | 'month';
+  selectedDate: string;
+  permissions: string;
+  locale: string;
+  availableSlots?: Array<{ start: string; end: string }>;
+}
 
+const props = defineProps<Props>();
 import DailyView from '@/Components/Calendar/DailyView.vue';
 import MonthlyView from '@/Components/Calendar/MonthlyView.vue';
 import WeeklyView from '@/Components/Calendar/WeeklyView.vue';
@@ -31,7 +41,7 @@ const todayDate = ref(
 );
 const showCreatePage = ref(false);
 const permissions = ref(usePage().props.permissions);
-const daysData = ref(usePage().props.events);
+const daysData = ref(usePage().props.calendarEvents);
 const calendar = useCalendar();
 const { hours, weekDays } = storeToRefs(calendar);
 
@@ -74,9 +84,9 @@ const refreshData = () => {
       timezone: timezone.value,
     },
     preserveState: true,
-    only: ['events'],
+    only: ['calendarEvents'],
     onSuccess: (page) => {
-      daysData.value = page.props.events;
+      daysData.value = page.props.calendarEvents;
       permissions.value = page.props.permissions ?? 'view';
       isLoading.value = false;
     },
@@ -410,7 +420,7 @@ onMounted(() => {
     />
     <WeeklyView
       v-if="currentTab === 'Week view'"
-      :events="daysData"
+      :calendarEvents="daysData"
       :scroll-date="scrollDate"
       :hours="hours"
       :week-days="weekDays"

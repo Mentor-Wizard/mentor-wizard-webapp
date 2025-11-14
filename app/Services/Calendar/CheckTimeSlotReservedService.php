@@ -13,9 +13,9 @@ readonly class CheckTimeSlotReservedService
         private string $toDate, private string $toTime, private string $timezone,
         private User $user, private array $excludeEvents = []) {}
 
-    public function execute(): bool
+    public function isSlotAvailable(): bool
     {
-        $availableSlots = new GetAvailableSlotsService($this->user, $this->timezone, $this->excludeEvents)->execute();
+        $availableSlots = new GetAvailableSlotsService($this->user, $this->timezone, $this->excludeEvents)->getAvailableSlots();
 
         if ($availableSlots === []) {
             return true;

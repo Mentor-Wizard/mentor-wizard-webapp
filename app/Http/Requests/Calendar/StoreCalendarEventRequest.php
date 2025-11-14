@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
 use Override;
 
-class EditEventRequest extends FormRequest
+class StoreCalendarEventRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -34,29 +34,6 @@ class EditEventRequest extends FormRequest
             'description' => ['max:2000'],
             'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
             'timezone'    => ['required', 'string'],
-        ];
-    }
-
-    #[Override]
-    public function messages(): array
-    {
-        return [
-            'title.required'          => 'CalendarEvent title is required.',
-            'title.max'               => 'CalendarEvent title cannot exceed 255 characters.',
-            'fromDate.required'       => 'Start date is required.',
-            'fromDate.date'           => 'Start date must be a valid date.',
-            'fromDate.after_or_equal' => 'Start date cannot be in the past.',
-            'toDate.required'         => 'End date is required.',
-            'toDate.date'             => 'End date must be a valid date.',
-            'toDate.after_or_equal'   => 'End date must be on or after the start date.',
-            'fromTime.required'       => 'Start time is required.',
-            'fromTime.date_format'    => 'Start time must be in HH:MM format.',
-            'toTime.required'         => 'End time is required.',
-            'toTime.date_format'      => 'End time must be in HH:MM format.',
-            'toTime.after'            => 'End time must be after start time.',
-            'description.max'         => 'Description cannot exceed 2000 characters.',
-            'type.required'           => 'CalendarEvent type is required.',
-            'type.in'                 => 'CalendarEvent type must be either individual or group.',
         ];
     }
 
@@ -82,8 +59,7 @@ class EditEventRequest extends FormRequest
                 $this->input('fromTime'),
                 $this->input('toDate'),
                 $this->input('toTime'),
-                $this->input('timezone', 'UTC'),
-                auth()->user(), [$this->input('id')])->execute();
+                $this->input('timezone', config('app.timezone')), auth()->user())->isSlotAvailable();
 
             if (! $isWithinAvailableSlots) {
                 $validator->errors()->add('fromDate', 'there are another events on this time');
@@ -91,22 +67,50 @@ class EditEventRequest extends FormRequest
         });
     }
 
+    #[Override]
+    public function messages(): array
+    {
+        return [
+            'title.required'          => 'CalendarEvent title is required.',
+            'title.max'               => 'CalendarEvent title cannot exceed 255 characters.',
+            'fromDate.required'       => 'Start date is required.',
+            'fromDate.date'           => 'Start date must be a valid date.',
+            'fromDate.after_or_equal' => 'Start date cannot be in the past.',
+            'toDate.required'         => 'End date is required.',
+            'toDate.date'             => 'End date must be a valid date.',
+            'toDate.after_or_equal'   => 'End date must be on or after the start date.',
+            'fromTime.required'       => 'Start time is required.',
+            'colour.required'         => 'Colour is required.',
+            'fromTime.date_format'    => 'Start time must be in HH:MM format.',
+            'toTime.required'         => 'End time is required.',
+            'toTime.date_format'      => 'End time must be in HH:MM format.',
+            'toTime.after'            => 'End time must be after start time.',
+            'description.max'         => 'Description cannot exceed 2000 characters.',
+            'type.required'           => 'CalendarEvent type is required.',
+            'type.in'                 => 'CalendarEvent type must be either individual or group.',
+        ];
+    }
+
     public function getEventData(): array
     {
         $validated = $this->validated();
 
-        $startDateTime = Date::createFromFormat(
-            'Y-m-d H:i',
-            $validated['fromDate'].' '.$validated['fromTime'],
-            $validated['timezone']
-        )?->setTimezone('UTC');
-        $endDateTime = Date::createFromFormat(
-            'Y-m-d H:i',
-            $validated['toDate'].' '.$validated['toTime'],
-            $validated['timezone']
-        )?->setTimezone('UTC');
+        try {
+            $startDateTime = Date::createFromFormat(
+                'Y-m-d H:i',
+                $validated['fromDate'].' '.$validated['fromTime'],
+                $validated['timezone']
+            )?->setTimezone(config('app.timezone'));
+            $endDateTime = Date::createFromFormat(
+                'Y-m-d H:i',
+                $validated['toDate'].' '.$validated['toTime'],
+                $validated['timezone']
+            )?->setTimezone(config('app.timezone'));
+        } catch (Exception) {
+            return [];
+        }
 
-        $duration = $startDateTime?->diffInSeconds($endDateTime);
+        $duration = (int) $startDateTime?->diffInSeconds($endDateTime);
         $eventType = match ($validated['type']) {
             'individual' => CalendarEventTypeEnum::INDIVIDUAL->value,
             'group'      => CalendarEventTypeEnum::GROUP->value,

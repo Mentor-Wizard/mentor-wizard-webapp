@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
-use App\Http\Requests\Calendar\EditEventRequest;
+use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Arr;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,7 +15,7 @@ class EditCalendarEvent
 {
     use AsController;
 
-    public function handle(EditEventRequest $request, CalendarEvent $calendarEvent): Response
+    public function handle(EditCalendarEventRequest $request, CalendarEvent $calendarEvent): Response
     {
         throw_unless($calendarEvent->exists, ModelNotFoundException::class, 'Calendar Event not found.');
 

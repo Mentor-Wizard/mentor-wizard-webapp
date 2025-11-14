@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 use App\Models\CalendarEvent;
 use App\Models\User;
-use App\Services\Calendar\GetDailyEventsService;
+use App\Services\Calendar\GetDailyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
-mutates(GetDailyEventsService::class);
+mutates(GetDailyCalendarEventsService::class);
 
-describe('GetDailyEventsService Service', function (): void {
+describe('GetDailyCalendarEventsService Service', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
 
     it('builds daily calendar grouped by month and appends days, marking flags correctly via service', function (): void {
-        Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0));
         $tz = 'UTC';
 
         /** @var User $user */
         $user = User::factory()->create();
 
         // Create an event on the selected day so hasEvent can be asserted
-        $start = Date::create(2025, 3, 5, 14, 0, 0, 'UTC');
+        $start = Date::create(2025, 3, 5, 14, 0, 0);
         $end = (clone $start)->addMinutes(90);
 
         /** @var CalendarEvent $event */
@@ -38,8 +38,8 @@ describe('GetDailyEventsService Service', function (): void {
         ]);
 
         $user->calendarEvents()->attach($event->getKey());
-
-        $result = new GetDailyEventsService($user, '2025-03-05', $tz)->execute();
+        $checkedDate = Date::parse('2025-03-05');
+        $result = new GetDailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
         expect($result)->toHaveKeys(['events', 'calendarView']);
 
@@ -62,14 +62,14 @@ describe('GetDailyEventsService Service', function (): void {
     });
 
     it('sets event date property using timezone via each() method', function (): void {
-        Date::setTestNow(Date::create(2025, 3, 5, 23, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 3, 5, 23, 0, 0));
         $tz = 'Pacific/Auckland';
 
         /** @var User $user */
         $user = User::factory()->create();
 
         // Create event at 23:00 UTC which should be next day in Auckland
-        $start = Date::create(2025, 3, 5, 23, 0, 0, 'UTC');
+        $start = Date::create(2025, 3, 5, 23, 0, 0);
         $end = (clone $start)->addHour();
 
         /** @var CalendarEvent $event */
@@ -84,8 +84,8 @@ describe('GetDailyEventsService Service', function (): void {
         ]);
 
         $user->calendarEvents()->attach($event->getKey());
-
-        $result = new GetDailyEventsService($user, '2025-03-05', $tz)->execute();
+        $checkedDate = Date::parse('2025-03-05');
+        $result = new GetDailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
         // Verify calendarView has proper structure with hasEvent flags
         $calendar = $result['calendarView'];
@@ -98,14 +98,14 @@ describe('GetDailyEventsService Service', function (): void {
     });
 
     it('initializes calendar months correctly with both set and append operations', function (): void {
-        Date::setTestNow(Date::create(2025, 3, 5, 12, 0, 0, 'UTC'));
+        Date::setTestNow(Date::create(2025, 3, 5, 12, 0, 0));
         $tz = 'UTC';
 
         /** @var User $user */
         $user = User::factory()->create();
 
         // Create events in different months to trigger multiple month processing
-        $event1Start = Date::create(2024, 12, 15, 10, 0, 0, 'UTC');
+        $event1Start = Date::create(2024, 12, 15, 10, 0, 0);
         $event1End = (clone $event1Start)->addHour();
 
         $event1 = CalendarEvent::query()->create([
@@ -118,7 +118,7 @@ describe('GetDailyEventsService Service', function (): void {
             'type'            => 'individual',
         ]);
 
-        $event2Start = Date::create(2025, 6, 20, 14, 0, 0, 'UTC');
+        $event2Start = Date::create(2025, 6, 20, 14, 0, 0);
         $event2End = (clone $event2Start)->addHour();
 
         $event2 = CalendarEvent::query()->create([
@@ -132,8 +132,8 @@ describe('GetDailyEventsService Service', function (): void {
         ]);
 
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
-
-        $result = new GetDailyEventsService($user, '2025-03-05', $tz)->execute();
+        $checkedDate = Date::parse('2025-03-05');
+        $result = new GetDailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
         $calendar = $result['calendarView'];
 

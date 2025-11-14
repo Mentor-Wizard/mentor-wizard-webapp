@@ -27,6 +27,7 @@ describe('CalendarEventRoleEnum', function (): void {
             ->toContain('Host')
             ->toContain('Co-Host')
             ->toContain('Menti')
-            ->toContain('Moderator');
+            ->toContain('Moderator')
+            ->toContain('Participant');
     });
 });

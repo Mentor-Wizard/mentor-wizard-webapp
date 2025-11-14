@@ -25,7 +25,7 @@ describe('EventMonthViewResource', function (): void {
             'description'     => 'Month view description',
         ]);
 
-        $resource = new EventMonthViewResource($event)->additional(['timeZone' => 'UTC']);
+        $resource = new EventMonthViewResource($event)->additional(['timeZone' => config('app.timezone')]);
         $array = $resource->toArray(request());
 
         expect($array)

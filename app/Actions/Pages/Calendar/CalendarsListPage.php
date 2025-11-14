@@ -6,9 +6,9 @@ namespace App\Actions\Pages\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\RoleEnum;
-use App\Services\Calendar\GetDailyEventsService;
-use App\Services\Calendar\GetMonthEventsService;
-use App\Services\Calendar\GetWeeklyEventsService;
+use App\Services\Calendar\GetDailyCalendarEventsService;
+use App\Services\Calendar\GetMonthCalendarEventsService;
+use App\Services\Calendar\GetWeeklyCalendarEventsService;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -23,8 +23,8 @@ class CalendarsListPage
 
     public function handle(Request $request): Response
     {
-        $timezone = $request->get('timezone');
-        $date = $request->get('date') ?? Date::now($timezone)->format('Y-m-d');
+        $timezone = $request->get('timezone') ?? config('app.timezone');
+        $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
         $mode = $request->get('mode') ?? 'Month view';
         $user = auth()->user();
 
@@ -36,10 +36,10 @@ class CalendarsListPage
             'locale'            => app()->getLocale(),
             'permissions'       => $user?->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
             'availableColours'  => CalendarEventColoursEnum::values(),
-            'events'            => match ($mode) {
-                'Day view'      => $timezone && $user ? new GetDailyEventsService($user, $date, $timezone)->execute() : [],
-                'Week view'     => $timezone && $user ? new GetWeeklyEventsService($user, $date, $timezone)->execute() : [],
-                default         => $timezone && $user ? new GetMonthEventsService($user, $date, $timezone)->execute() : [],
+            'calendarEvents'    => match ($mode) {
+                'Day view'      => $timezone && $user ? new GetDailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
+                'Week view'     => $timezone && $user ? new GetWeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],
+                default         => $timezone && $user ? new GetMonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents() : [],
             }]);
     }
 }

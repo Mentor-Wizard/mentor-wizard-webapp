@@ -10,6 +10,7 @@ enum CalendarEventRoleEnum: string
     case COHOST = 'Co-Host';
     case MENTI = 'Menti';
     case MODERATOR = 'Moderator';
+    case PARTICIPANT = 'Participant';
 
     public static function names(): array
     {

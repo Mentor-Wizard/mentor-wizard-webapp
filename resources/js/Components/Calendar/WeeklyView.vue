@@ -14,7 +14,7 @@ onMounted(() => {
     / 1440;
 });
 const props = defineProps({
-  events: {
+  calendarEvents: {
     type: Object,
     default: () => {},
   },
@@ -52,7 +52,10 @@ const props = defineProps({
           class="sticky top-0 z-30 flex-none bg-white shadow-sm ring-1 ring-black/5 sm:pr-8"
         >
           <div class="grid grid-cols-7 text-sm/6 text-gray-500 sm:hidden">
-            <div v-for="(day, dayIdx) in events.calendarView" :key="day.date">
+            <div
+              v-for="(day, dayIdx) in calendarEvents.calendarView"
+              :key="day.date"
+            >
               <button
                 type="button"
                 :disabled="!day.hasEvents"
@@ -72,7 +75,10 @@ const props = defineProps({
             class="-mr-px hidden grid-cols-7 divide-x divide-gray-100 border-r border-gray-100 text-sm/6 text-gray-500 sm:grid"
           >
             <div class="col-end-1 w-14" />
-            <div v-for="(day, dayIdx) in events.calendarView" :key="day.date">
+            <div
+              v-for="(day, dayIdx) in calendarEvents.calendarView"
+              :key="day.date"
+            >
               <span
                 :disabled="!day.hasEvents"
                 @click="scrollDate('exact date', day.date)"
@@ -128,7 +134,10 @@ const props = defineProps({
                 grid-template-rows: 1.75rem repeat(288, minmax(0, 1fr)) auto;
               "
             >
-              <template v-for="event in events.events" :key="event.id">
+              <template
+                v-for="event in calendarEvents.calendarEvents"
+                :key="event.id"
+              >
                 <li
                   :class="`relative mt-px flex sm:col-start-${event.dayNumber}`"
                   :style="{

@@ -127,7 +127,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description' => 'Should fail due to overlap',
             'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'timezone'    => 'UTC',
+            'timezone'    => config('app.timezone'),
         ];
 
         $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $payload);
