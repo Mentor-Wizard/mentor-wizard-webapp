@@ -67,7 +67,7 @@ class GetMonthCalendarEventsService
             $dateKey = $monthDate->format('Y-m-d');
             $this->calendarView[] = Arr::has($events, $dateKey)
                 ? $events[$dateKey]
-                : ['date' => $dateKey, 'events' => []];
+                : ['date' => $dateKey, 'calendarEvents' => []];
         }
 
         return $this->calendarView;
@@ -78,8 +78,8 @@ class GetMonthCalendarEventsService
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $dateEvents->first();
         $payload = [
-            'date'   => $firstEvent->start_date_time->setTimezone($this->timezone)->format('Y-m-d'),
-            'events' => EventMonthViewResource::collection($dateEvents)
+            'date'           => $firstEvent->start_date_time->setTimezone($this->timezone)->format('Y-m-d'),
+            'calendarEvents' => EventMonthViewResource::collection($dateEvents)
                 ->additional(['timeZone' => $this->timezone])
                 ->resolve(),
         ];

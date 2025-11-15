@@ -41,7 +41,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         $checkedDate = Date::parse('2025-03-05');
         $result = new GetDailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
-        expect($result)->toHaveKeys(['events', 'calendarView']);
+        expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
 
         $ym = '2025-03';
         $calendar = $result['calendarView'];

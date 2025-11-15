@@ -27,10 +27,10 @@ it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) 
     $result = new GetWeeklyCalendarEventsService($user, $date, $tz)->getWeeklyCalendarEvents();
 
     expect($result)
-        ->toHaveKeys(['events', 'calendarView']);
+        ->toHaveKeys(['calendarEvents', 'calendarView']);
 
     $entryForSelected = collect($result['calendarView'])
-        ->firstWhere('date', $date);
+        ->firstWhere('date', $date->format('Y-m-d'));
 
     expect($entryForSelected)
         ->toBeArray()
@@ -76,18 +76,18 @@ it('includes empty day entries with events key for month calendar and sets flags
 
     expect($eventEntry)
         ->toBeArray()
-        ->and($eventEntry['events'] ?? null)->toBeArray()->not->toBeEmpty()
+        ->and($eventEntry['calendarEvents'] ?? null)->toBeArray()->not->toBeEmpty()
         ->and($eventEntry['isCurrentMonth'] ?? null)->toBeTrue()
         ->and($eventEntry['isSelected'] ?? null)->toBeTrue()
         ->and($eventEntry['isToday'] ?? null)->toBeTrue();
 
     // Ensure a day without events includes empty events array
     $emptyDay = collect($calendarView)
-        ->first(fn (array $day): bool => $day['date'] !== '2025-02-10' && ($day['events'] ?? null) === []);
+        ->first(fn (array $day): bool => $day['date'] !== '2025-02-10' && ($day['calendarEvents'] ?? null) === []);
 
     expect($emptyDay)
         ->toBeArray()
-        ->and($emptyDay['events'])->toBeArray()->toBe([]);
+        ->and($emptyDay['calendarEvents'])->toBeArray()->toBe([]);
 });
 
 it('builds daily calendar grouped by month and appends days, marking flags correctly via service', function (): void {
@@ -115,7 +115,7 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
     $date = Date::parse('2025-03-05');
     $result = new GetDailyCalendarEventsService($user, $date, $tz)->getDailyCalendarEvents();
 
-    expect($result)->toHaveKeys(['events', 'calendarView']);
+    expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
 
     $ym = '2025-03';
     $calendar = $result['calendarView'];

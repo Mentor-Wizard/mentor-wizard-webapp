@@ -25,8 +25,8 @@ class GetDailyCalendarEventsService
         $this->buildDailyCalendarView($dateConfig['months'], $dateConfig['todayDate'], $dateConfig['daysEvents']);
 
         return [
-            'events'       => $events,
-            'calendarView' => $this->calendarView,
+            'calendarEvents'     => $events,
+            'calendarView'       => $this->calendarView,
         ];
     }
 

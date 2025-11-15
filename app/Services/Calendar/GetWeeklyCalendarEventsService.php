@@ -54,8 +54,8 @@ class GetWeeklyCalendarEventsService
         $this->calendarView = array_values($this->calendarView);
 
         return [
-            'events'       => $this->calendarEvents,
-            'calendarView' => $this->calendarView,
+            'calendarEvents'       => $this->calendarEvents,
+            'calendarView'         => $this->calendarView,
         ];
     }
 

@@ -91,7 +91,7 @@ describe('CalendarsListPage', function (): void {
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
-        expect($props['events'])->toBe([]);
+        expect($props['calendarEvents']['calendarEvents'])->toBe([]);
     });
 
     it('returns empty events array when user is not authenticated', function (): void {
@@ -102,7 +102,7 @@ describe('CalendarsListPage', function (): void {
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
-        expect($props['events'])->toBe([]);
+        expect($props['calendarEvents'])->toBe([]);
     });
 
     it('defaults to Month view when mode is not provided', function (): void {
@@ -116,7 +116,7 @@ describe('CalendarsListPage', function (): void {
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
-        expect($props['events'])->toBeArray();
+        expect($props['calendarEvents'])->toBeArray();
         // Should default to Month view and call GetMonthCalendarEventsService
     });
 
@@ -157,13 +157,13 @@ describe('CalendarsListPage', function (): void {
         $request1 = Request::create('/calendar', 'GET', ['mode' => 'Day view', 'date' => Date::now()->format('Y-m-d')]);
         $response1 = $action->handle($request1);
         $props1 = inertiaProps($response1);
-        expect($props1['events'])->toBe([]);
+        expect($props1['calendarEvents']['calendarEvents'])->toBe([]);
 
         // Has timezone but no user
         Auth::logout();
         $request2 = Request::create('/calendar', 'GET', ['timezone' => config('app.timezone'), 'mode' => 'Day view', 'date' => Date::now()->format('Y-m-d')]);
         $response2 = $action->handle($request2);
         $props2 = inertiaProps($response2);
-        expect($props2['events'])->toBe([]);
+        expect($props2['calendarEvents'])->toBe([]);
     });
 });
