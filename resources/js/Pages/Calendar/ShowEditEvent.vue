@@ -19,12 +19,19 @@ import {
   UserIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
-import { router, useForm, usePage } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
 const mode = ref('show');
-const permissions = ref('permissions');
+const permissions = ref(props.permissions);
+interface Props {
+  calendarEvent: [];
+  availableColours: [];
+  permissions: string;
+  locale: string;
+}
+const props = defineProps<Props>();
 const event = ref<EventFormData>({
   id: '',
   title: '',
@@ -93,7 +100,7 @@ let form = useForm({
   colour: '',
   timezone: timeZone,
 });
-const availableColours = ref([]);
+const availableColours = props.availableColours;
 const availableColoursScheme = ref({});
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
@@ -103,8 +110,8 @@ const eventTypes = [
 ];
 
 onMounted(() => {
-  const eventData = usePage().props.event;
-  availableColours.value = usePage().props.availableColours;
+  const eventData = props.calendarEvent;
+  availableColours.value = props.availableColours;
   availableColoursScheme.value = availableColours.value.reduce(
     (acc, c) => {
       acc[c] = `bg-${c}-500`;
@@ -115,7 +122,7 @@ onMounted(() => {
 
   if (eventData) {
     event.value = eventData;
-    permissions.value = usePage().props.permissions;
+    permissions.value = props.permissions;
 
     Object.assign(form, {
       id: eventData.id || '',

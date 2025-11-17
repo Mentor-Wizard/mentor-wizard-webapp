@@ -6,6 +6,7 @@ namespace App\Actions\Pages\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\RoleEnum;
+use App\Models\CalendarEvent;
 use App\Services\Calendar\GetDailyCalendarEventsService;
 use App\Services\Calendar\GetMonthCalendarEventsService;
 use App\Services\Calendar\GetWeeklyCalendarEventsService;
@@ -34,7 +35,7 @@ class CalendarsListPage
             'laravelVersion'    => Application::VERSION,
             'phpVersion'        => PHP_VERSION,
             'locale'            => app()->getLocale(),
-            'permissions'       => $user?->hasRole(RoleEnum::MENTOR->value) ? 'edit' : 'view',
+            'permissions'       => $user?->can('create',CalendarEvent::class) ? 'create' : 'view',
             'availableColours'  => CalendarEventColoursEnum::values(),
             'calendarEvents'    => match ($mode) {
                 'Day view'      => $timezone && $user ? new GetDailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],

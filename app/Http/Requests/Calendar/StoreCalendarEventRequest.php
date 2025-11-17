@@ -129,15 +129,4 @@ class StoreCalendarEventRequest extends FormRequest
             'date'            => $startDateTime?->format('Y-m-d'),
         ];
     }
-
-    protected function prepareForValidation(): void
-    {
-        if ($this->has(['fromDate', 'toDate', 'fromTime', 'toTime'])) {
-            $fromDateTime = Date::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
-            $toDateTime = Date::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
-            if ($this->fromDate === $this->toDate && $this->toTime <= $this->fromTime) {
-                return;
-            }
-        }
-    }
 }

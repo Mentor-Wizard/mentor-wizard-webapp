@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
@@ -40,6 +42,10 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'web_link'          => 'https://example.com/meet',
             'description'       => 'CalendarEvent description',
         ]);
+
+
+        $this->event->calendarEventUsers()->attach($this->mentor->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role'=>CalendarEventRoleEnum::HOST->value]);
+        $this->event->calendarEventUsers()->attach($this->viewer->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role'=>CalendarEventRoleEnum::MENTI->value]);
     });
 
     it('renders ShowEditEvent component with mentor permissions and correct event payload', function (): void {

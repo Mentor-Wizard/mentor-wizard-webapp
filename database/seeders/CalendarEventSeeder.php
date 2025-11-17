@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
@@ -26,10 +27,12 @@ class CalendarEventSeeder extends Seeder
             ->each(function ($event) use ($mentors, $menti): void {
                 $mentors->random(1)->first()->calendarEvents()->attach($event, [
                     'role' => CalendarEventRoleEnum::HOST,
+                    'colour' => CalendarEventColoursEnum::RED,
                 ]);
                 $menti->random(1, 3)->each(function ($user) use ($event): void {
                     $user->calendarEvents()->attach($event, [
                         'role' => CalendarEventRoleEnum::MENTI,
+                        'colour' => CalendarEventColoursEnum::BLUE,
                     ]);
                 });
             });

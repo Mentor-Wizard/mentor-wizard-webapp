@@ -44,15 +44,15 @@ describe('CalendarsListPage', function (): void {
 
         $reqMonth = Request::create('/calendar', 'GET', ['mode' => 'Month view', 'date' => $date, 'timezone' => config('app.timezone')]);
         $resMonth = inertiaProps($action->handle($reqMonth));
-        expect($resMonth['permissions'])->toBe('edit');
+        expect($resMonth['permissions'])->toBe('create');
 
         $reqWeek = Request::create('/calendar', 'GET', ['mode' => 'Week view', 'date' => $date, 'timezone' => config('app.timezone')]);
         $resWeek = inertiaProps($action->handle($reqWeek));
-        expect($resWeek['permissions'])->toBe('edit');
+        expect($resWeek['permissions'])->toBe('create');
 
         $reqDay = Request::create('/calendar', 'GET', ['mode' => 'Day view', 'date' => $date, 'timezone' => config('app.timezone')]);
         $resDay = inertiaProps($action->handle($reqDay));
-        expect($resDay['permissions'])->toBe('edit');
+        expect($resDay['permissions'])->toBe('create');
     });
 
     it('returns view permissions for non-mentor user', function (): void {
@@ -144,7 +144,7 @@ describe('CalendarsListPage', function (): void {
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
-        expect($props['permissions'])->toBe('edit');
+        expect($props['permissions'])->toBe('create');
     });
 
     it('requires both timezone AND user to fetch events', function (): void {

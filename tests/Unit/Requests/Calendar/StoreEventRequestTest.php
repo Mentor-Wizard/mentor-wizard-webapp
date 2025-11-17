@@ -119,9 +119,135 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
             ->and($data['end_date_time']->format('Y-m-d H:i'))->toBe($tomorrow->format('Y-m-d').' 00:15')
             ->and($data['duration'])->toBe(45 * 60);
     });
+
+    it('maps unknown type to CalendarEventTypeEnum::INDIVIDUAL value (default case)', function (): void {
+        $request = new class extends StoreCalendarEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Unknown Type',
+                    'fromDate'    => Date::today()->format('Y-m-d'),
+                    'fromTime'    => '09:00',
+                    'toDate'      => Date::today()->format('Y-m-d'),
+                    'toTime'      => '10:00',
+                    'type'        => 'unknown-type', // not 'individual' or 'group'
+                    'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        expect($data['type'])->toBe(CalendarEventTypeEnum::INDIVIDUAL->value);
+    });
+
+    it('verifies colour value is passed through to event data', function (): void {
+        $request = new class extends StoreCalendarEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Colour Test',
+                    'fromDate'    => Date::today()->format('Y-m-d'),
+                    'fromTime'    => '09:00',
+                    'toDate'      => Date::today()->format('Y-m-d'),
+                    'toTime'      => '10:00',
+                    'type'        => 'individual',
+                    'description' => 'Test colour',
+                    'colour'      => CalendarEventColoursEnum::RED->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        expect($data['colour'])->toBe(CalendarEventColoursEnum::RED->value);
+    });
+
+    it('verifies title value is passed through to event data', function (): void {
+        $request = new class extends StoreCalendarEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Specific Title',
+                    'fromDate'    => Date::today()->format('Y-m-d'),
+                    'fromTime'    => '09:00',
+                    'toDate'      => Date::today()->format('Y-m-d'),
+                    'toTime'      => '10:00',
+                    'type'        => 'individual',
+                    'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        expect($data['title'])->toBe('Specific Title');
+    });
+
+    it('verifies status is always set to CONFIRMED', function (): void {
+        $request = new class extends StoreCalendarEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Status Test',
+                    'fromDate'    => Date::today()->format('Y-m-d'),
+                    'fromTime'    => '09:00',
+                    'toDate'      => Date::today()->format('Y-m-d'),
+                    'toTime'      => '10:00',
+                    'type'        => 'individual',
+                    'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        expect($data['status'])->toBe(CalendarEventStatusEnum::CONFIRMED);
+    });
+
+    it('verifies date field is formatted correctly from start datetime', function (): void {
+        $request = new class extends StoreCalendarEventRequest
+        {
+            public function validated($key = null, $default = null): array
+            {
+                return [
+                    'title'       => 'Date Format Test',
+                    'fromDate'    => '2025-12-25',
+                    'fromTime'    => '14:30',
+                    'toDate'      => '2025-12-25',
+                    'toTime'      => '16:00',
+                    'type'        => 'individual',
+                    'description' => 'Desc',
+                    'colour'      => CalendarEventColoursEnum::BLUE->value,
+                    'timezone'    => 'UTC',
+                ];
+            }
+        };
+
+        $data = $request->getEventData();
+
+        expect($data['date'])->toBe('2025-12-25');
+    });
 });
 
 describe('StoreCalendarEventRequest rules and messages', function (): void {
+    it('authorizes all requests', function (): void {
+        $request = new StoreCalendarEventRequest;
+
+        expect($request->authorize())->toBeTrue();
+    });
+
     it('provides all expected validation rules', function (): void {
         $request = new StoreCalendarEventRequest;
         $rules = $request->rules();

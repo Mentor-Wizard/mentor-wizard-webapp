@@ -6,17 +6,15 @@ import {
   ChevronRightIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/vue/20/solid';
-import { router, usePage } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 interface Props {
-  calendarEvents: CalendarEvent[];
-  timezone: string;
+  calendarEvents: [];
   currentView: 'day' | 'week' | 'month';
   selectedDate: string;
   permissions: string;
   locale: string;
-  availableSlots?: Array<{ start: string; end: string }>;
 }
 
 const props = defineProps<Props>();
@@ -28,7 +26,7 @@ import CreateEvent from '@/Pages/Calendar/CreateEvent.vue';
 import { useCalendar } from '@/Stores/calendar.js';
 import { adjustDate } from '@/Stores/Calendar/helpers.js';
 
-const locale = usePage().props.locale;
+const locale = props.locale;
 
 const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone);
 const todayDate = ref(
@@ -40,8 +38,8 @@ const todayDate = ref(
   }),
 );
 const showCreatePage = ref(false);
-const permissions = ref(usePage().props.permissions);
-const daysData = ref(usePage().props.calendarEvents);
+const permissions = ref(props.permissions);
+const daysData = ref(props.calendarEvents);
 const calendar = useCalendar();
 const { hours, weekDays } = storeToRefs(calendar);
 
@@ -59,9 +57,6 @@ const changeTab = (tab: string) => {
   refreshData();
 };
 const scrollDate = (direction: string, date = null) => {
-  console.log('scroll date');
-  console.log(date);
-  // currentDate, currentTab, direction, exactDate = null
   let adjustInfo = adjustDate(
     currentDate.value,
     currentTab.value,
@@ -101,10 +96,6 @@ const openCreateEventPage = () => {
   showCreatePage.value = true;
 };
 const openShowEditEventPage = (eventId) => {
-  console.log(eventId);
-  console.log('open show edit event page');
-
-  console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
   router.visit(
     route('pages.calendar.show', {
       calendarEvent: eventId,
@@ -308,7 +299,7 @@ onMounted(() => {
           </Menu>
           <div class="ml-6 h-6 w-px bg-gray-300" />
           <button
-            v-if="permissions === 'edit'"
+            v-if="permissions === 'create'"
             type="button"
             class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
             @click="openCreateEventPage()"
@@ -420,7 +411,7 @@ onMounted(() => {
     />
     <WeeklyView
       v-if="currentTab === 'Week view'"
-      :calendarEvents="daysData"
+      :calendar-events="daysData"
       :scroll-date="scrollDate"
       :hours="hours"
       :week-days="weekDays"

@@ -23,6 +23,7 @@ use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
+use App\Models\CalendarEvent;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
@@ -69,7 +70,7 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
         ->name('pages.calendar.show');
     Route::middleware(['role:mentor'])->group(function (): void {
         Route::post('calendar-event/store', StoreCalendarEvent::class)
-            ->can('create', 'calendarEvent')
+            ->can('create', CalendarEvent::class)
             ->name('pages.calendar.store');
         Route::patch('calendar-event/edit/{calendarEvent:id}', EditCalendarEvent::class)
             ->can('update', 'calendarEvent')
