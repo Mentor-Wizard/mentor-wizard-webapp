@@ -23,6 +23,9 @@ use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
+use App\Actions\UserSchedule\DeleteUserSchedulePage;
+use App\Actions\UserSchedule\GetUserSchedulePage;
+use App\Actions\UserSchedule\StoreUserSchedulePage;
 use App\Models\CalendarEvent;
 use Illuminate\Support\Facades\Route;
 
@@ -86,5 +89,11 @@ Route::middleware('auth')
     ->group(function (): void {
         Route::get('list', GetChatPage::class)->name('page.chat.list');
     });
+
+Route::middleware(['auth', 'verified'])->prefix('user-schedule')->group(function (): void {
+    Route::get('/', GetUserSchedulePage::class)->name('user-schedule.index');
+    Route::post('/', StoreUserSchedulePage::class)->name('user-schedule.store');
+    Route::delete('/{userSchedule}', DeleteUserSchedulePage::class)->name('user-schedule.destroy');
+});
 
 require __DIR__.'/auth.php';

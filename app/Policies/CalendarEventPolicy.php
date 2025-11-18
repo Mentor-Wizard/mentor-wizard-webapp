@@ -10,7 +10,6 @@ use App\Models\User;
 
 final class CalendarEventPolicy
 {
-
     public function create(User $user): bool
     {
         return $user->hasRole('mentor');
