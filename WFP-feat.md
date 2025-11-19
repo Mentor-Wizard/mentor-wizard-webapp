@@ -1,34 +1,34 @@
-# План робіт: Інтеграція платіжної системи WayForPay
+# План робіт: Архітектура платіжної системи (Factory + Strategy)
 
 ## Огляд проєкту
 
-Інтеграція платіжної системи WayForPay для підтримки всіх типів платежів у
-додатку MentorWizard з використанням пакету
-[wayforpay/php-sdk](https://github.com/wayforpay/php-sdk).
+Реалізація гнучкої архітектури для підтримки множинних платіжних систем
+(WayForPay, LiqPay, Stripe) у додатку MentorWizard з використанням патернів
+**Factory** та **Strategy**.
 
-**ВАЖЛИВО - Оновлення в версії 1.5:**
+### Архітектурні патерни
 
-- ✅ Видалено методи для регулярних платежів з інтерфейсу (SDK не підтримує
-  повністю)
-- ✅ Додано кастомну реалізацію Account2Card (поповнення картки)
-- ✅ Додано кастомну реалізацію Account2Account (переказ на рахунок)
-- ✅ Видалено Changelog для спрощення документу
-- ✅ Оновлено контракт PaymentGatewayInterface
+**Factory Pattern** - централізоване створення інстансів платіжних шлюзів з
+конфігурації  
+**Strategy Pattern** - уніфікований інтерфейс для різних платіжних систем
+
+```
+Client → Factory → Strategy (WayForPay/LiqPay/Stripe) → External API
+```
 
 ### Технічний стек
 
-- Laravel 12.x
-- Inertia.js v2
-- Vue 3
+- Laravel 12.x (Eloquent, Service Container, Service Providers)
+- Inertia.js v2 + Vue 3
 - PostgreSQL
-- WayForPay PHP SDK
+- Payment SDKs: WayForPay, LiqPay, Stripe
 
-### Підтримувані операції
+### Підтримувані операції (WayForPay - перша реалізація)
 
-1. **Purchase (Invoice)** - створення invoice для прийняття платежів
+1. **Purchase** - створення invoice для прийняття платежів
 2. **Refund** - повернення/відміна платежів
 3. **Check** - перевірка статусу транзакції
-4. **ServiceUrl/ReturnUrl** - обробка callback від WayForPay
+4. **ServiceUrl/ReturnUrl** - обробка callback
 5. **Account2Card** - поповнення карт (кастомна реалізація)
 6. **Account2Account** - переказ на рахунок (кастомна реалізація)
 
@@ -36,71 +36,98 @@
 
 ## Критерії виконання
 
-✅ WayForPay підключений до основної системи  
-✅ Платіжна система має загальний інтерфейс та його реалізацію  
-✅ Платіжна система підключається через інтерфейс, використовуючи
-ServiceProvider  
-✅ Всі транзакції зберігаються в таблиці `payments`  
-✅ SDK використовується правильно відповідно до офіційної документації
+✅ Реалізовано Factory Pattern для створення платіжних шлюзів  
+✅ Реалізовано Strategy Pattern через PaymentGatewayInterface  
+✅ Підтримка декількох платіжних систем (конфігурація + enum)  
+✅ WayForPay gateway як перша повна реалізація  
+✅ Service Provider реєструє Factory + Default Gateway через DI  
+✅ Actions використовують комбінований підхід (DI + Factory)  
+✅ Всі транзакції зберігаються в таблиці `payments` з полем `payment_system`  
+✅ Можливість вибору платіжної системи runtime (frontend + backend)
 
 ---
 
 ## Етапи реалізації
 
-### Етап 1: Підготовка інфраструктури
+### Етап 1: Архітектурна основа
 
-#### 1.1. Встановлення пакету WayForPay SDK
+#### 1.1. Встановлення залежностей
 
 ```bash
 composer require wayforpay/php-sdk
 ```
 
-#### 1.2. Оновлення міграції таблиці `payments`
-
-**Поточна структура таблиці:**
-
-```
-payments:
-  - id (bigint)
-  - mentor_session_id (bigint, FK)
-  - order_reference (varchar)
-  - amount (int)
-  - currency (varchar)
-  - transaction_status (varchar)
-  - reason (varchar)
-  - reason_code (varchar)
-  - payment_system (varchar)
-  - card_type (varchar)
-  - issue_bank_name (varchar)
-  - created_at (timestamp)
-  - updated_at (timestamp)
-```
-
-**Необхідні зміни:**
-
-- Додати `transaction_id` (varchar, унікальний) - ID транзакції від WFP
-- Додати `payment_type` (varchar) - тип операції: purchase, refund,
-  account2card, account2account, regular
-- Додати `refund_amount` (int, nullable) - сума повернення
-- Додати `refunded_at` (timestamp, nullable) - дата повернення
-- Додати `card_pan` (varchar, nullable) - маскована картка
-- Додати `phone` (varchar, nullable) - телефон для деяких операцій
-- Додати `account_number` (varchar, nullable) - номер рахунку для
-  account2account
-- Додати `rectoken` (varchar, nullable) - токен для регулярних платежів
-- Додати `is_regular` (boolean, default false) - чи є регулярним
-- Додати `parent_payment_id` (bigint, nullable, FK) - зв'язок з батьківськимЮ
-  платежем (для refund)
-- Додати `metadata` (json, nullable) - додаткові дані
-- Змінити `mentor_session_id` на nullable - для платежів без сесій
-
-**Команда створення міграції:**
+**Майбутні платіжні системи:**
 
 ```bash
-php artisan make:migration update_payments_table_for_wayforpay --no-interaction
+# composer require liqpay/liqpay (коли буде потрібно)
+# composer require stripe/stripe-php (коли буде потрібно)
 ```
 
-#### 1.3. Створення конфігураційного файлу
+#### 1.2. Налаштування змінних середовища (.env)
+
+**Принцип:** Тільки sensitive дані (credentials) та environment-specific змінні
+в .env. Статичні дані (URLs, feature flags) → у config файлах.
+
+**Додати до `.env` файлу:**
+
+```env
+# ============================================
+# Payment Gateway Configuration
+# ============================================
+
+# Default payment gateway (wayforpay, liqpay, stripe)
+PAYMENT_GATEWAY=wayforpay
+
+# --------------------------------------------
+# WayForPay Credentials (SENSITIVE)
+# --------------------------------------------
+WAYFORPAY_MERCHANT_ACCOUNT=test_merchant_account
+WAYFORPAY_MERCHANT_SECRET_KEY=test_secret_key_here
+
+# --------------------------------------------
+# LiqPay Credentials (SENSITIVE - Optional)
+# --------------------------------------------
+LIQPAY_PUBLIC_KEY=
+LIQPAY_PRIVATE_KEY=
+
+# --------------------------------------------
+# Stripe Credentials (SENSITIVE - Optional)
+# --------------------------------------------
+STRIPE_API_KEY=
+STRIPE_WEBHOOK_SECRET=
+```
+
+**Оновити `.env.example`:**
+
+```env
+# Payment Gateway Configuration
+PAYMENT_GATEWAY=wayforpay
+
+# WayForPay Credentials
+WAYFORPAY_MERCHANT_ACCOUNT=
+WAYFORPAY_MERCHANT_SECRET_KEY=
+
+# LiqPay Credentials (optional)
+LIQPAY_PUBLIC_KEY=
+LIQPAY_PRIVATE_KEY=
+
+# Stripe Credentials (optional)
+STRIPE_API_KEY=
+STRIPE_WEBHOOK_SECRET=
+```
+
+**Переваги мінімального .env:**
+
+- ✅ Тільки 7 змінних замість 30+
+- ✅ Тільки sensitive дані
+- ✅ Простіше для нових розробників
+- ✅ Менше ризику помилок
+
+#### 1.3. Створення уніфікованої конфігурації для всіх платіжних систем
+
+**Принцип:** Всі статичні дані, URLs, feature flags → у config файлі.
+Авто-визначення enabled через наявність credentials.
 
 **Файл:** `config/payment.php`
 
@@ -108,36 +135,212 @@ php artisan make:migration update_payments_table_for_wayforpay --no-interaction
 <?php
 
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Default Payment Gateway
+    |--------------------------------------------------------------------------
+    */
     'default' => env('PAYMENT_GATEWAY', 'wayforpay'),
 
-    'wayforpay' => [
-        'merchant_account' => env('WAYFORPAY_MERCHANT_ACCOUNT'),
-        'merchant_secret_key' => env('WAYFORPAY_MERCHANT_SECRET_KEY'),
-        'merchant_domain' => env('WAYFORPAY_MERCHANT_DOMAIN', env('APP_URL')),
-        'service_url' => env('WAYFORPAY_SERVICE_URL'),
-        'return_url' => env('WAYFORPAY_RETURN_URL', '/payments/success'),
-        'decline_url' => env('WAYFORPAY_DECLINE_URL', '/payments/declined'),
+    /*
+    |--------------------------------------------------------------------------
+    | Available Payment Gateways
+    |--------------------------------------------------------------------------
+    */
+    'gateways' => [
+        'wayforpay' => [
+            // Авто-визначення: enabled якщо є credentials
+            'enabled' => !empty(env('WAYFORPAY_MERCHANT_ACCOUNT')),
+            'name' => 'WayForPay',
+            'driver' => 'wayforpay',
+
+            // Credentials з .env (SENSITIVE)
+            'merchant_account' => env('WAYFORPAY_MERCHANT_ACCOUNT'),
+            'merchant_secret_key' => env('WAYFORPAY_MERCHANT_SECRET_KEY'),
+
+            // Статичні дані (не змінюються між середовищами)
+            'merchant_domain' => env('APP_URL'),
+            'api_url' => 'https://api.wayforpay.com/api',
+
+            // URL endpoints (relative paths - СТАТИЧНІ)
+            'service_url' => '/api/payments/wayforpay/callback',
+            'return_url' => '/payments/success',
+            'decline_url' => '/payments/declined',
+        ],
+
+        'liqpay' => [
+            'enabled' => !empty(env('LIQPAY_PUBLIC_KEY')),
+            'name' => 'LiqPay',
+            'driver' => 'liqpay',
+
+            // Credentials з .env
+            'public_key' => env('LIQPAY_PUBLIC_KEY'),
+            'private_key' => env('LIQPAY_PRIVATE_KEY'),
+
+            // Статичні дані
+            'api_url' => 'https://www.liqpay.ua/api/request',
+            'service_url' => '/api/payments/liqpay/callback',
+            'return_url' => '/payments/success',
+            'decline_url' => '/payments/declined',
+        ],
+
+        'stripe' => [
+            'enabled' => !empty(env('STRIPE_API_KEY')),
+            'name' => 'Stripe',
+            'driver' => 'stripe',
+
+            // Credentials з .env
+            'api_key' => env('STRIPE_API_KEY'),
+            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+
+            // Статичні дані
+            'api_url' => 'https://api.stripe.com',
+            'service_url' => '/api/payments/stripe/webhook',
+            'return_url' => '/payments/success',
+            'decline_url' => '/payments/declined',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Gateway Features Matrix (СТАТИЧНІ)
+    |--------------------------------------------------------------------------
+    */
+    'features' => [
+        'wayforpay' => [
+            'purchase' => true,
+            'refund' => true,
+            'account2card' => true,
+            'account2account' => true,
+            'regular_payments' => true,
+        ],
+        'liqpay' => [
+            'purchase' => true,
+            'refund' => true,
+            'account2card' => false,
+            'account2account' => false,
+            'regular_payments' => true,
+        ],
+        'stripe' => [
+            'purchase' => true,
+            'refund' => true,
+            'account2card' => false,
+            'account2account' => false,
+            'regular_payments' => true,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Settings (СТАТИЧНІ налаштування)
+    |--------------------------------------------------------------------------
+    */
+    'settings' => [
+        'default_currency' => 'UAH',
+        'timeout' => 30, // секунди для API запитів
+        'retry_attempts' => 3,
+        'callback_timeout' => 300, // 5 хвилин
     ],
 ];
 ```
 
-**Змінні середовища (.env):**
+**Ключові переваги:**
 
-```env
-PAYMENT_GATEWAY=wayforpay
-WAYFORPAY_MERCHANT_ACCOUNT=test_merchant
-WAYFORPAY_MERCHANT_SECRET_KEY=test_secret_key
-WAYFORPAY_MERCHANT_DOMAIN="${APP_URL}"
-WAYFORPAY_SERVICE_URL="${APP_URL}/api/payments/callback"
-WAYFORPAY_RETURN_URL=/payments/success
-WAYFORPAY_DECLINE_URL=/payments/declined
+- ✅ Авто-визначення `enabled` (якщо є credentials → увімкнено)
+- ✅ Всі URL endpoints в одному місці
+- ✅ Feature matrix централізований
+- ✅ Статичні налаштування в config, не в .env
+- ✅ Легко додати новий gateway
+
+**Laravel Best Practice:**
+
+> Ніколи не використовуй `env()` поза config файлами!  
+> Завжди доступайся через
+> `config('payment.gateways.wayforpay.merchant_account')`
+
+#### 1.4. Створення Enum для платіжних систем
+
+**Файл:** `app/Enums/PaymentGateway.php`
+
+```php
+<?php
+
+namespace App\Enums;
+
+enum PaymentGateway: string
+{
+    case WayForPay = 'wayforpay';
+    case LiqPay = 'liqpay';
+    case Stripe = 'stripe';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::WayForPay => 'WayForPay',
+            self::LiqPay => 'LiqPay',
+            self::Stripe => 'Stripe',
+        };
+    }
+
+    public function isEnabled(): bool
+    {
+        return config("payment.gateways.{$this->value}.enabled", false);
+    }
+
+    public function supports(string $feature): bool
+    {
+        return config("payment.features.{$this->value}.{$feature}", false);
+    }
+
+    public static function available(): array
+    {
+        return array_filter(
+            self::cases(),
+            fn (self $gateway) => $gateway->isEnabled()
+        );
+    }
+
+    public static function default(): self
+    {
+        return self::from(config('payment.default'));
+    }
+}
+```
+
+**Команда:**
+
+```bash
+php artisan make:enum PaymentGateway --no-interaction
+```
+
+#### 1.5. Оновлення міграції таблиці `payments`
+
+**Ключові поля:**
+
+```php
+$table->string('payment_system')->default('wayforpay'); // wayforpay, liqpay, stripe
+$table->string('payment_type'); // purchase, refund, account2card, account2account
+$table->string('transaction_id')->unique()->nullable();
+$table->string('transaction_status'); // використовує PaymentStatus enum
+$table->json('metadata')->nullable(); // додаткові дані (payment_url, gateway_response)
+$table->foreignId('parent_payment_id')->nullable()->constrained('payments'); // для refund
+```
+
+**Команда:**
+
+```bash
+php artisan make:migration update_payments_table_for_multi_gateway --no-interaction
 ```
 
 ---
 
-### Етап 2: Створення архітектури платіжної системи
+### Етап 2: Strategy Pattern - Спільний контракт
 
-#### 2.1. Створення інтерфейсу платіжного шлюзу
+#### 2.1. Інтерфейс PaymentGatewayInterface (Strategy)
+
+#### 2.1. Інтерфейс PaymentGatewayInterface (Strategy)
+
+**Призначення:** Визначити спільний контракт для всіх платіжних систем
 
 **Файл:** `app/Contracts/PaymentGatewayInterface.php`
 
@@ -151,35 +354,23 @@ use App\DataTransferObjects\PaymentResult;
 
 interface PaymentGatewayInterface
 {
-    /**
-     * Ініціювати платіж (Purchase)
-     */
     public function initiatePurchase(PaymentData $data): PaymentResult;
-
-    /**
-     * Повернути платіж (Refund)
-     */
     public function refund(string $transactionId, float $amount, string $comment = ''): PaymentResult;
-
-    /**
-     * Отримати статус транзакції
-     */
     public function getTransactionStatus(string $orderReference): PaymentResult;
-
-    /**
-     * Перевірити підпис callback
-     */
     public function verifyCallback(array $data): bool;
 }
 ```
 
-**Команда створення:**
+**Ключова ідея:** Кожна платіжна система (WayForPay, LiqPay, Stripe) реалізує
+цей інтерфейс по-своєму, але надає однаковий API для клієнтського коду.
+
+**Команда:**
 
 ```bash
 php artisan make:class Contracts/PaymentGatewayInterface --no-interaction
 ```
 
-#### 2.2. Створення Data Transfer Objects
+#### 2.2. Data Transfer Objects (уніфікація даних)
 
 **Файл:** `app/DataTransferObjects/PaymentData.php`
 
@@ -198,6 +389,141 @@ readonly class PaymentData
         public int $productCount,
         public float $productPrice,
         public ?int $mentorSessionId = null,
+        public ?string $clientFirstName = null,
+        public ?string $clientLastName = null,
+        public ?string $clientEmail = null,
+        public ?string $clientPhone = null,
+        public array $metadata = [],
+    ) {}
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            orderReference: $data['order_reference'],
+            amount: $data['amount'],
+            currency: $data['currency'] ?? 'UAH',
+            productName: $data['product_name'],
+            productCount: $data['product_count'] ?? 1,
+            productPrice: $data['product_price'],
+            mentorSessionId: $data['mentor_session_id'] ?? null,
+            clientFirstName: $data['client_first_name'] ?? null,
+            clientLastName: $data['client_last_name'] ?? null,
+            clientEmail: $data['client_email'] ?? null,
+            clientPhone: $data['client_phone'] ?? null,
+            metadata: $data['metadata'] ?? [],
+        );
+    }
+}
+```
+
+**Файл:** `app/DataTransferObjects/PaymentResult.php`
+
+```php
+<?php
+
+namespace App\DataTransferObjects;
+
+readonly class PaymentResult
+{
+    public function __construct(
+        public bool $success,
+        public ?string $transactionId = null,
+        public ?string $orderReference = null,
+        public ?string $status = null,
+        public ?float $amount = null,
+        public ?string $currency = null,
+        public ?string $paymentUrl = null,
+        public ?array $rawData = null,
+        public ?string $errorMessage = null,
+    ) {}
+
+    public static function success(array $data): self
+    {
+        return new self(
+            success: true,
+            transactionId: $data['transaction_id'] ?? null,
+            orderReference: $data['order_reference'] ?? null,
+            status: $data['status'] ?? null,
+            amount: $data['amount'] ?? null,
+            currency: $data['currency'] ?? null,
+            paymentUrl: $data['payment_url'] ?? null,
+            rawData: $data,
+        );
+    }
+
+    public static function failure(string $errorMessage, ?array $rawData = null): self
+    {
+        return new self(
+            success: false,
+            errorMessage: $errorMessage,
+            rawData: $rawData,
+        );
+    }
+}
+```
+
+**Команди:**
+
+```bash
+php artisan make:class DataTransferObjects/PaymentData --no-interaction
+php artisan make:class DataTransferObjects/PaymentResult --no-interaction
+```
+
+#### 2.3. Enum для статусів та типів платежів
+
+**Файл:** `app/Enums/PaymentStatus.php`
+
+```php
+<?php
+
+namespace App\Enums;
+
+enum PaymentStatus: string
+{
+    case Pending = 'pending';
+    case Approved = 'approved';
+    case Declined = 'declined';
+    case Refunded = 'refunded';
+    case PartiallyRefunded = 'partially_refunded';
+    case Processing = 'processing';
+    case Failed = 'failed';
+
+    public function label(): string { /* ... */ }
+    public function color(): string { /* ... */ }
+}
+```
+
+**Файл:** `app/Enums/PaymentType.php`
+
+```php
+<?php
+
+namespace App\Enums;
+
+enum PaymentType: string
+{
+    case Purchase = 'purchase';
+    case Refund = 'refund';
+    case Account2card = 'account2card';
+    case Account2account = 'account2account';
+
+    public function label(): string { /* ... */ }
+}
+```
+
+**Команди:**
+
+```bash
+php artisan make:enum PaymentStatus --no-interaction
+php artisan make:enum PaymentType --no-interaction
+```
+
+---
+
+### Етап 3: Конкретні стратегії (Gateway реалізації)
+
+#### 3.1. WayForPayGateway (перша повна реалізація)
+
         public ?string $clientFirstName = null,
         public ?string $clientLastName = null,
         public ?string $clientEmail = null,
@@ -228,8 +554,10 @@ readonly class PaymentData
             metadata: $data['metadata'] ?? [],
         );
     }
+
 }
-```
+
+````
 
 **Файл:** `app/DataTransferObjects/PaymentResult.php`
 
@@ -287,7 +615,7 @@ readonly class PaymentResult
         );
     }
 }
-```
+````
 
 **Команди створення:**
 
@@ -379,36 +707,9 @@ php artisan make:enum PaymentStatus --no-interaction
 php artisan make:enum PaymentType --no-interaction
 ```
 
----
-
-### Етап 3: Реалізація WayForPay Gateway
-
-#### 3.1. Створення WayForPayGateway класу
+#### 3.1. WayForPayGateway (перша повна реалізація)
 
 **Файл:** `app/Services/Payment/WayForPayGateway.php`
-
-Цей клас буде реалізовувати `PaymentGatewayInterface` та використовувати
-WayForPay SDK.
-
-**Основні методи:**
-
-- `__construct()` - ініціалізація з конфігурацією
-- `initiatePurchase()` - створення форми оплати
-- `refund()` - повернення коштів
-- `transferToCard()` - переказ на картку
-- `transferToAccount()` - переказ на рахунок
-- `initiateRegularPayment()` - ініціація регулярного платежу
-- `chargeRegularPayment()` - списання за токеном
-- `getTransactionStatus()` - перевірка статусу
-- `verifyCallback()` - валідація підпису callback
-
-**Команда створення:**
-
-```bash
-php artisan make:class Services/Payment/WayForPayGateway --no-interaction
-```
-
-#### 3.2. Структура класу WayForPayGateway
 
 ```php
 <?php
@@ -419,23 +720,13 @@ use App\Contracts\PaymentGatewayInterface;
 use App\DataTransferObjects\PaymentData;
 use App\DataTransferObjects\PaymentResult;
 use Illuminate\Support\Facades\Log;
-use WayForPay\SDK\Credential\AccountSecretCredential;
-use WayForPay\SDK\Domain\Client;
-use WayForPay\SDK\Domain\Product;
-use WayForPay\SDK\Domain\CardToken;
-use WayForPay\SDK\Collection\ProductCollection;
-use WayForPay\SDK\Wizard\InvoiceWizard;
-use WayForPay\SDK\Wizard\RefundWizard;
-use WayForPay\SDK\Wizard\ChargeWizard;
-use WayForPay\SDK\Wizard\CheckWizard;
-use WayForPay\SDK\Handler\ServiceUrlHandler;
-use WayForPay\SDK\Exception\ApiException;
-use WayForPay\SDK\Exception\WayForPaySDKException;
-use DateTime;
+use WayForPay\SDK\Credential\AccountSecretTestCredential;
+use WayForPay\SDK\Wizard\PurchaseWizard;
+// ...інші imports
 
 class WayForPayGateway implements PaymentGatewayInterface
 {
-    private AccountSecretCredential $credential;
+    private AccountSecretTestCredential $credential;
 
     public function __construct(
         private readonly string $merchantAccount,
@@ -445,25 +736,642 @@ class WayForPayGateway implements PaymentGatewayInterface
         private readonly string $returnUrl,
         private readonly string $declineUrl,
     ) {
-        $this->credential = new AccountSecretCredential(
+        $this->credential = new AccountSecretTestCredential(
             $this->merchantAccount,
-            $this->merchantSecretKey
+            $this->merchantSecretKey,
+            $this->merchantDomain
         );
     }
 
     public function initiatePurchase(PaymentData $data): PaymentResult
     {
         try {
-            // Створення клієнта
-            $client = new Client(
-                $data->clientFirstName ?? '',
-                $data->clientLastName ?? '',
-                $data->clientEmail ?? '',
-                $data->clientPhone ?? '',
-                $data->clientCountry ?? 'UA'
-            );
+            // WayForPay специфічна логіка через SDK
+            $response = PurchaseWizard::get($this->credential)
+                ->setOrderReference($data->orderReference)
+                ->setAmount($data->amount)
+                ->setCurrency($data->currency)
+                ->setProducts([$data->productName], [$data->productCount], [$data->productPrice])
+                ->setServiceUrl(url($this->serviceUrl))
+                ->setReturnUrl(url($this->returnUrl))
+                ->send();
 
-            // Створення товарів
+            return PaymentResult::success([
+                'payment_url' => $response['invoiceUrl'] ?? null,
+                'order_reference' => $data->orderReference,
+                // ...
+            ]);
+        } catch (\Exception $e) {
+            Log::error('WayForPay purchase failed', ['error' => $e->getMessage()]);
+            return PaymentResult::failure($e->getMessage());
+        }
+    }
+
+    public function refund(string $transactionId, float $amount, string $comment = ''): PaymentResult
+    {
+        // WayForPay специфічна логіка для refund
+    }
+
+    public function getTransactionStatus(string $orderReference): PaymentResult
+    {
+        // WayForPay специфічна логіка для check status
+    }
+
+    public function verifyCallback(array $data): bool
+    {
+        // WayForPay специфічна логіка перевірки підпису
+    }
+}
+```
+
+**Ключові моменти:**
+
+- Інкапсулює всю WayForPay специфічну логіку
+- Приймає конфігурацію через конструктор (DI-friendly)
+- Повертає уніфікований `PaymentResult`
+
+**Команда:**
+
+```bash
+php artisan make:class Services/Payment/WayForPayGateway --no-interaction
+```
+
+#### 3.2. LiqPayGateway (заглушка для майбутнього)
+
+**Файл:** `app/Services/Payment/LiqPayGateway.php`
+
+```php
+<?php
+
+namespace App\Services\Payment;
+
+use App\Contracts\PaymentGatewayInterface;
+
+class LiqPayGateway implements PaymentGatewayInterface
+{
+    public function __construct(
+        private readonly string $publicKey,
+        private readonly string $privateKey,
+        private readonly string $serviceUrl,
+        private readonly string $returnUrl,
+        private readonly string $declineUrl,
+    ) {}
+
+    public function initiatePurchase(PaymentData $data): PaymentResult
+    {
+        // LiqPay специфічна логіка (буде реалізовано пізніше)
+        throw new \Exception('LiqPay gateway not implemented yet');
+    }
+
+    // ...інші методи
+}
+```
+
+---
+
+### Етап 4: Factory Pattern - Створення gateway інстансів
+
+#### 4.1. PaymentGatewayFactory
+
+**Призначення:** Централізоване створення платіжних шлюзів з конфігурації
+
+**Файл:** `app/Services/Payment/PaymentGatewayFactory.php`
+
+```php
+<?php
+
+namespace App\Services\Payment;
+
+use App\Contracts\PaymentGatewayInterface;
+use App\Enums\PaymentGateway;
+use InvalidArgumentException;
+
+class PaymentGatewayFactory
+{
+    /**
+     * Створити інстанс платіжного шлюзу
+     */
+    public function make(?string $gateway = null): PaymentGatewayInterface
+    {
+        $gateway = $gateway ?? config('payment.default');
+        $gatewayEnum = PaymentGateway::from($gateway);
+
+        if (! $gatewayEnum->isEnabled()) {
+            throw new InvalidArgumentException(
+                "Payment gateway [{$gateway}] is not enabled"
+            );
+        }
+
+        return match ($gatewayEnum) {
+            PaymentGateway::WayForPay => $this->createWayForPayGateway(),
+            PaymentGateway::LiqPay => $this->createLiqPayGateway(),
+            PaymentGateway::Stripe => $this->createStripeGateway(),
+        };
+    }
+
+    /**
+     * Отримати список доступних шлюзів
+     */
+    public function available(): array
+    {
+        return collect(PaymentGateway::available())
+            ->mapWithKeys(fn (PaymentGateway $gateway) => [
+                $gateway->value => [
+                    'name' => $gateway->label(),
+                    'value' => $gateway->value,
+                    'features' => config("payment.features.{$gateway->value}"),
+                ],
+            ])
+            ->all();
+    }
+
+    private function createWayForPayGateway(): WayForPayGateway
+    {
+        $config = config('payment.gateways.wayforpay');
+
+        return new WayForPayGateway(
+            merchantAccount: $config['merchant_account'],
+            merchantSecretKey: $config['merchant_secret_key'],
+            merchantDomain: $config['merchant_domain'],
+            serviceUrl: $config['service_url'],
+            returnUrl: $config['return_url'],
+            declineUrl: $config['decline_url'],
+        );
+    }
+
+    private function createLiqPayGateway(): LiqPayGateway
+    {
+        $config = config('payment.gateways.liqpay');
+
+        return new LiqPayGateway(
+            publicKey: $config['public_key'],
+            privateKey: $config['private_key'],
+            serviceUrl: $config['service_url'],
+            returnUrl: $config['return_url'],
+            declineUrl: $config['decline_url'],
+        );
+    }
+
+    private function createStripeGateway(): StripeGateway
+    {
+        // Аналогічно для Stripe
+    }
+}
+```
+
+**Ключові переваги:**
+
+- Інкапсуляція складної логіки створення
+- Всі параметри з конфігурації (єдине джерело правди)
+- Легко додати новий gateway
+
+**Команда:**
+
+```bash
+php artisan make:class Services/Payment/PaymentGatewayFactory --no-interaction
+```
+
+---
+
+### Етап 5: Service Provider - Реєстрація в DI Container
+
+#### 5.1. PaymentServiceProvider
+
+**Файл:** `app/Providers/PaymentServiceProvider.php`
+
+```php
+<?php
+
+namespace App\Providers;
+
+use App\Contracts\PaymentGatewayInterface;
+use App\Services\Payment\PaymentGatewayFactory;
+use Illuminate\Support\ServiceProvider;
+
+class PaymentServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // Реєструємо Factory як singleton
+        $this->app->singleton(PaymentGatewayFactory::class);
+
+        // Default gateway через інтерфейс (для простих випадків)
+        $this->app->bind(PaymentGatewayInterface::class, function ($app) {
+            return $app->make(PaymentGatewayFactory::class)->make();
+        });
+    }
+
+    public function boot(): void
+    {
+        //
+    }
+}
+```
+
+**Реєстрація в `bootstrap/providers.php`:**
+
+```php
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\PaymentServiceProvider::class, // ← додати
+];
+```
+
+**Як це працює:**
+
+1. `PaymentGatewayFactory` - singleton (один на весь додаток)
+2. `PaymentGatewayInterface` - резолвиться через Factory → default gateway
+3. Actions можуть інжектити або інтерфейс (default), або Factory (вибір runtime)
+
+---
+
+### Етап 6: Laravel Actions - Бізнес-логіка
+
+#### 6.1. CreatePurchaseAction (комбінований підхід)
+
+#### 6.1. CreatePurchaseAction (комбінований підхід)
+
+**Файл:** `app/Actions/Payment/CreatePurchaseAction.php`
+
+```php
+<?php
+
+namespace App\Actions\Payment;
+
+use App\Contracts\PaymentGatewayInterface;
+use App\DataTransferObjects\PaymentData;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentType;
+use App\Models\Payment;
+use App\Services\Payment\PaymentGatewayFactory;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class CreatePurchaseAction
+{
+    public function __construct(
+        private readonly PaymentGatewayInterface $defaultGateway, // ← DI default
+        private readonly PaymentGatewayFactory $factory, // ← DI factory для вибору
+    ) {}
+
+    /**
+     * Виконати платіж через вказаний або default gateway
+     */
+    public function execute(PaymentData $data, ?string $gateway = null): Payment
+    {
+        return DB::transaction(function () use ($data, $gateway) {
+            // Вибрати gateway: runtime або default
+            $gatewayInstance = $gateway
+                ? $this->factory->make($gateway)
+                : $this->defaultGateway;
+
+            // Створити запис у БД
+            $payment = Payment::create([
+                'mentor_session_id' => $data->mentorSessionId,
+                'order_reference' => $data->orderReference,
+                'amount' => (int) ($data->amount * 100),
+                'currency' => $data->currency,
+                'transaction_status' => PaymentStatus::Pending,
+                'payment_type' => PaymentType::Purchase,
+                'payment_system' => $gateway ?? config('payment.default'),
+                'metadata' => $data->metadata,
+            ]);
+
+            // Ініціювати платіж
+            $result = $gatewayInstance->initiatePurchase($data);
+
+            if (! $result->success) {
+                Log::error('Payment failed', [
+                    'gateway' => $gateway,
+                    'order_reference' => $data->orderReference,
+                    'error' => $result->errorMessage,
+                ]);
+
+                $payment->update([
+                    'transaction_status' => PaymentStatus::Failed,
+                    'reason' => $result->errorMessage,
+                ]);
+
+                throw new \Exception($result->errorMessage ?? 'Failed to initiate payment');
+            }
+
+            // Оновити payment даними від gateway
+            $payment->update([
+                'transaction_id' => $result->transactionId,
+                'metadata' => array_merge($payment->metadata, [
+                    'payment_url' => $result->paymentUrl,
+                    'gateway_response' => $result->rawData,
+                ]),
+            ]);
+
+            return $payment;
+        });
+    }
+}
+```
+
+**Ключові переваги:**
+
+- Можна використати default gateway (без параметра `$gateway`)
+- Можна обрати конкретний gateway runtime (передати `'liqpay'`)
+- Легко тестувати (мокуємо інтерфейс або factory)
+
+**Команди:**
+
+```bash
+php artisan make:action Payment/CreatePurchaseAction --no-interaction
+php artisan make:action Payment/ProcessRefundAction --no-interaction
+php artisan make:action Payment/HandleCallbackAction --no-interaction
+```
+
+---
+
+### Етап 7: API Routes & Controllers
+
+#### 7.1. API endpoints
+
+**Файл:** `routes/api.php`
+
+```php
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PaymentGatewayController;
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Список доступних платіжних систем
+    Route::get('/payments/gateways', [PaymentGatewayController::class, 'index']);
+
+    // Створення платежу
+    Route::post('/payments/purchase', [PaymentController::class, 'purchase']);
+});
+
+// Callbacks (без auth)
+Route::post('/payments/wayforpay/callback', [PaymentController::class, 'wayforpayCallback']);
+Route::post('/payments/liqpay/callback', [PaymentController::class, 'liqpayCallback']);
+```
+
+#### 7.2. PaymentGatewayController
+
+```php
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Services\Payment\PaymentGatewayFactory;
+use Illuminate\Http\JsonResponse;
+
+class PaymentGatewayController extends Controller
+{
+    public function __construct(
+        private readonly PaymentGatewayFactory $factory
+    ) {}
+
+    public function index(): JsonResponse
+    {
+        return response()->json([
+            'gateways' => $this->factory->available(),
+            'default' => config('payment.default'),
+        ]);
+    }
+}
+```
+
+#### 7.3. PaymentController (спрощено)
+
+```php
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Actions\Payment\CreatePurchaseAction;
+use App\DataTransferObjects\PaymentData;
+use App\Http\Requests\CreatePurchaseRequest;
+use Illuminate\Http\JsonResponse;
+
+class PaymentController extends Controller
+{
+    public function purchase(
+        CreatePurchaseRequest $request,
+        CreatePurchaseAction $action
+    ): JsonResponse {
+        $payment = $action->execute(
+            data: PaymentData::fromArray($request->validated()),
+            gateway: $request->input('gateway') // ← користувач обирає
+        );
+
+        return response()->json([
+            'success' => true,
+            'payment' => [
+                'id' => $payment->id,
+                'order_reference' => $payment->order_reference,
+                'status' => $payment->transaction_status->value,
+            ],
+            'redirect_url' => $payment->metadata['payment_url'] ?? null,
+        ]);
+    }
+}
+```
+
+---
+
+### Етап 8: Frontend (лаконічно)
+
+#### 8.1. Вибір платіжної системи
+
+**Vue компонент:** `resources/js/Pages/MentorSessions/Checkout.vue`
+
+```vue
+<script setup>
+const gateways = ref([]);
+const selectedGateway = ref('wayforpay');
+
+onMounted(async () => {
+    const { data } = await axios.get('/api/payments/gateways');
+    gateways.value = Object.values(data.gateways);
+    selectedGateway.value = data.default;
+});
+
+const handlePayment = async () => {
+    const { data } = await axios.post('/api/payments/purchase', {
+        order_reference: `SESSION_${session.id}_${Date.now()}`,
+        amount: session.cost,
+        product_name: `Mentor Session`,
+        mentor_session_id: session.id,
+        gateway: selectedGateway.value, // ← передаємо вибір
+    });
+
+    if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+    }
+};
+</script>
+
+<template>
+    <div>
+        <!-- Radio buttons для вибору gateway -->
+        <div v-for="gateway in gateways" :key="gateway.value">
+            <input
+                v-model="selectedGateway"
+                :value="gateway.value"
+                type="radio"
+            />
+            <label>{{ gateway.name }}</label>
+        </div>
+
+        <button @click="handlePayment">Оплатити {{ session.cost }} грн</button>
+    </div>
+</template>
+```
+
+---
+
+### Етап 9: Тестування
+
+#### 9.1. Unit тести для Factory
+
+```php
+it('creates wayforpay gateway when specified', function () {
+    $factory = app(PaymentGatewayFactory::class);
+    $gateway = $factory->make('wayforpay');
+
+    expect($gateway)->toBeInstanceOf(WayForPayGateway::class);
+});
+
+it('creates default gateway when not specified', function () {
+    config(['payment.default' => 'wayforpay']);
+    $factory = app(PaymentGatewayFactory::class);
+    $gateway = $factory->make();
+
+    expect($gateway)->toBeInstanceOf(WayForPayGateway::class);
+});
+
+it('throws exception when gateway is disabled', function () {
+    config(['payment.gateways.liqpay.enabled' => false]);
+    $factory = app(PaymentGatewayFactory::class);
+
+    $factory->make('liqpay');
+})->throws(InvalidArgumentException::class);
+```
+
+#### 9.2. Feature тест для CreatePurchaseAction
+
+```php
+it('creates purchase with specified gateway', function () {
+    $user = User::factory()->create();
+    $session = MentorSession::factory()->create(['cost' => 100]);
+
+    $action = app(CreatePurchaseAction::class);
+    $payment = $action->execute(
+        PaymentData::fromArray([
+            'order_reference' => 'TEST_123',
+            'amount' => 100,
+            'currency' => 'UAH',
+            'product_name' => 'Test',
+            'product_count' => 1,
+            'product_price' => 100,
+            'mentor_session_id' => $session->id,
+        ]),
+        gateway: 'wayforpay'
+    );
+
+    expect($payment->payment_system)->toBe('wayforpay')
+        ->and($payment->transaction_status)->toBe(PaymentStatus::Pending);
+});
+```
+
+---
+
+## Архітектурна діаграма (фінальна)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend (Vue)                           │
+│  - Вибір платіжної системи (radio buttons)                 │
+│  - Відправка запиту з полем "gateway"                      │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       ▼
+        ┌──────────────────────────────┐
+        │  PaymentController           │
+        │  - purchase()                │
+        └──────────────┬───────────────┘
+                       │
+                       ▼
+        ┌──────────────────────────────┐
+        │  CreatePurchaseAction        │
+        │  - DI: defaultGateway        │
+        │  - DI: factory               │
+        └──────────────┬───────────────┘
+                       │
+          ┌────────────┴────────────┐
+          │  Вибір стратегії:       │
+          │  gateway == null        │
+          │    → defaultGateway     │
+          │  gateway != null        │
+          │    → factory.make()     │
+          └────────────┬────────────┘
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+    ┌─────────┐  ┌─────────┐  ┌─────────┐
+    │WayForPay│  │ LiqPay  │  │ Stripe  │
+    │ Gateway │  │ Gateway │  │ Gateway │
+    └─────────┘  └─────────┘  └─────────┘
+          │            │            │
+          └────────────┴────────────┘
+                       │
+                       ▼
+        ┌──────────────────────────────┐
+        │ PaymentGatewayInterface      │
+        │ (спільний контракт)          │
+        └──────────────────────────────┘
+```
+
+---
+
+## Переваги реалізованої архітектури
+
+1. **Розширюваність** - додати нову платіжну систему:
+    - Створити клас що реалізує `PaymentGatewayInterface`
+    - Додати в `PaymentGatewayFactory`
+    - Додати конфігурацію в `config/payment.php`
+
+2. **Підтримуваність** - зміни в одній системі не впливають на інші
+
+3. **Тестованість** - кожен компонент тестується окремо
+
+4. **Гнучкість** - вибір платіжної системи:
+    - Default через DI
+    - Runtime через параметр
+    - Налаштування через конфіг
+
+5. **SOLID принципи**:
+    - **S** - кожен gateway відповідає тільки за свою систему
+    - **O** - легко розширити без зміни існуючого коду
+    - **L** - всі стратегії взаємозамінні
+    - **I** - мінімальний інтерфейс
+    - **D** - залежність від абстракції (інтерфейс)
+
+---
+
+## Контрольний чеклист
+
+- [ ] Config `payment.php` з множинними gateways
+- [ ] Enum `PaymentGateway` з методами enabled/available
+- [ ] Interface `PaymentGatewayInterface`
+- [ ] DTO: `PaymentData`, `PaymentResult`
+- [ ] Gateway: `WayForPayGateway` (повна реалізація)
+- [ ] Gateway: `LiqPayGateway` (заглушка)
+- [ ] Factory: `PaymentGatewayFactory`
+- [ ] Provider: `PaymentServiceProvider`
+- [ ] Action: `CreatePurchaseAction` (комбінований підхід)
+- [ ] Controller: `PaymentGatewayController` (список систем)
+- [ ] Controller: `PaymentController` (purchase з gateway param)
+- [ ] Frontend: вибір платіжної системи
+- [ ] Міграція: поле `payment_system`
+- [ ] Тести: Factory + Strategy + Actions
+
+---
+
             $products = new ProductCollection([
                 new Product(
                     $data->productName,
@@ -796,8 +1704,10 @@ class WayForPayGateway implements PaymentGatewayInterface
             return PaymentResult::failure($e->getMessage());
         }
     }
+
 }
-```
+
+````
 
 **Важливі примітки щодо кастомних методів:**
 
@@ -812,7 +1722,7 @@ class WayForPayGateway implements PaymentGatewayInterface
 
 ```php
 use Illuminate\Support\Facades\Http;
-```
+````
 
 ````
 
