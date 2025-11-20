@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\DTO\Payment;
 
-use App\Enums\Payments\PaymentStatusEnum;
-use App\Enums\Payments\PaymentTypeEnum;
+use App\Enums\Payment\PaymentStatusEnum;
+use App\Enums\Payment\PaymentTypeEnum;
 
 readonly class PaymentResponseDataDTO
 {
