@@ -13,5 +13,6 @@ return [
     App\Providers\Filament\AdminPanelProvider::class,
     Olssonm\VeryBasicAuth\VeryBasicAuthServiceProvider::class,
     Spatie\Permission\PermissionServiceProvider::class,
+    App\Providers\PaymentServiceProvider::class,
     ...$telescopeProviders,
 ];
