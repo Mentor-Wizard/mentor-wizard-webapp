@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\Payments\PaymentStatusEnum;
-use App\Enums\Payments\PaymentTypeEnum;
+use App\Enums\Payment\PaymentGatewayEnum;
+use App\Enums\Payment\PaymentStatusEnum;
+use App\Enums\Payment\PaymentTypeEnum;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -96,7 +97,7 @@ class Payment extends Model
             'refunded_at'        => 'datetime',
             'reason'             => 'string',
             'reason_code'        => 'string',
-            'payment_system'     => 'string',
+            'payment_system'     => PaymentGatewayEnum::class,
             'card_type'          => 'string',
             'card_pan'           => 'string',
             'issue_bank_name'    => 'string',

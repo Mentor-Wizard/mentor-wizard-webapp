@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\Payments\PaymentStatusEnum;
-use App\Enums\Payments\PaymentTypeEnum;
-use App\Models\Currency;
+use App\Enums\CurrencyEnum;
+use App\Enums\Payment\PaymentGatewayEnum;
+use App\Enums\Payment\PaymentStatusEnum;
+use App\Enums\Payment\PaymentTypeEnum;
 use App\Models\MentorSession;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,13 +28,13 @@ class PaymentFactory extends Factory
             'mentor_session_id'  => MentorSession::factory(),
             'transaction_id'     => fake()->unique()->uuid(),
             'order_reference'    => fake()->unique()->regexify('[A-Z0-9]{20}'),
-            'amount'             => fake()->numberBetween(10, 1000),
-            'currency'           => Currency::factory(),
+            'amount'             => fake()->numberBetween(1000, 100000),
+            'currency'           => fake()->randomElement(CurrencyEnum::names()),
             'transaction_status' => fake()->randomElement(PaymentStatusEnum::cases()),
             'payment_type'       => fake()->randomElement(PaymentTypeEnum::cases()),
             'reason'             => fake()->optional()->sentence(),
             'reason_code'        => fake()->optional()->numerify('####'),
-            'payment_system'     => fake()->randomElement(['WayForPay', 'MonoPay', 'LiqPay']),
+            'payment_system'     => fake()->randomElement(PaymentGatewayEnum::cases()),
             'card_type'          => fake()->randomElement(['Visa', 'Mastercard']),
             'card_pan'           => fake()->optional()->numerify('************####'),
             'issue_bank_name'    => fake()->optional()->company(),
@@ -72,15 +73,6 @@ class PaymentFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'transaction_status' => PaymentStatusEnum::Refunded,
             'refund_amount'      => $attributes['amount'],
-            'refunded_at'        => now(),
-        ]);
-    }
-
-    public function partiallyRefunded(): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'transaction_status' => PaymentStatusEnum::PartiallyRefunded,
-            'refund_amount'      => fake()->numberBetween(1, $attributes['amount'] - 1),
             'refunded_at'        => now(),
         ]);
     }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Interfaces;
 
-use App\DTO\PaymentRequestDataDTO;
-use App\DTO\PaymentResponseDataDTO;
+use App\DTO\Payment\PaymentRequestDataDTO;
+use App\DTO\Payment\PaymentResponseDataDTO;
 
 interface PaymentGatewayInterface
 {

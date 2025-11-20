@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Enums\Payments;
+namespace App\Enums\Payment;
 
 enum PaymentGatewayEnum: string
 {
@@ -38,10 +38,5 @@ enum PaymentGatewayEnum: string
     public function isEnabled(): bool
     {
         return config(sprintf('payment.gateways.%s.enabled', $this->value), false);
-    }
-
-    public function supports(string $feature): bool
-    {
-        return config(sprintf('payment.features.%s.%s', $this->value, $feature), false);
     }
 }
