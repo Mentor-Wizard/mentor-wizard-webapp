@@ -9,14 +9,4 @@ enum PaymentTypeEnum: string
     case Purchase = 'purchase';
     case Refund = 'refund';
     case Regular = 'regular';
-
-    // TODO: Implement translation labels for payment types
-    public function label(): string
-    {
-        return match ($this) {
-            self::Purchase        => 'Оплата',
-            self::Refund          => 'Повернення',
-            self::Regular         => 'Регулярний платіж',
-        };
-    }
 }
