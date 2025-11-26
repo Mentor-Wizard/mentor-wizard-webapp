@@ -9,7 +9,7 @@ use App\Interfaces\PaymentGatewayInterface;
 use InvalidArgumentException;
 use RuntimeException;
 
-class PaymentGatewayFactory
+class PaymentGatewayBuilder
 {
     public function make(?string $gateway = null): PaymentGatewayInterface
     {
