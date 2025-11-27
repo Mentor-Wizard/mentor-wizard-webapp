@@ -71,14 +71,12 @@ class UserForm
                             SpatieMediaLibraryFileUpload $component,
                             TemporaryUploadedFile $file,
                             ?Model $record,
-                        ): ?string {
-                            $user = $component->getLivewire()->getRecord();
-
-                            if (! $user instanceof User) {
-                                return null;
+                        ): void {
+                            if (! $record instanceof User) {
+                                return;
                             }
 
-                            AddAvatar::run($user, $file);
+                            AddAvatar::run($record, $file);
                         }),
 
                     Group::make([
