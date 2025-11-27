@@ -1,7 +1,7 @@
-FROM dunglas/frankenphp:1.9.1-php8.4-alpine
+FROM dunglas/frankenphp:1.10.1-php8.5-alpine
 
 # Copy composer from official image
-COPY --from=composer:2.8.5 /usr/bin/composer /usr/bin/
+COPY --from=composer:2.9.2 /usr/bin/composer /usr/bin/
 
 # Install system dependencies
 RUN \
@@ -44,9 +44,20 @@ RUN \
     pecl install redis && \
     docker-php-ext-enable redis
 
-# Install Xdebug and PCOV for development
-RUN pecl install xdebug pcov && \
-    docker-php-ext-enable xdebug pcov
+# Install PCOV for development
+RUN pecl install pcov && \
+    docker-php-ext-enable pcov
+
+# Install Xdebug (build from source because PECL release for PHP 8.5 is not yet available)
+RUN set -ex && \
+    git clone --depth=1 --branch master https://github.com/xdebug/xdebug.git /tmp/xdebug && \
+    cd /tmp/xdebug && \
+    phpize && \
+    ./configure --enable-xdebug && \
+    make -j"$(nproc)" && \
+    make install && \
+    docker-php-ext-enable xdebug && \
+    rm -rf /tmp/xdebug
 
 # Configure PHP settings
 RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory-limit.ini
