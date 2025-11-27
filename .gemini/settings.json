@@ -1,0 +1,10 @@
+{
+    "general": {
+        "enablePromptCompletion": true
+    },
+    "ui": {
+        "accessibility": {
+            "screenReader": true
+        }
+    }
+}
