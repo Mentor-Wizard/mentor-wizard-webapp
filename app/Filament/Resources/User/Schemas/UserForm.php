@@ -6,6 +6,7 @@ namespace App\Filament\Resources\User\Schemas;
 
 use App\Actions\User\AddAvatar;
 use App\Models\User;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -65,6 +66,7 @@ class UserForm
                         ->maxSize(5120) // 5MB
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
                         ->collection('avatar')
+                        ->responsiveImages()
                         ->saveUploadedFileUsing(static function (
                             SpatieMediaLibraryFileUpload $component,
                             TemporaryUploadedFile $file,
@@ -76,7 +78,7 @@ class UserForm
                                 return null;
                             }
 
-                            return AddAvatar::run($user, $file);
+                            AddAvatar::run($user, $file);
                         }),
 
                     Group::make([
@@ -165,9 +167,11 @@ class UserForm
                             ->prefix('$')
                             ->required(),
 
-                        TextInput::make('experience_started_at')
+                        DatePicker::make('experience_started_at')
                             ->label('Experience Started')
-                            ->type('date')
+                            ->native(false)
+                            ->displayFormat('d.m.Y')
+                            ->format('Y-m-d')
                             ->helperText('When did you start your professional career?')
                             ->required(),
                     ])->columns(2),

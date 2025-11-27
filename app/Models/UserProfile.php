@@ -92,7 +92,8 @@ class UserProfile extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
-            ->singleFile();
+            ->singleFile()
+            ->withResponsiveImages();
     }
 
     /**
