@@ -5,7 +5,7 @@ inputs:
   php:
     description: 'PHP version to install'
     required: true
-    default: '8.4'
+    default: '8.5'
 
   node:
     description: 'Node.js version to install'
