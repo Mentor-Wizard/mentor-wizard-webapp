@@ -1,116 +1,18 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true,
-  },
-  expertiseOptions: Array,
-  experienceOptions: Array,
-  ratings: Array,
-  availabilityOptions: Array,
-  currencyOptions: Array,
-});
+import { useMentorFilters } from '@/Stores/mentorFilters';
 
-const emit = defineEmits(['update:modelValue']);
-
+const mentorFilters = useMentorFilters();
 const expertiseSearch = ref('');
-const selectedExpertise = ref([]);
-const selectedExperience = ref([]);
-const priceMin = ref(0);
-const priceMax = ref(200);
-const selectedRatings = ref([]);
-const selectedAvailability = ref([]);
-const selectedCurrency = ref('USD');
-
-// Flag to prevent circular updates
-let isUpdatingFromParent = false;
 
 const filteredExpertise = computed(() =>
-  props.expertiseOptions.filter((option) =>
+  mentorFilters.expertiseOptions.filter((option) =>
     option.label.toLowerCase().includes(expertiseSearch.value.toLowerCase()),
   ),
 );
 
-// Watch for changes and emit to parent
-watch(
-  [
-    selectedExpertise,
-    selectedExperience,
-    priceMin,
-    priceMax,
-    selectedRatings,
-    selectedAvailability,
-    selectedCurrency,
-  ],
-  () => {
-    // Don't emit if we're updating from parent
-    if (isUpdatingFromParent) {
-      return;
-    }
-
-    const updatedFilters = {
-      expertise: selectedExpertise.value,
-      experience: selectedExperience.value,
-      priceMin: priceMin.value,
-      priceMax: priceMax.value,
-      ratings: selectedRatings.value,
-      availability: selectedAvailability.value,
-      currency: selectedCurrency.value,
-    };
-    emit('update:modelValue', updatedFilters);
-  },
-  { deep: true },
-);
-
-// TODO: Fix filter initialization from URL parameters
-// Problem: When navigating via URL (e.g. /mentors?experience[0]=entry&priceMax=125&priceMin=55&ratings[0]=5)
-// filters are not checked in the form. URL → UI synchronization doesn't work correctly.
-// Possible causes:
-// - Race condition during initialization (watch triggers before ListPage sets values)
-// - Incorrect parsing of Laravel array format experience[0]=value
-// - Issue with immediate: true and timing of refs updates
-// Watch for changes from parent (URL updates)
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    isUpdatingFromParent = true;
-
-    // Update all refs with new values from parent
-    selectedExpertise.value =
-      Array.isArray(newValue.expertise) ? [...newValue.expertise] : [];
-    selectedExperience.value =
-      Array.isArray(newValue.experience) ? [...newValue.experience] : [];
-    priceMin.value =
-      typeof newValue.priceMin === 'number' ? newValue.priceMin : 0;
-    priceMax.value =
-      typeof newValue.priceMax === 'number' ? newValue.priceMax : 200;
-    selectedRatings.value =
-      Array.isArray(newValue.ratings) ? [...newValue.ratings] : [];
-    selectedAvailability.value =
-      Array.isArray(newValue.availability) ? [...newValue.availability] : [];
-    selectedCurrency.value =
-      newValue.currency || 'USD';
-
-    // Reset flag after Vue updates
-    setTimeout(() => {
-      isUpdatingFromParent = false;
-    }, 0);
-  },
-  { deep: true, immediate: true },
-);
-
-const clearFilters = () => {
-  expertiseSearch.value = '';
-  selectedExpertise.value = [];
-  selectedExperience.value = [];
-  priceMin.value = 0;
-  priceMax.value = 200;
-  selectedRatings.value = [];
-  selectedAvailability.value = [];
-  selectedCurrency.value = 'USD';
-};
+const clearFilters = () => mentorFilters.clearFilters();
 </script>
 
 <template>
@@ -157,7 +59,7 @@ const clearFilters = () => {
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
               <input
-                v-model="selectedExpertise"
+                v-model="mentorFilters.selectedExpertise"
                 type="checkbox"
                 :value="option.value"
                 class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
@@ -178,12 +80,12 @@ const clearFilters = () => {
         <div class="p-4">
           <div class="space-y-3">
             <label
-              v-for="(option, i) in experienceOptions"
+              v-for="(option, i) in mentorFilters.experienceOptions"
               :key="i"
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
               <input
-                v-model="selectedExperience"
+                v-model="mentorFilters.selectedExperience"
                 type="checkbox"
                 :value="option.value"
                 class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
@@ -205,11 +107,11 @@ const clearFilters = () => {
           <div class="mb-4">
             <select
               id="currency"
-              v-model="selectedCurrency"
-              class="block w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 focus:border-blue-600 focus:ring-blue-600"
+              v-model="mentorFilters.selectedCurrency"
+              class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-600 focus:ring-blue-600"
             >
               <option
-                v-for="(currency, i) in currencyOptions"
+                v-for="(currency, i) in mentorFilters.currencyOptions"
                 :key="i"
                 :value="currency.value"
               >
@@ -218,9 +120,17 @@ const clearFilters = () => {
             </select>
           </div>
 
-          <div class="mb-4 flex justify-between text-base font-medium text-gray-700">
-            <span>{{ selectedCurrency }} {{ priceMin }}</span>
-            <span>{{ selectedCurrency }} {{ priceMax }}+</span>
+          <div
+            class="mb-4 flex justify-between text-base font-medium text-gray-700"
+          >
+            <span
+              >{{ mentorFilters.selectedCurrency }}
+              {{ mentorFilters.priceMin }}</span
+            >
+            <span
+              >{{ mentorFilters.selectedCurrency }}
+              {{ mentorFilters.priceMax }}+</span
+            >
           </div>
 
           <div class="relative h-2">
@@ -228,13 +138,16 @@ const clearFilters = () => {
             <div
               class="absolute h-2 rounded-full bg-blue-600"
               :style="{
-                left: (priceMin / 200) * 100 + '%',
-                width: ((priceMax - priceMin) / 200) * 100 + '%',
+                left: (mentorFilters.priceMin / 200) * 100 + '%',
+                width:
+                  ((mentorFilters.priceMax - mentorFilters.priceMin) / 200)
+                    * 100
+                  + '%',
               }"
             ></div>
 
             <input
-              v-model.number="priceMin"
+              v-model.number="mentorFilters.priceMin"
               type="range"
               min="0"
               max="200"
@@ -242,7 +155,7 @@ const clearFilters = () => {
               class="range-input"
             />
             <input
-              v-model.number="priceMax"
+              v-model.number="mentorFilters.priceMax"
               type="range"
               min="0"
               max="200"
@@ -252,9 +165,9 @@ const clearFilters = () => {
           </div>
 
           <div class="mt-5 flex justify-between text-sm text-gray-500">
-            <span>{{ selectedCurrency }} 0</span>
-            <span>{{ selectedCurrency }} 100</span>
-            <span>{{ selectedCurrency }} 200+</span>
+            <span>{{ mentorFilters.selectedCurrency }} 0</span>
+            <span>{{ mentorFilters.selectedCurrency }} 100</span>
+            <span>{{ mentorFilters.selectedCurrency }} 200+</span>
           </div>
         </div>
       </div>
@@ -269,12 +182,12 @@ const clearFilters = () => {
         <div class="p-4">
           <div class="space-y-3">
             <label
-              v-for="r in ratings"
+              v-for="r in mentorFilters.ratings"
               :key="r.value"
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
               <input
-                v-model="selectedRatings"
+                v-model="mentorFilters.selectedRatings"
                 type="checkbox"
                 :value="r.value"
                 class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
@@ -306,12 +219,12 @@ const clearFilters = () => {
         <div class="p-4">
           <div class="space-y-3">
             <label
-              v-for="(option, i) in availabilityOptions"
+              v-for="(option, i) in mentorFilters.availabilityOptions"
               :key="i"
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
               <input
-                v-model="selectedAvailability"
+                v-model="mentorFilters.selectedAvailability"
                 type="checkbox"
                 :value="option.value"
                 class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"

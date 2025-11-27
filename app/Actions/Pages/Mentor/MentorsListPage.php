@@ -41,39 +41,59 @@ class MentorsListPage
                 AllowedFilter::custom('stacks', new TagStacksFilter),
             ])
             ->allowedSorts(['id', 'rate', 'experience_started_at'])
-            ->paginate(12)
+            ->paginate(6)
             ->appends($request->query())
             ->through(function ($mentor) {
                 $user = $mentor->user;
                 $profile = $user?->profile;
 
                 return [
-                    'id' => $mentor->id,
-                    'name' => trim($profile->name . ' ' . $profile->last_name),
-                    'title' => $mentor->title,
-                    'price' =>  $mentor->rate ?? $profile?->cost_per_hour,
+                    'id'       => $mentor->id,
+                    'name'     => mb_trim($profile->name.' '.$profile->last_name),
+                    'title'    => $mentor->title,
+                    'price'    => $mentor->rate ?? $profile?->cost_per_hour,
                     'currency' => [
-                        'code' => $mentor->currency->name,
+                        'code'   => $mentor->currency->name,
                         'symbol' => $mentor->currency->symbol,
                     ],
                     'tags' => $mentor->mentorTags
                         ->where('type', TagEnum::STACK)
                         ->pluck('tag')
                         ->toArray(),
-                    'rating' => $user->rating ? round($user->rating, 1) : 0,
-                    'reviews' => $user->mentor_reviews_count ?? 0,
+                    'rating'     => $user->rating ? round($user->rating, 1) : 0,
+                    'reviews'    => $user->mentor_reviews_count ?? 0,
                     'experience' => $mentor->experience_started_at
                         ? now()->diff($mentor->experience_started_at)->y
                         : 0,
-                    'image' => $profile->avatar,
-                    'availability' => 'today',
+                    'image'             => $profile->avatar,
+                    'availability'      => 'today',
                     'availabilityLabel' => 'Available now',
                 ];
             });
 
+        // TODO: Replace static arrays with dynamic values
+        $expertiseOptions = [
+            ['value' => 'web-dev', 'label' => 'Web Development (324)'],
+            ['value' => 'mobile-dev', 'label' => 'Mobile Development (218)'],
+            ['value' => 'data-science', 'label' => 'Data Science (195)'],
+            ['value' => 'ux-ui', 'label' => 'UX/UI Design (167)'],
+            ['value' => 'digital-marketing', 'label' => 'Digital Marketing (142)'],
+            ['value' => 'product-mgmt', 'label' => 'Product Management (118)'],
+        ];
+        $currencyOptions = [
+            ['value' => 'USD', 'label' => 'USD ($)'],
+            ['value' => 'EUR', 'label' => 'EUR (€)'],
+            ['value' => 'GBP', 'label' => 'GBP (£)'],
+            ['value' => 'UAH', 'label' => 'UAH (₴)'],
+        ];
 
         return Inertia::render('Mentor/MentorsListPage', [
-            'mentors' => $mentors,
+            'mentors'     => $mentors,
+            'filtersData' => [
+                'expertiseOptions' => $expertiseOptions,
+                'currencyOptions'  => $currencyOptions,
+            ],
+            'queryParams' => $request->all(),
         ]);
     }
 }
