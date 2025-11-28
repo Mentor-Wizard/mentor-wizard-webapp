@@ -38,6 +38,8 @@ const confirmDelete = (program) => {
 const deleteProgram = () => {
   if (!programToDelete.value) return;
   router.delete(route('mentor-program.destroy', programToDelete.value.slug), {
+    preserveScroll: true,
+    only: ['programs'],
     onSuccess: () => {
       showDeleteModal.value = false;
       programToDelete.value = null;
