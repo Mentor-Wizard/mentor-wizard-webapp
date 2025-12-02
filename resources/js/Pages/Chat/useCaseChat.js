@@ -1,8 +1,16 @@
 import { ref } from 'vue';
 
+const listUsers = ref([]);
+
 const onlineUsers = ref([]);
 let channel = null;
+
 export function useCaseChat() {
+  const fetchUsers = async () => {
+    const { data } = await axios.get(route('chat.users'));
+    listUsers.value = data.users;
+    console.log(data.users);
+  };
   const subscribeUser = () => {
     console.log('subscribeUser');
     channel = Echo.join('presence-online-users')
@@ -28,5 +36,5 @@ export function useCaseChat() {
     }
   };
 
-  return { subscribeUser, unsubscribeUser };
+  return { subscribeUser, unsubscribeUser, fetchUsers, listUsers };
 }

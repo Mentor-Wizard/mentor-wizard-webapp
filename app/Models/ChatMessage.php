@@ -36,6 +36,9 @@ class ChatMessage extends Model
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

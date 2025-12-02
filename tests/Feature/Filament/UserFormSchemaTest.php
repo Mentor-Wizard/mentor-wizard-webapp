@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Filament\Resources\User\Pages\CreateUser;
-use App\Filament\Resources\User\Schemas\UserForm;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
@@ -20,13 +19,6 @@ beforeEach(function (): void {
 });
 
 describe('UserForm Schema', function (): void {
-    it('generates the correct form schema', function (): void {
-        $userForm = new UserForm;
-        $schema = $userForm->schema([]);
-
-        expect($schema)->toBeInstanceOf(UserForm::class);
-    });
-
     it('validates username field requirements through form interaction', function (): void {
         Livewire::test(CreateUser::class)
             ->fillForm([

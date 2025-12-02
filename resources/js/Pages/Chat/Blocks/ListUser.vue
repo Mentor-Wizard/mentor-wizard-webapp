@@ -2,10 +2,13 @@
 import { Tab, TabGroup, TabList } from '@headlessui/vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid/index.js';
 import { ref } from 'vue';
+import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
 import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
 
+const { listUsers } = useCaseChat();
+console.log(listUsers);
 const selectedTab = ref(0);
 
 function changeTab(index) {
@@ -113,7 +116,7 @@ const users = ref([
   </div>
 
   <div
-    v-for="user in users"
+    v-for="user in listUsers"
     :key="user.id"
     class="mt-2 flex max-w-md items-start rounded-lg border border-gray-200 p-2 shadow-sm"
     :class="user.active ? 'bg-gray-100' : 'bg-white'"

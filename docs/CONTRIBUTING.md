@@ -165,9 +165,11 @@ git checkout -b bugfix/login-validation-error
 
 ```bash
 # Перевірка перед commit'ом
-docker compose exec app ./vendor/bin/pest
-docker compose exec app ./vendor/bin/phpstan analyse
-docker compose exec app ./vendor/bin/pint
+docker compose exec app composer pint
+docker compose exec app composer phpstan
+docker compose exec app composer rector
+docker compose exec app yarn run eslint
+docker compose exec app yarn run prettier
 ```
 
 #### 3. Commit'и
@@ -202,23 +204,29 @@ git push origin feature/user-avatar-upload
 
 # Створення PR через GitHub CLI
 gh pr create --title "feat(auth): Add user avatar upload" --body "
+```
+
+```markdown
 ## Summary
+
 Додає можливість завантаження аватару користувача
 
 ## Changes
+
 - [x] Додано Action для завантаження аватару
 - [x] Створено Vue компонент для завантаження
 - [x] Додано валідацію файлів
 - [x] Написано тести
 
 ## Testing
+
 - [x] Unit тести для Action
 - [x] Feature тести для HTTP endpoint
 - [x] Frontend тести для компонента
 
 ## Screenshots
+
 [Прикріпити скріншоти UI змін]
-"
 ```
 
 #### 2. PR Template

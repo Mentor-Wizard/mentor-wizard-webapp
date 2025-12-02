@@ -3359,13 +3359,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"laravel-echo@npm:^2.2.6":
-  version: 2.2.6
-  resolution: "laravel-echo@npm:2.2.6"
+"laravel-echo@npm:^2.2.4":
+  version: 2.2.4
+  resolution: "laravel-echo@npm:2.2.4"
   peerDependencies:
     pusher-js: "*"
     socket.io-client: "*"
-  checksum: 10c0/77bf51521b00acb5e9d24e70417b0e8cac9f685e962af765ac4eb832fd13afeab7a465b6e8d5b77929a86d0668ba070e15ceaf0b4fec8e5a28add61ba0375976
+  checksum: 10c0/aacfe0900a33033137ab38efeec0a910489d9dafdf989abfc66268bf35aabbb177116ad4437913ef524b590592896475f6b7031a78810ea1bae0312e09260bdd
   languageName: node
   linkType: hard
 
@@ -4643,7 +4643,7 @@ __metadata:
     eslint-plugin-prettier-vue: "npm:^5.0.0"
     eslint-plugin-simple-import-sort: "npm:^12.1.1"
     eslint-plugin-vue: "npm:^10.5.0"
-    laravel-echo: "npm:^2.2.6"
+    laravel-echo: "npm:^2.2.4"
     laravel-vite-plugin: "npm:^2.0.1"
     libphonenumber-js: "npm:^1.12.23"
     oxlint: "npm:^1.19.0"

@@ -5,9 +5,9 @@ import ListUser from '@/Pages/Chat/Blocks/ListUser.vue';
 import MainList from '@/Pages/Chat/Blocks/MainList.vue';
 import { useCaseChat } from './useCaseChat.js';
 import { onMounted, onUnmounted } from 'vue';
-const { subscribeUser, unsubscribeUser } = useCaseChat();
-
+const { subscribeUser, unsubscribeUser, fetchUsers } = useCaseChat();
 onMounted(() => {
+  fetchUsers();
   subscribeUser();
 });
 

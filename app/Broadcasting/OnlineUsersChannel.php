@@ -10,6 +10,8 @@ class OnlineUsersChannel
 {
     /**
      * Authenticate the user's access to the channel.
+     *
+     * @return array<string, mixed>
      */
     public function join(User $user): array|bool
     {

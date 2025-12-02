@@ -13,25 +13,28 @@ class ChatListUser
 {
     use AsController;
 
-    public function handle(User $user): JsonResponse
+    public function handle(): JsonResponse
     {
-        dd($user->id);
+        $user = auth()->user();
         $companions = $this->getCompanions($user);
         $listUsers = [];
         foreach ($companions as $companion) {
             $lastMessage = $this->getLastMessage($user, $companion);
-            $userCompanion = $lastMessage->sender_id === $companion ? $lastMessage->receiver : $lastMessage->sender;
+            // $userCompanion = $lastMessage->sender_id === $user->id ? $lastMessage->receiver_id : $lastMessage->sender_id;
             $listUsers[] = [
-                'id'         => $userCompanion->id,
-                'name'       => $userCompanion->profile->name.' '.$userCompanion->profile->last_name,
+                'id'          => $user->id,
+                'id2'         => $companion,
+                'id3'         => $lastMessage->id,
+                /*'name'       => $userCompanion->profile->name.' '.$userCompanion->profile->last_name,
                 'avatar'     => $userCompanion->profile->avatar,
+                'message'    => $lastMessage->message,
                 'online'     => false,
-                'created_at' => $lastMessage->created_at,
+                'created_at' => $lastMessage->created_at,*/
             ];
         }
 
         return response()->json([
-            'data' => $listUsers,
+            'users' => $listUsers,
         ]);
     }
 
@@ -50,9 +53,26 @@ class ChatListUser
         return $senders->merge($receivers)->unique()->values()->toArray();
     }
 
-    private function getLastMessage(User $user, int $otherUserId): array
+    private function getLastMessage(User $user, int $otherUserId)
     {
-        return ChatMessage::query()
+        $query = ChatMessage::query()
+            ->with(['userSender', 'userReceiver'])
+            ->where(function ($query) use ($user, $otherUserId): void {
+                $query->where([
+                    ['sender_id', $user->id],
+                    ['receiver_id', $otherUserId],
+                ])->orWhere([
+                    ['sender_id', $otherUserId],
+                    ['receiver_id', $user->id],
+                ]);
+            })
+            ->latest('id');
+        $bindings = $query->getBindings();
+        $sql = $query->toSql();
+
+        $query->toSql();
+        $res = ChatMessage::query()
+            ->with(['userSender', 'userReceiver'])
             ->where(function ($query) use ($user, $otherUserId): void {
                 $query->where([
                     ['sender_id', $user->id],
@@ -64,5 +84,7 @@ class ChatListUser
             })
             ->latest('id')
             ->first();
+        dd($sql, $bindings, $res->id);
+
     }
 }

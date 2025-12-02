@@ -32,11 +32,17 @@ class Payment extends Model
         'issue_bank_name',
     ];
 
+    /**
+     * @return BelongsTo<MentorSession, $this>
+     */
     public function mentorSession(): BelongsTo
     {
         return $this->belongsTo(MentorSession::class, 'mentor_session_id');
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
