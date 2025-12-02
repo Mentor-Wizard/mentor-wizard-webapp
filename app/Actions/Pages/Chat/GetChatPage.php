@@ -15,8 +15,6 @@ class GetChatPage
 
     public function handle(User $user): Response
     {
-        return Inertia::render('Chat/ChatPage', [
-            'user' => $user,
-        ]);
+        return Inertia::render('Chat/ChatPage');
     }
 }

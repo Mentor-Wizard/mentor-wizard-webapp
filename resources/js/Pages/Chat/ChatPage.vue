@@ -3,6 +3,17 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InfoList from '@/Pages/Chat/Blocks/InfoList.vue';
 import ListUser from '@/Pages/Chat/Blocks/ListUser.vue';
 import MainList from '@/Pages/Chat/Blocks/MainList.vue';
+import { useCaseChat } from './useCaseChat.js';
+import { onMounted, onUnmounted } from 'vue';
+const { subscribeUser, unsubscribeUser } = useCaseChat();
+
+onMounted(() => {
+  subscribeUser();
+});
+
+onUnmounted(() => {
+  unsubscribeUser();
+});
 </script>
 
 <template>

@@ -20,22 +20,25 @@ class ChatMessage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'chat_id',
-        'user_id',
+        'sender_id',
+        'receiver_id',
         'message',
         'is_read',
     ];
 
-    public function chat(): BelongsTo
+    public function userSender(): BelongsTo
     {
-        return $this->belongsTo(Chat::class);
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function userReceiver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'receiver_id');
     }
 
     protected function casts(): array
     {
         return [
-            'chat_id' => 'int',
-            'user_id' => 'int',
             'message' => 'string',
             'is_read' => 'boolean',
         ];

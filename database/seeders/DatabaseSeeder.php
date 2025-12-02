@@ -21,6 +21,7 @@ final class DatabaseSeeder extends Seeder
             MentorTagSeeder::class,
             MentorProgramSeeder::class,
             MentorReviewSeeder::class,
+            ChatMessageSeeder::class,
         ]);
     }
 }

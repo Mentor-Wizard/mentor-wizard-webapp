@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Chat\ChatListUser;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
@@ -59,7 +60,8 @@ Route::middleware(['auth', 'role:mentor'])->group(function (): void {
 Route::middleware('auth')
     ->prefix('chat')
     ->group(function (): void {
-        Route::get('list', GetChatPage::class)->name('page.chat.list');
+        Route::get('list', GetChatPage::class)->name('page.chat');
+        Route::get('users', ChatListUser::class)->name('chat.users');
     });
 
 require __DIR__.'/auth.php';
