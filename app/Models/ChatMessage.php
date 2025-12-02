@@ -42,8 +42,9 @@ class ChatMessage extends Model
     protected function casts(): array
     {
         return [
-            'message' => 'string',
-            'is_read' => 'boolean',
+            'message'    => 'string',
+            'is_read'    => 'boolean',
+            'created_at' => 'datetime',
         ];
     }
 }

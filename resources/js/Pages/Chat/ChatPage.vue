@@ -8,7 +8,6 @@ import { onMounted, onUnmounted } from 'vue';
 const { subscribeUser, unsubscribeUser, fetchUsers } = useCaseChat();
 onMounted(() => {
   fetchUsers();
-  subscribeUser();
 });
 
 onUnmounted(() => {

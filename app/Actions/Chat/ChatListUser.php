@@ -6,7 +6,9 @@ namespace App\Actions\Chat;
 
 use App\Models\ChatMessage;
 use App\Models\User;
+use DateTimeInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class ChatListUser
@@ -20,16 +22,16 @@ class ChatListUser
         $listUsers = [];
         foreach ($companions as $companion) {
             $lastMessage = $this->getLastMessage($user, $companion);
-            // $userCompanion = $lastMessage->sender_id === $user->id ? $lastMessage->receiver_id : $lastMessage->sender_id;
+            $userCompanion = $lastMessage->sender_id === $user->id ? $lastMessage->userReceiver : $lastMessage->userSender;
             $listUsers[] = [
-                'id'          => $user->id,
-                'id2'         => $companion,
-                'id3'         => $lastMessage->id,
-                /*'name'       => $userCompanion->profile->name.' '.$userCompanion->profile->last_name,
+                'id'         => $userCompanion->id,
+                'name'       => $userCompanion->profile->name.' '.$userCompanion->profile->last_name,
                 'avatar'     => $userCompanion->profile->avatar,
                 'message'    => $lastMessage->message,
                 'online'     => false,
-                'created_at' => $lastMessage->created_at,*/
+                'is_read'    => $lastMessage->is_read,
+                'created_at' => $lastMessage->created_at,
+                'last'       => $this->getLastDateInfo($lastMessage->created_at),
             ];
         }
 
@@ -55,36 +57,25 @@ class ChatListUser
 
     private function getLastMessage(User $user, int $otherUserId)
     {
-        $query = ChatMessage::query()
+        return ChatMessage::query()
             ->with(['userSender', 'userReceiver'])
             ->where(function ($query) use ($user, $otherUserId): void {
-                $query->where([
-                    ['sender_id', $user->id],
-                    ['receiver_id', $otherUserId],
-                ])->orWhere([
-                    ['sender_id', $otherUserId],
-                    ['receiver_id', $user->id],
-                ]);
-            })
-            ->latest('id');
-        $bindings = $query->getBindings();
-        $sql = $query->toSql();
-
-        $query->toSql();
-        $res = ChatMessage::query()
-            ->with(['userSender', 'userReceiver'])
-            ->where(function ($query) use ($user, $otherUserId): void {
-                $query->where([
-                    ['sender_id', $user->id],
-                    ['receiver_id', $otherUserId],
-                ])->orWhere([
-                    ['sender_id', $otherUserId],
-                    ['receiver_id', $user->id],
-                ]);
+                $query->where(function ($q) use ($user, $otherUserId): void {
+                    $q->where('sender_id', $user->id)
+                        ->where('receiver_id', $otherUserId);
+                })->orWhere(function ($q) use ($user, $otherUserId): void {
+                    $q->where('sender_id', $otherUserId)
+                        ->where('receiver_id', $user->id);
+                });
             })
             ->latest('id')
             ->first();
-        dd($sql, $bindings, $res->id);
+    }
 
+    private function getLastDateInfo(DateTimeInterface $created_at): string
+    {
+        $carbonDate = Date::instance($created_at);
+
+        return $carbonDate->diffForHumans();
     }
 }
