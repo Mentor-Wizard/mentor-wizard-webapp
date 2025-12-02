@@ -9,6 +9,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\RouteCollection;
 use Inertia\Response;
+use Pest\Mixins\Expectation;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
@@ -46,7 +47,7 @@ describe('WelcomePage Action', function (): void {
                 'phpVersion'     => PHP_VERSION,
                 'laravelVersion' => Application::VERSION,
             ])
-            ->and(fn ($result): Pest\Mixins\Expectation => expect(Arr::get($resultData->getData(), 'page.props.mentors'))->toBeArray());
+            ->and(fn ($result): Expectation => expect(Arr::get($resultData->getData(), 'page.props.mentors'))->toBeArray());
     });
 
     it('includes mentors in the response with pagination', function (): void {

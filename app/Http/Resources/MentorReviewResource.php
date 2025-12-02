@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use Override;
 
 class MentorReviewResource extends JsonResource
@@ -19,7 +22,11 @@ class MentorReviewResource extends JsonResource
         parent::__construct($resource);
     }
 
-    public static function collectionWithMentor($resources, $mentor)
+    /**
+     * @param  EloquentCollection<int, MentorReview>  $resources
+     * @return Collection<int, static>
+     */
+    public static function collectionWithMentor(EloquentCollection $resources, User $mentor): Collection
     {
         return $resources->map(
             // @phpstan-ignore-next-line
@@ -27,6 +34,9 @@ class MentorReviewResource extends JsonResource
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Override]
     public function toArray(Request $request): array
     {

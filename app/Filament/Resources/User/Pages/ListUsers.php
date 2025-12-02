@@ -12,6 +12,9 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
+    /**
+     * @return CreateAction[]
+     */
     protected function getHeaderActions(): array
     {
         return [

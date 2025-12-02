@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\UserProfileFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,9 +19,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read string $avatar URL of the avatar image
  * @mixin IdeHelperUserProfile
  */
+#[UseFactory(UserProfileFactory::class)]
 class UserProfile extends Model implements HasMedia
 {
+    /** @use HasFactory<UserProfileFactory> */
     use HasFactory;
+
     use InteractsWithMedia;
 
     public const int PREVIEW_HEIGHT = 300;
@@ -59,12 +64,18 @@ class UserProfile extends Model implements HasMedia
         'avatar',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function currency(): ?BelongsTo
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
+    public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'currency_id');
     }
@@ -80,9 +91,13 @@ class UserProfile extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
-            ->singleFile();
+            ->singleFile()
+            ->withResponsiveImages();
     }
 
+    /**
+     * @return Attribute<non-empty-string, never>
+     */
     protected function avatar(): Attribute
     {
         return Attribute::get(fn (): string => $this->getFirstMediaUrl('avatar') !== '' ? $this->getFirstMediaUrl('avatar') : self::DEFAULT_AVATAR_URL);

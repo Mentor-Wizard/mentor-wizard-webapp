@@ -9,7 +9,6 @@ use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\delete;
@@ -52,7 +51,7 @@ describe('Mentor Program Destroy', function (): void {
 
         $response = delete(route('mentor-program.destroy', $nonExistentSlug));
 
-        $response->assertStatus(Response::HTTP_NOT_FOUND);
+        $response->assertNotFound();
     });
 
     it("throws 403 when trying to delete another mentor's program", function (): void {
@@ -72,7 +71,7 @@ describe('Mentor Program Destroy', function (): void {
 
         $response = delete(route('mentor-program.destroy', $anotherMentorProgram->slug));
 
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertForbidden();
 
         $this->assertDatabaseHas('mentor_programs', [
             'id' => $anotherMentorProgram->getKey(),
