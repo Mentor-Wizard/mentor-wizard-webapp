@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Http\Resources\EventWeekViewResource;
+use App\Http\Resources\Calendar\CalendarEventWeekViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -34,7 +34,7 @@ class GetWeeklyCalendarEventsService
 
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
-            $this->calendarEvents[] = new EventWeekViewResource($dayEvent, $this->timezone)
+            $this->calendarEvents[] = new CalendarEventWeekViewResource($dayEvent, $this->timezone)
                 ->additional(['user' => $this->user])
                 ->resolve();
         }

@@ -16,13 +16,12 @@ return new class extends Migration
         Schema::create('user_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->integer('day_of_week');
+            $table->integer('day_of_week')->nullable();
             $table->time('start_time');
             $table->time('end_time');
             $table->string('type');
             $table->date('day_off_date')->nullable();
             $table->string('timezone');
-            $table->string('comment')->nullable();
             $table->timestamps();
         });
     }

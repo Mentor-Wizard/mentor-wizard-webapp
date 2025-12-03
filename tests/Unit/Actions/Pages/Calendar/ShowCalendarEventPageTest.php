@@ -63,7 +63,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($page, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($page, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($page, 'props.permissions'))->toBe('edit')
-            // CalendarEvent payload is returned as an object via EventShowResource
+            // CalendarEvent payload is returned as an object via CalendarEventShowResource
             ->and(Arr::get($page, 'props.calendarEvent.id'))->toBe($this->event->getKey())
             ->and(Arr::get($page, 'props.calendarEvent.title'))->toBe('Demo CalendarEvent')
             ->and(Arr::get($page, 'props.calendarEvent.fromDate'))->toBe($this->start->format('Y-m-d'))
@@ -104,7 +104,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             ->not->toBeEmpty();
     });
 
-    it('passes user and timezone to EventShowResource which affects event payload', function (): void {
+    it('passes user and timezone to CalendarEventShowResource which affects event payload', function (): void {
         auth()->login($this->mentor);
 
         // Create event at 22:00 default timezone

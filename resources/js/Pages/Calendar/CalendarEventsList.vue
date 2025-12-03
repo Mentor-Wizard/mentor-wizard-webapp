@@ -22,7 +22,7 @@ import DailyView from '@/Components/Calendar/DailyView.vue';
 import MonthlyView from '@/Components/Calendar/MonthlyView.vue';
 import WeeklyView from '@/Components/Calendar/WeeklyView.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import CreateEvent from '@/Pages/Calendar/CreateEvent.vue';
+import CreateEvent from '@/Pages/Calendar/CreateCalendarEvent.vue';
 import { useCalendar } from '@/Stores/calendar.js';
 import { adjustDate } from '@/Stores/Calendar/helpers.js';
 
@@ -175,13 +175,13 @@ onMounted(() => {
     >
       <div>
         <h1 class="text-base font-semibold text-gray-900">
-          <time datetime="2022-01-22" class="sm:hidden">{{
+          <time class="sm:hidden">{{
             todayDate + ' (' + timezone + ')'
           }}</time>
-          <time datetime="2022-01-22" class="sm:hidden">{{
+          <time class="sm:hidden">{{
             todayDate + ' (' + timezone + ')'
           }}</time>
-          <time datetime="2022-01-22" class="hidden sm:inline">{{
+          <time class="hidden sm:inline">{{
             todayDate + ' (' + timezone + ')'
           }}</time>
         </h1>

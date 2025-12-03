@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Http\Resources\EventDayViewResource;
+use App\Http\Resources\Calendar\CalendarEventDayViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -73,7 +73,7 @@ class GetDailyCalendarEventsService
         $events = [];
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
-            $events[] = new EventDayViewResource($dayEvent, $this->timezone)->resolve();
+            $events[] = new CalendarEventDayViewResource($dayEvent, $this->timezone)->resolve();
         }
 
         return $events;

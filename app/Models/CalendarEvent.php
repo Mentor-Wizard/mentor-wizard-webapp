@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $web_link
  * @property string|null $description
  * @property int|null $mentor_program_id
- *
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]

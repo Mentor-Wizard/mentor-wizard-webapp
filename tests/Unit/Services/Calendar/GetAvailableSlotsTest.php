@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\UserScheduleRecordType;
 use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Models\UserSchedule;
 use App\Services\Calendar\GetAvailableSlotsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
@@ -117,5 +119,228 @@ describe('GetAvailableSlotsService Service', function (): void {
             ->and($result[1]['end']
                 ->equalTo(Date::now($tz)
                     ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)))->toBeTrue();
+    });
+
+    it('excludes specified events from available slots calculation', function (): void {
+        $tz = 'Europe/Kyiv';
+        Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
+
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        // Create three events
+        $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
+        $event1EndUtc = (clone $event1StartUtc)->addHour();
+
+        $event2StartUtc = Date::now($tz)->addDays(2)->setTime(12, 0, 0);
+        $event2EndUtc = (clone $event2StartUtc)->addHour();
+
+        $event3StartUtc = Date::now($tz)->addDays(3)->setTime(12, 0, 0);
+        $event3EndUtc = (clone $event3StartUtc)->addHour();
+
+        $event1 = CalendarEvent::query()->create([
+            'title'           => 'E1',
+            'status'          => 'confirmed',
+            'start_date_time' => $event1StartUtc,
+            'end_date_time'   => $event1EndUtc,
+            'duration'        => $event1StartUtc->diffInSeconds($event1EndUtc),
+            'date'            => $event1StartUtc->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+        $event2 = CalendarEvent::query()->create([
+            'title'           => 'E2',
+            'status'          => 'confirmed',
+            'start_date_time' => $event2StartUtc,
+            'end_date_time'   => $event2EndUtc,
+            'duration'        => $event2StartUtc->diffInSeconds($event2EndUtc),
+            'date'            => $event2StartUtc->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+        $event3 = CalendarEvent::query()->create([
+            'title'           => 'E3',
+            'status'          => 'confirmed',
+            'start_date_time' => $event3StartUtc,
+            'end_date_time'   => $event3EndUtc,
+            'duration'        => $event3StartUtc->diffInSeconds($event3EndUtc),
+            'date'            => $event3StartUtc->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+
+        $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey(), $event3->getKey()]);
+
+        // Exclude event2 from calculation
+        $result = new GetAvailableSlotsService($user, $tz, [$event2->getKey()])->getAvailableSlots();
+
+        // We expect 3 slots: [now..E1.start], [E1.end..E3.start], [E3.end..now+2months]
+        // Event2 should not be considered
+        expect($result)->toBeArray()->toHaveCount(3);
+
+        // Verify that E2 is not in the calculation
+        $slot2 = $result[1];
+        expect($slot2['start']->equalTo($event1EndUtc->clone()->setTimezone($tz)))->toBeTrue()
+            ->and($slot2['end']->equalTo($event3StartUtc->clone()->setTimezone($tz)))->toBeTrue();
+    });
+
+    it('applies schedule exclusion when excludeSchedule flag is true', function (): void {
+        $tz = 'Europe/Kyiv';
+        Date::setTestNow(Date::create(2025, 1, 6, 10, 0, 0, $tz)); // Monday
+
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        // Create user schedule: Monday 9:00-17:00
+        UserSchedule::query()->create([
+            'user_id'     => $user->getKey(),
+            'day_of_week' => 1, // Monday
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'timezone'    => $tz,
+        ]);
+
+        // Create an event on Monday 14:00-15:00
+        $eventStart = Date::create(2025, 1, 6, 14, 0, 0, $tz);
+        $eventEnd = Date::create(2025, 1, 6, 15, 0, 0, $tz);
+
+        $event = CalendarEvent::query()->create([
+            'title'           => 'Monday Event',
+            'status'          => 'confirmed',
+            'start_date_time' => $eventStart,
+            'end_date_time'   => $eventEnd,
+            'duration'        => $eventStart->diffInSeconds($eventEnd),
+            'date'            => $eventStart->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+        $user->calendarEvents()->attach($event->getKey());
+
+        // Get slots with schedule exclusion
+        $result = new GetAvailableSlotsService($user, $tz, [], true)->getAvailableSlots();
+
+        // Slots should only include times within working hours (9:00-17:00)
+        expect($result)->toBeArray()->not()->toBeEmpty();
+
+        // Verify that slots respect schedule boundaries
+        foreach ($result as $slot) {
+            $slotDate = $slot['start']->format('Y-m-d');
+            $slotStartTime = $slot['start']->format('H:i:s');
+            $slotEndTime = $slot['end']->format('H:i:s');
+
+            // If it's Monday (day_of_week = 1), times should be within 09:00-17:00
+            if ($slot['start']->dayOfWeek === 1) {
+                expect($slotStartTime >= '09:00:00' || $slotEndTime <= '17:00:00')->toBeTrue();
+            }
+        }
+    });
+
+    it('excludes day off dates when excludeSchedule flag is true', function (): void {
+        $tz = 'Europe/Kyiv';
+        Date::setTestNow(Date::create(2025, 1, 6, 10, 0, 0, $tz)); // Monday
+
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        // Create working schedule for Monday
+        UserSchedule::query()->create([
+            'user_id'     => $user->getKey(),
+            'day_of_week' => 1, // Monday
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'timezone'    => $tz,
+        ]);
+
+        // Create a day off on Monday, January 13
+        UserSchedule::query()->create([
+            'user_id'      => $user->getKey(),
+            'day_of_week'  => 1, // Monday (required but ignored for day off)
+            'start_time'   => '00:00:00',
+            'end_time'     => '23:59:59',
+            'type'         => UserScheduleRecordType::DAY_OFF,
+            'day_off_date' => Date::create(2025, 1, 13), // Next Monday
+            'timezone'     => $tz,
+        ]);
+
+        // Create events on both Mondays
+        $event1Start = Date::create(2025, 1, 6, 14, 0, 0, $tz); // This Monday
+        $event1End = Date::create(2025, 1, 6, 15, 0, 0, $tz);
+
+        $event2Start = Date::create(2025, 1, 13, 14, 0, 0, $tz); // Next Monday (day off)
+        $event2End = Date::create(2025, 1, 13, 15, 0, 0, $tz);
+
+        $event1 = CalendarEvent::query()->create([
+            'title'           => 'Event on Working Monday',
+            'status'          => 'confirmed',
+            'start_date_time' => $event1Start,
+            'end_date_time'   => $event1End,
+            'duration'        => $event1Start->diffInSeconds($event1End),
+            'date'            => $event1Start->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+
+        $event2 = CalendarEvent::query()->create([
+            'title'           => 'Event on Day Off',
+            'status'          => 'confirmed',
+            'start_date_time' => $event2Start,
+            'end_date_time'   => $event2End,
+            'duration'        => $event2Start->diffInSeconds($event2End),
+            'date'            => $event2Start->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+
+        $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
+
+        // Get slots with schedule exclusion
+        $result = new GetAvailableSlotsService($user, $tz, [], true)->getAvailableSlots();
+
+        // Slots should not include or overlap with the day off date (2025-01-13)
+        $slotsOnDayOff = array_filter($result, function ($slot) {
+            $slotDate = $slot['start']->format('Y-m-d');
+            $slotEndDate = $slot['end']->format('Y-m-d');
+            return $slotDate === '2025-01-13' || $slotEndDate === '2025-01-13';
+        });
+
+        expect($slotsOnDayOff)->toBeEmpty();
+    });
+
+    it('returns slots without schedule filtering when excludeSchedule is false', function (): void {
+        $tz = 'Europe/Kyiv';
+        Date::setTestNow(Date::create(2025, 1, 6, 10, 0, 0, $tz)); // Monday
+
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        // Create user schedule: Monday 9:00-17:00
+        UserSchedule::query()->create([
+            'user_id'     => $user->getKey(),
+            'day_of_week' => 1, // Monday
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'timezone'    => $tz,
+        ]);
+
+        // Create an event on Monday
+        $eventStart = Date::create(2025, 1, 6, 14, 0, 0, $tz);
+        $eventEnd = Date::create(2025, 1, 6, 15, 0, 0, $tz);
+
+        $event = CalendarEvent::query()->create([
+            'title'           => 'Monday Event',
+            'status'          => 'confirmed',
+            'start_date_time' => $eventStart,
+            'end_date_time'   => $eventEnd,
+            'duration'        => $eventStart->diffInSeconds($eventEnd),
+            'date'            => $eventStart->format('Y-m-d'),
+            'type'            => 'individual',
+        ]);
+        $user->calendarEvents()->attach($event->getKey());
+
+        // Get slots WITHOUT schedule exclusion (default behavior)
+        $result = new GetAvailableSlotsService($user, $tz, [], false)->getAvailableSlots();
+
+        // Should return slots outside working hours too
+        expect($result)->toBeArray()->toHaveCount(2);
+
+        // First slot should start at current time (10:00), not restricted by schedule
+        expect($result[0]['start']->format('H:i'))->toBe('10:00');
     });
 });

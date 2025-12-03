@@ -102,7 +102,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             ->and($eventEntry['date'])->toBe('2025-02-10');
     });
 
-    it('passes timezone to EventMonthViewResource via additional', function (): void {
+    it('passes timezone to CalendarEventMonthViewResource via additional', function (): void {
         Date::setTestNow(Date::create(2025, 2, 10, 12, 0, 0));
         $tz = 'Asia/Tokyo';
 

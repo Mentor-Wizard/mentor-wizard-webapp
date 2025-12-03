@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Calendar;
 
 use Carbon\CarbonInterface;
 use Carbon\CarbonInterval;
@@ -20,7 +20,7 @@ use Override;
  * @property-read string $web_link
  * @property-read string $description
  */
-class EventShowResource extends JsonResource
+class CalendarEventShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

@@ -18,9 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property-read Currency|null $currency
  * @property-read \Illuminate\Database\Eloquent\Collection $languages
  * @property-read \Illuminate\Database\Eloquent\Collection $stacks
- *
  * @TODO : Add visible properties after filters and frontend implementation
- *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]

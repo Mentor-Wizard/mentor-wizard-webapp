@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Pages\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
-use App\Http\Resources\EventShowResource;
+use App\Http\Resources\Calendar\CalendarEventShowResource;
 use App\Models\CalendarEvent;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
@@ -33,7 +33,7 @@ class ShowCalendarEventPage
             'locale'           => app()->getLocale(),
             'availableColours' => CalendarEventColoursEnum::values(),
             'permissions'      => auth()->user()->can('update', [$calendarEvent, auth()->user()]) ? 'edit' : 'view',
-            'calendarEvent'    => new EventShowResource($calendarEvent->load('calendarEventUsers'))
+            'calendarEvent'    => new CalendarEventShowResource($calendarEvent->load('calendarEventUsers'))
                 ->additional(['user' => auth()->user(),
                     'timezone'       => $timezone,
                 ])

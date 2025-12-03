@@ -33,7 +33,7 @@ class StoreUserScheduleRequest extends FormRequest
             'end_time'     => ['required', 'date_format:H:i', 'after:start_time'],
             'type'         => ['required', Rule::in(UserScheduleRecordType::values())],
             'day_off_date' => ['nullable', 'required_if:type,'.UserScheduleRecordType::DAY_OFF->value, 'date'],
-            'timezone'     => ['required', 'string', 'timezone:all'],
+            'timezone'     => ['required', 'string'],
             'comment'      => ['nullable', 'string', 'max:255'],
         ];
     }

@@ -32,7 +32,6 @@ class UserSchedule extends Model
         'type',
         'day_off_date',
         'timezone',
-        'comment',
     ];
 
     public function user(): BelongsTo
