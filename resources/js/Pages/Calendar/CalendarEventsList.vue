@@ -175,12 +175,8 @@ onMounted(() => {
     >
       <div>
         <h1 class="text-base font-semibold text-gray-900">
-          <time class="sm:hidden">{{
-            todayDate + ' (' + timezone + ')'
-          }}</time>
-          <time class="sm:hidden">{{
-            todayDate + ' (' + timezone + ')'
-          }}</time>
+          <time class="sm:hidden">{{ todayDate + ' (' + timezone + ')' }}</time>
+          <time class="sm:hidden">{{ todayDate + ' (' + timezone + ')' }}</time>
           <time class="hidden sm:inline">{{
             todayDate + ' (' + timezone + ')'
           }}</time>

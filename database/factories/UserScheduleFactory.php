@@ -22,12 +22,11 @@ class UserScheduleFactory extends Factory
     {
         return [
             'user_id'      => User::factory(),
-            'day_of_week'  => $this->faker->numberBetween(0, 6),
+            'day_of_week'  => fake()->numberBetween(0, 6),
             'start_time'   => '09:00',
             'end_time'     => '17:00',
-            'type'         => $this->faker->randomElement(UserScheduleRecordType::values()),
+            'type'         => fake()->randomElement(UserScheduleRecordType::values()),
             'timezone'     => 'UTC',
-            'comment'      => $this->faker->optional()->sentence(),
         ];
     }
 }

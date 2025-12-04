@@ -34,7 +34,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
@@ -46,7 +46,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
@@ -58,7 +58,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -71,7 +71,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => 'not-an-array',
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -91,7 +91,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -111,7 +111,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -132,7 +132,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -153,7 +153,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -184,7 +184,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
@@ -204,14 +204,14 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'day_of_week' => 2,
                     'start_time'  => '13:00',
                     'end_time'    => '17:00',
-                    'type'        => UserScheduleRecordType::ODD_DAYS->value,
+                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
                     'timezone'    => 'UTC',
                 ],
             ],
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
@@ -225,14 +225,14 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'start_time'   => '00:00',
                     'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
-                    'day_off_date' => '2025-12-25',
+                    'day_off_date' => Illuminate\Support\Facades\Date::now()->addMonth()->format('Y-m-d'),
                     'timezone'     => 'UTC',
                 ],
             ],
             'delete_ids' => [],
         ];
 
-        $request = new StoreBatchUserScheduleRequest();
+        $request = new StoreBatchUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
@@ -589,7 +589,7 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
                     'start_time'   => '00:00',
                     'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
-                    'day_off_date' => '2025-12-25',
+                    'day_off_date' => Illuminate\Support\Facades\Date::now()->addMonth()->format('Y-m-d'),
                     'timezone'     => 'UTC',
                 ],
             ],

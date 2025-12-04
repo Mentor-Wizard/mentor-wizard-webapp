@@ -9,6 +9,7 @@ use App\Models\UserSchedule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Override;
 
 class StoreBatchUserScheduleRequest extends FormRequest
 {
@@ -36,7 +37,6 @@ class StoreBatchUserScheduleRequest extends FormRequest
             'schedules.*.type'             => ['required', Rule::in(UserScheduleRecordType::values())],
             'schedules.*.day_off_date'     => ['nullable', 'required_if:schedules.*.type,'.UserScheduleRecordType::DAY_OFF->value, 'date'],
             'schedules.*.timezone'         => ['required', 'string'],
-            'schedules.*.comment'          => ['nullable', 'string', 'max:255'],
             'delete_ids'                   => ['nullable', 'array'],
             'delete_ids.*'                 => ['integer', 'exists:user_schedules,id'],
         ];
@@ -79,7 +79,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
                         ->exists();
 
                     if (! $exists) {
-                        $validator->errors()->add("schedules.{$index}.id", 'You can only update your own schedules.');
+                        $validator->errors()->add(sprintf('schedules.%s.id', $index), 'You can only update your own schedules.');
 
                         return;
                     }
@@ -96,6 +96,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
                 if (! isset($schedulesByDay[$dayOfWeek])) {
                     $schedulesByDay[$dayOfWeek] = [];
                 }
+
                 $schedulesByDay[$dayOfWeek][] = [
                     'index'      => $index,
                     'id'         => $schedule['id'] ?? null,
@@ -117,7 +118,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
                             && $schedule1['end_time'] > $schedule2['start_time']
                         ) {
                             $validator->errors()->add(
-                                "schedules.{$schedule1['index']}.start_time",
+                                sprintf('schedules.%s.start_time', $schedule1['index']),
                                 'This time slot overlaps with another schedule on the same day.'
                             );
 
@@ -133,7 +134,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
                         ->where('day_of_week', $dayOfWeek)
                         ->where('type', '!=', UserScheduleRecordType::DAY_OFF->value)
                         ->when($schedule['id'], fn ($q) => $q->where('id', '!=', $schedule['id']))
-                        ->when(! empty($deleteIds), fn ($q) => $q->whereNotIn('id', $deleteIds))
+                        ->unless(empty($deleteIds), fn ($q) => $q->whereNotIn('id', $deleteIds))
                         ->where(function ($query) use ($schedule): void {
                             $query->where(function ($q) use ($schedule): void {
                                 $q->where('start_time', '<', $schedule['end_time'])
@@ -144,7 +145,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
 
                     if ($existingOverlaps) {
                         $validator->errors()->add(
-                            "schedules.{$schedule['index']}.start_time",
+                            sprintf('schedules.%s.start_time', $schedule['index']),
                             'This time slot overlaps with an existing schedule.'
                         );
 
@@ -160,6 +161,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
      *
      * @return array<string, string>
      */
+    #[Override]
     public function messages(): array
     {
         return [
@@ -179,7 +181,6 @@ class StoreBatchUserScheduleRequest extends FormRequest
             'schedules.*.day_off_date.date'        => 'Day off date must be a valid date.',
             'schedules.*.timezone.required'        => 'Timezone is required.',
             'schedules.*.timezone.timezone'        => 'Invalid timezone.',
-            'schedules.*.comment.max'              => 'Comment may not be greater than 255 characters.',
             'delete_ids.array'                     => 'Delete IDs must be an array.',
             'delete_ids.*.exists'                  => 'Schedule ID to delete does not exist.',
         ];

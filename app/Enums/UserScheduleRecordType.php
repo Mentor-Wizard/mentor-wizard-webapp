@@ -23,7 +23,7 @@ enum UserScheduleRecordType: string
 
     public static function getCollection(): Collection
     {
-        return collect(self::cases())->map(fn($type) => [
+        return collect(self::cases())->map(fn ($type): array => [
             'value' => $type->value,
             'label' => $type->value,
         ]);

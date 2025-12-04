@@ -234,7 +234,6 @@ describe('GetAvailableSlotsService Service', function (): void {
 
     it('excludes day off dates when excludeSchedule flag is true', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 10, 0, 0, $tz)); // Monday
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -256,16 +255,16 @@ describe('GetAvailableSlotsService Service', function (): void {
             'start_time'   => '00:00:00',
             'end_time'     => '23:59:59',
             'type'         => UserScheduleRecordType::DAY_OFF,
-            'day_off_date' => Date::create(2025, 1, 13), // Next Monday
+            'day_off_date' => Date::today()->addMonth(1)->firstOfMonth(1), // Next Monday
             'timezone'     => $tz,
         ]);
 
         // Create events on both Mondays
-        $event1Start = Date::create(2025, 1, 6, 14, 0, 0, $tz); // This Monday
-        $event1End = Date::create(2025, 1, 6, 15, 0, 0, $tz);
+        $event1Start = Date::now()->addMonth(1)->firstOfMonth(1)->setTime(10, 0, 0)->setTimezone($tz); // This Monday
+        $event1End = Date::now()->addMonth(1)->firstOfMonth(1)->setTime(16, 0, 0)->setTimezone($tz);
 
-        $event2Start = Date::create(2025, 1, 13, 14, 0, 0, $tz); // Next Monday (day off)
-        $event2End = Date::create(2025, 1, 13, 15, 0, 0, $tz);
+        $event2Start = Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->setTime(10, 0, 0)->setTimezone($tz); // Next Monday (day off)
+        $event2End = Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->setTime(16, 0, 0)->setTimezone($tz);
 
         $event1 = CalendarEvent::query()->create([
             'title'           => 'Event on Working Monday',
@@ -293,10 +292,11 @@ describe('GetAvailableSlotsService Service', function (): void {
         $result = new GetAvailableSlotsService($user, $tz, [], true)->getAvailableSlots();
 
         // Slots should not include or overlap with the day off date (2025-01-13)
-        $slotsOnDayOff = array_filter($result, function ($slot) {
+        $slotsOnDayOff = array_filter($result, function (array $slot): bool {
             $slotDate = $slot['start']->format('Y-m-d');
             $slotEndDate = $slot['end']->format('Y-m-d');
-            return $slotDate === '2025-01-13' || $slotEndDate === '2025-01-13';
+
+            return $slotDate === Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->format('Y-m-d') || $slotEndDate === Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->format('Y-m-d');
         });
 
         expect($slotsOnDayOff)->toBeEmpty();

@@ -9,6 +9,7 @@ use App\Models\UserSchedule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Override;
 
 class StoreUserScheduleRequest extends FormRequest
 {
@@ -34,7 +35,6 @@ class StoreUserScheduleRequest extends FormRequest
             'type'         => ['required', Rule::in(UserScheduleRecordType::values())],
             'day_off_date' => ['nullable', 'required_if:type,'.UserScheduleRecordType::DAY_OFF->value, 'date'],
             'timezone'     => ['required', 'string'],
-            'comment'      => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -82,6 +82,7 @@ class StoreUserScheduleRequest extends FormRequest
      *
      * @return array<string, string>
      */
+    #[Override]
     public function messages(): array
     {
         return [
@@ -98,7 +99,6 @@ class StoreUserScheduleRequest extends FormRequest
             'day_off_date.date'        => 'Day off date must be a valid date.',
             'timezone.required'        => 'Timezone is required.',
             'timezone.timezone'        => 'Invalid timezone.',
-            'comment.max'              => 'Comment may not be greater than 255 characters.',
         ];
     }
 

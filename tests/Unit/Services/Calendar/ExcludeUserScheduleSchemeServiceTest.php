@@ -32,7 +32,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
     it('filters slots to only include working hours', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday 8 AM
+        $testDate = Date::now()->next('Monday')->setTime(8, 0, 0);
+        Date::setTestNow($testDate->copy()->setTimezone($tz));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -50,8 +51,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slot from 8:00 to 18:00 (spans beyond working hours)
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 8, 0, 0, $tz),
-                'end'   => Date::create(2025, 1, 6, 18, 0, 0, $tz),
+                'start' => $testDate->copy()->setTimezone($tz),
+                'end'   => $testDate->copy()->setTime(18, 0, 0)->setTimezone($tz),
             ],
         ];
 
@@ -67,7 +68,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
     it('handles multiple working day schedules for same day', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday
+        $testDate = Date::now()->next('Monday')->setTime(8, 0, 0);
+        Date::setTestNow($testDate->copy()->setTimezone($tz));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -94,8 +96,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slot all day
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 8, 0, 0, $tz),
-                'end'   => Date::create(2025, 1, 6, 18, 0, 0, $tz),
+                'start' => $testDate->copy()->setTimezone($tz),
+                'end'   => $testDate->copy()->setTime(18, 0, 0)->setTimezone($tz),
             ],
         ];
 
@@ -115,7 +117,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
     it('excludes slots on days without working schedule', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday
+        $monday = Date::now()->next('Monday')->setTime(8, 0, 0);
+        Date::setTestNow($monday->copy()->setTimezone($tz));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -133,12 +136,12 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slots on Monday and Tuesday
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 10, 0, 0, $tz), // Monday
-                'end'   => Date::create(2025, 1, 6, 16, 0, 0, $tz),
+                'start' => $monday->copy()->setTime(10, 0, 0)->setTimezone($tz), // Monday
+                'end'   => $monday->copy()->setTime(16, 0, 0)->setTimezone($tz),
             ],
             [
-                'start' => Date::create(2025, 1, 7, 10, 0, 0, $tz), // Tuesday (no schedule)
-                'end'   => Date::create(2025, 1, 7, 16, 0, 0, $tz),
+                'start' => $monday->copy()->addDay()->setTime(10, 0, 0)->setTimezone($tz), // Tuesday (no schedule)
+                'end'   => $monday->copy()->addDay()->setTime(16, 0, 0)->setTimezone($tz),
             ],
         ];
 
@@ -147,12 +150,11 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
         // Only Monday slot should be included
         expect($slots)->toBeArray()->toHaveCount(1);
-        expect($slots[0]['start']->format('Y-m-d'))->toBe('2025-01-06');
+        expect($slots[0]['start']->format('Y-m-d'))->toBe($monday->format('Y-m-d'));
     });
 
     it('excludes day off dates from available slots', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -174,19 +176,19 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
             'start_time'   => '00:00:00',
             'end_time'     => '23:59:59',
             'type'         => UserScheduleRecordType::DAY_OFF,
-            'day_off_date' => Date::create(2025, 1, 13),
+            'day_off_date' => Date::today()->addMonth(1)->firstOfMonth(1),
             'timezone'     => $tz,
         ]);
 
         // Event slots on two Mondays
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 10, 0, 0, $tz), // Monday (working day)
-                'end'   => Date::create(2025, 1, 6, 16, 0, 0, $tz),
+                'start' => Date::now()->addMonth(1)->firstOfMonth(1)->setTime(10, 0, 0)->setTimezone($tz), // Monday (working day)
+                'end'   => Date::now()->addMonth(1)->firstOfMonth(1)->setTime(16, 0, 0)->setTimezone($tz),
             ],
             [
-                'start' => Date::create(2025, 1, 13, 10, 0, 0, $tz), // Monday (day off)
-                'end'   => Date::create(2025, 1, 13, 16, 0, 0, $tz),
+                'start' => Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->setTime(10, 0, 0)->setTimezone($tz), // Monday (day off)
+                'end'   => Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->setTime(16, 0, 0)->setTimezone($tz),
             ],
         ];
 
@@ -195,14 +197,15 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
         // Only the first Monday should be included
         expect($slots)->toBeArray()->toHaveCount(1);
-        expect($slots[0]['start']->format('Y-m-d'))->toBe('2025-01-06');
+        expect($slots[0]['start']->format('Y-m-d'))->toBe(Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->format('Y-m-d'));
     });
 
     it('handles timezone conversion correctly', function (): void {
         $scheduleTimezone = 'Europe/Kyiv';
         $chosenTimezone = 'America/New_York';
 
-        Date::setTestNow(Date::create(2025, 1, 6, 12, 0, 0, $scheduleTimezone)); // Monday noon
+        $monday = Date::now()->next('Monday')->setTime(12, 0, 0);
+        Date::setTestNow($monday->copy()->setTimezone($scheduleTimezone));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -220,8 +223,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slot in chosen timezone
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 8, 0, 0, $scheduleTimezone),
-                'end'   => Date::create(2025, 1, 6, 18, 0, 0, $scheduleTimezone),
+                'start' => $monday->copy()->setTime(8, 0, 0)->setTimezone($scheduleTimezone),
+                'end'   => $monday->copy()->setTime(18, 0, 0)->setTimezone($scheduleTimezone),
             ],
         ];
 
@@ -237,7 +240,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
     it('handles multi-day event slots correctly', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday
+        $monday = Date::now()->next('Monday')->setTime(8, 0, 0);
+        Date::setTestNow($monday->copy()->setTimezone($tz));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -262,10 +266,11 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         ]);
 
         // Event slot spanning two days
+        $tuesday = $monday->copy()->addDay();
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 14, 0, 0, $tz), // Monday 14:00
-                'end'   => Date::create(2025, 1, 7, 12, 0, 0, $tz), // Tuesday 12:00
+                'start' => $monday->copy()->setTime(14, 0, 0)->setTimezone($tz), // Monday 14:00
+                'end'   => $tuesday->copy()->setTime(12, 0, 0)->setTimezone($tz), // Tuesday 12:00
             ],
         ];
 
@@ -276,17 +281,18 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         expect($slots)->toBeArray()->not()->toBeEmpty();
 
         // Find Monday slot
-        $mondaySlots = array_filter($slots, fn($slot) => $slot['start']->format('Y-m-d') === '2025-01-06');
+        $mondaySlots = array_filter($slots, fn (array $slot): bool => $slot['start']->format('Y-m-d') === $monday->format('Y-m-d'));
         expect($mondaySlots)->not()->toBeEmpty();
 
         // Find Tuesday slot
-        $tuesdaySlots = array_filter($slots, fn($slot) => $slot['start']->format('Y-m-d') === '2025-01-07');
+        $tuesdaySlots = array_filter($slots, fn (array $slot): bool => $slot['start']->format('Y-m-d') === $tuesday->format('Y-m-d'));
         expect($tuesdaySlots)->not()->toBeEmpty();
     });
 
     it('handles partial overlap with working hours', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday
+        $monday = Date::now()->next('Monday')->setTime(8, 0, 0);
+        Date::setTestNow($monday->copy()->setTimezone($tz));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -304,8 +310,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slot from 11:00 to 13:00 (fully within working hours)
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 11, 0, 0, $tz),
-                'end'   => Date::create(2025, 1, 6, 13, 0, 0, $tz),
+                'start' => $monday->copy()->setTime(11, 0, 0)->setTimezone($tz),
+                'end'   => $monday->copy()->setTime(13, 0, 0)->setTimezone($tz),
             ],
         ];
 
@@ -321,7 +327,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
     it('handles event slot starting before and ending within working hours', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday
+        $monday = Date::now()->next('Monday')->setTime(8, 0, 0);
+        Date::setTestNow($monday->copy()->setTimezone($tz));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -339,8 +346,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slot from 8:00 to 12:00
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 8, 0, 0, $tz),
-                'end'   => Date::create(2025, 1, 6, 12, 0, 0, $tz),
+                'start' => $monday->copy()->setTime(8, 0, 0)->setTimezone($tz),
+                'end'   => $monday->copy()->setTime(12, 0, 0)->setTimezone($tz),
             ],
         ];
 
@@ -356,7 +363,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
     it('handles event slot starting within and ending after working hours', function (): void {
         $tz = 'Europe/Kyiv';
-        Date::setTestNow(Date::create(2025, 1, 6, 8, 0, 0, $tz)); // Monday
+        $monday = Date::now()->next('Monday')->setTime(8, 0, 0);
+        Date::setTestNow($monday->copy()->setTimezone($tz));
 
         /** @var User $user */
         $user = User::factory()->create();
@@ -374,8 +382,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slot from 15:00 to 19:00
         $eventsSlots = [
             [
-                'start' => Date::create(2025, 1, 6, 15, 0, 0, $tz),
-                'end'   => Date::create(2025, 1, 6, 19, 0, 0, $tz),
+                'start' => $monday->copy()->setTime(15, 0, 0)->setTimezone($tz),
+                'end'   => $monday->copy()->setTime(19, 0, 0)->setTimezone($tz),
             ],
         ];
 

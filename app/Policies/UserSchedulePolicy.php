@@ -22,7 +22,7 @@ class UserSchedulePolicy
 
         $allIdsToCheck = array_merge($updateIds, $deleteIds);
 
-        if (empty($allIdsToCheck)) {
+        if ($allIdsToCheck === []) {
             return true;
         }
 

@@ -3,5 +3,5 @@ import MentorSchedule from '@/Pages/UserSchedule/ListPage.vue';
 </script>
 <template>
   <div>Mentor Schedule</div>
-  <MentorSchedule/>
+  <MentorSchedule />
 </template>

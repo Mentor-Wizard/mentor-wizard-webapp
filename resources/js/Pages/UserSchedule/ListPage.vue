@@ -12,10 +12,11 @@ import {
   PlusIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline';
-import {router, usePage} from '@inertiajs/vue3';
-import {computed, onMounted, ref, watch} from 'vue';
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import PopUp from "@/Components/UI/Notifications/PopUp.vue";
+import { router, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref, watch } from 'vue';
+
+import PopUp from '@/Components/UI/Notifications/PopUp.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 interface Schedule {
   id?: number;
@@ -38,23 +39,24 @@ interface Props {
   error?: string;
 }
 
+const timezoneCalculated = ref(null);
 const props = defineProps<Props>();
-const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone);
+
 const daysOfWeek = [
-  {value: 1, label: 'Monday'},
-  {value: 2, label: 'Tuesday'},
-  {value: 3, label: 'Wednesday'},
-  {value: 4, label: 'Thursday'},
-  {value: 5, label: 'Friday'},
-  {value: 6, label: 'Saturday'},
-  {value: 0, label: 'Sunday'},
+  { value: 1, label: 'Monday' },
+  { value: 2, label: 'Tuesday' },
+  { value: 3, label: 'Wednesday' },
+  { value: 4, label: 'Thursday' },
+  { value: 5, label: 'Friday' },
+  { value: 6, label: 'Saturday' },
+  { value: 0, label: 'Sunday' },
 ];
 
 // Filter schedule types for weekdays (exclude Day off and Weekend)
 const weekdayScheduleTypes = computed(() =>
   props.scheduleTypes.filter(
-    (type) => type.value !== 'Day off' && type.value !== 'Weekend'
-  )
+    (type) => type.value !== 'Day off' && type.value !== 'Weekend',
+  ),
 );
 
 // Generate time options (00:00 to 23:30 in 30-minute intervals)
@@ -72,13 +74,22 @@ const schedulesByDay = computed(() => {
   const grouped: Record<number, Schedule[]> = {};
   daysOfWeek.forEach((day) => {
     grouped[day.value] = props.schedules
-      .filter((schedule) => schedule.day_of_week === day.value && schedule.type !== 'Day off')
+      .filter(
+        (schedule) =>
+          schedule.day_of_week === day.value && schedule.type !== 'Day off',
+      )
       .map((schedule) => ({
         ...schedule,
         enabled: true,
         // Format times to HH:mm without seconds
-        start_time: schedule.start_time ? schedule.start_time.substring(0, 5) : schedule.start_time,
-        end_time: schedule.end_time ? schedule.end_time.substring(0, 5) : schedule.end_time,
+        start_time:
+          schedule.start_time ?
+            schedule.start_time.substring(0, 5)
+          : schedule.start_time,
+        end_time:
+          schedule.end_time ?
+            schedule.end_time.substring(0, 5)
+          : schedule.end_time,
       }));
   });
   return grouped;
@@ -92,8 +103,14 @@ const exclusionSchedules = computed(() => {
       ...schedule,
       enabled: true,
       // Format times to HH:mm without seconds
-      start_time: schedule.start_time ? schedule.start_time.substring(0, 5) : schedule.start_time,
-      end_time: schedule.end_time ? schedule.end_time.substring(0, 5) : schedule.end_time,
+      start_time:
+        schedule.start_time ?
+          schedule.start_time.substring(0, 5)
+        : schedule.start_time,
+      end_time:
+        schedule.end_time ?
+          schedule.end_time.substring(0, 5)
+        : schedule.end_time,
     }));
 });
 
@@ -103,15 +120,15 @@ const localExclusions = ref<Schedule[]>([]);
 
 // Initialize local schedules
 daysOfWeek.forEach((day) => {
-  localSchedules.value[day.value] = schedulesByDay.value[day.value].length
-    ? [...schedulesByDay.value[day.value]]
+  localSchedules.value[day.value] =
+    schedulesByDay.value[day.value].length ?
+      [...schedulesByDay.value[day.value]]
     : [];
 });
 
 // Initialize local exclusions
-localExclusions.value = exclusionSchedules.value.length
-  ? [...exclusionSchedules.value]
-  : [];
+localExclusions.value =
+  exclusionSchedules.value.length ? [...exclusionSchedules.value] : [];
 
 // Helper function to add one hour to a time string (HH:mm format)
 const addOneHour = (timeStr: string): string => {
@@ -121,22 +138,26 @@ const addOneHour = (timeStr: string): string => {
 };
 
 // Watch for start_time changes and auto-update end_time
-watch(localSchedules, (newSchedules) => {
-  daysOfWeek.forEach((day) => {
-    if (newSchedules[day.value]) {
-      newSchedules[day.value].forEach((schedule, index) => {
-        // Store previous start_time to detect changes
-        if (!schedule._prevStartTime) {
-          schedule._prevStartTime = schedule.start_time;
-        } else if (schedule._prevStartTime !== schedule.start_time) {
-          // Start time changed, update end_time
-          schedule.end_time = addOneHour(schedule.start_time);
-          schedule._prevStartTime = schedule.start_time;
-        }
-      });
-    }
-  });
-}, {deep: true});
+watch(
+  localSchedules,
+  (newSchedules) => {
+    daysOfWeek.forEach((day) => {
+      if (newSchedules[day.value]) {
+        newSchedules[day.value].forEach((schedule) => {
+          // Store previous start_time to detect changes
+          if (!schedule._prevStartTime) {
+            schedule._prevStartTime = schedule.start_time;
+          } else if (schedule._prevStartTime !== schedule.start_time) {
+            // Start time changed, update end_time
+            schedule.end_time = addOneHour(schedule.start_time);
+            schedule._prevStartTime = schedule.start_time;
+          }
+        });
+      }
+    });
+  },
+  { deep: true },
+);
 
 const errors = ref<Record<string, string>>({});
 
@@ -151,7 +172,7 @@ const notification = ref<{ show: boolean; success: boolean; message: string }>({
 });
 
 const showNotification = (success: boolean, message: string) => {
-  notification.value = {show: true, success, message};
+  notification.value = { show: true, success, message };
   setTimeout(() => {
     notification.value.show = false;
   }, 5000);
@@ -165,9 +186,12 @@ const refreshSchedules = () => {
 // Check for flash messages on mount
 onMounted(() => {
   const page = usePage();
-  timezone.value = page.props.timezone?page.props.timezone:ref(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  if(page.props.schedules.length == 0){
-    showNotification(true, "There are no schedules set");
+  timezoneCalculated.value =
+    page.props.timezone ?
+      page.props.timezone
+    : ref(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  if (page.props.schedules.length == 0) {
+    showNotification(true, 'There are no schedules set');
   }
 });
 
@@ -181,7 +205,7 @@ const addScheduleForDay = (dayOfWeek: number) => {
     start_time: '09:00',
     end_time: '17:00',
     type: 'Working Day',
-    timezone: timezone.value,
+    timezone: timezoneCalculated.value,
     enabled: true,
   });
 };
@@ -204,7 +228,7 @@ const addExclusion = () => {
     start_time: '09:00',
     end_time: '17:00',
     type: 'Day off',
-    timezone: timezone.value,
+    timezone: timezoneCalculated.value,
     enabled: true,
   });
 };
@@ -261,7 +285,7 @@ const saveAllSchedules = () => {
     onSuccess: () => {
       // Clear deletion tracking
       scheduleIdsToDelete.value = [];
-      showNotification(true, "Schedule was saved successfully");
+      showNotification(true, 'Schedule was saved successfully');
       refreshSchedules();
     },
     onError: (serverErrors) => {
@@ -284,12 +308,14 @@ const saveAllSchedules = () => {
                     return s.id === schedule.id;
                   }
                   // Otherwise match by all properties
-                  return s.day_of_week === schedule.day_of_week &&
-                    s.start_time === schedule.start_time &&
-                    s.end_time === schedule.end_time &&
-                    s.type === schedule.type &&
-                    s.enabled === schedule.enabled;
-                }
+                  return (
+                    s.day_of_week === schedule.day_of_week
+                    && s.start_time === schedule.start_time
+                    && s.end_time === schedule.end_time
+                    && s.type === schedule.type
+                    && s.enabled === schedule.enabled
+                  );
+                },
               );
 
               if (localIndex !== undefined && localIndex >= 0) {
@@ -305,25 +331,28 @@ const saveAllSchedules = () => {
 
 const getTypeLabel = (typeValue: string): string => {
   return (
-    props.scheduleTypes.find((type) => type.value === typeValue)?.label || typeValue
+    props.scheduleTypes.find((type) => type.value === typeValue)?.label
+    || typeValue
   );
 };
 </script>
 
 <template>
   <AuthenticatedLayout>
-
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <!-- Notification Popup -->
       <div>
-        <PopUp :show-status="notification.show" :success="notification.success" :message="notification.message"></PopUp>
+        <PopUp
+          :show-status="notification.show"
+          :success="notification.success"
+          :message="notification.message"
+        ></PopUp>
       </div>
-
 
       <div class="mb-8 flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Weekly Schedule</h1>
-          <h4>Timezone: {{ timezone }}</h4>
+          <h4>Timezone: {{ timezoneCalculated }}</h4>
           <p class="mt-2 text-sm text-gray-600">
             Manage your weekly schedule by adding time slots for each day.
           </p>
@@ -355,15 +384,16 @@ const getTypeLabel = (typeValue: string): string => {
               class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               @click="addScheduleForDay(day.value)"
             >
-              <PlusIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true"/>
+              <PlusIcon class="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
               Add
             </button>
           </div>
 
           <div
             v-if="
-            !localSchedules[day.value] || localSchedules[day.value].length === 0
-          "
+              !localSchedules[day.value]
+              || localSchedules[day.value].length === 0
+            "
             class="py-8 text-center text-sm text-gray-500"
           >
             No schedules for this day. Click "Add Schedule" to create one.
@@ -373,34 +403,31 @@ const getTypeLabel = (typeValue: string): string => {
             <div
               v-for="(schedule, index) in localSchedules[day.value]"
               :key="index"
-
               :class="[
-                  !schedule.enabled ? 'bg-gray-200' : '',
-                  'grid grid-cols-12 items-start gap-3 rounded-md border border-gray-200 bg-gray-50 p-3',
-                ]"
+                !schedule.enabled ? 'bg-gray-200' : '',
+                'grid grid-cols-12 items-start gap-3 rounded-md border border-gray-200 bg-gray-50 p-3',
+              ]"
             >
               <!-- Toggle -->
-              <div
-                class="col-span-1 flex items-center pt-2">
+              <div class="col-span-1 flex items-center pt-2">
                 <Switch
                   v-model="schedule.enabled"
                   :class="[
-                  schedule.enabled ? 'bg-indigo-600' : 'bg-gray-200',
-                  'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2',
-                ]"
-                >
-                <span
-                  aria-hidden="true"
-                  :class="[
-                    schedule.enabled ? 'translate-x-5' : 'translate-x-0',
-                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out transform',
+                    schedule.enabled ? 'bg-indigo-600' : 'bg-gray-200',
+                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:outline-none',
                   ]"
-                />
+                >
+                  <span
+                    aria-hidden="true"
+                    :class="[
+                      schedule.enabled ? 'translate-x-5' : 'translate-x-0',
+                      'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                    ]"
+                  />
                 </Switch>
               </div>
               <!-- Start Time -->
-              <div
-                class="col-span-2">
+              <div class="col-span-2">
                 <label class="block text-xs font-medium text-gray-700">
                   Start Time
                 </label>
@@ -410,17 +437,19 @@ const getTypeLabel = (typeValue: string): string => {
                 >
                   <div class="relative mt-1">
                     <ListboxButton
-                      class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-left text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                      class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-left text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
                     >
-                      <span class="block truncate">{{ schedule.start_time }}</span>
+                      <span class="block truncate">{{
+                        schedule.start_time
+                      }}</span>
                       <span
                         class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
                       >
-                      <ChevronUpDownIcon
-                        class="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </span>
+                        <ChevronUpDownIcon
+                          class="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </span>
                     </ListboxButton>
                     <transition
                       leave-active-class="transition duration-100 ease-in"
@@ -428,7 +457,7 @@ const getTypeLabel = (typeValue: string): string => {
                       leave-to-class="opacity-0"
                     >
                       <ListboxOptions
-                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                        class="ring-opacity-5 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black focus:outline-none"
                       >
                         <ListboxOption
                           v-for="time in timeOptions"
@@ -439,29 +468,29 @@ const getTypeLabel = (typeValue: string): string => {
                         >
                           <li
                             :class="[
-                            active ?
-                              'bg-indigo-600 text-white'
-                            : 'text-gray-900',
-                            'relative cursor-default py-2 pr-9 pl-3 select-none',
-                          ]"
-                          >
-                          <span
-                            :class="[
-                              selected ? 'font-semibold' : 'font-normal',
-                              'block truncate',
+                              active ?
+                                'bg-indigo-600 text-white'
+                              : 'text-gray-900',
+                              'relative cursor-default py-2 pr-9 pl-3 select-none',
                             ]"
                           >
-                            {{ time }}
-                          </span>
+                            <span
+                              :class="[
+                                selected ? 'font-semibold' : 'font-normal',
+                                'block truncate',
+                              ]"
+                            >
+                              {{ time }}
+                            </span>
                             <span
                               v-if="selected"
                               :class="[
-                              active ? 'text-white' : 'text-indigo-600',
-                              'absolute inset-y-0 right-0 flex items-center pr-4',
-                            ]"
+                                active ? 'text-white' : 'text-indigo-600',
+                                'absolute inset-y-0 right-0 flex items-center pr-4',
+                              ]"
                             >
-                            <CheckIcon class="h-5 w-5" aria-hidden="true"/>
-                          </span>
+                              <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                            </span>
                           </li>
                         </ListboxOption>
                       </ListboxOptions>
@@ -475,20 +504,25 @@ const getTypeLabel = (typeValue: string): string => {
                 <label class="block text-xs font-medium text-gray-700">
                   End Time
                 </label>
-                <Listbox v-model="schedule.end_time" :disabled="!schedule.enabled">
+                <Listbox
+                  v-model="schedule.end_time"
+                  :disabled="!schedule.enabled"
+                >
                   <div class="relative mt-1">
                     <ListboxButton
-                      class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-left text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                      class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-left text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
                     >
-                      <span class="block truncate">{{ schedule.end_time }}</span>
+                      <span class="block truncate">{{
+                        schedule.end_time
+                      }}</span>
                       <span
                         class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
                       >
-                      <ChevronUpDownIcon
-                        class="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </span>
+                        <ChevronUpDownIcon
+                          class="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </span>
                     </ListboxButton>
                     <transition
                       leave-active-class="transition duration-100 ease-in"
@@ -496,7 +530,7 @@ const getTypeLabel = (typeValue: string): string => {
                       leave-to-class="opacity-0"
                     >
                       <ListboxOptions
-                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                        class="ring-opacity-5 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black focus:outline-none"
                       >
                         <ListboxOption
                           v-for="time in timeOptions"
@@ -507,29 +541,29 @@ const getTypeLabel = (typeValue: string): string => {
                         >
                           <li
                             :class="[
-                            active ?
-                              'bg-indigo-600 text-white'
-                            : 'text-gray-900',
-                            'relative cursor-default py-2 pr-9 pl-3 select-none',
-                          ]"
-                          >
-                          <span
-                            :class="[
-                              selected ? 'font-semibold' : 'font-normal',
-                              'block truncate',
+                              active ?
+                                'bg-indigo-600 text-white'
+                              : 'text-gray-900',
+                              'relative cursor-default py-2 pr-9 pl-3 select-none',
                             ]"
                           >
-                            {{ time }}
-                          </span>
+                            <span
+                              :class="[
+                                selected ? 'font-semibold' : 'font-normal',
+                                'block truncate',
+                              ]"
+                            >
+                              {{ time }}
+                            </span>
                             <span
                               v-if="selected"
                               :class="[
-                              active ? 'text-white' : 'text-indigo-600',
-                              'absolute inset-y-0 right-0 flex items-center pr-4',
-                            ]"
+                                active ? 'text-white' : 'text-indigo-600',
+                                'absolute inset-y-0 right-0 flex items-center pr-4',
+                              ]"
                             >
-                            <CheckIcon class="h-5 w-5" aria-hidden="true"/>
-                          </span>
+                              <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                            </span>
                           </li>
                         </ListboxOption>
                       </ListboxOptions>
@@ -546,19 +580,19 @@ const getTypeLabel = (typeValue: string): string => {
                 <Listbox v-model="schedule.type" :disabled="!schedule.enabled">
                   <div class="relative mt-1">
                     <ListboxButton
-                      class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-left text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                      class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-left text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
                     >
-                    <span class="block truncate">{{
+                      <span class="block truncate">{{
                         getTypeLabel(schedule.type)
                       }}</span>
                       <span
                         class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
                       >
-                      <ChevronUpDownIcon
-                        class="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </span>
+                        <ChevronUpDownIcon
+                          class="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </span>
                     </ListboxButton>
                     <transition
                       leave-active-class="transition duration-100 ease-in"
@@ -566,7 +600,7 @@ const getTypeLabel = (typeValue: string): string => {
                       leave-to-class="opacity-0"
                     >
                       <ListboxOptions
-                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                        class="ring-opacity-5 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black focus:outline-none"
                       >
                         <ListboxOption
                           v-for="type in weekdayScheduleTypes"
@@ -577,29 +611,29 @@ const getTypeLabel = (typeValue: string): string => {
                         >
                           <li
                             :class="[
-                            active ?
-                              'bg-indigo-600 text-white'
-                            : 'text-gray-900',
-                            'relative cursor-default py-2 pr-9 pl-3 select-none',
-                          ]"
-                          >
-                          <span
-                            :class="[
-                              selected ? 'font-semibold' : 'font-normal',
-                              'block truncate',
+                              active ?
+                                'bg-indigo-600 text-white'
+                              : 'text-gray-900',
+                              'relative cursor-default py-2 pr-9 pl-3 select-none',
                             ]"
                           >
-                            {{ type.label }}
-                          </span>
+                            <span
+                              :class="[
+                                selected ? 'font-semibold' : 'font-normal',
+                                'block truncate',
+                              ]"
+                            >
+                              {{ type.label }}
+                            </span>
                             <span
                               v-if="selected"
                               :class="[
-                              active ? 'text-white' : 'text-indigo-600',
-                              'absolute inset-y-0 right-0 flex items-center pr-4',
-                            ]"
+                                active ? 'text-white' : 'text-indigo-600',
+                                'absolute inset-y-0 right-0 flex items-center pr-4',
+                              ]"
                             >
-                            <CheckIcon class="h-5 w-5" aria-hidden="true"/>
-                          </span>
+                              <CheckIcon class="h-5 w-5" aria-hidden="true" />
+                            </span>
                           </li>
                         </ListboxOption>
                       </ListboxOptions>
@@ -609,13 +643,13 @@ const getTypeLabel = (typeValue: string): string => {
               </div>
 
               <!-- Actions -->
-              <div class="col-span-4 mt-4 flex items-end justify-end" >
+              <div class="col-span-4 mt-4 flex items-end justify-end">
                 <button
                   type="button"
                   class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                   @click="removeSchedule(day.value, index)"
                 >
-                  <TrashIcon class="h-4 w-4" aria-hidden="true"/>
+                  <TrashIcon class="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
 
@@ -625,7 +659,6 @@ const getTypeLabel = (typeValue: string): string => {
                   {{ errors[`${day.value}-${index}`] }}
                 </p>
               </div>
-
             </div>
           </div>
         </div>
@@ -644,7 +677,7 @@ const getTypeLabel = (typeValue: string): string => {
               class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               @click="addExclusion"
             >
-              <PlusIcon class="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true"/>
+              <PlusIcon class="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
               Add Exclusion
             </button>
           </div>
@@ -667,17 +700,17 @@ const getTypeLabel = (typeValue: string): string => {
                 <Switch
                   v-model="exclusion.enabled"
                   :class="[
-                  exclusion.enabled ? 'bg-indigo-600' : 'bg-gray-200',
-                  'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2',
-                ]"
-                >
-                <span
-                  aria-hidden="true"
-                  :class="[
-                    exclusion.enabled ? 'translate-x-5' : 'translate-x-0',
-                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out transform',
+                    exclusion.enabled ? 'bg-indigo-600' : 'bg-gray-200',
+                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus:outline-none',
                   ]"
-                />
+                >
+                  <span
+                    aria-hidden="true"
+                    :class="[
+                      exclusion.enabled ? 'translate-x-5' : 'translate-x-0',
+                      'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                    ]"
+                  />
                 </Switch>
               </div>
 
@@ -690,7 +723,7 @@ const getTypeLabel = (typeValue: string): string => {
                   v-model="exclusion.day_off_date"
                   type="date"
                   :disabled="!exclusion.enabled"
-                  class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                  class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
                 />
               </div>
 
@@ -701,7 +734,7 @@ const getTypeLabel = (typeValue: string): string => {
                   class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                   @click="removeExclusion(index)"
                 >
-                  <TrashIcon class="h-4 w-4" aria-hidden="true"/>
+                  <TrashIcon class="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
 
