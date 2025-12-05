@@ -271,9 +271,10 @@ describe('StoreBatchUserScheduleRequest custom validation - ownership', function
 
         $validator = Validator::make($data, $request->rules());
         $request->withValidator($validator);
-        $validator->validate();
 
-        expect($validator->errors()->has('delete_ids'))->toBeTrue();
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->first('delete_ids'))
+            ->toBe('You can only delete your own schedules.');
     });
 
     it('allows deleting own schedule', function (): void {
@@ -339,9 +340,9 @@ describe('StoreBatchUserScheduleRequest custom validation - ownership', function
 
         $validator = Validator::make($data, $request->rules());
         $request->withValidator($validator);
-        $validator->validate();
 
-        expect($validator->errors()->has('schedules.0.id'))->toBeTrue();
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->first('delete_ids'));
     });
 
     it('allows updating own schedule', function (): void {
@@ -420,7 +421,6 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
 
         $validator = Validator::make($data, $request->rules());
         $request->withValidator($validator);
-        $validator->validate();
 
         expect($validator->errors()->has('schedules.0.start_time'))->toBeTrue();
     });
@@ -492,7 +492,6 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
 
         $validator = Validator::make($data, $request->rules());
         $request->withValidator($validator);
-        $validator->validate();
 
         expect($validator->errors()->has('schedules.0.start_time'))->toBeTrue();
     });

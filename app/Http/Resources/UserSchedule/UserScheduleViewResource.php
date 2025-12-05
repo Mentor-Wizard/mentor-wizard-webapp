@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources\UserSchedule;
 
 use Carbon\CarbonInterface;
-use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
@@ -38,7 +37,7 @@ class UserScheduleViewResource extends JsonResource
             'end_time'          => $this->end_time,
             'type'              => $this->type,
             'day_off_date'      => $this->day_off_date?->format('Y-m-d'),
-            'timezone'          => $this->timezone
+            'timezone'          => $this->timezone,
         ];
     }
 }

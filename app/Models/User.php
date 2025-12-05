@@ -28,6 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read MentorProfile|null $mentorProfile
  * @property-read float $rating
  * @property string $username
+ *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
@@ -168,9 +169,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function activeScheduleRecords(): HasMany
     {
         return $this->hasMany(UserSchedule::class)
-            ->where('type','=',"Day off")
-            ->where('day_off_date','>=',now()->format('Y-m-d'))
-            ->orWhere('type','!=',"Day off");
+            ->where('type', '=', 'Day off')
+            ->where('day_off_date', '>=', now()->format('Y-m-d'))
+            ->orWhere('type', '!=', 'Day off');
     }
 
     public function getFilamentName(): string

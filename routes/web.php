@@ -24,9 +24,7 @@ use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
-use App\Actions\UserSchedule\DeleteUserScheduleRecord;
 use App\Actions\UserSchedule\StoreBatchUserSchedule;
-use App\Actions\UserSchedule\StoreUserScheduleRecord;
 use App\Models\CalendarEvent;
 use Illuminate\Support\Facades\Route;
 
@@ -91,7 +89,7 @@ Route::middleware('auth')
         Route::get('list', GetChatPage::class)->name('page.chat.list');
     });
 
-Route::middleware(['auth', 'verified','role:mentor'])->prefix('user-schedule')->group(function (): void {
+Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')->group(function (): void {
     Route::get('/', GetUserSchedulePage::class)->name('user-schedule.index');
     Route::post('/batch', StoreBatchUserSchedule::class)->name('user-schedule.batch');
 });

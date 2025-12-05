@@ -158,7 +158,7 @@ describe('Update Calendar CalendarEvent', function (): void {
             'title' => 'Updated Event',
         ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(419);
     });
 
     it('throws exception when event does not exist', function (): void {

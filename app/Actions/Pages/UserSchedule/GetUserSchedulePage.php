@@ -24,7 +24,7 @@ class GetUserSchedulePage
         return Inertia::render('UserSchedule/ListPage', [
             'schedules'     => UserScheduleViewResource::collection($schedules)->resolve(),
             'scheduleTypes' => UserScheduleRecordType::getCollection(),
-            'timezone'      => $schedules?->first()->timezone ??null,
+            'timezone'      => $schedules?->first()->timezone ?? null,
         ]);
     }
 }

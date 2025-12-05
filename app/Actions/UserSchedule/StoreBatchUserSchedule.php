@@ -27,7 +27,7 @@ class StoreBatchUserSchedule
             $schedules = collect($request->input('schedules', []));
             $deleteIds = $request->input('delete_ids', []);
 
-//            Gate::authorize('upsert', [UserSchedule::class, $schedules, (array) $deleteIds]);
+            Gate::authorize('upsert', [UserSchedule::class, $schedules, (array) $deleteIds]);
 
             if (! empty($deleteIds)) {
                 UserSchedule::query()

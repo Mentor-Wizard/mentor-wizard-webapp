@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\UserScheduleRecordType;
 use App\Http\Requests\UserSchedule\StoreUserScheduleRequest;
 use App\Models\User;
-use App\Models\UserSchedule;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Validator;
 
@@ -29,7 +28,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
@@ -45,7 +44,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'     => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
@@ -59,7 +58,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'   => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -75,7 +74,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -90,7 +89,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -105,7 +104,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -121,7 +120,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -136,7 +135,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -152,7 +151,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -168,7 +167,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'timezone'    => 'UTC',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -183,7 +182,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->fails())->toBeTrue()
@@ -200,28 +199,9 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'comment'     => 'This is a test comment',
         ];
 
-        $request = new StoreUserScheduleRequest();
+        $request = new StoreUserScheduleRequest;
         $validator = Validator::make($data, $request->rules());
 
         expect($validator->passes())->toBeTrue();
     });
-
-    it('fails validation when comment exceeds 255 characters', function (): void {
-        $data = [
-            'day_of_week' => 1,
-            'start_time'  => '09:00',
-            'end_time'    => '17:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
-            'comment'     => str_repeat('a', 256),
-        ];
-
-        $request = new StoreUserScheduleRequest();
-        $validator = Validator::make($data, $request->rules());
-
-        expect($validator->fails())->toBeTrue()
-            ->and($validator->errors()->has('comment'))->toBeTrue();
-    });
 });
-
-

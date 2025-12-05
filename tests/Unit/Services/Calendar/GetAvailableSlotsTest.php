@@ -255,16 +255,16 @@ describe('GetAvailableSlotsService Service', function (): void {
             'start_time'   => '00:00:00',
             'end_time'     => '23:59:59',
             'type'         => UserScheduleRecordType::DAY_OFF,
-            'day_off_date' => Date::today()->addMonth(1)->firstOfMonth(1), // Next Monday
+            'day_off_date' => Date::today()->addMonth()->firstOfMonth(1), // Next Monday
             'timezone'     => $tz,
         ]);
 
         // Create events on both Mondays
-        $event1Start = Date::now()->addMonth(1)->firstOfMonth(1)->setTime(10, 0, 0)->setTimezone($tz); // This Monday
-        $event1End = Date::now()->addMonth(1)->firstOfMonth(1)->setTime(16, 0, 0)->setTimezone($tz);
+        $event1Start = Date::now()->addMonth()->firstOfMonth(1)->setTime(10, 0, 0)->setTimezone($tz); // This Monday
+        $event1End = Date::now()->addMonth()->firstOfMonth(1)->setTime(16, 0, 0)->setTimezone($tz);
 
-        $event2Start = Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->setTime(10, 0, 0)->setTimezone($tz); // Next Monday (day off)
-        $event2End = Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->setTime(16, 0, 0)->setTimezone($tz);
+        $event2Start = Date::now()->addMonth()->firstOfMonth(1)->addWeek()->setTime(10, 0, 0)->setTimezone($tz); // Next Monday (day off)
+        $event2End = Date::now()->addMonth()->firstOfMonth(1)->addWeek()->setTime(16, 0, 0)->setTimezone($tz);
 
         $event1 = CalendarEvent::query()->create([
             'title'           => 'Event on Working Monday',
@@ -295,8 +295,11 @@ describe('GetAvailableSlotsService Service', function (): void {
         $slotsOnDayOff = array_filter($result, function (array $slot): bool {
             $slotDate = $slot['start']->format('Y-m-d');
             $slotEndDate = $slot['end']->format('Y-m-d');
+            if ($slotDate === Date::now()->addMonth()->firstOfMonth(1)->addWeek()->format('Y-m-d')) {
+                return true;
+            }
 
-            return $slotDate === Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->format('Y-m-d') || $slotEndDate === Date::now()->addMonth(1)->firstOfMonth(1)->addWeek()->format('Y-m-d');
+            return $slotEndDate === Date::now()->addMonth()->firstOfMonth(1)->addWeek()->format('Y-m-d');
         });
 
         expect($slotsOnDayOff)->toBeEmpty();

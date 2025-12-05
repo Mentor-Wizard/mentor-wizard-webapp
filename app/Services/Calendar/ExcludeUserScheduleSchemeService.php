@@ -108,8 +108,8 @@ class ExcludeUserScheduleSchemeService
                         $scheduleEndTime = Date::parse($checkedDate.' '.$schedule['end_time'], $this->scheduleTimezone)
                             ->setTimezone($this->chosenTimezone ?? config('app.timezone'));
                         if (! $eventSlotStart->greaterThanOrEqualTo($scheduleEndTime) && ! $eventSlotEnd->lessThanOrEqualTo($scheduleStartTime)) {
-                            $periodStart = ($eventSlotStart->greaterThanOrEqualTo($scheduleStartTime)) ? $eventSlotStart : $scheduleStartTime;
-                            $periodEnd = ($eventSlotEnd->greaterThanOrEqualTo($scheduleEndTime)) ? $scheduleEndTime : $eventSlotEnd;
+                            $periodStart = ($eventSlotStart->greaterThanOrEqualTo($scheduleStartTime)) ? $eventSlotStart->setTimezone($this->chosenTimezone) : $scheduleStartTime;
+                            $periodEnd = ($eventSlotEnd->greaterThanOrEqualTo($scheduleEndTime)) ? $scheduleEndTime : $eventSlotEnd->setTimezone($this->chosenTimezone);
                             $this->scheduleSlots[] = ['start' => $periodStart, 'end' => $periodEnd];
                         }
                     }
