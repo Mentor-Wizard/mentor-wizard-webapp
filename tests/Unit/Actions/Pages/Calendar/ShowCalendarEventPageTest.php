@@ -43,9 +43,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'description'       => 'CalendarEvent description',
         ]);
 
-
-        $this->event->calendarEventUsers()->attach($this->mentor->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role'=>CalendarEventRoleEnum::HOST->value]);
-        $this->event->calendarEventUsers()->attach($this->viewer->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role'=>CalendarEventRoleEnum::MENTI->value]);
+        $this->event->calendarEventUsers()->attach($this->mentor->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role' => CalendarEventRoleEnum::HOST->value]);
+        $this->event->calendarEventUsers()->attach($this->viewer->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role' => CalendarEventRoleEnum::MENTI->value]);
     });
 
     it('renders ShowEditEvent component with mentor permissions and correct event payload', function (): void {
@@ -125,7 +124,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         ]);
 
         $eventAtNight->calendarEventUsers()->attach($this->mentor->getKey(), [
-            'colour' => App\Enums\CalendarEventColoursEnum::BLUE->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
         // Test with Asia/Tokyo timezone (UTC+9)
@@ -138,6 +137,6 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         expect(Arr::get($pageTokyo, 'props.calendarEvent.fromTime'))->not->toBe('22:00');
 
         // Verify user is passed and colour is retrieved
-        expect(Arr::get($pageTokyo, 'props.calendarEvent.colour'))->toBe(App\Enums\CalendarEventColoursEnum::BLUE->value);
+        expect(Arr::get($pageTokyo, 'props.calendarEvent.colour'))->toBe(CalendarEventColoursEnum::BLUE->value);
     });
 });

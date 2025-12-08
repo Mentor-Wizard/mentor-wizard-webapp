@@ -8,8 +8,10 @@ use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Date;
+use Symfony\Component\HttpFoundation\Response;
 
 mutates(EditCalendarEvent::class);
 
@@ -143,6 +145,6 @@ describe('EditCalendarEvent', function (): void {
         ($this->prepareRequest)($request);
 
         $action = new EditCalendarEvent;
-        expect(fn (): Symfony\Component\HttpFoundation\Response => $action->handle($request, $event))->toThrow(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        expect(fn (): Response => $action->handle($request, $event))->toThrow(ModelNotFoundException::class);
     });
 });

@@ -9,6 +9,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Date;
 
 class GetWeeklyCalendarEventsService
@@ -19,6 +20,9 @@ class GetWeeklyCalendarEventsService
 
     public function __construct(private readonly User $user, private readonly CarbonInterface $date, private readonly string $timezone) {}
 
+    /**
+     * @return array<string, mixed[]>
+     */
     public function getWeeklyCalendarEvents(): array
     {
         $startDate = $this->date->startOfWeek();
@@ -39,7 +43,7 @@ class GetWeeklyCalendarEventsService
                 ->resolve();
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, CalendarEvent> $eventsForCalendar */
+        /** @var Collection<int, CalendarEvent> $eventsForCalendar */
         $eventsForCalendar = $userEventsForCalendar->get();
         $eventsForCalendar->each(function (CalendarEvent $event): void {
             $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');

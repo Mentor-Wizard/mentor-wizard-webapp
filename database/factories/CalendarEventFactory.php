@@ -6,10 +6,12 @@ namespace Database\Factories;
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Date;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class CalendarEventFactory extends Factory
 {
@@ -27,7 +29,7 @@ class CalendarEventFactory extends Factory
     {
         $dateTime = fake()->dateTimeBetween('-5 month', '+5 month');
         $duration = fake()->randomNumber(1, true) * 1800;
-        $endTime = \Illuminate\Support\Facades\Date::parse($dateTime)->addSeconds($duration);
+        $endTime = Date::parse($dateTime)->addSeconds($duration);
         $date = $dateTime->format('Y-m-d');
 
         return [

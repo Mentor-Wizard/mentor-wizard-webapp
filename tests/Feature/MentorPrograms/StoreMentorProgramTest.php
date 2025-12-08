@@ -8,7 +8,6 @@ use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
@@ -75,7 +74,7 @@ describe('Mentor Program Store Page', function (): void {
 
         $response = post(route('mentor-program.store'), $programData);
 
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertForbidden();
 
         $this->assertDatabaseMissing('mentor_programs', [
             'name' => 'Unauthorized Program',

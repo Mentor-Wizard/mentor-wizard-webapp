@@ -15,6 +15,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
     it('maps "individual" to CalendarEventTypeEnum::INDIVIDUAL value', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -41,6 +44,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
     it('maps "group" to CalendarEventTypeEnum::GROUP value', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -68,6 +74,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
         // Here createFromFormat will return false for start datetime and true for end
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -97,6 +106,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
         {
             public function __construct(private readonly CarbonInterface $today, private readonly CarbonInterface $tomorrow) {}
 
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -123,6 +135,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
     it('maps unknown type to CalendarEventTypeEnum::INDIVIDUAL value (default case)', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -147,6 +162,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
     it('verifies colour value is passed through to event data', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -171,6 +189,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
     it('verifies title value is passed through to event data', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -195,6 +216,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
     it('verifies status is always set to CONFIRMED', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -219,6 +243,9 @@ describe('StoreCalendarEventRequest getEventData type mapping', function (): voi
     it('verifies date field is formatted correctly from start datetime', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [

@@ -33,21 +33,33 @@ class MentorProgram extends Model
         'currency_id',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    /**
+     * @return BelongsTo<Currency, $this>
+     */
     public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'currency_id');
     }
 
+    /**
+     * @return HasMany<MentorProgramBlock, $this>
+     */
     public function mentorProgramBlocks(): HasMany
     {
         return $this->hasMany(MentorProgramBlock::class, 'mentor_program_id');
     }
 
+    /**
+     * @return BelongsToMany<MentorProfile, $this>
+     */
     public function mentorProfiles(): BelongsToMany
     {
         return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_program');

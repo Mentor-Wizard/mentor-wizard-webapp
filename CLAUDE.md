@@ -191,6 +191,8 @@ The project enforces architectural rules via `tests/Unit/ArchTest.php`:
 - Enums must be proper enum classes
 
 ## Code Style & Development Practices
+### Eloquent ID Access
+- **Never** access `$model->id` directly. Use `$model->getKey()` (or `$model->getKeyName()` when you need the column name) to respect custom primary keys and keep code forward-compatible.
 
 ### Code Quality Tools
 1. **Laravel Pint** - Code formatting based on Laravel preset with strict rules

@@ -9,6 +9,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Date;
 
 class GetDailyCalendarEventsService
@@ -18,6 +19,9 @@ class GetDailyCalendarEventsService
     public function __construct(private readonly User $user, private readonly CarbonInterface $date,
         private readonly string $timezone = 'UTC') {}
 
+    /**
+     * @return array<string, mixed[]>
+     */
     public function getDailyCalendarEvents(): array
     {
         $dateConfig = $this->prepareDailyDateConfiguration();
@@ -45,7 +49,7 @@ class GetDailyCalendarEventsService
             $endCalendarMonth = (clone $todayDate)->endOfMonth();
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, CalendarEvent> $dailyEvents */
+        /** @var Collection<int, CalendarEvent> $dailyEvents */
         $dailyEvents = $this->user->calendarEvents()->get();
         $dailyEvents->each(function (CalendarEvent $event): void {
             $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');

@@ -33,7 +33,7 @@ describe('UserResource Mentor Profile Fields', function (): void {
                 'username'                            => 'mentoruser',
                 'email'                               => 'mentor@example.com',
                 'password'                            => 'password123',
-                'roles'                               => [$mentorRole->id],
+                'roles'                               => [$mentorRole->getKey()],
                 'profile.name'                        => 'John',
                 'profile.last_name'                   => 'Doe',
                 'mentorProfile.title'                 => 'Senior Software Engineer',
@@ -66,9 +66,38 @@ describe('UserResource Mentor Profile Fields', function (): void {
             'experience_started_at' => '2013-01-01',
         ]);
 
-        $component = Livewire::test(EditUser::class, ['record' => $user->id]);
+        $component = Livewire::test(EditUser::class, ['record' => $user->getKey()]);
 
         expect($component)->not->toBeNull();
+    });
+
+    it('persists experience_started_at when editing mentor profile', function (): void {
+        $currency = Currency::query()->first();
+        $user = User::factory()->create();
+        $user->assignRole('mentor');
+        $user->mentorProfile()->create([
+            'title'                 => 'Initial Title',
+            'description'           => 'Initial Description',
+            'rate'                  => '50.00',
+            'currency_id'           => $currency->id,
+            'experience_started_at' => '2013-01-01',
+        ]);
+
+        Livewire::test(EditUser::class, ['record' => $user->getKey()])
+            ->fillForm([
+                'mentorProfile.title'                 => 'Updated Title',
+                'mentorProfile.description'           => 'Updated Description',
+                'mentorProfile.rate'                  => '60.00',
+                'mentorProfile.currency_id'           => $currency->id,
+                'mentorProfile.experience_started_at' => '2013-01-01',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $user->refresh();
+
+        expect($user->mentorProfile->experience_started_at->format('Y-m-d'))
+            ->toBe('2013-01-01');
     });
 
     it('validates required mentor profile fields when mentor role is selected', function (): void {
@@ -79,7 +108,7 @@ describe('UserResource Mentor Profile Fields', function (): void {
                 'username'          => 'mentoruser',
                 'email'             => 'mentor@example.com',
                 'password'          => 'password123',
-                'roles'             => [$mentorRole->id],
+                'roles'             => [$mentorRole->getKey()],
                 'profile.name'      => 'John',
                 'profile.last_name' => 'Doe',
                 // Intentionally omitting required mentor profile fields
@@ -100,7 +129,7 @@ describe('UserResource Mentor Profile Fields', function (): void {
             'username'                            => 'mentoruser',
             'email'                               => 'mentor@example.com',
             'password'                            => 'password123',
-            'roles'                               => [$mentorRole->id],
+            'roles'                               => [$mentorRole->getKey()],
             'profile.name'                        => 'John',
             'profile.last_name'                   => 'Doe',
             'mentorProfile.title'                 => 'Senior Software Engineer',

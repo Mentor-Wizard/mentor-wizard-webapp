@@ -24,6 +24,9 @@ class EventWeekViewResource extends JsonResource
         parent::__construct($resource);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Override]
     public function toArray(Request $request): array
     {

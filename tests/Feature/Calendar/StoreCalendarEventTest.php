@@ -7,6 +7,7 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -106,7 +107,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
 
         // Create an existing future event for the user from 10:00 to 15:00 tomorrow
         $tomorrow = Date::tomorrow();
-        $event = App\Models\CalendarEvent::query()->create([
+        $event = CalendarEvent::query()->create([
             'title'           => 'Busy block',
             'status'          => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time' => $tomorrow->copy()->setTime(10, 0),

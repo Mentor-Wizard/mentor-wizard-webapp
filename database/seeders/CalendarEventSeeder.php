@@ -26,12 +26,12 @@ class CalendarEventSeeder extends Seeder
             ->create()
             ->each(function ($event) use ($mentors, $menti): void {
                 $mentors->random(1)->first()->calendarEvents()->attach($event, [
-                    'role' => CalendarEventRoleEnum::HOST,
+                    'role'   => CalendarEventRoleEnum::HOST,
                     'colour' => CalendarEventColoursEnum::RED,
                 ]);
                 $menti->random(1, 3)->each(function ($user) use ($event): void {
                     $user->calendarEvents()->attach($event, [
-                        'role' => CalendarEventRoleEnum::MENTI,
+                        'role'   => CalendarEventRoleEnum::MENTI,
                         'colour' => CalendarEventColoursEnum::BLUE,
                     ]);
                 });

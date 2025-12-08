@@ -19,6 +19,9 @@ class GetMonthCalendarEventsService
 
     public function __construct(private readonly User $user, private readonly CarbonInterface $date, private readonly string $timezone = 'UTC') {}
 
+    /**
+     * @return array<string, bool|mixed[]>
+     */
     public function getMonthCalendarEvents(): array
     {
         $dateConfig = $this->prepareDateConfiguration();

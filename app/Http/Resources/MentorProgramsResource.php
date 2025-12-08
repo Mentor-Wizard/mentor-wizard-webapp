@@ -12,6 +12,9 @@ class MentorProgramsResource extends JsonResource
 {
     public static $wrap;
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Override]
     public function toArray(Request $request): array
     {
@@ -26,7 +29,10 @@ class MentorProgramsResource extends JsonResource
         ];
     }
 
-    private function blocks()
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function blocks(): array
     {
         return $this->resource->mentorProgramBlocks()
             ->get()

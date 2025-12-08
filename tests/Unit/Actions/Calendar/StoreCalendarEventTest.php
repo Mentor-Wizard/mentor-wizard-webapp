@@ -13,10 +13,13 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 mutates(StoreCalendarEvent::class);
 
@@ -27,7 +30,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
 
         $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Illuminate\Routing\Redirector::class));
+            $request->setRedirector(app(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });
@@ -186,7 +189,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             ->and($pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
 
         // Verify timestamps are explicitly set in the database
-        $pivotRecord = Illuminate\Support\Facades\DB::table('calendar_event_user')
+        $pivotRecord = DB::table('calendar_event_user')
             ->where('calendar_event_id', $event->getKey())
             ->where('user_id', $this->user->getKey())
             ->first();
@@ -206,7 +209,7 @@ describe('Store Calendar CalendarEvent', function (): void {
         $request->shouldReceive('user')->andReturn($viewer);
 
         expect(fn (): RedirectResponse => (new StoreCalendarEvent)->handle($request))
-            ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+            ->toThrow(HttpException::class);
     });
 });
 

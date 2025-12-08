@@ -6,7 +6,6 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Services\Calendar\GetAvailableSlotsService;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 
 mutates(GetAvailableSlotsService::class);

@@ -12,6 +12,8 @@ use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
@@ -27,7 +29,7 @@ describe('EditCalendarEventRequest Validation', function (): void {
 
         $this->prepareRequest = function (EditCalendarEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Illuminate\Routing\Redirector::class));
+            $request->setRedirector(app(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });
@@ -169,7 +171,7 @@ describe('Update Calendar CalendarEvent', function (): void {
         $request->shouldReceive('getEventData')->never();
 
         expect(fn (): Response => (new EditCalendarEvent)->handle($request, $nonExistentEvent))
-            ->toThrow(Illuminate\Database\Eloquent\ModelNotFoundException::class, 'Calendar Event not found.');
+            ->toThrow(ModelNotFoundException::class, 'Calendar Event not found.');
     });
 
     it('syncs user colour correctly', function (): void {

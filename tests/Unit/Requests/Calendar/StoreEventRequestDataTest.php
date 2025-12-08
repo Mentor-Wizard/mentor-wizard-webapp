@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventColoursEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Routing\Redirector;
@@ -169,7 +170,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         // Create an existing event that will conflict
-        $existingEvent = App\Models\CalendarEvent::factory()->create([
+        $existingEvent = CalendarEvent::factory()->create([
             'start_date_time' => Date::now()->addDays(2)->setTime(10, 0, 0),
             'end_date_time'   => Date::now()->addDays(2)->setTime(11, 0, 0),
             'date'            => Date::now()->addDays(2)->format('Y-m-d'),
@@ -204,6 +205,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('getEventData handles null datetime objects gracefully', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -229,6 +233,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('getEventData uses description from validated data', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -254,6 +261,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('verifies exact datetime concatenation for fromDate and fromTime in getEventData', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -280,6 +290,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('verifies exact datetime concatenation for toDate and toTime in getEventData', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -306,6 +319,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('verifies duration calculation uses diffInSeconds between exact datetimes', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -331,6 +347,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('verifies null-safe operator on startDateTime when parsing fails', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [
@@ -356,6 +375,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('verifies null-safe operator on endDateTime when parsing fails', function (): void {
         $request = new class extends StoreCalendarEventRequest
         {
+            /**
+             * @return array<string, string>
+             */
             public function validated($key = null, $default = null): array
             {
                 return [

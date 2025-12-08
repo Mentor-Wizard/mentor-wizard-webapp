@@ -29,26 +29,41 @@ class Chat extends Model
         'coach_id',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function menti(): BelongsTo
     {
         return $this->belongsTo(User::class, 'menti_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function coach(): BelongsTo
     {
         return $this->belongsTo(User::class, 'coach_id');
     }
 
+    /**
+     * @return HasMany<ChatMessage, $this>
+     */
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [

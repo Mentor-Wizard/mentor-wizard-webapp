@@ -26,6 +26,9 @@ class EventDayViewResource extends JsonResource
         $this->timezone = $timezone ?? config('app.timezone');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Override]
     public function toArray(Request $request): array
     {

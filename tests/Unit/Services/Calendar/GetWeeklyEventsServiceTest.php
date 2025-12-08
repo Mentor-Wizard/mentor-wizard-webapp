@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Services\Calendar\GetWeeklyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
@@ -52,7 +53,7 @@ describe('GetWeeklyCalendarEventsService Service', function (): void {
         $start = Date::create(2025, 1, 14, 1, 0, 0);
         $end = (clone $start)->addHour();
 
-        $event = App\Models\CalendarEvent::query()->create([
+        $event = CalendarEvent::query()->create([
             'title'           => 'Early Morning UTC Event',
             'status'          => 'confirmed',
             'start_date_time' => $start,
