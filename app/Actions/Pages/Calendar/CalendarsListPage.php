@@ -25,7 +25,7 @@ class CalendarsListPage
     {
         $timezone = $request->get('timezone') ?? config('app.timezone');
         $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
-        $mode = $request->get('mode') ?? 'Month view';
+        $mode = $request->get('mode') ?? 'Month view'; // FIXME: чому в такому форматі? тобто ми в реквест суємо таку фігню? О_о
         $user = auth()->user();
 
         return Inertia::render('Calendar/CalendarsList', [
@@ -35,7 +35,7 @@ class CalendarsListPage
             'phpVersion'        => PHP_VERSION,
             'locale'            => app()->getLocale(),
             'permissions'       => $user?->can('create', CalendarEvent::class) ? 'create' : 'view',
-            'availableColours'  => CalendarEventColoursEnum::values(),
+            'availableColours'  => CalendarEventColoursEnum::values(), // TODO: може на американський манер colors?
             'calendarEvents'    => match ($mode) {
                 'Day view'      => $timezone && $user ? new GetDailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
                 'Week view'     => $timezone && $user ? new GetWeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],

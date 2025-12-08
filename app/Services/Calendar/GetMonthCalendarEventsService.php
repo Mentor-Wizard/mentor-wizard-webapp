@@ -50,17 +50,17 @@ class GetMonthCalendarEventsService
 
     private function getFormattedEventsForPeriod(CarbonInterface $startDate, CarbonInterface $endDate): array
     {
-        /** @var Collection<int, CalendarEvent> $caledarEvents */
-        $caledarEvents = $this->user->calendarEvents()
+        /** @var Collection<int, CalendarEvent> $calendarEvents */
+        $calendarEvents = $this->user->calendarEvents()
             ->whereBetween('start_date_time', [$startDate, $endDate])
             ->orderBy('start_date_time')
             ->get();
 
-        $caledarEvents->each(function (CalendarEvent $event): void {
+        $calendarEvents->each(function (CalendarEvent $event): void {
             $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');
         });
 
-        return $caledarEvents->groupBy('date')->map($this->formatDateEvents(...))->all();
+        return $calendarEvents->groupBy('date')->map($this->formatDateEvents(...))->all();
 
     }
 
@@ -73,7 +73,7 @@ class GetMonthCalendarEventsService
                 : ['date' => $dateKey, 'calendarEvents' => []];
         }
 
-        return $this->calendarView;
+        return $this->calendarView; // FIXME навіщо тут щось повертати?
     }
 
     private function formatDateEvents(Collection $dateEvents): array

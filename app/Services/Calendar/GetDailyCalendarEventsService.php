@@ -12,12 +12,12 @@ use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Date;
 
-class GetDailyCalendarEventsService
+class GetDailyCalendarEventsService // FIXME rename
 {
     private array $calendarView = [];
 
     public function __construct(private readonly User $user, private readonly CarbonInterface $date,
-        private readonly string $timezone = 'UTC') {}
+        private readonly string $timezone = 'UTC') {} // FIXME: шо по форматуванню?
 
     /**
      * @return array<string, mixed[]>
@@ -41,7 +41,10 @@ class GetDailyCalendarEventsService
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $this->user->calendarEvents()->orderBy('start_date_time')->first();
         /** @var ?CalendarEvent $latestEvent */
+        // FIXME: latest() is not working, remove ordering. Виглядає як не тестований кейс.
         $latestEvent = $this->user->calendarEvents()->orderBy('start_date_time', 'desc')->latest()->first();
+        // TODO: Alternative approach
+        // $latestEvent = $this->user->calendarEvents()->latest('start_date_time')->first();
 
         $startCalendarMonth = Date::parse($firstEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->startOfMonth();
         $endCalendarMonth = Date::parse($latestEvent->start_date_time ?? $this->date)->setTimezone($this->timezone)->endOfMonth();
@@ -52,6 +55,11 @@ class GetDailyCalendarEventsService
         /** @var Collection<int, CalendarEvent> $dailyEvents */
         $dailyEvents = $this->user->calendarEvents()->get();
         $dailyEvents->each(function (CalendarEvent $event): void {
+            /**
+             * FIXME Чому ми тут мутуємо (змінюємо) дату і під час витягування інформації з бази даних?
+             * Всі дати маємо зберігати в UTC.
+             * А на форматуванні даних робити локалізацію.
+             * **/
             $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');
         });
 
@@ -61,14 +69,27 @@ class GetDailyCalendarEventsService
             'todayDate'    => $todayDate,
             'tomorrowDate' => $tomorrowDate,
             'months'       => $period->toArray(),
+            // FIXME dayEvents?
             'daysEvents'   => $dailyEvents->pluck('date')->unique()->toArray(),
         ];
     }
 
     private function getDailyEvents(CarbonInterface $todayDate, CarbonInterface $tomorrowDate): array
     {
-        $todayDateUTC = (clone $todayDate)->setTimezone('UTC');
-        $tomorrowDateUTC = (clone $tomorrowDate)->setTimezone('UTC');
+        /*
+         * FIXME:
+         * $todayDateUTC = $todayDate->shiftTimezone('UTC');
+         * $tomorrowDateUTC = $tomorrowDate->shiftTimezone('UTC');
+         *
+         * FIXME: АБО
+         * Laravel автоматично конвертує Carbon в UTC для запитів
+         * $eventsCollection = $this->user->calendarEvents()
+         * ->whereBetween('start_date_time', [$todayDate, $tomorrowDate])
+         * ->orderBy('start_date_time')
+         *  ->get();
+         */
+        $todayDateUTC = (clone $todayDate)->setTimezone('UTC'); // FIXME: не обовʼязково
+        $tomorrowDateUTC = (clone $tomorrowDate)->setTimezone('UTC'); // FIXME: не обовʼязково
         $eventsCollection = $this->user->calendarEvents()
             ->whereBetween('start_date_time', [$todayDateUTC, $tomorrowDateUTC])
             ->orderBy('start_date_time')
@@ -100,6 +121,23 @@ class GetDailyCalendarEventsService
                 }
             }
         }
+
+        /**
+         * FIXME: простіше приймається. Щменшується когнитивна складність коду.
+         * foreach ($months as $month) {
+         * $monthKey = $month->format('Y-m');
+         *
+         * $period = CarbonPeriod::create(
+         * $month->copy()->setTimezone($this->timezone)->startOfMonth()->startOfWeek(),
+         * '1 day',
+         * $month->copy()->setTimezone($this->timezone)->endOfMonth()->endOfWeek()
+         * );
+         *
+         * $this->calendarView[$monthKey] = collect($period)
+         * ->map(fn($monthDate) => $this->buildDayPayload($monthDate, $todayDate, $daysEvents))
+         * ->all();
+         * }
+         */
     }
 
     private function buildDayPayload(CarbonInterface $monthDate, CarbonInterface $todayDate, array $daysEvents): array

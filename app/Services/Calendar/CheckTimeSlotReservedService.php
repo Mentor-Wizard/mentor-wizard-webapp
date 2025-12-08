@@ -9,9 +9,15 @@ use Illuminate\Support\Facades\Date;
 
 readonly class CheckTimeSlotReservedService
 {
-    public function __construct(private string $fromDate, private string $fromTime,
-        private string $toDate, private string $toTime, private string $timezone,
-        private User $user, private array $excludeEvents = []) {}
+    public function __construct(
+        private string $fromDate,
+        private string $fromTime,
+        private string $toDate,
+        private string $toTime,
+        private string $timezone,
+        private User $user,
+        private array $excludeEvents = [],
+    ) {}
 
     public function isSlotAvailable(): bool
     {

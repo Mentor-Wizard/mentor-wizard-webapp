@@ -12,7 +12,11 @@ class GetAvailableSlotsService
 {
     private array $availableSlots = [];
 
-    public function __construct(private readonly User $user, private readonly string $timezone, private readonly array $excludeEvents = []) {}
+    public function __construct(
+        private readonly User $user,
+        private readonly string $timezone,
+        private readonly array $excludeEvents = [],
+    ) {}
 
     public function getAvailableSlots(): array
     {
