@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Http\Resources\Calendar\CalendarEventDayViewResource;
+use App\DTO\Calendar\CalendarEventDayViewData;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -79,6 +79,7 @@ class DailyCalendarEventsService
     private function getDailyEvents(CarbonInterface $todayDate, CarbonInterface $tomorrowDate): array
     {
         $eventsCollection = $this->user->calendarEvents()
+            ->with('calendarEventUsers')
             ->whereBetween('start_date_time', [$todayDate, $tomorrowDate])
             ->orderBy('start_date_time')
             ->get();
@@ -86,7 +87,7 @@ class DailyCalendarEventsService
         $events = [];
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
-            $events[] = new CalendarEventDayViewResource($dayEvent, $this->timezone)->resolve();
+            $events[] = CalendarEventDayViewData::fromModel($dayEvent, $this->timezone, $this->user)->toArray();
         }
 
         return $events;

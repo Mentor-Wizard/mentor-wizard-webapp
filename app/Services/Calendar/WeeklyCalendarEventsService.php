@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Http\Resources\Calendar\CalendarEventWeekViewResource;
+use App\DTO\Calendar\CalendarEventWeekViewData;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -48,7 +48,7 @@ class WeeklyCalendarEventsService
         // Build calendar events for display
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
-            $this->calendarEvents[] = CalendarEventWeekViewResource::make($dayEvent, $this->timezone);
+            $this->calendarEvents[] = CalendarEventWeekViewData::fromModel($dayEvent, $this->timezone, $this->user)->toArray();
         }
 
         // Reuse the same collection for a calendar view
