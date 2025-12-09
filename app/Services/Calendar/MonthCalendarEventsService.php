@@ -13,11 +13,15 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 
-class GetMonthCalendarEventsService
+class MonthCalendarEventsService
 {
     private array $calendarView = [];
 
-    public function __construct(private readonly User $user, private readonly CarbonInterface $date, private readonly string $timezone = 'UTC') {}
+    public function __construct(
+        private readonly User $user,
+        private readonly CarbonInterface $date,
+        private readonly string $timezone = 'UTC',
+    ) {}
 
     /**
      * @return array<string, bool|mixed[]>
@@ -57,14 +61,14 @@ class GetMonthCalendarEventsService
             ->get();
 
         $calendarEvents->each(function (CalendarEvent $event): void {
-            $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');
+            $event->date = Date::parse($event->start_date_time)->timezone($this->timezone)->format('Y-m-d');
         });
 
         return $calendarEvents->groupBy('date')->map($this->formatDateEvents(...))->all();
 
     }
 
-    private function buildCalendarView(array $monthDates, array $events): array
+    private function buildCalendarView(array $monthDates, array $events): void
     {
         foreach ($monthDates as $monthDate) {
             $dateKey = $monthDate->format('Y-m-d');
@@ -72,8 +76,6 @@ class GetMonthCalendarEventsService
                 ? $events[$dateKey]
                 : ['date' => $dateKey, 'calendarEvents' => []];
         }
-
-        return $this->calendarView; // FIXME навіщо тут щось повертати?
     }
 
     private function formatDateEvents(Collection $dateEvents): array
@@ -81,7 +83,7 @@ class GetMonthCalendarEventsService
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $dateEvents->first();
         $payload = [
-            'date'           => $firstEvent->start_date_time->setTimezone($this->timezone)->format('Y-m-d'),
+            'date'           => $firstEvent->start_date_time->timezone($this->timezone)->format('Y-m-d'),
             'calendarEvents' => EventMonthViewResource::collection($dateEvents)
                 ->additional(['timeZone' => $this->timezone])
                 ->resolve(),
@@ -107,11 +109,15 @@ class GetMonthCalendarEventsService
 
     private function hasEventsBeforeDate(CarbonInterface $startDate): bool
     {
-        return $this->user->calendarEvents()->where('start_date_time', '<', $startDate->setTimezone('UTC'))->exists();
+        return $this->user->calendarEvents()
+            ->where('start_date_time', '<', $startDate)
+            ->exists();
     }
 
     private function hasEventsAfterDate(CarbonInterface $endDate): bool
     {
-        return $this->user->calendarEvents()->where('start_date_time', '>', $endDate->setTimezone('UTC')->endOfDay())->exists();
+        return $this->user->calendarEvents()
+            ->where('start_date_time', '>', $endDate->endOfDay())
+            ->exists();
     }
 }

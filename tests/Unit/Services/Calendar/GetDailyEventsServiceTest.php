@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Models\CalendarEvent;
 use App\Models\User;
-use App\Services\Calendar\GetDailyCalendarEventsService;
+use App\Services\Calendar\DailyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
-mutates(GetDailyCalendarEventsService::class);
+mutates(DailyCalendarEventsService::class);
 
 describe('GetDailyCalendarEventsService Service', function (): void {
     beforeEach(function (): void {
@@ -39,7 +39,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $user->calendarEvents()->attach($event->getKey());
         $checkedDate = Date::parse('2025-03-05');
-        $result = new GetDailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
+        $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
         expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
 
@@ -85,7 +85,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $user->calendarEvents()->attach($event->getKey());
         $checkedDate = Date::parse('2025-03-05');
-        $result = new GetDailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
+        $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
         // Verify calendarView has proper structure with hasEvent flags
         $calendar = $result['calendarView'];
@@ -133,7 +133,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
         $checkedDate = Date::parse('2025-03-05');
-        $result = new GetDailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
+        $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
         $calendar = $result['calendarView'];
 

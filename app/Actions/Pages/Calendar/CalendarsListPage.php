@@ -6,13 +6,11 @@ namespace App\Actions\Pages\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
 use App\Models\CalendarEvent;
-use App\Services\Calendar\GetDailyCalendarEventsService;
-use App\Services\Calendar\GetMonthCalendarEventsService;
-use App\Services\Calendar\GetWeeklyCalendarEventsService;
-use Illuminate\Foundation\Application;
+use App\Services\Calendar\DailyCalendarEventsService;
+use App\Services\Calendar\MonthCalendarEventsService;
+use App\Services\Calendar\WeeklyCalendarEventsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -29,17 +27,13 @@ class CalendarsListPage
         $user = auth()->user();
 
         return Inertia::render('Calendar/CalendarsList', [
-            'canLogin'          => Route::has('login'),
-            'canRegister'       => Route::has('register'),
-            'laravelVersion'    => Application::VERSION,
-            'phpVersion'        => PHP_VERSION,
             'locale'            => app()->getLocale(),
             'permissions'       => $user?->can('create', CalendarEvent::class) ? 'create' : 'view',
-            'availableColours'  => CalendarEventColoursEnum::values(), // TODO: може на американський манер colors?
+            'availableColours'  => CalendarEventColoursEnum::values(),
             'calendarEvents'    => match ($mode) {
-                'Day view'      => $timezone && $user ? new GetDailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
-                'Week view'     => $timezone && $user ? new GetWeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],
-                default         => $timezone && $user ? new GetMonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents() : [],
+                'Day view'      => $timezone && $user ? new DailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
+                'Week view'     => $timezone && $user ? new WeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],
+                default         => $timezone && $user ? new MonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents() : [],
             }]);
     }
 }

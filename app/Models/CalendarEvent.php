@@ -51,7 +51,6 @@ class CalendarEvent extends Model
     public function calendarEventUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
-            // FIXME навіщо нам тут колір?
             ->withPivot('colour')
             ->withTimestamps();
     }

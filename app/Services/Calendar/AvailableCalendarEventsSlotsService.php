@@ -8,7 +8,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Illuminate\Support\Facades\Date;
 
-class GetAvailableSlotsService
+class AvailableCalendarEventsSlotsService
 {
     private array $availableSlots = [];
 
@@ -39,18 +39,19 @@ class GetAvailableSlotsService
             if (is_null($previousEvent)) {
                 if ($event->start_date_time->greaterThanOrEqualTo($currentDate)) {
                     $this->availableSlots[] = ['start' => $currentDateTimezone,
-                        'end'                          => $event->start_date_time->setTimezone($this->timezone)];
+                        'end'                          => $event->start_date_time->timezone($this->timezone)];
                 }
             } else {
-                $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
-                    'end'                          => $event->start_date_time->setTimezone($this->timezone)];
+                $this->availableSlots[] = ['start' => $previousEvent->end_date_time->timezone($this->timezone),
+                    'end'                          => $event->start_date_time->timezone($this->timezone)];
             }
 
             $previousEvent = $event;
         }
 
-        $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
-            'end'                          => Date::now($this->timezone)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
+        $this->availableSlots[] = ['start' => $previousEvent->end_date_time->timezone($this->timezone),
+            'end'                          => Date::now($this->timezone)
+                ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
 
         return $this->availableSlots;
     }

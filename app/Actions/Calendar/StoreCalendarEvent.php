@@ -9,20 +9,15 @@ use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
-use Symfony\Component\HttpFoundation\Response;
 
-class StoreCalendarEvent
+class StoreCalendarEvent extends BaseCalendarEventAction
 {
     use AsController;
 
     public function handle(StoreCalendarEventRequest $request): RedirectResponse
     {
+        $validatedData = $this->getCalendarEventData($request);
 
-        // FIXME: винести в мідлвери роутів
-        abort_if($request->user()->cannot('create', CalendarEvent::class), Response::HTTP_FORBIDDEN, 'Unauthorized action.');
-
-        $validatedData = $request->getEventData();
-        // FIXME: в чому логіка?
         $colour = $validatedData['colour'];
         unset($validatedData['colour']);
         $calendarEvent = CalendarEvent::query()->create([

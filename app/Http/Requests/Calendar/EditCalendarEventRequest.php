@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
-use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use Exception;
@@ -92,54 +91,5 @@ class EditCalendarEventRequest extends FormRequest
                 $validator->errors()->add('fromDate', 'there are another events on this time');
             }
         });
-    }
-
-    public function getEventData(): array
-    {
-        $validated = $this->validated();
-
-        $startDateTime = Date::createFromFormat(
-            'Y-m-d H:i',
-            $validated['fromDate'].' '.$validated['fromTime'],
-            $validated['timezone']
-        )?->setTimezone('UTC');
-        $endDateTime = Date::createFromFormat(
-            'Y-m-d H:i',
-            $validated['toDate'].' '.$validated['toTime'],
-            $validated['timezone']
-        )?->setTimezone('UTC');
-
-        $duration = $startDateTime?->diffInSeconds($endDateTime);
-        $eventType = match ($validated['type']) {
-            'individual' => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'group'      => CalendarEventTypeEnum::GROUP->value,
-            default      => CalendarEventTypeEnum::INDIVIDUAL->value,
-        };
-
-        return [
-            'title'           => $validated['title'],
-            'start_date_time' => $startDateTime,
-            'end_date_time'   => $endDateTime,
-            'duration'        => $duration,
-            'type'            => $eventType,
-            'colour'          => $validated['colour'],
-            'description'     => $validated['description'],
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'date'            => $startDateTime?->format('Y-m-d'),
-        ];
-    }
-
-    // FIXME що робить цей метод?
-    protected function prepareForValidation(): void
-    {
-        if ($this->has(['fromDate', 'toDate', 'fromTime', 'toTime'])) {
-            // FIXME: unused variables
-            $fromDateTime = Date::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
-            $toDateTime = Date::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
-            // FIXME: ненаявні властивості класу
-            if ($this->fromDate === $this->toDate && $this->toTime <= $this->fromTime) {
-                return;
-            }
-        }
     }
 }

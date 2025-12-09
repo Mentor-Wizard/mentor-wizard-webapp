@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
-use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use Exception;
@@ -33,7 +32,6 @@ class StoreCalendarEventRequest extends FormRequest
             'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
             'description' => ['max:2000'],
             'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
-            'timezone'    => ['required', 'string'],
         ];
     }
 
@@ -91,46 +89,6 @@ class StoreCalendarEventRequest extends FormRequest
             'description.max'         => 'Description cannot exceed 2000 characters.',
             'type.required'           => 'CalendarEvent type is required.',
             'type.in'                 => 'CalendarEvent type must be either individual or group.',
-        ];
-    }
-
-    // FIXME чому метод реквесту має в назві "Event"? Ну типу... ми тут працюємо з реквестом, але неймінг привʼязуємо до CalendarEvent
-    public function getEventData(): array
-    {
-        $validated = $this->validated();
-
-        try {
-            $startDateTime = Date::createFromFormat(
-                'Y-m-d H:i',
-                $validated['fromDate'].' '.$validated['fromTime'],
-                $validated['timezone']
-            )?->setTimezone(config('app.timezone'));
-            $endDateTime = Date::createFromFormat(
-                'Y-m-d H:i',
-                $validated['toDate'].' '.$validated['toTime'],
-                $validated['timezone']
-            )?->setTimezone(config('app.timezone'));
-        } catch (Exception) {
-            return [];
-        }
-
-        $duration = (int) $startDateTime?->diffInSeconds($endDateTime);
-        $eventType = match ($validated['type']) {
-            'individual' => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'group'      => CalendarEventTypeEnum::GROUP->value,
-            default      => CalendarEventTypeEnum::INDIVIDUAL->value,
-        };
-
-        return [
-            'title'           => $validated['title'],
-            'start_date_time' => $startDateTime,
-            'end_date_time'   => $endDateTime,
-            'duration'        => $duration,
-            'type'            => $eventType,
-            'colour'          => $validated['colour'],
-            'description'     => $validated['description'],
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'date'            => $startDateTime?->format('Y-m-d'),
         ];
     }
 }

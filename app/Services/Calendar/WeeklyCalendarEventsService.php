@@ -12,13 +12,17 @@ use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Date;
 
-class GetWeeklyCalendarEventsService
+class WeeklyCalendarEventsService
 {
     private array $calendarView = [];
 
     private array $calendarEvents = [];
 
-    public function __construct(private readonly User $user, private readonly CarbonInterface $date, private readonly string $timezone) {}
+    public function __construct(
+        private readonly User $user,
+        private readonly CarbonInterface $date,
+        private readonly string $timezone,
+    ) {}
 
     /**
      * @return array<string, mixed[]>
@@ -26,12 +30,13 @@ class GetWeeklyCalendarEventsService
     public function getWeeklyCalendarEvents(): array
     {
         $startDate = $this->date->startOfWeek();
-        $startUTCDate = (clone $startDate)->setTimezone(config('app.timezone'));
+        $startUTCDate = $startDate->copy()->timezone(config('app.timezone'));
         $endDate = $this->date->endOfWeek();
-        $endUTCDate = (clone $endDate)->setTimezone(config('app.timezone'));
+        $endUTCDate = $endDate->copy()->timezone(config('app.timezone'));
         $todayDate = Date::parse($this->date, $this->timezone);
         $userEvents = $this->user->calendarEvents()->with('calendarEventUsers');
         $userEventsForCalendar = clone $userEvents;
+        // TODO подумати як уникнути клонування колекцій
 
         $eventsCollection = $userEvents->whereBetween('start_date_time',
             [$startUTCDate, $endUTCDate])->orderBy('start_date_time')->get();
@@ -46,7 +51,7 @@ class GetWeeklyCalendarEventsService
         /** @var Collection<int, CalendarEvent> $eventsForCalendar */
         $eventsForCalendar = $userEventsForCalendar->get();
         $eventsForCalendar->each(function (CalendarEvent $event): void {
-            $event->date = Date::parse($event->start_date_time)->setTimezone($this->timezone)->format('Y-m-d');
+            $event->date = Date::parse($event->start_date_time)->timezone($this->timezone)->format('Y-m-d');
         });
 
         $daysEvents = $eventsForCalendar->pluck('date')->unique()->toArray();

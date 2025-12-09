@@ -7,20 +7,13 @@ namespace App\Actions\Calendar;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Arr;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
-class EditCalendarEvent
+class EditCalendarEvent extends BaseCalendarEventAction
 {
-    use AsController;
-
     public function handle(EditCalendarEventRequest $request, CalendarEvent $calendarEvent): Response
     {
-        // FIXME: в мідлвери роутів
-        throw_unless($calendarEvent->exists, ModelNotFoundException::class, 'Calendar Event not found.');
-
-        $validatedData = $request->getEventData();
+        $validatedData = $this->getCalendarEventData($request);
         $colour = Arr::get($validatedData, 'colour');
         unset($validatedData['colour']);
         $calendarEvent->update([
