@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarEventColoursEnum;
-use App\Http\Resources\EventWeekViewResource;
+use App\Http\Resources\Calendar\CalendarEventWeekViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
-mutates(EventWeekViewResource::class);
+mutates(CalendarEventWeekViewResource::class);
 
 describe('EventWeekViewResource', function (): void {
     it('maps event to week view payload with dayNumber and timezone-aware fields', function (): void {
@@ -36,7 +36,7 @@ describe('EventWeekViewResource', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $resource = new EventWeekViewResource($event, 'Europe/Kyiv')->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, 'Europe/Kyiv')->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         expect($array)
@@ -71,7 +71,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::GREEN->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 12*3600 + 0*60 + 0 = 43200
@@ -98,7 +98,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::RED->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // durationIndex = 5400 * 12 / 3600 = 18
@@ -124,7 +124,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // Monday: format('w') = 1, so dayNumber = 1 + 1 = 2
@@ -149,7 +149,7 @@ describe('EventWeekViewResource', function (): void {
 
         // Don't attach user
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         expect($array['colour'])->toBeNull();
@@ -174,7 +174,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 14*3600 + 30*60 + 45 = 50400 + 1800 + 45 = 52245
@@ -202,7 +202,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::GREEN->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 0*3600 + 0*60 + 0 = 0
@@ -229,7 +229,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::RED->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // durationIndex = 0 * 12 / 3600 = 0
@@ -255,7 +255,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // Sunday: format('w') = 0, so dayNumber = 0 + 1 = 1
@@ -281,7 +281,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::YELLOW->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // Saturday: format('w') = 6, so dayNumber = 6 + 1 = 7
@@ -307,7 +307,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::PURPLE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // Verify all are integers
@@ -335,7 +335,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 1*3600 + 1*60 + 1 = 3661
@@ -361,7 +361,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::GREEN->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // durationIndex = 1500 * 12 / 3600 = 18000 / 3600 = 5
@@ -386,7 +386,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::RED->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 6*3600 = 21600
@@ -413,7 +413,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::YELLOW->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 0*3600 + 10*60 + 0 = 600
@@ -441,7 +441,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // Sunday: format('w') = 0, dayNumber = 0 + 1 = 1
@@ -469,7 +469,7 @@ describe('EventWeekViewResource', function (): void {
         // Attach different user, not the one in additional
         $event->calendarEventUsers()->attach($otherUser->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // Should be null because user not found in relationship
@@ -494,7 +494,7 @@ describe('EventWeekViewResource', function (): void {
 
         $event->calendarEventUsers()->attach($user->getKey(), ['colour' => CalendarEventColoursEnum::PURPLE->value]);
 
-        $resource = new EventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
+        $resource = new CalendarEventWeekViewResource($event, config('app.timezone'))->additional(['user' => $user]);
         $array = $resource->toArray(request());
 
         // Should get exact colour from pivot

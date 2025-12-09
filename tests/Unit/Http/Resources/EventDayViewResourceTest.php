@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarEventColoursEnum;
-use App\Http\Resources\EventDayViewResource;
+use App\Http\Resources\Calendar\CalendarEventDayViewResource;
 use App\Models\CalendarEvent;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 
-mutates(EventDayViewResource::class);
+mutates(CalendarEventDayViewResource::class);
 
 describe('EventDayViewResource', function (): void {
     it('maps event to day view payload with timezone-aware fields', function (): void {
@@ -26,7 +26,7 @@ describe('EventDayViewResource', function (): void {
             'description'     => 'Day view description',
         ]);
 
-        $resource = new EventDayViewResource($event);
+        $resource = new CalendarEventDayViewResource($event);
         $array = $resource->toArray(request());
 
         expect($array)
@@ -53,7 +53,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 12*3600 + 0*60 + 0 = 43200
@@ -74,7 +74,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // durationIndex = 5400 * 12 / 3600 = 18
@@ -93,7 +93,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 8*3600 + 30*60 + 0 = 28800 + 1800 = 30600
@@ -115,7 +115,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 14*3600 + 30*60 + 45 = 50400 + 1800 + 45 = 52245
@@ -137,7 +137,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 0*3600 + 0*60 + 0 = 0
@@ -158,7 +158,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // durationIndex = 0 * 12 / 3600 = 0
@@ -178,7 +178,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // Verify all are integers
@@ -198,7 +198,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, 'Europe/Kyiv');
+        $resource = new CalendarEventDayViewResource($event, 'Europe/Kyiv');
         $array = $resource->toArray(request());
 
         // In Europe/Kyiv timezone, 22:00 UTC becomes 01:00 EEST next day
@@ -218,7 +218,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event); // No timezone parameter
+        $resource = new CalendarEventDayViewResource($event); // No timezone parameter
         $array = $resource->toArray(request());
 
         expect($array['dateTime'])->toContain(config('app.timezone'))
@@ -238,7 +238,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 1*3600 + 1*60 + 1 = 3661
@@ -258,7 +258,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // durationIndex = 1500 * 12 / 3600 = 18000 / 3600 = 5
@@ -277,7 +277,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 6*3600 = 21600
@@ -298,7 +298,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 0*3600 + 10*60 + 0 = 600
@@ -320,7 +320,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // All values must be integers, not floats
@@ -344,7 +344,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 5*3600 = 18000
@@ -365,7 +365,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 0*3600 + 45*60 + 0 = 2700
@@ -386,7 +386,7 @@ describe('EventDayViewResource', function (): void {
             'date'            => $start->format('Y-m-d'),
         ]);
 
-        $resource = new EventDayViewResource($event, config('app.timezone'));
+        $resource = new CalendarEventDayViewResource($event, config('app.timezone'));
         $array = $resource->toArray(request());
 
         // secondsSinceMidnight = 0*3600 + 0*60 + 59 = 59

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleEnum;
-use App\Http\Resources\EventDayViewResource;
-use App\Http\Resources\EventWeekViewResource;
+use App\Http\Resources\Calendar\CalendarEventDayViewResource;
+use App\Http\Resources\Calendar\CalendarEventWeekViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Spatie\Permission\Models\Role;
 
-mutates(EventDayViewResource::class);
-mutates(EventWeekViewResource::class);
+mutates(CalendarEventDayViewResource::class);
+mutates(CalendarEventWeekViewResource::class);
 
 describe('CalendarEvent Resources with timezone', function (): void {
     it('applies timezone adjustment for week view', function (): void {
@@ -38,7 +38,7 @@ describe('CalendarEvent Resources with timezone', function (): void {
             ['role'      => CalendarEventRoleEnum::HOST,
                 'colour' => 'blue']);
 
-        $resource = new EventWeekViewResource($event, 'Europe/Kyiv')->additional(['user' => $this->user]);
+        $resource = new CalendarEventWeekViewResource($event, 'Europe/Kyiv')->additional(['user' => $this->user]);
 
         $array = $resource->toArray(request());
 
@@ -65,7 +65,7 @@ describe('CalendarEvent Resources with timezone', function (): void {
             'description'     => 'tz',
         ]);
 
-        $resource = new EventDayViewResource($event, 'Europe/Kyiv');
+        $resource = new CalendarEventDayViewResource($event, 'Europe/Kyiv');
         $array = $resource->toArray(request());
 
         expect($array['time'])->toBe('1:00 AM')

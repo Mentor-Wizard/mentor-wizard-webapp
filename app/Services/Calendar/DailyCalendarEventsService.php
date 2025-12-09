@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Http\Resources\EventDayViewResource;
+use App\Http\Resources\Calendar\CalendarEventDayViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -39,8 +39,10 @@ class DailyCalendarEventsService
 
     private function prepareDailyDateConfiguration(): array
     {
-        $todayDate = $this->date->startOfDay();
-        $tomorrowDate = $this->date->addDay()->startOfDay();
+        // Convert to UTC for database queries
+        $utcDate = Date::parse($this->date)->timezone('UTC');
+        $todayDate = $utcDate->copy()->startOfDay();
+        $tomorrowDate = $utcDate->copy()->addDay()->startOfDay();
 
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = $this->user->calendarEvents()->orderBy('start_date_time')->first();
@@ -84,7 +86,7 @@ class DailyCalendarEventsService
         $events = [];
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
-            $events[] = new EventDayViewResource($dayEvent, $this->timezone)->resolve();
+            $events[] = new CalendarEventDayViewResource($dayEvent, $this->timezone)->resolve();
         }
 
         return $events;

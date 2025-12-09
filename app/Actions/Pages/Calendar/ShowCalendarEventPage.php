@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Pages\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
-use App\Http\Resources\ShowCalendarEventResource;
+use App\Http\Resources\Calendar\ShowCalendarEventResource;
 use App\Models\CalendarEvent;
 use Inertia\Inertia;
 use Inertia\Response;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Http\Resources\EventMonthViewResource;
+use App\Http\Resources\Calendar\CalendarEventMonthViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -86,7 +86,7 @@ class MonthCalendarEventsService
         $firstEvent = $dateEvents->first();
         $payload = [
             'date'           => $firstEvent->start_date_time->timezone($this->timezone)->format('Y-m-d'),
-            'calendarEvents' => EventMonthViewResource::collection($dateEvents)
+            'calendarEvents' => CalendarEventMonthViewResource::collection($dateEvents)
                 ->additional(['timeZone' => $this->timezone])
                 ->resolve(),
         ];

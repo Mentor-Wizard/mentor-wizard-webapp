@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Calendar;
 
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;

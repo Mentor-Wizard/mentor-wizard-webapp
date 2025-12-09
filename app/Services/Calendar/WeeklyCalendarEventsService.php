@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Http\Resources\EventWeekViewResource;
+use App\Http\Resources\Calendar\CalendarEventWeekViewResource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -28,12 +28,14 @@ class WeeklyCalendarEventsService
      */
     public function getWeeklyCalendarEvents(): array
     {
-        $startDate = $this->date->startOfWeek();
-        // Convert to UTC for database queries
-        $startUTCDate = $startDate->copy()->timezone('UTC');
-        $endDate = $this->date->endOfWeek();
-        // Convert to UTC for database queries
-        $endUTCDate = $endDate->copy()->timezone('UTC');
+        // Always work in UTC for database operations
+        $utcDate = Date::parse($this->date)->timezone('UTC');
+        $startUTCDate = $utcDate->copy()->startOfWeek();
+        $endUTCDate = $utcDate->copy()->endOfWeek();
+
+        // For calendar view, use user's timezone
+        $startDate = Date::parse($this->date, $this->timezone)->startOfWeek();
+        $endDate = Date::parse($this->date, $this->timezone)->endOfWeek();
         $todayDate = Date::parse($this->date, $this->timezone);
 
         // Single query to fetch all events for the week
@@ -46,12 +48,10 @@ class WeeklyCalendarEventsService
         // Build calendar events for display
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
-            $this->calendarEvents[] = new EventWeekViewResource($dayEvent, $this->timezone)
-                ->additional(['user' => $this->user])
-                ->resolve();
+            $this->calendarEvents[] = CalendarEventWeekViewResource::make($dayEvent, $this->timezone);
         }
 
-        // Reuse the same collection for calendar view
+        // Reuse the same collection for a calendar view
         $eventsCollection->each(function (CalendarEvent $event): void {
             $event->date = Date::parse($event->start_date_time)->timezone($this->timezone)->format('Y-m-d');
         });

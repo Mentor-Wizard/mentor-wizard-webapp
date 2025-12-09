@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Http\Resources\EventMonthViewResource;
+use App\Http\Resources\Calendar\CalendarEventMonthViewResource;
 use App\Models\CalendarEvent;
 use Illuminate\Support\Facades\Date;
 
-mutates(EventMonthViewResource::class);
+mutates(CalendarEventMonthViewResource::class);
 
 describe('EventMonthViewResource', function (): void {
     it('maps event to month view payload (name, time, datetime, href, id)', function (): void {
@@ -25,7 +25,7 @@ describe('EventMonthViewResource', function (): void {
             'description'     => 'Month view description',
         ]);
 
-        $resource = new EventMonthViewResource($event)->additional(['timeZone' => config('app.timezone')]);
+        $resource = new CalendarEventMonthViewResource($event)->additional(['timeZone' => config('app.timezone')]);
         $array = $resource->toArray(request());
 
         expect($array)
@@ -51,7 +51,7 @@ describe('EventMonthViewResource', function (): void {
         ]);
 
         // Don't provide timeZone in additional data
-        $resource = new EventMonthViewResource($event);
+        $resource = new CalendarEventMonthViewResource($event);
         $array = $resource->toArray(request());
 
         // Should use UTC as default
@@ -72,7 +72,7 @@ describe('EventMonthViewResource', function (): void {
             'web_link'        => 'https://example.com/custom',
         ]);
 
-        $resource = new EventMonthViewResource($event)->additional(['timeZone' => 'Europe/Kyiv']);
+        $resource = new CalendarEventMonthViewResource($event)->additional(['timeZone' => 'Europe/Kyiv']);
         $array = $resource->toArray(request());
 
         // In Europe/Kyiv timezone, 22:00 UTC becomes 01:00 EEST next day

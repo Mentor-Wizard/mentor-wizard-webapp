@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Calendar;
 
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ use Override;
  * @property-read CarbonInterface $start_date_time
  * @property-read string $web_link
  */
-class EventMonthViewResource extends JsonResource
+class CalendarEventMonthViewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
