@@ -18,6 +18,7 @@ class MonthCalendarEventsService
 {
     use BuildsCalendarPayload;
 
+    /** @var list<array<string, mixed>> */
     private array $calendarView = [];
 
     public function __construct(
@@ -27,7 +28,11 @@ class MonthCalendarEventsService
     ) {}
 
     /**
-     * @return array<string, bool|mixed[]>
+     * @return array{
+     *     calendarView: list<array<string, mixed>>,
+     *     hasEventsBefore: bool,
+     *     hasEventsAfter: bool
+     * }
      */
     public function getMonthCalendarEvents(): array
     {
@@ -42,6 +47,13 @@ class MonthCalendarEventsService
         ];
     }
 
+    /**
+     * @return array{
+     *     startDate: CarbonInterface,
+     *     endDate: CarbonInterface,
+     *     monthDates: list<CarbonInterface>
+     * }
+     */
     private function prepareDateConfiguration(): array
     {
         // Convert to UTC for database queries
@@ -49,14 +61,18 @@ class MonthCalendarEventsService
         $startDate = $utcDate->copy()->startOfMonth()->startOfWeek();
         $endDate = $utcDate->copy()->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $monthDates = array_values(iterator_to_array($period));
 
         return [
             'startDate'  => $startDate,
             'endDate'    => $endDate,
-            'monthDates' => $period->toArray(),
+            'monthDates' => $monthDates,
         ];
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     private function getFormattedEventsForPeriod(CarbonInterface $startDate, CarbonInterface $endDate): array
     {
         /** @var Collection<int, CalendarEvent> $calendarEvents */
@@ -73,6 +89,10 @@ class MonthCalendarEventsService
 
     }
 
+    /**
+     * @param  list<CarbonInterface>  $monthDates
+     * @param  array<string, array<string, mixed>>  $events
+     */
     private function buildCalendarView(array $monthDates, array $events): void
     {
         foreach ($monthDates as $monthDate) {
@@ -83,6 +103,10 @@ class MonthCalendarEventsService
         }
     }
 
+    /**
+     * @param  Collection<int, CalendarEvent>  $dateEvents
+     * @return array<string, mixed>
+     */
     private function formatDateEvents(Collection $dateEvents): array
     {
         /** @var ?CalendarEvent $firstEvent */

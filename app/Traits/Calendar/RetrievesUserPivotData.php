@@ -6,6 +6,7 @@ namespace App\Traits\Calendar;
 
 use App\Models\CalendarEvent;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 trait RetrievesUserPivotData
 {
@@ -18,9 +19,12 @@ trait RetrievesUserPivotData
             return null;
         }
 
-        return $event->calendarEventUsers
+        $pivot = $event->calendarEventUsers
             ->firstWhere('id', $user->getKey())
-            ?->pivot
-            ?->colour;
+            ?->pivot;
+
+        /** @var Pivot|null $pivot */
+
+        return $pivot?->getAttribute('colour');
     }
 }

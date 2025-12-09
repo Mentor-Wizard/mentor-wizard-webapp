@@ -6,18 +6,24 @@ namespace App\Services\Calendar;
 
 use App\Models\CalendarEvent;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 
 class AvailableCalendarEventsSlotsService
 {
+    /** @var list<array{start: CarbonInterface, end: CarbonInterface}> */
     private array $availableSlots = [];
 
     public function __construct(
         private readonly User $user,
         private readonly string $timezone,
+        /** @var array<int, int|string> $excludeEvents */
         private readonly array $excludeEvents = [],
     ) {}
 
+    /**
+     * @return list<array{start: CarbonInterface, end: CarbonInterface}>
+     */
     public function getAvailableSlots(): array
     {
         $currentDate = Date::now();

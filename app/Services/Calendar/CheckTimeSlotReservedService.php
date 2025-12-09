@@ -16,6 +16,7 @@ readonly class CheckTimeSlotReservedService
         private string $toTime,
         private string $timezone,
         private User $user,
+        /** @var array<int, int|string> $excludeEvents */
         private array $excludeEvents = [],
     ) {}
 

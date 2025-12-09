@@ -8,6 +8,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Traits\Calendar\CalculatesCalendarMetrics;
 use App\Traits\Calendar\RetrievesUserPivotData;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\Date;
 
 final readonly class CalendarEventWeekViewData
@@ -39,6 +40,7 @@ final readonly class CalendarEventWeekViewData
             ->firstWhere('id', $user?->getKey())
             ?->pivot;
 
+        /** @var Pivot|null $userPivot */
         return new self(
             id: $event->getKey(),
             dayNumber: (int) $date->format('w') + 1,
@@ -48,7 +50,7 @@ final readonly class CalendarEventWeekViewData
             startIndex: self::calculateStartIndex($secondsSinceMidnight),
             title: $event->title,
             href: $event->web_link,
-            colour: $userPivot?->colour,
+            colour: $userPivot?->getAttribute('colour'),
         );
     }
 

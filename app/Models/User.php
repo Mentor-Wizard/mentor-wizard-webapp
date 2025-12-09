@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
@@ -27,6 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read UserProfile $profile
  * @property-read MentorProfile|null $mentorProfile
  * @property-read float $rating
+ * @property-read Pivot $pivot
  * @property string $username
  *
  * @mixin IdeHelperUser
@@ -171,20 +173,30 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->hasMany(Chat::class, 'menti_id');
     }
 
+    /**
+     * @return BelongsToMany<CalendarEvent, static>
+     */
     public function calendarEvents(): BelongsToMany
     {
+        /** @phpstan-ignore-next-line */
         return $this->belongsToMany(CalendarEvent::class, 'calendar_event_user', 'user_id')
             ->withPivot('colour')
             ->withPivot('role')
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<CalendarEvent, static>
+     */
     public function hostedCalendarEvents(): BelongsToMany
     {
         return $this->calendarEvents()
             ->wherePivot('role', CalendarEventRoleEnum::HOST);
     }
 
+    /**
+     * @return BelongsToMany<CalendarEvent, static>
+     */
     public function participatingCalendarEvents(): BelongsToMany
     {
         return $this->calendarEvents()

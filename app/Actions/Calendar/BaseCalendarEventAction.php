@@ -15,12 +15,17 @@ class BaseCalendarEventAction
 {
     use AsController;
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getCalendarEventData(StoreCalendarEventRequest|EditCalendarEventRequest $request): array
     {
         $validated = $request->validated();
 
         // Get timezone from user profile
-        $userTimezone = auth()->user()?->profile?->timezone ?? config('app.timezone');
+        $user = auth()->user();
+        $profile = $user?->profile;
+        $userTimezone = $profile ? $profile->timezone : config('app.timezone');
 
         // Parse dates in user's timezone
         $startDateTime = Date::createFromFormat(

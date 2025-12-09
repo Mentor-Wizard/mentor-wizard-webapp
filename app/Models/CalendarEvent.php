@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(CalendarEventFactory::class)]
 class CalendarEvent extends Model
 {
+    /** @use HasFactory<CalendarEventFactory> */
     use HasFactory;
 
     const int MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET = 6;
@@ -48,18 +49,25 @@ class CalendarEvent extends Model
         'mentor_program_id',
     ];
 
+    /**
+     * @return BelongsToMany<User, static>
+     */
     public function calendarEventUsers(): BelongsToMany
     {
+        /** @phpstan-ignore-next-line */
         return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
             ->withPivot('colour')
             ->withTimestamps();
     }
 
     /** Get the event duration in minutes. */
+    /**
+     * @return Attribute<int, never>
+     */
     protected function duration(): Attribute
     {
         return Attribute::make(
-            get: fn (): int => $this->start_date_time->diffInMinutes($this->end_date_time),
+            get: fn (): int => (int) $this->start_date_time->diffInMinutes($this->end_date_time),
         );
     }
 

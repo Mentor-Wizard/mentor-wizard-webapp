@@ -7,6 +7,7 @@ namespace App\DTO\Calendar;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Traits\Calendar\RetrievesUserPivotData;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 final readonly class CalendarEventData
 {
@@ -39,6 +40,7 @@ final readonly class CalendarEventData
             ->firstWhere('id', $user?->getKey())
             ?->pivot;
 
+        /** @var Pivot|null $userPivot */
         return new self(
             id: $event->getKey(),
             title: $event->title,
@@ -49,10 +51,10 @@ final readonly class CalendarEventData
             type: $event->type,
             toDateFormatted: $endDateTime->format('Y-M-d'),
             toTime: $endDateTime->format('H:i'),
-            duration: $startDateTime->diffInMinutes($endDateTime),
+            duration: (int) $startDateTime->diffInMinutes($endDateTime),
             href: $event->web_link,
             description: $event->description,
-            colour: $userPivot?->colour,
+            colour: $userPivot?->getAttribute('colour'),
         );
     }
 

@@ -18,7 +18,8 @@ class ShowCalendarEventPage
     public function handle(CalendarEvent $calendarEvent): Response
     {
         $user = auth()->user();
-        $timezone = $user?->profile?->timezone ?? config('app.timezone');
+        $profile = $user?->profile;
+        $timezone = $profile ? $profile->timezone : config('app.timezone');
 
         return Inertia::render('Calendar/ShowEditEvent', [
             'availableColours' => CalendarEventColoursEnum::values(),

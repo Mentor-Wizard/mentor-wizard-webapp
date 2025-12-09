@@ -8,10 +8,12 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use Exception;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\In;
 use Override;
 
 class EditCalendarEventRequest extends FormRequest
@@ -21,6 +23,9 @@ class EditCalendarEventRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, array<int, ValidationRule|string|In>>
+     */
     public function rules(): array
     {
         return [
@@ -79,7 +84,9 @@ class EditCalendarEventRequest extends FormRequest
             }
 
             // Get timezone from user profile
-            $timezone = auth()->user()?->profile?->timezone ?? config('app.timezone');
+            $user = auth()->user();
+            $profile = $user?->profile;
+            $timezone = $profile ? $profile->timezone : config('app.timezone');
 
             $isWithinAvailableSlots = new CheckTimeSlotReservedService(
                 $this->input('fromDate'),

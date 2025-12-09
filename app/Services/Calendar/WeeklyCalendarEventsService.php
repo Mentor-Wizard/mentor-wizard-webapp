@@ -10,14 +10,17 @@ use App\Models\User;
 use App\Traits\Calendar\BuildsCalendarPayload;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Date;
 
 class WeeklyCalendarEventsService
 {
     use BuildsCalendarPayload;
 
+    /** @var list<array<string, mixed>> */
     private array $calendarView = [];
 
+    /** @var list<array<string, mixed>> */
     private array $calendarEvents = [];
 
     public function __construct(
@@ -27,7 +30,10 @@ class WeeklyCalendarEventsService
     ) {}
 
     /**
-     * @return array<string, mixed[]>
+     * @return array{
+     *     calendarEvents: list<array<string, mixed>>,
+     *     calendarView: list<array<string, mixed>>
+     * }
      */
     public function getWeeklyCalendarEvents(): array
     {
@@ -47,7 +53,7 @@ class WeeklyCalendarEventsService
             ->whereBetween('start_date_time', [$startUTCDate, $endUTCDate])
             ->orderBy('start_date_time')
             ->get();
-
+        /** @var Collection<int, CalendarEvent> $eventsCollection */
         // Build calendar events for display
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
@@ -65,8 +71,6 @@ class WeeklyCalendarEventsService
             $this->buildWeekPayload($weekDay, $daysEvents, $todayDate);
         }
 
-        $this->calendarView = array_values($this->calendarView);
-
         return [
             'calendarEvents'       => $this->calendarEvents,
             'calendarView'         => $this->calendarView,
@@ -74,7 +78,7 @@ class WeeklyCalendarEventsService
     }
 
     /**
-     * @param  array<int|string, mixed>  $daysEvents
+     * @param  array<int, string>  $daysEvents
      */
     private function buildWeekPayload(CarbonInterface $weekDay, array $daysEvents, CarbonInterface $todayDate): void
     {

@@ -17,6 +17,7 @@ class DailyCalendarEventsService
 {
     use BuildsCalendarPayload;
 
+    /** @var array<string, array<int, array<string, mixed>>> */
     private array $calendarView = [];
 
     public function __construct(
@@ -40,6 +41,14 @@ class DailyCalendarEventsService
         ];
     }
 
+    /**
+     * @return array{
+     *     todayDate: CarbonInterface,
+     *     tomorrowDate: CarbonInterface,
+     *     months: list<CarbonInterface>,
+     *     daysEvents: array<int, string>
+     * }
+     */
     private function prepareDailyDateConfiguration(): array
     {
         // Convert to UTC for database queries
@@ -70,15 +79,19 @@ class DailyCalendarEventsService
         });
 
         $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
+        $months = array_values(iterator_to_array($period));
 
         return [
             'todayDate'    => $todayDate,
             'tomorrowDate' => $tomorrowDate,
-            'months'       => $period->toArray(),
-            'daysEvents'   => $dailyEvents->pluck('date')->unique()->toArray(),
+            'months'       => $months,
+            'daysEvents'   => array_values($dailyEvents->pluck('date')->unique()->toArray()),
         ];
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     private function getDailyEvents(CarbonInterface $todayDate, CarbonInterface $tomorrowDate): array
     {
         $eventsCollection = $this->user->calendarEvents()
@@ -96,6 +109,10 @@ class DailyCalendarEventsService
         return $events;
     }
 
+    /**
+     * @param  list<CarbonInterface>  $months
+     * @param  array<int, string>  $daysEvents
+     */
     private function buildDailyCalendarView(array $months, CarbonInterface $todayDate, array $daysEvents): void
     {
         foreach ($months as $month) {
@@ -106,8 +123,9 @@ class DailyCalendarEventsService
                 $month->copy()->timezone($this->timezone)->endOfMonth()->endOfWeek()
             );
 
-            $this->calendarView[$monthKey] = collect($period)
+            $this->calendarView[$monthKey] = collect($period->toArray())
                 ->map(fn (CarbonInterface $monthDate): array => $this->buildDayPayload($monthDate, $todayDate, $daysEvents))
+                ->values()
                 ->all();
         }
     }
