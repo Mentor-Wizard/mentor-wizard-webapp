@@ -412,6 +412,7 @@ public function withValidator(Validator $validator): void
     ```
 
 - [ ] **Test:** Парсинг неправильного формату дати
+
     ```php
     it('throws validation error for invalid date format', function () {
         $response = $this->postJson('/calendar/events', [

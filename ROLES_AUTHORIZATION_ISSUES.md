@@ -599,6 +599,7 @@ $allUserEvents = CalendarEvent::whereHas('calendarEventUsers', function ($q) use
     ```
 
 - [ ] **Test:** Host може видаляти подію
+
     ```php
     it('allows host to delete event', function () {
         $mentor = User::factory()->mentor()->create();
@@ -629,6 +630,7 @@ $allUserEvents = CalendarEvent::whereHas('calendarEventUsers', function ($q) use
     ```
 
 - [ ] **Test:** Заборона редагування події без ролі host
+
     ```php
     it('prevents editing event without host role', function () {
         $user = User::factory()->create();
@@ -661,6 +663,7 @@ $allUserEvents = CalendarEvent::whereHas('calendarEventUsers', function ($q) use
     ```
 
 - [ ] **Test:** Неможливість дублювання ролей
+
     ```php
     it('prevents duplicate role assignments', function () {
         $user = User::factory()->create();
