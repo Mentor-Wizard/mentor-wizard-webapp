@@ -129,11 +129,14 @@ class EditCalendarEventRequest extends FormRequest
         ];
     }
 
+    // FIXME що робить цей метод?
     protected function prepareForValidation(): void
     {
         if ($this->has(['fromDate', 'toDate', 'fromTime', 'toTime'])) {
+            // FIXME: unused variables
             $fromDateTime = Date::createFromFormat('Y-m-d H:i', $this->fromDate.' '.$this->fromTime);
             $toDateTime = Date::createFromFormat('Y-m-d H:i', $this->toDate.' '.$this->toTime);
+            // FIXME: ненаявні властивості класу
             if ($this->fromDate === $this->toDate && $this->toTime <= $this->fromTime) {
                 return;
             }

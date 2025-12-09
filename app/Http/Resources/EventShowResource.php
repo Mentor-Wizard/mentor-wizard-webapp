@@ -20,7 +20,7 @@ use Override;
  * @property-read string $web_link
  * @property-read string $description
  */
-class EventShowResource extends JsonResource
+class EventShowResource extends JsonResource // FIXME: rename ShowCalendarEventResource
 {
     /**
      * Transform the resource into an array.
@@ -31,7 +31,14 @@ class EventShowResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = $this->additional['user'] ?? null;
+        // FIXME: Що якщо користувач передав невалідний timezone?
         $timezone = $this->additional['timezone'] ?? config('app.timezone');
+
+        // FIXME: уникаємо мутації дати
+        /**
+         * $startDateTime = $this->start_date_time->copy()->tz($timezone);
+         * $endDateTime = $this->end_date_time->copy()->tz($timezone);
+         */
 
         return [
             'id'                => $this->resource->getKey(),
@@ -46,6 +53,7 @@ class EventShowResource extends JsonResource
             'duration'          => CarbonInterval::seconds($this->duration)->cascade()->format('%H:%I'),
             'href'              => $this->web_link,
             'description'       => $this->description,
+            // FIXME: color; potential N+1 problem;
             'colour'            => $this->resource->calendarEventUsers?->where('id', '=', $user?->getKey())?->first()?->pivot?->colour,
         ];
     }

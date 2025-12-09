@@ -18,9 +18,11 @@ class StoreCalendarEvent
     public function handle(StoreCalendarEventRequest $request): RedirectResponse
     {
 
+        // FIXME: винести в мідлвери роутів
         abort_if($request->user()->cannot('create', CalendarEvent::class), Response::HTTP_FORBIDDEN, 'Unauthorized action.');
 
         $validatedData = $request->getEventData();
+        // FIXME: в чому логіка?
         $colour = $validatedData['colour'];
         unset($validatedData['colour']);
         $calendarEvent = CalendarEvent::query()->create([

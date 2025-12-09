@@ -17,6 +17,7 @@ class EditCalendarEvent
 
     public function handle(EditCalendarEventRequest $request, CalendarEvent $calendarEvent): Response
     {
+        // FIXME: в мідлвери роутів
         throw_unless($calendarEvent->exists, ModelNotFoundException::class, 'Calendar Event not found.');
 
         $validatedData = $request->getEventData();

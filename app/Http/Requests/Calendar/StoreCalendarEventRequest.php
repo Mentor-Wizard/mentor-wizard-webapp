@@ -94,6 +94,7 @@ class StoreCalendarEventRequest extends FormRequest
         ];
     }
 
+    // FIXME чому метод реквесту має в назві "Event"? Ну типу... ми тут працюємо з реквестом, але неймінг привʼязуємо до CalendarEvent
     public function getEventData(): array
     {
         $validated = $this->validated();

@@ -21,18 +21,20 @@ class ShowCalendarEventPage
 
     public function handle(CalendarEvent $calendarEvent, Request $request): Response
     {
+        // FIXME: винести в мідлвери роутів?
         Gate::authorize('view', [$calendarEvent, auth()->user()]);
 
         $timezone = $request->query('timezone');
 
         return Inertia::render('Calendar/ShowEditEvent', [
-            'canLogin'         => Route::has('login'),
-            'canRegister'      => Route::has('register'),
-            'laravelVersion'   => Application::VERSION,
-            'phpVersion'       => PHP_VERSION,
-            'locale'           => app()->getLocale(),
-            'availableColours' => CalendarEventColoursEnum::values(),
+            'canLogin'         => Route::has('login'), // FIXME: чому це тут потрібно?!
+            'canRegister'      => Route::has('register'), // FIXME: чому це тут потрібно?!
+            'laravelVersion'   => Application::VERSION, // FIXME: чому це тут потрібно?!
+            'phpVersion'       => PHP_VERSION, // FIXME: чому це тут потрібно?!
+            'locale'           => app()->getLocale(), // FIXME: чому беремо це саме тут?!
+            'availableColours' => CalendarEventColoursEnum::values(), // FIXME: colors?
             'permissions'      => auth()->user()->can('update', [$calendarEvent, auth()->user()]) ? 'edit' : 'view',
+            // FIXME: make() буде краще сприйматись в екосистемі Ларки
             'calendarEvent'    => new EventShowResource($calendarEvent->load('calendarEventUsers'))
                 ->additional(['user' => auth()->user(),
                     'timezone'       => $timezone,

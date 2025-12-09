@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Policies\CalendarEventPolicy;
-use Database\Factories\CurrencyFactory;
+use Database\Factories\CalendarEventFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,12 +28,12 @@ use Illuminate\Support\Carbon;
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]
+#[UseFactory(CalendarEventFactory::class)]
 class CalendarEvent extends Model
 {
-    /** @use HasFactory<CurrencyFactory> */
     use HasFactory;
 
-    const MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET = 6;
+    const int MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET = 6;
 
     protected $fillable = [
         'title',
@@ -50,6 +51,7 @@ class CalendarEvent extends Model
     public function calendarEventUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
+            // FIXME навіщо нам тут колір?
             ->withPivot('colour')
             ->withTimestamps();
     }
