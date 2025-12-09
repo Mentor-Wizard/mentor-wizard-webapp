@@ -9,6 +9,7 @@ use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Pages\Calendar\CalendarsListPage;
+use App\Actions\Pages\Calendar\MentorProgramEventBookingPage;
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Actions\Pages\Chat\GetChatPage;
 use App\Actions\Pages\DashboardPage;
@@ -70,6 +71,8 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
     Route::get('calendar-event/{calendarEvent:id}', ShowCalendarEventPage::class)
         ->can('view', 'calendarEvent')
         ->name('pages.calendar.show');
+    Route::get('mentor-program/book/{mentorProgram:slug}', MentorProgramEventBookingPage::class)
+        ->name('pages.mentor.program.index');
     Route::middleware(['role:mentor'])->group(function (): void {
         Route::post('calendar-event/store', StoreCalendarEvent::class)
             ->can('create', CalendarEvent::class)

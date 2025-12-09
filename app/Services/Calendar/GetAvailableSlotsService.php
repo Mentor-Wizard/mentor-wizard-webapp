@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Calendar;
 
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Illuminate\Support\Facades\Date;
 
@@ -13,41 +14,64 @@ class GetAvailableSlotsService
     private array $availableSlots = [];
 
     public function __construct(private readonly User $user, private readonly string $timezone,
-        private readonly array $excludeEvents = [], private readonly bool $excludeSchedule = false) {}
+        private readonly array $excludeEvents = [], private readonly bool $excludeSchedule = false, private readonly ?MentorProgram $mentorProgram = null) {}
 
     public function getAvailableSlots(): array
     {
         $currentDate = Date::now();
         $currentDateTimezone = Date::now($this->timezone);
 
-        $events = $this->user->calendarEvents()
-            ->where('start_date_time', '>=', $currentDate)->orderBy('start_date_time')
+        $calendarEventRequestQuery = $this->user->calendarEvents();
+        if (! is_null($this->mentorProgram)) {
+            $mentorProgramStart = Date::parse($this->mentorProgram?->start_time);
+            $mentorProgramEnd = Date::parse($this->mentorProgram?->end_time);
+
+            if ($mentorProgramStart) {
+                $calendarEventRequestQuery->where('start_date_time', '>=', $mentorProgramStart);
+            }
+
+            if ($mentorProgramEnd) {
+                $calendarEventRequestQuery->where('end_date_time', '<=', $mentorProgramEnd);
+            }
+        } else {
+            $calendarEventRequestQuery->where('start_date_time', '>=', $currentDate);
+        }
+
+        $events = $calendarEventRequestQuery
+            ->orderBy('start_date_time')
             ->whereKeyNot($this->excludeEvents)
-            ->limit(100)
+            ->limit(200)
             ->get();
 
         if ($events->isEmpty()) {
-            return [];
-        }
-
-        $previousEvent = null;
-        foreach ($events as $event) {
-            /** @var CalendarEvent $event */
-            if (is_null($previousEvent)) {
-                if ($event->start_date_time->greaterThanOrEqualTo($currentDate)) {
-                    $this->availableSlots[] = ['start' => $currentDateTimezone,
+            $this->availableSlots[] = [
+                'start' => $mentorProgramStart ? $mentorProgramStart->setTimezone($this->timezone) : $currentDate,
+                'end'   => $mentorProgramEnd ? $mentorProgramEnd->setTimezone($this->timezone) : Date::now($this->timezone)
+                    ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
+            ];
+            if ($this->excludeSchedule) {
+                return $this->availableSlots;
+            }
+        } else {
+            $previousEvent = null;
+            foreach ($events as $event) {
+                /** @var CalendarEvent $event */
+                if (is_null($previousEvent)) {
+                    if ($event->start_date_time->greaterThanOrEqualTo($currentDate)) {
+                        $this->availableSlots[] = ['start' => $currentDateTimezone,
+                            'end'                          => $event->start_date_time->setTimezone($this->timezone)];
+                    }
+                } else {
+                    $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
                         'end'                          => $event->start_date_time->setTimezone($this->timezone)];
                 }
-            } else {
-                $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
-                    'end'                          => $event->start_date_time->setTimezone($this->timezone)];
+
+                $previousEvent = $event;
             }
 
-            $previousEvent = $event;
+            $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
+                'end'                          => Date::now($this->timezone)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
         }
-
-        $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
-            'end'                          => Date::now($this->timezone)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
 
         if ($this->excludeSchedule) {
             $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user, $this->availableSlots, $this->timezone)->getAvailableSlots();

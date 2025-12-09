@@ -25,15 +25,16 @@ class StoreCalendarEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'       => ['required', 'string', 'max:255'],
-            'fromDate'    => ['required', 'date', 'after_or_equal:today'],
-            'toDate'      => ['required', 'date', 'after_or_equal:fromDate'],
-            'fromTime'    => ['required', 'date_format:H:i'],
-            'toTime'      => ['required', 'date_format:H:i', 'after:fromTime'],
-            'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
-            'description' => ['max:2000'],
-            'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
-            'timezone'    => ['required', 'string'],
+            'title'             => ['required', 'string', 'max:255'],
+            'fromDate'          => ['required', 'date', 'after_or_equal:today'],
+            'toDate'            => ['required', 'date', 'after_or_equal:fromDate'],
+            'fromTime'          => ['required', 'date_format:H:i'],
+            'toTime'            => ['required', 'date_format:H:i', 'after:fromTime'],
+            'colour'            => ['required', Rule::in(CalendarEventColoursEnum::values())],
+            'description'       => ['max:2000'],
+            'type'              => ['required', Rule::in(CalendarEventTypeEnum::values())],
+            'timezone'          => ['required', 'string'],
+            'mentor_program_id' => ['nullable', 'integer', 'exists:mentor_programs,id'],
         ];
     }
 

@@ -31,6 +31,9 @@ class MentorProgram extends Model
         'description',
         'cost',
         'currency_id',
+        'start_time',
+        'end_time',
+        'session_duration',
     ];
 
     public function mentor(): BelongsTo

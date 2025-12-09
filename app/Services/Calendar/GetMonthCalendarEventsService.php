@@ -34,8 +34,8 @@ class GetMonthCalendarEventsService
 
     private function prepareDateConfiguration(): array
     {
-        $startDate = $this->date->startOfMonth()->startOfWeek();
-        $endDate = $this->date->endOfMonth()->endOfWeek();
+        $startDate = $this->date->copy()->startOfMonth()->startOfWeek();
+        $endDate = $this->date->copy()->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         return [

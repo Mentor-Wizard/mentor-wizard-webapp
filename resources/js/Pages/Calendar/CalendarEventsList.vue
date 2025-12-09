@@ -182,7 +182,6 @@ onMounted(() => {
           }}</time>
         </h1>
       </div>
-      <!--                            class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"-->
 
       <div v-if="timezone" class="flex items-center">
         <div

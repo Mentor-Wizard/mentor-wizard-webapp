@@ -44,6 +44,18 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  selectedDate: {
+    type: String,
+    default: null,
+  },
+  availableSlots: {
+    type: Array,
+    default: () => [],
+  },
+  mentorProgram: {
+    type: Object,
+    default: null,
+  },
 });
 
 let form = useForm({
@@ -56,6 +68,7 @@ let form = useForm({
   description: '',
   colour: 'blue',
   timezone: timeZone,
+  mentor_program_id: null,
 });
 
 // CalendarEvent types
@@ -79,11 +92,32 @@ onMounted(() => {
     },
     {} as Record<string, string>,
   );
-  if (!form.fromDate) {
-    form.fromDate = today;
+
+  // Initialize with selectedDate if provided (for mentor program booking)
+  if (props.selectedDate) {
+    form.fromDate = props.selectedDate;
+    form.toDate = props.selectedDate;
+
+    // Set initial times from first available slot
+    if (props.availableSlots && props.availableSlots.length > 0) {
+      const firstSlot = props.availableSlots[0];
+      const startTime = new Date(firstSlot.start);
+      const endTime = new Date(firstSlot.end);
+      form.fromTime = startTime.toTimeString().slice(0, 5);
+      form.toTime = endTime.toTimeString().slice(0, 5);
+    }
+  } else {
+    if (!form.fromDate) {
+      form.fromDate = today;
+    }
+    if (!form.toDate) {
+      form.toDate = today;
+    }
   }
-  if (!form.toDate) {
-    form.toDate = today;
+
+  // Set mentor program ID if provided
+  if (props.mentorProgram) {
+    form.mentor_program_id = props.mentorProgram.id;
   }
 });
 
@@ -146,6 +180,20 @@ const validateForm = () => {
     }
     if (currentTime > fromDateTime) {
       errors.value.fromDate = 'Start date/time must be in the future';
+    }
+
+    // Validate against available slots for mentor program bookings
+    if (props.availableSlots && props.availableSlots.length > 0) {
+      const isWithinSlots = props.availableSlots.some((slot) => {
+        const slotStart = new Date(slot.start);
+        const slotEnd = new Date(slot.end);
+        return fromDateTime >= slotStart && toDateTime <= slotEnd;
+      });
+
+      if (!isWithinSlots) {
+        errors.value.fromTime =
+          'Selected time must fall within available slots';
+      }
     }
   }
 
@@ -210,6 +258,33 @@ watch(
       const newEndTime = new Date();
       newEndTime.setHours(hours + 1, minutes);
       form.toTime = newEndTime.toTimeString().slice(0, 5);
+    }
+  },
+);
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen) {
+      // Reinitialize form when modal opens
+      if (props.selectedDate) {
+        form.fromDate = props.selectedDate;
+        form.toDate = props.selectedDate;
+
+        // Set initial times from first available slot
+        if (props.availableSlots && props.availableSlots.length > 0) {
+          const firstSlot = props.availableSlots[0];
+          const startTime = new Date(firstSlot.start);
+          const endTime = new Date(firstSlot.end);
+          form.fromTime = startTime.toTimeString().slice(0, 5);
+          form.toTime = endTime.toTimeString().slice(0, 5);
+        }
+      }
+
+      // Set mentor program ID if provided
+      if (props.mentorProgram) {
+        form.mentor_program_id = props.mentorProgram.id;
+      }
     }
   },
 );
