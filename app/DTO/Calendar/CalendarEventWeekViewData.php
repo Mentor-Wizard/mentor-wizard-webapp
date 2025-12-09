@@ -33,13 +33,8 @@ final readonly class CalendarEventWeekViewData
 
         $date = Date::parse($event->start_date_time)->setTimezone($timezone);
 
-        $timezoneAbbreviation = $date->format('T');
-        $dateTime = $date->format('Y-m-d').'"'.$timezoneAbbreviation.'"'.$date->format('H:i:s');
-
-        $secondsSinceMidnight = ((int) $date->format('H')) * self::SECONDS_IN_HOUR
-            + ((int) $date->format('i')) * 60
-            + ((int) $date->format('s'));
-
+        $dateTime = self::formatDateTimeWithTimezone($date);
+        $secondsSinceMidnight = self::calculateSecondsSinceMidnight($date);
         $userPivot = $event->calendarEventUsers
             ->firstWhere('id', $user?->getKey())
             ?->pivot;
@@ -49,8 +44,8 @@ final readonly class CalendarEventWeekViewData
             dayNumber: (int) $date->format('w') + 1,
             time: $date->format('g:i A'),
             dateTime: $dateTime,
-            durationIndex: (int) ($event->duration * self::DURATION_INDEX_MULTIPLIER / self::SECONDS_IN_HOUR),
-            startIndex: (int) (($secondsSinceMidnight * self::START_INDEX_MULTIPLIER / self::SECONDS_IN_HOUR) + self::START_INDEX_OFFSET),
+            durationIndex: self::calculateDurationIndex($event->duration),
+            startIndex: self::calculateStartIndex($secondsSinceMidnight),
             title: $event->title,
             href: $event->web_link,
             colour: $userPivot?->colour,

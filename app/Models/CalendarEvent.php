@@ -8,6 +8,7 @@ use App\Policies\CalendarEventPolicy;
 use Database\Factories\CalendarEventFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -19,11 +20,11 @@ use Illuminate\Support\Carbon;
  * @property string $date
  * @property string $title
  * @property string $status
- * @property int $duration
  * @property string $type
  * @property string|null $web_link
  * @property string|null $description
  * @property int|null $mentor_program_id
+ * @property-read int $duration Computed attribute: duration in minutes
  *
  * @mixin IdeHelperCalendarEvent
  */
@@ -40,7 +41,6 @@ class CalendarEvent extends Model
         'status',
         'start_date_time',
         'end_date_time',
-        'duration',
         'date',
         'type',
         'web_link',
@@ -53,6 +53,14 @@ class CalendarEvent extends Model
         return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
             ->withPivot('colour')
             ->withTimestamps();
+    }
+
+    /** Get the event duration in minutes. */
+    protected function duration(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): int => $this->start_date_time->diffInMinutes($this->end_date_time),
+        );
     }
 
     /**

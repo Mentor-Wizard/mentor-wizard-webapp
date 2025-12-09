@@ -12,6 +12,8 @@ trait CalculatesCalendarMetrics
 
     private const SECONDS_IN_HOUR = 3600;
 
+    private const MINUTES_IN_HOUR = 60;
+
     private const START_INDEX_MULTIPLIER = 6;
 
     private const START_INDEX_OFFSET = 2;
@@ -27,11 +29,11 @@ trait CalculatesCalendarMetrics
     }
 
     /**
-     * Calculate duration index for calendar display.
+     * Calculate duration index for calendar display (5-minute increments).
      */
-    protected static function calculateDurationIndex(int $durationInSeconds): int
+    protected static function calculateDurationIndex(int $durationInMinutes): int
     {
-        return (int) ($durationInSeconds * self::DURATION_INDEX_MULTIPLIER / self::SECONDS_IN_HOUR);
+        return (int) ($durationInMinutes * self::DURATION_INDEX_MULTIPLIER / self::MINUTES_IN_HOUR);
     }
 
     /**

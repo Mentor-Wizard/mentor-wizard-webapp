@@ -38,7 +38,6 @@ class BaseCalendarEventAction
         $startDateTimeUTC = $startDateTime?->timezone('UTC');
         $endDateTimeUTC = $endDateTime?->timezone('UTC');
 
-        $duration = (int) $startDateTimeUTC?->diffInSeconds($endDateTimeUTC);
         $eventType = match ($validated['type']) {
             'group'      => CalendarEventTypeEnum::GROUP->value,
             default      => CalendarEventTypeEnum::INDIVIDUAL->value,
@@ -48,7 +47,6 @@ class BaseCalendarEventAction
             'title'           => $validated['title'],
             'start_date_time' => $startDateTimeUTC,
             'end_date_time'   => $endDateTimeUTC,
-            'duration'        => $duration,
             'type'            => $eventType,
             'colour'          => $validated['colour'],
             'description'     => $validated['description'],

@@ -28,8 +28,8 @@ class CalendarEventFactory extends Factory
     public function definition(): array
     {
         $dateTime = fake()->dateTimeBetween('-5 month', '+5 month');
-        $duration = fake()->randomNumber(1, true) * 1800;
-        $endTime = Date::parse($dateTime)->addSeconds($duration);
+        $durationInMinutes = fake()->randomElement([30, 45, 60, 90, 120]);
+        $endTime = Date::parse($dateTime)->addMinutes($durationInMinutes);
         $date = $dateTime->format('Y-m-d');
 
         return [
@@ -38,7 +38,6 @@ class CalendarEventFactory extends Factory
             'start_date_time'   => $dateTime,
             'end_date_time'     => $endTime,
             'date'              => $date,
-            'duration'          => $duration,
             'type'              => fake()->randomElement(CalendarEventTypeEnum::values()),
             'web_link'          => fake()->url(),
             'description'       => fake()->text(),
