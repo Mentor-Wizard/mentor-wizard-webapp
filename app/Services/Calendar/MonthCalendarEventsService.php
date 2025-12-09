@@ -7,6 +7,7 @@ namespace App\Services\Calendar;
 use App\DTO\Calendar\CalendarEventMonthViewData;
 use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Traits\Calendar\BuildsCalendarPayload;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Date;
 
 class MonthCalendarEventsService
 {
+    use BuildsCalendarPayload;
+
     private array $calendarView = [];
 
     public function __construct(

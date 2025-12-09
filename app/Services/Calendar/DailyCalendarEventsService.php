@@ -7,6 +7,7 @@ namespace App\Services\Calendar;
 use App\DTO\Calendar\CalendarEventDayViewData;
 use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Traits\Calendar\BuildsCalendarPayload;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Date;
 
 class DailyCalendarEventsService
 {
+    use BuildsCalendarPayload;
+
     private array $calendarView = [];
 
     public function __construct(
@@ -107,28 +110,5 @@ class DailyCalendarEventsService
                 ->map(fn (CarbonInterface $monthDate): array => $this->buildDayPayload($monthDate, $todayDate, $daysEvents))
                 ->all();
         }
-    }
-
-    private function buildDayPayload(CarbonInterface $monthDate, CarbonInterface $todayDate, array $daysEvents): array
-    {
-        $payload = ['date' => $monthDate->format('Y-m-d')];
-
-        if ($monthDate->isSameMonth($todayDate)) {
-            $payload['isCurrentMonth'] = true;
-        }
-
-        if ($monthDate->isSameDay($todayDate)) {
-            $payload['isSelected'] = true;
-        }
-
-        if (Date::now($this->timezone)->isSameDay($monthDate)) {
-            $payload['isToday'] = true;
-        }
-
-        if (in_array($monthDate->format('Y-m-d'), $daysEvents)) {
-            $payload['hasEvent'] = true;
-        }
-
-        return $payload;
     }
 }

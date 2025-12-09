@@ -7,12 +7,15 @@ namespace App\Services\Calendar;
 use App\DTO\Calendar\CalendarEventWeekViewData;
 use App\Models\CalendarEvent;
 use App\Models\User;
+use App\Traits\Calendar\BuildsCalendarPayload;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Date;
 
 class WeeklyCalendarEventsService
 {
+    use BuildsCalendarPayload;
+
     private array $calendarView = [];
 
     private array $calendarEvents = [];
@@ -75,24 +78,6 @@ class WeeklyCalendarEventsService
      */
     private function buildWeekPayload(CarbonInterface $weekDay, array $daysEvents, CarbonInterface $todayDate): void
     {
-
-        $payload = ['date' => $weekDay->format('Y-m-d')];
-        if ($weekDay->isSameMonth($todayDate)) {
-            $payload['isCurrentMonth'] = true;
-        }
-
-        if ($weekDay->isSameDay($todayDate)) {
-            $payload['isSelected'] = true;
-        }
-
-        if (Date::now($this->timezone)->isSameDay($weekDay)) {
-            $payload['isToday'] = true;
-        }
-
-        if (in_array($weekDay->format('Y-m-d'), $daysEvents)) {
-            $payload['hasEvent'] = true;
-        }
-
-        $this->calendarView[] = $payload;
+        $this->calendarView[] = $this->buildDayPayload($weekDay, $todayDate, $daysEvents);
     }
 }
