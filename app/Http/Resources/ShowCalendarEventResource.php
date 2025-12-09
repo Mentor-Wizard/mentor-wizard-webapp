@@ -30,9 +30,13 @@ class ShowCalendarEventResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = auth()->user();
-        $timezone = $user?->profile->timezone ?? config('app.timezone');
+        $timezone = $user?->profile?->timezone ?? config('app.timezone');
         $startDateTime = $this->start_date_time->copy()->tz($timezone);
         $endDateTime = $this->end_date_time->copy()->tz($timezone);
+
+        $userPivot = $this->calendarEventUsers
+            ->firstWhere('id', $user?->getKey())
+            ?->pivot;
 
         return [
             'id'                => $this->resource->getKey(),
@@ -47,8 +51,7 @@ class ShowCalendarEventResource extends JsonResource
             'duration'          => $startDateTime->diffInMinutes($endDateTime), // TODO: remove duration in DB
             'href'              => $this->web_link,
             'description'       => $this->description,
-            // FIXME: potential N+1 problem;
-            'colour'            => $this->resource->calendarEventUsers?->where('id', '=', $user?->getKey())?->first()?->pivot?->colour,
+            'colour'            => $userPivot?->colour,
         ];
     }
 }

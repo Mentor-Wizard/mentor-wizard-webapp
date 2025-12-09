@@ -30,8 +30,6 @@ class EventWeekViewResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        $user = $this->additional['user'] ?? null;
-
         $date = Date::parse($this->start_date_time)->setTimezone($this->timezone);
 
         $timezoneAbbreviation = $date->format('T');
@@ -40,6 +38,10 @@ class EventWeekViewResource extends JsonResource
         $secondsSinceMidnight = ((int) $date->format('H')) * 3600
             + ((int) $date->format('i')) * 60
             + ((int) $date->format('s'));
+
+        $userPivot = $this->calendarEventUsers
+            ->firstWhere('id', auth()->user()?->getKey())
+            ?->pivot;
 
         return [
             'id'            => $this->resource->getKey(),
@@ -50,7 +52,7 @@ class EventWeekViewResource extends JsonResource
             'startIndex'    => (int) (($secondsSinceMidnight * 6 / 3600) + 2),
             'title'         => $this->title,
             'href'          => $this->web_link,
-            'colour'        => $this->resource->calendarEventUsers?->where('id', '=', $user->getKey())?->first()?->pivot?->colour,
+            'colour'        => $userPivot?->colour,
         ];
     }
 }

@@ -17,11 +17,21 @@ final class CalendarEventPolicy
 
     public function update(User $user, CalendarEvent $calendarEvent): bool
     {
-        return $user->hasRole('mentor')
-            && $calendarEvent->calendarEventUsers()
-                ->where('user_id', $user->getKey())
-                ->where('role', CalendarEventRoleEnum::HOST->value)
-                ->exists();
+        if (! $user->hasRole('mentor')) {
+            return false;
+        }
+
+        if ($calendarEvent->relationLoaded('calendarEventUsers')) {
+            return $calendarEvent->calendarEventUsers
+                ->where('id', $user->getKey())
+                ->where('pivot.role', CalendarEventRoleEnum::HOST->value)
+                ->isNotEmpty();
+        }
+
+        return $calendarEvent->calendarEventUsers()
+            ->where('user_id', $user->getKey())
+            ->where('role', CalendarEventRoleEnum::HOST->value)
+            ->exists();
     }
 
     public function delete(User $user, CalendarEvent $calendarEvent): bool
@@ -31,6 +41,12 @@ final class CalendarEventPolicy
 
     public function view(User $user, CalendarEvent $calendarEvent): bool
     {
+        if ($calendarEvent->relationLoaded('calendarEventUsers')) {
+            return $calendarEvent->calendarEventUsers
+                ->where('id', $user->getKey())
+                ->isNotEmpty();
+        }
+
         return $calendarEvent->calendarEventUsers()
             ->where('user_id', $user->getKey())
             ->exists();

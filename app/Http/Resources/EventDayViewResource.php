@@ -40,6 +40,10 @@ class EventDayViewResource extends JsonResource
             + ((int) $date->format('i')) * 60
             + ((int) $date->format('s'));
 
+        $userPivot = $this->calendarEventUsers
+            ->firstWhere('id', auth()->user()?->getKey())
+            ?->pivot;
+
         return [
             'id'            => $this->resource->getKey(),
             'time'          => $date->format('g:i A'),
@@ -48,7 +52,7 @@ class EventDayViewResource extends JsonResource
             'startIndex'    => (int) (($secondsSinceMidnight * 6 / 3600) + 2),
             'title'         => $this->title,
             'href'          => $this->web_link,
-            'colour'        => CalendarEventColoursEnum::randomValue(),
+            'colour'        => $userPivot?->colour ?? CalendarEventColoursEnum::randomValue(),
         ];
     }
 }
