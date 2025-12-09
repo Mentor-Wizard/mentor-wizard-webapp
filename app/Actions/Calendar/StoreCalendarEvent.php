@@ -8,12 +8,9 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Illuminate\Http\RedirectResponse;
-use Lorisleiva\Actions\Concerns\AsController;
 
 class StoreCalendarEvent extends BaseCalendarEventAction
 {
-    use AsController;
-
     public function handle(StoreCalendarEventRequest $request): RedirectResponse
     {
         $validatedData = $this->getCalendarEventData($request);
