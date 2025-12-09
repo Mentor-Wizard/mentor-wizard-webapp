@@ -41,8 +41,10 @@ class MonthCalendarEventsService
 
     private function prepareDateConfiguration(): array
     {
-        $startDate = $this->date->startOfMonth()->startOfWeek();
-        $endDate = $this->date->endOfMonth()->endOfWeek();
+        // Convert to UTC for database queries
+        $utcDate = Date::parse($this->date)->timezone('UTC');
+        $startDate = $utcDate->copy()->startOfMonth()->startOfWeek();
+        $endDate = $utcDate->copy()->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
 
         return [
@@ -100,7 +102,7 @@ class MonthCalendarEventsService
             $payload['isSelected'] = true;
         }
 
-        if (Date::now()->isSameDay($eventDate)) {
+        if (Date::now('UTC')->isSameDay($eventDate)) {
             $payload['isToday'] = true;
         }
 

@@ -19,18 +19,26 @@ class BaseCalendarEventAction
     {
         $validated = $request->validated();
 
+        // Get timezone from user profile
+        $userTimezone = auth()->user()?->profile?->timezone ?? config('app.timezone');
+
+        // Parse dates in user's timezone
         $startDateTime = Date::createFromFormat(
             'Y-m-d H:i',
             $validated['fromDate'].' '.$validated['fromTime'],
-            $validated['timezone']
+            $userTimezone
         );
         $endDateTime = Date::createFromFormat(
             'Y-m-d H:i',
             $validated['toDate'].' '.$validated['toTime'],
-            $validated['timezone']
+            $userTimezone
         );
 
-        $duration = (int) $startDateTime?->diffInSeconds($endDateTime);
+        // Convert to UTC for database storage
+        $startDateTimeUTC = $startDateTime?->timezone('UTC');
+        $endDateTimeUTC = $endDateTime?->timezone('UTC');
+
+        $duration = (int) $startDateTimeUTC?->diffInSeconds($endDateTimeUTC);
         $eventType = match ($validated['type']) {
             'group'      => CalendarEventTypeEnum::GROUP->value,
             default      => CalendarEventTypeEnum::INDIVIDUAL->value,
@@ -38,14 +46,14 @@ class BaseCalendarEventAction
 
         return [
             'title'           => $validated['title'],
-            'start_date_time' => $startDateTime,
-            'end_date_time'   => $endDateTime,
+            'start_date_time' => $startDateTimeUTC,
+            'end_date_time'   => $endDateTimeUTC,
             'duration'        => $duration,
             'type'            => $eventType,
             'colour'          => $validated['colour'],
             'description'     => $validated['description'],
             'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'date'            => $startDateTime?->format('Y-m-d'),
+            'date'            => $startDateTimeUTC?->format('Y-m-d'),
         ];
     }
 }

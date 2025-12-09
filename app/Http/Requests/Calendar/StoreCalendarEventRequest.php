@@ -52,12 +52,16 @@ class StoreCalendarEventRequest extends FormRequest
                 $validator->errors()->add('fromDate', 'toDate is not valid');
             }
 
+            // Get timezone from user profile
+            $timezone = auth()->user()?->profile?->timezone ?? config('app.timezone');
+
             $isWithinAvailableSlots = new CheckTimeSlotReservedService(
                 $this->input('fromDate'),
                 $this->input('fromTime'),
                 $this->input('toDate'),
                 $this->input('toTime'),
-                $this->input('timezone', config('app.timezone')), auth()->user())->isSlotAvailable();
+                $timezone,
+                auth()->user())->isSlotAvailable();
 
             if (! $isWithinAvailableSlots) {
                 $validator->errors()->add('fromDate', 'there are another events on this time');

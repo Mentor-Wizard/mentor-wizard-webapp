@@ -32,7 +32,6 @@ class EditCalendarEventRequest extends FormRequest
             'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
             'description' => ['max:2000'],
             'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
-            'timezone'    => ['required', 'string'],
         ];
     }
 
@@ -79,12 +78,15 @@ class EditCalendarEventRequest extends FormRequest
                 $validator->errors()->add('fromDate', 'toDate is not valid');
             }
 
+            // Get timezone from user profile
+            $timezone = auth()->user()?->profile?->timezone ?? config('app.timezone');
+
             $isWithinAvailableSlots = new CheckTimeSlotReservedService(
                 $this->input('fromDate'),
                 $this->input('fromTime'),
                 $this->input('toDate'),
                 $this->input('toTime'),
-                $this->input('timezone', 'UTC'),
+                $timezone,
                 auth()->user(), [$this->input('id')])->isSlotAvailable();
 
             if (! $isWithinAvailableSlots) {

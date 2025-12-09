@@ -9,7 +9,6 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Date;
 
 class WeeklyCalendarEventsService
@@ -30,17 +29,21 @@ class WeeklyCalendarEventsService
     public function getWeeklyCalendarEvents(): array
     {
         $startDate = $this->date->startOfWeek();
-        $startUTCDate = $startDate->copy()->timezone(config('app.timezone'));
+        // Convert to UTC for database queries
+        $startUTCDate = $startDate->copy()->timezone('UTC');
         $endDate = $this->date->endOfWeek();
-        $endUTCDate = $endDate->copy()->timezone(config('app.timezone'));
+        // Convert to UTC for database queries
+        $endUTCDate = $endDate->copy()->timezone('UTC');
         $todayDate = Date::parse($this->date, $this->timezone);
-        $userEvents = $this->user->calendarEvents()->with('calendarEventUsers');
-        $userEventsForCalendar = clone $userEvents;
-        // TODO подумати як уникнути клонування колекцій
 
-        $eventsCollection = $userEvents->whereBetween('start_date_time',
-            [$startUTCDate, $endUTCDate])->orderBy('start_date_time')->get();
+        // Single query to fetch all events for the week
+        $eventsCollection = $this->user->calendarEvents()
+            ->with('calendarEventUsers')
+            ->whereBetween('start_date_time', [$startUTCDate, $endUTCDate])
+            ->orderBy('start_date_time')
+            ->get();
 
+        // Build calendar events for display
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
             $this->calendarEvents[] = new EventWeekViewResource($dayEvent, $this->timezone)
@@ -48,13 +51,12 @@ class WeeklyCalendarEventsService
                 ->resolve();
         }
 
-        /** @var Collection<int, CalendarEvent> $eventsForCalendar */
-        $eventsForCalendar = $userEventsForCalendar->get();
-        $eventsForCalendar->each(function (CalendarEvent $event): void {
+        // Reuse the same collection for calendar view
+        $eventsCollection->each(function (CalendarEvent $event): void {
             $event->date = Date::parse($event->start_date_time)->timezone($this->timezone)->format('Y-m-d');
         });
 
-        $daysEvents = $eventsForCalendar->pluck('date')->unique()->toArray();
+        $daysEvents = $eventsCollection->pluck('date')->unique()->toArray();
         $weekDays = CarbonPeriod::create($startDate, '1 day', $endDate);
         foreach ($weekDays as $weekDay) {
             $this->buildWeekPayload($weekDay, $daysEvents, $todayDate);
@@ -68,6 +70,9 @@ class WeeklyCalendarEventsService
         ];
     }
 
+    /**
+     * @param  array<int|string, mixed>  $daysEvents
+     */
     private function buildWeekPayload(CarbonInterface $weekDay, array $daysEvents, CarbonInterface $todayDate): void
     {
 
