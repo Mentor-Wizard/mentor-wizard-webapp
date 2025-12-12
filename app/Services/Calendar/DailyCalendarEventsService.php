@@ -52,19 +52,26 @@ class DailyCalendarEventsService
     private function prepareDailyDateConfiguration(): array
     {
         // Convert to UTC for database queries
-        $utcDate = Date::parse($this->date)->timezone('UTC');
-        $todayDate = $utcDate->copy()->startOfDay();
-        $tomorrowDate = $utcDate->copy()->addDay()->startOfDay();
+        $todayDateAsPerTimezone = Date::parse($this->date);
+        $tomorrowDate = $todayDateAsPerTimezone->copy()->addDay()->timezone(config('app.timezone'));
+        $todayDate = $todayDateAsPerTimezone->copy()->startOfDay()->timezone(config('app.timezone'));
+
+        /** @var Collection<int, CalendarEvent> $dailyEvents */
+        $dailyEvents = $this->user->calendarEvents()
+            ->where('start_date_time', '>=',
+                Date::now()->subMonth()->startOfMonth())
+            ->where('start_date_time', '<=', Date::now()->addMonth()->endOfMonth())
+            ->get();
 
         /** @var ?CalendarEvent $firstEvent */
-        $firstEvent = $this->user->calendarEvents()->orderBy('start_date_time')->first();
+        $firstEvent = (clone $dailyEvents)->sortBy('start_date_time')->first();
         /** @var ?CalendarEvent $latestEvent */
-        $latestEvent = $this->user->calendarEvents()->latest()->first();
+        $latestEvent = (clone $dailyEvents)->last()?->first();
 
-        $startCalendarMonth = Date::parse($firstEvent->start_date_time ?? $this->date)
+        $startCalendarMonth = Date::parse($firstEvent?->start_date_time ?? $this->date)
             ->timezone($this->timezone)
             ->startOfMonth();
-        $endCalendarMonth = Date::parse($latestEvent->start_date_time ?? $this->date)
+        $endCalendarMonth = Date::parse($latestEvent?->start_date_time ?? $this->date)
             ->timezone($this->timezone)
             ->endOfMonth();
 
@@ -72,8 +79,8 @@ class DailyCalendarEventsService
             $endCalendarMonth = $todayDate->copy()->endOfMonth();
         }
 
+        //        $dailyEvents = $this->user->calendarEvents()->get();
         /** @var Collection<int, CalendarEvent> $dailyEvents */
-        $dailyEvents = $this->user->calendarEvents()->get();
         $dailyEvents->each(function (CalendarEvent $event): void {
             $event->date = $event->start_date_time->copy()->timezone($this->timezone)->format('Y-m-d');
         });
@@ -115,6 +122,7 @@ class DailyCalendarEventsService
      */
     private function buildDailyCalendarView(array $months, CarbonInterface $todayDate, array $daysEvents): void
     {
+        $referenceDate = $todayDate->copy()->timezone($this->timezone);
         foreach ($months as $month) {
             $monthKey = $month->format('Y-m');
             $period = CarbonPeriod::create(
@@ -124,7 +132,7 @@ class DailyCalendarEventsService
             );
 
             $this->calendarView[$monthKey] = collect($period->toArray())
-                ->map(fn (CarbonInterface $monthDate): array => $this->buildDayPayload($monthDate, $todayDate, $daysEvents))
+                ->map(fn (CarbonInterface $monthDate): array => $this->buildDayPayload($monthDate, $referenceDate, $daysEvents))
                 ->values()
                 ->all();
         }

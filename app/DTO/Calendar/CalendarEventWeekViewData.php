@@ -24,7 +24,7 @@ final readonly class CalendarEventWeekViewData
         public int $durationIndex,
         public int $startIndex,
         public string $title,
-        public string $href,
+        public ?string $webLink,
         public ?string $colour,
     ) {}
 
@@ -49,7 +49,7 @@ final readonly class CalendarEventWeekViewData
             durationIndex: self::calculateDurationIndex($event->duration),
             startIndex: self::calculateStartIndex($secondsSinceMidnight),
             title: $event->title,
-            href: $event->web_link,
+            webLink: $event->web_link,
             colour: $userPivot?->getAttribute('colour'),
         );
     }
@@ -67,7 +67,7 @@ final readonly class CalendarEventWeekViewData
             'durationIndex' => $this->durationIndex,
             'startIndex'    => $this->startIndex,
             'title'         => $this->title,
-            'href'          => $this->href,
+            'webLink'       => $this->webLink,
             'colour'        => $this->colour,
         ];
     }

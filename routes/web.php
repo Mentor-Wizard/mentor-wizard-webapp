@@ -73,10 +73,10 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
             ->can('create', CalendarEvent::class)
             ->name('pages.calendar.store');
         Route::patch('calendar-event/edit/{calendarEvent:id}', EditCalendarEvent::class)
-            ->can('update', CalendarEvent::class)
+            ->can('update', 'calendarEvent')
             ->name('pages.calendar.edit');
         Route::delete('calendar-event/delete/{calendarEvent}', DeleteCalendarEvent::class)
-            ->can('delete', CalendarEvent::class)
+            ->can('delete', 'calendarEvent')
             ->name('pages.calendar.delete');
     });
 });

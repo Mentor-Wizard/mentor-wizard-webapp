@@ -33,6 +33,7 @@ class UserProfileFactory extends Factory
             'phone'          => fake()->phoneNumber,
             'cost_per_hour'  => fake()->randomFloat(2, 10, 100),
             'currency_id'    => Currency::query()->inRandomOrder()->value('id') ?? Currency::factory(),
+            'timezone'       => fake()->timezone,
         ];
     }
 }

@@ -24,8 +24,8 @@ final readonly class CalendarEventData
         public string $toDateFormatted,
         public string $toTime,
         public int $duration,
-        public string $href,
-        public string $description,
+        public ?string $webLink,
+        public ?string $description,
         public ?string $colour,
     ) {}
 
@@ -52,7 +52,7 @@ final readonly class CalendarEventData
             toDateFormatted: $endDateTime->format('Y-M-d'),
             toTime: $endDateTime->format('H:i'),
             duration: (int) $startDateTime->diffInMinutes($endDateTime),
-            href: $event->web_link,
+            webLink: $event->web_link,
             description: $event->description,
             colour: $userPivot?->getAttribute('colour'),
         );
@@ -74,7 +74,7 @@ final readonly class CalendarEventData
             'toDateFormatted'   => $this->toDateFormatted,
             'toTime'            => $this->toTime,
             'duration'          => $this->duration,
-            'href'              => $this->href,
+            'webLink'           => $this->webLink,
             'description'       => $this->description,
             'colour'            => $this->colour,
         ];

@@ -36,7 +36,8 @@ enum CalendarEventColoursEnum: string
     public static function randomValue(): string
     {
         $values = self::values();
-        throw_if($values === [], RuntimeException::class, 'No calendar event colours are defined.');
+        throw_if($values === [], RuntimeException::class,
+            'No calendar event colours are defined.');
 
         $randomIndex = random_int(0, count($values) - 1);
 

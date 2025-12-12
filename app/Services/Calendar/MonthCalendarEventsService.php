@@ -82,7 +82,8 @@ class MonthCalendarEventsService
             ->get();
 
         $calendarEvents->each(function (CalendarEvent $event): void {
-            $event->date = Date::parse($event->start_date_time)->timezone($this->timezone)->format('Y-m-d');
+            $event->date = Date::parse($event->start_date_time)->copy()
+                ->timezone($this->timezone)->format('Y-m-d');
         });
 
         return $calendarEvents->groupBy('date')->map($this->formatDateEvents(...))->all();
@@ -113,7 +114,8 @@ class MonthCalendarEventsService
         $firstEvent = $dateEvents->first();
 
         $formattedEvents = $dateEvents->map(
-            fn (CalendarEvent $event): array => CalendarEventMonthViewData::fromModel($event, $this->timezone)->toArray()
+            fn (CalendarEvent $event): array => CalendarEventMonthViewData::fromModel($event,
+                $this->timezone)->toArray()
         )->all();
 
         $payload = [
@@ -132,7 +134,7 @@ class MonthCalendarEventsService
             $payload['isSelected'] = true;
         }
 
-        if (Date::now('UTC')->isSameDay($eventDate)) {
+        if (Date::now()->isSameDay($eventDate)) {
             $payload['isToday'] = true;
         }
 

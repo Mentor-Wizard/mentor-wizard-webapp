@@ -42,7 +42,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event1StartUtc,
             'end_date_time'   => $event1EndUtc,
-            'duration'        => $event1StartUtc->diffInSeconds($event1EndUtc),
             'date'            => $event1StartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -51,7 +50,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event2StartUtc,
             'end_date_time'   => $event2EndUtc,
-            'duration'        => $event2StartUtc->diffInSeconds($event2EndUtc),
             'date'            => $event2StartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -95,7 +93,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $eventStartUtc,
             'end_date_time'   => $eventEndUtc,
-            'duration'        => $eventEndUtc->diffInSeconds($eventStartUtc),
             'date'            => $eventStartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);

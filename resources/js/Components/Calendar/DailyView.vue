@@ -2,50 +2,18 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
 import { computed, onMounted, ref } from 'vue';
 
+import {
+  getFormattedMonth,
+  getTitleMonth,
+  shownMonth,
+} from '@/Stores/Calendar/helpers.js';
+
 const container = ref(null);
 const containerNav = ref(null);
 const containerOffset = ref(null);
 const filterDate = ref(new Date().toISOString());
 const existNextMonthEvents = ref(true);
 const existPreviousMonthEvents = ref(true);
-const checkNextMonthEvents = () => {
-  const formattedDate = new Date(filterDate.value);
-  const nextMonth = getFormattedMonth(
-    new Date(
-      formattedDate.setMonth(formattedDate.getMonth() + 1),
-    ).toISOString(),
-  );
-  existNextMonthEvents.value = !!Object.prototype.hasOwnProperty.call(
-    props.days?.calendarView,
-    nextMonth,
-  );
-};
-
-const checkPreviousMonthEvents = () => {
-  const formattedDate = new Date(filterDate.value);
-  const previousMonth = getFormattedMonth(
-    new Date(
-      formattedDate.setMonth(formattedDate.getMonth() - 1),
-    ).toISOString(),
-  );
-  existPreviousMonthEvents.value = !!Object.prototype.hasOwnProperty.call(
-    props.days?.calendarView,
-    previousMonth,
-  );
-};
-
-const shownMonth = ref(new Date().toISOString().split('T')[0].slice(0, 7));
-const getTitleMonth = () => {
-  return new Date(filterDate.value).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-  });
-};
-const getFormattedMonth = (dateString) => {
-  const date = new Date(dateString);
-  return date.toISOString().split('T')[0].slice(0, 7);
-};
-
 const props = defineProps({
   days: {
     type: Object,
@@ -78,11 +46,36 @@ const props = defineProps({
   },
 });
 
+const checkNextMonthEvents = () => {
+  const formattedDate = new Date(filterDate.value);
+  const nextMonth = getFormattedMonth(
+    new Date(
+      formattedDate.setMonth(formattedDate.getMonth() + 1),
+    ).toISOString(),
+  );
+  existNextMonthEvents.value = !!Object.prototype.hasOwnProperty.call(
+    props.days?.calendarView,
+    nextMonth,
+  );
+};
+
+const checkPreviousMonthEvents = () => {
+  const formattedDate = new Date(filterDate.value);
+  const previousMonth = getFormattedMonth(
+    new Date(
+      formattedDate.setMonth(formattedDate.getMonth() - 1),
+    ).toISOString(),
+  );
+  existPreviousMonthEvents.value = !!Object.prototype.hasOwnProperty.call(
+    props.days?.calendarView,
+    previousMonth,
+  );
+};
+
 const getShownMonth = computed(() => {
   if (!props?.days.calendarView) {
     return {};
   }
-  console.log(getFormattedMonth(filterDate.value));
   return props.days?.calendarView[getFormattedMonth(filterDate.value)];
 });
 const scrollMonth = (direction) => {
@@ -207,7 +200,7 @@ onMounted(() => {
             <ChevronLeftIcon class="size-5" aria-hidden="true" />
           </button>
           <div class="flex-auto text-sm font-semibold">
-            {{ getTitleMonth() }}
+            {{ getTitleMonth(filterDate) }}
           </div>
           <button
             v-if="existNextMonthEvents"

@@ -8,6 +8,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -49,12 +50,13 @@ class BaseCalendarEventAction
         };
 
         return [
-            'title'           => $validated['title'],
+            'title'           => Arr::get($validated, 'title'),
             'start_date_time' => $startDateTimeUTC,
             'end_date_time'   => $endDateTimeUTC,
             'type'            => $eventType,
-            'colour'          => $validated['colour'],
-            'description'     => $validated['description'],
+            'web_link'        => Arr::get($validated, 'webLink'),
+            'colour'          => Arr::get($validated, 'colour'),
+            'description'     => Arr::get($validated, 'description'),
             'status'          => CalendarEventStatusEnum::CONFIRMED,
             'date'            => $startDateTimeUTC?->format('Y-m-d'),
         ];

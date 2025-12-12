@@ -22,7 +22,8 @@ readonly class CheckTimeSlotReservedService
 
     public function isSlotAvailable(): bool
     {
-        $availableSlots = new AvailableCalendarEventsSlotsService($this->user, $this->timezone, $this->excludeEvents)->getAvailableSlots();
+        $availableSlots = new AvailableCalendarEventsSlotsService($this->user,
+            $this->timezone, $this->excludeEvents)->getAvailableSlots();
 
         if ($availableSlots === []) {
             return true;
@@ -39,6 +40,7 @@ readonly class CheckTimeSlotReservedService
             $this->timezone
         );
 
-        return array_any($availableSlots, fn ($slot): bool => $startDate?->greaterThanOrEqualTo($slot['start']) && $endDate?->lessThanOrEqualTo($slot['end']));
+        return array_any($availableSlots, fn ($slot): bool => $startDate?->greaterThanOrEqualTo($slot['start'])
+            && $endDate?->lessThanOrEqualTo($slot['end']));
     }
 }

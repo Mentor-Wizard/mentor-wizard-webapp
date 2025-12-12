@@ -58,8 +58,7 @@ describe('GetWeeklyCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $start,
             'end_date_time'   => $end,
-            'duration'        => $end->diffInSeconds($start),
-            'date'            => $start->format('Y-m-d'), // This is 2025-01-14 in UTC
+            'date'            => $start?->format('Y-m-d'), // This is 2025-01-14 in UTC
             'type'            => 'individual',
         ]);
 

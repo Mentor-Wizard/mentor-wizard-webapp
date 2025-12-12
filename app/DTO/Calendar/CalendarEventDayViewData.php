@@ -23,7 +23,7 @@ final readonly class CalendarEventDayViewData
         public int $durationIndex,
         public int $startIndex,
         public string $title,
-        public string $href,
+        public ?string $webLink,
         public string $colour,
     ) {}
 
@@ -41,7 +41,7 @@ final readonly class CalendarEventDayViewData
             durationIndex: self::calculateDurationIndex($event->duration),
             startIndex: self::calculateStartIndex($secondsSinceMidnight),
             title: $event->title,
-            href: $event->web_link,
+            webLink: $event->web_link,
             colour: self::getUserColour($event, $user) ?? CalendarEventColoursEnum::randomValue(),
         );
     }
@@ -58,7 +58,7 @@ final readonly class CalendarEventDayViewData
             'durationIndex' => $this->durationIndex,
             'startIndex'    => $this->startIndex,
             'title'         => $this->title,
-            'href'          => $this->href,
+            'webLink'       => $this->webLink,
             'colour'        => $this->colour,
         ];
     }

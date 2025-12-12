@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import {
   Dialog,
   DialogPanel,
@@ -15,23 +15,21 @@ import {
   CheckIcon,
   ChevronUpDownIcon,
   ClockIcon,
-  UserGroupIcon,
-  UserIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
-import { useForm, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
-const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+import { useForm } from '@inertiajs/vue3';
+import { onMounted, ref, watch } from 'vue';
 
-const errors = ref({
-  toDate: null,
-  fromTime: null,
-  fromDate: null,
-  toTime: null,
-  title: null,
-  colour: null,
-  description: null,
-});
+import {
+  capitalize,
+  errors,
+  eventTypes,
+  isFormValid,
+  selectedEventTypeHelper,
+  timeZone,
+  validateForm,
+} from '@/Stores/Calendar/helpers.js';
+
 const props = defineProps({
   open: {
     type: Boolean,
@@ -40,14 +38,15 @@ const props = defineProps({
     type: Function,
     default: () => {},
   },
-  availableColors: {
-    type: Array,
-    default: () => [],
+  availableColours: {
+    type: Object,
+    default: () => {},
   },
 });
 
 let form = useForm({
   title: '',
+  webLink: '',
   fromDate: '',
   toDate: '',
   fromTime: '09:00',
@@ -58,26 +57,20 @@ let form = useForm({
   timezone: timeZone,
 });
 
-// CalendarEvent types
-const eventTypes = [
-  { value: 'Individual', label: 'Individual', icon: UserIcon },
-  { value: 'Group', label: 'Group', icon: UserGroupIcon },
-];
-
-const availableColours = ref([]);
+const availableColoursList = ref([]);
 const availableColoursScheme = ref({});
-const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const selectedEventType = selectedEventTypeHelper(form);
 
 onMounted(() => {
   const now = new Date();
   const today = now.toISOString().split('T')[0];
-  availableColours.value = usePage().props.availableColours;
-  availableColoursScheme.value = availableColours.value.reduce(
-    (acc, c) => {
-      acc[c] = `bg-${c}-500`;
+  availableColoursList.value = props.availableColours;
+  availableColoursScheme.value = availableColoursList?.value?.reduce(
+    (acc, colour) => {
+      acc[colour] = `bg-${colour}-500`;
       return acc;
     },
-    {} as Record<string, string>,
+    {},
   );
   if (!form.fromDate) {
     form.fromDate = today;
@@ -87,80 +80,8 @@ onMounted(() => {
   }
 });
 
-const selectedEventType = computed(() =>
-  eventTypes.find((type) => type.value === form.type),
-);
-
-const isFormValid = computed(() => {
-  return (
-    form.title.trim()
-    && form.fromDate
-    && form.toDate
-    && form.fromTime
-    && form.colour
-    && form.toTime
-  );
-});
-
-const validateForm = () => {
-  errors.value = {
-    fromTime: null,
-    fromDate: null,
-    title: null,
-    toDate: null,
-    toTime: null,
-    colour: null,
-    description: null,
-  };
-
-  if (!form.title.trim()) {
-    errors.value.title = 'Title is required';
-  }
-
-  if (!form.fromDate) {
-    errors.value.fromDate = 'Start date is required';
-  }
-
-  if (!form.toDate) {
-    errors.value.toDate = 'End date is required';
-  }
-
-  if (!form.fromTime) {
-    errors.value.fromTime = 'Start time is required';
-  }
-
-  if (!form.toTime) {
-    errors.value.toTime = 'End time is required';
-  }
-
-  if (form.description.length > 2000) {
-    errors.value.description = 'Description is more than 2000 characters';
-  }
-
-  if (form.fromDate && form.toDate) {
-    const fromDateTime = new Date(`${form.fromDate}T${form.fromTime}`);
-    const toDateTime = new Date(`${form.toDate}T${form.toTime}`);
-    const currentTime = new Date();
-    if (fromDateTime >= toDateTime) {
-      errors.value.toDate = 'End date/time must be after start date/time';
-    }
-    if (currentTime > fromDateTime) {
-      errors.value.fromDate = 'Start date/time must be in the future';
-    }
-  }
-
-  let errorStatus = false;
-
-  Object.keys(errors.value).forEach((key) => {
-    if (errors.value[key]) {
-      errorStatus = true;
-    }
-  });
-  return !errorStatus;
-};
-
 const handleSubmit = () => {
-  if (validateForm()) {
+  if (validateForm(form, errors)) {
     form.post(route('pages.calendar.store'), {
       onSuccess: () => {
         handleClose();
@@ -179,7 +100,6 @@ const handleSubmit = () => {
 };
 
 const handleClose = () => {
-  console.log('close');
   form.reset();
   errors.value = {
     fromTime: null,
@@ -187,6 +107,7 @@ const handleClose = () => {
     title: null,
     toDate: null,
     toTime: null,
+    webLink: null,
     colour: null,
     description: null,
   };
@@ -295,16 +216,41 @@ watch(
                         </p>
                       </div>
                     </div>
+
                     <div>
                       <label
-                        for="title"
+                        for="webLink"
+                        class="block text-sm leading-6 font-medium text-gray-900"
+                      >
+                        Link to Event
+                      </label>
+                      <div class="mt-2">
+                        <input
+                          id="webLink"
+                          v-model="form.webLink"
+                          type="text"
+                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                          :class="{ 'ring-red-300': errors.webLink }"
+                          placeholder="Enter event title"
+                        />
+                        <p
+                          v-if="errors.webLink"
+                          class="mt-2 text-sm text-red-600"
+                        >
+                          {{ errors.webLink }}
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <label
+                        for="description"
                         class="block text-sm leading-6 font-medium text-gray-900"
                       >
                         Description
                       </label>
                       <div class="mt-2">
                         <input
-                          id="title"
+                          id="description"
                           v-model="form.description"
                           type="text"
                           class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
@@ -339,6 +285,7 @@ watch(
                                 selectedEventType?.label
                               }}</span>
                             </span>
+                            <p></p>
                             <span
                               class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
                             >
@@ -598,7 +545,7 @@ watch(
                 <button
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
-                  :disabled="!isFormValid"
+                  :disabled="!isFormValid(form)"
                   @click="handleSubmit"
                 >
                   Create Event

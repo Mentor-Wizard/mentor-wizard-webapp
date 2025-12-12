@@ -31,6 +31,7 @@ class MentorProgram extends Model
         'description',
         'cost',
         'currency_id',
+        'session_duration_options',
     ];
 
     /**

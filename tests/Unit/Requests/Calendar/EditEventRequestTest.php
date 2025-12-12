@@ -1,77 +1,140 @@
 <?php
 
 declare(strict_types=1);
-
-use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use Illuminate\Support\Facades\Date;
-use Mockery as m;
 
-it('builds event data correctly for individual type', function (): void {
-    $validated = [
-        'title'       => 'Demo CalendarEvent',
-        'fromDate'    => '2025-01-01',
-        'toDate'      => '2025-01-01',
-        'fromTime'    => '10:00',
-        'toTime'      => '11:30',
-        'description' => 'Some description',
-        'type'        => 'individual',
-        'colour'      => 'blue',
-        'timezone'    => 'Europe/Kyiv',
+it('successfully validates payload with all required info', function (): void {
+    $payload = [
+        'title'         => 'successfull validation',
+        'fromDate'      => Date::now()->addDays(5)->format('Y-m-d'),
+        'toDate'        => Date::now()->addDays(5)->format('Y-m-d'),
+        'fromTime'      => '10:00',
+        'toTime'        => '11:30',
+        'type'          => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'colour'        => CalendarEventColoursEnum::BLUE->value,
     ];
 
-    /** @var EditCalendarEventRequest|m\MockInterface $request */
-    $request = m::mock(EditCalendarEventRequest::class)->makePartial();
-    $request->shouldReceive('validated')->once()->andReturn($validated);
+    $request = new EditCalendarEventRequest;
 
-    $result = $request->getEventData();
+    $validator = Validator::make($payload, $request->rules());
 
-    $expectedStart = Date::createFromFormat('Y-m-d H:i', '2025-01-01 10:00', 'Europe/Kyiv');
-    $expectedEnd = Date::createFromFormat('Y-m-d H:i', '2025-01-01 11:30', 'Europe/Kyiv');
-
-    expect($result)
-        ->toBeArray()
-        ->and($result['title'])->toBe('Demo CalendarEvent')
-        ->and($result['start_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedStart)
-        ->and($result['end_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedEnd)
-        ->and($result['duration'])->toBe($expectedStart?->diffInSeconds($expectedEnd))
-        ->and($result['type'])->toBe(CalendarEventTypeEnum::INDIVIDUAL->value)
-        ->and($result['description'])->toBe('Some description')
-        ->and($result['status'])->toBe(CalendarEventStatusEnum::CONFIRMED)
-        ->and($result['date'])->toBe('2025-01-01');
+    expect($validator->passes())->toBeTrue();
+    expect($validator->errors())->isEmpty();
 });
 
-it('builds event data correctly for group type', function (): void {
-    $validated = [
-        'title'       => 'Group Session',
-        'fromDate'    => '2025-02-10',
-        'toDate'      => '2025-02-10',
-        'fromTime'    => '09:15',
-        'toTime'      => '10:00',
-        'description' => 'Group event',
-        'type'        => 'group',
-        'colour'      => 'blue',
-        'timezone'    => 'Europe/Kyiv',
+it('rejects when title is missing', function (): void {
+    $payload = [
+        // 'title' => missing
+        'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
+        'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
+        'fromTime' => '10:00',
+        'toTime'   => '11:30',
+        'type'     => 'individual',
+        'colour'   => CalendarEventColoursEnum::BLUE->value,
     ];
 
-    /** @var EditCalendarEventRequest|m\MockInterface $request */
-    $request = m::mock(EditCalendarEventRequest::class)->makePartial();
-    $request->shouldReceive('validated')->once()->andReturn($validated);
+    $request = new EditCalendarEventRequest;
 
-    $result = $request->getEventData();
+    $validator = Validator::make($payload, $request->rules());
 
-    $expectedStart = Date::createFromFormat('Y-m-d H:i', '2025-02-10 09:15', 'Europe/Kyiv');
-    $expectedEnd = Date::createFromFormat('Y-m-d H:i', '2025-02-10 10:00', 'Europe/Kyiv');
+    expect($validator->passes())->toBeFalse();
+    expect($validator->errors()->has('title'))->toBeTrue();
+});
 
-    expect($result)
-        ->toBeArray()
-        ->and($result['title'])->toBe('Group Session')
-        ->and($result['start_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedStart)
-        ->and($result['end_date_time'])->setTimezone('Europe/Kyiv')->toEqual($expectedEnd)
-        ->and($result['duration'])->toBe($expectedStart?->diffInSeconds($expectedEnd))
-        ->and($result['type'])->toBe(CalendarEventTypeEnum::GROUP->value)
-        ->and($result['description'])->toBe('Group event')
-        ->and($result['status'])->toBe(CalendarEventStatusEnum::CONFIRMED)
-        ->and($result['date'])->toBe('2025-02-10');
+it('rejects when fromDate is wrong format', function (): void {
+    $payload = [
+        'title'    => 'Wrong fromDate format ',
+        'fromDate' => '2025-01----01',
+        'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
+        'fromTime' => '10:00',
+        'toTime'   => '11:30',
+        'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'colour'   => CalendarEventColoursEnum::BLUE->value,
+    ];
+
+    $request = new EditCalendarEventRequest;
+
+    $validator = Validator::make($payload, $request->rules());
+
+    expect($validator->passes())->toBeFalse();
+    expect($validator->errors()->has('fromDate'))->toBeTrue();
+});
+
+it('rejects when fromTime is wrong format', function (): void {
+    $payload = [
+        'title'    => 'Wrong fromDate format ',
+        'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
+        'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
+        'fromTime' => '--:00',
+        'toTime'   => '11:30',
+        'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'colour'   => CalendarEventColoursEnum::BLUE->value,
+    ];
+
+    $request = new EditCalendarEventRequest;
+
+    $validator = Validator::make($payload, $request->rules());
+
+    expect($validator->passes())->toBeFalse();
+    expect($validator->errors()->has('fromTime'))->toBeTrue();
+});
+
+it('rejects when toDate is wrong format', function (): void {
+    $payload = [
+        'title'    => 'Wrong fromDate format ',
+        'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
+        'toDate'   => '----01-01',
+        'fromTime' => '10:00',
+        'toTime'   => '11:30',
+        'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'colour'   => CalendarEventColoursEnum::BLUE->value,
+    ];
+
+    $request = new EditCalendarEventRequest;
+
+    $validator = Validator::make($payload, $request->rules());
+
+    expect($validator->passes())->toBeFalse();
+    expect($validator->errors()->has('toDate'))->toBeTrue();
+});
+
+it('rejects when toTime is wrong format', function (): void {
+    $payload = [
+        'title'    => 'Wrong fromDate format ',
+        'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
+        'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
+        'fromTime' => '10:00',
+        'toTime'   => '--:30',
+        'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'colour'   => CalendarEventColoursEnum::BLUE->value,
+    ];
+
+    $request = new EditCalendarEventRequest;
+
+    $validator = Validator::make($payload, $request->rules());
+
+    expect($validator->passes())->toBeFalse();
+    expect($validator->errors()->has('toTime'))->toBeTrue();
+});
+
+it('rejects when colour is not from list', function (): void {
+    $payload = [
+        'title'    => 'Wrong fromDate format ',
+        'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
+        'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
+        'fromTime' => '10:00',
+        'toTime'   => '11:30',
+        'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'colour'   => 'wrong colour',
+    ];
+
+    $request = new EditCalendarEventRequest;
+
+    $validator = Validator::make($payload, $request->rules());
+
+    expect($validator->passes())->toBeFalse();
+    expect($validator->errors()->has('colour'))->toBeTrue();
 });

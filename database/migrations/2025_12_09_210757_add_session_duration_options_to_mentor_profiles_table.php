@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table): void {
-            $table->dropColumn('duration');
+        Schema::table('mentor_profiles', function (Blueprint $table): void {
+            $table->json('session_duration_options')->nullable();
         });
     }
 
@@ -23,8 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table): void {
-            $table->integer('duration')->after('date')->nullable();
+        Schema::table('mentor_profiles', function (Blueprint $table): void {
+            $table->dropColumn('session_duration_options');
         });
     }
 };

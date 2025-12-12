@@ -33,8 +33,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
-            'duration'        => $endUtc->diffInSeconds($startUtc),
-            'date'            => $startUtc->format('Y-m-d'),
+            'date'            => $startUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
 
@@ -83,8 +82,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
-            'duration'        => $endUtc->diffInSeconds($startUtc),
-            'date'            => $startUtc->format('Y-m-d'),
+            'date'            => $startUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
 
@@ -118,8 +116,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
-            'duration'        => $endUtc->diffInSeconds($startUtc),
-            'date'            => $startUtc->format('Y-m-d'),
+            'date'            => $startUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
 

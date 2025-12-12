@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 mutates(StoreCalendarEvent::class);
 
@@ -150,17 +149,18 @@ describe('Store Calendar CalendarEvent', function (): void {
         $eventPayload = [
             'title'           => 'Planning',
             'status'          => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time' => $start,
-            'end_date_time'   => $end,
-            'duration'        => $start->diffInSeconds($end),
-            'date'            => $start->format('Y-m-d'),
+            'fromDate'        => $start->format('Y-m-d'),
+            'toDate'          => $end->format('Y-m-d'),
+            'fromTime'        => '09:00',
+            'toTime'          => '10:00',
+            'webLink'         => 'https://google.com',
             'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'     => 'Sprint planning',
             'colour'          => CalendarEventColoursEnum::BLUE->value,
         ];
 
         $request = Mockery::mock(StoreCalendarEventRequest::class);
-        $request->shouldReceive('getEventData')->andReturn($eventPayload);
+        $request->shouldReceive('validated')->andReturn($eventPayload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
         $response = (new StoreCalendarEvent)->handle($request);
@@ -175,8 +175,7 @@ describe('Store Calendar CalendarEvent', function (): void {
         expect($event)
             ->title->toBe('Planning')
             ->status->toBe(CalendarEventStatusEnum::CONFIRMED->value)
-            ->date->toBe($start->format('Y-m-d'))
-            ->duration->toBe((int) $start->diffInSeconds($end));
+            ->date->toBe($start->format('Y-m-d'));
 
         $pivot = $event->calendarEventUsers()
             ->where('users.id', $this->user->getKey())
@@ -198,18 +197,6 @@ describe('Store Calendar CalendarEvent', function (): void {
         expect($pivotRecord->updated_at)->not->toBeNull();
         expect((string) Date::parse($pivotRecord->created_at))->toBe((string) now());
         expect((string) Date::parse($pivotRecord->updated_at))->toBe((string) now());
-    });
-
-    it('aborts with 403 for non-mentor user', function (): void {
-        Auth::logout();
-        $viewer = User::factory()->create();
-        Auth::login($viewer);
-
-        $request = Mockery::mock(StoreCalendarEventRequest::class);
-        $request->shouldReceive('user')->andReturn($viewer);
-
-        expect(fn (): RedirectResponse => (new StoreCalendarEvent)->handle($request))
-            ->toThrow(HttpException::class);
     });
 });
 

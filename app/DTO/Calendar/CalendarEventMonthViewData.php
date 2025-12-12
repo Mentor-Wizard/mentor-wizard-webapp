@@ -13,7 +13,7 @@ final readonly class CalendarEventMonthViewData
         public string $name,
         public string $time,
         public string $datetime,
-        public string $href,
+        public ?string $webLink,
     ) {}
 
     public static function fromModel(CalendarEvent $event, string $timezone): self
@@ -21,9 +21,9 @@ final readonly class CalendarEventMonthViewData
         return new self(
             id: $event->getKey(),
             name: $event->title,
-            time: $event->start_date_time->setTimezone($timezone)->format('gA'),
-            datetime: $event->start_date_time->setTimezone($timezone)->format('Y-m-d\TH:i'),
-            href: $event->web_link,
+            time: $event->start_date_time->timezone($timezone)->format('gA'),
+            datetime: $event->start_date_time->timezone($timezone)->format('Y-m-d\TH:i'),
+            webLink: $event->web_link,
         );
     }
 
@@ -33,11 +33,11 @@ final readonly class CalendarEventMonthViewData
     public function toArray(): array
     {
         return [
-            'id'       => $this->id,
-            'name'     => $this->name,
-            'time'     => $this->time,
-            'datetime' => $this->datetime,
-            'href'     => $this->href,
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'time'        => $this->time,
+            'datetime'    => $this->datetime,
+            'webLink'     => $this->webLink,
         ];
     }
 }

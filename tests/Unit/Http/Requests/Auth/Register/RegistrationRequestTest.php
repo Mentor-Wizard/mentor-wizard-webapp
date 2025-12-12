@@ -17,6 +17,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'valid@example.com',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -33,6 +34,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'test@example.com',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -48,6 +50,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'test@example.com',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -63,6 +66,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'test@example.com',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -77,6 +81,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'test@example.com',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -94,6 +99,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'invalid-email',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -114,6 +120,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'existing@example.com',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'StrongPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -131,6 +138,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'test@example.com',
                 'password'              => 'StrongPassword123!',
                 'password_confirmation' => 'DifferentPassword123!',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -145,6 +153,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'username'              => 'validuser',
                 'email'                 => 'test@example.com',
                 'password_confirmation' => 'password123',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -169,6 +178,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'test@example.com',
                 'password'              => 'simple123',
                 'password_confirmation' => 'simple123',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -183,6 +193,7 @@ describe('RegistrationRequest Validation', function (): void {
                 'email'                 => 'test@example.com',
                 'password'              => '123',
                 'password_confirmation' => '123',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;
@@ -193,9 +204,10 @@ describe('RegistrationRequest Validation', function (): void {
 
         it('requires both password and confirmation', function (): void {
             $data = [
-                'username' => 'validuser',
-                'email'    => 'test@example.com',
-                'password' => 'somepassword',
+                'username'              => 'validuser',
+                'email'                 => 'test@example.com',
+                'password'              => 'somepassword',
+                'timezone'              => 'Europe/Kyiv',
             ];
 
             $request = new RegistrationRequest;

@@ -22,19 +22,22 @@ class CalendarsListPage
 
     public function handle(Request $request): Response
     {
-        $timezone = $request->get('timezone') ?? config('app.timezone');
-        $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
-        $mode = CalendarViewModeEnum::tryFrom($request->get('mode')) ?? CalendarViewModeEnum::MONTH;
         $user = auth()->user();
+        $timezone = $user?->profile->timezone ?? $request->get('timezone') ?? config('app.timezone');
+        $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
+        $mode = $request->get('mode') ? CalendarViewModeEnum::tryFrom($request->get('mode')) : CalendarViewModeEnum::MONTH;
 
         return Inertia::render('Calendar/CalendarsList', [
             'locale'            => app()->getLocale(),
             'permissions'       => $user?->can('create', CalendarEvent::class) ? 'create' : 'view',
             'availableColours'  => CalendarEventColoursEnum::values(),
             'calendarEvents'    => match ($mode) {
-                CalendarViewModeEnum::DAY   => $timezone && $user ? new DailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
-                CalendarViewModeEnum::WEEK  => $timezone && $user ? new WeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],
-                CalendarViewModeEnum::MONTH => $timezone && $user ? new MonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents() : [],
+                CalendarViewModeEnum::DAY   => $timezone && $user
+                    ? new DailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
+                CalendarViewModeEnum::WEEK  => $timezone && $user
+                    ? new WeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],
+                CalendarViewModeEnum::MONTH => $timezone && $user
+                    ? new MonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents() : [],
             }]);
     }
 }

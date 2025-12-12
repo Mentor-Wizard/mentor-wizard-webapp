@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 import InputError from '@/Components/UI/Forms/InputError.vue';
@@ -12,6 +13,7 @@ const form = useForm({
   email: 'admin@admin.com',
   password: '',
   password_confirmation: '',
+  timezone: ref(Intl.DateTimeFormat().resolvedOptions().timeZone),
 });
 
 const submit = () => {

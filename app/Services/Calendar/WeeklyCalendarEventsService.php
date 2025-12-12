@@ -57,12 +57,14 @@ class WeeklyCalendarEventsService
         // Build calendar events for display
         foreach ($eventsCollection as $dayEvent) {
             /** @var CalendarEvent $dayEvent */
-            $this->calendarEvents[] = CalendarEventWeekViewData::fromModel($dayEvent, $this->timezone, $this->user)->toArray();
+            $this->calendarEvents[] = CalendarEventWeekViewData::fromModel($dayEvent,
+                $this->timezone, $this->user)->toArray();
         }
 
         // Reuse the same collection for a calendar view
         $eventsCollection->each(function (CalendarEvent $event): void {
-            $event->date = Date::parse($event->start_date_time)->timezone($this->timezone)->format('Y-m-d');
+            $event->date = Date::parse($event->start_date_time)
+                ->timezone($this->timezone)->format('Y-m-d');
         });
 
         $daysEvents = $eventsCollection->pluck('date')->unique()->toArray();

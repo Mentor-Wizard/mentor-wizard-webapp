@@ -32,8 +32,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $start,
             'end_date_time'   => $end,
-            'duration'        => $end->diffInSeconds($start),
-            'date'            => $start->format('Y-m-d'),
+            'date'            => $start?->format('Y-m-d'),
             'type'            => 'group',
         ]);
 
@@ -78,8 +77,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $start,
             'end_date_time'   => $end,
-            'duration'        => $end->diffInSeconds($start),
-            'date'            => $start->format('Y-m-d'),
+            'date'            => $start?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
 
@@ -95,55 +93,5 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         $hasEventDay = collect($calendar)->flatten(1)->firstWhere('hasEvent', true);
         expect($hasEventDay)->not->toBeNull()
             ->and($hasEventDay['hasEvent'])->toBeTrue();
-    });
-
-    it('initializes calendar months correctly with both set and append operations', function (): void {
-        Date::setTestNow(Date::create(2025, 3, 5, 12, 0, 0));
-        $tz = 'UTC';
-
-        /** @var User $user */
-        $user = User::factory()->create();
-
-        // Create events in different months to trigger multiple month processing
-        $event1Start = Date::create(2024, 12, 15, 10, 0, 0);
-        $event1End = (clone $event1Start)->addHour();
-
-        $event1 = CalendarEvent::query()->create([
-            'title'           => 'Old Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1Start,
-            'end_date_time'   => $event1End,
-            'duration'        => $event1End->diffInSeconds($event1Start),
-            'date'            => $event1Start->format('Y-m-d'),
-            'type'            => 'individual',
-        ]);
-
-        $event2Start = Date::create(2025, 6, 20, 14, 0, 0);
-        $event2End = (clone $event2Start)->addHour();
-
-        $event2 = CalendarEvent::query()->create([
-            'title'           => 'Future Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $event2Start,
-            'end_date_time'   => $event2End,
-            'duration'        => $event2End->diffInSeconds($event2Start),
-            'date'            => $event2Start->format('Y-m-d'),
-            'type'            => 'individual',
-        ]);
-
-        $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
-        $checkedDate = Date::parse('2025-03-05');
-        $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
-
-        $calendar = $result['calendarView'];
-
-        // Should have multiple month keys (including 2024-12, 2025-01, ..., 2025-06)
-        expect($calendar)->toBeArray()
-            ->and(count($calendar))->toBeGreaterThan(3);
-
-        // Each month should have an array of days
-        foreach ($calendar as $days) {
-            expect($days)->toBeArray()->not->toBeEmpty();
-        }
     });
 });

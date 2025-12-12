@@ -56,8 +56,7 @@ it('includes empty day entries with events key for month calendar and sets flags
         'status'          => 'confirmed',
         'start_date_time' => $startUtc,
         'end_date_time'   => $endUtc,
-        'duration'        => $endUtc->diffInSeconds($startUtc),
-        'date'            => $startUtc->format('Y-m-d'),
+        'date'            => $startUtc?->format('Y-m-d'),
         'type'            => 'individual',
     ]);
 
@@ -106,8 +105,7 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
         'status'          => 'confirmed',
         'start_date_time' => $start,
         'end_date_time'   => $end,
-        'duration'        => $end->diffInSeconds($start),
-        'date'            => $start->format('Y-m-d'),
+        'date'            => $start?->format('Y-m-d'),
         'type'            => 'group',
     ]);
 
