@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Models\CalendarEvent;
 use App\Models\User;
-use App\Services\Calendar\GetDailyCalendarEventsService;
-use App\Services\Calendar\GetMonthCalendarEventsService;
-use App\Services\Calendar\GetWeeklyCalendarEventsService;
+use App\Services\Calendar\DailyCalendarEventsService;
+use App\Services\Calendar\MonthCalendarEventsService;
+use App\Services\Calendar\WeeklyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
@@ -24,7 +24,7 @@ it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) 
 
     $date = Date::parse('2025-01-15'); // Wednesday
 
-    $result = new GetWeeklyCalendarEventsService($user, $date, $tz)->getWeeklyCalendarEvents();
+    $result = new WeeklyCalendarEventsService($user, $date, $tz)->getWeeklyCalendarEvents();
 
     expect($result)
         ->toHaveKeys(['calendarEvents', 'calendarView']);
@@ -56,15 +56,14 @@ it('includes empty day entries with events key for month calendar and sets flags
         'status'          => 'confirmed',
         'start_date_time' => $startUtc,
         'end_date_time'   => $endUtc,
-        'duration'        => $endUtc->diffInSeconds($startUtc),
-        'date'            => $startUtc->format('Y-m-d'),
+        'date'            => $startUtc?->format('Y-m-d'),
         'type'            => 'individual',
     ]);
 
     $user->calendarEvents()->attach($event->getKey());
 
     $date = Date::parse('2025-02-10');
-    $result = new GetMonthCalendarEventsService($user, $date, $tz)->getMonthCalendarEvents();
+    $result = new MonthCalendarEventsService($user, $date, $tz)->getMonthCalendarEvents();
 
     expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
 
@@ -106,14 +105,13 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
         'status'          => 'confirmed',
         'start_date_time' => $start,
         'end_date_time'   => $end,
-        'duration'        => $end->diffInSeconds($start),
-        'date'            => $start->format('Y-m-d'),
+        'date'            => $start?->format('Y-m-d'),
         'type'            => 'group',
     ]);
 
     $user->calendarEvents()->attach($event->getKey());
     $date = Date::parse('2025-03-05');
-    $result = new GetDailyCalendarEventsService($user, $date, $tz)->getDailyCalendarEvents();
+    $result = new DailyCalendarEventsService($user, $date, $tz)->getDailyCalendarEvents();
 
     expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
 

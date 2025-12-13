@@ -9,9 +9,15 @@ enum SocialiteDriverEnum: string
     case GOOGLE = 'google';
     case GITHUB = 'github';
 
+    /**
+     * @return array<int, string>
+     */
     public static function values(): array
     {
-        return array_column(self::cases(), 'value');
+        /** @var array<int, string> $values */
+        $values = array_column(self::cases(), 'value');
+
+        return $values;
     }
 
     public static function isValid(string $driver): bool

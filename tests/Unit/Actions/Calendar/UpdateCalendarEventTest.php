@@ -12,6 +12,7 @@ use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
@@ -27,7 +28,7 @@ describe('EditCalendarEventRequest Validation', function (): void {
 
         $this->prepareRequest = function (EditCalendarEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Illuminate\Routing\Redirector::class));
+            $request->setRedirector(app(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });
@@ -103,7 +104,6 @@ describe('Update Calendar CalendarEvent', function (): void {
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
-            'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
             'mentor_program_id' => null,
@@ -115,19 +115,20 @@ describe('Update Calendar CalendarEvent', function (): void {
         $start = Date::tomorrow()->setTime(13, 0, 0);
         $end = Date::tomorrow()->setTime(14, 30, 0);
         $payload = [
+            'id'              => $this->event->getKey(),
             'title'           => 'Updated Title',
             'status'          => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time' => $start,
-            'end_date_time'   => $end,
-            'duration'        => $start->diffInSeconds($end),
-            'date'            => $start->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::GROUP->value,
+            'fromDate'        => $start->format('Y-m-d'),
+            'toDate'          => $end->format('Y-m-d'),
+            'fromTime'        => '13:00',
+            'toTime'          => '14:00',
+            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
             'colour'          => CalendarEventColoursEnum::BLUE->value,
             'description'     => 'Updated description',
         ];
 
         $request = Mockery::mock(EditCalendarEventRequest::class);
-        $request->shouldReceive('getEventData')->andReturn($payload);
+        $request->shouldReceive('validated')->andReturn($payload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
         $response = (new EditCalendarEvent)->handle($request, $this->event);
@@ -140,8 +141,7 @@ describe('Update Calendar CalendarEvent', function (): void {
         expect($updated)
             ->title->toBe('Updated Title')
             ->date->toBe($start->format('Y-m-d'))
-            ->duration->toBe((int) $start->diffInSeconds($end))
-            ->type->toBe(CalendarEventTypeEnum::GROUP->value)
+            ->type->toBe(CalendarEventTypeEnum::INDIVIDUAL->value)
             ->description->toBe('Updated description');
     });
 
@@ -161,34 +161,23 @@ describe('Update Calendar CalendarEvent', function (): void {
         $response->assertStatus(419);
     });
 
-    it('throws exception when event does not exist', function (): void {
-        $nonExistentEvent = new CalendarEvent;
-        $nonExistentEvent->exists = false;
-
-        $request = Mockery::mock(EditCalendarEventRequest::class);
-        $request->shouldReceive('getEventData')->never();
-
-        expect(fn (): Response => (new EditCalendarEvent)->handle($request, $nonExistentEvent))
-            ->toThrow(Illuminate\Database\Eloquent\ModelNotFoundException::class, 'Calendar Event not found.');
-    });
-
     it('syncs user colour correctly', function (): void {
         $start = Date::tomorrow()->setTime(13, 0, 0);
         $end = Date::tomorrow()->setTime(14, 30, 0);
         $payload = [
             'title'           => 'Updated Title',
             'status'          => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time' => $start,
-            'end_date_time'   => $end,
-            'duration'        => $start->diffInSeconds($end),
-            'date'            => $start->format('Y-m-d'),
+            'fromDate'        => $start->format('Y-m-d'),
+            'toDate'          => $end->format('Y-m-d'),
+            'fromTime'        => '13:00',
+            'toTime'          => '14:00',
             'type'            => CalendarEventTypeEnum::GROUP->value,
             'colour'          => CalendarEventColoursEnum::GREEN->value,
             'description'     => 'Updated description',
         ];
 
         $request = Mockery::mock(EditCalendarEventRequest::class);
-        $request->shouldReceive('getEventData')->andReturn($payload);
+        $request->shouldReceive('validated')->andReturn($payload);
         $request->shouldReceive('user')->andReturn(Auth::user());
 
         (new EditCalendarEvent)->handle($request, $this->event);

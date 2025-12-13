@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Policies\CalendarEventPolicy;
-use Database\Factories\CurrencyFactory;
+use Database\Factories\CalendarEventFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -27,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]
+#[UseFactory(CalendarEventFactory::class)]
 class CalendarEvent extends Model
 {
     /** @use HasFactory<CurrencyFactory> */
@@ -47,11 +50,26 @@ class CalendarEvent extends Model
         'mentor_program_id',
     ];
 
+    /**
+     * @return BelongsToMany<User, static>
+     */
     public function calendarEventUsers(): BelongsToMany
     {
+        /** @phpstan-ignore-next-line */
         return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
             ->withPivot('colour')
             ->withTimestamps();
+    }
+
+    /** Get the event duration in minutes. */
+    /**
+     * @return Attribute<int, never>
+     */
+    protected function duration(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): int => (int) $this->start_date_time->diffInMinutes($this->end_date_time),
+        );
     }
 
     /**

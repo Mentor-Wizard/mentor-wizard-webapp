@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
@@ -33,14 +34,15 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
-            'duration'          => 3600,
+            'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
             'mentor_program_id' => null,
         ]);
 
-        $this->event->calendarEventUsers()->attach($this->user->getKey(), ['role' => CalendarEventRoleEnum::HOST,
-            'colour'                                                              => 'blue']);
+        $this->event->calendarEventUsers()->attach($this->user->getKey(),
+            ['role'      => CalendarEventRoleEnum::HOST,
+                'colour' => CalendarEventColoursEnum::BLUE->value]);
 
         auth()->login($this->anotherMentor);
         auth()->login($this->nonMentorUser);

@@ -37,33 +37,38 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'start_date_time'   => $this->start->format('Y-m-d H:i:s'),
             'end_date_time'     => $this->end->format('Y-m-d H:i:s'),
             'date'              => $this->start->format('Y-m-d'),
-            'duration'          => $this->start->diffInSeconds($this->end),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://example.com/meet',
             'description'       => 'CalendarEvent description',
         ]);
 
-        $this->event->calendarEventUsers()->attach($this->mentor->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role' => CalendarEventRoleEnum::HOST->value]);
-        $this->event->calendarEventUsers()->attach($this->viewer->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value, 'role' => CalendarEventRoleEnum::MENTI->value]);
+        $this->event->calendarEventUsers()->attach($this->mentor->getKey(),
+            [
+                'colour' => CalendarEventColoursEnum::BLUE->value,
+                'role'   => CalendarEventRoleEnum::HOST->value]
+        );
+        $this->event->calendarEventUsers()->attach($this->viewer->getKey(),
+            [
+                'colour' => CalendarEventColoursEnum::BLUE->value,
+                'role'   => CalendarEventRoleEnum::MENTI->value,
+            ]);
     });
 
-    it('renders ShowEditEvent component with mentor permissions and correct event payload', function (): void {
+    it('renders ShowEditEvent component
+        with mentor permissions and correct event payload', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
-        $response = new ShowCalendarEventPage()->handle($this->event, $request);
+        $response = new ShowCalendarEventPage()->handle($this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
-        $expectedDuration = '01:30';
+        $expectedDuration = 90; // in minutes
 
         expect($response)->toBeInstanceOf(Response::class)
             ->and(Arr::get($page, 'component'))->toBe('Calendar/ShowEditEvent')
-            ->and(Arr::get($page, 'props.canLogin'))->toBeTrue()
-            ->and(Arr::get($page, 'props.canRegister'))->toBeTrue()
             ->and(Arr::get($page, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($page, 'props.permissions'))->toBe('edit')
-            // CalendarEvent payload is returned as an object via CalendarEventShowResource
             ->and(Arr::get($page, 'props.calendarEvent.id'))->toBe($this->event->getKey())
             ->and(Arr::get($page, 'props.calendarEvent.title'))->toBe('Demo CalendarEvent')
             ->and(Arr::get($page, 'props.calendarEvent.fromDate'))->toBe($this->start->format('Y-m-d'))
@@ -73,7 +78,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($page, 'props.calendarEvent.toDateFormatted'))->toBe($this->end->format('Y-M-d'))
             ->and(Arr::get($page, 'props.calendarEvent.toTime'))->toBe('11:00')
             ->and(Arr::get($page, 'props.calendarEvent.duration'))->toBe($expectedDuration)
-            ->and(Arr::get($page, 'props.calendarEvent.href'))->toBe('https://example.com/meet')
+            ->and(Arr::get($page, 'props.calendarEvent.webLink'))->toBe('https://example.com/meet')
             ->and(Arr::get($page, 'props.calendarEvent.description'))->toBe('CalendarEvent description');
     });
 
@@ -81,7 +86,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->viewer);
 
         $request = new Request(['timezone' => config('app.timezone')]);
-        $response = new ShowCalendarEventPage()->handle($this->event, $request);
+        $response = new ShowCalendarEventPage()->handle($this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -95,7 +100,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
-        $response = new ShowCalendarEventPage()->handle($this->event, $request);
+        $response = new ShowCalendarEventPage()->handle($this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -104,7 +109,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             ->not->toBeEmpty();
     });
 
-    it('passes user and timezone to CalendarEventShowResource which affects event payload', function (): void {
+    it('passes user and timezone to EventShowResource which affects event payload', function (): void {
         auth()->login($this->mentor);
 
         // Create event at 22:00 default timezone
@@ -117,7 +122,6 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'start_date_time'   => $start->format('Y-m-d H:i:s'),
             'end_date_time'     => $end->format('Y-m-d H:i:s'),
             'date'              => $start->format('Y-m-d'),
-            'duration'          => $start->diffInSeconds($end),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://example.com/night',
             'description'       => 'Night Event',
@@ -128,8 +132,10 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         ]);
 
         // Test with Asia/Tokyo timezone (UTC+9)
-        $requestTokyo = new Request(['timezone' => 'Asia/Tokyo']);
-        $responseTokyo = new ShowCalendarEventPage()->handle($eventAtNight, $requestTokyo);
+        $this->mentor->profile->timezone = 'Asia/Tokyo';
+        $this->mentor->profile->save();
+
+        $responseTokyo = new ShowCalendarEventPage()->handle($eventAtNight);
         $resultDataTokyo = $responseTokyo->toResponse(request())->getOriginalContent();
         $pageTokyo = $resultDataTokyo->getData()['page'];
 

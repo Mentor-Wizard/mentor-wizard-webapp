@@ -7,6 +7,7 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -22,6 +23,8 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->user->profile->timezone = 'Europe/Kyiv';
+        $this->user->profile->save();
 
         $this->nonMentorUser = User::factory()->create();
     });
@@ -37,9 +40,9 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'             => Date::today()->format('Y-m-d'),
             'toTime'             => '10:00',
             'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'            => 'https://google.com',
             'description'        => 'Test description',
             'colour'             => CalendarEventColoursEnum::BLUE->value,
-            'timezone'           => 'Europe/Kyiv',
         ];
 
         $response = $this->withoutMiddleware()
@@ -53,7 +56,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'start_date_time'   => Date::today()->format('Y-m-d').' 07:00:00',
             'end_date_time'     => Date::today()->format('Y-m-d').' 08:00:00',
             'date'              => Date::today()->format('Y-m-d'),
-            'duration'          => 3600,
+            'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
             'mentor_program_id' => null,
@@ -67,38 +70,276 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         ]);
     });
 
-    it('validates input when storing event', function (): void {
+    it('fails when title is missing', function (): void {
         actingAs($this->user);
 
-        $invalidData = [
-            'title'             => Str::random(256),
-            'fromDate'          => '2024-08-15',
-            'fromTime'          => '09:00',
-            'toDate'            => '2024-08-15',
-            'toTime'            => '10:00',
-            'type'              => 'individual',
-            'description'       => Str::random(2001),
-            'colour'            => CalendarEventColoursEnum::BLUE->value,
-            'timezone'          => 'Europe/Kyiv',
+        $data = [
+            'fromDate'    => Date::today()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toDate'      => Date::today()->format('Y-m-d'),
+            'toTime'      => '10:00',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
         ];
 
-        $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $invalidData);
-        $response->assertSessionHasErrors(['fromDate', 'description', 'title', 'type']);
-
-        $invalidData = [
-            'title'              => Str::random(256),
-            'fromDate'           => '2024-08-15',
-            'fromTime'           => null,
-            'toDate'             => null,
-            'toTime'             => null,
-            'type'               => 'individual',
-            'colour'             => CalendarEventColoursEnum::BLUE->value,
-            'description'        => Str::random(2001),
-        ];
-
-        $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $invalidData);
-        $response->assertSessionHasErrors(['fromDate', 'description', 'title', 'type']);
+        $this->withoutMiddleware()
+            ->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['title']);
     });
+
+    it('fails when title exceeds max length', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'       => Str::random(256),
+            'fromDate'    => Date::today()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toDate'      => Date::today()->format('Y-m-d'),
+            'toTime'      => '10:00',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()
+            ->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['title']);
+    });
+
+    it('fails when fromDate is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromTime' => '09:00',
+            'toDate'   => Date::today()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['fromDate']);
+    });
+
+    it('fails when fromDate is not a valid date', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => '2024-00---',
+            'fromTime' => '09:00',
+            'toDate'   => Date::today()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['fromDate']);
+    });
+
+    it('fails when fromDate is in the past', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::yesterday()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => Date::yesterday()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['fromDate']);
+    });
+
+    it('fails when toDate is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::today()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['toDate']);
+    });
+
+    it('fails when toDate is not a date', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::today()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => 'bad-date',
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['toDate']);
+    });
+
+    it('fails when toDate is before fromDate', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => Date::today()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['toDate']);
+    });
+
+    it('fails when fromTime is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['fromTime']);
+    });
+
+    it('fails when fromTime has invalid format', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '9 AM',
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['fromTime']);
+    });
+
+    it('fails when toTime is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['toTime']);
+    });
+
+    it('fails when toTime has invalid format', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'toTime'   => '10 AM',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['toTime']);
+    });
+
+    it('fails when toTime is not after fromTime', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '11:00',
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['toTime']);
+    });
+
+    it('fails when type is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['type']);
+    });
+
+    it('fails when type is invalid', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => 'invalid_type',
+            'colour'   => CalendarEventColoursEnum::BLUE->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['type']);
+    });
+
+    it('fails when colour is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'    => 'Event',
+            'fromDate' => Date::tomorrow()->format('Y-m-d'),
+            'fromTime' => '09:00',
+            'toDate'   => Date::tomorrow()->format('Y-m-d'),
+            'toTime'   => '10:00',
+            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['colour']);
+    });
+
+    it('fails when description exceeds max length', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'       => 'Event',
+            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toDate'      => Date::tomorrow()->format('Y-m-d'),
+            'toTime'      => '10:00',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'description' => Str::random(2001),
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['description']);
+    });
+
+    it('fails when webLink is invalid url', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'       => 'Event',
+            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'    => '09:00',
+            'toDate'      => Date::tomorrow()->format('Y-m-d'),
+            'toTime'      => '10:00',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'webLink'     => 'not-a-url',
+        ];
+        $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['webLink']);
+    });
+
+    // fromDate invalid already covered above
 
     it('adds custom error when timeslot overlaps existing event', function (): void {
         actingAs($this->user);
@@ -106,12 +347,11 @@ describe('Calendar CalendarEvent Store Page', function (): void {
 
         // Create an existing future event for the user from 10:00 to 15:00 tomorrow
         $tomorrow = Date::tomorrow();
-        $event = App\Models\CalendarEvent::query()->create([
+        $event = CalendarEvent::query()->create([
             'title'           => 'Busy block',
             'status'          => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time' => $tomorrow->copy()->setTime(10, 0),
             'end_date_time'   => $tomorrow->copy()->setTime(15, 0),
-            'duration'        => 5 * 3600,
             'date'            => $tomorrow->format('Y-m-d'),
             'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'     => 'Busy',
@@ -121,13 +361,12 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $payload = [
             'title'       => 'Overlap attempt',
             'fromDate'    => $tomorrow->format('Y-m-d'),
-            'fromTime'    => '11:00', // inside busy block
+            'fromTime'    => '13:00', // inside busy block
             'toDate'      => $tomorrow->format('Y-m-d'),
-            'toTime'      => '12:00',
+            'toTime'      => '15:00',
             'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description' => 'Should fail due to overlap',
             'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'timezone'    => config('app.timezone'),
         ];
 
         $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $payload);
@@ -149,11 +388,9 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
-            'timezone'          => 'Europe/Kyiv',
         ];
 
-        $response = $this->withoutMiddleware()
-            ->post(route('pages.calendar.store'), $eventData);
+        $response = $this->post(route('pages.calendar.store'), $eventData);
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 });

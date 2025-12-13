@@ -45,8 +45,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event1StartUtc,
             'end_date_time'   => $event1EndUtc,
-            'duration'        => $event1EndUtc->diffInSeconds($event1StartUtc),
-            'date'            => $event1StartUtc->format('Y-m-d'),
+            'date'            => $event1StartUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach($event1->getKey());
@@ -78,8 +77,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event1StartUtc,
             'end_date_time'   => $event1EndUtc,
-            'duration'        => $event1EndUtc->diffInSeconds($event1StartUtc),
-            'date'            => $event1StartUtc->format('Y-m-d'),
+            'date'            => $event1StartUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach($event1->getKey());
@@ -113,8 +111,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event1StartUtc,
             'end_date_time'   => $event1EndUtc,
-            'duration'        => $event1EndUtc->diffInSeconds($event1StartUtc),
-            'date'            => $event1StartUtc->format('Y-m-d'),
+            'date'            => $event1StartUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $event2 = CalendarEvent::query()->create([
@@ -122,8 +119,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event2StartUtc,
             'end_date_time'   => $event2EndUtc,
-            'duration'        => $event2EndUtc->diffInSeconds($event2StartUtc),
-            'date'            => $event2StartUtc->format('Y-m-d'),
+            'date'            => $event2StartUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
@@ -155,8 +151,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event1StartUtc,
             'end_date_time'   => $event1EndUtc,
-            'duration'        => $event1EndUtc->diffInSeconds($event1StartUtc),
-            'date'            => $event1StartUtc->format('Y-m-d'),
+            'date'            => $event1StartUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach($event1->getKey());

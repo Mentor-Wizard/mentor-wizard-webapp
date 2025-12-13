@@ -20,7 +20,7 @@ class ResetPasswordRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, ValidationRule|array<int, ValidationRule|string>|string>
      */
     public function rules(): array
     {

@@ -1,3 +1,6 @@
+import { UserGroupIcon, UserIcon } from '@heroicons/vue/24/outline';
+import { computed, ref } from 'vue';
+
 /**
  * Adjusts the current date based on the specified direction and view type
  * @param {Date} currentDate - The current date
@@ -72,23 +75,149 @@ export const adjustDate = (
  * @returns {string}
  */
 
-export const formatWeekRange = (currentDate, locale) => {
-  const d = new Date(currentDate);
-  const day = d.getDay() === 0 ? 7 : d.getDay();
-  const start = new Date(d);
+export const formatWeekRange = (locale, currentDate) => {
+  const currentDateObject = new Date(currentDate);
+  const day = currentDateObject.getDay() === 0 ? 7 : currentDateObject.getDay();
+  const start = new Date(currentDateObject);
   start.setHours(0, 0, 0, 0);
-  start.setDate(d.getDate() - (day - 1));
+  start.setDate(currentDateObject.getDate() - (day - 1));
 
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
   const localeValue =
     typeof locale === 'string' ? locale : String(locale || 'uk-UA');
-  const monthFormatted = new Intl.DateTimeFormat(localeValue, {
-    month: 'short',
-  });
-  const pad2 = (n) => String(n).padStart(2, '0');
-  const cleanMonth = (m) => m.replace(/\.$/, '');
-  const startLabel = `${pad2(start.getDate())} ${cleanMonth(monthFormatted.format(start))}`;
-  const endLabel = `${pad2(end.getDate())} ${cleanMonth(monthFormatted.format(end))}`;
+  const monthFmt = new Intl.DateTimeFormat(localeValue, { month: 'short' });
+  const pad2 = (number) => String(number).padStart(2, '0');
+  const cleanMonth = (month) => month.replace(/\.$/, '');
+  const startLabel = `${pad2(start.getDate())} ${cleanMonth(monthFmt.format(start))}`;
+  const endLabel = `${pad2(end.getDate())} ${cleanMonth(monthFmt.format(end))}`;
   return `${startLabel} - ${endLabel}`;
+};
+
+export const validateForm = (form, errors) => {
+  errors.value = {
+    fromTime: null,
+    fromDate: null,
+    title: null,
+    toDate: null,
+    toTime: null,
+    webLink: null,
+    colour: null,
+    description: null,
+  };
+
+  if (!form.title.trim()) {
+    errors.value.title = 'Title is required';
+  }
+
+  if (!form.fromDate) {
+    errors.value.fromDate = 'Start date is required';
+  }
+
+  if (!form.toDate) {
+    errors.value.toDate = 'End date is required';
+  }
+
+  if (!form.fromTime) {
+    errors.value.fromTime = 'Start time is required';
+  }
+
+  if (!form.toTime) {
+    errors.value.toTime = 'End time is required';
+  }
+
+  if (form.description.length > 2000) {
+    errors.value.description = 'Description is more than 2000 characters';
+  }
+
+  if (!isValidUrl(form.webLink)) {
+    errors.value.webLink = 'Weblink format is wrong';
+  }
+
+  if (form.fromDate && form.toDate) {
+    const fromDateTime = new Date(`${form.fromDate}T${form.fromTime}`);
+    const toDateTime = new Date(`${form.toDate}T${form.toTime}`);
+    const currentTime = new Date();
+    if (fromDateTime >= toDateTime) {
+      errors.value.toDate = 'End date/time must be after start date/time';
+    }
+    if (currentTime > fromDateTime) {
+      errors.value.fromDate = 'Start date/time must be in the future';
+    }
+  }
+
+  let errorStatus = false;
+
+  Object.keys(errors.value).forEach((key) => {
+    if (errors.value[key]) {
+      errorStatus = true;
+    }
+  });
+  return !errorStatus;
+};
+
+const isValidUrl = (urlString) => {
+  try {
+    new URL(urlString);
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+export const capitalize = (symbol) =>
+  symbol ? symbol.charAt(0).toUpperCase() + symbol.slice(1) : symbol;
+
+export function selectedEventTypeHelper(form) {
+  return computed(() => eventTypes.find((type) => type.value === form.type));
+}
+
+export function isFormValid(form) {
+  return computed(() =>
+    Boolean(
+      form.title?.trim()
+        && form.fromDate
+        && form.toDate
+        && form.fromTime
+        && form.colour
+        && form.toTime,
+    ),
+  );
+}
+
+// CalendarEvent types
+export const eventTypes = [
+  { value: 'Individual', label: 'Individual', icon: UserIcon },
+  { value: 'Group', label: 'Group', icon: UserGroupIcon },
+];
+
+export const errors = ref({
+  title: null,
+  fromDate: null,
+  fromTime: null,
+  toDate: null,
+  toTime: null,
+  type: null,
+  webLink: null,
+  colour: null,
+  description: null,
+});
+
+export const timeZone = ref(
+  Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+);
+
+export const shownMonth = ref(
+  new Date().toISOString().split('T')[0].slice(0, 7),
+);
+export const getTitleMonth = (filterDate) => {
+  return new Date(filterDate).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+  });
+};
+export const getFormattedMonth = (dateString) => {
+  const date = new Date(dateString);
+  return date.toISOString().split('T')[0].slice(0, 7);
 };

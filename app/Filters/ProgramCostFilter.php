@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filters;
 
+use App\Models\MentorProfile;
 use App\Traits\ParsesNumericRange;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
+/**
+ * @implements Filter<MentorProfile>
+ */
 class ProgramCostFilter implements Filter
 {
     use ParsesNumericRange;

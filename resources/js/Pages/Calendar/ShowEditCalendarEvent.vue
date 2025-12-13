@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import {
   Dialog,
   DialogPanel,
@@ -20,19 +20,37 @@ import {
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import { router, useForm } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
-const timeZone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+import {
+  capitalize,
+  errors,
+  eventTypes,
+  isFormValid,
+  selectedEventTypeHelper,
+  timeZone,
+  validateForm,
+} from '@/Stores/Calendar/helpers.js';
+const props = defineProps({
+  locale: {
+    type: String,
+    default: null,
+  },
+  permissions: {
+    type: String,
+    default: 'view',
+  },
+  availableColours: {
+    type: Object,
+    default: () => {},
+  },
+  calendarEvent: {
+    type: Object,
+    default: () => {},
+  },
+});
 const mode = ref('show');
-const permissions = ref(props.permissions);
-interface Props {
-  calendarEvent: [];
-  availableColours: [];
-  permissions: string;
-  locale: string;
-}
-const props = defineProps<Props>();
-const event = ref<EventFormData>({
+const event = ref({
   id: '',
   title: '',
   fromDate: '',
@@ -41,28 +59,13 @@ const event = ref<EventFormData>({
   fromTime: '',
   toTime: '',
   type: 'Individual',
+  href: '',
   description: '',
   colour: '',
   timezone: ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'),
 });
 
-interface EventFormData {
-  id: string;
-  title: string;
-  fromDate: string;
-  fromDateFormatted: string;
-  toDate: string;
-  toDateFormatted: string;
-  fromTime: string;
-  toTime: string;
-  description: string;
-  duration: string;
-  type: 'Group' | 'Individual';
-  colour: string;
-  timeZone: string;
-}
-
-const changeMode = (newMode: string) => {
+const changeMode = (newMode) => {
   mode.value = newMode;
 };
 
@@ -78,46 +81,33 @@ const deleteEvent = () => {
   });
 };
 
-const errors = ref({
-  toDate: null,
-  fromTime: null,
-  fromDate: null,
-  toTime: null,
-  title: null,
-  colour: null,
-  description: null,
-});
-
 let form = useForm({
   id: '',
   title: '',
   fromDate: '',
-  toDate: '',
   fromTime: '09:00',
+  toDate: '',
   toTime: '10:00',
   type: 'Individual',
+  webLink: '',
   description: '',
   colour: '',
   timezone: timeZone,
 });
 const availableColours = props.availableColours;
+const permissions = ref(props.permissions);
 const availableColoursScheme = ref({});
-const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-
-const eventTypes = [
-  { value: 'Individual', label: 'Individual', icon: UserIcon },
-  { value: 'Group', label: 'Group', icon: UserGroupIcon },
-];
+const selectedEventType = selectedEventTypeHelper(form);
 
 onMounted(() => {
   const eventData = props.calendarEvent;
   availableColours.value = props.availableColours;
   availableColoursScheme.value = availableColours.value.reduce(
-    (acc, c) => {
-      acc[c] = `bg-${c}-500`;
+    (acc, colour) => {
+      acc[colour] = `bg-${colour}-500`;
       return acc;
     },
-    {} as Record<string, string>,
+    {},
   );
 
   if (eventData) {
@@ -128,9 +118,10 @@ onMounted(() => {
       id: eventData.id || '',
       title: eventData.title || '',
       fromDate: eventData.fromDate || '',
-      toDate: eventData.toDate || '',
       fromTime: eventData.fromTime || '',
+      toDate: eventData.toDate || '',
       toTime: eventData.toTime || '',
+      webLink: eventData.webLink || '',
       type: eventData.type || '',
       colour: eventData.colour || '',
       description: eventData.description || '',
@@ -138,78 +129,8 @@ onMounted(() => {
   }
 });
 
-const selectedEventType = computed(() =>
-  eventTypes.find((type) => type.value === form.type),
-);
-
-const isFormValid = computed(() => {
-  return (
-    form.title.trim()
-    && form.fromDate
-    && form.toDate
-    && form.fromTime
-    && form.colour
-    && form.toTime
-  );
-});
-
-const validateForm = () => {
-  errors.value = {
-    fromTime: null,
-    fromDate: null,
-    title: null,
-    toDate: null,
-    toTime: null,
-    colour: null,
-    description: null,
-  };
-
-  if (!form.title.trim()) {
-    errors.value.title = 'Title is required';
-  }
-
-  if (!form.fromDate) {
-    errors.value.fromDate = 'Start date is required';
-  }
-
-  if (!form.toDate) {
-    errors.value.toDate = 'End date is required';
-  }
-
-  if (!form.fromTime) {
-    errors.value.fromTime = 'Start time is required';
-  }
-
-  if (!form.toTime) {
-    errors.value.toTime = 'End time is required';
-  }
-
-  if (form.description.length > 1000) {
-    errors.value.description = 'Description is more than 1000 characters';
-  }
-
-  if (form.fromDate && form.toDate) {
-    const fromDateTime = new Date(`${form.fromDate}T${form.fromTime}`);
-    const toDateTime = new Date(`${form.toDate}T${form.toTime}`);
-
-    if (fromDateTime >= toDateTime) {
-      errors.value.toDate = 'End date/time must be after start date/time';
-    }
-  }
-  let errorStatus = false;
-
-  Object.keys(errors.value).forEach((key) => {
-    console.log(key);
-    if (errors.value[key]) {
-      errorStatus = true;
-    }
-  });
-
-  return !errorStatus;
-};
-
 const handleSubmit = () => {
-  if (validateForm()) {
+  if (validateForm(form, errors)) {
     form.patch(route('pages.calendar.edit', { id: event.value.id }), {
       onSuccess: () => {
         form.reset();
@@ -317,6 +238,7 @@ watch(
                       >
                         Event Title
                       </label>
+
                       <div class="mt-2">
                         <input
                           id="title"
@@ -334,6 +256,33 @@ watch(
                         </p>
                       </div>
                     </div>
+
+                    <div>
+                      <label
+                        for="title"
+                        class="block text-sm leading-6 font-medium text-gray-900"
+                      >
+                        Web link
+                      </label>
+
+                      <div class="mt-2">
+                        <input
+                          id="webLink"
+                          v-model="form.webLink"
+                          type="text"
+                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                          :class="{ 'ring-red-300': errors.webLink }"
+                          placeholder="Enter weblink"
+                        />
+                        <p
+                          v-if="errors.webLink"
+                          class="mt-2 text-sm text-red-600"
+                        >
+                          {{ errors.webLink }}
+                        </p>
+                      </div>
+                    </div>
+
                     <div>
                       <label
                         for="title"
@@ -346,6 +295,7 @@ watch(
                           id="title"
                           v-model="form.description"
                           type="text"
+                          maxlength="2000"
                           class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                           :class="{ 'ring-red-300': errors.description }"
                           placeholder="Enter event title"
@@ -801,9 +751,9 @@ watch(
                           <ClockIcon class="h-4 w-4" />
                           <span
                             >Duration:
-                            <span class="font-semibold">{{
-                              event.duration
-                            }}</span></span
+                            <span class="font-semibold"
+                              >{{ event.duration }} minutes
+                            </span></span
                           >
                         </div>
                       </div>
@@ -877,11 +827,11 @@ watch(
                     </div>
 
                     <div
-                      v-if="event.href"
+                      v-if="event.webLink"
                       class="mt-6 border-t border-gray-200 pt-4"
                     >
                       <a
-                        :href="event.href"
+                        :href="event.webLink"
                         target="_blank"
                         class="inline-flex items-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors duration-200 hover:bg-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
                       >
@@ -907,7 +857,7 @@ watch(
 
               <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                 <button
-                  v-if="mode === 'show' && permissions == 'edit'"
+                  v-if="mode === 'show' && permissions === 'edit'"
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   @click="changeMode('edit')"
@@ -915,7 +865,7 @@ watch(
                   Edit Event
                 </button>
                 <button
-                  v-if="permissions == 'edit'"
+                  v-if="permissions === 'edit'"
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   @click="deleteEvent()"
@@ -923,7 +873,7 @@ watch(
                   Delete Event
                 </button>
                 <button
-                  v-if="mode === 'edit' && permissions == 'edit'"
+                  v-if="mode === 'edit' && permissions === 'edit'"
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   @click="changeMode('show')"
@@ -931,7 +881,7 @@ watch(
                   Show Event
                 </button>
                 <button
-                  v-if="mode === 'edit' && permissions == 'edit'"
+                  v-if="mode === 'edit' && permissions === 'edit'"
                   type="button"
                   class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   :disabled="!isFormValid"

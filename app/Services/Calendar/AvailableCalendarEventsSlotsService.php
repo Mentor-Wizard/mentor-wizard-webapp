@@ -6,15 +6,24 @@ namespace App\Services\Calendar;
 
 use App\Models\CalendarEvent;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 
-class GetAvailableSlotsService
+class AvailableCalendarEventsSlotsService
 {
+    /** @var list<array{start: CarbonInterface, end: CarbonInterface}> */
     private array $availableSlots = [];
 
-    public function __construct(private readonly User $user, private readonly string $timezone,
-        private readonly array $excludeEvents = [], private readonly bool $excludeSchedule = false) {}
+    public function __construct(
+        private readonly User $user,
+        private readonly string $timezone,
+        /** @var array<int, int|string> $excludeEvents */
+        private readonly array $excludeEvents = [],
+    ) {}
 
+    /**
+     * @return list<array{start: CarbonInterface, end: CarbonInterface}>
+     */
     public function getAvailableSlots(): array
     {
         $currentDate = Date::now();
@@ -36,18 +45,19 @@ class GetAvailableSlotsService
             if (is_null($previousEvent)) {
                 if ($event->start_date_time->greaterThanOrEqualTo($currentDate)) {
                     $this->availableSlots[] = ['start' => $currentDateTimezone,
-                        'end'                          => $event->start_date_time->setTimezone($this->timezone)];
+                        'end'                          => $event->start_date_time->timezone($this->timezone)];
                 }
             } else {
-                $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
-                    'end'                          => $event->start_date_time->setTimezone($this->timezone)];
+                $this->availableSlots[] = ['start' => $previousEvent->end_date_time->timezone($this->timezone),
+                    'end'                          => $event->start_date_time->timezone($this->timezone)];
             }
 
             $previousEvent = $event;
         }
 
-        $this->availableSlots[] = ['start' => $previousEvent->end_date_time->setTimezone($this->timezone),
-            'end'                          => Date::now($this->timezone)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
+        $this->availableSlots[] = ['start' => $previousEvent->end_date_time->timezone($this->timezone),
+            'end'                          => Date::now($this->timezone)
+                ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
 
         if ($this->excludeSchedule) {
             $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user, $this->availableSlots, $this->timezone)->getAvailableSlots();

@@ -7,11 +7,11 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserSchedule;
 use App\Services\Calendar\GetAvailableSlotsService;
+use App\Services\Calendar\AvailableCalendarEventsSlotsService;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 
-mutates(GetAvailableSlotsService::class);
+mutates(AvailableCalendarEventsSlotsService::class);
 
 describe('GetAvailableSlotsService Service', function (): void {
     beforeEach(function (): void {
@@ -22,7 +22,7 @@ describe('GetAvailableSlotsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
         $user = User::factory()->create();
 
-        $slots = new GetAvailableSlotsService($user, 'Europe/Kyiv')->getAvailableSlots();
+        $slots = new AvailableCalendarEventsSlotsService($user, 'Europe/Kyiv')->getAvailableSlots();
 
         expect($slots)->toBeArray()->toBeEmpty();
     });
@@ -45,7 +45,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event1StartUtc,
             'end_date_time'   => $event1EndUtc,
-            'duration'        => $event1StartUtc->diffInSeconds($event1EndUtc),
             'date'            => $event1StartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -54,13 +53,12 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event2StartUtc,
             'end_date_time'   => $event2EndUtc,
-            'duration'        => $event2StartUtc->diffInSeconds($event2EndUtc),
             'date'            => $event2StartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
 
-        $result = new GetAvailableSlotsService($user, $tz)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService($user, $tz)->getAvailableSlots();
 
         // We expect 3 slots: [now..E1.start], [E1.end..E2.start], [E2.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(3);
@@ -98,13 +96,12 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $eventStartUtc,
             'end_date_time'   => $eventEndUtc,
-            'duration'        => $eventEndUtc->diffInSeconds($eventStartUtc),
             'date'            => $eventStartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach($event->getKey());
 
-        $result = new GetAvailableSlotsService($user, $tz)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService($user, $tz)->getAvailableSlots();
 
         // Two slots should exist: [now..E-future.start], [E-future.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(2);

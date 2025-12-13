@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import {
   ChevronDownIcon,
@@ -9,23 +9,33 @@ import {
 import { router } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
-interface Props {
-  calendarEvents: [];
-  currentView: 'day' | 'week' | 'month';
-  selectedDate: string;
-  permissions: string;
-  locale: string;
-}
 
-const props = defineProps<Props>();
 import DailyView from '@/Components/Calendar/DailyView.vue';
 import MonthlyView from '@/Components/Calendar/MonthlyView.vue';
 import WeeklyView from '@/Components/Calendar/WeeklyView.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import CreateEvent from '@/Pages/Calendar/CreateCalendarEvent.vue';
 import { useCalendar } from '@/Stores/calendar.js';
-import { adjustDate } from '@/Stores/Calendar/helpers.js';
+import { adjustDate, formatWeekRange } from '@/Stores/Calendar/helpers.js';
 
+const props = defineProps({
+  locale: {
+    type: String,
+    default: null,
+  },
+  permissions: {
+    type: String,
+    default: 'view',
+  },
+  calendarEvents: {
+    type: Object,
+    default: () => {},
+  },
+  availableColours: {
+    type: Object,
+    default: () => {},
+  },
+});
 const locale = props.locale;
 
 const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -52,11 +62,11 @@ const setTodayDate = () => {
   refreshData();
 };
 
-const changeTab = (tab: string) => {
+const changeTab = (tab) => {
   currentTab.value = tab;
   refreshData();
 };
-const scrollDate = (direction: string, date = null) => {
+const scrollDate = (direction, date = null) => {
   let adjustInfo = adjustDate(
     currentDate.value,
     currentTab.value,
@@ -65,7 +75,6 @@ const scrollDate = (direction: string, date = null) => {
   );
   currentDate.value = adjustInfo.date;
   currentTab.value = adjustInfo.tab;
-
   isLoading.value = true;
   refreshData();
 };
@@ -119,25 +128,6 @@ const closeCreateEventPage = () => {
   showCreatePage.value = false;
 };
 
-const formatWeekRange = () => {
-  const d = new Date(currentDate.value);
-  const day = d.getDay() === 0 ? 7 : d.getDay();
-  const start = new Date(d);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(d.getDate() - (day - 1));
-
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  const localeValue =
-    typeof locale === 'string' ? locale : String(locale || 'uk-UA');
-  const monthFmt = new Intl.DateTimeFormat(localeValue, { month: 'short' });
-  const pad2 = (n: number) => String(n).padStart(2, '0');
-  const cleanMonth = (m: string) => m.replace(/\.$/, '');
-  const startLabel = `${pad2(start.getDate())} ${cleanMonth(monthFmt.format(start))}`;
-  const endLabel = `${pad2(end.getDate())} ${cleanMonth(monthFmt.format(end))}`;
-  return `${startLabel} - ${endLabel}`;
-};
-
 const scrollButtonName = computed(() => {
   if (currentTab.value === 'Day view') {
     if (currentDate.value.toDateString() === new Date().toDateString()) {
@@ -153,7 +143,7 @@ const scrollButtonName = computed(() => {
       );
     }
   } else if (currentTab.value === 'Week view') {
-    return formatWeekRange();
+    return formatWeekRange(locale, currentDate.value);
   } else if (currentTab.value === 'Month view') {
     return new Date(currentDate.value).toLocaleString(
       String(locale || 'uk-UA'),
@@ -182,7 +172,6 @@ onMounted(() => {
           }}</time>
         </h1>
       </div>
-      <!--                            class="flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pr-0 md:hover:bg-gray-50"-->
 
       <div v-if="timezone" class="flex items-center">
         <div
@@ -191,7 +180,7 @@ onMounted(() => {
           <button
             type="button"
             :disabled="
-              !daysData['hasEventsBefore'] && currentTab == 'Month View'
+              !daysData['hasEventsBefore'] && currentTab === 'Month view'
             "
             :class="[
               'flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 focus:relative md:w-9 md:pr-0',
@@ -214,7 +203,7 @@ onMounted(() => {
           <button
             type="button"
             :disabled="
-              !daysData['hasEventsAfter'] && currentTab == 'Month View'
+              !daysData['hasEventsAfter'] && currentTab === 'Month view'
             "
             :class="[
               'flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 focus:relative md:w-9 md:pl-0',
@@ -394,8 +383,11 @@ onMounted(() => {
         </Menu>
       </div>
     </header>
+
     <CreateEvent
+      v-if="props.availableColours"
       :open="showCreatePage"
+      :available-colours="props.availableColours"
       :close-create-event-page="closeCreateEventPage"
     />
 
