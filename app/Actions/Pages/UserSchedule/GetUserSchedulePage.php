@@ -16,7 +16,9 @@ class GetUserSchedulePage
 
     public function handle(): Response
     {
-        $schedules = auth()->user()->activeScheduleRecords()
+        $user = auth()->user();
+        $profileTimezone = $user?->profile->timezone ?? config('app.timezone');
+        $schedules = $user->activeScheduleRecords()
             ->orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();
@@ -24,7 +26,7 @@ class GetUserSchedulePage
         return Inertia::render('UserSchedule/ListPage', [
             'schedules'     => UserScheduleViewResource::collection($schedules)->resolve(),
             'scheduleTypes' => UserScheduleRecordType::getCollection(),
-            'timezone'      => $schedules?->first()->timezone ?? null,
+            'timezone'      => $profileTimezone,
         ]);
     }
 }

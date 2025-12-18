@@ -19,6 +19,10 @@ class UserSchedule extends Model
 {
     use HasFactory;
 
+    const int MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY = 4;
+
+    const int MAX_NUMBER_OF_ACTIVE_DAY_OFF_EXCLUSIONS = 30;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -31,7 +35,6 @@ class UserSchedule extends Model
         'end_time',
         'type',
         'day_off_date',
-        'timezone',
     ];
 
     public function user(): BelongsTo

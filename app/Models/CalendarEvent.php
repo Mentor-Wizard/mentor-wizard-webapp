@@ -42,7 +42,6 @@ class CalendarEvent extends Model
         'status',
         'start_date_time',
         'end_date_time',
-        'duration',
         'date',
         'type',
         'web_link',

@@ -75,7 +75,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $lastdate = Date::today()->endOfMonth()->endOfWeek()->format('Y-m-d');
         $difference = Date::parse($firstDate)->diffInDays(Date::parse($lastdate));
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.calendarEvents.hasEventsBefore'))->toBeFalse()
@@ -135,7 +135,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $difference = Date::parse($firstDate)->diffInDays(Date::parse($lastdate));
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.calendarEvents.hasEventsBefore'))->toBeTrue()
@@ -146,14 +146,14 @@ describe('List Calendar CalendarEvent Page', function (): void {
                 .$difference.'.calendarEvents.0.webLink'))->toBe($this->data['web_link'])
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.calendarEvents.0.datetime'))->toBe(Date::today()->endOfMonth()->endOfWeek()
-            ->setTime(19, 59, 0)->setTimezone('Europe/Kyiv')->format('Y-m-d\TH:i'))
+            ->setTime(19, 59, 0)->timezone('Europe/Kyiv')->format('Y-m-d\TH:i'))
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.calendarEvents.0.time'))->toBe('9PM')
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.calendarEvents.0.id'))->toBe($this->monthEvent->getKey())
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'.$difference.'.date'))
             ->toBe(Date::today()->endOfMonth()->endOfWeek()->setTime(19, 59, 0)
-                ->setTimezone('Europe/Kyiv')->format('Y-m-d'));
+                ->timezone('Europe/Kyiv')->format('Y-m-d'));
     });
 
     it('renders Month View of Calendar CalendarEvent list page, with events after and before
@@ -200,7 +200,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $difference = Date::parse($firstDate)->diffInDays(Date::parse($lastdate));
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.calendarEvents.hasEventsBefore'))->toBeTrue()
@@ -212,7 +212,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.calendarEvents.0.datetime'))->toBe(Date::today()->endOfMonth()->endOfWeek()
             ->setTime(19, 59, 0)
-            ->setTimezone('Europe/Kyiv')->format('Y-m-d\TH:i'))
+            ->timezone('Europe/Kyiv')->format('Y-m-d\TH:i'))
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.calendarEvents.0.time'))->toBe('9PM')
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
@@ -220,7 +220,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.date'))
             ->toBe(Date::today()->endOfMonth()->endOfWeek()->setTime(19, 59, 0)
-                ->setTimezone('Europe/Kyiv')->format('Y-m-d'));
+                ->timezone('Europe/Kyiv')->format('Y-m-d'));
     });
 
     it('renders Month View of Calendar CalendarEvent list page, with events after and before
@@ -271,7 +271,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $difference = Date::parse($firstDate)->diffInDays(Date::parse($lastdate));
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.calendarEvents.hasEventsBefore'))->toBeTrue()
@@ -283,7 +283,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.calendarEvents.0.datetime'))->toBe(Date::today()->endOfMonth()->endOfWeek()
             ->setTime(19, 59, 0)
-            ->setTimezone('America/New_York')->format('Y-m-d\TH:i'))
+            ->timezone('America/New_York')->format('Y-m-d\TH:i'))
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.calendarEvents.0.time'))->toBe('2PM')
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
@@ -291,7 +291,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ->and(Arr::get($result, 'props.calendarEvents.calendarView.'
                 .$difference.'.date'))
             ->toBe(Date::today()->endOfMonth()->endOfWeek()->setTime(19, 59, 0)
-                ->setTimezone('America/New_York')->format('Y-m-d'));
+                ->timezone('America/New_York')->format('Y-m-d'));
     });
 
     it('renders Weekly View of Calendar CalendarEvent list page
@@ -332,7 +332,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $weekEndDate = Date::parse($requestDate, 'Europe/Kyiv')->endOfWeek();
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.dayNumber'))
@@ -406,7 +406,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $weekEndDate = Date::parse($requestDate, 'Europe/Kyiv')->endOfWeek();
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.dayNumber'))
@@ -482,7 +482,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $weekEndDate = Date::parse($requestDate, 'America/New_York')->endOfWeek();
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.dayNumber'))
@@ -583,7 +583,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $timezoneAbbreviation = $todayDate->format('T');
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.webLink'))
@@ -688,7 +688,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $timezoneAbbreviation = $todayDate->format('T');
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.webLink'))
@@ -795,7 +795,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $timezoneAbbreviation = $todayDate->format('T');
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarsList')
+            ->and(Arr::get($result, 'component'))->toBe('Calendar/CalendarEventsList')
             ->and(Arr::get($result, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($result, 'props.permissions'))->toBe('create')
             ->and(Arr::get($result, 'props.calendarEvents.calendarEvents.0.webLink'))

@@ -19,6 +19,7 @@ class AvailableCalendarEventsSlotsService
         private readonly string $timezone,
         /** @var array<int, int|string> $excludeEvents */
         private readonly array $excludeEvents = [],
+        private readonly bool $excludeSchedule = false,
     ) {}
 
     /**
@@ -44,23 +45,30 @@ class AvailableCalendarEventsSlotsService
             /** @var CalendarEvent $event */
             if (is_null($previousEvent)) {
                 if ($event->start_date_time->greaterThanOrEqualTo($currentDate)) {
-                    $this->availableSlots[] = ['start' => $currentDateTimezone,
-                        'end'                          => $event->start_date_time->timezone($this->timezone)];
+                    $this->availableSlots[] = [
+                        'start' => $currentDateTimezone,
+                        'end'   => $event->start_date_time->timezone($this->timezone),
+                    ];
                 }
             } else {
-                $this->availableSlots[] = ['start' => $previousEvent->end_date_time->timezone($this->timezone),
-                    'end'                          => $event->start_date_time->timezone($this->timezone)];
+                $this->availableSlots[] = [
+                    'start' => $previousEvent->end_date_time->timezone($this->timezone),
+                    'end'   => $event->start_date_time->timezone($this->timezone),
+                ];
             }
 
             $previousEvent = $event;
         }
 
-        $this->availableSlots[] = ['start' => $previousEvent->end_date_time->timezone($this->timezone),
-            'end'                          => Date::now($this->timezone)
-                ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)];
+        $this->availableSlots[] = [
+            'start' => $previousEvent->end_date_time->timezone($this->timezone),
+            'end'   => Date::now($this->timezone)
+                ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
+        ];
 
         if ($this->excludeSchedule) {
-            $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user, $this->availableSlots, $this->timezone)->getAvailableSlots();
+            $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user,
+                $this->availableSlots, $this->timezone)->getAvailableSlots();
         }
 
         return $this->availableSlots;

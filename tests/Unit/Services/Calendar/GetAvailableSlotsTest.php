@@ -6,7 +6,6 @@ use App\Enums\UserScheduleRecordType;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserSchedule;
-use App\Services\Calendar\GetAvailableSlotsService;
 use App\Services\Calendar\AvailableCalendarEventsSlotsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -67,18 +66,19 @@ describe('GetAvailableSlotsService Service', function (): void {
         $slot1 = $result[0];
 
         expect($slot1['start']->equalTo(Date::now($tz)
-            ->setTime(10, 0, 0)->setTimezone($tz)))->toBeTrue()
-            ->and($slot1['end']->equalTo($event1StartUtc->clone()->setTimezone($tz)))->toBeTrue();
+            ->setTime(10, 0, 0)->timezone($tz)))->toBeTrue()
+            ->and($slot1['end']->equalTo($event1StartUtc->clone()->timezone($tz)))->toBeTrue();
 
         // Slot 2 between E1 end and E2 start in tz
         $slot2 = $result[1];
-        expect($slot2['start']->equalTo($event1EndUtc->clone()->setTimezone($tz)))->toBeTrue()
-            ->and($slot2['end']->equalTo($event2StartUtc->clone()->setTimezone($tz)))->toBeTrue();
+        expect($slot2['start']->equalTo($event1EndUtc->clone()->timezone($tz)))->toBeTrue()
+            ->and($slot2['end']->equalTo($event2StartUtc->clone()->timezone($tz)))->toBeTrue();
 
         // Slot 3 ends at now+2 months in tz
         $slot3 = $result[2];
-        expect($slot3['start']->equalTo($event2EndUtc->clone()->setTimezone($tz)))->toBeTrue()
-            ->and($slot3['end']->equalTo(Date::now($tz)->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)
+        expect($slot3['start']->equalTo($event2EndUtc->clone()->timezone($tz)))->toBeTrue()
+            ->and($slot3['end']->equalTo(Date::now($tz)
+                ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)
                 ->setTime(10, 0, 0)))->toBeTrue();
     });
 
@@ -109,10 +109,10 @@ describe('GetAvailableSlotsService Service', function (): void {
         expect($result[0]['start']
             ->equalTo(Date::now($tz)->setTime(10, 0, 0)))->toBeTrue()
             ->and($result[0]['end']
-                ->equalTo($eventStartUtc->clone()->setTimezone($tz)))->toBeTrue();
+                ->equalTo($eventStartUtc->clone()->timezone($tz)))->toBeTrue();
 
         expect($result[1]['start']
-            ->equalTo($eventEndUtc->clone()->setTimezone($tz)))->toBeTrue()
+            ->equalTo($eventEndUtc->clone()->timezone($tz)))->toBeTrue()
             ->and($result[1]['end']
                 ->equalTo(Date::now($tz)
                     ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)))->toBeTrue();
@@ -140,7 +140,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event1StartUtc,
             'end_date_time'   => $event1EndUtc,
-            'duration'        => $event1StartUtc->diffInSeconds($event1EndUtc),
             'date'            => $event1StartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -149,7 +148,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event2StartUtc,
             'end_date_time'   => $event2EndUtc,
-            'duration'        => $event2StartUtc->diffInSeconds($event2EndUtc),
             'date'            => $event2StartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -158,7 +156,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event3StartUtc,
             'end_date_time'   => $event3EndUtc,
-            'duration'        => $event3StartUtc->diffInSeconds($event3EndUtc),
             'date'            => $event3StartUtc->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -166,7 +163,7 @@ describe('GetAvailableSlotsService Service', function (): void {
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey(), $event3->getKey()]);
 
         // Exclude event2 from calculation
-        $result = new GetAvailableSlotsService($user, $tz, [$event2->getKey()])->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService($user, $tz, [$event2->getKey()])->getAvailableSlots();
 
         // We expect 3 slots: [now..E1.start], [E1.end..E3.start], [E3.end..now+2months]
         // Event2 should not be considered
@@ -174,8 +171,8 @@ describe('GetAvailableSlotsService Service', function (): void {
 
         // Verify that E2 is not in the calculation
         $slot2 = $result[1];
-        expect($slot2['start']->equalTo($event1EndUtc->clone()->setTimezone($tz)))->toBeTrue()
-            ->and($slot2['end']->equalTo($event3StartUtc->clone()->setTimezone($tz)))->toBeTrue();
+        expect($slot2['start']->equalTo($event1EndUtc->clone()->timezone($tz)))->toBeTrue()
+            ->and($slot2['end']->equalTo($event3StartUtc->clone()->timezone($tz)))->toBeTrue();
     });
 
     it('applies schedule exclusion when excludeSchedule flag is true', function (): void {
@@ -191,8 +188,7 @@ describe('GetAvailableSlotsService Service', function (): void {
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
             'end_time'    => '17:00:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
-            'timezone'    => $tz,
+            'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
         // Create an event on Monday 14:00-15:00
@@ -204,14 +200,13 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $eventStart,
             'end_date_time'   => $eventEnd,
-            'duration'        => $eventStart->diffInSeconds($eventEnd),
-            'date'            => $eventStart->format('Y-m-d'),
+            'date'            => $eventStart?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach($event->getKey());
 
         // Get slots with schedule exclusion
-        $result = new GetAvailableSlotsService($user, $tz, [], true)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService($user, $tz, [], true)->getAvailableSlots();
 
         // Slots should only include times within working hours (9:00-17:00)
         expect($result)->toBeArray()->not()->toBeEmpty();
@@ -241,8 +236,7 @@ describe('GetAvailableSlotsService Service', function (): void {
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
             'end_time'    => '17:00:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
-            'timezone'    => $tz,
+            'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
         // Create a day off on Monday, January 13
@@ -253,22 +247,24 @@ describe('GetAvailableSlotsService Service', function (): void {
             'end_time'     => '23:59:59',
             'type'         => UserScheduleRecordType::DAY_OFF,
             'day_off_date' => Date::today()->addMonth()->firstOfMonth(1), // Next Monday
-            'timezone'     => $tz,
         ]);
 
         // Create events on both Mondays
-        $event1Start = Date::now()->addMonth()->firstOfMonth(1)->setTime(10, 0, 0)->setTimezone($tz); // This Monday
-        $event1End = Date::now()->addMonth()->firstOfMonth(1)->setTime(16, 0, 0)->setTimezone($tz);
+        $event1Start = Date::now()->addMonth()->firstOfMonth(1)
+            ->setTime(10, 0, 0)->timezone($tz); // This Monday
+        $event1End = Date::now()->addMonth()->firstOfMonth(1)
+            ->setTime(16, 0, 0)->timezone($tz);
 
-        $event2Start = Date::now()->addMonth()->firstOfMonth(1)->addWeek()->setTime(10, 0, 0)->setTimezone($tz); // Next Monday (day off)
-        $event2End = Date::now()->addMonth()->firstOfMonth(1)->addWeek()->setTime(16, 0, 0)->setTimezone($tz);
+        $event2Start = Date::now()->addMonth()->firstOfMonth(1)
+            ->addWeek()->setTime(10, 0, 0)->timezone($tz); // Next Monday (day off)
+        $event2End = Date::now()->addMonth()->firstOfMonth(1)
+            ->addWeek()->setTime(16, 0, 0)->timezone($tz);
 
         $event1 = CalendarEvent::query()->create([
             'title'           => 'Event on Working Monday',
             'status'          => 'confirmed',
             'start_date_time' => $event1Start,
             'end_date_time'   => $event1End,
-            'duration'        => $event1Start->diffInSeconds($event1End),
             'date'            => $event1Start->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -278,7 +274,6 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $event2Start,
             'end_date_time'   => $event2End,
-            'duration'        => $event2Start->diffInSeconds($event2End),
             'date'            => $event2Start->format('Y-m-d'),
             'type'            => 'individual',
         ]);
@@ -286,7 +281,7 @@ describe('GetAvailableSlotsService Service', function (): void {
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
 
         // Get slots with schedule exclusion
-        $result = new GetAvailableSlotsService($user, $tz, [], true)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService($user, $tz, [], true)->getAvailableSlots();
 
         // Slots should not include or overlap with the day off date (2025-01-13)
         $slotsOnDayOff = array_filter($result, function (array $slot): bool {
@@ -315,8 +310,7 @@ describe('GetAvailableSlotsService Service', function (): void {
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
             'end_time'    => '17:00:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
-            'timezone'    => $tz,
+            'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
         // Create an event on Monday
@@ -328,14 +322,13 @@ describe('GetAvailableSlotsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $eventStart,
             'end_date_time'   => $eventEnd,
-            'duration'        => $eventStart->diffInSeconds($eventEnd),
-            'date'            => $eventStart->format('Y-m-d'),
+            'date'            => $eventStart?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
         $user->calendarEvents()->attach($event->getKey());
 
         // Get slots WITHOUT schedule exclusion (default behavior)
-        $result = new GetAvailableSlotsService($user, $tz, [], false)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService($user, $tz, [], false)->getAvailableSlots();
 
         // Should return slots outside working hours too
         expect($result)->toBeArray()->toHaveCount(2);

@@ -21,7 +21,6 @@ return new class extends Migration
             $table->time('end_time');
             $table->string('type');
             $table->date('day_off_date')->nullable();
-            $table->string('timezone');
             $table->timestamps();
         });
     }

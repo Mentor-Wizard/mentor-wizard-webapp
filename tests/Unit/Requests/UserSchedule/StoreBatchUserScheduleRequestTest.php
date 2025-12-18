@@ -7,6 +7,7 @@ use App\Http\Requests\UserSchedule\StoreBatchUserScheduleRequest;
 use App\Models\User;
 use App\Models\UserSchedule;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Validator;
 
 use function Pest\Laravel\actingAs;
@@ -27,8 +28,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'day_of_week' => 1,
                     'start_time'  => '09:00',
                     'end_time'    => '12:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
             ],
             'delete_ids' => [],
@@ -84,7 +84,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                 [
                     'start_time' => '09:00',
                     'end_time'   => '12:00',
-                    'type'       => UserScheduleRecordType::ALL_WORKING_DAYS->value,
+                    'type'       => UserScheduleRecordType::WORKING_DAY->value,
                     'timezone'   => 'UTC',
                 ],
             ],
@@ -104,8 +104,8 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                 [
                     'day_of_week' => 1,
                     'end_time'    => '12:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -125,8 +125,8 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'day_of_week' => 1,
                     'start_time'  => '17:00',
                     'end_time'    => '09:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -147,7 +147,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'start_time'  => '09:00',
                     'end_time'    => '12:00',
                     'type'        => 'invalid_type',
-                    'timezone'    => 'UTC',
+
                 ],
             ],
             'delete_ids' => [],
@@ -166,8 +166,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
         ]);
 
         $data = [
@@ -177,8 +176,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'day_of_week' => 1,
                     'start_time'  => '10:00',
                     'end_time'    => '13:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
             ],
             'delete_ids' => [],
@@ -197,15 +195,15 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'day_of_week' => 1,
                     'start_time'  => '09:00',
                     'end_time'    => '12:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
                 [
                     'day_of_week' => 2,
                     'start_time'  => '13:00',
                     'end_time'    => '17:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -225,7 +223,7 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'start_time'   => '00:00',
                     'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
-                    'day_off_date' => Illuminate\Support\Facades\Date::now()->addMonth()->format('Y-m-d'),
+                    'day_off_date' => Date::now()->addMonth()->format('Y-m-d'),
                     'timezone'     => 'UTC',
                 ],
             ],
@@ -246,45 +244,14 @@ describe('StoreBatchUserScheduleRequest custom validation - ownership', function
         actingAs($this->user);
     });
 
-    it('detects when trying to delete another users schedule', function (): void {
-        $otherUser = User::factory()->create();
-        $otherSchedule = UserSchedule::factory()->create([
-            'user_id'     => $otherUser->getKey(),
-            'day_of_week' => 1,
-            'start_time'  => '09:00',
-            'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
-        ]);
-
-        $data = [
-            'schedules'  => [],
-            'delete_ids' => [$otherSchedule->getKey()],
-        ];
-
-        $request = StoreBatchUserScheduleRequest::create(
-            route('user-schedule.batch'),
-            'POST',
-            $data
-        );
-        $request->setUserResolver(fn () => $this->user);
-
-        $validator = Validator::make($data, $request->rules());
-        $request->withValidator($validator);
-
-        expect($validator->fails())->toBeTrue()
-            ->and($validator->errors()->first('delete_ids'))
-            ->toBe('You can only delete your own schedules.');
-    });
-
     it('allows deleting own schedule', function (): void {
         $schedule = UserSchedule::factory()->create([
             'user_id'     => $this->user->getKey(),
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
         ]);
 
         $data = [
@@ -306,53 +273,14 @@ describe('StoreBatchUserScheduleRequest custom validation - ownership', function
         expect($validator->errors()->has('delete_ids'))->toBeFalse();
     });
 
-    it('detects when trying to update another users schedule', function (): void {
-        $otherUser = User::factory()->create();
-        $otherSchedule = UserSchedule::factory()->create([
-            'user_id'     => $otherUser->getKey(),
-            'day_of_week' => 1,
-            'start_time'  => '09:00',
-            'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
-        ]);
-
-        $data = [
-            'schedules' => [
-                [
-                    'id'          => $otherSchedule->getKey(),
-                    'day_of_week' => 1,
-                    'start_time'  => '10:00',
-                    'end_time'    => '13:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
-                ],
-            ],
-            'delete_ids' => [],
-        ];
-
-        $request = StoreBatchUserScheduleRequest::create(
-            route('user-schedule.batch'),
-            'POST',
-            $data
-        );
-        $request->setUserResolver(fn () => $this->user);
-
-        $validator = Validator::make($data, $request->rules());
-        $request->withValidator($validator);
-
-        expect($validator->fails())->toBeTrue()
-            ->and($validator->errors()->first('delete_ids'));
-    });
-
     it('allows updating own schedule', function (): void {
         $schedule = UserSchedule::factory()->create([
             'user_id'     => $this->user->getKey(),
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
         ]);
 
         $data = [
@@ -362,8 +290,8 @@ describe('StoreBatchUserScheduleRequest custom validation - ownership', function
                     'day_of_week' => 1,
                     'start_time'  => '10:00',
                     'end_time'    => '13:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -398,15 +326,15 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
                     'day_of_week' => 1,
                     'start_time'  => '09:00',
                     'end_time'    => '13:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
                 [
                     'day_of_week' => 1,
                     'start_time'  => '12:00',
                     'end_time'    => '16:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -422,25 +350,26 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
         $validator = Validator::make($data, $request->rules());
         $request->withValidator($validator);
 
-        expect($validator->errors()->has('schedules.0.start_time'))->toBeTrue();
+        expect($validator->errors()->has('schedules.1.start_time'))
+            ->toBeTrue();
     });
 
     it('allows non-overlapping schedules within the batch', function (): void {
         $data = [
             'schedules' => [
                 [
-                    'day_of_week' => 1,
+                    'day_of_week' => 0,
                     'start_time'  => '09:00',
                     'end_time'    => '12:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
                 [
-                    'day_of_week' => 1,
+                    'day_of_week' => 0,
                     'start_time'  => '13:00',
                     'end_time'    => '16:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -463,21 +392,21 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
     it('detects overlap with existing schedules', function (): void {
         UserSchedule::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'day_of_week' => 1,
+            'day_of_week' => 0,
             'start_time'  => '09:00',
             'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
         ]);
 
         $data = [
             'schedules' => [
                 [
-                    'day_of_week' => 1,
+                    'day_of_week' => 0,
                     'start_time'  => '11:00',
                     'end_time'    => '14:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -502,8 +431,8 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
         ]);
 
         $data = [
@@ -513,8 +442,8 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
                     'day_of_week' => 1,
                     'start_time'  => '13:00',
                     'end_time'    => '16:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],
@@ -540,8 +469,8 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '12:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
         ]);
 
         $data = [
@@ -550,8 +479,8 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
                     'day_of_week' => 1,
                     'start_time'  => '10:00',
                     'end_time'    => '14:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [$existingSchedule->getKey()],
@@ -577,8 +506,8 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '17:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
         ]);
 
         $data = [
@@ -588,7 +517,7 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
                     'start_time'   => '00:00',
                     'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
-                    'day_off_date' => Illuminate\Support\Facades\Date::now()->addMonth()->format('Y-m-d'),
+                    'day_off_date' => Date::now()->addMonth()->format('Y-m-d'),
                     'timezone'     => 'UTC',
                 ],
             ],
@@ -616,15 +545,15 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
                     'day_of_week' => 1,
                     'start_time'  => '09:00',
                     'end_time'    => '13:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
                 [
                     'day_of_week' => 2,
                     'start_time'  => '09:00',
                     'end_time'    => '13:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
                 ],
             ],
             'delete_ids' => [],

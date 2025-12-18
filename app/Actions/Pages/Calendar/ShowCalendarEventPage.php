@@ -21,7 +21,7 @@ class ShowCalendarEventPage
         $profile = $user?->profile;
         $timezone = $profile ? $profile->timezone : config('app.timezone');
 
-        return Inertia::render('Calendar/ShowEditEvent', [
+        return Inertia::render('Calendar/ShowEditCalendarEvent', [
             'locale'           => app()->getLocale(),
             'availableColours' => CalendarEventColoursEnum::values(),
             'permissions'      => $user->can('update', [$calendarEvent, $user]) ? 'edit' : 'view',

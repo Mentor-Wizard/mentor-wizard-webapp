@@ -7,13 +7,11 @@ namespace App\Actions\Pages\Calendar;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarViewModeEnum;
 use App\Models\CalendarEvent;
-use App\Services\Calendar\GetDailyCalendarEventsService;
-use App\Services\Calendar\GetMonthCalendarEventsService;
-use App\Services\Calendar\GetWeeklyCalendarEventsService;
-use Illuminate\Foundation\Application;
+use App\Services\Calendar\DailyCalendarEventsService;
+use App\Services\Calendar\MonthCalendarEventsService;
+use App\Services\Calendar\WeeklyCalendarEventsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -29,7 +27,7 @@ class CalendarsListPage
         $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
         $mode = $request->get('mode') ? CalendarViewModeEnum::tryFrom($request->get('mode')) : CalendarViewModeEnum::MONTH;
 
-        return Inertia::render('Calendar/CalendarsList', [
+        return Inertia::render('Calendar/CalendarEventsList', [
             'locale'            => app()->getLocale(),
             'permissions'       => $user?->can('create', CalendarEvent::class) ? 'create' : 'view',
             'availableColours'  => CalendarEventColoursEnum::values(),

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleGuardEnum;
+use App\Enums\UserScheduleRecordType;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
@@ -218,10 +219,10 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     public function activeScheduleRecords(): HasMany
     {
-        return $this->hasMany(UserSchedule::class)
-            ->where('type', '=', 'Day off')
-            ->where('day_off_date', '>=', now()->format('Y-m-d'))
-            ->orWhere('type', '!=', 'Day off');
+        return $this->schedules()
+            ->where('type', '!=', UserScheduleRecordType::DAY_OFF->value)
+            ->orWhere('type', '=', UserScheduleRecordType::DAY_OFF->value)
+            ->where('day_off_date', '>=', now()->format('Y-m-d'));
     }
 
     public function getFilamentName(): string

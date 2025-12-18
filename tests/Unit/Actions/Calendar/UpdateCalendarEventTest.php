@@ -158,7 +158,7 @@ describe('Update Calendar CalendarEvent', function (): void {
             'title' => 'Updated Event',
         ]);
 
-        $response->assertStatus(419);
+        $response->assertStatus(403);
     });
 
     it('syncs user colour correctly', function (): void {

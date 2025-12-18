@@ -31,7 +31,7 @@ final readonly class CalendarEventDayViewData
     {
         $user ??= auth()->user();
 
-        $date = Date::parse($event->start_date_time)->setTimezone($timezone);
+        $date = Date::parse($event->start_date_time)->timezone($timezone);
         $secondsSinceMidnight = self::calculateSecondsSinceMidnight($date);
 
         return new self(

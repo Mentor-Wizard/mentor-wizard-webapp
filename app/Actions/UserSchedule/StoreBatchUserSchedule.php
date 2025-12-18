@@ -27,6 +27,7 @@ class StoreBatchUserSchedule
             $schedules = collect($request->input('schedules', []));
             $deleteIds = $request->input('delete_ids', []);
 
+            // Added gate here, to check each schedule record, on case of possibility to update it
             Gate::authorize('upsert', [UserSchedule::class, $schedules, (array) $deleteIds]);
 
             if (! empty($deleteIds)) {
@@ -57,7 +58,7 @@ class StoreBatchUserSchedule
             DB::commit();
 
             return to_route('user-schedule.index')
-                ->with('success', 'Schedules saved successfully.');
+                ->with('success', 'Schedules were saved successfully.');
         } catch (Exception) {
             DB::rollBack();
 

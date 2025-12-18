@@ -30,7 +30,7 @@ describe('Calendar Pages - CalendarsList', function (): void {
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
-            ->component('Calendar/CalendarsList')
+            ->component('Calendar/CalendarEventsList')
             ->has('locale')
             ->has('availableColours')
             ->has('calendarEvents')
@@ -44,7 +44,7 @@ describe('Calendar Pages - CalendarsList', function (): void {
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
-            ->component('Calendar/CalendarsList')
+            ->component('Calendar/CalendarEventsList')
             ->has('locale')
             ->has('availableColours')
             ->has('calendarEvents')

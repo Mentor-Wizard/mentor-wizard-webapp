@@ -32,15 +32,13 @@ describe('StoreBatchUserSchedule', function (): void {
                     'day_of_week' => 1,
                     'start_time'  => '09:00',
                     'end_time'    => '17:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
                 [
                     'day_of_week' => 2,
                     'start_time'  => '10:00',
                     'end_time'    => '16:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
             ],
             'delete_ids' => [],
@@ -76,11 +74,11 @@ describe('StoreBatchUserSchedule', function (): void {
             'schedules' => [
                 [
                     'id'          => $schedule->id,
+                    'user_id'     => $this->user->getKey(),
                     'day_of_week' => 1,
                     'start_time'  => '10:00',
                     'end_time'    => '18:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
             ],
             'delete_ids' => [],
@@ -97,7 +95,6 @@ describe('StoreBatchUserSchedule', function (): void {
 
         $action = new StoreBatchUserSchedule;
         $response = $action->handle($request);
-
         expect($response)->toBeInstanceOf(RedirectResponse::class);
 
         $schedule->refresh();
@@ -146,18 +143,17 @@ describe('StoreBatchUserSchedule', function (): void {
             'schedules' => [
                 [
                     'id'          => $existingSchedule->id,
+                    'user_id'     => $this->user->getKey(),
                     'day_of_week' => 1,
                     'start_time'  => '10:00',
                     'end_time'    => '18:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
                 [
                     'day_of_week' => 2,
                     'start_time'  => '09:00',
                     'end_time'    => '17:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
             ],
             'delete_ids' => [$scheduleToDelete->id],
@@ -191,8 +187,7 @@ describe('StoreBatchUserSchedule', function (): void {
                     'day_of_week' => 1,
                     'start_time'  => '09:00',
                     'end_time'    => '17:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
             ],
             'delete_ids' => [],
@@ -210,7 +205,7 @@ describe('StoreBatchUserSchedule', function (): void {
         $action = new StoreBatchUserSchedule;
         $response = $action->handle($request);
 
-        expect($response->getSession()->get('success'))->toBe('Schedules saved successfully.');
+        expect($response->getSession()->get('success'))->toBe('Schedules were saved successfully.');
     });
 
     it('handles day off schedules with dates', function (): void {
@@ -224,7 +219,6 @@ describe('StoreBatchUserSchedule', function (): void {
                     'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
                     'day_off_date' => $dayOffDate->format('Y-m-d'),
-                    'timezone'     => 'UTC',
                 ],
             ],
             'delete_ids' => [],
@@ -284,8 +278,7 @@ describe('StoreBatchUserSchedule', function (): void {
                     'day_of_week'  => 1,
                     'start_time'   => '09:00',
                     'end_time'     => '17:00',
-                    'type'         => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'     => 'UTC',
+                    'type'         => UserScheduleRecordType::WORKING_DAY->value,
                     'extra_field'  => 'should be filtered',
                 ],
             ],
@@ -314,8 +307,7 @@ describe('StoreBatchUserSchedule', function (): void {
                     'day_of_week' => 1,
                     'start_time'  => '09:00',
                     'end_time'    => '17:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                    'timezone'    => 'UTC',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
                 ],
             ],
             'delete_ids' => [],
@@ -357,6 +349,6 @@ describe('StoreBatchUserSchedule', function (): void {
         $response = $action->handle($request);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getSession()->get('success'))->toBe('Schedules saved successfully.');
+            ->and($response->getSession()?->get('success'))->toBe('Schedules were saved successfully.');
     });
 });

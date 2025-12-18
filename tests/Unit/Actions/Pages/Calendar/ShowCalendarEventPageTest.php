@@ -66,7 +66,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $expectedDuration = 90; // in minutes
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($page, 'component'))->toBe('Calendar/ShowEditEvent')
+            ->and(Arr::get($page, 'component'))->toBe('Calendar/ShowEditCalendarEvent')
             ->and(Arr::get($page, 'props.locale'))->toBe(app()->getLocale())
             ->and(Arr::get($page, 'props.permissions'))->toBe('edit')
             ->and(Arr::get($page, 'props.calendarEvent.id'))->toBe($this->event->getKey())
@@ -91,7 +91,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $page = $resultData->getData()['page'];
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and(Arr::get($page, 'component'))->toBe('Calendar/ShowEditEvent')
+            ->and(Arr::get($page, 'component'))->toBe('Calendar/ShowEditCalendarEvent')
             ->and(Arr::get($page, 'props.permissions'))->toBe('view')
             ->and(Arr::get($page, 'props.calendarEvent.id'))->toBe($this->event->getKey());
     });
