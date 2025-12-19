@@ -7,8 +7,8 @@ namespace App\Traits\Calendar;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventTypeEnum;
 use Illuminate\Validation\Rule;
-use Override;
 use Illuminate\Validation\Rules\In;
+use Override;
 
 trait CalendarEventRequestRules
 {
