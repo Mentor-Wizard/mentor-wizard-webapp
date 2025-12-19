@@ -68,10 +68,10 @@ class DailyCalendarEventsService
         /** @var ?CalendarEvent $latestEvent */
         $latestEvent = (clone $dailyEvents)->last()?->first();
 
-        $startCalendarMonth = Date::parse($firstEvent?->start_date_time ?? $this->date)
+        $startCalendarMonth = Date::parse($firstEvent->start_date_time ?? $this->date)
             ->timezone($this->timezone)
             ->startOfMonth();
-        $endCalendarMonth = Date::parse($latestEvent?->start_date_time ?? $this->date)
+        $endCalendarMonth = Date::parse($latestEvent->start_date_time ?? $this->date)
             ->timezone($this->timezone)
             ->endOfMonth();
 

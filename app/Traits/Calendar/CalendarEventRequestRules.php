@@ -8,9 +8,13 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventTypeEnum;
 use Illuminate\Validation\Rule;
 use Override;
+use Illuminate\Validation\Rules\In;
 
 trait CalendarEventRequestRules
 {
+    /**
+     * @return array<string, list<In|string>>
+     */
     public function rules(): array
     {
         return [

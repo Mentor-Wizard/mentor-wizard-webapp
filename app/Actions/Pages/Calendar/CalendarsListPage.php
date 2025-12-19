@@ -32,12 +32,13 @@ class CalendarsListPage
             'permissions'       => $user?->can('create', CalendarEvent::class) ? 'create' : 'view',
             'availableColours'  => CalendarEventColoursEnum::values(),
             'calendarEvents'    => match ($mode) {
-                CalendarViewModeEnum::DAY   => $timezone && $user
+                CalendarViewModeEnum::DAY   => $user
                     ? new DailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
-                CalendarViewModeEnum::WEEK  => $timezone && $user
+                CalendarViewModeEnum::WEEK  => $user
                     ? new WeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],
-                CalendarViewModeEnum::MONTH => $timezone && $user
+                CalendarViewModeEnum::MONTH => $user
                     ? new MonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents() : [],
+                default                   => [],
             }]);
     }
 }
