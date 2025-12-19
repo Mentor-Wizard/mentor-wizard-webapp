@@ -28,14 +28,14 @@ describe('ShowCalendarEventPage', function (): void {
         $event = CalendarEvent::factory()->create();
 
         $request = new Request(['timezone' => 'UTC']);
-        $response = (new ShowCalendarEventPage)->handle($event, $request);
+        $response = (new ShowCalendarEventPage)->handle($event);
 
         expect($response)->toBeInstanceOf(InertiaResponse::class);
         $props = inertiaProps($response);
 
         expect($props)
-            ->toHaveKeys(['canLogin', 'canRegister', 'laravelVersion', 'phpVersion', 'locale', 'permissions', 'event'])
-            ->and($props['permissions'])->toBe('edit')
-            ->and($props['event'])->toBeArray();
+            ->toHaveKeys(['locale', 'permissions', 'calendarEvent'])
+            ->and($props['permissions'])->toBe('view')
+            ->and($props['calendarEvent'])->toBeArray();
     });
 });

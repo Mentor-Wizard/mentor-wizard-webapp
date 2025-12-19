@@ -40,7 +40,7 @@ class ExcludeUserScheduleSchemeService
     {
         $schedules = $this->user->activeScheduleRecords();
 
-        $this->scheduleTimezone = (clone $schedules)->first()?->first()->timezone ?? config('app.timezone');
+        $this->scheduleTimezone = $this->user->profile->timezone ?? config('app.timezone');
         $this->userSchedules = $schedules->get()->groupBy('type');
 
         foreach ($this->userSchedules as $type => $schedules) {
@@ -63,22 +63,40 @@ class ExcludeUserScheduleSchemeService
         foreach ($this->eventsSlots as $eventSlot) {
             $startTime = $eventSlot['start'];
             $endTime = $eventSlot['end'];
-            $carbonPeriod = CarbonPeriod::create($startTime->setTimezone($this->scheduleTimezone), '1 day',
-                $endTime->setTimezone($this->scheduleTimezone));
+            $carbonPeriod = CarbonPeriod::create($startTime->timezone($this->scheduleTimezone), '1 day',
+                $endTime->timezone($this->scheduleTimezone));
             foreach ($carbonPeriod as $date) {
                 if (($date->format('Y-m-d') === $startTime->format('Y-m-d')) && $carbonPeriod->count() === 1) {
                     if ($startTime->format('Y-m-d') !== $endTime->format('Y-m-d')) {
-                        $this->checkedIntervals[] = ['start' => $startTime, 'end' => $startTime->endOfDay()];
-                        $this->checkedIntervals[] = ['start' => clone ($endTime)->startOfDay(), 'end' => $endTime];
+                        $this->checkedIntervals[] = [
+                            'start' => $startTime,
+                            'end'   => $startTime->endOfDay(),
+                        ];
+                        $this->checkedIntervals[] = [
+                            'start' => clone ($endTime)->startOfDay(),
+                            'end'   => $endTime,
+                        ];
                     } else {
-                        $this->checkedIntervals[] = ['start' => $startTime, 'end' => $endTime];
+                        $this->checkedIntervals[] = [
+                            'start' => $startTime,
+                            'end'   => $endTime,
+                        ];
                     }
                 } elseif ($date->format('Y-m-d') === $startTime->format('Y-m-d')) {
-                    $this->checkedIntervals[] = ['start' => $date->copy(), 'end' => $date->copy()->endOfDay()];
+                    $this->checkedIntervals[] = [
+                        'start' => $date->copy(),
+                        'end'   => $date->copy()->endOfDay(),
+                    ];
                 } elseif ($date->format('Y-m-d') === $endTime->format('Y-m-d')) {
-                    $this->checkedIntervals[] = ['start' => $date->copy()->startOfDay(), 'end' => $endTime];
+                    $this->checkedIntervals[] = [
+                        'start' => $date->copy()->startOfDay(),
+                        'end'   => $endTime,
+                    ];
                 } else {
-                    $this->checkedIntervals[] = ['start' => $date->copy()->startOfDay(), 'end' => $date->copy()->endOfDay()];
+                    $this->checkedIntervals[] = [
+                        'start' => $date->copy()->startOfDay(),
+                        'end'   => $date->copy()->endOfDay(),
+                    ];
                 }
             }
         }
@@ -93,8 +111,6 @@ class ExcludeUserScheduleSchemeService
                 $eventSlotEnd = $currentInterval['end'];
                 $checkedDate = ($eventSlotStart)->format('Y-m-d');
 
-                //                print($checkedDate . '----------' . $this->listOfExclusions[0] .  PHP_EOL);
-
                 if (in_array($checkedDate, $this->listOfExclusions)) {
                     continue;
                 }
@@ -103,13 +119,18 @@ class ExcludeUserScheduleSchemeService
 
                 if (isset($this->formattedSlots['Working Day'][$dayOfWeek])) {
                     foreach ($this->formattedSlots['Working Day'][$dayOfWeek] as $schedule) {
-                        $scheduleStartTime = Date::parse($checkedDate.' '.$schedule['start_time'], $this->scheduleTimezone)
-                            ->setTimezone($this->chosenTimezone ?? config('app.timezone'));
-                        $scheduleEndTime = Date::parse($checkedDate.' '.$schedule['end_time'], $this->scheduleTimezone)
-                            ->setTimezone($this->chosenTimezone ?? config('app.timezone'));
-                        if (! $eventSlotStart->greaterThanOrEqualTo($scheduleEndTime) && ! $eventSlotEnd->lessThanOrEqualTo($scheduleStartTime)) {
-                            $periodStart = ($eventSlotStart->greaterThanOrEqualTo($scheduleStartTime)) ? $eventSlotStart->setTimezone($this->chosenTimezone) : $scheduleStartTime;
-                            $periodEnd = ($eventSlotEnd->greaterThanOrEqualTo($scheduleEndTime)) ? $scheduleEndTime : $eventSlotEnd->setTimezone($this->chosenTimezone);
+                        $scheduleStartTime = Date::parse($checkedDate
+                            .' '.$schedule['start_time'], $this->scheduleTimezone)
+                            ->timezone($this->chosenTimezone ?? config('app.timezone'));
+                        $scheduleEndTime = Date::parse($checkedDate
+                            .' '.$schedule['end_time'], $this->scheduleTimezone)
+                            ->timezone($this->chosenTimezone ?? config('app.timezone'));
+                        if (! $eventSlotStart->greaterThanOrEqualTo($scheduleEndTime)
+                            && ! $eventSlotEnd->lessThanOrEqualTo($scheduleStartTime)) {
+                            $periodStart = ($eventSlotStart->greaterThanOrEqualTo($scheduleStartTime))
+                                ? $eventSlotStart->timezone($this->chosenTimezone) : $scheduleStartTime;
+                            $periodEnd = ($eventSlotEnd->greaterThanOrEqualTo($scheduleEndTime))
+                                ? $scheduleEndTime : $eventSlotEnd->timezone($this->chosenTimezone);
                             $this->scheduleSlots[] = ['start' => $periodStart, 'end' => $periodEnd];
                         }
                     }

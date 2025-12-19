@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 enum UserScheduleRecordType: string
 {
-    case ALL_WORKING_DAYS = 'Working Day';
+    case WORKING_DAY = 'Working Day';
     case DAY_OFF = 'Day off';
 
     public static function values(): array

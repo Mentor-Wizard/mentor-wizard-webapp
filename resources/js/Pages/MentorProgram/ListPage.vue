@@ -38,6 +38,8 @@ const confirmDelete = (program) => {
 const deleteProgram = () => {
   if (!programToDelete.value) return;
   router.delete(route('mentor-program.destroy', programToDelete.value.slug), {
+    preserveScroll: true,
+    only: ['programs'],
     onSuccess: () => {
       showDeleteModal.value = false;
       programToDelete.value = null;
@@ -92,6 +94,14 @@ const deleteProgram = () => {
                         >, {{ program.name }}</span
                       ></a
                     >
+
+                    <a
+                      :href="route('pages.mentor.program.book', program.slug)"
+                      class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block"
+                    >Book event<span class="sr-only"
+                    >, {{ program.name }}</span
+                    ></a
+                    >
                     <Menu as="div" class="relative flex-none">
                       <MenuButton
                         class="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900"
@@ -137,6 +147,21 @@ const deleteProgram = () => {
                               Delete<span class="sr-only"
                                 >, {{ program.name }}</span
                               >
+                            </button>
+                          </MenuItem>
+
+                          <MenuItem v-slot="{ active }">
+                            <button
+                              type="button"
+                              :class="[
+                                active ? 'bg-gray-50 outline-hidden' : '',
+                                'block w-full px-3 py-1 text-left text-sm/6 text-gray-900',
+                              ]"
+                              @click="route('pages.mentor.program.book', program.slug)"
+                            >
+                              Book Event<span class="sr-only"
+                            >, {{ program.name }}</span
+                            >
                             </button>
                           </MenuItem>
                         </MenuItems>

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 

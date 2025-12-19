@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Calendar\DeleteCalendarEvent;
+use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
@@ -22,6 +23,8 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->user->profile->timezone = 'Europe/Kyiv';
+        $this->user->profile->save();
 
         $this->anotherMentor = User::factory()->create();
         $this->anotherMentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
@@ -36,14 +39,14 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
-            'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'web_link'          => 'https://google.com',
             'description'       => 'Test description',
             'mentor_program_id' => null,
         ]);
         $this->event->calendarEventUsers()->attach($this->user->getKey(),
             ['role'      => CalendarEventRoleEnum::HOST,
-                'colour' => 'blue']);
+                'colour' => CalendarEventColoursEnum::BLUE->value]);
     });
 
     it('deletes mentor program and returns redirect response', function (): void {
@@ -89,8 +92,8 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
-            'duration'          => 3600,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'web_link'          => 'https://google.com',
             'description'       => 'Test description',
             'mentor_program_id' => null,
         ]);

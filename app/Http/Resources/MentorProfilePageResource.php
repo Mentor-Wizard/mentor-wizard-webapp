@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Enums\RoleEnum;
+use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Collection;
@@ -22,6 +23,9 @@ class MentorProfilePageResource extends JsonResource
 
     public static $wrap;
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Override]
     public function toArray(Request $request): array
     {
@@ -41,6 +45,9 @@ class MentorProfilePageResource extends JsonResource
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function titleBlock(User $user): array
     {
         // @phpstan-ignore-next-line
@@ -62,6 +69,9 @@ class MentorProfilePageResource extends JsonResource
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function statisticBlock(User $user): array
     {
         return [
@@ -73,6 +83,9 @@ class MentorProfilePageResource extends JsonResource
         ];
     }
 
+    /**
+     * @return Collection<int, MentorReview>
+     */
     private function reviewBlock(User $user): Collection
     {
         return $user->mentorReviews
@@ -80,6 +93,9 @@ class MentorProfilePageResource extends JsonResource
             ->take(GetMentorProfilePage::PER_PAGE);
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     private function similarMentor(User $user): Collection
     {
         return User::role(RoleEnum::MENTOR)

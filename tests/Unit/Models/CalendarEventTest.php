@@ -31,10 +31,10 @@ describe('CalendarEvent model', function (): void {
 
         $fresh = CalendarEvent::query()->find($event->id);
 
-        expect($fresh->start_date_time)->toBeInstanceOf(CarbonImmutable::class)
-            ->and($fresh->end_date_time)->toBeInstanceOf(CarbonImmutable::class)
-            ->and($fresh->start_date_time->format('H:i'))->toBe('09:15')
-            ->and($fresh->end_date_time->format('H:i'))->toBe('10:45');
+        expect($fresh?->start_date_time)->toBeInstanceOf(CarbonImmutable::class)
+            ->and($fresh?->end_date_time)->toBeInstanceOf(CarbonImmutable::class)
+            ->and($fresh?->start_date_time->format('H:i'))->toBe('09:15')
+            ->and($fresh?->end_date_time->format('H:i'))->toBe('10:45');
     });
 
     it('has users many-to-many relationship with timestamps', function (): void {
@@ -60,7 +60,6 @@ describe('CalendarEvent model', function (): void {
             'status',
             'start_date_time',
             'end_date_time',
-            'duration',
             'date',
             'type',
             'web_link',
@@ -80,7 +79,6 @@ describe('CalendarEvent model', function (): void {
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
-            'duration'          => (int) $start?->diffInSeconds($end),
             'date'              => $start?->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://example.com/meeting',
@@ -97,7 +95,7 @@ describe('CalendarEvent model', function (): void {
             ->and($event->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value)
             ->and($event->start_date_time->format('Y-m-d H:i'))->toBe('2025-08-22 09:00')
             ->and($event->end_date_time->format('Y-m-d H:i'))->toBe('2025-08-22 10:30')
-            ->and($event->duration)->toBe((int) $start?->diffInSeconds($end))
+            ->and($event->duration)->toBe((int) $start?->diffInMinutes($end))
             ->and($event->date)->toBe('2025-08-22')
             ->and($event->type)->toBe(CalendarEventTypeEnum::INDIVIDUAL->value)
             ->and($event->web_link)->toBe('https://example.com/meeting')

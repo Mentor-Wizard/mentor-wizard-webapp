@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Models\CalendarEvent;
 use App\Models\User;
-use App\Services\Calendar\GetMonthCalendarEventsService;
+use App\Services\Calendar\MonthCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
-mutates(GetMonthCalendarEventsService::class);
+mutates(MonthCalendarEventsService::class);
 
 describe('GetMonthCalendarEventsService Service', function (): void {
     beforeEach(function (): void {
@@ -33,14 +33,13 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
-            'duration'        => $endUtc->diffInSeconds($startUtc),
-            'date'            => $startUtc->format('Y-m-d'),
+            'date'            => $startUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
 
         $user->calendarEvents()->attach($event->getKey());
         $checkedDate = Date::parse('2025-02-10');
-        $result = new GetMonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
 
@@ -83,15 +82,14 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
-            'duration'        => $endUtc->diffInSeconds($startUtc),
-            'date'            => $startUtc->format('Y-m-d'),
+            'date'            => $startUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
 
         $user->calendarEvents()->attach($event->getKey());
 
         $checkedDate = Date::parse('2025-02-10');
-        $result = new GetMonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         // Verify the event appears in the calendar view with correct timezone-adjusted date
         $calendarView = $result['calendarView'];
@@ -118,14 +116,13 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             'status'          => 'confirmed',
             'start_date_time' => $startUtc,
             'end_date_time'   => $endUtc,
-            'duration'        => $endUtc->diffInSeconds($startUtc),
-            'date'            => $startUtc->format('Y-m-d'),
+            'date'            => $startUtc?->format('Y-m-d'),
             'type'            => 'individual',
         ]);
 
         $user->calendarEvents()->attach($event->getKey());
         $checkedDate = Date::parse('2025-02-10');
-        $result = new GetMonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         // Verify events are returned with timezone applied
         $eventEntry = collect($result['calendarView'])->firstWhere(fn ($day): bool => isset($day['calendarEvents']) && count($day['calendarEvents']) > 0);

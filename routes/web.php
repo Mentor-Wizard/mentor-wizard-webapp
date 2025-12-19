@@ -72,7 +72,7 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
         ->can('view', 'calendarEvent')
         ->name('pages.calendar.show');
     Route::get('mentor-program/book/{mentorProgram:slug}', MentorProgramEventBookingPage::class)
-        ->name('pages.mentor.program.index');
+        ->name('pages.mentor.program.book');
     Route::middleware(['role:mentor'])->group(function (): void {
         Route::post('calendar-event/store', StoreCalendarEvent::class)
             ->can('create', CalendarEvent::class)

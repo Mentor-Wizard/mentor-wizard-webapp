@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Models\CalendarEvent;
 use App\Models\User;
-use App\Services\Calendar\GetWeeklyCalendarEventsService;
+use App\Services\Calendar\WeeklyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
-mutates(GetWeeklyCalendarEventsService::class);
+mutates(WeeklyCalendarEventsService::class);
 
 describe('GetWeeklyCalendarEventsService Service', function (): void {
     beforeEach(function (): void {
@@ -24,7 +25,7 @@ describe('GetWeeklyCalendarEventsService Service', function (): void {
 
         $date = '2025-01-15'; // Wednesday
         $checkedDate = Date::parse($date);
-        $result = new GetWeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
+        $result = new WeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
 
         expect($result)
             ->toHaveKeys(['calendarEvents', 'calendarView']);
@@ -52,19 +53,18 @@ describe('GetWeeklyCalendarEventsService Service', function (): void {
         $start = Date::create(2025, 1, 14, 1, 0, 0);
         $end = (clone $start)->addHour();
 
-        $event = App\Models\CalendarEvent::query()->create([
+        $event = CalendarEvent::query()->create([
             'title'           => 'Early Morning UTC Event',
             'status'          => 'confirmed',
             'start_date_time' => $start,
             'end_date_time'   => $end,
-            'duration'        => $end->diffInSeconds($start),
-            'date'            => $start->format('Y-m-d'), // This is 2025-01-14 in UTC
+            'date'            => $start?->format('Y-m-d'), // This is 2025-01-14 in UTC
             'type'            => 'individual',
         ]);
 
         $user->calendarEvents()->attach($event->getKey());
         $checkedDate = Date::parse('2025-01-15');
-        $result = new GetWeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
+        $result = new WeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
 
         $calendar = $result['calendarView'];
 
@@ -87,7 +87,7 @@ describe('GetWeeklyCalendarEventsService Service', function (): void {
         /** @var User $user */
         $user = User::factory()->create();
         $checkedDate = Date::parse('2025-01-15');
-        $result = new GetWeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
+        $result = new WeeklyCalendarEventsService($user, $checkedDate, $tz)->getWeeklyCalendarEvents();
 
         $calendarView = $result['calendarView'];
 

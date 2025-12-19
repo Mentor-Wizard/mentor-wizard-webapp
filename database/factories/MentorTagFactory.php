@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\TagEnum;
+use App\Models\MentorTag;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\MentorTag>
+ * @extends Factory<MentorTag>
  */
 class MentorTagFactory extends Factory
 {

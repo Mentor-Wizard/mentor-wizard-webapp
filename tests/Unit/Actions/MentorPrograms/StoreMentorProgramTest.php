@@ -10,6 +10,7 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -26,7 +27,7 @@ describe('StoreMentorProgramRequest Validation', function (): void {
         $this->user = createAndAuthenticateMentorForStore();
         $this->prepareRequest = function (StoreMentorProgramRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Illuminate\Routing\Redirector::class));
+            $request->setRedirector(app(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });

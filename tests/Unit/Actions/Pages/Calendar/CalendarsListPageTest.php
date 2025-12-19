@@ -19,7 +19,8 @@ describe('CalendarsListPage', function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('returns default mode and date when missing, includes base props, unauthenticated yields null events and view permissions', function (): void {
+    it('returns default mode and date when missing, includes base props,
+        unauthenticated yields null events and view permissions', function (): void {
         $action = new CalendarsListPage;
         $request = Request::create('/calendar', 'GET');
         $response = $action->handle($request);
@@ -30,7 +31,7 @@ describe('CalendarsListPage', function (): void {
         $props = inertiaProps($response);
 
         expect($props)
-            ->toHaveKeys(['canLogin', 'canRegister', 'laravelVersion', 'phpVersion', 'locale']);
+            ->toHaveKeys(['locale', 'permissions', 'availableColours', 'calendarEvents']);
     });
 
     it('returns week/daily/month events for mentor user depending on mode', function (): void {
@@ -42,15 +43,29 @@ describe('CalendarsListPage', function (): void {
 
         $action = new CalendarsListPage;
 
-        $reqMonth = Request::create('/calendar', 'GET', ['mode' => 'Month view', 'date' => $date, 'timezone' => config('app.timezone')]);
+        $reqMonth = Request::create('/calendar', 'GET',
+            [
+                'mode'     => 'Month view',
+                'date'     => $date,
+                'timezone' => config('app.timezone'),
+            ]);
         $resMonth = inertiaProps($action->handle($reqMonth));
         expect($resMonth['permissions'])->toBe('create');
 
-        $reqWeek = Request::create('/calendar', 'GET', ['mode' => 'Week view', 'date' => $date, 'timezone' => config('app.timezone')]);
+        $reqWeek = Request::create('/calendar', 'GET',
+            [
+                'mode' => 'Week view',
+                'date' => $date, 'timezone' => config('app.timezone'),
+            ]);
         $resWeek = inertiaProps($action->handle($reqWeek));
         expect($resWeek['permissions'])->toBe('create');
 
-        $reqDay = Request::create('/calendar', 'GET', ['mode' => 'Day view', 'date' => $date, 'timezone' => config('app.timezone')]);
+        $reqDay = Request::create('/calendar', 'GET',
+            [
+                'mode'     => 'Day view',
+                'date'     => $date,
+                'timezone' => config('app.timezone'),
+            ]);
         $resDay = inertiaProps($action->handle($reqDay));
         expect($resDay['permissions'])->toBe('create');
     });
@@ -61,7 +76,10 @@ describe('CalendarsListPage', function (): void {
         Auth::login($user);
 
         $action = new CalendarsListPage;
-        $request = Request::create('/calendar', 'GET', ['timezone' => config('app.timezone')]);
+        $request = Request::create('/calendar', 'GET',
+            [
+                'timezone' => config('app.timezone'),
+            ]);
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
@@ -74,7 +92,11 @@ describe('CalendarsListPage', function (): void {
         Auth::login($user);
 
         $action = new CalendarsListPage;
-        $request = Request::create('/calendar', 'GET', ['timezone' => 'Europe/Kyiv', 'mode' => 'Month view']);
+        $request = Request::create('/calendar', 'GET',
+            [
+                'timezone' => 'Europe/Kyiv',
+                'mode'     => 'Month view',
+            ]);
         $response = $action->handle($request);
 
         expect($response)->toBeInstanceOf(InertiaResponse::class);
@@ -87,7 +109,11 @@ describe('CalendarsListPage', function (): void {
         Auth::login($user);
 
         $action = new CalendarsListPage;
-        $request = Request::create('/calendar', 'GET', ['mode' => 'Day view', 'date' => Date::now()->format('Y-m-d')]);
+        $request = Request::create('/calendar', 'GET',
+            [
+                'mode' => 'Day view',
+                'date' => Date::now()->format('Y-m-d'),
+            ]);
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
@@ -98,7 +124,11 @@ describe('CalendarsListPage', function (): void {
         Auth::logout();
 
         $action = new CalendarsListPage;
-        $request = Request::create('/calendar', 'GET', ['timezone' => config('app.timezone'), 'mode' => 'Week view']);
+        $request = Request::create('/calendar', 'GET',
+            [
+                'timezone' => config('app.timezone'),
+                'mode'     => 'Week view',
+            ]);
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
@@ -112,7 +142,11 @@ describe('CalendarsListPage', function (): void {
 
         $action = new CalendarsListPage;
         // No mode parameter
-        $request = Request::create('/calendar', 'GET', ['timezone' => config('app.timezone'), 'date' => Date::now()->format('Y-m-d')]);
+        $request = Request::create('/calendar', 'GET',
+            [
+                'timezone' => config('app.timezone'),
+                'date'     => Date::now()->format('Y-m-d'),
+            ]);
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
@@ -125,7 +159,10 @@ describe('CalendarsListPage', function (): void {
         Auth::login($user);
 
         $action = new CalendarsListPage;
-        $request = Request::create('/calendar', 'GET', ['timezone' => config('app.timezone')]);
+        $request = Request::create('/calendar', 'GET',
+            [
+                'timezone' => config('app.timezone'),
+            ]);
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
@@ -140,7 +177,10 @@ describe('CalendarsListPage', function (): void {
         Auth::login($user);
 
         $action = new CalendarsListPage;
-        $request = Request::create('/calendar', 'GET', ['timezone' => config('app.timezone')]);
+        $request = Request::create('/calendar', 'GET',
+            [
+                'timezone' => config('app.timezone'),
+            ]);
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
@@ -154,14 +194,23 @@ describe('CalendarsListPage', function (): void {
         $action = new CalendarsListPage;
 
         // Has user but no timezone
-        $request1 = Request::create('/calendar', 'GET', ['mode' => 'Day view', 'date' => Date::now()->format('Y-m-d')]);
+        $request1 = Request::create('/calendar', 'GET',
+            [
+                'mode' => 'Day view',
+                'date' => Date::now()->format('Y-m-d'),
+            ]);
         $response1 = $action->handle($request1);
         $props1 = inertiaProps($response1);
         expect($props1['calendarEvents']['calendarEvents'])->toBe([]);
 
         // Has timezone but no user
         Auth::logout();
-        $request2 = Request::create('/calendar', 'GET', ['timezone' => config('app.timezone'), 'mode' => 'Day view', 'date' => Date::now()->format('Y-m-d')]);
+        $request2 = Request::create('/calendar', 'GET',
+            [
+                'timezone' => config('app.timezone'),
+                'mode'     => 'Day view',
+                'date'     => Date::now()->format('Y-m-d'),
+            ]);
         $response2 = $action->handle($request2);
         $props2 = inertiaProps($response2);
         expect($props2['calendarEvents'])->toBe([]);

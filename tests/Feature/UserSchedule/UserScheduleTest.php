@@ -30,7 +30,6 @@ it('displays user schedule page for authenticated user', function (): void {
             ->component('UserSchedule/ListPage')
             ->has('schedules')
             ->has('scheduleTypes')
-            ->has('timezone')
         );
 });
 
@@ -51,15 +50,13 @@ it('saves multiple schedules in one batch request', function (): void {
                 'day_of_week' => 1,
                 'start_time'  => '09:00',
                 'end_time'    => '12:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
             [
                 'day_of_week' => 2,
                 'start_time'  => '13:00',
                 'end_time'    => '17:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
         ],
         'delete_ids' => [],
@@ -68,7 +65,7 @@ it('saves multiple schedules in one batch request', function (): void {
     $response = $this->post(route('user-schedule.batch'), $batchData);
 
     $response->assertRedirect(route('user-schedule.index'))
-        ->assertSessionHas('success', 'Schedules saved successfully.');
+        ->assertSessionHas('success', 'Schedules were saved successfully.');
 
     assertDatabaseHas('user_schedules', [
         'user_id'     => $this->user->getKey(),
@@ -92,8 +89,7 @@ it('updates existing schedules in batch request', function (): void {
         'day_of_week' => 1,
         'start_time'  => '09:00',
         'end_time'    => '12:00',
-        'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-        'timezone'    => 'UTC',
+        'type'        => UserScheduleRecordType::WORKING_DAY->value,
     ]);
 
     $batchData = [
@@ -104,8 +100,7 @@ it('updates existing schedules in batch request', function (): void {
                 'day_of_week' => 1,
                 'start_time'  => '10:00',
                 'end_time'    => '14:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
         ],
         'delete_ids' => [],
@@ -120,7 +115,7 @@ it('updates existing schedules in batch request', function (): void {
         'id'         => $schedule->getKey(),
         'start_time' => '10:00',
         'end_time'   => '14:00',
-        'type'       => UserScheduleRecordType::ALL_WORKING_DAYS->value,
+        'type'       => UserScheduleRecordType::WORKING_DAY->value,
     ]);
 });
 
@@ -133,8 +128,7 @@ it('deletes schedules in batch request', function (): void {
         'day_of_week' => 1,
         'start_time'  => '09:00',
         'end_time'    => '12:00',
-        'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-        'timezone'    => 'UTC',
+        'type'        => UserScheduleRecordType::WORKING_DAY->value,
     ]);
 
     $schedule2 = UserSchedule::factory()->create([
@@ -142,8 +136,7 @@ it('deletes schedules in batch request', function (): void {
         'day_of_week' => 2,
         'start_time'  => '09:00',
         'end_time'    => '12:00',
-        'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-        'timezone'    => 'UTC',
+        'type'        => UserScheduleRecordType::WORKING_DAY->value,
     ]);
 
     $batchData = [
@@ -174,8 +167,7 @@ it('creates, updates, and deletes schedules in one batch request', function (): 
         'day_of_week' => 1,
         'start_time'  => '09:00',
         'end_time'    => '12:00',
-        'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-        'timezone'    => 'UTC',
+        'type'        => UserScheduleRecordType::WORKING_DAY->value,
     ]);
 
     $scheduleToDelete = UserSchedule::factory()->create([
@@ -183,8 +175,8 @@ it('creates, updates, and deletes schedules in one batch request', function (): 
         'day_of_week' => 3,
         'start_time'  => '09:00',
         'end_time'    => '12:00',
-        'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-        'timezone'    => 'UTC',
+        'type'        => UserScheduleRecordType::WORKING_DAY->value,
+
     ]);
 
     $batchData = [
@@ -196,16 +188,14 @@ it('creates, updates, and deletes schedules in one batch request', function (): 
                 'day_of_week' => 1,
                 'start_time'  => '10:00',
                 'end_time'    => '13:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
             // Create new
             [
                 'day_of_week' => 2,
                 'start_time'  => '14:00',
                 'end_time'    => '18:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
         ],
         'delete_ids' => [$scheduleToDelete->getKey()],
@@ -235,6 +225,57 @@ it('creates, updates, and deletes schedules in one batch request', function (): 
     ]);
 });
 
+it('fails when exceeding maximum number of schedules per day', function (): void {
+    $this->withoutMiddleware();
+    actingAs($this->user);
+
+    $schedules = [];
+    for ($i = 0; $i < UserSchedule::MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY + 1; $i++) {
+        $start = sprintf('%02d:00', 8 + $i);
+        $end = sprintf('%02d:00', 9 + $i);
+        $schedules[] = [
+            'day_of_week' => 1,
+            'start_time'  => $start,
+            'end_time'    => $end,
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+        ];
+    }
+
+    $response = $this->from(route('user-schedule.index'))
+        ->post(route('user-schedule.batch'), [
+            'schedules'  => $schedules,
+            'delete_ids' => [],
+        ]);
+
+    $response->assertRedirect(route('user-schedule.index'))
+        ->assertSessionHasErrors(['schedules.1.max_schedules_per_day']);
+});
+
+it('fails when exceeding maximum number of day-off exclusions', function (): void {
+    $this->withoutMiddleware();
+    actingAs($this->user);
+
+    $schedules = [];
+    for ($i = 0; $i < UserSchedule::MAX_NUMBER_OF_ACTIVE_DAY_OFF_EXCLUSIONS + 1; $i++) {
+        $schedules[] = [
+            'type'          => UserScheduleRecordType::DAY_OFF->value,
+            'day_off_date'  => now()->addDays($i + 1)->toDateString(),
+            'day_of_week'   => 1,
+            'start_time'    => '00:00',
+            'end_time'      => '23:59',
+        ];
+    }
+
+    $response = $this->from(route('user-schedule.index'))
+        ->post(route('user-schedule.batch'), [
+            'schedules'  => $schedules,
+            'delete_ids' => [],
+        ]);
+
+    $response->assertRedirect(route('user-schedule.index'))
+        ->assertSessionHasErrors(['schedules.7.max_schedules_per_day']);
+});
+
 it('validates overlapping schedules in batch request', function (): void {
     $this->withoutMiddleware();
     actingAs($this->user);
@@ -245,15 +286,13 @@ it('validates overlapping schedules in batch request', function (): void {
                 'day_of_week' => 1,
                 'start_time'  => '09:00',
                 'end_time'    => '13:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
             [
                 'day_of_week' => 1,
                 'start_time'  => '12:00',
                 'end_time'    => '16:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
         ],
         'delete_ids' => [],
@@ -265,7 +304,6 @@ it('validates overlapping schedules in batch request', function (): void {
 });
 
 it('prevents batch deletion of another users schedules', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $otherUser = User::factory()->create();
@@ -274,8 +312,7 @@ it('prevents batch deletion of another users schedules', function (): void {
         'day_of_week' => 1,
         'start_time'  => '09:00',
         'end_time'    => '12:00',
-        'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-        'timezone'    => 'UTC',
+        'type'        => UserScheduleRecordType::WORKING_DAY->value,
     ]);
 
     $batchData = [
@@ -285,7 +322,8 @@ it('prevents batch deletion of another users schedules', function (): void {
 
     $response = $this->post(route('user-schedule.batch'), $batchData);
 
-    $response->assertSessionHasErrors(['delete_ids']);
+    $response->assertRedirect(route('user-schedule.index'))
+        ->assertSessionHas('error', 'Failed to save schedules. Please try again.');
 
     assertDatabaseHas('user_schedules', [
         'id' => $otherSchedule->getKey(),
@@ -302,8 +340,7 @@ it('prevents batch update of another users schedules', function (): void {
         'day_of_week' => 1,
         'start_time'  => '09:00',
         'end_time'    => '12:00',
-        'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-        'timezone'    => 'UTC',
+        'type'        => UserScheduleRecordType::WORKING_DAY->value,
     ]);
 
     $batchData = [
@@ -313,8 +350,7 @@ it('prevents batch update of another users schedules', function (): void {
                 'day_of_week' => 1,
                 'start_time'  => '10:00',
                 'end_time'    => '14:00',
-                'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-                'timezone'    => 'UTC',
+                'type'        => UserScheduleRecordType::WORKING_DAY->value,
             ],
         ],
         'delete_ids' => [],
@@ -322,7 +358,8 @@ it('prevents batch update of another users schedules', function (): void {
 
     $response = $this->post(route('user-schedule.batch'), $batchData);
 
-    $response->assertSessionHasErrors();
+    $response->assertRedirect(route('user-schedule.index'))
+        ->assertSessionHas('error', 'Failed to save schedules. Please try again.');
 
     assertDatabaseHas('user_schedules', [
         'id'         => $otherSchedule->getKey(),

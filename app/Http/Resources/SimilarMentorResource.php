@@ -12,6 +12,9 @@ class SimilarMentorResource extends JsonResource
 {
     public static $wrap;
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Override]
     public function toArray(Request $request): array
     {

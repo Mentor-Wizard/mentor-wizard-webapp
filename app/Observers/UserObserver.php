@@ -14,7 +14,8 @@ class UserObserver
     public function created(User $user): void
     {
         $user->assignRole(Role::findByName(RoleEnum::USER->value));
-        $user->profile()->create();
+        $user->profile()->create(['timezone' => request()
+            ->get('timezone') ?? config('app.timezone', 'UTC')]);
         $user->slug = $this->generateUniqueSlug($user->username);
         $user->save();
     }

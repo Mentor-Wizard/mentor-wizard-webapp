@@ -61,6 +61,6 @@ describe('Mentor Program Edit Page', function (): void {
         $mentorProgram = MentorProgram::factory()->create();
         $response = get(route('mentor-program.edit', $mentorProgram->slug));
 
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertForbidden();
     });
 });

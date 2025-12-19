@@ -7,6 +7,7 @@ use App\Http\Requests\UserProfile\DeleteUserProfileRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Lorisleiva\Actions\Concerns\AsController;
 
 mutates(DeleteUserProfile::class);
 
@@ -122,6 +123,6 @@ describe('DeleteUserProfile', function (): void {
 
     it('works with the controller trait', function (): void {
         $traits = class_uses(DeleteUserProfile::class);
-        expect($traits)->toHaveKey(Lorisleiva\Actions\Concerns\AsController::class);
+        expect($traits)->toHaveKey(AsController::class);
     });
 });

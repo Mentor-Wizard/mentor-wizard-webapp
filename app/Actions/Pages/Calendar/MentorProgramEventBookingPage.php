@@ -28,7 +28,7 @@ class MentorProgramEventBookingPage
             $date,
             $user,
             $timezone,
-            false,
+            true,
             $mentorProgram
         )->getFormattedMonthAvailableSlots();
 

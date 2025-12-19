@@ -3,12 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\UserScheduleRecordType;
+use Illuminate\Support\Collection;
 
 mutates(UserScheduleRecordType::class);
 
 describe('UserScheduleRecordType', function (): void {
     it('has correct enum values', function (): void {
-        expect(UserScheduleRecordType::ALL_WORKING_DAYS->value)->toBe('Working Day')
+        expect(UserScheduleRecordType::WORKING_DAY->value)->toBe('Working Day')
             ->and(UserScheduleRecordType::DAY_OFF->value)->toBe('Day off');
     });
 
@@ -36,7 +37,7 @@ describe('UserScheduleRecordType', function (): void {
     it('returns collection with correct structure', function (): void {
         $collection = UserScheduleRecordType::getCollection();
 
-        expect($collection)->toBeInstanceOf(Illuminate\Support\Collection::class)
+        expect($collection)->toBeInstanceOf(Collection::class)
             ->toHaveCount(2);
 
         foreach ($collection as $item) {

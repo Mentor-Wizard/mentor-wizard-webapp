@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\User;
+use App\Models\UserSchedule;
 use Illuminate\Support\Collection;
 
 class UserSchedulePolicy
@@ -26,9 +27,10 @@ class UserSchedulePolicy
             return true;
         }
 
-        return ! $user->schedules()
+        return ! UserSchedule::query()
             ->whereIn('id', $allIdsToCheck)
             ->where('user_id', '!=', $user->id)
+            ->orWhereNull('user_id')
             ->exists();
     }
 }

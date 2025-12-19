@@ -44,7 +44,7 @@ describe('GetUserSchedulePage', function (): void {
         expect($props)
             ->toHaveKeys(['schedules', 'scheduleTypes', 'timezone'])
             ->and($props['schedules'])->toBeArray()->toBeEmpty()
-            ->and($props['timezone'])->toBeNull();
+            ->and($props['timezone'])->toBe('UTC');
     });
 
     it('returns schedules ordered by day_of_week and start_time', function (): void {
@@ -55,21 +55,21 @@ describe('GetUserSchedulePage', function (): void {
             'user_id'     => $this->user->id,
             'day_of_week' => 3, // Wednesday
             'start_time'  => '14:00:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
         UserSchedule::factory()->create([
             'user_id'     => $this->user->id,
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
         UserSchedule::factory()->create([
             'user_id'     => $this->user->id,
             'day_of_week' => 1, // Monday
             'start_time'  => '14:00:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
         $action = new GetUserSchedulePage;
@@ -108,19 +108,15 @@ describe('GetUserSchedulePage', function (): void {
         }
     });
 
-    it('returns timezone from first schedule when schedules exist', function (): void {
+    it('returns new timezone when changed timezone for profile', function (): void {
         actingAs($this->user);
 
-        $timezone = 'Europe/Kyiv';
+        $newTimezone = 'Europe/Kyiv';
+        $this->user->profile->timezone = $newTimezone;
+        $this->user->profile->save();
 
         UserSchedule::factory()->create([
             'user_id'  => $this->user->id,
-            'timezone' => $timezone,
-        ]);
-
-        UserSchedule::factory()->create([
-            'user_id'  => $this->user->id,
-            'timezone' => 'America/New_York',
         ]);
 
         $action = new GetUserSchedulePage;
@@ -128,7 +124,7 @@ describe('GetUserSchedulePage', function (): void {
 
         $props = inertiaProps($response);
 
-        expect($props['timezone'])->toBe($timezone);
+        expect($props['timezone'])->toBe($newTimezone);
     });
 
     it('returns only active schedule records', function (): void {
@@ -138,7 +134,7 @@ describe('GetUserSchedulePage', function (): void {
         UserSchedule::factory()->create([
             'user_id'     => $this->user->id,
             'day_of_week' => 1,
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
         $action = new GetUserSchedulePage;
@@ -174,7 +170,7 @@ describe('GetUserSchedulePage', function (): void {
 
         UserSchedule::factory()->create([
             'user_id'      => $this->user->id,
-            'type'         => UserScheduleRecordType::ALL_WORKING_DAYS,
+            'type'         => UserScheduleRecordType::WORKING_DAY,
             'day_off_date' => null,
         ]);
 
@@ -191,12 +187,10 @@ describe('GetUserSchedulePage', function (): void {
 
         $otherUser = User::factory()->create();
 
-        // Create schedule for authenticated user
         UserSchedule::factory()->create([
             'user_id' => $this->user->id,
         ]);
 
-        // Create schedule for other user
         UserSchedule::factory()->create([
             'user_id' => $otherUser->id,
         ]);

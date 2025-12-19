@@ -37,7 +37,8 @@ describe('Update Info User', function (): void {
             ->and($user->profile->last_name)->toBe('Dou')
             ->and($user->profile->telegram)->toBe('https://t.me/john')
             ->and($user->profile->whatsapp)->toBe('https://wa.me/john')
-            ->and($user->profile->phone)->toBe('+380671234567');
+            ->and($user->profile->phone)->toBe('+380671234567')
+            ->and($user->profile->timezone)->toBe('UTC');
     })->with([
         'info updated user with new email' => fn (): array => [
             'user'       => User::factory()->create(),
@@ -48,6 +49,7 @@ describe('Update Info User', function (): void {
                 'telegram'    => 'https://t.me/john',
                 'whatsapp'    => 'https://wa.me/john',
                 'phone'       => '+380671234567',
+
             ],
         ],
     ]);

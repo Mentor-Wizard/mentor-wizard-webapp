@@ -37,7 +37,6 @@ class UserScheduleViewResource extends JsonResource
             'end_time'          => $this->end_time,
             'type'              => $this->type,
             'day_off_date'      => $this->day_off_date?->format('Y-m-d'),
-            'timezone'          => $this->timezone,
         ];
     }
 }

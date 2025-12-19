@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\TagEnum;
 use App\Filters\TagLanguagesFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\QueryBuilder\Filters\Filter;
 
 covers(TagLanguagesFilter::class);
 
@@ -62,7 +63,7 @@ describe('TagLanguagesFilter', function (): void {
 
     describe('interface implementation', function (): void {
         it('implements Filter interface', function (): void {
-            expect($this->filter)->toBeInstanceOf(Spatie\QueryBuilder\Filters\Filter::class);
+            expect($this->filter)->toBeInstanceOf(Filter::class);
         });
 
         it('uses correct TagEnum value', function (): void {

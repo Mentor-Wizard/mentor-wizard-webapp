@@ -68,7 +68,7 @@ describe('Mentor Program Create Page', function (): void {
 
         $response = get(route('mentor-program.create'));
 
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertForbidden();
     });
 
 });

@@ -24,8 +24,8 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '17:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+            'timezone'    => $this->user->profile->timezone,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -41,7 +41,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'end_time'     => '23:59',
             'type'         => UserScheduleRecordType::DAY_OFF->value,
             'day_off_date' => '2025-12-25',
-            'timezone'     => 'UTC',
+            'timezone'     => $this->user->profile->timezone,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -54,8 +54,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
         $data = [
             'start_time' => '09:00',
             'end_time'   => '17:00',
-            'type'       => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'   => 'UTC',
+            'type'       => UserScheduleRecordType::WORKING_DAY->value,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -70,8 +69,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'day_of_week' => 7,
             'start_time'  => '09:00',
             'end_time'    => '17:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -85,8 +83,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
         $data = [
             'day_of_week' => 1,
             'end_time'    => '17:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -100,8 +97,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
         $data = [
             'day_of_week' => 1,
             'start_time'  => '09:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -116,8 +112,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'day_of_week' => 1,
             'start_time'  => '17:00',
             'end_time'    => '09:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -132,7 +127,6 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '17:00',
-            'timezone'    => 'UTC',
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -148,7 +142,6 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'start_time'  => '09:00',
             'end_time'    => '17:00',
             'type'        => 'invalid_type',
-            'timezone'    => 'UTC',
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -164,7 +157,6 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'start_time'  => '00:00',
             'end_time'    => '23:59',
             'type'        => UserScheduleRecordType::DAY_OFF->value,
-            'timezone'    => 'UTC',
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -179,7 +171,7 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '17:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
         ];
 
         $request = new StoreUserScheduleRequest;
@@ -194,8 +186,8 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
             'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '17:00',
-            'type'        => UserScheduleRecordType::ALL_WORKING_DAYS->value,
-            'timezone'    => 'UTC',
+            'type'        => UserScheduleRecordType::WORKING_DAY->value,
+            'timezone'    => $this->user->profile->timezone,
             'comment'     => 'This is a test comment',
         ];
 
