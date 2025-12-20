@@ -43,6 +43,7 @@
         "pusher-js": "^8.4.0",
         "socket.io-client": "^4.8.1",
         "tailwindcss": "^4.1.17",
+        "typescript": "^5.9.3",
         "vite": "^7.2.2",
         "vue": "^3.5.24",
         "vue-eslint-parser": "^10.2.0",
