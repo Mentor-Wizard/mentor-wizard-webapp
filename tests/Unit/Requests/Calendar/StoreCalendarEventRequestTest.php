@@ -8,6 +8,7 @@ use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
@@ -169,7 +170,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'title'       => 'Invalid FromDateTime',
             'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
             'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => null, // Invalid time that might pass initial format check
+            'fromTime'    => null,
             'toTime'      => '10:45',
             'description' => 'desc',
             'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
@@ -195,7 +196,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'title'       => 'Invalid FromDateTime',
             'fromDate'    => null,
             'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '08:00', // Invalid time that might pass initial format check
+            'fromTime'    => '08:00',
             'toTime'      => '09:00',
             'description' => 'desc',
             'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
@@ -218,10 +219,10 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid FromDateTime',
+            'title'       => 'Invalid toDateTime',
             'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
             'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '08:00', // Invalid time that might pass initial format check
+            'fromTime'    => '08:00',
             'toTime'      => null,
             'description' => 'desc',
             'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
