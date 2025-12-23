@@ -23,22 +23,21 @@ class CalendarsListPage
     public function handle(Request $request): Response
     {
         $user = auth()->user();
-        $timezone = $user?->profile->timezone ?? $request->get('timezone') ?? config('app.timezone');
-        $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
+        $timezone = $user->profile->timezone;
+        $date = $request->get('date')
+            ? Date::parse($request->get('date'), $timezone)
+            : Date::now($timezone);
         $mode = $request->get('mode') ? CalendarViewModeEnum::tryFrom($request->get('mode')) : CalendarViewModeEnum::MONTH;
 
         return Inertia::render('Calendar/CalendarsList', [
             'locale'            => app()->getLocale(),
-            'permissions'       => $user?->can('create', CalendarEvent::class) ? 'create' : 'view',
+            'permissions'       => $user->can('create', CalendarEvent::class) ? 'create' : 'view',
             'availableColours'  => CalendarEventColoursEnum::values(),
             'calendarEvents'    => match ($mode) {
-                CalendarViewModeEnum::DAY   => $user
-                    ? new DailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents() : [],
-                CalendarViewModeEnum::WEEK  => $user
-                    ? new WeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() : [],
-                CalendarViewModeEnum::MONTH => $user
-                    ? new MonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents() : [],
-                default                   => [],
+                CalendarViewModeEnum::DAY   => new DailyCalendarEventsService($user, $date, $timezone)->getDailyCalendarEvents(),
+                CalendarViewModeEnum::WEEK  => new WeeklyCalendarEventsService($user, $date, $timezone)->getWeeklyCalendarEvents() ,
+                CalendarViewModeEnum::MONTH => new MonthCalendarEventsService($user, $date, $timezone)->getMonthCalendarEvents(),
+                default                     => [],
             }]);
     }
 }

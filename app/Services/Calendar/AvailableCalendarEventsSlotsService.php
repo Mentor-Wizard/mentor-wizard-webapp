@@ -30,13 +30,20 @@ class AvailableCalendarEventsSlotsService
         $currentDateTimezone = Date::now($this->timezone);
 
         $events = $this->user->calendarEvents()
-            ->where('start_date_time', '>=', $currentDate)->orderBy('start_date_time')
+            ->where('start_date_time', '>=', $currentDate)
+            ->orderBy('start_date_time')
             ->whereKeyNot($this->excludeEvents)
             ->limit(100)
             ->get();
 
         if ($events->isEmpty()) {
-            return [];
+            $this->availableSlots[] = [
+                'start' => $currentDateTimezone,
+                'end'   => Date::now($this->timezone)
+                    ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
+            ];
+
+            return $this->availableSlots;
         }
 
         $previousEvent = null;

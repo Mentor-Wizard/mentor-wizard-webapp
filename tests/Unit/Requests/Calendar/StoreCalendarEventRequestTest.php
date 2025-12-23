@@ -30,7 +30,43 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('successfully validates payload with all required info', function (): void {
         $payload = [
             'id'            => 1,
-            'title'         => 'successfull validation',
+            'title'         => 'successful validation',
+            'fromDate'      => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'        => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'      => '10:00',
+            'toTime'        => '11:30',
+            'type'          => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'        => CalendarEventColoursEnum::BLUE->value,
+        ];
+
+        $request = new StoreCalendarEventRequest;
+
+        $validator = Validator::make($payload, $request->rules());
+
+        expect($validator->passes())->toBeTrue();
+        expect($validator->errors())->isEmpty();
+    });
+
+    it('successfully validates payload with change of timezone', function (): void {
+        $this->user->profile->timezone = 'Europe/London';
+        $this->user->profile->save();
+
+        Config::set('app.timezone', 'UTC');
+
+        CalendarEvent::query()->create([
+            'start_date_time' => Date::now()->addDays(5)
+                ->timezone('Europe/London')->format('Y-m-d H:i:s'),
+            'end_date_time' => Date::now()->addDays(5)
+                ->timezone('Europe/London')->addHours(1)->format('Y-m-d H:i:s'),
+            'date' => Date::now()->addDays(5)
+                ->timezone('Europe/London')->format('Y-m-d'),
+            'type'  => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'title' => 'booked slot validation',
+        ]);
+
+        $payload = [
+            'id'            => 1,
+            'title'         => 'successful validation',
             'fromDate'      => Date::now()->addDays(5)->format('Y-m-d'),
             'toDate'        => Date::now()->addDays(5)->format('Y-m-d'),
             'fromTime'      => '10:00',
@@ -83,6 +119,110 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
             'fromTime'    => '25:99', // Invalid time that might pass initial format check
             'toTime'      => '10:45',
+            'description' => 'desc',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+        ];
+
+        $request = new StoreCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        try {
+            $request->validateResolved();
+            expect(false)->toBeTrue('Should have thrown exception');
+        } catch (Exception $exception) {
+            expect($exception)->toBeInstanceOf(Exception::class);
+        }
+    });
+
+    it('catches exception when toDate is null', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+
+        $data = [
+            'title'       => 'Invalid FromDateTime',
+            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'      => null,
+            'fromTime'    => '09:00', // Invalid time that might pass initial format check
+            'toTime'      => '10:45',
+            'description' => 'desc',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+        ];
+
+        $request = new StoreCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        try {
+            $request->validateResolved();
+            expect(false)->toBeTrue('Should have thrown exception');
+        } catch (Exception $exception) {
+            expect($exception)->toBeInstanceOf(Exception::class);
+        }
+    });
+
+    it('catches exception when fromTime is null', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+
+        $data = [
+            'title'       => 'Invalid FromDateTime',
+            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'    => null, // Invalid time that might pass initial format check
+            'toTime'      => '10:45',
+            'description' => 'desc',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+        ];
+
+        $request = new StoreCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        try {
+            $request->validateResolved();
+            expect(false)->toBeTrue('Should have thrown exception');
+        } catch (Exception $exception) {
+            expect($exception)->toBeInstanceOf(Exception::class);
+        }
+    });
+
+    it('catches exception when fromDate is null', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+
+        $data = [
+            'title'       => 'Invalid FromDateTime',
+            'fromDate'    => null,
+            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'    => '08:00', // Invalid time that might pass initial format check
+            'toTime'      => '09:00',
+            'description' => 'desc',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+        ];
+
+        $request = new StoreCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        try {
+            $request->validateResolved();
+            expect(false)->toBeTrue('Should have thrown exception');
+        } catch (Exception $exception) {
+            expect($exception)->toBeInstanceOf(Exception::class);
+        }
+    });
+
+    it('catches exception when toTime is null', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
+
+        $data = [
+            'title'       => 'Invalid FromDateTime',
+            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'    => '08:00', // Invalid time that might pass initial format check
+            'toTime'      => null,
             'description' => 'desc',
             'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
             'colour'      => CalendarEventColoursEnum::BLUE->value,

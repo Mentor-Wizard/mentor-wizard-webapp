@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Services\Calendar\AvailableCalendarEventsSlotsService;
+use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
 mutates(AvailableCalendarEventsSlotsService::class);
 
-describe('GetAvailableSlotsService Service', function (): void {
+describe('AvailableCalendarEventsSlotsService', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -21,7 +24,35 @@ describe('GetAvailableSlotsService Service', function (): void {
 
         $slots = new AvailableCalendarEventsSlotsService($user, 'Europe/Kyiv')->getAvailableSlots();
 
-        expect($slots)->toBeArray()->toBeEmpty();
+        expect($slots)->toBeArray()->toHaveCount(1);
+        expect($slots[0]['start'])->toBeInstanceOf(CarbonImmutable::class);
+        expect($slots[0]['end'])->toBeInstanceOf(CarbonImmutable::class);
+    });
+
+    it('check limit of calendar events', function (): void {
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        $user = User::factory()->create();
+
+        for ($i = 1; $i <= 105; $i++) {
+            $currentCalendarEvent = CalendarEvent::query()->create([
+                'start_date_time' => Date::now()->addDays($i)->setTime(10, 0)->format('Y-m-d H:i:s'),
+                'end_date_time'   => Date::now()->addDays($i)->setTime(11, 0)->format('Y-m-d H:i:s'),
+                'date'            => Date::now()->addDays($i)->format('Y-m-d'),
+                'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'title'           => 'Event '.$i,
+                'status'          => CalendarEventStatusEnum::CONFIRMED->value,
+            ]);
+            $user->calendarEvents()->attach($currentCalendarEvent->getKey());
+        }
+
+        $service = new AvailableCalendarEventsSlotsService(
+            user: $user,
+            timezone: 'UTC',
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toHaveCount(101);
     });
 
     it('builds available slots between events using timezone conversion', function (): void {

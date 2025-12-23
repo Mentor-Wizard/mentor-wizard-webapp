@@ -19,11 +19,20 @@ describe('CheckTimeSlotReservedService Service', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $user = User::factory()->create();
 
+        $startDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-02 14:00',
+            config('app.timezone')
+        );
+        $endDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-02 15:00',
+            config('app.timezone')
+        );
+
         $service = new CheckTimeSlotReservedService(
-            fromDate: '2025-04-02',
-            fromTime: '14:00',
-            toDate: '2025-04-02',
-            toTime: '15:00',
+            startDateTime: $startDate,
+            endDateTime: $endDate,
             timezone: 'Europe/Kyiv',
             user: $user
         );
@@ -50,12 +59,21 @@ describe('CheckTimeSlotReservedService Service', function (): void {
         ]);
         $user->calendarEvents()->attach($event1->getKey());
 
+        $startDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 13:00',
+            $tz
+        );
+        $endDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 14:00',
+            $tz
+        );
+
         // Request slot before the event (13:00-14:00 Kyiv)
         $service = new CheckTimeSlotReservedService(
-            fromDate: '2025-04-01',
-            fromTime: '13:00',
-            toDate: '2025-04-01',
-            toTime: '14:00',
+            startDateTime: $startDate,
+            endDateTime: $endDate,
             timezone: $tz,
             user: $user
         );
@@ -82,12 +100,20 @@ describe('CheckTimeSlotReservedService Service', function (): void {
         ]);
         $user->calendarEvents()->attach($event1->getKey());
 
+        $startDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 14:30',
+            $tz
+        );
+        $endDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 15:30',
+            $tz
+        );
         // Request slot that overlaps the event (14:30-15:30 Kyiv)
         $service = new CheckTimeSlotReservedService(
-            fromDate: '2025-04-01',
-            fromTime: '14:30',
-            toDate: '2025-04-01',
-            toTime: '15:30',
+            startDateTime: $startDate,
+            endDateTime: $endDate,
             timezone: $tz,
             user: $user
         );
@@ -124,12 +150,20 @@ describe('CheckTimeSlotReservedService Service', function (): void {
         ]);
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
 
+        $startDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 16:00',
+            $tz
+        );
+        $endDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 17:00',
+            $tz
+        );
         // Request slot between events (16:00-17:00 Kyiv, which is between 13:00-15:00 UTC events)
         $service = new CheckTimeSlotReservedService(
-            fromDate: '2025-04-01',
-            fromTime: '16:00',
-            toDate: '2025-04-01',
-            toTime: '17:00',
+            startDateTime: $startDate,
+            endDateTime: $endDate,
             timezone: $tz,
             user: $user
         );
@@ -156,12 +190,20 @@ describe('CheckTimeSlotReservedService Service', function (): void {
         ]);
         $user->calendarEvents()->attach($event1->getKey());
 
+        $startDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 15:00',
+            $tz
+        );
+        $endDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 16:00',
+            $tz
+        );
         // Request the exact slot of the event, but exclude that event
         $service = new CheckTimeSlotReservedService(
-            fromDate: '2025-04-01',
-            fromTime: '15:00',
-            toDate: '2025-04-01',
-            toTime: '16:00',
+            startDateTime: $startDate,
+            endDateTime: $endDate,
             timezone: $tz,
             user: $user,
             excludeEvents: [$event1->getKey()]
