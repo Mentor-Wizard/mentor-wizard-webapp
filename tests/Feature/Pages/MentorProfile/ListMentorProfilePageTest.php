@@ -193,6 +193,8 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('filters by multiple experience levels', function (): void {
+        MentorProfile::query()->delete();
+
         MentorProfile::factory()->create([
             'title'                 => 'Entry Level Dev',
             'experience_started_at' => now()->subYears(2),
@@ -224,6 +226,8 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('filters by minimum rating', function (): void {
+        MentorProfile::query()->delete();
+
         $mentor1 = MentorProfile::factory()->create(['title' => 'Low Rated Mentor']);
         $mentor2 = MentorProfile::factory()->create(['title' => 'Good Rated Mentor']);
         $mentor3 = MentorProfile::factory()->create(['title' => 'Excellent Rated Mentor']);
@@ -258,6 +262,8 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('combines experience and rating filters', function (): void {
+        MentorProfile::query()->delete();
+
         $mentor1 = MentorProfile::factory()->create([
             'title'                 => 'Senior High Rated',
             'experience_started_at' => now()->subYears(10),

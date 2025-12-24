@@ -33,6 +33,7 @@ focusing on:
   tools
 - Follow the project's established patterns from CLAUDE.md, AGENTS.md, and any
   Laravel-specific guidelines
+- Run all tests in docker container to ensure environment consistency
 
 ## Testing Philosophy & Best Practices
 
