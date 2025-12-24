@@ -36,6 +36,9 @@ class ExperienceLevelFilter implements Filter
         });
     }
 
+    /**
+     * @param  Builder<MentorProfile>  $query
+     */
     private function applyRange(Builder $query, string $level): void
     {
         $now = now();

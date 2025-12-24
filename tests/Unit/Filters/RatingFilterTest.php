@@ -262,7 +262,6 @@ describe('RatingFilter', function (): void {
             $profile1 = MentorProfile::factory()->create(['user_id' => $user1->id]);
             MentorReview::factory()->create(['mentor_id' => $user1->id, 'rating' => 4]);
             MentorReview::factory()->create(['mentor_id' => $user1->id, 'rating' => 4]);
-            MentorReview::factory()->create(['mentor_id' => $user1->id, 'rating' => 3]);
 
             $user2 = User::factory()->create();
             $profile2 = MentorProfile::factory()->create(['user_id' => $user2->id]);

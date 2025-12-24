@@ -23,15 +23,13 @@ class RatingFilter implements Filter
      */
     public function __invoke(Builder $query, mixed $value, string $property): void
     {
-        $minRating = (float) $value;
+        $minRating = is_numeric($value) ? (float) $value : 0.0;
 
-        $query->whereHas('user.mentorReviews', function (Builder $q): void {
-            $q->select('mentor_id');
-        })
-            ->whereRaw('
-                (SELECT AVG(rating)
-                 FROM mentor_reviews
-                 WHERE mentor_reviews.mentor_id = mentor_profiles.user_id) >= ?
-            ', [$minRating]);
+        $query->whereHas('user', function (Builder $userQuery) use ($minRating): void {
+            $userQuery->whereRaw(
+                '(SELECT AVG(rating) FROM mentor_reviews WHERE mentor_reviews.mentor_id = users.id) >= ?',
+                [$minRating]
+            );
+        });
     }
 }
