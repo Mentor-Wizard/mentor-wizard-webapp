@@ -19,10 +19,10 @@ trait CalendarEventRequestRules
     {
         return [
             'title'       => ['required', 'string', 'max:255'],
-            'fromDate'    => ['required', 'date', 'after_or_equal:today'],
-            'toDate'      => ['required', 'date', 'after_or_equal:fromDate'],
-            'fromTime'    => ['required', 'date_format:H:i'],
-            'toTime'      => ['required', 'date_format:H:i', 'after:fromTime'],
+            'fromDate'    => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'toDate'      => ['required', 'date_format:Y-m-d', 'after_or_equal:fromDate'],
+            'fromTime'    => ['required', 'date_format:H:i', 'bail'],
+            'toTime'      => ['required', 'date_format:H:i', 'after:fromTime', 'bail'],
             'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
             'description' => ['max:2000'],
             'webLink'     => ['url'],

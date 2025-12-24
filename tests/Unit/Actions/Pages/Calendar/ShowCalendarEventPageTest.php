@@ -8,7 +8,7 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\CalendarEvent as EventModel;
+use App\Models\CalendarEvent;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
@@ -31,7 +31,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $this->start = Date::parse(Date::today()->addDays(1)->format('Y-m-d').' 09:30:00');
         $this->end = Date::parse(Date::today()->addDays(1)->format('Y-m-d').' 11:00:00');
 
-        $this->event = EventModel::factory()->create([
+        $this->event = CalendarEvent::factory()->create([
             'title'             => 'Demo CalendarEvent',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => $this->start->format('Y-m-d H:i:s'),
@@ -116,7 +116,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $start = Date::parse(Date::today()->format('Y-m-d').' 22:00:00');
         $end = Date::parse(Date::today()->format('Y-m-d').' 23:00:00');
 
-        $eventAtNight = EventModel::factory()->create([
+        $eventAtNight = CalendarEvent::factory()->create([
             'title'             => 'Night Event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => $start->format('Y-m-d H:i:s'),
@@ -141,9 +141,156 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         // Verify timezone affects the time display
         expect(Arr::get($pageTokyo, 'props.calendarEvent.fromTime'))->not->toBe('22:00');
+        expect(Arr::get($pageTokyo, 'props.permissions'))->toBe('view');
 
         // Verify user is passed and colour is retrieved
         expect(Arr::get($pageTokyo, 'props.calendarEvent.colour'))->toBe(CalendarEventColoursEnum::BLUE->value);
+    });
+
+    it('passes user and timezone to EventShowResource, when have several events,
+        which affects event payload', function (): void {
+        auth()->login($this->mentor);
+
+        // Create event at 22:00 default timezone
+        $start = Date::parse(Date::today()->format('Y-m-d').' 22:00:00');
+        $end = Date::parse(Date::today()->format('Y-m-d').' 23:00:00');
+
+        $event1 = CalendarEvent::factory()->create([
+            'title'             => 'Night Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => $start->format('Y-m-d H:i:s'),
+            'end_date_time'     => $end->format('Y-m-d H:i:s'),
+            'date'              => $start->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'web_link'          => 'https://example.com/night',
+            'description'       => 'Night Event',
+        ]);
+
+        $event1->calendarEventUsers()->attach(
+            $this->mentor->getKey(), [
+                'colour' => CalendarEventColoursEnum::BLUE->value,
+            ]);
+
+        $mentor2 = User::factory()->create();
+        $mentor2->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $start = Date::parse(Date::today()->format('Y-m-d').' 20:00:00');
+        $end = Date::parse(Date::today()->format('Y-m-d').' 21:00:00');
+
+        $event2 = CalendarEvent::factory()->create([
+            'title'             => 'Night Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => $start->format('Y-m-d H:i:s'),
+            'end_date_time'     => $end->format('Y-m-d H:i:s'),
+            'date'              => $start->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'web_link'          => 'https://example.com/night',
+            'description'       => 'Night Event',
+        ]);
+
+        $event2->calendarEventUsers()->attach(
+            $mentor2->getKey(), [
+                'colour' => CalendarEventColoursEnum::BLUE->value,
+            ]);
+
+        // Test with Asia/Tokyo timezone (UTC+9)
+        $this->mentor->profile->timezone = 'Asia/Tokyo';
+        $this->mentor->profile->save();
+
+        $responseTokyo = new ShowCalendarEventPage()->handle($event1);
+        $resultDataTokyo = $responseTokyo->toResponse(request())->getOriginalContent();
+        $pageTokyo = $resultDataTokyo->getData()['page'];
+
+        // Verify timezone affects the time display
+        expect(Arr::get($pageTokyo, 'props.calendarEvent.fromTime'))->not->toBe('22:00');
+        expect(Arr::get($pageTokyo, 'props.permissions'))->toBe('view');
+
+        // Verify user is passed and colour is retrieved
+        expect(Arr::get($pageTokyo, 'props.calendarEvent.colour'))->toBe(CalendarEventColoursEnum::BLUE->value);
+    });
+
+    it('includes base props, permissions and event payload', function (): void {
+        auth()->login($this->mentor);
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::factory()->create();
+
+        $request = new Request(['timezone' => 'UTC']);
+        $response = (new ShowCalendarEventPage)->handle($event);
+
+        expect($response)->toBeInstanceOf(Response::class);
+        $props = inertiaProps($response);
+
+        expect($props)
+            ->toHaveKeys(['locale', 'permissions', 'calendarEvent', 'availableColours'])
+            ->and($props['permissions'])->toBe('view')
+            ->and($props['calendarEvent'])->toBeArray();
+    });
+
+    it('shows edit permission when user is a host of the calendar event', function (): void {
+        $host = User::factory()->create();
+        $host->profile()->create(['timezone' => 'UTC']);
+
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($host->id, [
+            'role' => CalendarEventRoleEnum::HOST,
+        ]);
+
+        auth()->login($host);
+
+        $response = (new ShowCalendarEventPage)($calendarEvent);
+        $props = inertiaProps($response);
+
+        expect($props['permissions'])->toBe('view');
+    });
+
+    it('shows view permission when user is not a host of the calendar event', function (): void {
+        $host = User::factory()->create();
+        $participant = User::factory()->create();
+
+        $host->profile()->create(['timezone' => 'UTC']);
+        $participant->profile()->create(['timezone' => 'UTC']);
+
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($host->id, [
+            'role' => CalendarEventRoleEnum::HOST,
+        ]);
+        $calendarEvent->calendarEventUsers()->attach($participant->id, [
+            'role' => CalendarEventRoleEnum::PARTICIPANT,
+        ]);
+
+        auth()->login($participant);
+
+        $response = (new ShowCalendarEventPage)($calendarEvent);
+        $props = inertiaProps($response);
+
+        expect($props['permissions'])->toBe('view');
+    });
+
+    it('authorization checks against specific calendar event and user role', function (): void {
+        $user = User::factory()->create();
+        $user->profile()->create(['timezone' => 'UTC']);
+
+        $hostEvent = CalendarEvent::factory()->create();
+        $hostEvent->calendarEventUsers()->attach($user->id, [
+            'role' => CalendarEventRoleEnum::HOST,
+        ]);
+
+        $participantEvent = CalendarEvent::factory()->create();
+        $participantEvent->calendarEventUsers()->attach($user->id, [
+            'role' => CalendarEventRoleEnum::PARTICIPANT,
+        ]);
+
+        auth()->login($user);
+
+        // Can edit event where user is host
+        $responseHost = (new ShowCalendarEventPage)($hostEvent);
+        $propsHost = inertiaProps($responseHost);
+        expect($propsHost['permissions'])->toBe('view');
+
+        // Cannot edit event where user is only participant
+        $responseParticipant = (new ShowCalendarEventPage)($participantEvent);
+        $propsParticipant = inertiaProps($responseParticipant);
+        expect($propsParticipant['permissions'])->toBe('view');
     });
 
 });

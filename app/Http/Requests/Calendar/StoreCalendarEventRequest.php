@@ -22,20 +22,19 @@ class StoreCalendarEventRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
-
-            // Get timezone from user profile
             $user = auth()->user();
             $timezone = $user->profile->timezone;
 
             if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime'])) {
                 $startDate = Date::createFromFormat(
                     '!Y-m-d H:i',
-                    $this->input('fromDate').' '.$this->input('fromTime'),
+                    $this->input('fromDate').$this->input('fromTime'),
                     $timezone
                 );
+
                 $endDate = Date::createFromFormat(
                     '!Y-m-d H:i',
-                    $this->input('toDate').' '.$this->input('toTime'),
+                    $this->input('toDate').$this->input('toTime'),
                     $timezone
                 );
 
@@ -43,8 +42,9 @@ class StoreCalendarEventRequest extends FormRequest
                     $startDate,
                     $endDate,
                     $timezone,
-                    auth()->user())
-                    ->isSlotAvailable();
+                    auth()->user()
+                )->isSlotAvailable();
+
                 if (! $isWithinAvailableSlots) {
                     $validator->errors()->add('fromDate', 'there are another events on this time');
                 }

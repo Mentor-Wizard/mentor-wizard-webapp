@@ -8,6 +8,7 @@ use App\DTO\Calendar\CalendarEventDayViewData;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Traits\Calendar\BuildsCalendarPayload;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
@@ -43,9 +44,9 @@ class DailyCalendarEventsService
 
     /**
      * @return array{
-     *     todayDate: CarbonInterface,
-     *     tomorrowDate: CarbonInterface,
-     *     months: list<CarbonInterface>,
+     *     todayDate: CarbonImmutable,
+     *     tomorrowDate: CarbonImmutable,
+     *     months: array<mixed>,
      *     daysEvents: array<int, string>
      * }
      */
@@ -66,7 +67,7 @@ class DailyCalendarEventsService
         /** @var ?CalendarEvent $firstEvent */
         $firstEvent = (clone $dailyEvents)->sortBy('start_date_time')->first();
         /** @var ?CalendarEvent $latestEvent */
-        $latestEvent = (clone $dailyEvents)->last()?->first();
+        $latestEvent = (clone $dailyEvents)->last();
 
         $startCalendarMonth = Date::parse($firstEvent->start_date_time ?? $this->date)
             ->timezone($this->timezone)
@@ -79,14 +80,13 @@ class DailyCalendarEventsService
             $endCalendarMonth = $todayDate->copy()->endOfMonth();
         }
 
-        //        $dailyEvents = $this->user->calendarEvents()->get();
         /** @var Collection<int, CalendarEvent> $dailyEvents */
         $dailyEvents->each(function (CalendarEvent $event): void {
             $event->date = $event->start_date_time->copy()->timezone($this->timezone)->format('Y-m-d');
         });
 
         $period = CarbonPeriod::create($startCalendarMonth, '1 month', $endCalendarMonth);
-        $months = array_values(iterator_to_array($period));
+        $months = (iterator_to_array($period));
 
         return [
             'todayDate'    => $todayDate,
@@ -117,7 +117,7 @@ class DailyCalendarEventsService
     }
 
     /**
-     * @param  list<CarbonInterface>  $months
+     * @param  array<mixed>  $months
      * @param  array<int, string>  $daysEvents
      */
     private function buildDailyCalendarView(array $months, CarbonInterface $todayDate, array $daysEvents): void

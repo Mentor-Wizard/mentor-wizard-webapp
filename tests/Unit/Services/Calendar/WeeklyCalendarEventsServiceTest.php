@@ -40,6 +40,49 @@ describe('GetWeeklyCalendarEventsService Service', function (): void {
             ->and($entryForSelected['isToday'] ?? null)->toBeTrue();
     });
 
+    it('returns weekly events when events exist', function (): void {
+        $user = User::factory()->create();
+
+        $firstEvent = CalendarEvent::factory()->create([
+            'start_date_time' => '2025-01-15 10:00:00',
+            'end_date_time'   => '2025-01-15 11:00:00',
+        ]);
+        $user->calendarEvents()->attach($firstEvent->getKey());
+        $secondEvent = CalendarEvent::factory()->create([
+            'start_date_time' => '2025-01-16 14:00:00',
+            'end_date_time'   => '2025-01-16 15:00:00',
+        ]);
+
+        $user->calendarEvents()->attach($secondEvent->getKey());
+        $service = new WeeklyCalendarEventsService(
+            $user,
+            Date::parse('2025-01-15'),
+            'UTC'
+        );
+
+        $result = $service->getWeeklyCalendarEvents();
+
+        expect($result)->not->toBeEmpty();
+        expect(count($result))->toBeGreaterThan(0);
+
+        $flatEvents = collect($result)->flatten(1);
+        expect($flatEvents)->toHaveCount(9);
+    });
+
+    it('returns empty structure when no events exist', function (): void {
+        $user = User::factory()->create();
+
+        $service = new WeeklyCalendarEventsService(
+            $user,
+            Date::parse('2025-01-15'),
+            'UTC'
+        );
+
+        $result = $service->getWeeklyCalendarEvents();
+
+        expect($result)->toBeArray();
+    });
+
     it('sets event date property using timezone via each() method and only marks correct dates with hasEvent', function (): void {
         Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0));
         // Use timezone that shifts the date
