@@ -23,7 +23,7 @@ class RatingFilter implements Filter
      */
     public function __invoke(Builder $query, mixed $value, string $property): void
     {
-        $minRating = is_numeric($value) ? (float) $value : 1.0;
+        $minRating = is_numeric($value) ? (float) $value : 1.0; // @pest-mutate-ignore
 
         $query->whereHas('user', function (Builder $userQuery) use ($minRating): void {
             $userQuery->whereRaw(

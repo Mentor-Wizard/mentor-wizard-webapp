@@ -1,7 +1,7 @@
 ---
 name: tester
 description: Use this agent when you need to write, update, or run unit and feature tests for Laravel applications. Specifically invoke this agent when: (1) implementing new features that require test coverage, (2) fixing bugs and need corresponding regression tests, (3) refactoring code and need to ensure test suite validity, (4) reviewing test coverage and quality, (5) debugging failing tests, or (6) setting up testing infrastructure. Examples:\n\n<example>\nContext: User has just implemented a new API endpoint for user registration.\nuser: "I've just added a new POST /api/register endpoint in UserController. Here's the code:"\n[code provided]\nassistant: "Let me use the laravel-test-engineer agent to create comprehensive feature tests for this new registration endpoint."\n[Uses Agent tool to invoke laravel-test-engineer]\n</example>\n\n<example>\nContext: User is working on a service class and wants it tested.\nuser: "Can you help me test the PaymentService class I just wrote?"\nassistant: "I'll use the laravel-test-engineer agent to write unit tests for your PaymentService class."\n[Uses Agent tool to invoke laravel-test-engineer]\n</example>\n\n<example>\nContext: User mentions test failures after changes.\nuser: "The test suite is failing after I updated the authentication logic."\nassistant: "Let me use the laravel-test-engineer agent to diagnose and fix the failing tests."\n[Uses Agent tool to invoke laravel-test-engineer]\n</example>
-model: sonnet
+model: opus
 color: green
 ---
 
