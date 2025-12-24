@@ -428,6 +428,91 @@ describe('RatingFilter', function (): void {
     });
 
     describe('edge cases', function (): void {
+        it('defaults null value to 0.0 excluding mentors without reviews', function (): void {
+            $user = User::factory()->create();
+            $profile = MentorProfile::factory()->create(['user_id' => $user->id]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, null, 'rating');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(0);
+        });
+
+        it('defaults non-numeric string to 0.0 requiring mentors have reviews', function (): void {
+            $user1 = User::factory()->create();
+            $profile1 = MentorProfile::factory()->create(['user_id' => $user1->id]);
+            MentorReview::factory()->create(['mentor_id' => $user1->id, 'rating' => 1]);
+
+            $user2 = User::factory()->create();
+            $profile2 = MentorProfile::factory()->create(['user_id' => $user2->id]);
+            MentorReview::factory()->create(['mentor_id' => $user2->id, 'rating' => 5]);
+
+            $userNoReview = User::factory()->create();
+            $profileNoReview = MentorProfile::factory()->create(['user_id' => $userNoReview->id]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, 'invalid', 'rating');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(2)
+                ->and($results->pluck('id')->toArray())->toContain($profile1->id)
+                ->and($results->pluck('id')->toArray())->toContain($profile2->id)
+                ->and($results->pluck('id')->toArray())->not->toContain($profileNoReview->id);
+        });
+
+        it('defaults array value to 0.0 requiring valid reviews', function (): void {
+            $userWithReview = User::factory()->create();
+            $profileWithReview = MentorProfile::factory()->create(['user_id' => $userWithReview->id]);
+            MentorReview::factory()->create(['mentor_id' => $userWithReview->id, 'rating' => 1]);
+
+            $userNoReview = User::factory()->create();
+            $profileNoReview = MentorProfile::factory()->create(['user_id' => $userNoReview->id]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, [1, 2, 3], 'rating');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(1)
+                ->and($results->first()->id)->toBe($profileWithReview->id);
+        });
+
+        it('defaults object value to 0.0 requiring valid reviews', function (): void {
+            $userWithReview = User::factory()->create();
+            $profileWithReview = MentorProfile::factory()->create(['user_id' => $userWithReview->id]);
+            MentorReview::factory()->create(['mentor_id' => $userWithReview->id, 'rating' => 1]);
+
+            $userNoReview = User::factory()->create();
+            $profileNoReview = MentorProfile::factory()->create(['user_id' => $userNoReview->id]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, new stdClass, 'rating');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(1)
+                ->and($results->first()->id)->toBe($profileWithReview->id);
+        });
+
+        it('casts numeric string to float correctly for decimal comparison', function (): void {
+            $userHigh = User::factory()->create();
+            $profileHigh = MentorProfile::factory()->create(['user_id' => $userHigh->id]);
+            MentorReview::factory()->create(['mentor_id' => $userHigh->id, 'rating' => 4]);
+            MentorReview::factory()->create(['mentor_id' => $userHigh->id, 'rating' => 5]);
+
+            $userLow = User::factory()->create();
+            $profileLow = MentorProfile::factory()->create(['user_id' => $userLow->id]);
+            MentorReview::factory()->create(['mentor_id' => $userLow->id, 'rating' => 4]);
+            MentorReview::factory()->create(['mentor_id' => $userLow->id, 'rating' => 4]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, '4.5', 'rating');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(1)
+                ->and($results->first()->id)->toBe($profileHigh->id)
+                ->and($results->pluck('id')->toArray())->not->toContain($profileLow->id);
+        });
+
         it('handles threshold of 1 (minimum rating)', function (): void {
             $user = User::factory()->create();
             $profile = MentorProfile::factory()->create(['user_id' => $user->id]);

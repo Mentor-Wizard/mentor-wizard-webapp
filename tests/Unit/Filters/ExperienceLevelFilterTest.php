@@ -524,6 +524,43 @@ describe('ExperienceLevelFilter', function (): void {
                 ->and($results->first()->id)->toBe($midMentor->id)
                 ->and($results->pluck('id')->toArray())->not->toContain($entryMentor->id);
         });
+
+        it('casts integer value to string before exploding', function (): void {
+            $entryMentor = MentorProfile::factory()->create([
+                'experience_started_at' => now()->subYears(2),
+            ]);
+
+            $midMentor = MentorProfile::factory()->create([
+                'experience_started_at' => now()->subYears(5),
+            ]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, 123, 'experience');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(2);
+        });
+
+        it('casts object with __toString to string before exploding', function (): void {
+            $stringableObject = new class
+            {
+                public function __toString(): string
+                {
+                    return 'entry';
+                }
+            };
+
+            $entryMentor = MentorProfile::factory()->create([
+                'experience_started_at' => now()->subYears(2),
+            ]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, $stringableObject, 'experience');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(1)
+                ->and($results->first()->id)->toBe($entryMentor->id);
+        });
     });
 
     describe('boundary testing for mutation coverage', function (): void {
