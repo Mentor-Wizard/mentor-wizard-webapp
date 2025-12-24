@@ -1281,14 +1281,14 @@ $pages->assertNoJavascriptErrors()->assertNoConsoleLogs(); </code-snippet>
       data. This often the case when testing validation rules, so consider going
       with this solutionwhen writing tests for validation rules.
 
-        <code-snippet name="Pest Dataset Example" lang="php">
-            it('has emails', function (string $email) {
-            expect($email)->not->toBeEmpty();
-            })->with([
-            'james' => 'james@laravel.com',
-            'taylor' => 'taylor@laravel.com',
-            ]);
-        </code-snippet>
+          <code-snippet name="Pest Dataset Example" lang="php">
+              it('has emails', function (string $email) {
+              expect($email)->not->toBeEmpty();
+              })->with([
+              'james' => 'james@laravel.com',
+              'taylor' => 'taylor@laravel.com',
+              ]);
+          </code-snippet>
 
     ## Test Enforcement
     - Every change must be programmatically tested. Write a new test or update
