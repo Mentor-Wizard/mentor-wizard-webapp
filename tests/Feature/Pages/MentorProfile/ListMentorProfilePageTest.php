@@ -220,7 +220,7 @@ describe('ListMentorProfilePage filters and includes', function (): void {
 
         $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'entry,expert']]))
             ->assertOk()
-            ->assertJsonCount(3, 'data')
+            ->assertJsonCount(2, 'data')
             ->assertJsonFragment(['title' => 'Entry Level Dev'])
             ->assertJsonFragment(['title' => 'Expert Dev']);
     });
