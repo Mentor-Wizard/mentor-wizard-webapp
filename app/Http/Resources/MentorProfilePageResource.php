@@ -98,7 +98,7 @@ class MentorProfilePageResource extends JsonResource
      */
     private function similarMentor(User $user): Collection
     {
-        return User::role(RoleEnum::MENTOR)
+        return User::query()->role(RoleEnum::MENTOR)
             ->with('profile')
             ->where('id', '<>', $user->id)
             ->limit(self::MENTOR_PER_PAGE)
