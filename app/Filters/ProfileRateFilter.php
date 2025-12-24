@@ -17,8 +17,8 @@ class ProfileRateFilter implements Filter
     use ParsesNumericRange;
 
     /**
-     * Expected: ?filter[rate][min]=10&filter[rate][max]=100
-     * Also supports only one bound: ?filter[rate][min]=50 or ?filter[rate][max]=80
+     * Expected:filter[rate][min]=10&filter[rate][max]=100
+     * Also supports only one bound:filter[rate][min]=50 or ?filter[rate][max]=80
      *
      * @param  array{min?: string|int|float|null, max?: string|int|float|null}|mixed  $value
      * @param  non-empty-string  $property  Column name to filter (e.g., "rate")
