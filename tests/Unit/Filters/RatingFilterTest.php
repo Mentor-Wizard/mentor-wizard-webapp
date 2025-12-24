@@ -428,7 +428,7 @@ describe('RatingFilter', function (): void {
     });
 
     describe('edge cases', function (): void {
-        it('defaults null value to 0.0 excluding mentors without reviews', function (): void {
+        it('defaults null value to 1.0 excluding mentors without reviews', function (): void {
             $user = User::factory()->create();
             $profile = MentorProfile::factory()->create(['user_id' => $user->id]);
 
@@ -439,7 +439,7 @@ describe('RatingFilter', function (): void {
             expect($results)->toHaveCount(0);
         });
 
-        it('defaults non-numeric string to 0.0 requiring mentors have reviews', function (): void {
+        it('defaults non-numeric string to 1.0 requiring mentors have reviews', function (): void {
             $user1 = User::factory()->create();
             $profile1 = MentorProfile::factory()->create(['user_id' => $user1->id]);
             MentorReview::factory()->create(['mentor_id' => $user1->id, 'rating' => 1]);
@@ -461,7 +461,7 @@ describe('RatingFilter', function (): void {
                 ->and($results->pluck('id')->toArray())->not->toContain($profileNoReview->id);
         });
 
-        it('defaults array value to 0.0 requiring valid reviews', function (): void {
+        it('defaults array value to 1.0 requiring valid reviews', function (): void {
             $userWithReview = User::factory()->create();
             $profileWithReview = MentorProfile::factory()->create(['user_id' => $userWithReview->id]);
             MentorReview::factory()->create(['mentor_id' => $userWithReview->id, 'rating' => 1]);
@@ -477,7 +477,7 @@ describe('RatingFilter', function (): void {
                 ->and($results->first()->id)->toBe($profileWithReview->id);
         });
 
-        it('defaults object value to 0.0 requiring valid reviews', function (): void {
+        it('defaults object value to 1.0 requiring valid reviews', function (): void {
             $userWithReview = User::factory()->create();
             $profileWithReview = MentorProfile::factory()->create(['user_id' => $userWithReview->id]);
             MentorReview::factory()->create(['mentor_id' => $userWithReview->id, 'rating' => 1]);
@@ -594,6 +594,26 @@ describe('RatingFilter', function (): void {
                 ->and($results->pluck('id')->toArray())->toContain($profile1->id)
                 ->and($results->pluck('id')->toArray())->toContain($profile2->id)
                 ->and($results->pluck('id')->toArray())->toContain($profile3->id);
+        });
+
+        it('excludes mentors with rating below 1.0 when using non-numeric default', function (): void {
+            $userLowRating = User::factory()->create();
+            $profileLowRating = MentorProfile::factory()->create(['user_id' => $userLowRating->id]);
+            MentorReview::factory()->create(['mentor_id' => $userLowRating->id, 'rating' => 0]);
+            MentorReview::factory()->create(['mentor_id' => $userLowRating->id, 'rating' => 1]);
+
+            $userNormalRating = User::factory()->create();
+            $profileNormalRating = MentorProfile::factory()->create(['user_id' => $userNormalRating->id]);
+            MentorReview::factory()->create(['mentor_id' => $userNormalRating->id, 'rating' => 2]);
+
+            $query = MentorProfile::query();
+            $this->filter->__invoke($query, null, 'rating');
+            $results = $query->get();
+
+            expect($results)->toHaveCount(1)
+                ->and($results->first()->id)->toBe($profileNormalRating->id)
+                ->and($results->pluck('id')->toArray())->toContain($profileNormalRating->id)
+                ->and($results->pluck('id')->toArray())->not->toContain($profileLowRating->id);
         });
     });
 });

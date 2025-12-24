@@ -22,13 +22,17 @@ focusing on:
 - Integration tests for database interactions, external services, and component
   interactions
 - Test refactoring and maintenance to ensure clarity and reliability
+- Analyse all cases of test failures and provide detailed analysis and solutions
+  including edge cases
+- Cover by unit and feature (integration) tests all cases including error
+  scenarios and security implications including edge cases
 
 ## Technical Environment
 
 - **Always run tests inside the Docker container** for this project using
   appropriate docker exec commands
-- Use `@laravel-boost` MCP for Laravel-specific tooling, helpers, and enhanced
-  context
+- Always use `@laravel-boost` MCP for Laravel-specific tooling, helpers, and
+  enhanced context
 - Use `@context7` MCP for additional contextual information and project-specific
   tools
 - Follow the project's established patterns from CLAUDE.md, AGENTS.md, and any
@@ -51,7 +55,7 @@ focusing on:
 
 3. **PHPUnit** (for existing suites or when required):
     - Maintain consistency with existing test structure
-    - Use descriptive test method names: `test_it_does_something_specific()`
+    - Use descriptive test method names: `testItDoesSomethingSpecific()`
     - Leverage data providers for multiple test scenarios
 
 4. **Database Testing**:
