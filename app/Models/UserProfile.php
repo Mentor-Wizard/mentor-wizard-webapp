@@ -17,7 +17,6 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @property-read string $avatar URL of the avatar image
- *
  * @mixin IdeHelperUserProfile
  */
 #[UseFactory(UserProfileFactory::class)]

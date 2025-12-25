@@ -29,7 +29,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
 
         $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Redirector::class));
+            $request->setRedirector(resolve(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });

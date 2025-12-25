@@ -23,7 +23,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Redirector::class));
+            $request->setRedirector(resolve(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });
@@ -934,7 +934,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
             $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
                 $request->setContainer(app());
-                $request->setRedirector(app(Redirector::class));
+                $request->setRedirector(resolve(Redirector::class));
                 $request->setUserResolver(fn () => $this->user);
             };
 

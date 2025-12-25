@@ -25,7 +25,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $description
  * @property int|null $mentor_program_id
  * @property-read int $duration Computed attribute: duration in minutes
- *
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]
