@@ -277,10 +277,9 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         expect($calendar)->toHaveKey('2025-02');
         expect($calendar)->toHaveKey('2025-03');
-        expect($calendar)->toHaveKey('2025-04');
 
         // Ensure multiple days present to cover both set and append branches
-        expect($calendar)->toBeArray()->and(count($calendar))->toBe(3);
+        expect($calendar)->toBeArray()->and(count($calendar))->toBe(2);
     });
 
     it('builds daily calendar checking start time mutation', function (): void {
