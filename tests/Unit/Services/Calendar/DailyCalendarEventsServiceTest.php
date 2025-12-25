@@ -7,7 +7,10 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Services\Calendar\DailyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
+
+uses(RefreshDatabase::class);
 
 mutates(DailyCalendarEventsService::class);
 
