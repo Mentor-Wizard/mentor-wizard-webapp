@@ -16,51 +16,55 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         $this->seed(RoleSeeder::class);
     });
 
+    afterEach(function (): void {
+        Date::setTestNow(); // Reset to real time
+    });
+
     it('builds daily calendar grouped by month and appends days, marking flags correctly via service',
         function (): void {
-        Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0));
-        $tz = 'UTC';
+            Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0));
+            $tz = 'UTC';
 
-        /** @var User $user */
-        $user = User::factory()->create();
+            /** @var User $user */
+            $user = User::factory()->create();
 
-        // Create an event on the selected day so hasEvent can be asserted
-        $start = Date::create(2025, 3, 5, 14, 0, 0);
-        $end = (clone $start)->addMinutes(90);
+            // Create an event on the selected day so hasEvent can be asserted
+            $start = Date::create(2025, 3, 5, 14, 0, 0);
+            $end = (clone $start)->addMinutes(90);
 
-        /** @var CalendarEvent $event */
-        $event = CalendarEvent::query()->create([
-            'title'           => 'Daily CalendarEvent',
-            'status'          => 'confirmed',
-            'start_date_time' => $start,
-            'end_date_time'   => $end,
-            'date'            => $start?->format('Y-m-d'),
-            'type'            => 'group',
-        ]);
+            /** @var CalendarEvent $event */
+            $event = CalendarEvent::query()->create([
+                'title'           => 'Daily CalendarEvent',
+                'status'          => 'confirmed',
+                'start_date_time' => $start,
+                'end_date_time'   => $end,
+                'date'            => $start?->format('Y-m-d'),
+                'type'            => 'group',
+            ]);
 
-        $user->calendarEvents()->attach($event->getKey());
-        $checkedDate = Date::parse('2025-03-05');
-        $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
+            $user->calendarEvents()->attach($event->getKey());
+            $checkedDate = Date::parse('2025-03-05');
+            $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
-        expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
+            expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
 
-        $ym = '2025-03';
-        $calendar = $result['calendarView'];
+            $ym = '2025-03';
+            $calendar = $result['calendarView'];
 
-        expect($calendar)->toHaveKey($ym);
-        $days = $calendar[$ym];
+            expect($calendar)->toHaveKey($ym);
+            $days = $calendar[$ym];
 
-        // Ensure multiple days present to cover both set and append branches
-        expect($days)->toBeArray()->and(count($days))->toBeGreaterThan(10);
+            // Ensure multiple days present to cover both set and append branches
+            expect($days)->toBeArray()->and(count($days))->toBeGreaterThan(10);
 
-        $selected = collect($days)->firstWhere('date', '2025-03-05');
-        expect($selected)
-            ->toBeArray()
-            ->and($selected['isCurrentMonth'] ?? null)->toBeTrue()
-            ->and($selected['isSelected'] ?? null)->toBeTrue()
-            ->and($selected['isToday'] ?? null)->toBeTrue()
-            ->and($selected['hasEvent'] ?? null)->toBeTrue();
-    });
+            $selected = collect($days)->firstWhere('date', '2025-03-05');
+            expect($selected)
+                ->toBeArray()
+                ->and($selected['isCurrentMonth'] ?? null)->toBeTrue()
+                ->and($selected['isSelected'] ?? null)->toBeTrue()
+                ->and($selected['isToday'] ?? null)->toBeTrue()
+                ->and($selected['hasEvent'] ?? null)->toBeTrue();
+        });
 
     it('builds daily calendar without any events, marking flags correctly via service', function (): void {
         Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0));
@@ -270,6 +274,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         expect($calendar)->toHaveKey('2025-02');
         expect($calendar)->toHaveKey('2025-03');
+        expect($calendar)->toHaveKey('2025-04');
 
         // Ensure multiple days present to cover both set and append branches
         expect($calendar)->toBeArray()->and(count($calendar))->toBe(3);
@@ -380,41 +385,41 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
     it('sets event date property using timezone via each() method with backward transition',
         function (): void {
-        Date::setTestNow(Date::create(2025, 3, 5, 23, 0, 0));
-        $tz = 'Pacific/Auckland';
+            Date::setTestNow(Date::create(2025, 3, 5, 23, 0, 0));
+            $tz = 'Pacific/Auckland';
 
-        /** @var User $user */
-        $user = User::factory()->create();
+            /** @var User $user */
+            $user = User::factory()->create();
 
-        // Create event at 23:00 UTC which should be next day in Auckland
-        $start = Date::create(2025, 3, 5, 22, 0, 0);
-        $end = (clone $start)->addHour();
+            // Create event at 23:00 UTC which should be next day in Auckland
+            $start = Date::create(2025, 3, 5, 22, 0, 0);
+            $end = (clone $start)->addHour();
 
-        /** @var CalendarEvent $event */
-        $event = CalendarEvent::query()->create([
-            'title'           => 'Late Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $start,
-            'end_date_time'   => $end,
-            'date'            => $start?->format('Y-m-d'),
-            'type'            => 'individual',
-        ]);
+            /** @var CalendarEvent $event */
+            $event = CalendarEvent::query()->create([
+                'title'           => 'Late Event',
+                'status'          => 'confirmed',
+                'start_date_time' => $start,
+                'end_date_time'   => $end,
+                'date'            => $start?->format('Y-m-d'),
+                'type'            => 'individual',
+            ]);
 
-        $user->calendarEvents()->attach($event->getKey());
-        $checkedDate = Date::parse('2025-03-05');
-        $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
+            $user->calendarEvents()->attach($event->getKey());
+            $checkedDate = Date::parse('2025-03-05');
+            $result = new DailyCalendarEventsService($user, $checkedDate, $tz)->getDailyCalendarEvents();
 
-        $calendar = $result['calendarView'];
+            $calendar = $result['calendarView'];
 
-        expect($calendar)->toBeArray();
+            expect($calendar)->toBeArray();
 
-        $hasEventDay = collect($calendar)->flatten(1)->firstWhere('hasEvent', true);
-        expect($hasEventDay)->not->toBeNull()
-            ->and($hasEventDay['hasEvent'])->toBeTrue()
-            ->and($hasEventDay['date'])->toBe('2025-03-06')
-            ->and($hasEventDay['isToday'])->toBeTrue();
+            $hasEventDay = collect($calendar)->flatten(1)->firstWhere('hasEvent', true);
+            expect($hasEventDay)->not->toBeNull()
+                ->and($hasEventDay['hasEvent'])->toBeTrue()
+                ->and($hasEventDay['date'])->toBe('2025-03-06')
+                ->and($hasEventDay['isToday'])->toBeTrue();
 
-    });
+        });
 
     it('sets event date property using timezone via each() method with transition', function (): void {
         Date::setTestNow(Date::create(2025, 3, 5, 23, 0, 0));
