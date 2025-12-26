@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Profile;
 
+use App\Filters\ExperienceLevelFilter;
 use App\Filters\ProfileRateFilter;
 use App\Filters\ProgramCostFilter;
+use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
 use App\Models\MentorProfile;
@@ -35,6 +37,8 @@ class ListMentorProfilePage
                 AllowedFilter::custom('cost', new ProgramCostFilter),
                 AllowedFilter::custom('languages', new TagLanguagesFilter),
                 AllowedFilter::custom('stacks', new TagStacksFilter),
+                AllowedFilter::custom('experience', new ExperienceLevelFilter),
+                AllowedFilter::custom('rating', new RatingFilter),
             ])
             ->allowedSorts([
                 'id',
