@@ -24,65 +24,52 @@ const totalMentors = computed(() => mentorsPagination.value.total || 0);
 onMounted(() => {
   const query = pageProps.queryParams || {};
 
-  mentorFilters.selectedRatings = query.ratings || [];
-  mentorFilters.selectedExpertise = query.expertise || [];
-  mentorFilters.selectedExperience = query.experience || [];
-  mentorFilters.selectedAvailability = query.availability || [];
+  // Parse query parameters in Spatie Query Builder format
+  mentorFilters.parseQueryParams(query);
 
-  if (query.priceMin) mentorFilters.priceMin = Number(query.priceMin);
-  if (query.priceMax) mentorFilters.priceMax = Number(query.priceMax);
-  if (query.currency) mentorFilters.selectedCurrency = query.currency;
+  // Initialize filter options from backend
+  const filtersDataValue = filtersData.value || {};
+  mentorFilters.setOptions({
+    stacks: filtersDataValue.stackOptions || [],
+    languages: filtersDataValue.languageOptions || [],
+    currencies: filtersDataValue.currencyOptions || [],
+  });
 
+  // Initialize pagination and sorting
   if (query.sortBy) sortBy.value = query.sortBy;
   if (query.page) page.value = Number(query.page);
 });
 
 watch(
-  filtersData,
-  (newData) => {
-    if (!newData) return;
-    mentorFilters.setDynamicOptions({
-      expertise: newData.expertiseOptions || [],
-      currencies: newData.currencyOptions || [],
-    });
-  },
-  { immediate: true },
-);
-
-watch(
   [
-    () => mentorFilters.selectedExpertise,
+    () => mentorFilters.selectedStacks,
+    () => mentorFilters.selectedLanguages,
     () => mentorFilters.selectedExperience,
-    () => mentorFilters.selectedRatings,
-    () => mentorFilters.selectedAvailability,
-    () => mentorFilters.selectedCurrency,
-    () => mentorFilters.priceMin,
-    () => mentorFilters.priceMax,
+    () => mentorFilters.minRate,
+    () => mentorFilters.maxRate,
+    () => mentorFilters.minRating,
     sortBy,
     page,
   ],
   () => {
-    const params = {};
+    // Build query params in Spatie Query Builder format
+    const params = mentorFilters.buildQueryParams();
 
-    if (mentorFilters.selectedExpertise.length)
-      params.expertise = mentorFilters.selectedExpertise;
-    if (mentorFilters.selectedExperience.length)
-      params.experience = mentorFilters.selectedExperience;
-    if (mentorFilters.selectedRatings.length)
-      params.ratings = mentorFilters.selectedRatings;
-    if (mentorFilters.selectedAvailability.length)
-      params.availability = mentorFilters.selectedAvailability;
+    // Add pagination if needed
+    if (page.value > 1) {
+      params.page = page.value;
+    }
 
-    if (mentorFilters.priceMin > 1) params.priceMin = mentorFilters.priceMin;
-    if (mentorFilters.priceMax < 200) params.priceMax = mentorFilters.priceMax;
+    // Add sorting if needed
+    if (sortBy.value !== 'relevance') {
+      params.sortBy = sortBy.value;
+    }
 
-    if (mentorFilters.selectedCurrency !== 'USD')
-      params.currency = mentorFilters.selectedCurrency;
-
-    if (page.value > 1) params.page = page.value;
-    if (sortBy.value !== 'relevance') params.sortBy = sortBy.value;
-
-    router.get('/mentors', params, { preserveState: true, replace: true });
+    router.get('/mentors', params, {
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+    });
   },
   { deep: true },
 );
