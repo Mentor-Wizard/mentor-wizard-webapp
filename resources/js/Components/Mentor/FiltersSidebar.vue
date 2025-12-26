@@ -6,10 +6,35 @@ import { useMentorFilters } from '@/Stores/mentorFilters';
 const mentorFilters = useMentorFilters();
 const stackSearch = ref('');
 
+// Collapse/expand state
+const showAllStacks = ref(false);
+const showAllLanguages = ref(false);
+
 const filteredStacks = computed(() =>
   mentorFilters.stackOptions.filter((option) =>
     option.label.toLowerCase().includes(stackSearch.value.toLowerCase()),
   ),
+);
+
+// Visible stacks (limited to 10 unless expanded)
+const visibleStacks = computed(() => {
+  const filtered = filteredStacks.value;
+  return showAllStacks.value ? filtered : filtered.slice(0, 10);
+});
+
+// Visible languages (limited to 10 unless expanded)
+const visibleLanguages = computed(() => {
+  const all = mentorFilters.languageOptions;
+  return showAllLanguages.value ? all : all.slice(0, 10);
+});
+
+// Count of hidden items
+const hiddenStacksCount = computed(() =>
+  Math.max(0, filteredStacks.value.length - 10),
+);
+
+const hiddenLanguagesCount = computed(() =>
+  Math.max(0, mentorFilters.languageOptions.length - 10),
 );
 
 const clearFilters = () => mentorFilters.clearAllFilters();
@@ -55,7 +80,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
 
           <div class="mt-4 space-y-3">
             <label
-              v-for="(option, i) in filteredStacks"
+              v-for="(option, i) in visibleStacks"
               :key="i"
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
@@ -67,6 +92,17 @@ const clearFilters = () => mentorFilters.clearAllFilters();
               />
               {{ option.label }}
             </label>
+
+            <button
+              v-if="filteredStacks.length > 10"
+              type="button"
+              @click="showAllStacks = !showAllStacks"
+              class="mt-3 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
+            >
+              {{
+                showAllStacks ? 'Show less' : `Show more (${hiddenStacksCount})`
+              }}
+            </button>
           </div>
         </div>
       </div>
@@ -82,7 +118,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
         <div class="p-4">
           <div class="space-y-3">
             <label
-              v-for="(option, i) in mentorFilters.languageOptions"
+              v-for="(option, i) in visibleLanguages"
               :key="i"
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
@@ -94,6 +130,19 @@ const clearFilters = () => mentorFilters.clearAllFilters();
               />
               {{ option.label }}
             </label>
+
+            <button
+              v-if="mentorFilters.languageOptions.length > 10"
+              type="button"
+              @click="showAllLanguages = !showAllLanguages"
+              class="mt-3 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
+            >
+              {{
+                showAllLanguages ? 'Show less' : (
+                  `Show more (${hiddenLanguagesCount})`
+                )
+              }}
+            </button>
           </div>
         </div>
       </div>
