@@ -12,3 +12,4 @@ AGENTS.md
 compose.yml
 composer.lock
 taskfile.yml
+.claude/

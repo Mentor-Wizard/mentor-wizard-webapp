@@ -27,7 +27,10 @@ class MentorsListPage
 
     public function handle(Request $request): Response
     {
-        $mentors = QueryBuilder::for(MentorProfile::class, $request)
+        /** @var QueryBuilder<MentorProfile> $query */
+        $query = QueryBuilder::for(MentorProfile::class, $request);
+
+        $mentors = $query
             ->with(['mentorPrograms', 'mentorTags', 'user.profile', 'currency'])
             ->with(['user' => function ($query): void {
                 $query->withCount('mentorReviews');
