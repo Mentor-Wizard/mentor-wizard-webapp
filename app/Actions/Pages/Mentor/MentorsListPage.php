@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Pages\Mentor;
 
 use App\Enums\TagEnum;
+use App\Filters\ExperienceLevelFilter;
 use App\Filters\ProfileRateFilter;
 use App\Filters\ProgramCostFilter;
+use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
+use App\Models\Currency;
 use App\Models\MentorProfile;
+use App\Models\MentorTag;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,7 +30,7 @@ class MentorsListPage
         // TODO: Implement actual mentor filtering logic
         $mentors = QueryBuilder::for(MentorProfile::class)
             ->with(['mentorPrograms', 'mentorTags', 'user.profile', 'currency'])
-            ->with(['user' => function ($query) {
+            ->with(['user' => function ($query): void {
                 $query->withCount('mentorReviews');
             }])
             ->allowedIncludes(['mentorPrograms', 'mentorTags', 'currency'])
@@ -39,11 +43,13 @@ class MentorsListPage
                 AllowedFilter::custom('cost', new ProgramCostFilter),
                 AllowedFilter::custom('languages', new TagLanguagesFilter),
                 AllowedFilter::custom('stacks', new TagStacksFilter),
+                AllowedFilter::custom('experience', new ExperienceLevelFilter),
+                AllowedFilter::custom('rating', new RatingFilter),
             ])
             ->allowedSorts(['id', 'rate', 'experience_started_at'])
             ->paginate(6)
             ->appends($request->query())
-            ->through(function ($mentor) {
+            ->through(function ($mentor): array {
                 $user = $mentor->user;
                 $profile = $user?->profile;
 
@@ -71,29 +77,61 @@ class MentorsListPage
                 ];
             });
 
-        // TODO: Replace static arrays with dynamic values
-        $expertiseOptions = [
-            ['value' => 'web-dev', 'label' => 'Web Development (324)'],
-            ['value' => 'mobile-dev', 'label' => 'Mobile Development (218)'],
-            ['value' => 'data-science', 'label' => 'Data Science (195)'],
-            ['value' => 'ux-ui', 'label' => 'UX/UI Design (167)'],
-            ['value' => 'digital-marketing', 'label' => 'Digital Marketing (142)'],
-            ['value' => 'product-mgmt', 'label' => 'Product Management (118)'],
-        ];
-        $currencyOptions = [
-            ['value' => 'USD', 'label' => 'USD ($)'],
-            ['value' => 'EUR', 'label' => 'EUR (€)'],
-            ['value' => 'GBP', 'label' => 'GBP (£)'],
-            ['value' => 'UAH', 'label' => 'UAH (₴)'],
-        ];
-
         return Inertia::render('Mentor/MentorsListPage', [
             'mentors'     => $mentors,
             'filtersData' => [
-                'expertiseOptions' => $expertiseOptions,
-                'currencyOptions'  => $currencyOptions,
+                'stackOptions'    => $this->getStackOptions(),
+                'languageOptions' => $this->getLanguageOptions(),
+                'currencyOptions' => $this->getCurrencyOptions(),
             ],
             'queryParams' => $request->all(),
         ]);
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function getStackOptions(): array
+    {
+        return MentorTag::query()->where('type', TagEnum::STACK)
+            ->orderBy('tag')
+            ->get()
+            ->map(fn (MentorTag $tag): array => [
+                'value' => $tag->tag,
+                'label' => $tag->tag,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function getLanguageOptions(): array
+    {
+        return MentorTag::query()->where('type', TagEnum::LANGUAGE)
+            ->orderBy('tag')
+            ->get()
+            ->map(fn (MentorTag $tag): array => [
+                'value' => $tag->tag,
+                'label' => $tag->tag,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function getCurrencyOptions(): array
+    {
+        return Currency::query()->orderBy('name')
+            ->get()
+            ->map(fn (Currency $currency): array => [
+                'value' => $currency->name,
+                'label' => sprintf('%s (%s)', $currency->name, $currency->symbol),
+            ])
+            ->values()
+            ->all();
     }
 }

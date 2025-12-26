@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Pages\Mentor\MentorsListPage;
 use Illuminate\Http\Request;
+use Inertia\Response;
 use Inertia\Testing\AssertableInertia;
 
 mutates(MentorsListPage::class);
@@ -16,7 +17,7 @@ describe('ListMentorPage', function (): void {
         $response = $action->handle($request);
 
         expect($response)
-            ->toBeInstanceOf(Inertia\Response::class);
+            ->toBeInstanceOf(Response::class);
     });
 
     it('returns mentors and total count in props', function (): void {
@@ -42,6 +43,6 @@ describe('ListMentorPage', function (): void {
         $response = $action->handle($request);
 
         expect($response)
-            ->toBeInstanceOf(Inertia\Response::class);
+            ->toBeInstanceOf(Response::class);
     });
 });
