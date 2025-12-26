@@ -5,6 +5,7 @@ import { useMentorFilters } from '@/Stores/mentorFilters';
 
 const mentorFilters = useMentorFilters();
 const stackSearch = ref('');
+const languageSearch = ref('');
 
 // Collapse/expand state
 const showAllStacks = ref(false);
@@ -16,6 +17,12 @@ const filteredStacks = computed(() =>
   ),
 );
 
+const filteredLanguages = computed(() =>
+  mentorFilters.languageOptions.filter((option) =>
+    option.label.toLowerCase().includes(languageSearch.value.toLowerCase()),
+  ),
+);
+
 // Visible stacks (limited to 10 unless expanded)
 const visibleStacks = computed(() => {
   const filtered = filteredStacks.value;
@@ -24,8 +31,8 @@ const visibleStacks = computed(() => {
 
 // Visible languages (limited to 10 unless expanded)
 const visibleLanguages = computed(() => {
-  const all = mentorFilters.languageOptions;
-  return showAllLanguages.value ? all : all.slice(0, 10);
+  const filtered = filteredLanguages.value;
+  return showAllLanguages.value ? filtered : filtered.slice(0, 10);
 });
 
 // Count of hidden items
@@ -34,7 +41,7 @@ const hiddenStacksCount = computed(() =>
 );
 
 const hiddenLanguagesCount = computed(() =>
-  Math.max(0, mentorFilters.languageOptions.length - 10),
+  Math.max(0, filteredLanguages.value.length - 10),
 );
 
 const clearFilters = () => mentorFilters.clearAllFilters();
@@ -116,7 +123,33 @@ const clearFilters = () => mentorFilters.clearAllFilters();
         </h3>
 
         <div class="p-4">
-          <div class="space-y-3">
+          <div class="relative">
+            <input
+              v-model="languageSearch"
+              type="text"
+              placeholder="Search languages..."
+              class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm text-gray-900 placeholder-gray-500 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
+            />
+            <div
+              class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-3">
             <label
               v-for="(option, i) in visibleLanguages"
               :key="i"
@@ -132,7 +165,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
             </label>
 
             <button
-              v-if="mentorFilters.languageOptions.length > 10"
+              v-if="filteredLanguages.length > 10"
               type="button"
               @click="showAllLanguages = !showAllLanguages"
               class="mt-3 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
