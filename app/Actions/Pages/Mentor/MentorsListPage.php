@@ -27,8 +27,7 @@ class MentorsListPage
 
     public function handle(Request $request): Response
     {
-        // TODO: Implement actual mentor filtering logic
-        $mentors = QueryBuilder::for(MentorProfile::class)
+        $mentors = QueryBuilder::for(MentorProfile::class, $request)
             ->with(['mentorPrograms', 'mentorTags', 'user.profile', 'currency'])
             ->with(['user' => function ($query): void {
                 $query->withCount('mentorReviews');

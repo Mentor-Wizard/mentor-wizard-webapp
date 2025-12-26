@@ -79,38 +79,43 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
 
   /**
    * Parse query params from URL
-   * Example: parseQueryParams({ 'filter[stacks]': 'Laravel,React' })
+   * Laravel converts filter[stacks] to filter: { stacks: 'Laravel' }
+   * Example: parseQueryParams({ filter: { stacks: 'Laravel,React' } })
    */
   function parseQueryParams(query) {
     if (!query) return;
 
-    // Parse filter[stacks]
-    if (query['filter[stacks]']) {
-      selectedStacks.value = query['filter[stacks]'].split(',');
+    // Laravel passes filters as nested object
+    const filter = query.filter || {};
+
+    // Parse stacks
+    if (filter.stacks) {
+      selectedStacks.value = filter.stacks.split(',');
     }
 
-    // Parse filter[languages]
-    if (query['filter[languages]']) {
-      selectedLanguages.value = query['filter[languages]'].split(',');
+    // Parse languages
+    if (filter.languages) {
+      selectedLanguages.value = filter.languages.split(',');
     }
 
-    // Parse filter[experience]
-    if (query['filter[experience]']) {
-      selectedExperience.value = query['filter[experience]'].split(',');
+    // Parse experience
+    if (filter.experience) {
+      selectedExperience.value = filter.experience.split(',');
     }
 
-    // Parse filter[rate][min] and filter[rate][max]
-    if (query['filter[rate][min]']) {
-      minRate.value = parseFloat(query['filter[rate][min]']);
+    // Parse rate min/max
+    if (filter.rate) {
+      if (filter.rate.min) {
+        minRate.value = parseFloat(filter.rate.min);
+      }
+      if (filter.rate.max) {
+        maxRate.value = parseFloat(filter.rate.max);
+      }
     }
 
-    if (query['filter[rate][max]']) {
-      maxRate.value = parseFloat(query['filter[rate][max]']);
-    }
-
-    // Parse filter[rating]
-    if (query['filter[rating]']) {
-      minRating.value = parseFloat(query['filter[rating]']);
+    // Parse rating
+    if (filter.rating) {
+      minRating.value = parseFloat(filter.rating);
     }
   }
 

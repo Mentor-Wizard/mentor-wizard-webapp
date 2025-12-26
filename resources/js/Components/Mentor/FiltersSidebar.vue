@@ -4,33 +4,34 @@ import { computed, ref } from 'vue';
 import { useMentorFilters } from '@/Stores/mentorFilters';
 
 const mentorFilters = useMentorFilters();
-const expertiseSearch = ref('');
+const stackSearch = ref('');
 
-const filteredExpertise = computed(() =>
-  mentorFilters.expertiseOptions.filter((option) =>
-    option.label.toLowerCase().includes(expertiseSearch.value.toLowerCase()),
+const filteredStacks = computed(() =>
+  mentorFilters.stackOptions.filter((option) =>
+    option.label.toLowerCase().includes(stackSearch.value.toLowerCase()),
   ),
 );
 
-const clearFilters = () => mentorFilters.clearFilters();
+const clearFilters = () => mentorFilters.clearAllFilters();
 </script>
 
 <template>
   <aside class="hidden space-y-6 lg:block">
     <form class="space-y-6">
+      <!-- Technology Stacks -->
       <div class="rounded-lg border border-gray-200 bg-white">
         <h3
           class="border-b border-gray-200 px-4 py-3.5 text-base font-semibold text-gray-900"
         >
-          Expertise Area
+          Technology Stacks
         </h3>
 
         <div class="p-4">
           <div class="relative">
             <input
-              v-model="expertiseSearch"
+              v-model="stackSearch"
               type="text"
-              placeholder="Search expertise..."
+              placeholder="Search stacks..."
               class="block w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm text-gray-900 placeholder-gray-500 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none"
             />
             <div
@@ -54,12 +55,12 @@ const clearFilters = () => mentorFilters.clearFilters();
 
           <div class="mt-4 space-y-3">
             <label
-              v-for="(option, i) in filteredExpertise"
+              v-for="(option, i) in filteredStacks"
               :key="i"
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
               <input
-                v-model="mentorFilters.selectedExpertise"
+                v-model="mentorFilters.selectedStacks"
                 type="checkbox"
                 :value="option.value"
                 class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
@@ -70,6 +71,34 @@ const clearFilters = () => mentorFilters.clearFilters();
         </div>
       </div>
 
+      <!-- Languages -->
+      <div class="rounded-lg border border-gray-200 bg-white">
+        <h3
+          class="border-b border-gray-200 px-4 py-3.5 text-base font-semibold text-gray-900"
+        >
+          Languages
+        </h3>
+
+        <div class="p-4">
+          <div class="space-y-3">
+            <label
+              v-for="(option, i) in mentorFilters.languageOptions"
+              :key="i"
+              class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
+            >
+              <input
+                v-model="mentorFilters.selectedLanguages"
+                type="checkbox"
+                :value="option.value"
+                class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+              />
+              {{ option.label }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience Level -->
       <div class="rounded-lg border border-gray-200 bg-white">
         <h3
           class="border-b border-gray-200 px-4 py-3.5 text-base font-semibold text-gray-900"
@@ -96,6 +125,7 @@ const clearFilters = () => mentorFilters.clearFilters();
         </div>
       </div>
 
+      <!-- Price Range -->
       <div class="rounded-lg border border-gray-200 bg-white">
         <h3
           class="border-b border-gray-200 px-4 py-3.5 text-base font-semibold text-gray-900"
@@ -125,11 +155,11 @@ const clearFilters = () => mentorFilters.clearFilters();
           >
             <span
               >{{ mentorFilters.selectedCurrency }}
-              {{ mentorFilters.priceMin }}</span
+              {{ mentorFilters.minRate || 0 }}</span
             >
             <span
               >{{ mentorFilters.selectedCurrency }}
-              {{ mentorFilters.priceMax }}+</span
+              {{ mentorFilters.maxRate || 200 }}+</span
             >
           </div>
 
@@ -138,16 +168,18 @@ const clearFilters = () => mentorFilters.clearFilters();
             <div
               class="absolute h-2 rounded-full bg-blue-600"
               :style="{
-                left: (mentorFilters.priceMin / 200) * 100 + '%',
+                left: ((mentorFilters.minRate || 0) / 200) * 100 + '%',
                 width:
-                  ((mentorFilters.priceMax - mentorFilters.priceMin) / 200)
+                  (((mentorFilters.maxRate || 200)
+                    - (mentorFilters.minRate || 0))
+                    / 200)
                     * 100
                   + '%',
               }"
             ></div>
 
             <input
-              v-model.number="mentorFilters.priceMin"
+              v-model.number="mentorFilters.minRate"
               type="range"
               min="0"
               max="200"
@@ -155,7 +187,7 @@ const clearFilters = () => mentorFilters.clearFilters();
               class="range-input"
             />
             <input
-              v-model.number="mentorFilters.priceMax"
+              v-model.number="mentorFilters.maxRate"
               type="range"
               min="0"
               max="200"
@@ -172,25 +204,26 @@ const clearFilters = () => mentorFilters.clearFilters();
         </div>
       </div>
 
+      <!-- Minimum Rating -->
       <div class="rounded-lg border border-gray-200 bg-white">
         <h3
           class="border-b border-gray-200 px-4 py-3.5 text-base font-semibold text-gray-900"
         >
-          Rating
+          Minimum Rating
         </h3>
 
         <div class="p-4">
           <div class="space-y-3">
             <label
-              v-for="r in mentorFilters.ratings"
+              v-for="r in mentorFilters.ratingOptions"
               :key="r.value"
               class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
             >
               <input
-                v-model="mentorFilters.selectedRatings"
-                type="checkbox"
+                v-model="mentorFilters.minRating"
+                type="radio"
                 :value="r.value"
-                class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                class="h-5 w-5 border-gray-300 text-blue-600 focus:ring-blue-600"
               />
               <span class="flex items-center gap-1">
                 <span v-for="i in r.value" :key="i" class="text-yellow-400"
@@ -209,32 +242,7 @@ const clearFilters = () => mentorFilters.clearFilters();
         </div>
       </div>
 
-      <div class="rounded-lg border border-gray-200 bg-white">
-        <h3
-          class="border-b border-gray-200 px-4 py-3.5 text-base font-semibold text-gray-900"
-        >
-          Availability
-        </h3>
-
-        <div class="p-4">
-          <div class="space-y-3">
-            <label
-              v-for="(option, i) in mentorFilters.availabilityOptions"
-              :key="i"
-              class="flex cursor-pointer items-center gap-3 text-base text-gray-700"
-            >
-              <input
-                v-model="mentorFilters.selectedAvailability"
-                type="checkbox"
-                :value="option.value"
-                class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-              />
-              {{ option.label }}
-            </label>
-          </div>
-        </div>
-      </div>
-
+      <!-- Clear Filters Button -->
       <div>
         <button
           type="button"

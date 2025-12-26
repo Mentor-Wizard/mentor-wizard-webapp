@@ -41,19 +41,10 @@ onMounted(() => {
 });
 
 watch(
-  [
-    () => mentorFilters.selectedStacks,
-    () => mentorFilters.selectedLanguages,
-    () => mentorFilters.selectedExperience,
-    () => mentorFilters.minRate,
-    () => mentorFilters.maxRate,
-    () => mentorFilters.minRating,
-    sortBy,
-    page,
-  ],
-  () => {
+  () => mentorFilters.buildQueryParams(),
+  (newParams, oldParams) => {
     // Build query params in Spatie Query Builder format
-    const params = mentorFilters.buildQueryParams();
+    const params = { ...newParams };
 
     // Add pagination if needed
     if (page.value > 1) {
@@ -66,9 +57,9 @@ watch(
     }
 
     router.get('/mentors', params, {
-      preserveState: true,
       preserveScroll: true,
       replace: true,
+      only: ['mentors'],
     });
   },
   { deep: true },
