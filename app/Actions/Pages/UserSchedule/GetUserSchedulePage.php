@@ -17,7 +17,7 @@ class GetUserSchedulePage
     public function handle(): Response
     {
         $user = auth()->user();
-        $profileTimezone = $user?->profile->timezone ?? config('app.timezone');
+        $profileTimezone = $user->profile->timezone;
         $schedules = $user->activeScheduleRecords()
             ->orderBy('day_of_week')
             ->orderBy('start_time')

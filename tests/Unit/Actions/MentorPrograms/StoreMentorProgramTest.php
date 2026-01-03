@@ -27,7 +27,7 @@ describe('StoreMentorProgramRequest Validation', function (): void {
         $this->user = createAndAuthenticateMentorForStore();
         $this->prepareRequest = function (StoreMentorProgramRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Redirector::class));
+            $request->setRedirector(resolve(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });

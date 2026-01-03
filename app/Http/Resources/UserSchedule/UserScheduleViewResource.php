@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\UserSchedule;
 
-use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
 
 /**
  * @property-read int|string $id
- * @property-read string $title
- * @property-read CarbonInterface $start_date_time
- * @property-read CarbonInterface $end_date_time
- * @property-read string $type
- * @property-read int $duration
- * @property-read string $web_link
- * @property-read string $description
+ * @property mixed $user_id
+ * @property mixed $type
+ * @property mixed $end_time
+ * @property mixed $start_time
+ * @property mixed $day_of_week
+ * @property mixed $day_off_date
  */
 class UserScheduleViewResource extends JsonResource
 {

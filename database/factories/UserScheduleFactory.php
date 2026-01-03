@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\RoleEnum;
 use App\Enums\UserScheduleRecordType;
 use App\Models\User;
 use App\Models\UserSchedule;
@@ -21,8 +22,11 @@ class UserScheduleFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::factory()->create();
+        $user->assignRole(RoleEnum::MENTOR->value);
+
         return [
-            'user_id'      => User::factory(),
+            'user_id'      => $user,
             'day_of_week'  => fake()->numberBetween(0, 6),
             'start_time'   => '09:00',
             'end_time'     => '17:00',

@@ -31,12 +31,12 @@ class BaseCalendarEventAction
         // Parse dates in user's timezone
         $startDateTime = Date::createFromFormat(
             'Y-m-d H:i',
-            $validated['fromDate'].' '.$validated['fromTime'],
+            $validated['fromDate'].$validated['fromTime'],
             $userTimezone
         );
         $endDateTime = Date::createFromFormat(
             'Y-m-d H:i',
-            $validated['toDate'].' '.$validated['toTime'],
+            $validated['toDate'].$validated['toTime'],
             $userTimezone
         );
 

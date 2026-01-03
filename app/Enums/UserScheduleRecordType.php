@@ -11,6 +11,9 @@ enum UserScheduleRecordType: string
     case WORKING_DAY = 'Working Day';
     case DAY_OFF = 'Day off';
 
+    /**
+     * @return array<int, string>
+     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
@@ -21,6 +24,9 @@ enum UserScheduleRecordType: string
         return in_array($driver, self::values(), true);
     }
 
+    /**
+     * @return Collection<int, array{value: string, label: string}>
+     */
     public static function getCollection(): Collection
     {
         return collect(self::cases())->map(fn ($type): array => [

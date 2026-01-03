@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[UseFactory(UserScheduleFactory::class)]
 class UserSchedule extends Model
 {
+    /** @use HasFactory<UserScheduleFactory> */
     use HasFactory;
 
     const int MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY = 4;
@@ -37,6 +38,9 @@ class UserSchedule extends Model
         'day_off_date',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

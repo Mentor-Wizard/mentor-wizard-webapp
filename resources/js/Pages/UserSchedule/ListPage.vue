@@ -290,17 +290,19 @@ const saveAllSchedules = () => {
     },
     onError: (serverErrors) => {
       console.error('Server validation errors:', serverErrors);
-      showNotification(false, 'Server validation errors:', serverErrors);
+      showNotification(false, 'Server validation errors:');
       // Map server errors to local error state
       Object.keys(serverErrors).forEach((key) => {
         if (key.startsWith('schedules.')) {
-          const match = key.match(/schedules\.(\d+)\./);
+          const match = key.match(/schedules\.(\d+)\.(\d+)/);
           if (match) {
-            const index = parseInt(match[1]);
-            const schedule = schedulesToSave[index];
+            const scheduleGroupIndex = parseInt(match[1]);
+            const scheduleIndex = parseInt(match[2]);
+
+            const schedule = schedulesToSave[scheduleIndex];
             if (schedule) {
               // Find the exact matching schedule in localSchedules
-              const dayOfWeek = schedule.day_of_week;
+              const dayOfWeek = scheduleGroupIndex;
               const localIndex = localSchedules.value[dayOfWeek]?.findIndex(
                 (s) => {
                   // Match by ID if both have IDs

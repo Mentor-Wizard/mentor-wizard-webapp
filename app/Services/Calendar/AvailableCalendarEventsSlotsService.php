@@ -7,11 +7,12 @@ namespace App\Services\Calendar;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
 
 class AvailableCalendarEventsSlotsService
 {
-    /** @var list<array{start: CarbonInterface, end: CarbonInterface}> */
+    /** @var array<int, array{start: CarbonInterface, end: CarbonInterface}> */
     private array $availableSlots = [];
 
     public function __construct(
@@ -23,7 +24,7 @@ class AvailableCalendarEventsSlotsService
     ) {}
 
     /**
-     * @return list<array{start: CarbonInterface, end: CarbonInterface}>
+     * @return array<int,array{start: CarbonInterface, end: CarbonInterface}>
      */
     public function getAvailableSlots(): array
     {
@@ -31,15 +32,36 @@ class AvailableCalendarEventsSlotsService
         $currentDateTimezone = Date::now($this->timezone);
 
         $events = $this->user->calendarEvents()
-            ->where('start_date_time', '>=', $currentDate)->orderBy('start_date_time')
+            ->where('start_date_time', '>=', $currentDate)
+            ->orderBy('start_date_time')
             ->whereKeyNot($this->excludeEvents)
             ->limit(100)
             ->get();
 
         if ($events->isEmpty()) {
-            return [];
+            $this->availableSlots[] = [
+                'start' => $currentDateTimezone,
+                'end'   => Date::now($this->timezone)
+                    ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
+            ];
+
+        } else {
+            $this->configureSlots($events, $currentDateTimezone, $currentDate);
         }
 
+        if ($this->excludeSchedule) {
+            $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user,
+                $this->availableSlots, $this->timezone)->getAvailableSlots();
+        }
+
+        return $this->availableSlots;
+    }
+
+    /**
+     * @param  Collection<int, mixed>  $events
+     */
+    protected function configureSlots(Collection $events, CarbonInterface $currentDateTimezone, CarbonInterface $currentDate): void
+    {
         $previousEvent = null;
         foreach ($events as $event) {
             /** @var CalendarEvent $event */
@@ -66,11 +88,5 @@ class AvailableCalendarEventsSlotsService
                 ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
         ];
 
-        if ($this->excludeSchedule) {
-            $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user,
-                $this->availableSlots, $this->timezone)->getAvailableSlots();
-        }
-
-        return $this->availableSlots;
     }
 }

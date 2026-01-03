@@ -58,7 +58,7 @@ describe('Calendar Pages - ShowCalendarEvent', function (): void {
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
-            ->component('Calendar/ShowEditEvent')
+            ->component('Calendar/ShowEditCalendarEvent')
             ->has('availableColours')
             ->where('permissions', 'edit')
             ->has('calendarEvent')
@@ -71,7 +71,7 @@ describe('Calendar Pages - ShowCalendarEvent', function (): void {
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
-            ->component('Calendar/ShowEditEvent')
+            ->component('Calendar/ShowEditCalendarEvent')
             ->where('permissions', 'view')
             ->has('calendarEvent')
         );

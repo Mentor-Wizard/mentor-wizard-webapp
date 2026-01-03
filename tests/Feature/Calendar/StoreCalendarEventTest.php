@@ -31,13 +31,12 @@ describe('Calendar CalendarEvent Store Page', function (): void {
 
     it('creates an event successfully', function (): void {
         actingAs($this->user);
-        auth()->login($this->user);
 
         $eventData = [
             'title'              => 'Default event',
-            'fromDate'           => Date::today()->format('Y-m-d'),
+            'fromDate'           => Date::today()->addDay()->format('Y-m-d'),
             'fromTime'           => '09:00',
-            'toDate'             => Date::today()->format('Y-m-d'),
+            'toDate'             => Date::today()->addDay()->format('Y-m-d'),
             'toTime'             => '10:00',
             'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'            => 'https://google.com',
@@ -53,9 +52,9 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $this->assertDatabaseHas('calendar_events', [
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Date::today()->format('Y-m-d').' 07:00:00',
-            'end_date_time'     => Date::today()->format('Y-m-d').' 08:00:00',
-            'date'              => Date::today()->format('Y-m-d'),
+            'start_date_time'   => Date::today()->addDay()->format('Y-m-d').' 07:00:00',
+            'end_date_time'     => Date::today()->addDay()->format('Y-m-d').' 08:00:00',
+            'date'              => Date::today()->addDay()->format('Y-m-d'),
             'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
@@ -377,8 +376,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     });
 
     it('throws 403 when a non-mentor user tries to create an event', function (): void {
-        actingAs($this->nonMentorUser);
-        auth()->login($this->nonMentorUser);
+
         $eventData = [
             'title'             => 'Default event',
             'fromDate'          => Date::today()->format('Y-m-d'),
@@ -390,7 +388,12 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'colour'            => CalendarEventColoursEnum::BLUE->value,
         ];
 
-        $response = $this->post(route('pages.calendar.store'), $eventData);
+        $response = $this->actingAs($this->nonMentorUser)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('pages.calendar.store'), array_merge($eventData, [
+                '_token' => 'test-token',
+            ]));
+
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 });

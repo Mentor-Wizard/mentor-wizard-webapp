@@ -18,8 +18,8 @@ class ShowCalendarEventPage
     public function handle(CalendarEvent $calendarEvent): Response
     {
         $user = auth()->user();
-        $profile = $user?->profile;
-        $timezone = $profile ? $profile->timezone : config('app.timezone');
+        $profile = $user->profile;
+        $timezone = $profile->timezone;
 
         return Inertia::render('Calendar/ShowEditCalendarEvent', [
             'locale'           => app()->getLocale(),

@@ -7,6 +7,7 @@ namespace App\Http\Requests\UserSchedule;
 use App\Enums\UserScheduleRecordType;
 use App\Services\UserSchedule\CheckUserScheduleOverlap;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -45,7 +46,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
     /**
      * Configure the validator instance.
      */
-    public function withValidator($validator): void
+    public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
             if ($validator->errors()->any()) {
@@ -53,17 +54,20 @@ class StoreBatchUserScheduleRequest extends FormRequest
             }
 
             $user = Auth::user();
-            $schedules = $this->input('schedules', []);
-            $deleteIds = $this->input('delete_ids', []);
+            $schedules = $this->input('schedules') ?? [];
+            $deleteIds = $this->input('delete_ids') ?? [];
 
-            $overLappingErrors = new CheckUserScheduleOverlap($schedules, $deleteIds, $user?->id)->verifyOverlappingErrors();
+            if (! $validator->errors()->hasAny(['schedules', 'delete_ids'])) {
 
-            // Errors are returned as a list of [key => message] arrays — flatten and add
-            foreach ($overLappingErrors as $errorPair) {
-                foreach ($errorPair as $key => $message) {
-                    $validator->errors()->add($key, $message);
+                $overLappingErrors = new CheckUserScheduleOverlap($schedules, $deleteIds, $user?->id)->verifyOverlappingErrors();
+
+                foreach ($overLappingErrors as $errorPair) {
+                    foreach ($errorPair as $key => $message) {
+                        $validator->errors()->add($key, $message);
+                    }
                 }
             }
+
         });
     }
 

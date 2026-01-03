@@ -57,7 +57,7 @@ class MonthCalendarEventsService
     private function prepareDateConfiguration(): array
     {
         // Convert to UTC for database queries
-        $utcDate = Date::parse($this->date)->timezone('UTC');
+        $utcDate = Date::parse($this->date);
         $startDate = $utcDate->copy()->startOfMonth()->startOfWeek();
         $endDate = $utcDate->copy()->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
