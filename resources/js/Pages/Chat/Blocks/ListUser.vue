@@ -7,7 +7,8 @@ import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
 import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
 
-const { sortedUsers, messageSortList, messageSortBy } = useCaseChat();
+const { sortedUsers, messageSortList, messageSortBy, fetchMessages } =
+  useCaseChat();
 
 const selectedTab = ref(0);
 
@@ -77,8 +78,9 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
 
   <div
     v-for="user in sortedUsers"
+    @click="fetchMessages(user.id)"
     :key="user.id"
-    class="mt-2 flex max-w-md items-start rounded-lg border border-gray-200 p-2 shadow-sm"
+    class="mt-2 flex max-w-md cursor-pointer items-start rounded-lg border border-gray-200 p-2 shadow-sm"
     :class="user.active ? 'bg-gray-100' : 'bg-white'"
   >
     <div class="relative">
@@ -101,9 +103,10 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
         </h4>
         <span class="text-[0.75rem] text-gray-500">{{ user.last }}</span>
       </div>
-      <p class="mt-1 line-clamp-2 text-[0.75rem] text-gray-800">
-        {{ user.message }}
-      </p>
+      <p
+        v-html="user.message"
+        class="mt-1 line-clamp-2 text-[0.75rem] text-gray-800"
+      ></p>
     </div>
   </div>
 </template>

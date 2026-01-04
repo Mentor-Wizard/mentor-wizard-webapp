@@ -15,8 +15,10 @@ import emojiList from 'unicode-emoji-json';
 import { onBeforeUnmount, ref } from 'vue';
 
 import { useCaseFileType } from '../useCaseFileType.js';
+import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 const { getColorByFileName, getIconByFileName } = useCaseFileType();
+const { sendMessage } = useCaseChat();
 
 const editor = new Editor({
   extensions: [
@@ -38,7 +40,7 @@ const setLink = () => {
     editor.chain().focus().unsetLink().run();
     return;
   }
-  const url = window.prompt('URL посилання:');
+  const url = window.prompt('URL link:');
   if (!url) return;
   editor.chain().focus().setLink({ href: url }).run();
 };
@@ -75,13 +77,8 @@ const removeFile = (index) => {
   filesForm.value = filesForm.value.filter((_, i) => i !== index);
 };
 
-// TODO - send data to backend
-const sendMessage = () => {
-  // get data from editor
-  // const html = editor.getHTML();
-  if (filesForm.value.length > 0) {
-    // TODO - attach files to request
-  }
+const send = () => {
+  sendMessage(filesForm, editor.getHTML());
 
   editor.commands.clearContent();
   filesForm.value = [];
@@ -148,7 +145,7 @@ onBeforeUnmount(() => {
       <button
         class="mb-2 rounded px-1 py-1 text-gray-600 hover:bg-blue-100"
         :disabled="editor.isEmpty && filesForm.length === 0"
-        @click="sendMessage"
+        @click="send"
       >
         <PaperAirplaneIcon
           class="size-5 cursor-pointer text-blue-600 hover:text-blue-800"

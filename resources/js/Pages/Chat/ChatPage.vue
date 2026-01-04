@@ -5,9 +5,12 @@ import ListUser from '@/Pages/Chat/Blocks/ListUser.vue';
 import MainList from '@/Pages/Chat/Blocks/MainList.vue';
 import { useCaseChat } from './useCaseChat.js';
 import { onMounted, onUnmounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 const { subscribeUser, unsubscribeUser, fetchUsers } = useCaseChat();
+const user = usePage().props.auth.user;
+
 onMounted(() => {
-  fetchUsers();
+  fetchUsers(user.id);
 });
 
 onUnmounted(() => {

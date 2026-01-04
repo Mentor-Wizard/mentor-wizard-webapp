@@ -9,15 +9,19 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @mixin IdeHelperChatMessage
  */
 #[UseFactory(ChatMessageFactory::class)]
-class ChatMessage extends Model
+class ChatMessage extends Model implements HasMedia
 {
     /** @use HasFactory<ChatMessageFactory> */
     use HasFactory;
+
+    use InteractsWithMedia;
 
     protected $fillable = [
         'sender_id',
@@ -34,6 +38,12 @@ class ChatMessage extends Model
     public function userReceiver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('files')
+            ->useDisk('public');
     }
 
     /**
