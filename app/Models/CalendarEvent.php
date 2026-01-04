@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Policies\CalendarEventPolicy;
 use Database\Factories\CalendarEventFactory;
+use Database\Factories\CurrencyFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Casts\Attribute;

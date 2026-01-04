@@ -7,6 +7,7 @@ namespace App\Http\Requests\UserSchedule;
 use App\Enums\UserScheduleRecordType;
 use App\Models\UserSchedule;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -42,7 +43,7 @@ class StoreUserScheduleRequest extends FormRequest
     /**
      * Configure the validator instance.
      */
-    public function withValidator($validator): void
+    public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator): void {
             if ($validator->errors()->any()) {

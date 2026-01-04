@@ -14,24 +14,42 @@ class CheckUserScheduleOverlap
     // in view component day off exclusions are set next ot the 7 days of week. So index is 0-6 + 1
     private const int INDEX_OF_EXCLUSION_AT_VUE_COMPONENT = 7;
 
+    /**
+     * @var array<int, array<int, mixed>>
+     */
     private array $schedulesByDay = [];
 
+    /**
+     * @var array<int, mixed>
+     */
     private array $dayOffExclusions = [];
 
+    /**
+     * @var array<int|string, array<string, string>>
+     */
     private array $errors = [];
 
+    /**
+     * @param  array<int, mixed>  $schedules
+     * @param  array<int, int>  $deleteIds
+     */
     public function __construct(
         private array $schedules,
         private readonly array $deleteIds,
         private readonly int $userId) {}
 
+    /**
+     * @return array<int|string, array<string, string>>
+     */
     public function verifyOverlappingErrors(): array
     {
         $this->combineExistingAndNewSchedules();
         $this->groupSchedulesByday();
         $this->sortScheduleByStartTime();
         $this->checkNumberPerDay();
-        $this->checkWeekDayOverlapping();
+        foreach ($this->schedulesByDay as $dayOfWeek => $daySchedules) {
+            $this->checkWeekDayOverlapping($dayOfWeek, $daySchedules);
+        }
 
         return $this->errors;
     }
@@ -86,7 +104,7 @@ class CheckUserScheduleOverlap
             if (count($daySchedules) > UserSchedule::MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY) {
                 $this->errors[] = [
                     sprintf('schedules.%s.max_schedules_per_day',
-                        $index) => 'There are more than '.UserSchedule::MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY
+                        $index.'.0') => 'There are more than '.UserSchedule::MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY
                         .'  schedules for this day',
                 ];
             }
@@ -110,27 +128,30 @@ class CheckUserScheduleOverlap
         }
     }
 
-    private function checkWeekDayOverlapping(): void
+    /**
+     * @param  array<int,mixed>  $daySchedules
+     */
+    private function checkWeekDayOverlapping(int $dayOfWeek, array $daySchedules): void
     {
-        foreach ($this->schedulesByDay as $dayOfWeek => $daySchedules) {
-            $schedulesCount = count($daySchedules);
-            if ($schedulesCount <= UserSchedule::MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY) {
-                foreach ($daySchedules as $index => $schedule) {
-                    $nextSchedule = Arr::get($daySchedules, $index + 1) ?? null;
-                    if (! $nextSchedule) {
-                        continue;
-                    }
-                    if (Date::parse($schedule['end_time']) <= Date::parse($nextSchedule['start_time'])) {
-                        continue;
-                    }
-
-                    $this->errors[] = [
-                        sprintf('schedules.%s.start_time',
-                            $dayOfWeek) => 'This time slot overlaps with another schedule on the same day.',
-                    ];
-
-                    return;
+        $schedulesCount = count($daySchedules);
+        if ($schedulesCount <= UserSchedule::MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY) {
+            foreach ($daySchedules as $index => $schedule) {
+                $nextSchedule = Arr::get($daySchedules, $index + 1) ?? null;
+                if (! $nextSchedule) {
+                    continue;
                 }
+
+                if (Date::parse($schedule['end_time']) <= Date::parse($nextSchedule['start_time'])) {
+                    continue;
+                }
+
+                $errorIndex = Arr::get($schedule, 'index') ? $dayOfWeek.'.'.$schedule['index'] : $dayOfWeek;
+                $this->errors[] = [
+                    sprintf('schedules.%s.start_time',
+                        $errorIndex) => 'This time slot overlaps with another schedule on the same day.',
+                ];
+
+                return;
             }
         }
     }

@@ -28,7 +28,7 @@ describe('EditCalendarEventRequest Validation', function (): void {
 
         $this->prepareRequest = function (EditCalendarEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Redirector::class));
+            $request->setRedirector(resolve(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });
@@ -154,9 +154,13 @@ describe('Update Calendar CalendarEvent', function (): void {
         $request = Mockery::mock(EditCalendarEventRequest::class);
         $request->shouldReceive('getEventData')->never();
 
-        $response = $this->patch(route('pages.calendar.edit', $this->event), [
-            'title' => 'Updated Event',
-        ]);
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $this->event),
+                [
+                    'title'  => 'Updated Event',
+                    '_token' => 'test-token',
+                ]
+            );
 
         $response->assertStatus(403);
     });

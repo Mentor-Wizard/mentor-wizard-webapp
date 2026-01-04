@@ -211,11 +211,17 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->hasMany(Chat::class, 'coach_id');
     }
 
+    /**
+     * @return HasMany<UserSchedule, $this>
+     */
     public function schedules(): HasMany
     {
         return $this->hasMany(UserSchedule::class);
     }
 
+    /**
+     * @return HasMany<UserSchedule, $this>
+     */
     public function activeScheduleRecords(): HasMany
     {
         return $this->schedules()

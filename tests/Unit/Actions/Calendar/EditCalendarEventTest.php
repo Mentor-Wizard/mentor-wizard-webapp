@@ -23,7 +23,7 @@ describe('EditCalendarEvent', function (): void {
 
         $this->prepareRequest = function (EditCalendarEventRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Redirector::class));
+            $request->setRedirector(resolve(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });

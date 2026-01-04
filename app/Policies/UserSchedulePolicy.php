@@ -12,6 +12,9 @@ class UserSchedulePolicy
 {
     /**
      * Create a new policy instance.
+     *
+     * @param  Collection<int, array{id?: int}>  $scheduleBatch
+     * @param  array<int, int>  $deleteIds
      */
     public function upsert(User $user, Collection $scheduleBatch, array $deleteIds): bool
     {
@@ -22,10 +25,6 @@ class UserSchedulePolicy
             ->toArray();
 
         $allIdsToCheck = array_merge($updateIds, $deleteIds);
-
-        if ($allIdsToCheck === []) {
-            return true;
-        }
 
         return ! UserSchedule::query()
             ->whereIn('id', $allIdsToCheck)

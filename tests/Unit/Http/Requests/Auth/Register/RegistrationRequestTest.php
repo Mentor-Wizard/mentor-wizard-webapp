@@ -216,5 +216,95 @@ describe('RegistrationRequest Validation', function (): void {
             expect($validator->fails())->toBeTrue()
                 ->and($validator->errors()->get('password'))->toHaveCount(1);
         });
+
+        it('requires timezone validation check', function (): void {
+            $data = [
+                'username'              => 'validuser',
+                'email'                 => 'test@example.com',
+                'password'              => 'somepassword',
+                'password_confirmation' => 'somepassword',
+                'timezone'              => null,
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->get('timezone'))->toHaveCount(1);
+        });
+
+        it('requires timezone validation check with number', function (): void {
+            $data = [
+                'username'              => 'validuser',
+                'email'                 => 'test@example.com',
+                'password'              => 'somepassword',
+                'password_confirmation' => 'somepassword',
+                'timezone'              => 234234,
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->get('timezone'))->toHaveCount(2);
+        });
+
+        it('check custom timezones', function (): void {
+            $data = [
+                'username'              => 'validuser',
+                'email'                 => 'test@example.com',
+                'password'              => 'somepassword',
+                'password_confirmation' => 'somepassword',
+                'timezone'              => 'Europe/Kiev',
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->passes())->toBeTrue();
+
+            $data = [
+                'username'              => 'validuser',
+                'email'                 => 'test@example.com',
+                'password'              => 'somepassword',
+                'password_confirmation' => 'somepassword',
+                'timezone'              => 'Asia/Calcutta',
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->passes())->toBeTrue();
+        });
+
+        it('check wrong timezones', function (): void {
+            $data = [
+                'username'              => 'validuser',
+                'email'                 => 'test@example.com',
+                'password'              => 'somepassword',
+                'password_confirmation' => 'somepassword',
+                'timezone'              => 'Europe/Wrong',
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->get('timezone'))->toHaveCount(1);
+
+            $data = [
+                'username'              => 'validuser',
+                'email'                 => 'test@example.com',
+                'password'              => 'somepassword',
+                'password_confirmation' => 'somepassword',
+                'timezone'              => 'Wrong/Calcutta',
+            ];
+
+            $request = new RegistrationRequest;
+            $validator = Validator::make($data, $request->rules());
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->get('timezone'))->toHaveCount(1);
+        });
     });
 });

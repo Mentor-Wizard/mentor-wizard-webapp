@@ -48,6 +48,15 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
             'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
+        // Create schedule: Monday 9:00-17:00
+        UserSchedule::query()->create([
+            'user_id'     => $user->getKey(),
+            'day_of_week' => 2, // Monday
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::WORKING_DAY,
+        ]);
+
         // Event slot from 8:00 to 18:00 (spans beyond working hours)
         $eventsSlots = [
             [

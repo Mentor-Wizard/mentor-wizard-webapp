@@ -42,7 +42,7 @@ describe('CheckUserScheduleOverlap', function (): void {
             }
         }
 
-        expect($keys)->toContain('schedules.1.max_schedules_per_day');
+        expect($keys)->toContain('schedules.1.0.max_schedules_per_day');
     });
 
     it('returns error when day off exclusions exceed the maximum', function (): void {

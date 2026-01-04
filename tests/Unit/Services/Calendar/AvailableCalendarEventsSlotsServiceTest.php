@@ -2,17 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Enums\UserScheduleRecordType;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserSchedule;
 use App\Services\Calendar\AvailableCalendarEventsSlotsService;
+use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
 mutates(AvailableCalendarEventsSlotsService::class);
 
-describe('GetAvailableSlotsService Service', function (): void {
+describe('AvailableCalendarEventsSlotsService', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
     });
@@ -23,7 +26,35 @@ describe('GetAvailableSlotsService Service', function (): void {
 
         $slots = new AvailableCalendarEventsSlotsService($user, 'Europe/Kyiv')->getAvailableSlots();
 
-        expect($slots)->toBeArray()->toBeEmpty();
+        expect($slots)->toBeArray()->toHaveCount(1);
+        expect($slots[0]['start'])->toBeInstanceOf(CarbonImmutable::class);
+        expect($slots[0]['end'])->toBeInstanceOf(CarbonImmutable::class);
+    });
+
+    it('check limit of calendar events', function (): void {
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        $user = User::factory()->create();
+
+        for ($i = 1; $i <= 105; $i++) {
+            $currentCalendarEvent = CalendarEvent::query()->create([
+                'start_date_time' => Date::now()->addDays($i)->setTime(10, 0)->format('Y-m-d H:i:s'),
+                'end_date_time'   => Date::now()->addDays($i)->setTime(11, 0)->format('Y-m-d H:i:s'),
+                'date'            => Date::now()->addDays($i)->format('Y-m-d'),
+                'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'title'           => 'Event '.$i,
+                'status'          => CalendarEventStatusEnum::CONFIRMED->value,
+            ]);
+            $user->calendarEvents()->attach($currentCalendarEvent->getKey());
+        }
+
+        $service = new AvailableCalendarEventsSlotsService(
+            user: $user,
+            timezone: 'UTC',
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toHaveCount(101);
     });
 
     it('builds available slots between events using timezone conversion', function (): void {
@@ -239,6 +270,8 @@ describe('GetAvailableSlotsService Service', function (): void {
             'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
+        $dayOffdate = Date::today()->addMonth()->firstOfMonth(1); // Next Monday
+
         // Create a day off on Monday, January 13
         UserSchedule::query()->create([
             'user_id'      => $user->getKey(),
@@ -246,7 +279,7 @@ describe('GetAvailableSlotsService Service', function (): void {
             'start_time'   => '00:00:00',
             'end_time'     => '23:59:59',
             'type'         => UserScheduleRecordType::DAY_OFF,
-            'day_off_date' => Date::today()->addMonth()->firstOfMonth(1), // Next Monday
+            'day_off_date' => $dayOffdate,
         ]);
 
         // Create events on both Mondays
@@ -266,7 +299,7 @@ describe('GetAvailableSlotsService Service', function (): void {
             'start_date_time' => $event1Start,
             'end_date_time'   => $event1End,
             'date'            => $event1Start->format('Y-m-d'),
-            'type'            => 'individual',
+            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
         ]);
 
         $event2 = CalendarEvent::query()->create([
@@ -275,7 +308,7 @@ describe('GetAvailableSlotsService Service', function (): void {
             'start_date_time' => $event2Start,
             'end_date_time'   => $event2End,
             'date'            => $event2Start->format('Y-m-d'),
-            'type'            => 'individual',
+            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
         ]);
 
         $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
@@ -284,16 +317,18 @@ describe('GetAvailableSlotsService Service', function (): void {
         $result = new AvailableCalendarEventsSlotsService($user, $tz, [], true)->getAvailableSlots();
 
         // Slots should not include or overlap with the day off date (2025-01-13)
-        $slotsOnDayOff = array_filter($result, function (array $slot): bool {
+
+        $slotsOnDayOff = array_filter($result, function (array $slot) use ($dayOffdate): bool {
             $slotDate = $slot['start']->format('Y-m-d');
             $slotEndDate = $slot['end']->format('Y-m-d');
-            if ($slotDate === Date::now()->addMonth()->firstOfMonth(1)->addWeek()->format('Y-m-d')) {
+            if ($slotDate === $dayOffdate->format('Y-m-d')) {
                 return true;
             }
 
-            return $slotEndDate === Date::now()->addMonth()->firstOfMonth(1)->addWeek()->format('Y-m-d');
+            return $slotEndDate === $dayOffdate->format('Y-m-d');
         });
 
+        expect($result)->not->toBeEmpty();
         expect($slotsOnDayOff)->toBeEmpty();
     });
 

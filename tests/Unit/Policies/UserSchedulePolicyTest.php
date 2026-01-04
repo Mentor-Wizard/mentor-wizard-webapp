@@ -78,6 +78,15 @@ describe('UserSchedulePolicy', function (): void {
         expect($result)->toBeFalse();
     });
 
+    it('pass upsert, in case no user schedules are set', function (): void {
+        $otherUser = User::factory()->create();
+        $otherSchedule = UserSchedule::factory()->create(['user_id' => $otherUser->id]);
+
+        $result = $this->policy->upsert($this->user, collect([]), []);
+
+        expect($result)->toBeTrue();
+    });
+
     it('allows mixed create and update of own schedules', function (): void {
         $existingSchedule = UserSchedule::factory()->create(['user_id' => $this->user->id]);
 

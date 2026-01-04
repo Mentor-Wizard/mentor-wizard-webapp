@@ -5,44 +5,75 @@ declare(strict_types=1);
 namespace App\Services\Calendar;
 
 use App\Models\User;
+use App\Models\UserSchedule;
+use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
 
 class ExcludeUserScheduleSchemeService
 {
+    /**
+     * @var array<int,array{start: CarbonInterface, end: CarbonInterface}>
+     */
     private array $scheduleSlots = [];
 
+    /**
+     * @var array<array<int|string, mixed>>
+     */
     private array $formattedSlots = [];
 
+    /**
+     * @var array<int, mixed>
+     */
     private array $checkedIntervals;
 
-    private string $scheduleTimezone;
+    private readonly string $scheduleTimezone;
 
-    private array $listOfExclusions = [];
+    /**
+     * @var array<int, mixed>
+     */
+    private array $daysOffList = [];
 
-    private Collection $userSchedules;
+    /**
+     * @var Collection<string, EloquentCollection<int, UserSchedule>>
+     */
+    private readonly Collection $userSchedules;
 
-    public function __construct(private readonly User $user,
+    /**
+     * @param  array<int, array{start: CarbonInterface, end: CarbonInterface}>  $eventsSlots
+     */
+    public function __construct(
+        private readonly User $user,
         private readonly array $eventsSlots,
-        private readonly string $chosenTimezone) {}
+        private readonly string $chosenTimezone)
+    {
+        $this->scheduleTimezone = $this->user->profile->timezone;
+        $this->userSchedules = $this->user->activeScheduleRecords()->get()->groupBy('type');
+    }
 
+    /**
+     * @return array<int,array{start: CarbonInterface, end: CarbonInterface}>
+     */
     public function getAvailableSlots(): array
     {
-        $this->prepareUserSchedule();
-        $this->splitEventsAvailableSlotsPerDay();
-        $this->compareEventsAndScheduleSlots();
+        $this->groupUserScheduleByDayAndTypes();
+        foreach ($this->eventsSlots as $eventSlot) {
+            $this->groupCalendarEventsSlotsPerDay($eventSlot);
+        }
+
+        if (isset($this->formattedSlots['Working Day']) && (isset($this->formattedSlots['Working Day']) && $this->formattedSlots['Working Day'] !== [])) {
+            foreach ($this->checkedIntervals as $currentInterval) {
+                $this->combineCalendarEventsAndUserScheduleSlots($currentInterval);
+            }
+        }
 
         return $this->scheduleSlots;
     }
 
-    private function prepareUserSchedule(): void
+    private function groupUserScheduleByDayAndTypes(): void
     {
-        $schedules = $this->user->activeScheduleRecords();
-
-        $this->scheduleTimezone = $this->user->profile->timezone ?? config('app.timezone');
-        $this->userSchedules = $schedules->get()->groupBy('type');
-
         foreach ($this->userSchedules as $type => $schedules) {
             if (isset($this->formattedSlots[$type])) {
                 $this->formattedSlots[$type][] = $schedules->groupBy('day_of_week')->toArray();
@@ -53,88 +84,129 @@ class ExcludeUserScheduleSchemeService
 
         if (isset($this->formattedSlots['Day off'])) {
             foreach ($this->formattedSlots['Day off'][1] as $dayOff) {
-                $this->listOfExclusions[] = Date::parse($dayOff['day_off_date'])->format('Y-m-d');
+                $this->daysOffList[] = Date::parse($dayOff['day_off_date'])->format('Y-m-d');
             }
         }
     }
 
-    private function splitEventsAvailableSlotsPerDay(): void
+    /**
+     * @param  array{start: CarbonInterface, end: CarbonInterface}  $eventSlot
+     */
+    private function groupCalendarEventsSlotsPerDay(array $eventSlot): void
     {
-        foreach ($this->eventsSlots as $eventSlot) {
-            $startTime = $eventSlot['start'];
-            $endTime = $eventSlot['end'];
-            $carbonPeriod = CarbonPeriod::create($startTime->timezone($this->scheduleTimezone), '1 day',
-                $endTime->timezone($this->scheduleTimezone));
-            foreach ($carbonPeriod as $date) {
-                if (($date->format('Y-m-d') === $startTime->format('Y-m-d')) && $carbonPeriod->count() === 1) {
-                    if ($startTime->format('Y-m-d') !== $endTime->format('Y-m-d')) {
-                        $this->checkedIntervals[] = [
-                            'start' => $startTime,
-                            'end'   => $startTime->endOfDay(),
-                        ];
-                        $this->checkedIntervals[] = [
-                            'start' => clone ($endTime)->startOfDay(),
-                            'end'   => $endTime,
-                        ];
-                    } else {
-                        $this->checkedIntervals[] = [
-                            'start' => $startTime,
-                            'end'   => $endTime,
-                        ];
-                    }
-                } elseif ($date->format('Y-m-d') === $startTime->format('Y-m-d')) {
-                    $this->checkedIntervals[] = [
-                        'start' => $date->copy(),
-                        'end'   => $date->copy()->endOfDay(),
-                    ];
-                } elseif ($date->format('Y-m-d') === $endTime->format('Y-m-d')) {
-                    $this->checkedIntervals[] = [
-                        'start' => $date->copy()->startOfDay(),
-                        'end'   => $endTime,
-                    ];
-                } else {
-                    $this->checkedIntervals[] = [
-                        'start' => $date->copy()->startOfDay(),
-                        'end'   => $date->copy()->endOfDay(),
-                    ];
-                }
+        $startTime = $eventSlot['start'];
+        $endTime = $eventSlot['end'];
+        $carbonPeriod = CarbonPeriod::create($startTime->timezone($this->scheduleTimezone), '1 day',
+            $endTime->timezone($this->scheduleTimezone));
+
+        foreach ($carbonPeriod as $date) {
+            if (($carbonPeriod->count() === 1) && ($date->format('Y-m-d') === $startTime->format('Y-m-d'))) {
+                $this->oneDayPeriodFormatting($startTime, $endTime);
+            } elseif ($date->format('Y-m-d') === $startTime->format('Y-m-d')) {
+                $this->firstDateFormatting($startTime);
+            } elseif ($date->format('Y-m-d') === $endTime->format('Y-m-d')) {
+                $this->lastDateFormatting($startTime, $endTime);
+            } else {
+                $this->middleDateFormatting($startTime);
             }
         }
     }
 
-    private function compareEventsAndScheduleSlots(): void
+    private function oneDayPeriodFormatting(CarbonInterface $startTime, CarbonInterface $endTime): void
     {
-        if (isset($this->formattedSlots['Working Day']) && ! empty($this->formattedSlots['Working Day'])) {
+        if ($startTime->format('Y-m-d') !== $endTime->format('Y-m-d')) {
+            $this->checkedIntervals[] = [
+                'start' => $startTime,
+                'end'   => $startTime->endOfDay(),
+            ];
+            $this->checkedIntervals[] = [
+                'start' => clone ($endTime)->startOfDay(),
+                'end'   => $endTime,
+            ];
+        } else {
+            $this->checkedIntervals[] = [
+                'start' => $startTime,
+                'end'   => $endTime,
+            ];
+        }
+    }
 
-            foreach ($this->checkedIntervals as $currentInterval) {
-                $eventSlotStart = $currentInterval['start'];
-                $eventSlotEnd = $currentInterval['end'];
-                $checkedDate = ($eventSlotStart)->format('Y-m-d');
+    private function firstDateFormatting(CarbonInterface $date): void
+    {
+        $this->checkedIntervals[] = [
+            'start' => $date->copy(),
+            'end'   => $date->copy()->endOfDay(),
+        ];
+    }
 
-                if (in_array($checkedDate, $this->listOfExclusions)) {
-                    continue;
-                }
+    private function lastDateFormatting(CarbonInterface $date, CarbonInterface $endTime): void
+    {
+        $this->checkedIntervals[] = [
+            'start' => $date->copy()->startOfDay(),
+            'end'   => $endTime,
+        ];
+    }
 
-                $dayOfWeek = $eventSlotStart->dayOfWeek;
+    private function middleDateFormatting(CarbonInterface $date): void
+    {
+        $this->checkedIntervals[] = [
+            'start' => $date->copy()->startOfDay(),
+            'end'   => $date->copy()->endOfDay(),
+        ];
+    }
 
-                if (isset($this->formattedSlots['Working Day'][$dayOfWeek])) {
-                    foreach ($this->formattedSlots['Working Day'][$dayOfWeek] as $schedule) {
-                        $scheduleStartTime = Date::parse($checkedDate
-                            .' '.$schedule['start_time'], $this->scheduleTimezone)
-                            ->timezone($this->chosenTimezone ?? config('app.timezone'));
-                        $scheduleEndTime = Date::parse($checkedDate
-                            .' '.$schedule['end_time'], $this->scheduleTimezone)
-                            ->timezone($this->chosenTimezone ?? config('app.timezone'));
-                        if (! $eventSlotStart->greaterThanOrEqualTo($scheduleEndTime)
-                            && ! $eventSlotEnd->lessThanOrEqualTo($scheduleStartTime)) {
-                            $periodStart = ($eventSlotStart->greaterThanOrEqualTo($scheduleStartTime))
-                                ? $eventSlotStart->timezone($this->chosenTimezone) : $scheduleStartTime;
-                            $periodEnd = ($eventSlotEnd->greaterThanOrEqualTo($scheduleEndTime))
-                                ? $scheduleEndTime : $eventSlotEnd->timezone($this->chosenTimezone);
-                            $this->scheduleSlots[] = ['start' => $periodStart, 'end' => $periodEnd];
-                        }
-                    }
-                }
+    /**
+     * @param  array{start: CarbonInterface, end: CarbonInterface}  $currentInterval
+     */
+    private function combineCalendarEventsAndUserScheduleSlots(array $currentInterval): void
+    {
+        $eventSlotStart = $currentInterval['start'];
+        $eventSlotEnd = $currentInterval['end'];
+        $checkedDate = ($eventSlotStart)->format('Y-m-d');
+
+        if (in_array($checkedDate, $this->daysOffList)) {
+            return;
+        }
+
+        $dayOfWeek = $eventSlotStart->dayOfWeek;
+        if (isset($this->formattedSlots['Working Day'][$dayOfWeek])) {
+            $this->defineCombinedSlots($dayOfWeek, $checkedDate, $eventSlotStart, $eventSlotEnd);
+        }
+    }
+
+    private function defineCombinedSlots(
+        int $dayOfWeek,
+        string $checkedDate,
+        CarbonInterface $eventSlotStart,
+        CarbonInterface $eventSlotEnd): void
+    {
+        foreach ($this->formattedSlots['Working Day'][$dayOfWeek] as $schedule) {
+            $scheduleStartTime = Date::parse(
+                $checkedDate
+                .$schedule['start_time'],
+                $this->scheduleTimezone)
+                ->timezone($this->chosenTimezone);
+
+            $scheduleEndTime = Date::parse(
+                $checkedDate
+                .$schedule['end_time'],
+                $this->scheduleTimezone)
+                ->timezone($this->chosenTimezone);
+
+            if (! $eventSlotStart->greaterThanOrEqualTo($scheduleEndTime)
+                && ! $eventSlotEnd->lessThanOrEqualTo($scheduleStartTime)) {
+
+                $periodStart = ($eventSlotStart->greaterThanOrEqualTo($scheduleStartTime))
+                    ? $eventSlotStart->timezone($this->chosenTimezone)
+                    : $scheduleStartTime;
+                $periodEnd = ($eventSlotEnd->greaterThanOrEqualTo($scheduleEndTime))
+                    ? $scheduleEndTime
+                    : $eventSlotEnd->timezone($this->chosenTimezone);
+
+                $this->scheduleSlots[] = [
+                    'start' => $periodStart,
+                    'end'   => $periodEnd,
+                ];
             }
         }
     }

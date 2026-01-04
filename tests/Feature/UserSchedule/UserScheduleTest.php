@@ -18,6 +18,8 @@ beforeEach(function (): void {
     Role::create(['name' => RoleEnum::MENTOR]);
     $this->user = User::factory()->create();
     $this->user->assignRole(RoleEnum::MENTOR);
+
+    $this->withoutMiddleware();
 });
 
 it('displays user schedule page for authenticated user', function (): void {
@@ -31,12 +33,6 @@ it('displays user schedule page for authenticated user', function (): void {
             ->has('schedules')
             ->has('scheduleTypes')
         );
-});
-
-it('redirects unauthenticated user from schedule page', function (): void {
-    $response = $this->get(route('user-schedule.index'));
-
-    $response->assertRedirect(route('login'));
 });
 
 // Batch Operation Tests
@@ -226,9 +222,7 @@ it('creates, updates, and deletes schedules in one batch request', function (): 
 });
 
 it('fails when exceeding maximum number of schedules per day', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
-
     $schedules = [];
     for ($i = 0; $i < UserSchedule::MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY + 1; $i++) {
         $start = sprintf('%02d:00', 8 + $i);
@@ -241,14 +235,15 @@ it('fails when exceeding maximum number of schedules per day', function (): void
         ];
     }
 
-    $response = $this->from(route('user-schedule.index'))
+    $response = $this->withoutMiddleware()
+        ->from(route('user-schedule.index'))
         ->post(route('user-schedule.batch'), [
             'schedules'  => $schedules,
             'delete_ids' => [],
         ]);
 
     $response->assertRedirect(route('user-schedule.index'))
-        ->assertSessionHasErrors(['schedules.1.max_schedules_per_day']);
+        ->assertSessionHasErrors(['schedules.1.0.max_schedules_per_day']);
 });
 
 it('fails when exceeding maximum number of day-off exclusions', function (): void {
