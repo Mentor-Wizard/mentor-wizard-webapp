@@ -64,13 +64,14 @@ class GetBookingCalendarEventsService
             $this->mentorProgram)
             ->getAvailableSlots());
 
-        $splitSlots =  new SplitSlotsPerSessionDuration(
+        $splitSlots = new SplitSlotsPerSessionDuration(
             $availableSlots,
             $this->mentorProgram->session_duration,
-        $this->timezone)
+            $this->timezone)
             ->getSplitSlots();
 
         $slotsCollection = collect($splitSlots)->map(fn ($slot): stdClass => (object) ($slot));
+
         return $slotsCollection->map($this->formatDateEvents(...))->all();
     }
 

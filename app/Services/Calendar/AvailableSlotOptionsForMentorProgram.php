@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Calendar;
 
 use App\Models\CalendarEvent;
@@ -8,7 +10,6 @@ use App\Models\User;
 
 class AvailableSlotOptionsForMentorProgram
 {
-
     protected MentorProgram $mentorProgram;
 
     protected int $mentorSessionDuration;
@@ -25,12 +26,13 @@ class AvailableSlotOptionsForMentorProgram
 
     public function getAvailableSlots(): SplitSlotsPerSessionDuration
     {
-        $availableSlots  = new AvailableCalendarEventsSlotsService($this->mentor,
+        $availableSlots = new AvailableCalendarEventsSlotsService($this->mentor,
             $this->mentor->profile->timezone,
-        [],
-        true,
-        $this->mentorProgram
+            [],
+            true,
+            $this->mentorProgram
         )->getAvailableSlots();
+
         return new SplitSlotsPerSessionDuration($availableSlots,
             $this->mentorSessionDuration,
             $this->mentor->profile->timezone);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
-use Override;
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class EditCalendarEventRequest extends FormRequest
 {
