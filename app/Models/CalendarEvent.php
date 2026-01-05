@@ -38,6 +38,7 @@ class CalendarEvent extends Model
     use HasFactory;
 
     const MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET = 6;
+
     const ROUNDING_DISCRECY_TIME_IN_MINUTES = 5;
 
     protected $fillable = [
@@ -64,12 +65,12 @@ class CalendarEvent extends Model
             ->withTimestamps();
     }
 
-    public function MentorSession():BelongsTo
+    public function mentorSession():BelongsTo
     {
         return $this->belongsTo(MentorSession::class);
     }
 
-    public function MentorProgram():BelongsTo
+    public function mentorProgram():BelongsTo
     {
         return $this->belongsTo(MentorProgram::class);
     }

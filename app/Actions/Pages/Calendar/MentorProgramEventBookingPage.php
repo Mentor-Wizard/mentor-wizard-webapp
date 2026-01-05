@@ -19,11 +19,9 @@ class MentorProgramEventBookingPage
 
     public function handle(Request $request, MentorProgram $mentorProgram): Response
     {
-        $timezone = $request->get('timezone') ?? config('app.timezone');
-        $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
-//        $mentorProgramId = $request->get('mentorProgramId');
         $user = auth()->user();
-//        $mentorProgram = $mentorProgramId ? MentorProgram::query()->find($mentorProgramId) : null;
+        $timezone = $user->profile->timezone;
+        $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
 
         $calendarData = new GetBookingCalendarEventsService(
             $date,
@@ -41,6 +39,7 @@ class MentorProgramEventBookingPage
             'weekDays'          => $weekDays,
             'mentorProgram'     => $mentorProgram,
             'roundingMinutes'   => CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES,
+            'currentDate'       => $date->toDateString(),
         ]);
     }
 }

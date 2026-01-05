@@ -15,21 +15,23 @@ class AvailableCalendarEventsSlotsService
 {
     /** @var array<int, array{start: CarbonInterface, end: CarbonInterface}> */
     private array $availableSlots = [];
-    private Collection $events;
-    private CarbonInterface $periodStart;
-    private CarbonInterface $periodFinish;
-    private int $minimumPreBookingtimeInMinutes;
 
+    private Collection $events;
+
+    private CarbonInterface $periodStart;
+
+    private CarbonInterface $periodFinish;
+
+    private readonly int $minimumPreBookingtimeInMinutes;
 
     public function __construct(
-        private readonly User      $user,
-        private readonly string    $timezone,
+        private readonly User $user,
+        private readonly string $timezone,
         /** @var array<int, int|string> $excludeEvents */
-        private readonly array     $excludeEvents = [],
-        private readonly bool      $excludeSchedule = false,
-        private MentorProgram|null $mentorProgram = null
-    )
-    {
+        private readonly array $excludeEvents = [],
+        private readonly bool $excludeSchedule = false,
+        private readonly ?MentorProgram $mentorProgram = null,
+    ) {
         $this->minimumPreBookingtimeInMinutes = $this->mentorProgram->mentor->minimum_pre_booking_time ?? 0;
     }
 
@@ -53,10 +55,10 @@ class AvailableCalendarEventsSlotsService
         if ($this->events->isEmpty()) {
             $this->availableSlots[] = [
                 'start' => $currentDateTimezone,
-                'end' => $this->periodFinish,
+                'end'   => $this->periodFinish,
             ];
         } else {
-            $this->configureSlots($this->events);
+            $this->configureSlots();
         }
 
         if ($this->excludeSchedule) {
@@ -64,19 +66,24 @@ class AvailableCalendarEventsSlotsService
                 $this->availableSlots, $this->timezone)->getAvailableSlots();
         }
 
-
         return $this->availableSlots;
     }
 
     protected function getCalendarEvents()
     {
-        $calendarEventRequestQuery = $this->user->calendarEvents();
-        if (!is_null($this->mentorProgram?->start_time)) {
+
+        $ids = [$this->user->id, $this->mentorProgram->mentor_id];
+        $calendarEventRequestQuery = CalendarEvent::query()
+            ->whereHas('calendarEventUsers', fn ($q) => $q->whereIn('users.id', $ids))
+            ->with(['calendarEventUsers' => fn ($q) => $q->whereIn('users.id', $ids)]);
+
+        if (! is_null($this->mentorProgram?->start_time)) {
             $this->periodStart = $this->mentorProgram->start_time->copy()
-                ->greaterThanOrEqualTo($this->periodStart) ?
-                $this->mentorProgram->start_time : $this->periodStart;
+                ->greaterThanOrEqualTo($this->periodStart)
+                ? $this->mentorProgram->start_time : $this->periodStart;
         }
-        if (!is_null($this->mentorProgram?->end_time)) {
+
+        if (! is_null($this->mentorProgram?->end_time)) {
             $this->periodFinish = $this->mentorProgram->end_time
                 ->copy()->lessThanOrEqualTo($this->periodFinish)
                 ? $this->mentorProgram->end_time : $this->periodFinish;
@@ -94,13 +101,10 @@ class AvailableCalendarEventsSlotsService
             ->get();
     }
 
-    /**
-     * @param Collection<int, mixed> $events
-     */
-    protected function configureSlots(Collection $events): void
+    protected function configureSlots(): void
     {
         $previousEvent = null;
-        foreach ($events as $event) {
+        foreach ($this->events as $event) {
             /** @var CalendarEvent $event */
             if (is_null($previousEvent)) {
                 if ($event->start_date_time->greaterThanOrEqualTo($this->periodStart)) {
@@ -110,15 +114,16 @@ class AvailableCalendarEventsSlotsService
                     $endSlotPeriod = $event->start_date_time->timezone($this->timezone)
                         ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
 
-                    if ($this->mentorProgram->session_duration &&
-                        $endSlotPeriod->diffInMinutes($startSlotPeriod)
+                    if ($this->mentorProgram->session_duration
+                         && $startSlotPeriod->diffInMinutes($endSlotPeriod)
                         < $this->mentorProgram->session_duration
                     ) {
                         continue;
                     }
+
                     $this->availableSlots[] = [
                         'start' => $startSlotPeriod,
-                        'end' => $endSlotPeriod,
+                        'end'   => $endSlotPeriod,
                     ];
                 }
             } else {
@@ -127,24 +132,25 @@ class AvailableCalendarEventsSlotsService
                 $endSlotPeriod = $event->start_date_time->timezone($this->timezone)
                     ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
 
-                if ($this->mentorProgram->session_duration &&
-                    $startSlotPeriod->diffInMinutes($endSlotPeriod) < $this->mentorProgram->session_duration
+                if ($this->mentorProgram->session_duration
+                    && $startSlotPeriod->diffInMinutes($endSlotPeriod) < $this->mentorProgram->session_duration
                 ) {
                     continue;
                 }
+
                 $this->availableSlots[] = [
                     'start' => $startSlotPeriod,
-                    'end' => $endSlotPeriod,
+                    'end'   => $endSlotPeriod,
                 ];
             }
 
             $previousEvent = $event;
         }
 
-            $this->availableSlots[] = [
-                'start' => $previousEvent? $previousEvent->end_date_time->timezone($this->timezone):
-                $this->periodStart->timezone($this->timezone),
-                'end' => $this->periodFinish->timezone($this->timezone),
-            ];
+        $this->availableSlots[] = [
+            'start' => $previousEvent ? $previousEvent->end_date_time->timezone($this->timezone)
+            : $this->periodStart->timezone($this->timezone),
+            'end' => $this->periodFinish->timezone($this->timezone),
+        ];
     }
 }

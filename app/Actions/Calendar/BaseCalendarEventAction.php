@@ -8,7 +8,6 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
-use App\Models\MentorProgram;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;

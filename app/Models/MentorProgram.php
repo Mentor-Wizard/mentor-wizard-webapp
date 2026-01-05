@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Enums\CalendarEventStatusEnum;
 use App\Observers\MentorProgramObserver;
 use Database\Factories\MentorProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -35,6 +37,11 @@ class MentorProgram extends Model
         'end_time',
         'session_duration',
         'session_duration_options',
+    ];
+
+    protected $appends = [
+        'pending_events_requests_number',
+        'confirmed_events_number',
     ];
 
     /**
@@ -72,6 +79,25 @@ class MentorProgram extends Model
     public function mentorSession():hasMany
     {
         return $this->hasMany(MentorSession::class, 'mentor_program_id');
+    }
+
+    public function calendarEvents():HasMany
+    {
+        return $this->hasMany(CalendarEvent::class, 'mentor_program_id');
+    }
+
+    protected function pendingEventsRequestsNumber(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->calendarEvents()
+            ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION)
+            ->count());
+    }
+
+    protected function confirmedEventsNumber(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->calendarEvents()
+            ->where('status', CalendarEventStatusEnum::CONFIRMED)
+            ->count());
     }
 
 }

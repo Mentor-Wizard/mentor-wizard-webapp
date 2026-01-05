@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Log;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class StoreBatchUserSchedule
@@ -42,29 +43,53 @@ class StoreBatchUserSchedule
             }
 
             $fillableFields = (new UserSchedule)->getFillable();
-            $updateSchedules = collect($schedules)->map(function (array $schedule) use ($fillableFields) {
-                if (isset($schedule['id'])) {
-                    return Arr::only($schedule, array_merge($fillableFields, ['id']));
-                }
-            })->filter()->all();
-            $createSchedules = collect($schedules)->map(function (array $schedule) use ($fillableFields, $userId) {
-                if (! isset($schedule['id'])) {
-                    return Arr::add(Arr::only($schedule,
-                        $fillableFields),
-                        'user_id', $userId);
-                }
-            })->filter()->all();
 
+            $defaults = array_fill_keys($fillableFields, null);
+
+            $updateSchedules = collect($schedules)
+                ->map(function (array $schedule) use ($fillableFields, $defaults) {
+                    if (!isset($schedule['id'])) {
+                        return null;
+                    }
+
+                    $normalized = array_replace($defaults, $schedule);
+
+                    return Arr::only($normalized, array_merge($fillableFields, ['id']));
+                })
+                ->filter()
+                ->values()
+                ->all();
+
+            $createSchedules = collect($schedules)
+                ->map(function (array $schedule) use ($fillableFields, $defaults, $userId) {
+                    if (isset($schedule['id'])) {
+                        return null;
+                    }
+
+                    $normalized = array_replace($defaults, $schedule);
+
+                    return Arr::add(
+                        Arr::only($normalized, $fillableFields),
+                        'user_id',
+                        $userId
+                    );
+                })
+                ->filter()
+                ->values()
+                ->all();
+
+//
             DB::table('user_schedules')
                 ->upsert($updateSchedules, 'id', $fillableFields);
-            DB::table('user_schedules')->insert($createSchedules);
+             DB::table('user_schedules')->insert($createSchedules);
 
             // @pest-mutate-ignore-next-line
             DB::commit();
 
             return to_route('user-schedule.index')
                 ->with('success', 'Schedules were saved successfully.');
-        } catch (Exception) {
+        } catch (Exception $exception) {
+            Log::info($exception->getMessage());
             DB::rollBack();
 
             return to_route('user-schedule.index')

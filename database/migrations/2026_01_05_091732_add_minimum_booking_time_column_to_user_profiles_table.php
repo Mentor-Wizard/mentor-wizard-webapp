@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user_profiles', function (Blueprint $table) {
+        Schema::table('user_profiles', function (Blueprint $table): void {
             $table->integer('minimum_pre_booking_time')->default(0)->after('timezone');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('user_profiles', function (Blueprint $table) {
+        Schema::table('user_profiles', function (Blueprint $table): void {
             $table->dropColumn('minimum_pre_booking_time');
         });
     }

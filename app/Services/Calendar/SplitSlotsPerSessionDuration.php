@@ -1,32 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Calendar;
 
 use Carbon\CarbonPeriod;
+
 class SplitSlotsPerSessionDuration
 {
-
     protected array $splitSlots = [];
 
-    /**
-     * @param array $slots
-     * @param int $sessionDurationInMinutes
-     */
     public function __construct(
         private readonly array $slots,
         private readonly int $sessionDurationInMinutes,
-        private readonly string $timezone
-    )
-    {
-    }
+        private readonly string $timezone,
+    ) {}
 
-    public function getSplitSlots():array
+    public function getSplitSlots(): array
     {
         foreach ($this->slots as $slot) {
             $slotDuration = $slot['start']->diffInMinutes($slot['end']);
             if ($slotDuration > $this->sessionDurationInMinutes) {
                 $periods = CarbonPeriod::create($slot['start'],
-                    $this->sessionDurationInMinutes . ' minutes', $slot['end'])
+                    $this->sessionDurationInMinutes.' minutes', $slot['end'])
                     ->excludeStartDate()
                     ->excludeEndDate();
 
@@ -34,7 +30,7 @@ class SplitSlotsPerSessionDuration
                     $date = $period->timezone($this->timezone)->format('Y-m-d');
                     $slotElement = [
                         'start' => $period->copy()->subMinutes($this->sessionDurationInMinutes),
-                        'end' => $period
+                        'end'   => $period,
                     ];
                     if (isset($this->splitSlots[$date])) {
                         $this->splitSlots[$date][] = $slotElement;
@@ -44,6 +40,7 @@ class SplitSlotsPerSessionDuration
                 }
             }
         }
+
         return $this->splitSlots;
     }
 }

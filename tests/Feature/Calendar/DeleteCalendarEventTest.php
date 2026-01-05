@@ -8,6 +8,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent as EventModel;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -29,6 +30,11 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
 
         auth()->login($this->user);
         actingAs($this->user);
+        // Create a mentor program where the current user is the mentor
+        $this->program = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
@@ -37,7 +43,7 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
             'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null,
+            'mentor_program_id' => $this->program->getKey(),
         ]);
 
         $this->event->calendarEventUsers()->attach($this->user->getKey(),
@@ -87,5 +93,28 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
                     '_token' => csrf_token(),
                 ]);
         $response->assertStatus(Response::HTTP_FORBIDDEN);
+    });
+
+    it('allows attached mentee to delete the event', function (): void {
+        // Attach a mentee (non-mentor user) to the event
+        $mentee = User::factory()->create();
+        $this->event->calendarEventUsers()->attach($mentee->getKey(), [
+            'role'   => CalendarEventRoleEnum::MENTI,
+            'colour' => CalendarEventColoursEnum::GREEN->value,
+        ]);
+
+        actingAs($mentee);
+        auth()->login($mentee);
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $this->event->getKey()),
+                [
+                    '_token' => csrf_token(),
+                ]);
+
+        $response->assertRedirect(route('pages.calendar.index'));
+        $this->assertDatabaseMissing('calendar_events', [
+            'id' => $this->event->getKey(),
+        ]);
     });
 });

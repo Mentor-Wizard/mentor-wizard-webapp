@@ -10,7 +10,6 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Date;
 use stdClass;
 
@@ -23,9 +22,12 @@ class GetBookingCalendarEventsService
         private readonly User $user,
         private readonly string $timezone,
         private readonly bool $excludeSchedule = false,
-        private readonly MentorProgram $mentorProgram,
+        private readonly ?MentorProgram $mentorProgram = null,
     ) {}
 
+    /**
+     * @return array<string, bool|mixed[]>
+     */
     public function getFormattedMonthAvailableSlots(): array
     {
         $dateConfig = $this->prepareDateConfiguration();
@@ -54,8 +56,12 @@ class GetBookingCalendarEventsService
 
     private function getFormattedEventsSlots(): array
     {
-        $availableSlots = (new AvailableCalendarEventsSlotsService($this->mentorProgram->mentor,
-            $this->timezone, [], $this->excludeSchedule, $this->mentorProgram)
+        $availableSlots = (new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            [],
+            $this->excludeSchedule,
+            $this->mentorProgram)
             ->getAvailableSlots());
 
         $splitSlots =  new SplitSlotsPerSessionDuration(

@@ -8,6 +8,7 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Services\Calendar\GetBookingCalendarEventsService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
 
 class testSlotsCalendarEvents extends Command
 {
@@ -30,7 +31,7 @@ class testSlotsCalendarEvents extends Command
      */
     public function handle(): never
     {
-        $date = \Illuminate\Support\Facades\Date::now();
+        $date = Date::now();
         $user = User::query()->where('id', 13)->first();
         $mentorProgram = MentorProgram::query()->where('id', 2)->first();
         $availableSlots = new GetBookingCalendarEventsService($date, $user, 'Europe/Kyiv', true, $mentorProgram);

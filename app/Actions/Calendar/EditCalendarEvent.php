@@ -6,23 +6,17 @@ namespace App\Actions\Calendar;
 
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
-use Arr;
 use Symfony\Component\HttpFoundation\Response;
 
 class EditCalendarEvent extends BaseCalendarEventAction
 {
     public function handle(EditCalendarEventRequest $request, CalendarEvent $calendarEvent): Response
     {
-        $validatedData = $this->getCalendarEventData($request);
-        $colour = Arr::get($validatedData, 'colour');
-        unset($validatedData['colour']);
+        // Only update web_link according to the new business rule
+        $validated = $request->validated();
         $calendarEvent->update([
-            ...$validatedData,
+            'web_link' => $validated['webLink'] ?? null,
         ]);
-
-        $calendarEvent->calendarEventUsers()->syncWithPivotValues(auth()->id(), [
-            'colour' => $colour,
-        ], false);
 
         return to_route('pages.calendar.index');
     }

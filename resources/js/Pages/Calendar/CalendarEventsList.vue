@@ -47,7 +47,7 @@ const todayDate = ref(
     weekday: 'long',
   }),
 );
-const showCreatePage = ref(false);
+
 const permissions = ref(props.permissions);
 const daysData = ref(props.calendarEvents);
 const calendar = useCalendar();
@@ -101,9 +101,6 @@ const refreshData = () => {
   });
 };
 
-// const openCreateEventPage = () => {
-//   showCreatePage.value = true;
-// };
 const openShowEditEventPage = (eventId) => {
   router.visit(
     route('pages.calendar.show', {
@@ -123,10 +120,6 @@ const openShowEditEventPage = (eventId) => {
     },
   );
 };
-
-// const closeCreateEventPage = () => {
-//   showCreatePage.value = false;
-// };
 
 const scrollButtonName = computed(() => {
   if (currentTab.value === 'Day view') {
@@ -383,13 +376,6 @@ onMounted(() => {
         </Menu>
       </div>
     </header>
-
-<!--    <CreateEvent-->
-<!--      v-if="props.availableColours"-->
-<!--      :open="showCreatePage"-->
-<!--      :available-colours="props.availableColours"-->
-<!--      :close-create-event-page="closeCreateEventPage"-->
-<!--    />-->
 
     <MonthlyView
       v-if="currentTab === 'Month view'"

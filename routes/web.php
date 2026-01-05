@@ -26,7 +26,6 @@ use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
 use App\Actions\UserSchedule\StoreBatchUserSchedule;
-use App\Models\CalendarEvent;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');

@@ -1,6 +1,7 @@
 <script setup>
 import { ClockIcon } from '@heroicons/vue/20/solid';
 import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 import CreateCalendarEvent from '@/Pages/Calendar/CreateCalendarEvent.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
@@ -21,6 +22,10 @@ const props = defineProps({
   roundingMinutes: {
     type: Number,
     default: 5,
+  },
+  currentDate: {
+    type: String,
+    default: null,
   },
 });
 
@@ -62,6 +67,27 @@ const getDaySlots = (slots) => {
     })
     .join(', ');
 };
+
+const monthLabel = () => {
+  const d = props.currentDate ? new Date(props.currentDate) : new Date();
+  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+};
+
+const addMonths = (dateStr, diff) => {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + diff);
+  return d.toISOString().slice(0, 10);
+};
+
+const goToMonth = (diff) => {
+  const target = addMonths(props.currentDate, diff);
+  router.visit(route('pages.mentor.program.book', props.mentorProgram.slug), {
+    preserveScroll: true,
+    preserveState: true,
+    data: { date: target },
+  });
+};
 </script>
 
 <template>
@@ -74,6 +100,21 @@ const getDaySlots = (slots) => {
         <div class="mx-4 mt-4 rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
           <h1 class="text-xl font-semibold text-gray-900">{{ mentorProgram.name }}</h1>
           <p class="mt-1 text-sm text-gray-600">{{ mentorProgram.description }}</p>
+        </div>
+
+        <!-- Month navigation + Week day headers -->
+        <div class="mx-4 mt-4 flex items-center justify-between">
+          <button type="button" class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="!days?.hasEventsAfter"
+                  @click="goToMonth(-1)">
+            Prev
+          </button>
+          <div class="text-sm font-semibold text-gray-900">{{ monthLabel() }}</div>
+          <button type="button" class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="!days?.hasEventsBefore"
+                  @click="goToMonth(1)">
+            Next
+          </button>
         </div>
 
         <!-- Week day headers -->

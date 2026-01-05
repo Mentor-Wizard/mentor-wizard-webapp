@@ -22,26 +22,23 @@ class StoreCalendarEvent extends BaseCalendarEventAction
             ...$validatedData,
         ]);
 
-        // Attach the current user as HOST
-        $calendarEvent->calendarEventUsers()->attach(auth()->id(), [
-            'role'   => CalendarEventRoleEnum::HOST->value,
-            'colour' => $colour,
-        ]);
 
         // If this is a mentor program booking, attach the mentor as a participant
         $mentorProgramId = $request->input('mentor_program_id');
-        if ($mentorProgramId) {
             $mentorProgram = MentorProgram::query()->find($mentorProgramId);
             if ($mentorProgram && $mentorProgram->mentor_id) {
-                $mentor = $mentorProgram->mentor;
-                if ($mentor && $mentor->getKey() !== auth()->id()) {
-                    $calendarEvent->calendarEventUsers()->attach($mentor->getKey(), [
-                        'role'   => CalendarEventRoleEnum::PARTICIPANT->value,
+                    $calendarEvent->calendarEventUsers()->attach($mentorProgram->mentor_id, [
+                        'role'   => CalendarEventRoleEnum::HOST->value,
                         'colour' => $colour,
                     ]);
-                }
             }
-        }
+
+            if($mentorProgram->mentor_id !== auth()->user()->getKey()){
+                $calendarEvent->calendarEventUsers()->attach(auth()->user()->getKey(), [
+                    'role'   => CalendarEventRoleEnum::MENTI->value,
+                    'colour' => $colour,
+                ]);
+            }
 
         return to_route('pages.calendar.index');
     }

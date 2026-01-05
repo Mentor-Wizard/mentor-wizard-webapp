@@ -10,20 +10,27 @@ class AvailableSlotOptionsForMentorProgram
 {
 
     protected MentorProgram $mentorProgram;
+
     protected int $mentorSessionDuration;
+
     protected User $mentor;
+
     public function __construct(CalendarEvent $calendarEvent)
     {
-        $this->mentorProgram = $calendarEvent->mentorPrograms->first();
+        $this->mentorProgram = MentorProgram::query()->find($calendarEvent->mentor_program_id);
         $this->mentor = $this->mentorProgram->mentor;
         $this->mentorSessionDuration = $this->mentorProgram->session_duration;
 
     }
 
-    public function getAvailableSlots()
+    public function getAvailableSlots(): SplitSlotsPerSessionDuration
     {
         $availableSlots  = new AvailableCalendarEventsSlotsService($this->mentor,
-            $this->mentor->profile->timezone)->getAvailableSlots();
+            $this->mentor->profile->timezone,
+        [],
+        true,
+        $this->mentorProgram
+        )->getAvailableSlots();
         return new SplitSlotsPerSessionDuration($availableSlots,
             $this->mentorSessionDuration,
             $this->mentor->profile->timezone);

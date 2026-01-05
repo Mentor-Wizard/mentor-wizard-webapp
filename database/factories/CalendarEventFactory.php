@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
@@ -41,6 +42,7 @@ class CalendarEventFactory extends Factory
             'type'              => fake()->randomElement(CalendarEventTypeEnum::values()),
             'web_link'          => fake()->url(),
             'description'       => fake()->text(),
+            'mentor_program_id' => MentorProgram::factory(),
         ];
     }
 

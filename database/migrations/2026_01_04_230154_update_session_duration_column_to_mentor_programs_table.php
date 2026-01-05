@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('mentor_programs', function (Blueprint $table) {
+        Schema::table('mentor_programs', function (Blueprint $table): void {
                 $table->integer('session_duration')->default(60)->change();;
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mentor_programs', function (Blueprint $table) {
+        Schema::table('mentor_programs', function (Blueprint $table): void {
             $table->integer('session_duration')->nullable()->change();
         });
     }

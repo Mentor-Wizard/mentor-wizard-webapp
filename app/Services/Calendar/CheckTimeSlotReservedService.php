@@ -17,7 +17,7 @@ readonly class CheckTimeSlotReservedService
         private User $user,
         /** @var array<int, int|string> $excludeEvents */
         private array $excludeEvents = [],
-        private MentorProgram $mentorProgram
+        private ?MentorProgram $mentorProgram = null
     ) {}
 
     public function isSlotAvailable(): bool

@@ -6,10 +6,7 @@ namespace App\Actions\Pages\Calendar;
 
 use App\DTO\Calendar\CalendarEventData;
 use App\Enums\CalendarEventColoursEnum;
-use App\Enums\CalendarEventRoleEnum;
 use App\Models\CalendarEvent;
-use App\Models\MentorProgram;
-use App\Services\Calendar\AvailableCalendarEventsSlotsService;
 use App\Services\Calendar\AvailableSlotOptionsForMentorProgram;
 use Inertia\Inertia;
 use Inertia\Response;

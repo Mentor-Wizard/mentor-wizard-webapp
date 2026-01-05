@@ -8,6 +8,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -18,14 +19,15 @@ class CalendarEventSeeder extends Seeder
      */
     public function run(): void
     {
-        $mentors = User::query()->role(RoleEnum::MENTOR)->get();
         $menti = User::query()->role(RoleEnum::MENTI)->get();
 
         CalendarEvent::factory()
             ->count(500)
             ->create()
-            ->each(function ($event) use ($mentors, $menti): void {
-                $mentors->random(1)->first()->calendarEvents()->attach($event, [
+            ->each(function ($event) use ($menti): void {
+                $mentorProgram = MentorProgram::query()->find($event->mentor_program_id)?->first();
+                $mentor= $mentorProgram?->mentor;
+                $mentor->calendarEvents()->attach($event, [
                     'role'   => CalendarEventRoleEnum::HOST,
                     'colour' => CalendarEventColoursEnum::RED,
                 ]);
