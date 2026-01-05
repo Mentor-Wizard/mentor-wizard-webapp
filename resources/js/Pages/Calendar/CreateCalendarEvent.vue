@@ -54,17 +54,25 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  selectedSlot: {
+    type: Object,
+    default: null,
+  },
+  roundingMinutes: {
+    type: Number,
+    default: 5,
+  },
 });
 
 let form = useForm({
-  title: '',
+  title: 'Event for ' +  props.mentorProgram?.name ?? 'mentor',
   webLink: '',
   fromDate: '',
   toDate: '',
   fromTime: '09:00',
   toTime: '10:00',
   type: 'Individual',
-  description: '',
+  description: props.mentorProgram?.description ?? '',
   colour: 'blue',
   timezone: timeZone,
   mentor_program_id: null,
@@ -73,6 +81,59 @@ let form = useForm({
 const availableColoursList = ref([]);
 const availableColoursScheme = ref({});
 const selectedEventType = selectedEventTypeHelper(form);
+const usingSlotsMode = ref(false);
+const activeSelectedSlot = ref(null);
+
+const getSessionDurationMinutes = () => {
+  if (props?.mentorProgram?.session_duration) {
+    return Number(props.mentorProgram.session_duration);
+  }
+  // default 60 minutes if not provided
+  return 60;
+};
+
+const roundDateToMinutes = (date, minutes) => {
+  const ms = 1000 * 60 * minutes;
+  return new Date(Math.round(date.getTime() / ms) * ms);
+};
+
+const roundTimeString = (timeStr, minutes) => {
+  const [h, m] = timeStr.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  const rd = roundDateToMinutes(d, minutes);
+  return rd.toTimeString().slice(0, 5);
+};
+
+const formatTime = (isoOrDate) => {
+  const d = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
+  return d.toTimeString().slice(0, 5);
+};
+
+const selectSlot = (slot) => {
+  if (!slot) {
+    return;
+  }
+  usingSlotsMode.value = true;
+  activeSelectedSlot.value = slot;
+  if (props.selectedDate) {
+    form.fromDate = props.selectedDate;
+    form.toDate = props.selectedDate;
+  }
+  const startTime = new Date(slot.start);
+  const sessionMinutes = getSessionDurationMinutes();
+  const desiredEnd = new Date(startTime.getTime() + sessionMinutes * 60000);
+  const slotEnd = new Date(slot.end);
+  const endTime = desiredEnd <= slotEnd ? desiredEnd : slotEnd;
+  form.fromTime = formatTime(startTime);
+  form.toTime = formatTime(endTime);
+};
+
+const onCustomEdit = () => {
+  // switch to custom mode, clear selected slot
+  usingSlotsMode.value = false;
+  activeSelectedSlot.value = null;
+};
 
 onMounted(() => {
   const now = new Date();
@@ -91,13 +152,28 @@ onMounted(() => {
     form.fromDate = props.selectedDate;
     form.toDate = props.selectedDate;
 
-    // Set initial times from first available slot
-    if (props.availableSlots && props.availableSlots.length > 0) {
+    // Prefill from explicit selected slot if provided, else first slot
+    if (props.selectedSlot) {
+      usingSlotsMode.value = true;
+      activeSelectedSlot.value = props.selectedSlot;
+      const startTime = new Date(props.selectedSlot.start);
+      const sessionMinutes = getSessionDurationMinutes();
+      const desiredEnd = new Date(startTime.getTime() + sessionMinutes * 60000);
+      const slotEnd = new Date(props.selectedSlot.end);
+      const endTime = desiredEnd <= slotEnd ? desiredEnd : slotEnd;
+      form.fromTime = formatTime(startTime);
+      form.toTime = formatTime(endTime);
+    } else if (props.availableSlots && props.availableSlots.length > 0) {
       const firstSlot = props.availableSlots[0];
+      usingSlotsMode.value = true;
+      activeSelectedSlot.value = firstSlot;
       const startTime = new Date(firstSlot.start);
-      const endTime = new Date(firstSlot.end);
-      form.fromTime = startTime.toTimeString().slice(0, 5);
-      form.toTime = endTime.toTimeString().slice(0, 5);
+      const sessionMinutes = getSessionDurationMinutes();
+      const desiredEnd = new Date(startTime.getTime() + sessionMinutes * 60000);
+      const slotEnd = new Date(firstSlot.end);
+      const endTime = desiredEnd <= slotEnd ? desiredEnd : slotEnd;
+      form.fromTime = formatTime(startTime);
+      form.toTime = formatTime(endTime);
     }
   } else {
     if (!form.fromDate) {
@@ -148,18 +224,12 @@ onMounted(() => {
     if (currentTime > fromDateTime) {
       errors.value.fromDate = 'Start date/time must be in the future';
     }
-
-    // Validate against available slots for mentor program bookings
-    if (props.availableSlots && props.availableSlots.length > 0) {
-      const isWithinSlots = props.availableSlots.some((slot) => {
-        const slotStart = new Date(slot.start);
-        const slotEnd = new Date(slot.end);
-        return fromDateTime >= slotStart && toDateTime <= slotEnd;
-      });
-
-      if (!isWithinSlots) {
-        errors.value.fromTime =
-          'Selected time must fall within available slots';
+    // Validate within selected slot only when using slot mode
+    if (usingSlotsMode.value && activeSelectedSlot.value) {
+      const slotStart = new Date(activeSelectedSlot.value.start);
+      const slotEnd = new Date(activeSelectedSlot.value.end);
+      if (!(fromDateTime >= slotStart && toDateTime <= slotEnd)) {
+        errors.value.fromTime = 'Time must be within the chosen slot';
       }
     }
   }
@@ -173,6 +243,11 @@ onMounted(() => {
   });
 
 const handleSubmit = () => {
+  // Round custom inputs to grid before validation/submit
+  if (!usingSlotsMode.value) {
+    form.fromTime = roundTimeString(form.fromTime, props.roundingMinutes);
+    form.toTime = roundTimeString(form.toTime, props.roundingMinutes);
+  }
   if (validateForm(form, errors)) {
     form.post(route('pages.calendar.store'), {
       onSuccess: () => {
@@ -203,6 +278,8 @@ const handleClose = () => {
     colour: null,
     description: null,
   };
+  usingSlotsMode.value = false;
+  activeSelectedSlot.value = null;
   props.closeCreateEventPage();
 };
 
@@ -220,9 +297,18 @@ watch(
   (newFromTime) => {
     if (newFromTime && form.fromDate === form.toDate) {
       const [hours, minutes] = newFromTime.split(':').map(Number);
-      const newEndTime = new Date();
-      newEndTime.setHours(hours + 1, minutes);
-      form.toTime = newEndTime.toTimeString().slice(0, 5);
+      const base = new Date();
+      base.setHours(hours, minutes, 0, 0);
+      const sessionMinutes = getSessionDurationMinutes();
+      const computedEnd = new Date(base.getTime() + sessionMinutes * 60000);
+      // If using a slot, clamp to slot end
+      if (usingSlotsMode.value && activeSelectedSlot.value) {
+        const slotEnd = new Date(activeSelectedSlot.value.end);
+        form.toTime = formatTime(computedEnd <= slotEnd ? computedEnd : slotEnd);
+      } else {
+        // Round to grid for custom
+        form.toTime = roundTimeString(formatTime(computedEnd), props.roundingMinutes);
+      }
     }
   },
 );
@@ -248,13 +334,28 @@ watch(
         form.fromDate = props.selectedDate;
         form.toDate = props.selectedDate;
 
-        // Set initial times from first available slot
-        if (props.availableSlots && props.availableSlots.length > 0) {
+        // If slot selected, prefer it
+        if (props.selectedSlot) {
+          usingSlotsMode.value = true;
+          activeSelectedSlot.value = props.selectedSlot;
+          const startTime = new Date(props.selectedSlot.start);
+          const sessionMinutes = getSessionDurationMinutes();
+          const desiredEnd = new Date(startTime.getTime() + sessionMinutes * 60000);
+          const slotEnd = new Date(props.selectedSlot.end);
+          const endTime = desiredEnd <= slotEnd ? desiredEnd : slotEnd;
+          form.fromTime = formatTime(startTime);
+          form.toTime = formatTime(endTime);
+        } else if (props.availableSlots && props.availableSlots.length > 0) {
           const firstSlot = props.availableSlots[0];
+          usingSlotsMode.value = true;
+          activeSelectedSlot.value = firstSlot;
           const startTime = new Date(firstSlot.start);
-          const endTime = new Date(firstSlot.end);
-          form.fromTime = startTime.toTimeString().slice(0, 5);
-          form.toTime = endTime.toTimeString().slice(0, 5);
+          const sessionMinutes = getSessionDurationMinutes();
+          const desiredEnd = new Date(startTime.getTime() + sessionMinutes * 60000);
+          const slotEnd = new Date(firstSlot.end);
+          const endTime = desiredEnd <= slotEnd ? desiredEnd : slotEnd;
+          form.fromTime = formatTime(startTime);
+          form.toTime = formatTime(endTime);
         }
       }
 
@@ -323,6 +424,31 @@ watch(
                   </DialogTitle>
 
                   <form class="space-y-4" @submit.prevent="handleSubmit">
+                    <!-- Quick slot selection -->
+                    <div v-if="availableSlots && availableSlots.length" class="rounded-md border border-indigo-100 bg-indigo-50/50 p-3">
+                      <div class="mb-2 text-xs font-medium text-indigo-900">Available slots</div>
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          v-for="slot in availableSlots"
+                          :key="slot.start + '-' + slot.end"
+                          type="button"
+                          class="rounded-full border px-2.5 py-1 text-xs font-medium"
+                          :class="activeSelectedSlot && activeSelectedSlot.start === slot.start && activeSelectedSlot.end === slot.end
+                            ? 'border-indigo-500 bg-indigo-100 text-indigo-800'
+                            : 'border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50'"
+                          @click.prevent="selectSlot(slot)"
+                        >
+                          {{ new Date(slot.start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) }}
+                          -
+                          {{ new Date(slot.end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Session duration display -->
+                    <div v-if="mentorProgram?.session_duration" class="rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-700">
+                      Session duration: <span class="font-medium">{{ mentorProgram.session_duration }}</span> minutes
+                    </div>
                     <div>
                       <label
                         for="title"
@@ -331,14 +457,16 @@ watch(
                         Event Title
                       </label>
                       <div class="mt-2">
-                        <input
-                          id="title"
-                          v-model="form.title"
-                          type="text"
-                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                          :class="{ 'ring-red-300': errors.title }"
-                          placeholder="Enter event title"
-                        />
+                        {{form.title}}
+
+<!--                        <input-->
+<!--                          id="title"-->
+<!--                          v-model="form.title"-->
+<!--                          type="text"-->
+<!--                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"-->
+<!--                          :class="{ 'ring-red-300': errors.title }"-->
+<!--                          placeholder="Enter event title"-->
+<!--                        />-->
                         <p
                           v-if="errors.title"
                           class="mt-2 text-sm text-red-600"
@@ -348,7 +476,7 @@ watch(
                       </div>
                     </div>
 
-                    <div>
+                    <div v-if="form.webLink && form.webLink !== ''">
                       <label
                         for="webLink"
                         class="block text-sm leading-6 font-medium text-gray-900"
@@ -356,14 +484,15 @@ watch(
                         Link to Event
                       </label>
                       <div class="mt-2">
-                        <input
-                          id="webLink"
-                          v-model="form.webLink"
-                          type="text"
-                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                          :class="{ 'ring-red-300': errors.webLink }"
-                          placeholder="Enter event title"
-                        />
+                        {{form.webLink}}
+<!--                        <input-->
+<!--                          id="webLink"-->
+<!--                          v-model="form.webLink"-->
+<!--                          type="text"-->
+<!--                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"-->
+<!--                          :class="{ 'ring-red-300': errors.webLink }"-->
+<!--                          placeholder="Enter event title"-->
+<!--                        />-->
                         <p
                           v-if="errors.webLink"
                           class="mt-2 text-sm text-red-600"
@@ -380,14 +509,15 @@ watch(
                         Description
                       </label>
                       <div class="mt-2">
-                        <input
-                          id="description"
-                          v-model="form.description"
-                          type="text"
-                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                          :class="{ 'ring-red-300': errors.description }"
-                          placeholder="Enter event title"
-                        />
+                        {{form.description}}
+<!--                        <input-->
+<!--                          id="description"-->
+<!--                          v-model="form.description"-->
+<!--                          type="text"-->
+<!--                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"-->
+<!--                          :class="{ 'ring-red-300': errors.description }"-->
+<!--                          placeholder="Enter event title"-->
+<!--                        />-->
                         <p
                           v-if="errors.description"
                           class="mt-2 text-sm text-red-600"
@@ -404,9 +534,14 @@ watch(
                       </label>
                       <Listbox v-model="form.type">
                         <div class="relative mt-2">
-                          <ListboxButton
-                            class="relative w-full cursor-default rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-3 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
-                          >
+<!--                          <ListboxButton-->
+<!--                            class="relative w-full cursor-default rounded-lg-->
+<!--                             border border-gray-300 bg-white py-2 pr-10 pl-3 text-left -->
+<!--                             shadow-md focus:outline-none focus-visible:border-indigo-500 -->
+<!--                             focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 -->
+<!--                             focus-visible:ring-offset-orange-300 sm:text-sm"-->
+<!--                          >-->
+
                             <span class="flex items-center">
                               <component
                                 :is="selectedEventType?.icon"
@@ -416,15 +551,15 @@ watch(
                                 selectedEventType?.label
                               }}</span>
                             </span>
-                            <span
-                              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
-                            >
-                              <ChevronUpDownIcon
-                                class="h-5 w-5 text-gray-400"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          </ListboxButton>
+<!--                            <span-->
+<!--                              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"-->
+<!--                            >-->
+<!--                              <ChevronUpDownIcon-->
+<!--                                class="h-5 w-5 text-gray-400"-->
+<!--                                aria-hidden="true"-->
+<!--                              />-->
+<!--                            </span>-->
+<!--                          </ListboxButton>-->
                           <transition
                             leave-active-class="transition duration-100 ease-in"
                             leave-from-class="opacity-100"
@@ -579,6 +714,7 @@ watch(
                             type="date"
                             class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                             :class="{ 'ring-red-300': errors.fromDate }"
+                            @input="onCustomEdit"
                           />
                           <p
                             v-if="errors.fromDate"
@@ -605,6 +741,7 @@ watch(
                             :min="form.fromDate"
                             class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                             :class="{ 'ring-red-300': errors.toDate }"
+                            @input="onCustomEdit"
                           />
                           <p
                             v-if="errors.toDate"
@@ -632,6 +769,8 @@ watch(
                             type="time"
                             class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                             :class="{ 'ring-red-300': errors.fromTime }"
+                            @input="onCustomEdit"
+                            @blur="form.fromTime = roundTimeString(form.fromTime, roundingMinutes)"
                           />
                           <p
                             v-if="errors.fromTime"
@@ -657,6 +796,8 @@ watch(
                             type="time"
                             class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                             :class="{ 'ring-red-300': errors.toTime }"
+                            @input="onCustomEdit"
+                            @blur="form.toTime = roundTimeString(form.toTime, roundingMinutes)"
                           />
                           <p
                             v-if="errors.toTime"

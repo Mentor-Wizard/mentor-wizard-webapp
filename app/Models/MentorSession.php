@@ -29,6 +29,7 @@ class MentorSession extends Model
         'is_cancelled',
         'is_date_changed',
         'cost',
+        'mentor_program_id',
     ];
 
     /**
@@ -67,6 +68,12 @@ class MentorSession extends Model
     {
         return $this->hasOne(CalendarEvent::class);
     }
+
+    public function mentorProgram():HasOne
+    {
+        return $this->hasOne(MentorProgram::class);
+    }
+
 
     /**
      * @return array<string, string>

@@ -8,6 +8,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Models\MentorProgram;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -27,6 +28,7 @@ class BaseCalendarEventAction
         $user = auth()->user();
         $profile = $user?->profile;
         $userTimezone = $profile ? $profile->timezone : config('app.timezone');
+        $mentorProgramId = $request->get('mentor_program_id');
 
         // Parse dates in user's timezone
         $startDateTime = Date::createFromFormat(
@@ -50,15 +52,16 @@ class BaseCalendarEventAction
         };
 
         return [
-            'title'           => Arr::get($validated, 'title'),
-            'start_date_time' => $startDateTimeUTC,
-            'end_date_time'   => $endDateTimeUTC,
-            'type'            => $eventType,
-            'web_link'        => Arr::get($validated, 'webLink'),
-            'colour'          => Arr::get($validated, 'colour'),
-            'description'     => Arr::get($validated, 'description'),
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'date'            => $startDateTimeUTC?->format('Y-m-d'),
+            'title'                 => Arr::get($validated, 'title'),
+            'start_date_time'       => $startDateTimeUTC,
+            'end_date_time'         => $endDateTimeUTC,
+            'type'                  => $eventType,
+            'web_link'              => Arr::get($validated, 'webLink'),
+            'colour'                => Arr::get($validated, 'colour'),
+            'description'           => Arr::get($validated, 'description'),
+            'status'                => CalendarEventStatusEnum::CONFIRMED,
+            'date'                  => $startDateTimeUTC?->format('Y-m-d'),
+            'mentor_program_id'     => $mentorProgramId,
         ];
     }
 }

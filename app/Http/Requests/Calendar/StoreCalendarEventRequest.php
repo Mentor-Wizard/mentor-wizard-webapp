@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
+use App\Models\MentorProgram;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use App\Traits\Calendar\CalendarEventRequestRules;
 use Illuminate\Contracts\Validation\Validator;
@@ -25,6 +26,8 @@ class StoreCalendarEventRequest extends FormRequest
             $user = auth()->user();
             $timezone = $user->profile->timezone;
 
+            $mentorProgram = $this->input('mentor_program_id') ?
+                MentorProgram::query()->find($this->input('mentor_program_id')) : null;
             if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime'])) {
                 $startDate = Date::createFromFormat(
                     '!Y-m-d H:i',
@@ -42,7 +45,9 @@ class StoreCalendarEventRequest extends FormRequest
                     $startDate,
                     $endDate,
                     $timezone,
-                    auth()->user()
+                    auth()->user(),
+                    [],
+                    $mentorProgram
                 )->isSlotAvailable();
 
                 if (! $isWithinAvailableSlots) {
@@ -50,44 +55,5 @@ class StoreCalendarEventRequest extends FormRequest
                 }
             }
         });
-    }
-
-    public function getEventData(): array
-    {
-        $validated = $this->validated();
-
-        try {
-            $startDateTime = Date::createFromFormat(
-                'Y-m-d H:i',
-                $validated['fromDate'].' '.$validated['fromTime'],
-                $validated['timezone']
-            )?->setTimezone(config('app.timezone'));
-            $endDateTime = Date::createFromFormat(
-                'Y-m-d H:i',
-                $validated['toDate'].' '.$validated['toTime'],
-                $validated['timezone']
-            )?->setTimezone(config('app.timezone'));
-        } catch (Exception) {
-            return [];
-        }
-
-        $duration = (int) $startDateTime?->diffInSeconds($endDateTime);
-        $eventType = match ($validated['type']) {
-            'individual' => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'group'      => CalendarEventTypeEnum::GROUP->value,
-            default      => CalendarEventTypeEnum::INDIVIDUAL->value,
-        };
-
-        return [
-            'title'           => $validated['title'],
-            'start_date_time' => $startDateTime,
-            'end_date_time'   => $endDateTime,
-            'duration'        => $duration,
-            'type'            => $eventType,
-            'colour'          => $validated['colour'],
-            'description'     => $validated['description'],
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'date'            => $startDateTime?->format('Y-m-d'),
-        ];
     }
 }

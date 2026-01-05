@@ -6,7 +6,11 @@ namespace App\Actions\Pages\Calendar;
 
 use App\DTO\Calendar\CalendarEventData;
 use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
+use App\Services\Calendar\AvailableCalendarEventsSlotsService;
+use App\Services\Calendar\AvailableSlotOptionsForMentorProgram;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -25,6 +29,8 @@ class ShowCalendarEventPage
             'locale'           => app()->getLocale(),
             'availableColours' => CalendarEventColoursEnum::values(),
             'permissions'      => $user->can('update', [$calendarEvent, $user]) ? 'edit' : 'view',
+            'mentorProgramDuration'=>$calendarEvent->mentorProgram->first()->session_duration,
+            'availableSlots' =>  new AvailableSlotOptionsForMentorProgram($calendarEvent)->getAvailableSlots(),
             'calendarEvent'    => CalendarEventData::fromModel(
                 $calendarEvent->load('calendarEventUsers'),
                 $timezone,

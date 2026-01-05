@@ -10,27 +10,23 @@ use App\Models\User;
 
 final class CalendarEventPolicy
 {
-    public function create(User $user): bool
-    {
-        return $user->hasRole('mentor');
-    }
 
     public function update(User $user, CalendarEvent $calendarEvent): bool
     {
-        if (! $user->hasRole('mentor')) {
-            return false;
-        }
-
         if ($calendarEvent->relationLoaded('calendarEventUsers')) {
             return $calendarEvent->calendarEventUsers
                 ->where('id', $user->getKey())
-                ->where('pivot.role', CalendarEventRoleEnum::HOST->value)
+                ->whereIn('pivot.role', [CalendarEventRoleEnum::HOST->value,
+                    CalendarEventRoleEnum::COHOST->value,
+                    CalendarEventRoleEnum::MENTI->value])
                 ->isNotEmpty();
         }
 
         return $calendarEvent->calendarEventUsers()
             ->where('user_id', $user->getKey())
-            ->where('role', CalendarEventRoleEnum::HOST->value)
+            ->whereIn('role', [CalendarEventRoleEnum::HOST->value,
+                CalendarEventRoleEnum::COHOST->value,
+                CalendarEventRoleEnum::MENTI->value])
             ->exists();
     }
 

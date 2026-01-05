@@ -16,63 +16,76 @@ class AvailableCalendarEventsSlotsService
     /** @var array<int, array{start: CarbonInterface, end: CarbonInterface}> */
     private array $availableSlots = [];
     private Collection $events;
-    private CarbonInterface|null $mentorProgramStart;
-    private CarbonInterface|null $mentorProgramEnd;
+    private CarbonInterface $periodStart;
+    private CarbonInterface $periodFinish;
+    private int $minimumPreBookingtimeInMinutes;
+
 
     public function __construct(
-        private readonly User $user,
-        private readonly string $timezone,
+        private readonly User      $user,
+        private readonly string    $timezone,
         /** @var array<int, int|string> $excludeEvents */
-        private readonly array $excludeEvents = [],
-        private readonly bool $excludeSchedule = false,
+        private readonly array     $excludeEvents = [],
+        private readonly bool      $excludeSchedule = false,
         private MentorProgram|null $mentorProgram = null
-    ) {}
+    )
+    {
+        $this->minimumPreBookingtimeInMinutes = $this->mentorProgram->mentor->minimum_pre_booking_time ?? 0;
+    }
 
     /**
      * @return array<int,array{start: CarbonInterface, end: CarbonInterface}>
      */
     public function getAvailableSlots(): array
     {
+        $this->periodStart = Date::now()
+            ->addMinutes($this->minimumPreBookingtimeInMinutes)
+            ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+        $currentDateTimezone = Date::now($this->timezone)
+            ->addMinutes($this->minimumPreBookingtimeInMinutes)
+            ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+        $this->periodFinish = Date::now($this->timezone)
+            ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)
+            ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+
         $this->getCalendarEvents();
-        $currentDate = Date::now();
-        $currentDateTimezone = Date::now($this->timezone);
 
         if ($this->events->isEmpty()) {
             $this->availableSlots[] = [
                 'start' => $currentDateTimezone,
-                'end'   => Date::now($this->timezone)
-                    ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
+                'end' => $this->periodFinish,
             ];
         } else {
-            $this->configureSlots($this->events, $currentDateTimezone, $currentDate);
+            $this->configureSlots($this->events);
         }
 
         if ($this->excludeSchedule) {
-            $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user,
+            $this->availableSlots = new ExcludeUserScheduleSchemeService($this->mentorProgram->mentor,
                 $this->availableSlots, $this->timezone)->getAvailableSlots();
         }
+
 
         return $this->availableSlots;
     }
 
-    protected function getCalendarEvents(){
-
-        $currentDate = Date::now();
+    protected function getCalendarEvents()
+    {
         $calendarEventRequestQuery = $this->user->calendarEvents();
-        if (!is_null($this->mentorProgram)) {
-            $this->mentorProgramStart = Date::parse($this->mentorProgram?->start_time);
-            $this->mentorProgramEnd = Date::parse($this->mentorProgram?->end_time);
-
-            if ($this->mentorProgramStart) {
-                $calendarEventRequestQuery->where('start_date_time', '>=', $this->mentorProgramStart);
-            }
-
-            if ($this->mentorProgramEnd) {
-                $calendarEventRequestQuery->where('end_date_time', '<=', $this->mentorProgramEnd);
-            }
-        } else {
-            $calendarEventRequestQuery->where('start_date_time', '>=', $currentDate);
+        if (!is_null($this->mentorProgram?->start_time)) {
+            $this->periodStart = $this->mentorProgram->start_time->copy()
+                ->greaterThanOrEqualTo($this->periodStart) ?
+                $this->mentorProgram->start_time : $this->periodStart;
         }
+        if (!is_null($this->mentorProgram?->end_time)) {
+            $this->periodFinish = $this->mentorProgram->end_time
+                ->copy()->lessThanOrEqualTo($this->periodFinish)
+                ? $this->mentorProgram->end_time : $this->periodFinish;
+        }
+
+        $calendarEventRequestQuery->where('start_date_time', '>=',
+            $this->periodStart);
+        $calendarEventRequestQuery->where('end_date_time', '<=',
+            $this->periodFinish);
 
         $this->events = $calendarEventRequestQuery
             ->orderBy('start_date_time')
@@ -82,69 +95,56 @@ class AvailableCalendarEventsSlotsService
     }
 
     /**
-     * @param  Collection<int, mixed>  $events
+     * @param Collection<int, mixed> $events
      */
-    protected function configureSlots(Collection $events, CarbonInterface $currentDateTimezone, CarbonInterface $currentDate): void
+    protected function configureSlots(Collection $events): void
     {
         $previousEvent = null;
         foreach ($events as $event) {
             /** @var CalendarEvent $event */
             if (is_null($previousEvent)) {
-                if ($event->start_date_time->greaterThanOrEqualTo($currentDate)) {
+                if ($event->start_date_time->greaterThanOrEqualTo($this->periodStart)) {
+                    $startSlotPeriod = $this->periodStart->timezone($this->timezone)
+                        ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+
+                    $endSlotPeriod = $event->start_date_time->timezone($this->timezone)
+                        ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+
+                    if ($this->mentorProgram->session_duration &&
+                        $endSlotPeriod->diffInMinutes($startSlotPeriod)
+                        < $this->mentorProgram->session_duration
+                    ) {
+                        continue;
+                    }
                     $this->availableSlots[] = [
-                        'start' => $currentDateTimezone,
-                        'end'   => $event->start_date_time->timezone($this->timezone),
+                        'start' => $startSlotPeriod,
+                        'end' => $endSlotPeriod,
                     ];
                 }
             } else {
+                $startSlotPeriod = $previousEvent->end_date_time->timezone($this->timezone)
+                    ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+                $endSlotPeriod = $event->start_date_time->timezone($this->timezone)
+                    ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+
+                if ($this->mentorProgram->session_duration &&
+                    $startSlotPeriod->diffInMinutes($endSlotPeriod) < $this->mentorProgram->session_duration
+                ) {
+                    continue;
+                }
                 $this->availableSlots[] = [
-                    'start' => $previousEvent->end_date_time->timezone($this->timezone),
-                    'end'   => $event->start_date_time->timezone($this->timezone),
+                    'start' => $startSlotPeriod,
+                    'end' => $endSlotPeriod,
                 ];
             }
-            $this->availableSlots[] = [
-                'start' => $this->mentorProgramStart ? $this->mentorProgramStart->setTimezone($this->timezone) : $currentDate,
-                'end'   => $this->mentorProgramEnd ? $this->mentorProgramEnd->setTimezone($this->timezone) : Date::now($this->timezone)
-                    ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
-            ];
-//            if ($this->excludeSchedule) {
-//                return $this->availableSlots;
-//            }
+
+            $previousEvent = $event;
         }
 
-//        else{
-//            $previousEvent = null;
-//            foreach ($events as $event) {
-//                /** @var CalendarEvent $event */
-//                if (is_null($previousEvent)) {
-//                    if ($event->start_date_time->greaterThanOrEqualTo($currentDate)) {
-//                        $this->availableSlots[] = [
-//                            'start' => $currentDateTimezone,
-//                            'end'   => $event->start_date_time->timezone($this->timezone),
-//                        ];
-//                    }
-//                } else {
-//                    $this->availableSlots[] = [
-//                        'start' => $previousEvent->end_date_time->timezone($this->timezone),
-//                        'end'   => $event->start_date_time->timezone($this->timezone),
-//                    ];
-//                }
-//
-//                $previousEvent = $event;
-//            }
-//
-//            $this->availableSlots[] = [
-//                'start' => $previousEvent->end_date_time->timezone($this->timezone),
-//                'end'   => Date::now($this->timezone)
-//                    ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
-//            ];
-//        }
-
-//        if ($this->excludeSchedule) {
-//            $this->availableSlots = new ExcludeUserScheduleSchemeService($this->user,
-//                $this->availableSlots, $this->timezone)->getAvailableSlots();
-//        }
-//
-//        return $this->availableSlots;
+            $this->availableSlots[] = [
+                'start' => $previousEvent? $previousEvent->end_date_time->timezone($this->timezone):
+                $this->periodStart->timezone($this->timezone),
+                'end' => $this->periodFinish->timezone($this->timezone),
+            ];
     }
 }

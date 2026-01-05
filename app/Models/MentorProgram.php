@@ -68,4 +68,10 @@ class MentorProgram extends Model
     {
         return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_program');
     }
+
+    public function mentorSession():hasMany
+    {
+        return $this->hasMany(MentorSession::class, 'mentor_program_id');
+    }
+
 }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\MentorSession;
+use App\Models\MentorProgram;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,8 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
-            $table->foreignIdFor(MentorSession::class, 'mentor_session_id')
+        Schema::table('mentor_sessions', function (Blueprint $table) {
+            $table->foreignIdFor(MentorProgram::class, 'mentor_program_id')
                 ->nullable()->constrained()->cascadeOnDelete();
         });
     }
@@ -23,8 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('calendar_events', function (Blueprint $table) {
-            $table->dropColumn('mentor_session_id');
+        Schema::table('mentor_sessions', function (Blueprint $table) {
+            $table->dropColumn('mentor_program_id');
         });
     }
 };

@@ -25,7 +25,7 @@ trait CalendarEventRequestRules
             'toTime'      => ['required', 'date_format:H:i', 'after:fromTime', 'bail'],
             'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
             'description' => ['max:2000'],
-            'webLink'     => ['url'],
+            'webLink'     => ['sometimes','nullable','url'],
             'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
         ];
     }

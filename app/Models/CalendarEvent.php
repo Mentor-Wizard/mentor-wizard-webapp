@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $web_link
  * @property string|null $description
  * @property int|null $mentor_program_id
+ * @property int|null $mentor_session_id
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]
@@ -37,6 +38,7 @@ class CalendarEvent extends Model
     use HasFactory;
 
     const MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET = 6;
+    const ROUNDING_DISCRECY_TIME_IN_MINUTES = 5;
 
     protected $fillable = [
         'title',
@@ -48,6 +50,7 @@ class CalendarEvent extends Model
         'web_link',
         'description',
         'mentor_program_id',
+        'mentor_session_id',
     ];
 
     /**
@@ -64,6 +67,11 @@ class CalendarEvent extends Model
     public function MentorSession():BelongsTo
     {
         return $this->belongsTo(MentorSession::class);
+    }
+
+    public function MentorProgram():BelongsTo
+    {
+        return $this->belongsTo(MentorProgram::class);
     }
 
     /** Get the event duration in minutes. */

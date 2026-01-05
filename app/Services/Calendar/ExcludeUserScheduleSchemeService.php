@@ -11,6 +11,7 @@ use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
+use Log;
 
 class ExcludeUserScheduleSchemeService
 {
@@ -58,12 +59,18 @@ class ExcludeUserScheduleSchemeService
      */
     public function getAvailableSlots(): array
     {
+        if(($this->userSchedules->isEmpty())) {
+            return $this->eventsSlots;
+        }
         $this->groupUserScheduleByDayAndTypes();
+
         foreach ($this->eventsSlots as $eventSlot) {
             $this->groupCalendarEventsSlotsPerDay($eventSlot);
         }
 
-        if (isset($this->formattedSlots['Working Day']) && (isset($this->formattedSlots['Working Day']) && $this->formattedSlots['Working Day'] !== [])) {
+
+        if (isset($this->formattedSlots['Working Day']) &&
+            (isset($this->formattedSlots['Working Day']) && $this->formattedSlots['Working Day'] !== [])) {
             foreach ($this->checkedIntervals as $currentInterval) {
                 $this->combineCalendarEventsAndUserScheduleSlots($currentInterval);
             }
@@ -105,9 +112,9 @@ class ExcludeUserScheduleSchemeService
             } elseif ($date->format('Y-m-d') === $startTime->format('Y-m-d')) {
                 $this->firstDateFormatting($startTime);
             } elseif ($date->format('Y-m-d') === $endTime->format('Y-m-d')) {
-                $this->lastDateFormatting($startTime, $endTime);
+                $this->lastDateFormatting($date, $endTime);
             } else {
-                $this->middleDateFormatting($startTime);
+                $this->middleDateFormatting($date);
             }
         }
     }
@@ -140,7 +147,7 @@ class ExcludeUserScheduleSchemeService
     }
 
     private function lastDateFormatting(CarbonInterface $date, CarbonInterface $endTime): void
-    {
+    {;
         $this->checkedIntervals[] = [
             'start' => $date->copy()->startOfDay(),
             'end'   => $endTime,

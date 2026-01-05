@@ -32,8 +32,8 @@ class StoreCalendarEvent extends BaseCalendarEventAction
         $mentorProgramId = $request->input('mentor_program_id');
         if ($mentorProgramId) {
             $mentorProgram = MentorProgram::query()->find($mentorProgramId);
-            if ($mentorProgram && $mentorProgram->mentor_profile_id) {
-                $mentor = $mentorProgram->mentorProfile->user;
+            if ($mentorProgram && $mentorProgram->mentor_id) {
+                $mentor = $mentorProgram->mentor;
                 if ($mentor && $mentor->getKey() !== auth()->id()) {
                     $calendarEvent->calendarEventUsers()->attach($mentor->getKey(), [
                         'role'   => CalendarEventRoleEnum::PARTICIPANT->value,

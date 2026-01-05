@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Pages\Calendar;
 
 use App\Models\MentorProgram;
+use App\Models\CalendarEvent;
 use App\Services\Calendar\GetBookingCalendarEventsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -16,13 +17,13 @@ class MentorProgramEventBookingPage
 {
     use AsController;
 
-    public function handle(Request $request): Response
+    public function handle(Request $request, MentorProgram $mentorProgram): Response
     {
         $timezone = $request->get('timezone') ?? config('app.timezone');
         $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
-        $mentorProgramId = $request->get('mentorProgramId');
+//        $mentorProgramId = $request->get('mentorProgramId');
         $user = auth()->user();
-        $mentorProgram = $mentorProgramId ? MentorProgram::query()->find($mentorProgramId) : null;
+//        $mentorProgram = $mentorProgramId ? MentorProgram::query()->find($mentorProgramId) : null;
 
         $calendarData = new GetBookingCalendarEventsService(
             $date,
@@ -39,6 +40,7 @@ class MentorProgramEventBookingPage
             'days'              => $calendarData,
             'weekDays'          => $weekDays,
             'mentorProgram'     => $mentorProgram,
+            'roundingMinutes'   => CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES,
         ]);
     }
 }
