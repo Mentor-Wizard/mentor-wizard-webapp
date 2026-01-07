@@ -18,15 +18,16 @@ trait CalendarEventRequestRules
     public function rules(): array
     {
         return [
-            'title'       => ['required', 'string', 'max:255'],
-            'fromDate'    => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
-            'toDate'      => ['required', 'date_format:Y-m-d', 'after_or_equal:fromDate'],
-            'fromTime'    => ['required', 'date_format:H:i', 'bail'],
-            'toTime'      => ['required', 'date_format:H:i', 'after:fromTime', 'bail'],
-            'colour'      => ['required', Rule::in(CalendarEventColoursEnum::values())],
-            'description' => ['max:2000'],
-            'webLink'     => ['sometimes','nullable','url'],
-            'type'        => ['required', Rule::in(CalendarEventTypeEnum::values())],
+            'title'                 => ['required', 'string', 'max:255'],
+            'fromDate'              => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'toDate'                => ['required', 'date_format:Y-m-d', 'after_or_equal:fromDate'],
+            'fromTime'              => ['required', 'date_format:H:i', 'bail'],
+            'toTime'                => ['required', 'date_format:H:i', 'after:fromTime', 'bail'],
+            'colour'                => ['required', Rule::in(CalendarEventColoursEnum::values())],
+            'description'           => ['max:2000'],
+            'webLink'               => ['sometimes', 'nullable', 'url'],
+            'type'                  => ['required', Rule::in(CalendarEventTypeEnum::values())],
+            'mentor_program_id'     => ['required', 'integer'],
         ];
     }
 
@@ -55,6 +56,7 @@ trait CalendarEventRequestRules
             'webLink.url'             => 'Weblink to event is not valid',
             'type.required'           => 'CalendarEvent type is required.',
             'type.in'                 => 'CalendarEvent type must be either individual or group.',
+            'mentor_program_id'       => 'CalendarEvent should be related to mentor program.',
         ];
     }
 }

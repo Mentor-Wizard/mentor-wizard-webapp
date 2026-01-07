@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -25,7 +28,7 @@ describe('Calendar event web link update authorization (mentor vs mentee)', func
         $this->mentee = User::factory()->create();
 
         // Another random user
-        $this->stranger = User::factory()->create();
+        $this->visitor = User::factory()->create();
 
         // Program owned by mentor
         $this->program = MentorProgram::factory()->create([
@@ -35,8 +38,9 @@ describe('Calendar event web link update authorization (mentor vs mentee)', func
         // Event under the mentor program
         $this->event = CalendarEvent::factory()->create([
             'date'              => Date::tomorrow()->toDateString(),
-            'mentor_program_id' => $this->program->getKey(),
             'web_link'          => null,
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->program->getKey(),
         ]);
 
         // Attach mentee to event
@@ -49,13 +53,23 @@ describe('Calendar event web link update authorization (mentor vs mentee)', func
         actingAs($this->mentor);
         Auth::login($this->mentor);
 
-        $response = $this->patch(route('pages.calendar.edit', $this->event), [
-            'webLink' => 'https://meet.example.com/room-1',
-        ]);
+        $response = $this->withSession(['_token' => 'test_token'])
+            ->patch(route('pages.calendar.edit', $this->event), [
+                'title'             => 'New title',
+                'fromTime'          => '10:00',
+                'toTime'            => '11:00',
+                'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+                'toDate'            => Date::tomorrow()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'webLink'           => 'https://meet.example.com/room-1',
+                'mentor_program_id' => $this->program->getKey(),
+                '_token'            => 'test_token',
+            ]);
 
         $response->assertRedirect(route('pages.calendar.index'));
         $this->assertDatabaseHas('calendar_events', [
-            'id' => $this->event->getKey(),
+            'id'       => $this->event->getKey(),
             'web_link' => 'https://meet.example.com/room-1',
         ]);
     });
@@ -64,33 +78,29 @@ describe('Calendar event web link update authorization (mentor vs mentee)', func
         actingAs($this->mentee);
         Auth::login($this->mentee);
 
-        $response = $this->patch(route('pages.calendar.edit', $this->event), [
-            'webLink' => 'https://blocked.example',
-        ]);
+        $response = $this
+            ->withSession(['_token' => 'test_token'])
+            ->patch(route('pages.calendar.edit', $this->event), [
+                'webLink' => 'https://blocked.example',
+                '_token'  => 'test_token',
+            ]);
 
         $response->assertForbidden();
     });
 
-    it('stranger cannot update web link, gets 403', function (): void {
-        actingAs($this->stranger);
-        Auth::login($this->stranger);
+    it('not related visitor cannot update web link, gets 403', function (): void {
+        actingAs($this->visitor);
+        Auth::login($this->visitor);
 
-        $response = $this->patch(route('pages.calendar.edit', $this->event), [
-            'webLink' => 'https://blocked.example',
-        ]);
+        $response = $this
+            ->withSession(['_token' => 'test_token'])
+            ->patch(route('pages.calendar.edit', [
+                $this->event,
+                '_token' => 'test_token',
+            ]), [
+                'webLink' => 'https://blocked.example',
+            ]);
 
         $response->assertForbidden();
-    });
-
-    it('mentee can delete the event', function (): void {
-        actingAs($this->mentee);
-        Auth::login($this->mentee);
-
-        $response = $this->delete(route('pages.calendar.delete', $this->event));
-
-        $response->assertRedirect(route('pages.calendar.index'));
-        $this->assertDatabaseMissing('calendar_events', [
-            'id' => $this->event->getKey(),
-        ]);
     });
 });

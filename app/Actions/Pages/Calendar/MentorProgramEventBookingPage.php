@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Calendar;
 
-use App\Models\MentorProgram;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Services\Calendar\GetBookingCalendarEventsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;

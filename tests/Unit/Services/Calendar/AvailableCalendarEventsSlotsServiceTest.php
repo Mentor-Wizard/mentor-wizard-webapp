@@ -4,27 +4,42 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\RoleEnum;
 use App\Enums\UserScheduleRecordType;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserSchedule;
 use App\Services\Calendar\AvailableCalendarEventsSlotsService;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Spatie\Permission\Models\Role;
 
 mutates(AvailableCalendarEventsSlotsService::class);
 
 describe('AvailableCalendarEventsSlotsService', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
     });
 
     it('returns empty array when user has no future events', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
-        $user = User::factory()->create();
-
-        $slots = new AvailableCalendarEventsSlotsService($user, 'Europe/Kyiv')->getAvailableSlots();
+        $tz = 'Europe/Kyiv';
+        $slots = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            [],
+            true,
+            $this->mentorProgram
+        )->getAvailableSlots();
 
         expect($slots)->toBeArray()->toHaveCount(1);
         expect($slots[0]['start'])->toBeInstanceOf(CarbonImmutable::class);
@@ -33,36 +48,39 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
     it('check limit of calendar events', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
-        $user = User::factory()->create();
 
         for ($i = 1; $i <= 105; $i++) {
             $currentCalendarEvent = CalendarEvent::query()->create([
-                'start_date_time' => Date::now()->addDays($i)->setTime(10, 0)->format('Y-m-d H:i:s'),
-                'end_date_time'   => Date::now()->addDays($i)->setTime(11, 0)->format('Y-m-d H:i:s'),
-                'date'            => Date::now()->addDays($i)->format('Y-m-d'),
-                'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'title'           => 'Event '.$i,
-                'status'          => CalendarEventStatusEnum::CONFIRMED->value,
+                'start_date_time' => Date::now()->addDays($i)->setTime(10, 0)
+                    ->format('Y-m-d H:i:s'),
+                'end_date_time'   => Date::now()->addDays($i)->setTime(11, 0)
+                    ->format('Y-m-d H:i:s'),
+                'date'              => Date::now()->addDays($i)->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'title'             => 'Event '.$i,
+                'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
-            $user->calendarEvents()->attach($currentCalendarEvent->getKey());
+            $this->user->calendarEvents()->attach($currentCalendarEvent->getKey());
         }
 
+        $tz = 'UTC';
         $service = new AvailableCalendarEventsSlotsService(
-            user: $user,
-            timezone: 'UTC',
+            $this->user,
+            $tz,
+            [],
+            true,
+            $this->mentorProgram
         );
 
         $slots = $service->getAvailableSlots();
 
-        expect($slots)->toHaveCount(101);
+        expect($slots)->toHaveCount(106);
     });
 
     it('builds available slots between events using timezone conversion', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
-
-        /** @var User $user */
-        $user = User::factory()->create();
 
         // Create two future events in UTC
         $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
@@ -71,24 +89,31 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $event2EndUtc = (clone $event2StartUtc)->setTime(14, 0, 0);
 
         $event1 = CalendarEvent::query()->create([
-            'title'           => 'E1',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1StartUtc,
-            'end_date_time'   => $event1EndUtc,
-            'date'            => $event1StartUtc->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E1',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event1StartUtc,
+            'end_date_time'     => $event1EndUtc,
+            'date'              => $event1StartUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event2 = CalendarEvent::query()->create([
-            'title'           => 'E2',
-            'status'          => 'confirmed',
-            'start_date_time' => $event2StartUtc,
-            'end_date_time'   => $event2EndUtc,
-            'date'            => $event2StartUtc->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E2',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event2StartUtc,
+            'end_date_time'     => $event2EndUtc,
+            'date'              => $event2StartUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
+        $this->user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
 
-        $result = new AvailableCalendarEventsSlotsService($user, $tz)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            [],
+            true,
+            $this->mentorProgram)->getAvailableSlots();
 
         // We expect 3 slots: [now..E1.start], [E1.end..E2.start], [E2.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(3);
@@ -116,23 +141,26 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
     it('creates initial slot when first event starts after current UTC time', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
-        $user = User::factory()->create();
-
         $eventStartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
-        //        $eventStartUtc = Carbon::create(2025, 4, 1, 10, 0, 1, 'UTC');
         $eventEndUtc = (clone $eventStartUtc)->addHour();
 
         $event = CalendarEvent::query()->create([
-            'title'           => 'E-future',
-            'status'          => 'confirmed',
-            'start_date_time' => $eventStartUtc,
-            'end_date_time'   => $eventEndUtc,
-            'date'            => $eventStartUtc->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E-future',
+            'status'            => 'confirmed',
+            'start_date_time'   => $eventStartUtc,
+            'end_date_time'     => $eventEndUtc,
+            'date'              => $eventStartUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey());
 
-        $result = new AvailableCalendarEventsSlotsService($user, $tz)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            [],
+            true,
+            $this->mentorProgram)->getAvailableSlots();
 
         // Two slots should exist: [now..E-future.start], [E-future.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(2);
@@ -153,9 +181,6 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create three events
         $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
@@ -167,34 +192,43 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $event3EndUtc = (clone $event3StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
-            'title'           => 'E1',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1StartUtc,
-            'end_date_time'   => $event1EndUtc,
-            'date'            => $event1StartUtc->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E1',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event1StartUtc,
+            'end_date_time'     => $event1EndUtc,
+            'date'              => $event1StartUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event2 = CalendarEvent::query()->create([
-            'title'           => 'E2',
-            'status'          => 'confirmed',
-            'start_date_time' => $event2StartUtc,
-            'end_date_time'   => $event2EndUtc,
-            'date'            => $event2StartUtc->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E2',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event2StartUtc,
+            'end_date_time'     => $event2EndUtc,
+            'date'              => $event2StartUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event3 = CalendarEvent::query()->create([
-            'title'           => 'E3',
-            'status'          => 'confirmed',
-            'start_date_time' => $event3StartUtc,
-            'end_date_time'   => $event3EndUtc,
-            'date'            => $event3StartUtc->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E3',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event3StartUtc,
+            'end_date_time'     => $event3EndUtc,
+            'date'              => $event3StartUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey(), $event3->getKey()]);
+        $this->user->calendarEvents()->attach([$event1->getKey(), $event2->getKey(), $event3->getKey()]);
 
         // Exclude event2 from calculation
-        $result = new AvailableCalendarEventsSlotsService($user, $tz, [$event2->getKey()])->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            [$event2->getKey()],
+            true,
+            $this->mentorProgram
+        )->getAvailableSlots();
 
         // We expect 3 slots: [now..E1.start], [E1.end..E3.start], [E3.end..now+2months]
         // Event2 should not be considered
@@ -210,12 +244,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::create(2025, 1, 6, 10, 0, 0, $tz)); // Monday
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create user schedule: Monday 9:00-17:00
         UserSchedule::query()->create([
-            'user_id'     => $user->getKey(),
+            'user_id'     => $this->user->getKey(),
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
             'end_time'    => '17:00:00',
@@ -227,17 +258,24 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $eventEnd = Date::create(2025, 1, 6, 15, 0, 0, $tz);
 
         $event = CalendarEvent::query()->create([
-            'title'           => 'Monday Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $eventStart,
-            'end_date_time'   => $eventEnd,
-            'date'            => $eventStart?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Monday Event',
+            'status'            => 'confirmed',
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey());
 
         // Get slots with schedule exclusion
-        $result = new AvailableCalendarEventsSlotsService($user, $tz, [], true)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            [],
+            true,
+            $this->mentorProgram
+        )->getAvailableSlots();
 
         // Slots should only include times within working hours (9:00-17:00)
         expect($result)->toBeArray()->not()->toBeEmpty();
@@ -258,12 +296,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
     it('excludes day off dates when excludeSchedule flag is true', function (): void {
         $tz = 'Europe/Kyiv';
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create working schedule for Monday
         UserSchedule::query()->create([
-            'user_id'     => $user->getKey(),
+            'user_id'     => $this->user->getKey(),
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
             'end_time'    => '17:00:00',
@@ -274,7 +309,7 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         // Create a day off on Monday, January 13
         UserSchedule::query()->create([
-            'user_id'      => $user->getKey(),
+            'user_id'      => $this->user->getKey(),
             'day_of_week'  => 1, // Monday (required but ignored for day off)
             'start_time'   => '00:00:00',
             'end_time'     => '23:59:59',
@@ -294,27 +329,35 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             ->addWeek()->setTime(16, 0, 0)->timezone($tz);
 
         $event1 = CalendarEvent::query()->create([
-            'title'           => 'Event on Working Monday',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1Start,
-            'end_date_time'   => $event1End,
-            'date'            => $event1Start->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'title'             => 'Event on Working Monday',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event1Start,
+            'end_date_time'     => $event1End,
+            'date'              => $event1Start->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
         $event2 = CalendarEvent::query()->create([
-            'title'           => 'Event on Day Off',
-            'status'          => 'confirmed',
-            'start_date_time' => $event2Start,
-            'end_date_time'   => $event2End,
-            'date'            => $event2Start->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'title'             => 'Event on Day Off',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event2Start,
+            'end_date_time'     => $event2End,
+            'date'              => $event2Start->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
+        $this->user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
 
         // Get slots with schedule exclusion
-        $result = new AvailableCalendarEventsSlotsService($user, $tz, [], true)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            [],
+            true,
+            $this->mentorProgram
+        )->getAvailableSlots();
 
         // Slots should not include or overlap with the day off date (2025-01-13)
 
@@ -336,12 +379,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::create(2025, 1, 6, 10, 0, 0, $tz)); // Monday
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create user schedule: Monday 9:00-17:00
         UserSchedule::query()->create([
-            'user_id'     => $user->getKey(),
+            'user_id'     => $this->user->getKey(),
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
             'end_time'    => '17:00:00',
@@ -353,17 +393,24 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $eventEnd = Date::create(2025, 1, 6, 15, 0, 0, $tz);
 
         $event = CalendarEvent::query()->create([
-            'title'           => 'Monday Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $eventStart,
-            'end_date_time'   => $eventEnd,
-            'date'            => $eventStart?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Monday Event',
+            'status'            => 'confirmed',
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey());
 
         // Get slots WITHOUT schedule exclusion (default behavior)
-        $result = new AvailableCalendarEventsSlotsService($user, $tz, [], false)->getAvailableSlots();
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            [],
+            false,
+            $this->mentorProgram
+        )->getAvailableSlots();
 
         // Should return slots outside working hours too
         expect($result)->toBeArray()->toHaveCount(2);

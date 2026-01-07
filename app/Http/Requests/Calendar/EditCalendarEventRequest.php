@@ -4,37 +4,57 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
+use App\Models\MentorProgram;
+use App\Services\Calendar\CheckTimeSlotReservedService;
+use App\Traits\Calendar\CalendarEventRequestRules;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Override;
+use Illuminate\Support\Facades\Date;
 
 class EditCalendarEventRequest extends FormRequest
 {
+    use CalendarEventRequestRules;
+
     public function authorize(): bool
     {
-        // Authorization is handled by the policy on the route (can:update)
         return true;
     }
 
-    /**
-     * Only allow updating of the web link.
-     *
-     * @return array<string, array<int, string>>
-     */
-    public function rules(): array
+    public function withValidator(Validator $validator): void
     {
-        return [
-            'webLink' => ['sometimes', 'nullable', 'url', 'max:2048'],
-        ];
-    }
+        $validator->after(function ($validator): void {
+            $user = auth()->user();
+            $profile = $user->profile;
+            $timezone = $profile->timezone;
 
-    /**
-     * @return array<string, string>
-     */
-    #[Override]
-    public function messages(): array
-    {
-        return [
-            'webLink.url' => 'Web link must be a valid URL.',
-        ];
+            $mentorProgram = $this->input('mentor_program_id')
+                ? MentorProgram::query()->find($this->input('mentor_program_id')) : null;
+
+            if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime'])) {
+                $startDate = Date::createFromFormat(
+                    '!Y-m-d H:i',
+                    $this->input('fromDate').$this->input('fromTime'),
+                    $timezone
+                );
+                $endDate = Date::createFromFormat(
+                    '!Y-m-d H:i',
+                    $this->input('toDate').$this->input('toTime'),
+                    $timezone
+                );
+
+                $isWithinAvailableSlots = new CheckTimeSlotReservedService(
+                    $startDate,
+                    $endDate,
+                    $timezone,
+                    auth()->user(),
+                    [$this->input('id')],
+                    $mentorProgram)
+                    ->isSlotAvailable();
+
+                if (! $isWithinAvailableSlots) {
+                    $validator->errors()->add('fromDate', 'there are another events on this time');
+                }
+            }
+        });
     }
 }

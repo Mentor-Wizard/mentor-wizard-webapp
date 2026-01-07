@@ -5,13 +5,16 @@ declare(strict_types=1);
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
 
 mutates(StoreCalendarEventRequest::class);
 
@@ -21,6 +24,11 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $this->user = User::factory()->create();
         auth()->login($this->user);
 
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
         $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(resolve(Redirector::class));
@@ -30,14 +38,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('successfully validates payload with all required info', function (): void {
         $payload = [
-            'id'            => 1,
-            'title'         => 'successful validation',
-            'fromDate'      => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'        => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime'      => '10:00',
-            'toTime'        => '11:30',
-            'type'          => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'        => CalendarEventColoursEnum::BLUE->value,
+            'id'                => 1,
+            'title'             => 'successful validation',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -68,19 +77,21 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
                 ->timezone('Europe/London')->addHours(1)->format('Y-m-d H:i:s'),
             'date' => Date::now()->addDays(5)
                 ->timezone('Europe/London')->format('Y-m-d'),
-            'type'  => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'title' => 'booked slot validation',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'title'             => 'booked slot validation',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
         $payload = [
-            'id'            => 1,
-            'title'         => 'successful validation',
-            'fromDate'      => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'        => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime'      => '10:00',
-            'toTime'        => '11:30',
-            'type'          => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'        => CalendarEventColoursEnum::BLUE->value,
+            'id'                => 1,
+            'title'             => 'successful validation',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -95,14 +106,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid FromDate',
-            'fromDate'    => '2025-13-45',
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '09:15',
-            'toTime'      => '10:45',
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid FromDate',
+            'fromDate'          => '2025-13-45',
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => '09:15',
+            'toTime'            => '10:45',
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -121,14 +133,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid FromDateTime',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '25:99---', // Invalid time that might pass initial format check
-            'toTime'      => '10:45',
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid FromDateTime',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => '25:99---', // Invalid time that might pass initial format check
+            'toTime'            => '10:45',
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -147,14 +160,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid FromDateTime',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => null,
-            'fromTime'    => '09:00', // Invalid time that might pass initial format check
-            'toTime'      => '10:45',
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid FromDateTime',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => null,
+            'fromTime'          => '09:00', // Invalid time that might pass initial format check
+            'toTime'            => '10:45',
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -173,14 +187,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid FromDateTime',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => null,
-            'toTime'      => '10:45',
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid FromDateTime',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => null,
+            'toTime'            => '10:45',
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -199,14 +214,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid FromDateTime',
-            'fromDate'    => null,
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '08:00',
-            'toTime'      => '09:00',
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid FromDateTime',
+            'fromDate'          => null,
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => '08:00',
+            'toTime'            => '09:00',
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -225,14 +241,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid toDateTime',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '08:00',
-            'toTime'      => null,
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid toDateTime',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => '08:00',
+            'toTime'            => null,
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -251,14 +268,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid ToDate',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => '2025-02-30', // Invalid date
-            'fromTime'    => '09:15',
-            'toTime'      => '10:45',
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid ToDate',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => '2025-02-30', // Invalid date
+            'fromTime'          => '09:15',
+            'toTime'            => '10:45',
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -277,14 +295,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
         $data = [
-            'title'       => 'Invalid ToDateTime',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '09:15',
-            'toTime'      => 'not-a-time', // Invalid time
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Invalid ToDateTime',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => '09:15',
+            'toTime'            => 'not-a-time', // Invalid time
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -304,22 +323,24 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         // Create an existing event that will conflict
         $existingEvent = CalendarEvent::factory()->create([
-            'start_date_time' => Date::now()->addDays(2)->setTime(10, 0, 0),
-            'end_date_time'   => Date::now()->addDays(2)->setTime(11, 0, 0),
-            'date'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $existingEvent->calendarEventUsers()->attach($this->user->getKey());
 
         $data = [
-            'title'       => 'Conflicting Event',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '10:15', // overlaps with existing event
-            'toTime'      => '10:45',
-            'description' => 'desc',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'timezone'    => 'UTC',
+            'title'             => 'Conflicting Event',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => '10:15', // overlaps with existing event
+            'toTime'            => '10:45',
+            'description'       => 'desc',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'timezone'          => 'UTC',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -337,12 +358,13 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('rejects when title is missing', function (): void {
         $payload = [
             // 'title' => missing
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => 'individual',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => 'individual',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -355,13 +377,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when fromDate is wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => 'not-a-date',
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => 'not-a-date',
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -373,13 +396,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     });
     it('rejects when fromDate and fromTime are at wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => 'not-a-date',
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10----:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => 'not-a-date',
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10----:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -393,13 +417,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when fromTime is wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => 'not-a-time',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => 'not-a-time',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -412,13 +437,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when toDate is wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => 'not-a-date',
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => 'not-a-date',
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -431,12 +457,13 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('does not check slot availability when only fromDate is invalid', function (): void {
         $data = [
-            'fromDate'    => '2025-01-01',
-            'fromTime'    => 'invalid-time',
-            'toDate'      => '2025-01-01',
-            'toTime'      => '11:00',
-            'title'       => 'Test Event',
-            'description' => 'Test Description',
+            'fromDate'          => '2025-01-01',
+            'fromTime'          => 'invalid-time',
+            'toDate'            => '2025-01-01',
+            'toTime'            => '11:00',
+            'title'             => 'Test Event',
+            'description'       => 'Test Description',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = StoreCalendarEventRequest::create('/calendar', 'POST', $data);
@@ -456,13 +483,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when toDate and toTime are at wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => 'not-a-date',
-            'fromTime' => '10:00',
-            'toTime'   => '1-----1:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => 'not-a-date',
+            'fromTime'          => '10:00',
+            'toTime'            => '1-----1:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -476,13 +504,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when fromTime and toTime are at wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '1------0:00',
-            'toTime'   => '1-----1:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '1------0:00',
+            'toTime'            => '1-----1:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -496,13 +525,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when toDate and fromDate are with wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => 'not-a-date',
-            'toDate'   => 'not-a-date',
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => 'not-a-date',
+            'toDate'            => 'not-a-date',
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -516,13 +546,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when toTime is wrong format', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => 'not-a-time',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => 'not-a-time',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -535,13 +566,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('rejects when colour is not from list', function (): void {
         $payload = [
-            'title'    => 'Wrong fromDate format ',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => 'wrong colour',
+            'title'             => 'Wrong fromDate format ',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => 'wrong colour',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -554,24 +586,26 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('verify slots availability with validation from list', function (): void {
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-            'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-            'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+            'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+            'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -589,24 +623,26 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('verify slots availability with wrong fromDate validation from list', function (): void {
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-            'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-            'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+            'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+            'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => 'tesdfsdf6644',
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => 'tesdfsdf6644',
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -625,24 +661,26 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('verify slots availability with wrong toDate validation from list', function (): void {
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-            'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-            'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+            'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+            'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => '23423423--4',
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => '23423423--4',
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -663,24 +701,26 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('verify slots availability with wrong fromTime validation from list', function (): void {
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-            'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-            'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+            'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+            'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => null,
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => null,
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -696,13 +736,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         }
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -721,24 +762,26 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('verify slots availability with wrong toTime validation from list', function (): void {
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-            'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-            'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+            'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+            'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '-------',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '-------',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -757,24 +800,26 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('skips slot availability check when fromDate has validation error', function (): void {
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-            'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-            'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+            'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+            'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => 'not-a-date',
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '10:00',
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => 'not-a-date',
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -804,24 +849,26 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
     it('skips slot availability check when fromTime has validation error', function (): void {
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-            'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-            'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+            'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+            'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'    => 'Conflicting slot',
-            'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime' => '25:99', // Invalid time that passes string format but fails parsing
-            'toTime'   => '11:30',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Conflicting slot',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '25:99', // Invalid time that passes string format but fails parsing
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = new StoreCalendarEventRequest;
@@ -932,6 +979,11 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
             $this->user = User::factory()->create();
             auth()->login($this->user);
 
+            $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+            $this->mentorProgram = MentorProgram::factory()->create([
+                'mentor_id' => $this->user->getKey(),
+            ]);
+
             $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
                 $request->setContainer(app());
                 $request->setRedirector(resolve(Redirector::class));
@@ -942,11 +994,12 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
             $start = Date::now()->addDays(2)->setTime(9, 15, 0);
             $end = Date::now()->addDays(2)->setTime(10, 45, 0);
             $event = CalendarEvent::factory()->create([
-                'start_date_time' => $start->copy(),
-                'end_date_time'   => $end->copy(),
-                'date'            => $start->copy()->format('Y-m-d'),
-                'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'title'           => 'existing overlap',
+                'start_date_time'   => $start->copy(),
+                'end_date_time'     => $end->copy(),
+                'date'              => $start->copy()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'title'             => 'existing overlap',
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
             // Attach event to the authenticated user via pivot so availability service sees it
             $this->user->calendarEvents()->attach($event->getKey(), [
@@ -956,14 +1009,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
         it('does not add availability error when fromDate is invalid (guards withValidator)', function (): void {
             $data = [
-                'title'       => 'Invalid FromDate',
-                'fromDate'    => Date::now()->subDay()->format('Y-m-d'), // invalid by rule but parseable
-                'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-                'fromTime'    => '09:15',
-                'toTime'      => '10:45',
-                'description' => 'desc',
-                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'      => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'Invalid FromDate',
+                'fromDate'          => Date::now()->subDay()->format('Y-m-d'), // invalid by rule but parseable
+                'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+                'fromTime'          => '09:15',
+                'toTime'            => '10:45',
+                'description'       => 'desc',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request = new StoreCalendarEventRequest;
@@ -982,14 +1036,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
         it('does not add availability error when fromTime is invalid (guards withValidator)', function (): void {
             $data = [
-                'title'       => 'Invalid FromTime',
-                'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-                'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-                'fromTime'    => '-------:15',
-                'toTime'      => '10:45',
-                'description' => 'desc',
-                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'      => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'Invalid FromTime',
+                'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+                'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+                'fromTime'          => '-------:15',
+                'toTime'            => '10:45',
+                'description'       => 'desc',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request = new StoreCalendarEventRequest;
@@ -1006,14 +1061,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
         it('does not add availability error when toDate is invalid (guards withValidator)', function (): void {
             $data = [
-                'title'       => 'Invalid ToDate',
-                'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-                'toDate'      => '----01-01', // invalid
-                'fromTime'    => '09:15',
-                'toTime'      => '10:45',
-                'description' => 'desc',
-                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'      => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'Invalid ToDate',
+                'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+                'toDate'            => '----01-01', // invalid
+                'fromTime'          => '09:15',
+                'toTime'            => '10:45',
+                'description'       => 'desc',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request = new StoreCalendarEventRequest;
@@ -1030,14 +1086,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
         it('does not add availability error when toTime is invalid (guards withValidator)', function (): void {
             $data = [
-                'title'       => 'Invalid ToTime',
-                'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-                'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-                'fromTime'    => '09:15',
-                'toTime'      => '--:45', // invalid
-                'description' => 'desc',
-                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'      => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'Invalid ToTime',
+                'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+                'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+                'fromTime'          => '09:15',
+                'toTime'            => '--:45', // invalid
+                'description'       => 'desc',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request = new StoreCalendarEventRequest;
@@ -1056,14 +1113,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
             and skips it when fromTime is invalid but parseable', function (): void {
             // 1) First run: valid times that overlap -> withValidator runs and adds fromDate error
             $valid = [
-                'title'       => 'valid overlap',
-                'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-                'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-                'fromTime'    => '09:15',
-                'toTime'      => '10:45',
-                'description' => 'desc',
-                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'      => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'valid overlap',
+                'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+                'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+                'fromTime'          => '09:15',
+                'toTime'            => '10:45',
+                'description'       => 'desc',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request1 = new StoreCalendarEventRequest;
@@ -1079,14 +1137,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
             // 2) Second run: Leading space makes concatenation parseable, but rule invalidates fromTime
             $invalidFromTime = [
-                'title'       => 'Leading space FromTime',
-                'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-                'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-                'fromTime'    => '-- 10:00', // invalid by rule, parseable by concatenation
-                'toTime'      => '11:00',
-                'description' => 'desc',
-                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'      => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'Leading space FromTime',
+                'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+                'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+                'fromTime'          => '-- 10:00', // invalid by rule, parseable by concatenation
+                'toTime'            => '11:00',
+                'description'       => 'desc',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request2 = new StoreCalendarEventRequest;
@@ -1103,24 +1162,26 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
         it('throws exception when fromTime is invalid and guard is bypassed', function (): void {
             $event = CalendarEvent::query()->create([
-                'title'           => 'Busy block',
-                'status'          => CalendarEventStatusEnum::CONFIRMED,
-                'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-                'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-                'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-                'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'description'     => 'Busy',
+                'title'             => 'Busy block',
+                'status'            => CalendarEventStatusEnum::CONFIRMED,
+                'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+                'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+                'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'description'       => 'Busy',
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
             $event->calendarEventUsers()->attach($this->user->getKey());
 
             $payload = [
-                'title'    => 'Conflicting slot',
-                'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-                'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-                'fromTime' => 'invalid',
-                'toTime'   => '11:30',
-                'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'   => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'Conflicting slot',
+                'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+                'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+                'fromTime'          => 'invalid',
+                'toTime'            => '11:30',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request = new StoreCalendarEventRequest;
@@ -1144,24 +1205,26 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
 
         it('skips slot availability check when fromTime has validation error', function (): void {
             $event = CalendarEvent::query()->create([
-                'title'           => 'Busy block',
-                'status'          => CalendarEventStatusEnum::CONFIRMED,
-                'start_date_time' => Date::now()->addDays(5)->setTime(10, 0),
-                'end_date_time'   => Date::now()->addDays(5)->setTime(11, 30),
-                'date'            => Date::now()->addDays(5)->format('Y-m-d'),
-                'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'description'     => 'Busy',
+                'title'             => 'Busy block',
+                'status'            => CalendarEventStatusEnum::CONFIRMED,
+                'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+                'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+                'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'description'       => 'Busy',
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
             $event->calendarEventUsers()->attach($this->user->getKey());
 
             $payload = [
-                'title'    => 'Conflicting slot',
-                'fromDate' => Date::now()->addDays(5)->format('Y-m-d'),
-                'toDate'   => Date::now()->addDays(5)->format('Y-m-d'),
-                'fromTime' => '10:00:00', // Wrong format - should be H:i not H:i:s
-                'toTime'   => '11:30',
-                'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'   => CalendarEventColoursEnum::BLUE->value,
+                'title'             => 'Conflicting slot',
+                'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+                'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+                'fromTime'          => '10:00:00', // Wrong format - should be H:i not H:i:s
+                'toTime'            => '11:30',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
 
             $request = new StoreCalendarEventRequest;

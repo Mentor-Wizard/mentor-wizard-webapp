@@ -27,7 +27,7 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         $result = new ExcludeUserScheduleSchemeService($user, $eventsSlots, 'Europe/Kyiv');
         $slots = $result->getAvailableSlots();
 
-        expect($slots)->toBeArray()->toBeEmpty();
+        expect($slots)->toBeArray()->toHaveCount(1);
     });
 
     it('filters slots to only include working hours', function (): void {

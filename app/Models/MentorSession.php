@@ -64,16 +64,15 @@ class MentorSession extends Model
         return $this->hasOne(MentorSessionNote::class);
     }
 
-    public function calendarEvent():HasOne
+    public function calendarEvent(): HasOne
     {
         return $this->hasOne(CalendarEvent::class);
     }
 
-    public function mentorProgram():HasOne
+    public function mentorProgram(): HasOne
     {
         return $this->hasOne(MentorProgram::class);
     }
-
 
     /**
      * @return array<string, string>

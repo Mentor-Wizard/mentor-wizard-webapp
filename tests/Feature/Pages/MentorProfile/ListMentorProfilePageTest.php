@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\Profile\ListMentorProfilePage;
+use App\Enums\RoleEnum;
 use App\Enums\TagEnum;
 use App\Models\MentorProfile;
 use App\Models\MentorProgram;
 use App\Models\MentorTag;
+use App\Models\User;
 use Database\Seeders\RoleSeeder;
 
 mutates(ListMentorProfilePage::class);
@@ -14,6 +16,8 @@ mutates(ListMentorProfilePage::class);
 describe('ListMentorProfilePage filters and includes', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+        $mentor = User::factory()->create();
+        $mentor->assignRole(RoleEnum::MENTOR->value);
 
         // Create profiles
         $this->profileA = MentorProfile::factory()->create(['title' => 'Laravel Guru', 'description' => 'Senior dev', 'rate' => 80.0]);
@@ -21,9 +25,9 @@ describe('ListMentorProfilePage filters and includes', function (): void {
         $this->profileC = MentorProfile::factory()->create(['title' => 'Python Master', 'description' => 'Monty Guy', 'rate' => 40.0]);
 
         // Programs
-        $this->programA1 = MentorProgram::factory()->create(['name' => 'Advanced PHP', 'description' => 'PHP', 'cost' => 600]);
-        $this->programB1 = MentorProgram::factory()->create(['name' => 'React Basics', 'description' => 'React', 'cost' => 200]);
-        $this->programC1 = MentorProgram::factory()->create(['name' => 'Python Junior', 'description' => 'Python', 'cost' => 50]);
+        $this->programA1 = MentorProgram::factory()->create(['name' => 'Advanced PHP', 'description' => 'PHP', 'cost' => 600, 'mentor_id' => $mentor->getKey()]);
+        $this->programB1 = MentorProgram::factory()->create(['name' => 'React Basics', 'description' => 'React', 'cost' => 200, 'mentor_id' => $mentor->getKey()]);
+        $this->programC1 = MentorProgram::factory()->create(['name' => 'Python Junior', 'description' => 'Python', 'cost' => 50, 'mentor_id' => $mentor->getKey()]);
 
         // Attach programs to profiles
         $this->profileA->mentorPrograms()->attach($this->programA1->getKey());

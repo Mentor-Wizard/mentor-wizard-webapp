@@ -11,7 +11,7 @@ final class CalendarEventPolicy
 {
     public function update(User $user, CalendarEvent $calendarEvent): bool
     {
-        // Only the mentor of the related mentor program can update events (web_link only at application level)
+        // Only the mentor of the related mentor program can update events
         $mentorProgram = $calendarEvent->MentorProgram()->first();
         if ($mentorProgram === null) {
             return false;

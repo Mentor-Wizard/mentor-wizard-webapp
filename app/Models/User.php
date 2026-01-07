@@ -31,6 +31,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read float $rating
  * @property-read Pivot $pivot
  * @property string $username
+ *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
@@ -179,7 +180,8 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function calendarEvents(): BelongsToMany
     {
         /** @phpstan-ignore-next-line */
-        return $this->belongsToMany(CalendarEvent::class, 'calendar_event_user', 'user_id')
+        return $this->belongsToMany(CalendarEvent::class,
+            'calendar_event_user', 'user_id')
             ->withPivot('colour')
             ->withPivot('role')
             ->withTimestamps();

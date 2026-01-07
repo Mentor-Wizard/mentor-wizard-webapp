@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Calendar;
 
 use App\DTO\Calendar\CalendarEventMonthViewData;
+use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Traits\Calendar\BuildsCalendarPayload;
@@ -77,6 +78,7 @@ class MonthCalendarEventsService
     {
         /** @var Collection<int, CalendarEvent> $calendarEvents */
         $calendarEvents = $this->user->calendarEvents()
+            ->where('status', '=', CalendarEventStatusEnum::CONFIRMED->value)
             ->whereBetween('start_date_time', [$startDate, $endDate])
             ->orderBy('start_date_time')
             ->get();

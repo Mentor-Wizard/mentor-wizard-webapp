@@ -37,18 +37,4 @@ describe('Calendar Pages - CalendarsList', function (): void {
             ->where('permissions', 'create')
         );
     });
-
-    it('renders calendars list for authenticated non-mentor with view permissions', function (): void {
-        $response = $this->actingAs($this->user)
-            ->get(route('pages.calendar.index'));
-
-        $response->assertStatus(Response::HTTP_OK);
-        $response->assertInertia(fn (Assert $page): AssertableJson => $page
-            ->component('Calendar/CalendarEventsList')
-            ->has('locale')
-            ->has('availableColours')
-            ->has('calendarEvents')
-            ->where('permissions', 'view')
-        );
-    });
 });

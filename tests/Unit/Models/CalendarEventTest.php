@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -11,6 +12,7 @@ use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Date;
+use Spatie\Permission\Models\Role;
 
 mutates(CalendarEvent::class);
 
@@ -65,11 +67,17 @@ describe('CalendarEvent model', function (): void {
             'web_link',
             'description',
             'mentor_program_id',
+            'mentor_session_id',
         ]);
     });
 
     it('can be created with mass assignable attributes', function (): void {
-        $program = MentorProgram::factory()->create();
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $program = MentorProgram::factory()->create(
+            ['mentor_id' => $user]
+        );
 
         $start = Date::create(2025, 8, 22, 9, 0, 0);
         $end = Date::create(2025, 8, 22, 10, 30, 0);

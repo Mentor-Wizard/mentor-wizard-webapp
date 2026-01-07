@@ -3,19 +3,24 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
+use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
+use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 mutates(EditMentorProgramPage::class);
 
 describe('Edit Mentor Program', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
-
         $this->seed(CurrencySeeder::class);
+        $this->mentor = User::factory()->create();
+        $this->mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
         $this->currencies = Currency::query()->pluck('name', 'id')->toArray();
         $this->data = [
             'name'        => 'Test Program',
@@ -23,6 +28,7 @@ describe('Edit Mentor Program', function (): void {
             'description' => 'Test Description',
             'cost'        => '100.00',
             'currency_id' => array_key_first($this->currencies),
+            'mentor_id'   => $this->mentor->id,
         ];
     });
 

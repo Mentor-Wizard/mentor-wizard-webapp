@@ -54,20 +54,22 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
         auth()->login($this->nonMentorUser);
     });
 
-    it('event deleted successfully', function (): void {
+    it('confirmed event is cancelled successfully', function (): void {
         actingAs($this->user);
         auth()->login($this->user);
 
         $response = $this->withSession(['_token' => 'test-token'])
             ->delete(route('pages.calendar.delete', $this->event->getKey()),
                 [
-                    '_token' => csrf_token(),
+                    '_token' => 'test-token',
                 ]);
 
         $response->assertRedirect(route('pages.calendar.index'));
 
-        $this->assertDatabaseMissing('calendar_events', [
-            'id' => $this->event->getKey(),
+        // Event should still exist but have CANCELLED status
+        $this->assertDatabaseHas('calendar_events', [
+            'id'     => $this->event->getKey(),
+            'status' => CalendarEventStatusEnum::CANCELLED->value,
         ]);
     });
 
@@ -95,7 +97,7 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     });
 
-    it('allows attached mentee to delete the event', function (): void {
+    it('allows attached mentee to cancel a confirmed event', function (): void {
         // Attach a mentee (non-mentor user) to the event
         $mentee = User::factory()->create();
         $this->event->calendarEventUsers()->attach($mentee->getKey(), [
@@ -113,8 +115,30 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
                 ]);
 
         $response->assertRedirect(route('pages.calendar.index'));
-        $this->assertDatabaseMissing('calendar_events', [
-            'id' => $this->event->getKey(),
+        $this->assertDatabaseHas('calendar_events', [
+            'id'     => $this->event->getKey(),
+            'status' => CalendarEventStatusEnum::CANCELLED->value,
+        ]);
+    });
+
+    it('finished event cannot be deleted and returns error flash', function (): void {
+        // Set event to FINISHED status
+        $this->event->update(['status' => CalendarEventStatusEnum::FINISHED->value]);
+
+        actingAs($this->user);
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $this->event->getKey()), [
+                '_token' => csrf_token(),
+            ]);
+
+        $response->assertRedirect(route('pages.calendar.index'));
+        $response->assertSessionHas('error', 'Completed event cannot be deleted.');
+
+        // Still exists and status unchanged
+        $this->assertDatabaseHas('calendar_events', [
+            'id'     => $this->event->getKey(),
+            'status' => CalendarEventStatusEnum::FINISHED->value,
         ]);
     });
 });

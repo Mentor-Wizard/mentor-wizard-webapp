@@ -28,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $description
  * @property int|null $mentor_program_id
  * @property int|null $mentor_session_id
+ *
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]
@@ -60,17 +61,18 @@ class CalendarEvent extends Model
     public function calendarEventUsers(): BelongsToMany
     {
         /** @phpstan-ignore-next-line */
-        return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
-            ->withPivot('colour')
+        return $this->belongsToMany(User::class,
+            'calendar_event_user', 'calendar_event_id')
+            ->withPivot('colour', 'confirmed_at', 'role')
             ->withTimestamps();
     }
 
-    public function mentorSession():BelongsTo
+    public function mentorSession(): BelongsTo
     {
         return $this->belongsTo(MentorSession::class);
     }
 
-    public function mentorProgram():BelongsTo
+    public function mentorProgram(): BelongsTo
     {
         return $this->belongsTo(MentorProgram::class);
     }

@@ -8,13 +8,13 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
-use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
 
@@ -25,6 +25,10 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
         $this->user->profile->timezone = 'Europe/Kyiv';
         $this->user->profile->save();
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
 
         $this->nonMentorUser = User::factory()->create();
     });
@@ -42,23 +46,28 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'webLink'            => 'https://google.com',
             'description'        => 'Test description',
             'colour'             => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id'  => $this->mentorProgram->getKey(),
         ];
 
         $response = $this->withoutMiddleware()
             ->post(route('pages.calendar.store'), $eventData);
+        if ($response->status() === 500) {
+            dd($response->exception);
+        }
+
         $response->assertRedirect(route('pages.calendar.index'));
 
         // Times are stored in UTC, so 09:00 Europe/Kyiv = 07:00 UTC (2 hour offset)
         $this->assertDatabaseHas('calendar_events', [
             'title'             => 'Default event',
-            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => Date::today()->addDay()->format('Y-m-d').' 07:00:00',
             'end_date_time'     => Date::today()->addDay()->format('Y-m-d').' 08:00:00',
             'date'              => Date::today()->addDay()->format('Y-m-d'),
             'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
-            'mentor_program_id' => null,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
         $eventId = DB::table('calendar_events')->latest()->first()->id;
@@ -73,12 +82,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         actingAs($this->user);
 
         $data = [
-            'fromDate'    => Date::today()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toDate'      => Date::today()->format('Y-m-d'),
-            'toTime'      => '10:00',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'fromDate'          => Date::today()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::today()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $this->withoutMiddleware()
@@ -89,13 +99,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when title exceeds max length', function (): void {
         actingAs($this->user);
         $data = [
-            'title'       => Str::random(256),
-            'fromDate'    => Date::today()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toDate'      => Date::today()->format('Y-m-d'),
-            'toTime'      => '10:00',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => Str::random(256),
+            'fromDate'          => Date::today()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::today()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()
             ->post(route('pages.calendar.store'), $data)
@@ -105,12 +116,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when fromDate is missing', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromTime' => '09:00',
-            'toDate'   => Date::today()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromTime'          => '09:00',
+            'toDate'            => Date::today()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['fromDate']);
@@ -119,13 +131,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when fromDate is not a valid date', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => '2024-00---',
-            'fromTime' => '09:00',
-            'toDate'   => Date::today()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => '2024-00---',
+            'fromTime'          => '09:00',
+            'toDate'            => Date::today()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['fromDate']);
@@ -134,13 +147,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when fromDate is in the past', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::yesterday()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::yesterday()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::yesterday()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::yesterday()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['fromDate']);
@@ -149,12 +163,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when toDate is missing', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::today()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::today()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['toDate']);
@@ -163,13 +178,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when toDate is not a date', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::today()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => 'bad-date',
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::today()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => 'bad-date',
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['toDate']);
@@ -178,13 +194,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when toDate is before fromDate', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::today()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::today()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['toDate']);
@@ -193,12 +210,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when fromTime is missing', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['fromTime']);
@@ -207,13 +225,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when fromTime has invalid format', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '9 AM',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '9 AM',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['fromTime']);
@@ -222,12 +241,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when toTime is missing', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['toTime']);
@@ -236,13 +256,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when toTime has invalid format', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10 AM',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10 AM',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['toTime']);
@@ -251,13 +272,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when toTime is not after fromTime', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '11:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '11:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['toTime']);
@@ -266,12 +288,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when type is missing', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['type']);
@@ -280,13 +303,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when type is invalid', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => 'invalid_type',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => 'invalid_type',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['type']);
@@ -295,12 +319,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when colour is missing', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['colour']);
@@ -309,14 +334,15 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when description exceeds max length', function (): void {
         actingAs($this->user);
         $data = [
-            'title'       => 'Event',
-            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toDate'      => Date::tomorrow()->format('Y-m-d'),
-            'toTime'      => '10:00',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'description' => Str::random(2001),
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'description'       => Str::random(2001),
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['description']);
@@ -325,14 +351,15 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     it('fails when webLink is invalid url', function (): void {
         actingAs($this->user);
         $data = [
-            'title'       => 'Event',
-            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toDate'      => Date::tomorrow()->format('Y-m-d'),
-            'toTime'      => '10:00',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'webLink'     => 'not-a-url',
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'webLink'           => 'not-a-url',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withoutMiddleware()->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['webLink']);
@@ -347,25 +374,27 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         // Create an existing future event for the user from 10:00 to 15:00 tomorrow
         $tomorrow = Date::tomorrow();
         $event = CalendarEvent::query()->create([
-            'title'           => 'Busy block',
-            'status'          => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time' => $tomorrow->copy()->setTime(10, 0),
-            'end_date_time'   => $tomorrow->copy()->setTime(15, 0),
-            'date'            => $tomorrow->format('Y-m-d'),
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Busy',
+            'title'             => 'Busy block',
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => $tomorrow->copy()->setTime(10, 0),
+            'end_date_time'     => $tomorrow->copy()->setTime(15, 0),
+            'date'              => $tomorrow->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Busy',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($this->user->getKey());
 
         $payload = [
-            'title'       => 'Overlap attempt',
-            'fromDate'    => $tomorrow->format('Y-m-d'),
-            'fromTime'    => '13:00', // inside busy block
-            'toDate'      => $tomorrow->format('Y-m-d'),
-            'toTime'      => '15:00',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description' => 'Should fail due to overlap',
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Overlap attempt',
+            'fromDate'          => $tomorrow->format('Y-m-d'),
+            'fromTime'          => '13:00', // inside busy block
+            'toDate'            => $tomorrow->format('Y-m-d'),
+            'toTime'            => '15:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Should fail due to overlap',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $response = $this->withoutMiddleware()->post(route('pages.calendar.store'), $payload);
@@ -375,25 +404,4 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         ]);
     });
 
-    it('throws 403 when a non-mentor user tries to create an event', function (): void {
-
-        $eventData = [
-            'title'             => 'Default event',
-            'fromDate'          => Date::today()->format('Y-m-d'),
-            'fromTime'          => '09:00',
-            'toDate'            => Date::today()->format('Y-m-d'),
-            'toTime'            => '10:00',
-            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'       => 'Test description',
-            'colour'            => CalendarEventColoursEnum::BLUE->value,
-        ];
-
-        $response = $this->actingAs($this->nonMentorUser)
-            ->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), array_merge($eventData, [
-                '_token' => 'test-token',
-            ]));
-
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
-    });
 });

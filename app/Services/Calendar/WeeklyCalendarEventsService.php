@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Calendar;
 
 use App\DTO\Calendar\CalendarEventWeekViewData;
+use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Traits\Calendar\BuildsCalendarPayload;
@@ -50,6 +51,7 @@ class WeeklyCalendarEventsService
         // Single query to fetch all events for the week
         $eventsCollection = $this->user->calendarEvents()
             ->with('calendarEventUsers')
+            ->where('status', '=', CalendarEventStatusEnum::CONFIRMED->value)
             ->whereBetween('start_date_time', [$startUTCDate, $endUTCDate])
             ->orderBy('start_date_time')
             ->get();

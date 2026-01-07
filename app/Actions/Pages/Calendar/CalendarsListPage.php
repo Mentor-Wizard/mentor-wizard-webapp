@@ -6,7 +6,6 @@ namespace App\Actions\Pages\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarViewModeEnum;
-use App\Models\CalendarEvent;
 use App\Services\Calendar\DailyCalendarEventsService;
 use App\Services\Calendar\MonthCalendarEventsService;
 use App\Services\Calendar\WeeklyCalendarEventsService;
@@ -31,7 +30,7 @@ class CalendarsListPage
 
         return Inertia::render('Calendar/CalendarEventsList', [
             'locale'            => app()->getLocale(),
-            'permissions'       => $user->can('create', CalendarEvent::class) ? 'create' : 'view',
+            'permissions'       => 'create',
             'availableColours'  => CalendarEventColoursEnum::values(),
             'calendarEvents'    => match ($mode) {
                 CalendarViewModeEnum::DAY   => new DailyCalendarEventsService($user, $date, $timezone)

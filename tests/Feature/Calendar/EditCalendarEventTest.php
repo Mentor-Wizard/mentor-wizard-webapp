@@ -8,6 +8,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -24,6 +25,10 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
         $this->user->profile->timezone = 'Europe/Kyiv';
         $this->user->profile->save();
 
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+
         auth()->login($this->user);
         $this->nonMentorUser = User::factory()->create();
         $this->event = CalendarEvent::factory()->create([
@@ -35,6 +40,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Test description',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $this->event->calendarEventUsers()->attach($this->user->getKey(),
             ['role' => CalendarEventRoleEnum::HOST, 'colour' => CalendarEventColoursEnum::BLUE->value]);
@@ -45,34 +51,35 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
 
         $updateEventData = [
             'title'             => 'Default event',
-            'fromDate'          => Date::today()->addDays(6)->format('Y-m-d'),
-            'fromTime'          => '14:00',
-            'toDate'            => Date::today()->addDays(6)->format('Y-m-d'),
-            'toTime'            => '16:00',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '12:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '13:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'           => 'https://google.com',
-            'description'       => 'Test description',
+            'webLink'           => 'https://new_url_link.com',
+            'description'       => 'New description',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->patch(route('pages.calendar.edit', $this->event->getKey()), [
+            ->patch(route('pages.calendar.edit', [$this->event->getKey(),
                 ...$updateEventData,
                 '_token' => 'test-token',
-            ]);
+            ]));
 
         $response->assertRedirect(route('pages.calendar.index'));
         // Times are stored in UTC, so 14:00 Europe/Kyiv = 12:00 UTC (2 hour offset)
         $this->assertDatabaseHas('calendar_events', [
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Date::today()->addDays(6)->format('Y-m-d').' 12:00:00',
-            'end_date_time'     => Date::today()->addDays(6)->format('Y-m-d').' 14:00:00',
-            'date'              => Date::today()->addDays(6)->format('Y-m-d'),
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'web_link'          => 'https://google.com',
-            'description'       => 'Test description',
-            'mentor_program_id' => null,
+            'web_link'          => 'https://new_url_link.com',
+            'description'       => 'New description',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
         $this->assertDatabaseHas('calendar_event_user', [
@@ -85,13 +92,14 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when title is missing', function (): void {
         actingAs($this->user);
         $data = [
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'  => 'https://google.com',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [
@@ -103,14 +111,15 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when title exceeds max length', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => Str::random(256),
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'  => 'https://google.com',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => Str::random(256),
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [
@@ -123,13 +132,14 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
         actingAs($this->user);
         // missing
         $base = [
-            'title'    => 'Event',
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'  => 'https://google.com',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [
@@ -164,13 +174,14 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when toDate missing/invalid/before fromDate', function (): void {
         actingAs($this->user);
         $base = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'  => 'https://google.com',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         // missing
         $this->withSession(['_token' => 'test-token'])
@@ -205,13 +216,14 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when fromTime missing/invalid', function (): void {
         actingAs($this->user);
         $base = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'  => 'https://google.com',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         // missing
         $this->withSession(['_token' => 'test-token'])
@@ -235,13 +247,14 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when toTime missing/invalid/not after', function (): void {
         actingAs($this->user);
         $base = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'  => 'https://google.com',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         // missing
         $this->withSession(['_token' => 'test-token'])
@@ -276,13 +289,14 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when type missing/invalid', function (): void {
         actingAs($this->user);
         $base = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'webLink'  => 'https://google.com',
-            'colour'   => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         // missing
         $this->withSession(['_token' => 'test-token'])
@@ -305,13 +319,14 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when colour missing', function (): void {
         actingAs($this->user);
         $data = [
-            'title'    => 'Event',
-            'fromDate' => Date::tomorrow()->format('Y-m-d'),
-            'fromTime' => '09:00',
-            'toDate'   => Date::tomorrow()->format('Y-m-d'),
-            'toTime'   => '10:00',
-            'type'     => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'  => 'https://google.com',
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [
@@ -323,15 +338,16 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when description is too long', function (): void {
         actingAs($this->user);
         $data = [
-            'title'       => 'Event',
-            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toDate'      => Date::tomorrow()->format('Y-m-d'),
-            'toTime'      => '10:00',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'     => 'https://google.com',
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'description' => Str::random(2001),
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'description'       => Str::random(2001),
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [
@@ -343,15 +359,16 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
     it('fails update when wrong link formatting', function (): void {
         actingAs($this->user);
         $data = [
-            'title'       => 'Event',
-            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toDate'      => Date::tomorrow()->format('Y-m-d'),
-            'toTime'      => '10:00',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'webLink'     => '-----google.com',
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'description' => Str::random(2001),
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => '-----google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'description'       => Str::random(2001),
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [
@@ -374,6 +391,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'webLink'           => 'https://google.com',
             'description'       => 'Test description',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $response = $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [

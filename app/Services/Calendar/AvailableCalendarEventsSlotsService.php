@@ -22,7 +22,7 @@ class AvailableCalendarEventsSlotsService
 
     private CarbonInterface $periodFinish;
 
-    private readonly int $minimumPreBookingtimeInMinutes;
+    private readonly int $minimumPreBookingTimeInMinutes;
 
     public function __construct(
         private readonly User $user,
@@ -32,7 +32,7 @@ class AvailableCalendarEventsSlotsService
         private readonly bool $excludeSchedule = false,
         private readonly ?MentorProgram $mentorProgram = null,
     ) {
-        $this->minimumPreBookingtimeInMinutes = $this->mentorProgram->mentor->minimum_pre_booking_time ?? 0;
+        $this->minimumPreBookingTimeInMinutes = $this->mentorProgram->mentor->minimum_pre_booking_time ?? 0;
     }
 
     /**
@@ -41,10 +41,10 @@ class AvailableCalendarEventsSlotsService
     public function getAvailableSlots(): array
     {
         $this->periodStart = Date::now()
-            ->addMinutes($this->minimumPreBookingtimeInMinutes)
+            ->addMinutes($this->minimumPreBookingTimeInMinutes)
             ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
         $currentDateTimezone = Date::now($this->timezone)
-            ->addMinutes($this->minimumPreBookingtimeInMinutes)
+            ->addMinutes($this->minimumPreBookingTimeInMinutes)
             ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
         $this->periodFinish = Date::now($this->timezone)
             ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)
@@ -71,7 +71,6 @@ class AvailableCalendarEventsSlotsService
 
     protected function getCalendarEvents()
     {
-
         $ids = [$this->user->id, $this->mentorProgram->mentor_id];
         $calendarEventRequestQuery = CalendarEvent::query()
             ->whereHas('calendarEventUsers', fn ($q) => $q->whereIn('users.id', $ids))

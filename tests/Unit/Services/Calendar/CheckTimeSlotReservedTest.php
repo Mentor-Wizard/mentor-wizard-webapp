@@ -2,22 +2,31 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventRoleEnum;
+use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Spatie\Permission\Models\Role;
 
 mutates(CheckTimeSlotReservedService::class);
 
 describe('CheckTimeSlotReservedService Service', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
     });
 
     it('returns true when user has no future events (no conflicts)', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
-        $user = User::factory()->create();
 
         $startDate = Date::createFromFormat(
             '!Y-m-d H:i',
@@ -34,7 +43,9 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             startDateTime: $startDate,
             endDateTime: $endDate,
             timezone: 'Europe/Kyiv',
-            user: $user
+            user: $this->user,
+            excludeEvents: [],
+            mentorProgram: $this->mentorProgram
         );
 
         expect($service->isSlotAvailable())->toBeTrue();
@@ -43,21 +54,22 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     it('returns true when requested interval fits entirely within an available slot', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
-        $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
         $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
-            'title'           => 'E1',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1StartUtc,
-            'end_date_time'   => $event1EndUtc,
-            'date'            => $event1StartUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E1',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event1StartUtc,
+            'end_date_time'     => $event1EndUtc,
+            'date'              => $event1StartUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach($event1->getKey());
+        $this->user->calendarEvents()->attach($event1->getKey(),
+            ['role' => CalendarEventRoleEnum::HOST->value]);
 
         $startDate = Date::createFromFormat(
             '!Y-m-d H:i',
@@ -75,7 +87,8 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             startDateTime: $startDate,
             endDateTime: $endDate,
             timezone: $tz,
-            user: $user
+            user: $this->user,
+            mentorProgram: $this->mentorProgram
         );
 
         expect($service->isSlotAvailable())->toBeTrue();
@@ -84,21 +97,21 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     it('returns false when requested interval overlaps with existing event', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
-        $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
         $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
-            'title'           => 'E1',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1StartUtc,
-            'end_date_time'   => $event1EndUtc,
-            'date'            => $event1StartUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E1',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event1StartUtc,
+            'end_date_time'     => $event1EndUtc,
+            'date'              => $event1StartUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach($event1->getKey());
+        $this->user->calendarEvents()->attach($event1->getKey());
 
         $startDate = Date::createFromFormat(
             '!Y-m-d H:i',
@@ -115,7 +128,8 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             startDateTime: $startDate,
             endDateTime: $endDate,
             timezone: $tz,
-            user: $user
+            user: $this->user,
+            mentorProgram: $this->mentorProgram
         );
 
         expect($service->isSlotAvailable())->toBeFalse();
@@ -124,7 +138,6 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     it('returns true when requested slot is between two events', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
-        $user = User::factory()->create();
 
         // Create two events
         $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
@@ -133,22 +146,24 @@ describe('CheckTimeSlotReservedService Service', function (): void {
         $event2EndUtc = (clone $event2StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
-            'title'           => 'E1',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1StartUtc,
-            'end_date_time'   => $event1EndUtc,
-            'date'            => $event1StartUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E1',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event1StartUtc,
+            'end_date_time'     => $event1EndUtc,
+            'date'              => $event1StartUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event2 = CalendarEvent::query()->create([
-            'title'           => 'E2',
-            'status'          => 'confirmed',
-            'start_date_time' => $event2StartUtc,
-            'end_date_time'   => $event2EndUtc,
-            'date'            => $event2StartUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E2',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event2StartUtc,
+            'end_date_time'     => $event2EndUtc,
+            'date'              => $event2StartUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
+        $this->user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
 
         $startDate = Date::createFromFormat(
             '!Y-m-d H:i',
@@ -165,7 +180,8 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             startDateTime: $startDate,
             endDateTime: $endDate,
             timezone: $tz,
-            user: $user
+            user: $this->user,
+            mentorProgram: $this->mentorProgram
         );
 
         expect($service->isSlotAvailable())->toBeTrue();
@@ -174,21 +190,21 @@ describe('CheckTimeSlotReservedService Service', function (): void {
     it('excludes specified events when checking availability', function (): void {
         Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
         $tz = 'Europe/Kyiv';
-        $user = User::factory()->create();
 
         // Create event from 12:00-13:00 UTC (15:00-16:00 Kyiv)
         $event1StartUtc = Date::create(2025, 4, 1, 12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour();
 
         $event1 = CalendarEvent::query()->create([
-            'title'           => 'E1',
-            'status'          => 'confirmed',
-            'start_date_time' => $event1StartUtc,
-            'end_date_time'   => $event1EndUtc,
-            'date'            => $event1StartUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'E1',
+            'status'            => 'confirmed',
+            'start_date_time'   => $event1StartUtc,
+            'end_date_time'     => $event1EndUtc,
+            'date'              => $event1StartUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $user->calendarEvents()->attach($event1->getKey());
+        $this->user->calendarEvents()->attach($event1->getKey());
 
         $startDate = Date::createFromFormat(
             '!Y-m-d H:i',
@@ -205,8 +221,9 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             startDateTime: $startDate,
             endDateTime: $endDate,
             timezone: $tz,
-            user: $user,
-            excludeEvents: [$event1->getKey()]
+            user: $this->user,
+            excludeEvents: [$event1->getKey()],
+            mentorProgram: $this->mentorProgram
         );
 
         expect($service->isSlotAvailable())->toBeTrue();

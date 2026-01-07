@@ -23,12 +23,12 @@ class ShowCalendarEventPage
         $timezone = $profile->timezone;
 
         return Inertia::render('Calendar/ShowEditCalendarEvent', [
-            'locale'           => app()->getLocale(),
-            'availableColours' => CalendarEventColoursEnum::values(),
-            'permissions'      => $user->can('update', [$calendarEvent, $user]) ? 'edit' : 'view',
-            'mentorProgramDuration'=>$calendarEvent->mentorProgram->first()->session_duration,
-            'availableSlots' =>  new AvailableSlotOptionsForMentorProgram($calendarEvent)->getAvailableSlots(),
-            'calendarEvent'    => CalendarEventData::fromModel(
+            'locale'                => app()->getLocale(),
+            'availableColours'      => CalendarEventColoursEnum::values(),
+            'permissions'           => $user->can('update', [$calendarEvent, $user]) ? 'edit' : 'view',
+            'mentorProgramDuration' => $calendarEvent->mentorProgram->first()->session_duration,
+            'availableSlots'        => new AvailableSlotOptionsForMentorProgram($calendarEvent)->getAvailableSlots(),
+            'calendarEvent'         => CalendarEventData::fromModel(
                 $calendarEvent->load('calendarEventUsers'),
                 $timezone,
                 $user

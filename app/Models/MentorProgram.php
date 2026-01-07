@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Enums\CalendarEventStatusEnum;
 use App\Observers\MentorProgramObserver;
 use Database\Factories\MentorProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -76,28 +76,27 @@ class MentorProgram extends Model
         return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_program');
     }
 
-    public function mentorSession():hasMany
+    public function mentorSession(): HasMany
     {
         return $this->hasMany(MentorSession::class, 'mentor_program_id');
     }
 
-    public function calendarEvents():HasMany
+    public function calendarEvents(): HasMany
     {
         return $this->hasMany(CalendarEvent::class, 'mentor_program_id');
     }
 
     protected function pendingEventsRequestsNumber(): Attribute
     {
-        return Attribute::make(get: fn() => $this->calendarEvents()
+        return Attribute::make(get: fn () => $this->calendarEvents()
             ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION)
             ->count());
     }
 
     protected function confirmedEventsNumber(): Attribute
     {
-        return Attribute::make(get: fn() => $this->calendarEvents()
+        return Attribute::make(get: fn () => $this->calendarEvents()
             ->where('status', CalendarEventStatusEnum::CONFIRMED)
             ->count());
     }
-
 }

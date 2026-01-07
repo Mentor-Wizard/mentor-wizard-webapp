@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Calendar\ConfirmCalendarEvent;
 use App\Actions\Calendar\DeleteCalendarEvent;
 use App\Actions\Calendar\EditCalendarEvent;
 use App\Actions\Calendar\StoreCalendarEvent;
@@ -10,6 +11,7 @@ use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Pages\Calendar\CalendarsListPage;
 use App\Actions\Pages\Calendar\MentorProgramEventBookingPage;
+use App\Actions\Pages\Calendar\PendingCalendarEventsListPage;
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Actions\Pages\Chat\GetChatPage;
 use App\Actions\Pages\DashboardPage;
@@ -70,6 +72,8 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
     Route::get('calendar-event/{calendarEvent:id}', ShowCalendarEventPage::class)
         ->can('view', 'calendarEvent')
         ->name('pages.calendar.show');
+    Route::get('pending-calendar-event/list/{mentorProgram:slug?}', PendingCalendarEventsListPage::class)
+        ->name('pages.calendar.pending');
     Route::get('mentor-program/book/{mentorProgram:slug}', MentorProgramEventBookingPage::class)
         ->name('pages.mentor.program.book');
     Route::post('calendar-event/store', StoreCalendarEvent::class)
@@ -77,9 +81,12 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
     Route::patch('calendar-event/edit/{calendarEvent:id}', EditCalendarEvent::class)
         ->can('update', 'calendarEvent')
         ->name('pages.calendar.edit');
+    Route::patch('calendar-event/confirm/{calendarEvent:id}', ConfirmCalendarEvent::class)
+        ->name('calendar.confirm.booking');
     Route::delete('calendar-event/delete/{calendarEvent}', DeleteCalendarEvent::class)
         ->can('delete', 'calendarEvent')
         ->name('pages.calendar.delete');
+
 });
 
 Route::middleware('auth')

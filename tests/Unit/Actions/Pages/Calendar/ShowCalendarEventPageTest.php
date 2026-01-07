@@ -9,6 +9,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
@@ -40,6 +41,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://example.com/meet',
             'description'       => 'CalendarEvent description',
+            'mentor_program_id' => MentorProgram::factory()
+                ->create(['mentor_id' => $this->mentor->getKey()])->getKey(),
         ]);
 
         $this->event->calendarEventUsers()->attach($this->mentor->getKey(),
@@ -139,6 +142,9 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://example.com/night',
             'description'       => 'Night Event',
+            'mentor_program_id' => MentorProgram::factory()->create(
+                ['mentor_id' => $this->mentor->getKey()]
+            )->getKey(),
         ]);
 
         $eventAtNight->calendarEventUsers()->attach($this->mentor->getKey(), [
@@ -155,7 +161,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         // Verify timezone affects the time display
         expect(Arr::get($pageTokyo, 'props.calendarEvent.fromTime'))->not->toBe('22:00');
-        expect(Arr::get($pageTokyo, 'props.permissions'))->toBe('view');
+        expect(Arr::get($pageTokyo, 'props.permissions'))->toBe('edit');
 
         // Verify user is passed and colour is retrieved
         expect(Arr::get($pageTokyo, 'props.calendarEvent.colour'))->toBe(CalendarEventColoursEnum::BLUE->value);
@@ -178,6 +184,9 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://example.com/night',
             'description'       => 'Night Event',
+            'mentor_program_id' => MentorProgram::factory()->create(
+                ['mentor_id' => $this->mentor->getKey()]
+            )->getKey(),
         ]);
 
         $event1->calendarEventUsers()->attach(
@@ -200,6 +209,9 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://example.com/night',
             'description'       => 'Night Event',
+            'mentor_program_id' => MentorProgram::factory()->create(
+                ['mentor_id' => $this->mentor->getKey()]
+            )->getKey(),
         ]);
 
         $event2->calendarEventUsers()->attach(
@@ -217,16 +229,21 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         // Verify timezone affects the time display
         expect(Arr::get($pageTokyo, 'props.calendarEvent.fromTime'))->not->toBe('22:00');
-        expect(Arr::get($pageTokyo, 'props.permissions'))->toBe('view');
+        expect(Arr::get($pageTokyo, 'props.permissions'))->toBe('edit');
 
         // Verify user is passed and colour is retrieved
-        expect(Arr::get($pageTokyo, 'props.calendarEvent.colour'))->toBe(CalendarEventColoursEnum::BLUE->value);
+        expect(Arr::get($pageTokyo, 'props.calendarEvent.colour'))
+            ->toBe(CalendarEventColoursEnum::BLUE->value);
     });
 
     it('includes base props, permissions and event payload', function (): void {
         auth()->login($this->mentor);
         /** @var CalendarEvent $event */
-        $event = CalendarEvent::factory()->create();
+        $event = CalendarEvent::factory()->create(
+            ['mentor_program_id' => MentorProgram::factory()->create(
+                ['mentor_id' => $this->mentor->getKey()]
+            )->getKey()]
+        );
 
         $request = new Request(['timezone' => 'UTC']);
         $response = (new ShowCalendarEventPage)->handle($event);
@@ -236,7 +253,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         expect($props)
             ->toHaveKeys(['locale', 'permissions', 'calendarEvent', 'availableColours'])
-            ->and($props['permissions'])->toBe('view')
+            ->and($props['permissions'])->toBe('edit')
             ->and($props['calendarEvent'])->toBeArray();
     });
 
@@ -244,7 +261,12 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $host = User::factory()->create();
         $host->profile()->create(['timezone' => 'UTC']);
 
-        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create([
+            'mentor_program_id' => MentorProgram::factory()->create(
+                [
+                    'mentor_id' => $this->mentor->getKey(),
+                ])->getKey(),
+        ]);
         $calendarEvent->calendarEventUsers()->attach($host->id, [
             'role' => CalendarEventRoleEnum::HOST,
         ]);
@@ -259,12 +281,17 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
     it('shows view permission when user is not a host of the calendar event', function (): void {
         $host = User::factory()->create();
-        $participant = User::factory()->create();
+        $participant = User::factory()->create([]);
 
         $host->profile()->create(['timezone' => 'UTC']);
         $participant->profile()->create(['timezone' => 'UTC']);
 
-        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create([
+            'mentor_program_id' => MentorProgram::factory()->create(
+                [
+                    'mentor_id' => $host,
+                ])->getKey()]
+        );
         $calendarEvent->calendarEventUsers()->attach($host->id, [
             'role' => CalendarEventRoleEnum::HOST,
         ]);
@@ -284,12 +311,23 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $user = User::factory()->create();
         $user->profile()->create(['timezone' => 'UTC']);
 
-        $hostEvent = CalendarEvent::factory()->create();
+        $hostEvent = CalendarEvent::factory()->create([
+            'mentor_program_id' => MentorProgram::factory()->create(
+                ['mentor_id' => $this->mentor->getKey()]
+            )->getKey()]);
         $hostEvent->calendarEventUsers()->attach($user->id, [
             'role' => CalendarEventRoleEnum::HOST,
         ]);
 
-        $participantEvent = CalendarEvent::factory()->create();
+        $participantEvent = CalendarEvent::factory()->create(
+            [
+                'mentor_program_id' => MentorProgram::factory()->create(
+                    [
+                        'mentor_id' => $this->mentor->getKey(),
+                    ])->getKey(),
+            ]
+
+        );
         $participantEvent->calendarEventUsers()->attach($user->id, [
             'role' => CalendarEventRoleEnum::PARTICIPANT,
         ]);

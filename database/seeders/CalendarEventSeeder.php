@@ -20,23 +20,25 @@ class CalendarEventSeeder extends Seeder
     public function run(): void
     {
         $menti = User::query()->role(RoleEnum::MENTI)->get();
+        $mentorPrograms = MentorProgram::query()->with('mentor')->get();
+        foreach ($mentorPrograms as $mentorProgram) {
 
-        CalendarEvent::factory()
-            ->count(500)
-            ->create()
-            ->each(function ($event) use ($menti): void {
-                $mentorProgram = MentorProgram::query()->find($event->mentor_program_id)?->first();
-                $mentor= $mentorProgram?->mentor;
-                $mentor->calendarEvents()->attach($event, [
-                    'role'   => CalendarEventRoleEnum::HOST,
-                    'colour' => CalendarEventColoursEnum::RED,
-                ]);
-                $menti->random(1, 3)->each(function ($user) use ($event): void {
-                    $user->calendarEvents()->attach($event, [
-                        'role'   => CalendarEventRoleEnum::MENTI,
-                        'colour' => CalendarEventColoursEnum::BLUE,
+            CalendarEvent::factory(['mentor_program_id' => $mentorProgram->id])
+                ->count(random_int(1, 3))
+                ->create()
+                ->each(function ($event) use ($menti, $mentorProgram): void {
+                    $mentor = $mentorProgram?->mentor;
+                    $mentor->calendarEvents()->attach($event, [
+                        'role'   => CalendarEventRoleEnum::HOST,
+                        'colour' => CalendarEventColoursEnum::RED,
                     ]);
+                    $menti->random(1, 3)->each(function ($user) use ($event): void {
+                        $user->calendarEvents()->attach($event, [
+                            'role'   => CalendarEventRoleEnum::MENTI,
+                            'colour' => CalendarEventColoursEnum::BLUE,
+                        ]);
+                    });
                 });
-            });
+        }
     }
 }

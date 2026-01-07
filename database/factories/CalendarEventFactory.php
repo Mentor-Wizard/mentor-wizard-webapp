@@ -6,7 +6,6 @@ namespace Database\Factories;
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
@@ -28,7 +27,7 @@ class CalendarEventFactory extends Factory
      */
     public function definition(): array
     {
-        $dateTime = fake()->dateTimeBetween('-5 month', '+5 month');
+        $dateTime = fake()->dateTimeBetween('-2 month', '+5 month');
         $durationInMinutes = fake()->randomElement([30, 45, 60, 90, 120]);
         $endTime = Date::parse($dateTime)->addMinutes($durationInMinutes);
         $date = $dateTime->format('Y-m-d');
@@ -42,7 +41,6 @@ class CalendarEventFactory extends Factory
             'type'              => fake()->randomElement(CalendarEventTypeEnum::values()),
             'web_link'          => fake()->url(),
             'description'       => fake()->text(),
-            'mentor_program_id' => MentorProgram::factory(),
         ];
     }
 

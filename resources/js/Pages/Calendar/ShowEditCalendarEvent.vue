@@ -25,9 +25,7 @@ import { onMounted, ref, watch } from 'vue';
 import {
   capitalize,
   errors,
-  eventTypes,
   isFormValid,
-  selectedEventTypeHelper,
   timeZone,
   validateForm,
 } from '@/Stores/Calendar/helpers.js';
@@ -62,6 +60,7 @@ const event = ref({
   href: '',
   description: '',
   colour: '',
+  mentor_program_id: props.calendarEvent?.mentor_program_id,
   timezone: ref(Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'),
 });
 
@@ -93,11 +92,11 @@ let form = useForm({
   description: '',
   colour: '',
   timezone: timeZone,
+  mentor_program_id: props?.calendarEvent?.mentor_program_id,
 });
 const availableColours = props.availableColours;
 const permissions = ref(props.permissions);
 const availableColoursScheme = ref({});
-const selectedEventType = selectedEventTypeHelper(form);
 
 onMounted(() => {
   const eventData = props.calendarEvent;
@@ -150,6 +149,7 @@ const handleSubmit = () => {
 
 const handleClose = () => {
   console.log('close');
+  console.log(props.calendarEvents);
   router.visit(route('pages.calendar.index'), {});
 };
 
@@ -231,35 +231,32 @@ watch(
                   </DialogTitle>
 
                   <form class="space-y-4" @submit.prevent="handleSubmit">
-                    <div>
-                      <label
-                        for="title"
-                        class="block text-sm leading-6 font-medium text-gray-900"
-                      >
-                        Event Title
-                      </label>
-
-                      <div class="mt-2">
-                        <input
-                          id="title"
-                          v-model="form.title"
-                          type="text"
-                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                          :class="{ 'ring-red-300': errors.title }"
-                          placeholder="Enter event title"
-                        />
-                        <p
-                          v-if="errors.title"
-                          class="mt-2 text-sm text-red-600"
-                        >
-                          {{ errors.title }}
-                        </p>
+                    <!-- CalendarEvent Title -->
+                    <div
+                      class="rounded-lg border border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50 p-4"
+                    >
+                      <div class="mb-2 flex items-center">
+                        <div class="flex-shrink-0">
+                          <div
+                            class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100"
+                          >
+                            <span class="text-sm font-semibold text-indigo-600"
+                              >T</span
+                            >
+                          </div>
+                        </div>
+                        <h4 class="ml-3 text-sm font-medium text-gray-700">
+                          Event Title
+                        </h4>
                       </div>
+                      <p class="ml-11 text-lg font-semibold text-gray-900">
+                        {{ event.title || 'No title provided' }}
+                      </p>
                     </div>
 
                     <div>
                       <label
-                        for="title"
+                        for="webLink"
                         class="block text-sm leading-6 font-medium text-gray-900"
                       >
                         Web link
@@ -291,14 +288,14 @@ watch(
                         Description
                       </label>
                       <div class="mt-2">
-                        <input
-                          id="title"
+                        <textarea
+                          id="description"
                           v-model="form.description"
-                          type="text"
                           maxlength="2000"
+                          rows="3"
                           class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                           :class="{ 'ring-red-300': errors.description }"
-                          placeholder="Enter event title"
+                          placeholder="Enter event description"
                         />
                         <p
                           v-if="errors.description"
@@ -314,79 +311,23 @@ watch(
                       >
                         Event Type
                       </label>
-                      <Listbox v-model="form.type">
-                        <div class="relative mt-2">
-                          <ListboxButton
-                            class="relative w-full cursor-default rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-2 pl-3 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
-                          >
-                            <span class="flex items-center">
-                              <component
-                                :is="selectedEventType?.icon"
-                                class="mr-3 h-5 w-5 text-gray-400"
-                              />
-                              <span class="block truncate">{{
-                                selectedEventType?.label
-                              }}</span>
-                            </span>
-                            <span
-                              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
-                            >
-                              <ChevronUpDownIcon
-                                class="h-5 w-5 text-gray-400"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          </ListboxButton>
-                          <transition
-                            leave-active-class="transition duration-100 ease-in"
-                            leave-from-class="opacity-100"
-                            leave-to-class="opacity-0"
-                          >
-                            <ListboxOptions
-                              class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 pl-2 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-                            >
-                              <ListboxOption
-                                v-for="type in eventTypes"
-                                :key="type.value"
-                                v-slot="{ active, selected }"
-                                :value="type.value"
-                                as="template"
-                              >
-                                <li
-                                  :class="[
-                                    active ?
-                                      'bg-amber-100 text-amber-900'
-                                    : 'text-gray-900',
-                                    'relative cursor-default py-2 pr-4 pl-10 select-none',
-                                  ]"
-                                >
-                                  <span
-                                    :class="[
-                                      selected ? 'font-medium' : 'font-normal',
-                                      'flex items-center truncate',
-                                    ]"
-                                  >
-                                    <component
-                                      :is="type.icon"
-                                      class="mr-3 h-5 w-5"
-                                    />
-                                    {{ type.label }}
-                                  </span>
-                                  <span
-                                    v-if="selected"
-                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600"
-                                  >
-                                    <CheckIcon
-                                      class="h-5 w-5"
-                                      aria-hidden="true"
-                                    />
-                                  </span>
-                                </li>
-                              </ListboxOption>
-                            </ListboxOptions>
-                          </transition>
-                        </div>
-                      </Listbox>
+                      <div class="mt-1">
+                        <span
+                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                          :class="
+                            event.type === 'Individual' ?
+                              'bg-blue-100 text-blue-800'
+                            : 'bg-purple-100 text-purple-800'
+                          "
+                        >
+                          <UserIcon
+                            v-if="event.type === 'Individual'"
+                            class="mr-1 h-3 w-3"
+                          />
+                          <UserGroupIcon v-else class="mr-1 h-3 w-3" />
+                          {{ event.type || 'Not specified' }}
+                        </span>
+                      </div>
                     </div>
 
                     <div v-if="availableColours">
@@ -474,107 +415,87 @@ watch(
                         </div>
                       </Listbox>
                     </div>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label
-                          for="from-date"
-                          class="block text-sm leading-6 font-medium text-gray-900"
-                        >
-                          <CalendarIcon class="mr-1 inline h-4 w-4" />
-                          From Date
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="from-date"
-                            v-model="form.fromDate"
-                            type="date"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.fromDate }"
-                          />
-                          <p
-                            v-if="errors.fromDate"
-                            class="mt-1 text-sm text-red-600"
-                          >
-                            {{ errors.fromDate }}
-                          </p>
-                        </div>
-                      </div>
 
-                      <div>
-                        <label
-                          for="to-date"
-                          class="block text-sm leading-6 font-medium text-gray-900"
+                    <div
+                      class="rounded-lg border border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50 p-4"
+                    >
+                      <!-- Date & Time Section -->
+                      <div
+                        class="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                      >
+                        <h4
+                          class="mb-4 flex items-center text-sm font-medium text-gray-700"
                         >
-                          <CalendarIcon class="mr-1 inline h-4 w-4" />
-                          To Date
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="to-date"
-                            v-model="form.toDate"
-                            type="date"
-                            :min="form.fromDate"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.toDate }"
-                          />
-                          <p
-                            v-if="errors.toDate"
-                            class="mt-1 text-sm text-red-600"
-                          >
-                            {{ errors.toDate }}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                          <ClockIcon class="mr-2 h-4 w-4 text-gray-500" />
+                          Schedule
+                        </h4>
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label
-                          for="from-time"
-                          class="block text-sm leading-6 font-medium text-gray-900"
-                        >
-                          <ClockIcon class="mr-1 inline h-4 w-4" />
-                          From Time
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="from-time"
-                            v-model="form.fromTime"
-                            type="time"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.fromTime }"
-                          />
-                          <p
-                            v-if="errors.fromTime"
-                            class="mt-1 text-sm text-red-600"
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <!-- Start Date & Time -->
+                          <div
+                            class="rounded-md border border-gray-200 bg-white p-3"
                           >
-                            {{ errors.fromTime }}
-                          </p>
-                        </div>
-                      </div>
+                            <div class="mb-2 flex items-center space-x-2">
+                              <CalendarIcon class="h-4 w-4 text-green-500" />
+                              <span
+                                class="text-xs font-medium tracking-wider text-green-600 uppercase"
+                                >Start</span
+                              >
+                            </div>
+                            <div class="space-y-1">
+                              <p class="text-sm font-semibold text-gray-900">
+                                {{ event.fromDateFormatted || 'Not set' }}
+                              </p>
+                              <div class="flex items-center space-x-1">
+                                <ClockIcon class="h-3 w-3 text-gray-400" />
+                                <span class="text-sm text-gray-600">{{
+                                  event.fromTime || 'Not set'
+                                }}</span>
+                              </div>
+                            </div>
+                          </div>
 
-                      <div>
-                        <label
-                          for="to-time"
-                          class="block text-sm leading-6 font-medium text-gray-900"
-                        >
-                          <ClockIcon class="mr-1 inline h-4 w-4" />
-                          To Time
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="to-time"
-                            v-model="form.toTime"
-                            type="time"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.toTime }"
-                          />
-                          <p
-                            v-if="errors.toTime"
-                            class="mt-1 text-sm text-red-600"
+                          <!-- End Date & Time -->
+                          <div
+                            class="rounded-md border border-gray-200 bg-white p-3"
                           >
-                            {{ errors.toTime }}
-                          </p>
+                            <div class="mb-2 flex items-center space-x-2">
+                              <CalendarIcon class="h-4 w-4 text-red-500" />
+                              <span
+                                class="text-xs font-medium tracking-wider text-red-600 uppercase"
+                                >End</span
+                              >
+                            </div>
+                            <div class="space-y-1">
+                              <p class="text-sm font-semibold text-gray-900">
+                                {{ event.toDateFormatted || 'Not set' }}
+                              </p>
+                              <div class="flex items-center space-x-1">
+                                <ClockIcon class="h-3 w-3 text-gray-400" />
+                                <span class="text-sm text-gray-600">{{
+                                  event.toTime || 'Not set'
+                                }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Duration Display -->
+                        <div
+                          v-if="event.duration"
+                          class="mt-4 border-t border-gray-200 pt-3"
+                        >
+                          <div
+                            class="flex items-center justify-center space-x-2 text-sm text-gray-600"
+                          >
+                            <ClockIcon class="h-4 w-4" />
+                            <span
+                              >Duration:
+                              <span class="font-semibold"
+                                >{{ event.duration }} minutes
+                              </span></span
+                            >
+                          </div>
                         </div>
                       </div>
                     </div>

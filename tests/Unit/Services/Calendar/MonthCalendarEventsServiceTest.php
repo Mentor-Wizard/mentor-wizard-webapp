@@ -2,17 +2,28 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use App\Services\Calendar\MonthCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Spatie\Permission\Models\Role;
 
 mutates(MonthCalendarEventsService::class);
 
 describe('GetMonthCalendarEventsService Service', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
     });
 
     it('includes empty day entries with events key for month calendar and sets flags for event day using service (timezone aware)', function (): void {
@@ -20,26 +31,28 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 2, 10, 9, 0, 0));
         $tz = 'Europe/Kyiv';
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create an event for today in UTC (will be converted in resource/service as needed)
         $startUtc = Date::create(2025, 2, 10, 10, 0, 0);
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
-            'title'           => 'Test CalendarEvent',
-            'status'          => 'confirmed',
-            'start_date_time' => $startUtc,
-            'end_date_time'   => $endUtc,
-            'date'            => $startUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Test CalendarEvent',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
         $checkedDate = Date::parse('2025-02-10');
-        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
 
@@ -69,27 +82,29 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 2, 10, 22, 0, 0));
         $tz = 'America/New_York';
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create event at 22:00 UTC which should be different date in NY timezone
         $startUtc = Date::create(2025, 2, 10, 22, 0, 0);
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
-            'title'           => 'Late Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $startUtc,
-            'end_date_time'   => $endUtc,
-            'date'            => $startUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Late Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $checkedDate = Date::parse('2025-02-10');
-        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         // Verify the event appears in the calendar view with correct timezone-adjusted date
         $calendarView = $result['calendarView'];
@@ -105,24 +120,26 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 3, 10, 22, 0, 0));
         $tz = 'America/New_York';
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create event at 22:00 UTC which should be different date in NY timezone
         $startUtc = Date::create(2025, 3, 11, 22, 0, 0);
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
-            'title'           => 'Late Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $startUtc,
-            'end_date_time'   => $endUtc,
-            'date'            => $startUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Late Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         // Create event at 02:00 UTC which should be different date in NY timezone
         $startUtc = Date::create(2025, 3, 10, 02, 0, 0);
@@ -130,18 +147,23 @@ describe('GetMonthCalendarEventsService Service', function (): void {
 
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
-            'title'           => 'Late Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $startUtc,
-            'end_date_time'   => $endUtc,
-            'date'            => $startUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Late Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $checkedDate = Date::parse('2025-03-10');
-        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         // Verify the event appears in the calendar view with correct timezone-adjusted date
         $calendarView = $result['calendarView'];
@@ -158,27 +180,29 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 2, 10, 2, 0, 0));
         $tz = 'America/New_York';
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create event at 22:00 UTC which should be different date in NY timezone
         $startUtc = Date::create(2025, 2, 10, 2, 0, 0);
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
-            'title'           => 'Late Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $startUtc,
-            'end_date_time'   => $endUtc,
-            'date'            => $startUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Late Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $checkedDate = Date::parse('2025-02-09');
-        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         // Verify the event appears in the calendar view with correct timezone-adjusted date
         $calendarView = $result['calendarView'];
@@ -200,27 +224,29 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 2, 10, 22, 0, 0));
         $tz = 'Pacific/Auckland';
 
-        /** @var User $user */
-        $user = User::factory()->create();
-
         // Create event at 22:00 UTC which should be different date in Pacific timezone
         $startUtc = Date::create(2025, 2, 10, 22, 0, 0);
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
-            'title'           => 'Late Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $startUtc,
-            'end_date_time'   => $endUtc,
-            'date'            => $startUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Late Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $checkedDate = Date::parse('2025-02-09');
-        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         // Verify the event appears in the calendar view with correct timezone-adjusted date
         $calendarView = $result['calendarView'];
@@ -241,29 +267,66 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         Date::setTestNow(Date::create(2025, 2, 10, 12, 0, 0));
         $tz = 'Asia/Tokyo';
 
-        /** @var User $user */
-        $user = User::factory()->create();
+        $startUtc = Date::create(2025, 2, 10, 12, 0, 0);
+        $endUtc = (clone $startUtc)->addHour();
+
+        /** @var CalendarEvent $event */
+        $event = CalendarEvent::query()->create([
+            'title'             => 'Tokyo Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
+        $checkedDate = Date::parse('2025-02-10');
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
+
+        // Verify events are returned with timezone applied
+        $eventEntry = collect($result['calendarView'])
+            ->firstWhere(fn ($day): bool => isset($day['calendarEvents']) && count($day['calendarEvents']) > 0);
+
+        expect($eventEntry['calendarEvents'][0])->toHaveKey('datetime');
+    });
+
+    it('passes timezone to CalendarEventMonthViewResource via additional', function (): void {
+        Date::setTestNow(Date::create(2025, 2, 10, 12, 0, 0));
+        $tz = 'Asia/Tokyo';
 
         $startUtc = Date::create(2025, 2, 10, 12, 0, 0);
         $endUtc = (clone $startUtc)->addHour();
 
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
-            'title'           => 'Tokyo Event',
-            'status'          => 'confirmed',
-            'start_date_time' => $startUtc,
-            'end_date_time'   => $endUtc,
-            'date'            => $startUtc?->format('Y-m-d'),
-            'type'            => 'individual',
+            'title'             => 'Tokyo Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc?->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
         $checkedDate = Date::parse('2025-02-10');
-        $result = new MonthCalendarEventsService($user, $checkedDate, $tz)->getMonthCalendarEvents();
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
 
         // Verify events are returned with timezone applied
-        $eventEntry = collect($result['calendarView'])->firstWhere(fn ($day): bool => isset($day['calendarEvents']) && count($day['calendarEvents']) > 0);
+        $eventEntry = collect($result['calendarView'])
+            ->firstWhere(fn ($day): bool => isset($day['calendarEvents']) && count($day['calendarEvents']) > 0);
 
         expect($eventEntry['calendarEvents'][0])->toHaveKey('datetime');
     });
+
 });

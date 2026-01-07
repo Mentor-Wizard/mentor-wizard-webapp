@@ -25,9 +25,9 @@ class BaseCalendarEventAction
 
         // Get timezone from user profile
         $user = auth()->user();
-        $profile = $user?->profile;
-        $userTimezone = $profile ? $profile->timezone : config('app.timezone');
-        $mentorProgramId = $request->get('mentor_program_id');
+        $profile = $user->profile;
+        $userTimezone = $profile->timezone;
+        $mentorProgramId = $validated['mentor_program_id'];
 
         // Parse dates in user's timezone
         $startDateTime = Date::createFromFormat(

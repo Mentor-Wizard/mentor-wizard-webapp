@@ -14,7 +14,6 @@ import DailyView from '@/Components/Calendar/DailyView.vue';
 import MonthlyView from '@/Components/Calendar/MonthlyView.vue';
 import WeeklyView from '@/Components/Calendar/WeeklyView.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import CreateEvent from '@/Pages/Calendar/CreateCalendarEvent.vue';
 import { useCalendar } from '@/Stores/calendar.js';
 import { adjustDate, formatWeekRange } from '@/Stores/Calendar/helpers.js';
 

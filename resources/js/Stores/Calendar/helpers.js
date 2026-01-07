@@ -130,7 +130,7 @@ export const validateForm = (form, errors) => {
     errors.value.description = 'Description is more than 2000 characters';
   }
 
-  if(form.webLink === ''){
+  if (form.webLink === '') {
     form.webLink = null;
   }
   if (!isValidUrl(form.webLink)) {
@@ -161,7 +161,7 @@ export const validateForm = (form, errors) => {
 
 const isValidUrl = (urlString) => {
   try {
-    if(urlString == null){
+    if (urlString == null) {
       return true;
     }
     new URL(urlString);

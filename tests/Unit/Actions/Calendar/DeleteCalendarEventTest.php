@@ -49,28 +49,39 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
                 'colour' => CalendarEventColoursEnum::BLUE->value]);
     });
 
-    it('deletes mentor program and returns redirect response', function (): void {
+    it('cancels confirmed event and returns redirect response', function (): void {
+        // Confirmed events should be cancelled, not deleted
         $action = new DeleteCalendarEvent;
         $response = $action->handle($this->event);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'))
-            ->and(CalendarEvent::query()->count())->toBe(0);
-    });
-
-    it('deletes already deleted event and returns redirect response', function (): void {
-
-        CalendarEvent::query()->find($this->event->getKey())?->delete();
-
-        $response = new DeleteCalendarEvent()->handle($this->event);
-
-        expect($response)->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getStatusCode())->toBe(302)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
+        expect(session('error'))->toBe('Confirmed event cannot be deleted.');
 
+        expect(CalendarEvent::query()->find($this->event->getKey()))->not->toBeNull();
+        expect(CalendarEvent::query()->find($this->event->getKey())?->status)
+            ->toBe(CalendarEventStatusEnum::CANCELLED->value);
     });
 
-    it('deletes event for non-mentor user and returns redirect response', function (): void {
+    it('deletes event when status is pending or cancelled', function (): void {
+        // Pending mentor confirmation -> delete
+        $pending = CalendarEvent::factory()->create([
+            'status' => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+        ]);
+        $response1 = new DeleteCalendarEvent()->handle($pending);
+        expect($response1)->toBeInstanceOf(RedirectResponse::class)
+            ->and(CalendarEvent::query()->find($pending->getKey()))->toBeNull();
+
+        // Cancelled -> delete
+        $cancelled = CalendarEvent::factory()->create([
+            'status' => CalendarEventStatusEnum::CANCELLED,
+        ]);
+        $response2 = new DeleteCalendarEvent()->handle($cancelled);
+        expect($response2)->toBeInstanceOf(RedirectResponse::class)
+            ->and(CalendarEvent::query()->find($cancelled->getKey()))->toBeNull();
+    });
+
+    it('handles delete call for non-mentor viewer and returns redirect (authorization handled in feature)', function (): void {
         Auth::logout();
         $viewer = User::factory()->create();
         Auth::login($viewer);
@@ -83,7 +94,7 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
     });
 
-    it("deletes another mentor's event and returns redirect response", function (): void {
+    it("handles another mentor's event and returns redirect (authorization handled in feature)", function (): void {
 
         $this->actingAs($this->anotherMentor);
 

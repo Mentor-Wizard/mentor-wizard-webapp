@@ -48,7 +48,7 @@ class StoreBatchUserSchedule
 
             $updateSchedules = collect($schedules)
                 ->map(function (array $schedule) use ($fillableFields, $defaults) {
-                    if (!isset($schedule['id'])) {
+                    if (! isset($schedule['id'])) {
                         return null;
                     }
 
@@ -78,10 +78,10 @@ class StoreBatchUserSchedule
                 ->values()
                 ->all();
 
-//
+            //
             DB::table('user_schedules')
                 ->upsert($updateSchedules, 'id', $fillableFields);
-             DB::table('user_schedules')->insert($createSchedules);
+            DB::table('user_schedules')->insert($createSchedules);
 
             // @pest-mutate-ignore-next-line
             DB::commit();

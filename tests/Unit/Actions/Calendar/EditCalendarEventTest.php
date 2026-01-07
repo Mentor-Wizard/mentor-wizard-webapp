@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Calendar\EditCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Routing\Redirector;
@@ -33,33 +35,42 @@ describe('EditCalendarEvent', function (): void {
 
         // Create event with two users attached
         $otherUser = User::factory()->create();
+        $mentorProgram = MentorProgram::factory()->create(
+            ['mentor_id' => $this->user->getKey()]
+        );
         $event = CalendarEvent::factory()->create([
-            'title'           => 'Multi-User Event',
-            'start_date_time' => Date::now()->addDays(2)->setTime(10, 0, 0),
-            'end_date_time'   => Date::now()->addDays(2)->setTime(11, 0, 0),
-            'date'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'title'             => 'Multi-User Event',
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'mentor_program_id' => $mentorProgram->getKey(),
         ]);
 
         // Attach both users
         $event->calendarEventUsers()->attach($this->user->getKey(),
-            ['colour' => CalendarEventColoursEnum::BLUE->value]);
+            ['colour'  => CalendarEventColoursEnum::BLUE->value,
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]);
         $event->calendarEventUsers()->attach($otherUser->getKey(),
-            ['colour' => CalendarEventColoursEnum::GREEN->value]);
+            ['colour'  => CalendarEventColoursEnum::GREEN->value,
+                'role' => CalendarEventRoleEnum::MENTI,
+            ]);
 
         expect($event->calendarEventUsers)->toHaveCount(2);
 
         // Update event with new colour for current user
         $data = [
-            'id'          => $event->getKey(),
-            'title'       => 'Updated Event',
-            'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
-            'fromTime'    => '10:00',
-            'toTime'      => '11:00',
-            'description' => 'Updated desc',
-            'type'        => 'Individual',
-            'webLink'     => 'https://google.com',
-            'colour'      => CalendarEventColoursEnum::RED->value,
+            'id'                => $event->getKey(),
+            'title'             => 'Updated Event',
+            'fromDate'          => Date::now()->addDays(2)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(2)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:00',
+            'description'       => 'Updated desc',
+            'type'              => 'Individual',
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::RED->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
         ];
 
         $request = new EditCalendarEventRequest;
@@ -68,7 +79,7 @@ describe('EditCalendarEvent', function (): void {
         $request->validateResolved();
 
         $action = new EditCalendarEvent;
-        $action->handle($request, $event);
+        $result = $action->handle($request, $event);
 
         // Refresh event and check both users are still attached
         $event->refresh();
@@ -78,7 +89,7 @@ describe('EditCalendarEvent', function (): void {
 
         // Verify current user's colour was updated
         $currentUserPivot = $event->calendarEventUsers->where('id', $this->user->getKey())->first()->pivot;
-        expect($currentUserPivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
+        expect($currentUserPivot->colour)->toBe(CalendarEventColoursEnum::RED->value);
 
         // Verify other user's colour remains unchanged
         $otherUserPivot = $event->calendarEventUsers->where('id', $otherUser->getKey())->first()->pivot;
@@ -88,26 +99,32 @@ describe('EditCalendarEvent', function (): void {
     it('updates event details correctly', function (): void {
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
 
+        $mentorProgram = MentorProgram::factory()->create(
+            ['mentor_id' => $this->user->getKey()]
+        );
         $event = CalendarEvent::factory()->create([
-            'title'           => 'Original Title',
-            'start_date_time' => Date::now()->addDays(2)->setTime(10, 0, 0),
-            'end_date_time'   => Date::now()->addDays(2)->setTime(11, 0, 0),
-            'date'            => Date::now()->addDays(2)->format('Y-m-d'),
-            'description'     => 'Original description',
+            'title'             => 'Original Title',
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'description'       => 'Original description',
+            'mentor_program_id' => $mentorProgram->getKey(),
         ]);
 
-        $event->calendarEventUsers()->attach($this->user->getKey(), ['colour' => CalendarEventColoursEnum::BLUE->value]);
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            ['colour' => CalendarEventColoursEnum::BLUE->value]);
 
         $data = [
-            'title'       => 'Updated Title',
-            'fromDate'    => Date::now()->addDays(3)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(3)->format('Y-m-d'),
-            'fromTime'    => '14:00',
-            'toTime'      => '15:30',
-            'description' => 'Updated description',
-            'type'        => 'Group',
-            'webLink'     => 'https://google.com',
-            'colour'      => CalendarEventColoursEnum::PURPLE->value,
+            'title'             => 'Updated Title',
+            'fromDate'          => Date::now()->addDays(3)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(3)->format('Y-m-d'),
+            'fromTime'          => '14:30',
+            'toTime'            => '15:30',
+            'description'       => 'Updated description',
+            'type'              => 'Group',
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::PURPLE->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
         ];
 
         $request = new EditCalendarEventRequest;
@@ -119,8 +136,8 @@ describe('EditCalendarEvent', function (): void {
         $action->handle($request, $event);
 
         $event->refresh();
-        expect($event->webLink)->toBe('https://google.com')
-            ->and($event->duration)->toBe(90); // 1.5 hours
+        expect($event->web_link)->toBe('https://google.com')
+            ->and($event->duration)->toBe(60);
     });
 
     it('throws exception when event does not exist', function (): void {

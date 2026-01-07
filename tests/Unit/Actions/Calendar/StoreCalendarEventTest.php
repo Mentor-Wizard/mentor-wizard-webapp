@@ -10,6 +10,7 @@ use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendar();
-
+        $this->mentorProgram = MentorProgram::factory()->create(['mentor_id' => $this->user->getKey()]);
         $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(resolve(Redirector::class));
@@ -89,48 +90,52 @@ describe('StoreCalendarEventRequest Validation', function (): void {
         }
     })->with([
         'empty title' => fn (): array => [[
-            'title'       => '',
-            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
-            'toDate'      => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toTime'      => '10:00',
-            'description' => 'x',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'timezone'    => 'Europe/Kyiv',
+            'title'             => '',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'description'       => 'x',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'timezone'          => 'Europe/Kyiv',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ], 'title'],
         'past fromDate' => fn (): array => [[
-            'title'       => 'Past date',
-            'fromDate'    => Date::yesterday()->format('Y-m-d'),
-            'toDate'      => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toTime'      => '10:00',
-            'description' => 'x',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'timezone'    => 'Europe/Kyiv',
+            'title'             => 'Past date',
+            'fromDate'          => Date::yesterday()->format('Y-m-d'),
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'description'       => 'x',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'timezone'          => 'Europe/Kyiv',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ], 'fromDate'],
         'toTime before fromTime (same day)' => fn (): array => [[
-            'title'           => 'Wrong time',
-            'fromDate'        => Date::tomorrow()->format('Y-m-d'),
-            'toDate'          => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'        => '10:00',
-            'toTime'          => '09:00',
-            'description'     => 'x',
-            'type'            => CalendarEventTypeEnum::GROUP->value,
-            'colour'          => CalendarEventColoursEnum::BLUE->value,
-            'timezone'        => 'Europe/Kyiv',
+            'title'             => 'Wrong time',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '09:00',
+            'description'       => 'x',
+            'type'              => CalendarEventTypeEnum::GROUP->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'timezone'          => 'Europe/Kyiv',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ], 'toTime'],
         'invalid type' => fn (): array => [[
-            'title'       => 'Type fail',
-            'fromDate'    => Date::tomorrow()->format('Y-m-d'),
-            'toDate'      => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'    => '09:00',
-            'toTime'      => '10:00',
-            'description' => 'x',
-            'type'        => 'Invalid',
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
-            'timezone'    => 'Europe/Kyiv',
+            'title'             => 'Type fail',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'description'       => 'x',
+            'type'              => 'Invalid',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'timezone'          => 'Europe/Kyiv',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ], 'type'],
     ]);
 });
@@ -139,6 +144,7 @@ describe('Store Calendar CalendarEvent', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendar();
+        $this->mentorProgram = MentorProgram::factory()->create(['mentor_id' => $this->user->getKey()]);
     });
 
     it('stores event, attaches host and redirects to calendar page', function (): void {
@@ -147,16 +153,17 @@ describe('Store Calendar CalendarEvent', function (): void {
         $end = Date::tomorrow()->setTime(10, 0, 0);
 
         $eventPayload = [
-            'title'           => 'Planning',
-            'status'          => CalendarEventStatusEnum::CONFIRMED->value,
-            'fromDate'        => $start->format('Y-m-d'),
-            'toDate'          => $end->format('Y-m-d'),
-            'fromTime'        => '09:00',
-            'toTime'          => '10:00',
-            'webLink'         => 'https://google.com',
-            'type'            => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'description'     => 'Sprint planning',
-            'colour'          => CalendarEventColoursEnum::BLUE->value,
+            'title'             => 'Planning',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'fromDate'          => $start->format('Y-m-d'),
+            'toDate'            => $end->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'webLink'           => 'https://google.com',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Sprint planning',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $request = Mockery::mock(StoreCalendarEventRequest::class);

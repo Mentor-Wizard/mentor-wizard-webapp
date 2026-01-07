@@ -8,6 +8,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -23,17 +24,21 @@ describe('Calendar Pages - ShowCalendarEvent', function (): void {
         $this->host = User::factory()->create();
         $this->host->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
+        $mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->host->getKey(),
+        ]);
         $this->participant = User::factory()->create();
         $this->stranger = User::factory()->create();
 
         $this->event = CalendarEvent::factory()->create([
             'title'             => 'Event to Show',
-            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
             'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'description'       => 'Details',
+            'mentor_program_id' => $mentorProgram->getKey(),
         ]);
 
         // Attach relations

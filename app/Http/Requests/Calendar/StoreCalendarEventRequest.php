@@ -28,7 +28,6 @@ class StoreCalendarEventRequest extends FormRequest
 
             $mentorProgram = $this->input('mentor_program_id')
                 ? MentorProgram::query()->find($this->input('mentor_program_id')) : null;
-            $mentor = $mentorProgram ? $mentorProgram->mentor : null;
             if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime'])) {
                 $startDate = Date::createFromFormat(
                     '!Y-m-d H:i',

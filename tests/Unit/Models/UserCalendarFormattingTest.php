@@ -2,16 +2,27 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use App\Services\Calendar\DailyCalendarEventsService;
 use App\Services\Calendar\MonthCalendarEventsService;
 use App\Services\Calendar\WeeklyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Spatie\Permission\Models\Role;
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
+    $this->user = User::factory()->create();
+    $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+    $this->mentorProgram = MentorProgram::factory()->create(
+        ['mentor_id' => $this->user]
+    );
+
 });
 
 it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) using service', function (): void {
@@ -19,12 +30,9 @@ it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) 
     Date::setTestNow(Date::create(2025, 1, 15, 12, 0, 0));
     $tz = config('app.timezone');
 
-    /** @var User $user */
-    $user = User::factory()->create();
-
     $date = Date::parse('2025-01-15'); // Wednesday
 
-    $result = new WeeklyCalendarEventsService($user, $date, $tz)->getWeeklyCalendarEvents();
+    $result = new WeeklyCalendarEventsService($this->user, $date, $tz)->getWeeklyCalendarEvents();
 
     expect($result)
         ->toHaveKeys(['calendarEvents', 'calendarView']);
@@ -39,7 +47,8 @@ it('sets flags in week formatted calendar (isCurrentMonth, isSelected, isToday) 
         ->and($entryForSelected['isToday'] ?? null)->toBeTrue();
 });
 
-it('includes empty day entries with events key for month calendar and sets flags for event day using service (timezone aware)', function (): void {
+it('includes empty day entries with events key for month calendar
+and sets flags for event day using service (timezone aware)', function (): void {
     // Set application now to UTC, but test conversion by using Europe/Kyiv for building
     Date::setTestNow(Date::create(2025, 2, 10, 9, 0, 0));
     $tz = 'Europe/Kyiv';
@@ -52,12 +61,13 @@ it('includes empty day entries with events key for month calendar and sets flags
     $endUtc = (clone $startUtc)->addHour();
 
     $event = CalendarEvent::query()->create([
-        'title'           => 'Test Event',
-        'status'          => 'confirmed',
-        'start_date_time' => $startUtc,
-        'end_date_time'   => $endUtc,
-        'date'            => $startUtc?->format('Y-m-d'),
-        'type'            => 'individual',
+        'title'             => 'Test Event',
+        'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+        'start_date_time'   => $startUtc,
+        'end_date_time'     => $endUtc,
+        'date'              => $startUtc?->format('Y-m-d'),
+        'type'              => 'individual',
+        'mentor_program_id' => $this->mentorProgram->getKey(),
     ]);
 
     $user->calendarEvents()->attach($event->getKey());
@@ -93,25 +103,23 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
     Date::setTestNow(Date::create(2025, 3, 5, 8, 0, 0));
     $tz = config('app.timezone');
 
-    /** @var User $user */
-    $user = User::factory()->create();
-
     // Create an event on the selected day so hasEvent can be asserted
     $start = Date::create(2025, 3, 5, 14, 0, 0);
     $end = (clone $start)->addMinutes(90);
 
     $event = CalendarEvent::query()->create([
-        'title'           => 'Daily Event',
-        'status'          => 'confirmed',
-        'start_date_time' => $start,
-        'end_date_time'   => $end,
-        'date'            => $start?->format('Y-m-d'),
-        'type'            => 'group',
+        'title'             => 'Daily Event',
+        'status'            => 'confirmed',
+        'start_date_time'   => $start,
+        'end_date_time'     => $end,
+        'date'              => $start?->format('Y-m-d'),
+        'type'              => 'group',
+        'mentor_program_id' => $this->mentorProgram->getKey(),
     ]);
 
-    $user->calendarEvents()->attach($event->getKey());
+    $this->user->calendarEvents()->attach($event->getKey());
     $date = Date::parse('2025-03-05');
-    $result = new DailyCalendarEventsService($user, $date, $tz)->getDailyCalendarEvents();
+    $result = new DailyCalendarEventsService($this->user, $date, $tz)->getDailyCalendarEvents();
 
     expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
 
