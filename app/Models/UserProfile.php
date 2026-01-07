@@ -44,6 +44,7 @@ class UserProfile extends Model implements HasMedia
         'telegram',
         'whatsapp',
         'phone',
+        'mute',
         'cost_per_hour',
         'currency_id',
     ];
@@ -57,6 +58,7 @@ class UserProfile extends Model implements HasMedia
         'whatsapp',
         'phone',
         'avatar',
+        'mute',
         'cost_per_hour',
         'currency_id',
     ];
@@ -94,6 +96,16 @@ class UserProfile extends Model implements HasMedia
         $this->addMediaCollection('avatar')
             ->singleFile()
             ->withResponsiveImages();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'mute' => 'boolean',
+        ];
     }
 
     /**

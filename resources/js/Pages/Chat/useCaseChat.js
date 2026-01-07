@@ -6,6 +6,7 @@ const messageSortList = ['Resent', 'New', 'Name'];
 const messageSortBy = ref(1);
 const currentCompanion = ref(null);
 const chatMessages = ref([]);
+const chatFiles = ref([]);
 let channel = null;
 
 export function useCaseChat() {
@@ -20,6 +21,7 @@ export function useCaseChat() {
     currentCompanion.value = listUsers.value.find((user) => user.id === id);
     const { data } = await axios.get(route('chat.messages', { receiver: id }));
     chatMessages.value = data.messages;
+    chatFiles.value = data.files;
     await scrollToBottom();
   };
 
@@ -37,6 +39,10 @@ export function useCaseChat() {
       { headers: { 'Content-Type': 'multipart/form-data' } },
     );
     chatMessages.value.push(data.message);
+    chatFiles.value = [
+      ...(chatFiles.value ?? []),
+      ...(data.message.attachments ?? []),
+    ];
     await scrollToBottom();
   };
 
@@ -44,6 +50,14 @@ export function useCaseChat() {
     const { data } = await axios.get(
       route('chat.get-messages', { message: id }),
     );
+    chatMessages.value.push(data.message);
+    await scrollToBottom();
+  };
+
+  const setMute = async (mute) => {
+    const { data } = await axios.post(route('chat.mute'), {
+      mute: mute ? 1 : 0,
+    });
     chatMessages.value.push(data.message);
     await scrollToBottom();
   };
@@ -59,8 +73,6 @@ export function useCaseChat() {
   };
 
   const subscribeUser = (user_id) => {
-    console.log('subscribeUser');
-
     const updateOnlineStatus = (userId, isOnline) => {
       const userIndex = listUsers.value.findIndex((u) => u.id === userId);
 
@@ -85,21 +97,16 @@ export function useCaseChat() {
 
     channel = Echo.join('presence-online-users')
       .here((onlineUsersList) => {
-        console.log('here. list users:', onlineUsersList);
-
         const onlineIds = new Set(onlineUsersList.map((u) => u.id));
 
         listUsers.value.forEach((user) => {
-          console.log('onlineIds', onlineIds.has(user.id));
           user.online = onlineIds.has(user.id);
         });
       })
       .joining((user) => {
-        console.log('joining. user:', user);
         updateOnlineStatus(user.id, true);
       })
       .leaving((user) => {
-        console.log('leaving. Користувач відключився:', user);
         updateOnlineStatus(user.id, false);
       })
       .error((error) => {
@@ -162,6 +169,8 @@ export function useCaseChat() {
     messageSortList,
     messageSortBy,
     chatMessages,
+    chatFiles,
     sendMessage,
+    setMute,
   };
 }

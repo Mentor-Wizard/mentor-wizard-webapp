@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Enums\TagEnum;
 use App\Models\ChatMessage;
 use App\Models\User;
 use DateTimeInterface;
@@ -30,7 +31,8 @@ class ChatListUser
                 'message'    => $lastMessage->message,
                 'online'     => false,
                 'is_read'    => $lastMessage->is_read,
-                'created_at' => $lastMessage->created_at,
+                'created_at' => $lastMessage->created_at->format('d.m.Y'),
+                'tags'       => $userCompanion->mentorProfile?->mentorTags()->where('mentor_tags.type', TagEnum::STACK)->pluck('tag')->toArray(),
                 'last'       => $this->getLastDateInfo($lastMessage->created_at),
             ];
         }

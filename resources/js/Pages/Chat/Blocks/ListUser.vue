@@ -84,11 +84,7 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
     :class="user.active ? 'bg-gray-100' : 'bg-white'"
   >
     <div class="relative">
-      <img
-        :src="user.avatar"
-        alt="Sarah Johnson"
-        class="h-12 w-12 rounded-full"
-      />
+      <img :src="user.avatar" :alt="user.name" class="h-12 w-12 rounded-full" />
       <!-- Status online -->
       <span
         class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white"

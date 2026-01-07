@@ -6,6 +6,7 @@ use App\Actions\Chat\ChatListUser;
 use App\Actions\Chat\ChatMessages;
 use App\Actions\Chat\GetMessage;
 use App\Actions\Chat\SendMessage;
+use App\Actions\Chat\SetMute;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
@@ -68,6 +69,7 @@ Route::middleware('auth')
         Route::get('messages/{receiver}', ChatMessages::class)->name('chat.messages');
         Route::post('send-messages/{receiver}', SendMessage::class)->name('chat.send-messages');
         Route::get('message/{message}', GetMessage::class)->name('chat.get-messages');
+        Route::post('mute', SetMute::class)->name('chat.mute');
     });
 
 require __DIR__.'/auth.php';

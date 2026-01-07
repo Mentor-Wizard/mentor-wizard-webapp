@@ -22,13 +22,9 @@ class ChatMessages
         $this->setReadMessages($user, $receiver);
 
         return response()->json([
-            'messages' => $this->getMessages($user, $receiver),
+            'messages' => $this->repository->getMessages($user, $receiver),
+            'files'    => $this->repository->getFiles($user, $receiver),
         ]);
-    }
-
-    private function getMessages(User $user, User $receiver): array
-    {
-        return $this->repository->getMessages($user, $receiver);
     }
 
     private function setReadMessages(User $user, User $receiver): void

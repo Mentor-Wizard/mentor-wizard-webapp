@@ -32,14 +32,9 @@ class ChatMessageResource extends JsonResource
     {
         /** @var ChatMessage $chatMessage */
         $chatMessage = $this->resource;
-        $files = $chatMessage->getMedia('files')
-            ->map(fn ($media): array => [
-                'id'        => $media->id,
-                'name'      => $media->file_name,
-                'mime_type' => $media->mime_type,
-                'size'      => $media->size,
-                'url'       => $media->getUrl(),
-            ])->all();
+        $files = ChatFileResource::collection(
+            $chatMessage->getMedia('files')
+        );
 
         return [
             'id'            => $chatMessage->id,

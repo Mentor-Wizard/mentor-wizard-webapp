@@ -86,7 +86,7 @@ const groupedMessages = computed(() => {
           :class="[
             'max-w-[75%]',
             msg.sender === 'user' ?
-              'rounded-br-none bg-blue-600 text-sm text-white'
+              'rounded-br-none bg-blue-100 text-sm text-gray-800'
             : 'rounded-tl-none bg-white text-sm text-gray-800',
             'rounded-xl p-3 shadow-sm',
           ]"
@@ -98,7 +98,7 @@ const groupedMessages = computed(() => {
             :class="[
               'rounded-lg border p-1 shadow-sm',
               msg.sender === 'user' ?
-                'border-blue-500 bg-blue-600'
+                'border-blue-100 bg-blue-200'
               : 'border-white/30 bg-white/20',
             ]"
           >
@@ -122,7 +122,7 @@ const groupedMessages = computed(() => {
             :class="[
               'text-sm text-[0.8rem]',
               msg.sender === 'user' ?
-                'text-right text-blue-200'
+                'text-right text-blue-400'
               : 'text-right text-gray-500',
             ]"
           >
