@@ -24,7 +24,7 @@ class ShowCalendarEventPage
         return Inertia::render('Calendar/ShowEditEvent', [
             'locale'           => app()->getLocale(),
             'availableColours' => CalendarEventColoursEnum::values(),
-            'permissions'      => $user->can('update', [$calendarEvent, $user]) ? 'edit' : 'view',
+            'permissions'      => $user->can('update', $calendarEvent) ? 'edit' : 'view',
             'calendarEvent'    => CalendarEventData::fromModel(
                 $calendarEvent->load('calendarEventUsers'),
                 $timezone,

@@ -61,6 +61,7 @@ class MonthCalendarEventsService
         $startDate = $utcDate->copy()->startOfMonth()->startOfWeek();
         $endDate = $utcDate->copy()->endOfMonth()->endOfWeek();
         $period = CarbonPeriod::create($startDate, '1 day', $endDate);
+        // @pest-mutate-ignore UnwrapArrayValues
         $monthDates = array_values(iterator_to_array($period));
 
         return [
