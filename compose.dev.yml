@@ -1,0 +1,131 @@
+services:
+  db:
+    image: postgres:17-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - mw-db-network
+      - dokploy-network
+    healthcheck:
+      test: pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  redis:
+    image: redis:7.2.4-alpine
+    restart: unless-stopped
+    command:
+      - 'redis-server'
+      - '--requirepass ${REDIS_PASSWORD}'
+    volumes:
+      - redis_data:/data
+    networks:
+      - mw-redis-network
+      - dokploy-network
+    healthcheck:
+      test: redis-cli -a ${REDIS_PASSWORD} ping
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  app-base: &app-base
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile-dev
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www
+      - mw_app_composer_data:/.composer
+      - mw_app_npm_data:/.npm
+    networks:
+      - mw-db-network
+      - mw-redis-network
+      - dokploy-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  app:
+    <<: *app-base
+    environment:
+      COMMAND: php artisan octane:frankenphp --host=0.0.0.0 --port=80 --watch
+      PROCESS: app
+      XDEBUG_MODE: debug,coverage
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mw-app.rule=Host(`maks.mentor-wizard.com`)"
+      - "traefik.http.routers.mw-app.entrypoints=websecure"
+      - "traefik.http.routers.mw-app.tls.certResolver=letsencrypt"
+      - "traefik.http.services.mw-app.loadbalancer.server.port=443"
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+      - '5173:5173'
+      - '9003:9003'
+    healthcheck:
+      test: curl -s http://localhost/up >/dev/null || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  workers:
+    <<: *app-base
+    environment:
+      COMMAND: php artisan queue:work --sleep=1 --tries=3
+      PROCESS: worker
+
+  schedule:
+    <<: *app-base
+    environment:
+      COMMAND: supercronic -quiet /var/www/docker/php/schedule/schedule
+      PROCESS: schedule
+    healthcheck:
+      test: supercronic -test /var/www/docker/php/schedule/schedule | grep -q 'is valid'
+      interval: 30s
+      timeout: 10s
+      retries: 2
+
+  websockets:
+    <<: *app-base
+    environment:
+      COMMAND: php artisan reverb:start --host=0.0.0.0 --port=8080 --debug
+      PROCESS: reverb
+    ports:
+      - '8080:8080'
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+    networks:
+      - mw-db-network
+      - dokploy-network
+
+volumes:
+  db_data:
+    name: mw_db_data
+  redis_data:
+    name: mw_redis_data
+  mw_app_composer_data:
+    name: mw_app_composer_data
+  mw_app_npm_data:
+    name: mw_app_npm_data
+
+networks:
+  mw-db-network:
+    driver: bridge
+  mw-redis-network:
+    driver: bridge
+  dokploy-network:
+    external: true
