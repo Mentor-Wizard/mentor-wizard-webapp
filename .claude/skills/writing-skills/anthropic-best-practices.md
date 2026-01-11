@@ -852,43 +852,43 @@ both how to write effective agent instructions and what information agents need.
 
 **Creating a new Skill:**
 
-1. **Complete a task without a Skill**: Work through a problem with Claude A
-   using normal prompting. As you work, you'll naturally provide context,
-   explain preferences, and share procedural knowledge. Notice what information
-   you repeatedly provide.
+1.  **Complete a task without a Skill**: Work through a problem with Claude A
+    using normal prompting. As you work, you'll naturally provide context,
+    explain preferences, and share procedural knowledge. Notice what information
+    you repeatedly provide.
 
-2. **Identify the reusable pattern**: After completing the task, identify what
-   context you provided that would be useful for similar future tasks.
+2.  **Identify the reusable pattern**: After completing the task, identify what
+    context you provided that would be useful for similar future tasks.
 
     **Example**: If you worked through a BigQuery analysis, you might have
     provided table names, field definitions, filtering rules (like "always
     exclude test accounts"), and common query patterns.
 
-3. **Ask Claude A to create a Skill**: "Create a Skill that captures this
-   BigQuery analysis pattern we just used. Include the table schemas, naming
-   conventions, and the rule about filtering test accounts."
+3.  **Ask Claude A to create a Skill**: "Create a Skill that captures this
+    BigQuery analysis pattern we just used. Include the table schemas, naming
+    conventions, and the rule about filtering test accounts."
 
-       <Tip>
-         Claude models understand the Skill format and structure natively. You don't need special system prompts or a "writing skills" skill to get Claude to help create Skills. Simply ask Claude to create a Skill and it will generate properly structured SKILL.md content with appropriate frontmatter and body content.
-       </Tip>
+        <Tip>
+          Claude models understand the Skill format and structure natively. You don't need special system prompts or a "writing skills" skill to get Claude to help create Skills. Simply ask Claude to create a Skill and it will generate properly structured SKILL.md content with appropriate frontmatter and body content.
+        </Tip>
 
-4. **Review for conciseness**: Check that Claude A hasn't added unnecessary
-   explanations. Ask: "Remove the explanation about what win rate means - Claude
-   already knows that."
+4.  **Review for conciseness**: Check that Claude A hasn't added unnecessary
+    explanations. Ask: "Remove the explanation about what win rate means -
+    Claude already knows that."
 
-5. **Improve information architecture**: Ask Claude A to organize the content
-   more effectively. For example: "Organize this so the table schema is in a
-   separate reference file. We might add more tables later."
+5.  **Improve information architecture**: Ask Claude A to organize the content
+    more effectively. For example: "Organize this so the table schema is in a
+    separate reference file. We might add more tables later."
 
-6. **Test on similar tasks**: Use the Skill with Claude B (a fresh instance with
-   the Skill loaded) on related use cases. Observe whether Claude B finds the
-   right information, applies rules correctly, and handles the task
-   successfully.
+6.  **Test on similar tasks**: Use the Skill with Claude B (a fresh instance
+    with the Skill loaded) on related use cases. Observe whether Claude B finds
+    the right information, applies rules correctly, and handles the task
+    successfully.
 
-7. **Iterate based on observation**: If Claude B struggles or misses something,
-   return to Claude A with specifics: "When Claude used this Skill, it forgot to
-   filter by date for Q4. Should we add a section about date filtering
-   patterns?"
+7.  **Iterate based on observation**: If Claude B struggles or misses something,
+    return to Claude A with specifics: "When Claude used this Skill, it forgot
+    to filter by date for Q4. Should we add a section about date filtering
+    patterns?"
 
 **Iterating on existing Skills:**
 

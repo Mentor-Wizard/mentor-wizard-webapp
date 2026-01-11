@@ -1,0 +1,121 @@
+services:
+  app:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    environment:
+      COMMAND: php artisan octane:frankenphp --host=0.0.0.0 --port=80
+      PROCESS: app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - dokploy-network
+      - default
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.mw-app-${APP_ENV}.rule=Host(`${DOMAIN_NAME}`)'
+      - 'traefik.http.routers.mw-app-${APP_ENV}.entrypoints=websecure'
+      - 'traefik.http.routers.mw-app-${APP_ENV}.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.mw-app-${APP_ENV}.loadbalancer.server.port=80'
+    healthcheck:
+      test: curl -s http://localhost/up >/dev/null || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  workers:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    environment:
+      COMMAND: php artisan queue:work
+      PROCESS: worker
+    networks:
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  schedule:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    environment:
+      COMMAND: supercronic -quiet /var/www/docker/php/schedule/schedule
+      PROCESS: schedule
+    networks:
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  websockets:
+    image: ${DOCKER_IMAGE}
+    restart: unless-stopped
+    environment:
+      COMMAND:
+        php artisan reverb:start --host="0.0.0.0" --port=8080
+        --hostname="0.0.0.0"
+      PROCESS: reverb
+    networks:
+      - dokploy-network
+      - default
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.mw-ws-${APP_ENV}.rule=Host(`ws.${DOMAIN_NAME}`)'
+      - 'traefik.http.routers.mw-ws-${APP_ENV}.entrypoints=websecure'
+      - 'traefik.http.routers.mw-ws-${APP_ENV}.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.mw-ws-${APP_ENV}.loadbalancer.server.port=8080'
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine3.20
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - default
+    healthcheck:
+      test: pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  redis:
+    image: redis:7.2.4-alpine
+    restart: unless-stopped
+    command:
+      - 'redis-server'
+      - '--requirepass ${REDIS_PASSWORD}'
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
+    healthcheck:
+      test: redis-cli ping
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+volumes:
+  db_data:
+  redis_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  dokploy-network:
+    external: true
