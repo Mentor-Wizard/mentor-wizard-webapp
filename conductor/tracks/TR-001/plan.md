@@ -21,16 +21,23 @@
 ## Фаза 2: GitHub Actions (CI/CD)
 
 - [ ] **Налаштування секретів**
-    - `GITHUB_TOKEN` (автоматично доступний для GHCR).
-    - Dokploy секрети: `DOKPLOY_API_KEY`, `DOKPLOY_URL`.
-    - (Опціонально) `DOCKER_REGISTRY` якщо не `ghcr.io`.
+    - `GITHUB_TOKEN` (автоматично).
+    - `DOKPLOY_WEBHOOK_URL` (для Stage та Prod через GitHub Environments або
+      різні змінні).
 
 - [ ] **Створення Workflow `deploy.yml`**
-    - Налаштувати трігери (push to main).
-    - Job: Build & Push Docker Image to GHCR.
-        - Image: `ghcr.io/${{ github.repository }}:main`.
+    - Trigger: `workflow_dispatch` (Ручний запуск).
+    - Inputs:
+        - `environment`: Вибір (stage/production).
+        - `commit_sha`: (Опціонально) Для збірки конкретного коміту.
+    - Logic:
+        - Checkout (Selected Ref or Specific SHA).
+        - Build Docker Image.
+        - Push to GHCR:
+            - Tag: `ghcr.io/...:sha-xxxx` (Unmutable).
+            - Tag: `ghcr.io/...:${{ inputs.environment }}` (Floating tag:
+              `stage` or `production`).
     - Job: Trigger Dokploy Deployment (webhook).
-        - Dokploy підтягне оновлений `ghcr.io/...:main`.
 
 ## Фаза 3: Налаштування Dokploy
 

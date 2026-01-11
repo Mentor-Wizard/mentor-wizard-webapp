@@ -1,4 +1,4 @@
-services:
+Так services:
   app:
     image: ${DOCKER_IMAGE}
     restart: unless-stopped
