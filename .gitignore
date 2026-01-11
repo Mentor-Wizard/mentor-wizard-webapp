@@ -62,6 +62,7 @@ frankenphp
 
 # Gemini artifacts
 .gemini/
+GEMINI.md
 
 # Tasks docs
 /docs/tasks-docs
