@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Enums\RoleEnum;
 use App\Enums\TagEnum;
 use App\Models\ChatMessage;
 use App\Models\User;
@@ -28,6 +29,7 @@ class ChatListUser
                 'id'         => $userCompanion->id,
                 'name'       => $userCompanion->profile->name.' '.$userCompanion->profile->last_name,
                 'avatar'     => $userCompanion->profile->avatar,
+                'slug'       => $userCompanion->hasRole(RoleEnum::MENTOR->value) ? $userCompanion->slug : null,
                 'message'    => $lastMessage->message,
                 'online'     => false,
                 'is_read'    => $lastMessage->is_read,

@@ -29,7 +29,7 @@ onUnmounted(() => {
                 <ListUser />
               </aside>
               <main
-                class="flex h-[150vh] w-[50%] flex-col border-l border-gray-200 bg-gray-50"
+                class="flex h-[80vh] w-[50%] flex-col border-l border-gray-200 bg-gray-50"
               >
                 <MainList />
               </main>

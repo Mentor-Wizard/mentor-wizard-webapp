@@ -41,8 +41,8 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
       <h2 class="text-xl leading-tight font-bold text-gray-900">
         {{ currentCompanion?.name }}
       </h2>
-      <p class="mt-1 text-base text-gray-600">
-        {{ currentCompanion?.tags ? currentCompanion.tags[0] : 'not set' }}
+      <p v-if="currentCompanion?.tags" class="mt-1 text-base text-gray-600">
+        {{ currentCompanion.tags[0] }}
       </p>
       <p class="mt-2 text-sm text-gray-500">
         Member since {{ currentCompanion?.created_at }}
@@ -57,12 +57,15 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
         Book Session
       </button>
 
-      <button
+      <a
+        v-if="currentCompanion?.slug"
+        :href="route('page.mentor', { mentor: currentCompanion.slug })"
+        target="_blank"
         class="flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition duration-150 ease-in-out hover:bg-gray-50"
       >
         <UserIcon class="me-2 h-4 w-4 text-gray-600" />
         Profile
-      </button>
+      </a>
     </div>
   </div>
   <section>

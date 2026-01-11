@@ -1,5 +1,5 @@
 import { computed, nextTick, ref } from 'vue';
-
+import { useAlerts } from '@/UseCases/useCaseAlert.js';
 const scrollContainer = ref(null);
 const listUsers = ref([]);
 const messageSortList = ['Resent', 'New', 'Name'];
@@ -7,13 +7,15 @@ const messageSortBy = ref(1);
 const currentCompanion = ref(null);
 const chatMessages = ref([]);
 const chatFiles = ref([]);
+const { mute } = useAlerts();
 let channel = null;
 
 export function useCaseChat() {
   const fetchUsers = async (user_id) => {
     const { data } = await axios.get(route('chat.users'));
     listUsers.value = data.users;
-    if (listUsers.value.length > 0) await fetchMessages(listUsers.value[0].id);
+    if (sortedUsers.value.length > 0)
+      await fetchMessages(sortedUsers.value[0].id);
     subscribeUser(user_id);
   };
 
@@ -51,15 +53,18 @@ export function useCaseChat() {
       route('chat.get-messages', { message: id }),
     );
     chatMessages.value.push(data.message);
+    chatFiles.value = [
+      ...(chatFiles.value ?? []),
+      ...(data.message.attachments ?? []),
+    ];
     await scrollToBottom();
   };
 
-  const setMute = async (mute) => {
-    const { data } = await axios.post(route('chat.mute'), {
-      mute: mute ? 1 : 0,
+  const setMute = async (value) => {
+    await axios.post(route('chat.set-mute'), {
+      mute: value ? 1 : 0,
     });
-    chatMessages.value.push(data.message);
-    await scrollToBottom();
+    mute.value = value;
   };
 
   const scrollToBottom = async () => {
