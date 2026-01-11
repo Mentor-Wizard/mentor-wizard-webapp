@@ -64,11 +64,17 @@ class MentorSession extends Model
         return $this->hasOne(MentorSessionNote::class);
     }
 
+    /**
+     * @return HasOne<CalendarEvent, $this>
+     */
     public function calendarEvent(): HasOne
     {
         return $this->hasOne(CalendarEvent::class);
     }
 
+    /**
+     * @return HasOne<MentorProgram, $this>
+     */
     public function mentorProgram(): HasOne
     {
         return $this->hasOne(MentorProgram::class);
@@ -80,14 +86,15 @@ class MentorSession extends Model
     protected function casts(): array
     {
         return [
-            'mentor_id'       => 'int',
-            'menti_id'        => 'int',
-            'date'            => 'datetime',
-            'is_success'      => 'boolean',
-            'is_paid'         => 'boolean',
-            'is_cancelled'    => 'boolean',
-            'is_date_changed' => 'boolean',
-            'cost'            => 'float',
+            'mentor_id'         => 'int',
+            'menti_id'          => 'int',
+            'mentor_program_id' => 'int',
+            'date'              => 'datetime',
+            'is_success'        => 'boolean',
+            'is_paid'           => 'boolean',
+            'is_cancelled'      => 'boolean',
+            'is_date_changed'   => 'boolean',
+            'cost'              => 'float',
         ];
     }
 }

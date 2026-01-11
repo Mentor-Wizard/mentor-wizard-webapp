@@ -35,8 +35,7 @@ class StoreUserScheduleRequest extends FormRequest
             'start_time'   => ['required', 'date_format:H:i'],
             'end_time'     => ['required', 'date_format:H:i', 'after:start_time'],
             'type'         => ['required', Rule::in(UserScheduleRecordType::values())],
-            'day_off_date' => ['nullable', 'required_if:type,'.UserScheduleRecordType::DAY_OFF->value, 'date'],
-            'timezone'     => ['required', 'string'],
+            'day_off_date' => ['nullable', 'date_format:Y-m-d', 'required_if:type,'.UserScheduleRecordType::DAY_OFF->value, 'date'],
         ];
     }
 
@@ -99,8 +98,6 @@ class StoreUserScheduleRequest extends FormRequest
             'type.in'                  => 'Invalid schedule type selected.',
             'day_off_date.required_if' => 'Day off date is required when type is Day off.',
             'day_off_date.date'        => 'Day off date must be a valid date.',
-            'timezone.required'        => 'Timezone is required.',
-            'timezone.timezone'        => 'Invalid timezone.',
         ];
     }
 

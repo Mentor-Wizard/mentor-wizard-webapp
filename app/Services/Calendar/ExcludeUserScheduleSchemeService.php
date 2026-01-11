@@ -68,8 +68,7 @@ class ExcludeUserScheduleSchemeService
             $this->groupCalendarEventsSlotsPerDay($eventSlot);
         }
 
-        if (isset($this->formattedSlots['Working Day'])
-            && (isset($this->formattedSlots['Working Day']) && $this->formattedSlots['Working Day'] !== [])) {
+        if (! empty($this->formattedSlots['Working Day'])) {
             foreach ($this->checkedIntervals as $currentInterval) {
                 $this->combineCalendarEventsAndUserScheduleSlots($currentInterval);
             }
@@ -106,7 +105,7 @@ class ExcludeUserScheduleSchemeService
             $endTime->timezone($this->scheduleTimezone));
 
         foreach ($carbonPeriod as $date) {
-            if (($carbonPeriod->count() === 1) && ($date->format('Y-m-d') === $startTime->format('Y-m-d'))) {
+            if ($carbonPeriod->count() === 1) {
                 $this->oneDayPeriodFormatting($startTime, $endTime);
             } elseif ($date->format('Y-m-d') === $startTime->format('Y-m-d')) {
                 $this->firstDateFormatting($startTime);
@@ -188,14 +187,12 @@ class ExcludeUserScheduleSchemeService
     {
         foreach ($this->formattedSlots['Working Day'][$dayOfWeek] as $schedule) {
             $scheduleStartTime = Date::parse(
-                $checkedDate
-                .$schedule['start_time'],
+                sprintf('%s %s', $checkedDate, $schedule['start_time']),
                 $this->scheduleTimezone)
                 ->timezone($this->chosenTimezone);
 
             $scheduleEndTime = Date::parse(
-                $checkedDate
-                .$schedule['end_time'],
+                sprintf('%s %s', $checkedDate, $schedule['end_time']),
                 $this->scheduleTimezone)
                 ->timezone($this->chosenTimezone);
 

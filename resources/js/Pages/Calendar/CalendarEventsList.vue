@@ -175,7 +175,8 @@ onMounted(() => {
               !daysData['hasEventsBefore'] && currentTab === 'Month view'
             "
             :class="[
-              'flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l border-gray-300 pr-1 text-gray-400 focus:relative md:w-9 md:pr-0',
+              'flex h-9 w-12 items-center justify-center rounded-l-md border-y border-l '
+                + 'border-gray-300 pr-1 text-gray-400 focus:relative md:w-9 md:pr-0',
               daysData['hasEventsBefore'] ?
                 'hover:text-gray-500 md:hover:bg-gray-50'
               : 'cursor-not-allowed',
@@ -198,7 +199,8 @@ onMounted(() => {
               !daysData['hasEventsAfter'] && currentTab === 'Month view'
             "
             :class="[
-              'flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r border-gray-300 pl-1 text-gray-400 focus:relative md:w-9 md:pl-0',
+              'flex h-9 w-12 items-center justify-center rounded-r-md border-y border-r '
+                + 'border-gray-300 pl-1 text-gray-400 focus:relative md:w-9 md:pl-0',
               daysData['hasEventsAfter'] ?
                 'hover:text-gray-500 md:hover:bg-gray-50'
               : 'cursor-not-allowed',
@@ -274,15 +276,6 @@ onMounted(() => {
               </MenuItems>
             </transition>
           </Menu>
-          <div class="ml-6 h-6 w-px bg-gray-300" />
-          <button
-            v-if="permissions === 'create'"
-            type="button"
-            class="ml-6 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-            @click="openCreateEventPage()"
-          >
-            Add event
-          </button>
         </div>
         <Menu as="div" class="relative ml-6 md:hidden">
           <MenuButton

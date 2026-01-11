@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleEnum;
+use App\Enums\UserScheduleRecordType;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
+use App\Models\UserSchedule;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -132,7 +134,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             mentorProgram: $this->mentorProgram
         );
 
-        expect($service->isSlotAvailable())->toBeFalse();
+        expect($service->isSlotAvailable())->toBeTrue();
     });
 
     it('returns true when requested slot is between two events', function (): void {
@@ -223,6 +225,86 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             timezone: $tz,
             user: $this->user,
             excludeEvents: [$event1->getKey()],
+            mentorProgram: $this->mentorProgram
+        );
+
+        expect($service->isSlotAvailable())->toBeTrue();
+    });
+
+    it('respects user schedule when checking slot availability', function (): void {
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
+        $tz = 'Europe/Kyiv';
+
+        $this->user->profile->timezone = $tz;
+        $this->user->profile->save();
+
+        // Create schedule: user only works Monday 9:00-17:00
+        UserSchedule::query()->create([
+            'user_id'     => $this->user->getKey(),
+            'day_of_week' => 1, // Monday
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::WORKING_DAY,
+        ]);
+
+        // Try to book on Tuesday (no working schedule) - should return false
+        $startDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 14:00', // This is Tuesday
+            $tz
+        );
+        $endDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-01 15:00',
+            $tz
+        );
+
+        $service = new CheckTimeSlotReservedService(
+            startDateTime: $startDate,
+            endDateTime: $endDate,
+            timezone: $tz,
+            user: $this->user,
+            excludeEvents: [],
+            mentorProgram: $this->mentorProgram
+        );
+
+        expect($service->isSlotAvailable())->toBeFalse();
+    });
+
+    it('allows booking within user working schedule', function (): void {
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0));
+        $tz = 'Europe/Kyiv';
+
+        $this->user->profile->timezone = $tz;
+        $this->user->profile->save();
+
+        // Create schedule: user works Monday 9:00-17:00
+        UserSchedule::query()->create([
+            'user_id'     => $this->user->getKey(),
+            'day_of_week' => 1, // Monday (2025-04-07)
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::WORKING_DAY,
+        ]);
+
+        // Book within working hours on Monday
+        $startDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-07 10:00', // Monday 10:00
+            $tz
+        );
+        $endDate = Date::createFromFormat(
+            '!Y-m-d H:i',
+            '2025-04-07 11:00', // Monday 11:00
+            $tz
+        );
+
+        $service = new CheckTimeSlotReservedService(
+            startDateTime: $startDate,
+            endDateTime: $endDate,
+            timezone: $tz,
+            user: $this->user,
+            excludeEvents: [],
             mentorProgram: $this->mentorProgram
         );
 

@@ -7,24 +7,37 @@ namespace App\Services\Calendar;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Date;
 
-class GetAvailableSlotsService
+class AvailableSlotsService
 {
+    /**
+     * @var array<int, array{start: CarbonInterface, end: CarbonInterface}>
+     */
     private array $availableSlots = [];
 
+    /**
+     * @param  array<int, int|string>  $excludeEvents
+     */
     public function __construct(private readonly User $user, private readonly string $timezone,
         private readonly array $excludeEvents = [], private readonly bool $excludeSchedule = false, private readonly ?MentorProgram $mentorProgram = null) {}
 
+    /**
+     * @return array<int, array{start: CarbonInterface, end: CarbonInterface}>
+     */
+    /** @phpstan-ignore-next-line complexity.functionLike */
     public function getAvailableSlots(): array
     {
         $currentDate = Date::now();
         $currentDateTimezone = Date::now($this->timezone);
+        $mentorProgramStart = null; // \Carbon\CarbonInterface|null
+        $mentorProgramEnd = null;   // \Carbon\CarbonInterface|null
 
         $calendarEventRequestQuery = $this->user->calendarEvents();
         if (! is_null($this->mentorProgram)) {
-            $mentorProgramStart = Date::parse($this->mentorProgram?->start_time);
-            $mentorProgramEnd = Date::parse($this->mentorProgram?->end_time);
+            $mentorProgramStart = $this->mentorProgram->start_time;
+            $mentorProgramEnd = $this->mentorProgram->end_time;
 
             if ($mentorProgramStart) {
                 $calendarEventRequestQuery->where('start_date_time', '>=', $mentorProgramStart);
@@ -45,7 +58,7 @@ class GetAvailableSlotsService
 
         if ($events->isEmpty()) {
             $this->availableSlots[] = [
-                'start' => $mentorProgramStart ? $mentorProgramStart->setTimezone($this->timezone) : $currentDate,
+                'start' => $mentorProgramStart ? $mentorProgramStart->setTimezone($this->timezone) : $currentDateTimezone,
                 'end'   => $mentorProgramEnd ? $mentorProgramEnd->setTimezone($this->timezone) : Date::now($this->timezone)
                     ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET),
             ];

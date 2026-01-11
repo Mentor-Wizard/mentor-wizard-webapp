@@ -24,13 +24,12 @@ class StoreCalendarEvent extends BaseCalendarEventAction
 
         // If this is a mentor program booking, attach the mentor as a participant
         $mentorProgramId = $validatedData['mentor_program_id'];
-        $mentorProgram = MentorProgram::query()->find($mentorProgramId);
-        if ($mentorProgram && $mentorProgram->mentor_id) {
-            $calendarEvent->calendarEventUsers()->attach($mentorProgram->mentor_id, [
-                'role'   => CalendarEventRoleEnum::HOST->value,
-                'colour' => $colour,
-            ]);
-        }
+        /** @var MentorProgram $mentorProgram */
+        $mentorProgram = MentorProgram::query()->findOrFail($mentorProgramId);
+        $calendarEvent->calendarEventUsers()->attach($mentorProgram->mentor_id, [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => $colour,
+        ]);
 
         if ($mentorProgram->mentor_id !== auth()->user()->getKey()) {
             $calendarEvent->calendarEventUsers()->attach(auth()->user()->getKey(), [

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
@@ -28,6 +29,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $this->mentorProgram = MentorProgram::factory()->create([
             'mentor_id' => $this->user->getKey(),
         ]);
+
+        $this->timezone = $this->user->profile->timezone;
+
     });
 
     it('returns empty array when user has no future events', function (): void {
@@ -36,9 +40,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $slots = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [],
-            true,
-            $this->mentorProgram
+            true
         )->getAvailableSlots();
 
         expect($slots)->toBeArray()->toHaveCount(1);
@@ -68,9 +72,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $service = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [],
             true,
-            $this->mentorProgram
         );
 
         $slots = $service->getAvailableSlots();
@@ -111,9 +115,10 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [],
             true,
-            $this->mentorProgram)->getAvailableSlots();
+        )->getAvailableSlots();
 
         // We expect 3 slots: [now..E1.start], [E1.end..E2.start], [E2.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(3);
@@ -138,6 +143,413 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
                 ->setTime(10, 0, 0)))->toBeTrue();
     });
 
+    it('respects minimum pre-booking time from mentor program mentor', function (): void {
+        $tz = 'UTC';
+        // Align now to 00 seconds and minutes to avoid rounding surprises
+        Date::setTestNow(Date::create(2025, 5, 1, 10, 0, 0, $tz));
+
+        // Ensure mentor has a minimum pre-booking time set
+        $this->mentorProgram->mentor->profile->update(['minimum_pre_booking_time' => 90]);
+
+        $slots = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            true
+        )->getAvailableSlots();
+
+        expect($slots)->toBeArray()->toHaveCount(1);
+        // Start should be now + 90 minutes, rounded/ceiled to the app rounding step
+        $expectedStart = Date::now($tz)
+            ->addMinutes(90)
+            ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
+
+        expect($slots[0]['start']->equalTo($expectedStart))->toBeTrue();
+    });
+
+    it('handles zero minimum pre booking time', function (): void {
+        $mentorNoPreBooking = User::factory()->create();
+        $mentorNoPreBooking->assignRole(RoleEnum::MENTOR->value);
+
+        $mentorProgram = MentorProgram::factory()->create([
+            'mentor_id'        => $mentorNoPreBooking->id,
+            'session_duration' => 30,
+        ]);
+        $mentorNoPreBooking->profile->update(['minimum_pre_booking_time' => 0]);
+
+        Date::setTestNow('2026-01-10 10:00:00');
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->not->toBeEmpty();
+        expect($slots[0]['start']->format('H:i'))->toBe('10:00');
+    });
+
+    it('filters out slots shorter than session duration', function (): void {
+        Date::setTestNow('2026-01-10 10:00:00');
+
+        $this->user->profile->update(['minimum_pre_booking_time' => 30]);
+        // Create an event that leaves only 20 minute gap (less than 30 min session)
+        CalendarEvent::factory()->create([
+            'start_date_time'   => Date::parse('2026-01-10 10:20:00'),
+            'end_date_time'     => Date::parse('2026-01-10 12:00:00'),
+            'mentor_program_id' => $this->mentorProgram->id,
+        ])->calendarEventUsers()->attach([$this->user->id], [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        // The 20-minute gap before the event should NOT appear
+        $slotsBeforeEvent = collect($slots)->filter(
+            fn ($slot): bool => $slot['end']->lessThanOrEqualTo(Date::parse('2026-01-10 11:20:00'))
+        );
+
+        expect($slotsBeforeEvent)->toHaveCount(0);
+    });
+
+    it('includes slots equal to session duration', function (): void {
+        Date::setTestNow('2026-01-10 10:00:00');
+        // Create an event that leaves exactly 30 minute gap (equal to session)
+        CalendarEvent::factory()->create([
+            'start_date_time'   => Date::parse('2026-01-10 10:30:00'),
+            'end_date_time'     => Date::parse('2026-01-10 12:00:00'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'date'              => Date::parse('2026-01-10'),
+            'mentor_program_id' => $this->mentorProgram->id,
+        ])->calendarEventUsers()->attach([$this->user->id, $this->mentorProgram
+            ->mentor->id]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        // Should have a slot from 11:00 to 11:30 (30 minutes exactly)
+        $targetSlot = collect($slots)->first(
+            fn ($slot): bool => $slot['start']->format('H:i') === '10:00'
+                && $slot['end']->format('H:i') === '10:30'
+        );
+
+        expect($targetSlot)->not->toBeNull();
+    });
+
+    it('creates slot between events when duration is sufficient', function (): void {
+        Date::setTestNow('2026-01-10 10:00:00');
+
+        CalendarEvent::factory()->create([
+            'start_date_time'   => Date::parse('2026-01-10 11:00:00'),
+            'end_date_time'     => Date::parse('2026-01-10 11:30:00'),
+            'mentor_program_id' => $this->mentorProgram->id,
+        ])->calendarEventUsers()->attach([$this->user->id,
+            $this->mentorProgram->mentor->id]);
+
+        CalendarEvent::factory()->create([
+            'start_date_time'   => Date::parse('2026-01-10 12:30:00'),
+            'end_date_time'     => Date::parse('2026-01-10 13:00:00'),
+            'mentor_program_id' => $this->mentorProgram->id,
+        ])->calendarEventUsers()->attach([$this->user->id,
+            $this->mentorProgram->mentor->id]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        // Should have a slot from 11:30 to 12:30 (60 minutes)
+        $betweenSlot = collect($slots)->first(
+            fn ($slot): bool => $slot['start']->format('H:i') === '11:30'
+                && $slot['end']->format('H:i') === '12:30'
+        );
+
+        expect($betweenSlot)->not->toBeNull();
+    });
+
+    it('respects mentor program start and end times', function (): void {
+        Date::setTestNow('2026-01-10 10:00:00');
+
+        $this->mentorProgram->update([
+            'start_time' => Date::parse('2026-02-01 00:00:00'),
+            'end_time'   => Date::parse('2026-02-28 23:59:59'),
+        ]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->not->toBeEmpty();
+        expect($slots[0]['start']->format('Y-m-d'))->toBeGreaterThanOrEqual('2026-02-01');
+        expect(end($slots)['end']->format('Y-m-d'))->toBeLessThanOrEqual('2026-02-28');
+    });
+
+    it('returns single slot when no events exist', function (): void {
+        Date::setTestNow('2026-01-10 10:00:00');
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toHaveCount(1);
+        expect($slots[0])->toHaveKeys(['start', 'end']);
+    });
+
+    it('excludes specific events by id', function (): void {
+        Date::setTestNow('2026-01-10 10:00:00');
+
+        $event1 = CalendarEvent::factory()->create([
+            'start_date_time'   => Date::parse('2026-01-10 11:00:00'),
+            'end_date_time'     => Date::parse('2026-01-10 11:30:00'),
+            'mentor_program_id' => $this->mentorProgram->id,
+        ]);
+        $event1->calendarEventUsers()->attach([$this->user->id, $this->user->id]);
+
+        // Service excluding the event should act as if it doesn't exist
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [$event1->id],
+            false
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        // Should have one continuous slot (event is excluded)
+        expect($slots)->toHaveCount(1);
+    });
+
+    it('includes events that belong to either the user or the mentor (both ids used in query)', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 6, 1, 9, 0, 0, $tz));
+
+        // Event A is attached ONLY to the user
+        $eventAStart = Date::now()->addHours(2);
+        $eventAEnd = (clone $eventAStart)->addHour();
+        $eventA = CalendarEvent::query()->create([
+            'title'             => 'A',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $eventAStart,
+            'end_date_time'     => $eventAEnd,
+            'date'              => $eventAStart->toDateString(),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $this->user->calendarEvents()->attach($eventA->getKey());
+
+        // Event B is attached ONLY to the mentor
+        $mentor = $this->mentorProgram->mentor;
+        $eventBStart = Date::now()->addHours(4);
+        $eventBEnd = (clone $eventBStart)->addHour();
+        $eventB = CalendarEvent::query()->create([
+            'title'             => 'B',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $eventBStart,
+            'end_date_time'     => $eventBEnd,
+            'date'              => $eventBStart->toDateString(),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $mentor->calendarEvents()->attach($eventB->getKey());
+
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            true
+        )->getAvailableSlots();
+
+        // We expect three slots: [now..A.start], [A.end..B.start], [B.end..finish]
+        expect($result)->toBeArray()->toHaveCount(3);
+        expect($result[0]['end']->equalTo($eventAStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
+        expect($result[1]['start']->equalTo($eventAEnd->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
+        expect($result[1]['end']->equalTo($eventBStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
+    });
+
+    it('limits the number of fetched events to 200', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 7, 1, 8, 0, 0, $tz));
+
+        // Create 205 back-to-back, non-overlapping events in the future
+        for ($i = 1; $i <= 205; $i++) {
+            $start = Date::now()->addHours($i * 12)->setTime(9, 0);
+            $end = (clone $start)->addHour();
+            $event = CalendarEvent::query()->create([
+                'start_date_time'   => $start,
+                'end_date_time'     => $end,
+                'date'              => $start->toDateString(),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'title'             => 'Event '.$i,
+                'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+            ]);
+            $this->user->calendarEvents()->attach($event->getKey());
+        }
+
+        $slots = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            true
+        )->getAvailableSlots();
+
+        // With a strict 200 event limit, we will only compute gaps for 200 events => 201 slots
+        expect($slots)->toHaveCount(201);
+    });
+
+    it('honors mentor program start_time and end_time window for period bounds', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 8, 1, 8, 0, 0, $tz));
+
+        // Set explicit window on mentor program
+        $startWindow = Date::now()->addDays(2)->setTime(9, 0);
+        $endWindow = Date::now()->addDays(10)->setTime(17, 0);
+        $this->mentorProgram->update([
+            'start_time' => $startWindow,
+            'end_time'   => $endWindow,
+        ]);
+
+        // Create events outside the window - they should be ignored by where clauses
+        $beforeStart = CalendarEvent::query()->create([
+            'title'             => 'Before',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => Date::now()->addDay()->setTime(8, 0),
+            'end_date_time'     => Date::now()->addDay()->setTime(9, 0),
+            'date'              => Date::now()->addDay()->toDateString(),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $afterEnd = CalendarEvent::query()->create([
+            'title'             => 'After',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => Date::now()->addDays(12)->setTime(9, 0),
+            'end_date_time'     => Date::now()->addDays(12)->setTime(10, 0),
+            'date'              => Date::now()->addDays(12)->toDateString(),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $this->user->calendarEvents()->attach([$beforeStart->getKey(), $afterEnd->getKey()]);
+
+        // Also create one event inside to create a middle break
+        $insideStart = Date::now()->addDays(5)->setTime(10, 0);
+        $insideEnd = (clone $insideStart)->addHour();
+        $inside = CalendarEvent::query()->create([
+            'title'             => 'Inside',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $insideStart,
+            'end_date_time'     => $insideEnd,
+            'date'              => $insideStart->toDateString(),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $this->user->calendarEvents()->attach($inside->getKey());
+
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            true
+        )->getAvailableSlots();
+
+        // First slot must start at program start window
+        expect($result[0]['start']->equalTo($startWindow->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
+        // Last slot must end at program end window
+        expect(end($result)['end']->equalTo($endWindow->timezone($tz)))->toBeTrue();
+        // Ensure only the inside event influenced segmentation (3 slots total)
+        expect($result)->toHaveCount(2);
+    });
+
+    it('skips gaps shorter than session_duration at the beginning and between events', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 9, 1, 8, 0, 0, $tz));
+
+        // Set session duration to 60 minutes
+        $this->mentorProgram->update(['session_duration' => 60]);
+
+        // Create an event starting in 30 minutes (gap < session duration => should be skipped)
+        $e1Start = Date::now()->addMinutes(30);
+        $e1End = (clone $e1Start)->addMinutes(10);
+        $e1 = CalendarEvent::query()->create([
+            'title'             => 'E1',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $e1Start,
+            'end_date_time'     => $e1End,
+            'date'              => $e1Start->toDateString(),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $this->user->calendarEvents()->attach($e1->getKey());
+
+        // Next event begins 30 minutes after E1 end -> gap=30 (<60) should be skipped
+        $e2Start = (clone $e1End)->addMinutes(30);
+        $e2End = (clone $e2Start)->addHour();
+        $e2 = CalendarEvent::query()->create([
+            'title'             => 'E2',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $e2Start,
+            'end_date_time'     => $e2End,
+            'date'              => $e2Start->toDateString(),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $this->user->calendarEvents()->attach($e2->getKey(),
+            ['role' => CalendarEventRoleEnum::HOST->value]);
+
+        $result = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false
+        )->getAvailableSlots();
+
+        // Only the last slot from E2.end to the finish should remain (initial gap and middle gap skipped)
+        expect($result)->toHaveCount(2);
+        expect($result[0]['start']->equalTo($e2End->timezone($tz)
+            ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeFalse();
+    });
+
     it('creates initial slot when first event starts after current UTC time', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
@@ -158,9 +570,10 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [],
-            true,
-            $this->mentorProgram)->getAvailableSlots();
+            true
+        )->getAvailableSlots();
 
         // Two slots should exist: [now..E-future.start], [E-future.end..now+2months]
         expect($result)->toBeArray()->toHaveCount(2);
@@ -225,9 +638,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [$event2->getKey()],
-            true,
-            $this->mentorProgram
+            true
         )->getAvailableSlots();
 
         // We expect 3 slots: [now..E1.start], [E1.end..E3.start], [E3.end..now+2months]
@@ -272,9 +685,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [],
-            true,
-            $this->mentorProgram
+            true
         )->getAvailableSlots();
 
         // Slots should only include times within working hours (9:00-17:00)
@@ -354,9 +767,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [],
-            true,
-            $this->mentorProgram
+            true
         )->getAvailableSlots();
 
         // Slots should not include or overlap with the day off date (2025-01-13)
@@ -407,9 +820,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
+            $this->mentorProgram,
             [],
             false,
-            $this->mentorProgram
         )->getAvailableSlots();
 
         // Should return slots outside working hours too

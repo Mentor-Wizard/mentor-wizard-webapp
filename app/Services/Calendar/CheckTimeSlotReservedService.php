@@ -22,9 +22,12 @@ readonly class CheckTimeSlotReservedService
 
     public function isSlotAvailable(): bool
     {
-        $availableSlots = new AvailableCalendarEventsSlotsService($this->user,
-            $this->timezone, $this->excludeEvents, true,
-            $this->mentorProgram
+        $availableSlots = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            $this->excludeEvents,
+            true
         )->getAvailableSlots();
 
         return array_any($availableSlots, fn ($slot): bool => $this->startDateTime->greaterThanOrEqualTo($slot['start'])

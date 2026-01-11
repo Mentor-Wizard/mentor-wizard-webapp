@@ -345,4 +345,93 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         expect($propsParticipant['permissions'])->toBe('view');
     });
 
+    describe('ShowCalendarEventPage', function (): void {
+        beforeEach(function (): void {
+            $this->seed(RoleSeeder::class);
+            $this->user = User::factory()->create();
+            $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+            auth()->login($this->user);
+
+            $this->mentorProgram = MentorProgram::factory()->create([
+                'mentor_id'        => $this->user->getKey(),
+                'session_duration' => 60,
+            ]);
+
+            $this->calendarEvent = CalendarEvent::factory()->create([
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+                'start_date_time'   => Date::now()->addDay(),
+                'end_date_time'     => Date::now()->addDay()->addHour(),
+            ]);
+
+            $this->user->calendarEvents()->attach($this->calendarEvent->getKey());
+        });
+
+        it('includes available colours in response', function (): void {
+            $action = new ShowCalendarEventPage;
+            $response = $action->handle($this->calendarEvent);
+
+            expect($response)->toBeInstanceOf(Response::class);
+
+            $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+            $props = $page['props'];
+
+            expect($props)->toHaveKey('availableColours')
+                ->and($props['availableColours'])->toBe(CalendarEventColoursEnum::values());
+        });
+
+        it('includes permissions in response based on user authorization', function (): void {
+            $action = new ShowCalendarEventPage;
+            $response = $action->handle($this->calendarEvent);
+
+            expect($response)->toBeInstanceOf(Response::class);
+
+            $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+            $props = $page['props'];
+
+            expect($props)->toHaveKey('permissions')
+                ->and($props['permissions'])->toBeIn(['edit', 'view']);
+        });
+
+        it('includes mentor program duration in response', function (): void {
+            $action = new ShowCalendarEventPage;
+            $response = $action->handle($this->calendarEvent);
+
+            expect($response)->toBeInstanceOf(Response::class);
+
+            $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+            $props = $page['props'];
+
+            expect($props)->toHaveKey('mentorProgramDuration')
+                ->and($props['mentorProgramDuration'])->toBe(60);
+        });
+
+        it('includes available slots in response', function (): void {
+            $action = new ShowCalendarEventPage;
+            $response = $action->handle($this->calendarEvent);
+
+            expect($response)->toBeInstanceOf(Response::class);
+
+            $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+            $props = $page['props'];
+
+            expect($props)->toHaveKey('availableSlots')
+                ->and($props['availableSlots'])->not->toBeNull();
+        });
+
+        it('includes calendar event data in response', function (): void {
+            $action = new ShowCalendarEventPage;
+            $response = $action->handle($this->calendarEvent);
+
+            expect($response)->toBeInstanceOf(Response::class);
+
+            $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+            $props = $page['props'];
+
+            expect($props)->toHaveKey('calendarEvent')
+                ->and($props['calendarEvent'])->toBeArray()
+                ->and($props['calendarEvent'])->toHaveKeys(['id', 'title']);
+        });
+    });
+
 });

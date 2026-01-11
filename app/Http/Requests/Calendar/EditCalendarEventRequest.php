@@ -27,8 +27,7 @@ class EditCalendarEventRequest extends FormRequest
             $profile = $user->profile;
             $timezone = $profile->timezone;
 
-            $mentorProgram = $this->input('mentor_program_id')
-                ? MentorProgram::query()->find($this->input('mentor_program_id')) : null;
+            $mentorProgram = MentorProgram::query()->find($this->input('mentor_program_id'))?->first();
 
             if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime'])) {
                 $startDate = Date::createFromFormat(

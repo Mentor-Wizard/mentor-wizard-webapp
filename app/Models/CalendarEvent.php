@@ -56,7 +56,7 @@ class CalendarEvent extends Model
     ];
 
     /**
-     * @return BelongsToMany<User, static>
+     * @return BelongsToMany<User, CalendarEvent>
      */
     public function calendarEventUsers(): BelongsToMany
     {
@@ -67,11 +67,17 @@ class CalendarEvent extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsTo<MentorSession, $this>
+     */
     public function mentorSession(): BelongsTo
     {
         return $this->belongsTo(MentorSession::class);
     }
 
+    /**
+     * @return BelongsTo<MentorProgram, $this>
+     */
     public function mentorProgram(): BelongsTo
     {
         return $this->belongsTo(MentorProgram::class);

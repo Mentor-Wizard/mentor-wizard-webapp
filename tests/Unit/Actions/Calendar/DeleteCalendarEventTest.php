@@ -9,6 +9,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -26,6 +27,11 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
         $this->user->profile->timezone = 'Europe/Kyiv';
         $this->user->profile->save();
 
+        // Create mentor program for the primary mentor
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+
         $this->anotherMentor = User::factory()->create();
         $this->anotherMentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
@@ -42,7 +48,7 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://google.com',
             'description'       => 'Test description',
-            'mentor_program_id' => null,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $this->event->calendarEventUsers()->attach($this->user->getKey(),
             ['role'      => CalendarEventRoleEnum::HOST,
@@ -81,7 +87,21 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
             ->and(CalendarEvent::query()->find($cancelled->getKey()))->toBeNull();
     });
 
-    it('handles delete call for non-mentor viewer and returns redirect (authorization handled in feature)', function (): void {
+    it('deletes event when status stored as raw string (string path of switch)', function (): void {
+        // Ensure we cover the non-enum (string) branch of the switch expression
+        $stringCancelled = CalendarEvent::factory()->create([
+            'status'            => 'Cancelled',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $response = new DeleteCalendarEvent()->handle($stringCancelled);
+
+        expect($response)->toBeInstanceOf(RedirectResponse::class)
+            ->and(CalendarEvent::query()->find($stringCancelled->getKey()))->toBeNull();
+    });
+
+    it('handles delete call for non-mentor viewer and returns redirect (authorization handled in feature)',
+        function (): void {
         Auth::logout();
         $viewer = User::factory()->create();
         Auth::login($viewer);
@@ -94,7 +114,8 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
     });
 
-    it("handles another mentor's event and returns redirect (authorization handled in feature)", function (): void {
+    it("handles another mentor's event and returns redirect (authorization handled in feature)",
+        function (): void {
 
         $this->actingAs($this->anotherMentor);
 
@@ -106,7 +127,10 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://google.com',
             'description'       => 'Test description',
-            'mentor_program_id' => null,
+            // Create a separate mentor program for another mentor to reflect ownership properly
+            'mentor_program_id' => MentorProgram::factory()->create([
+                'mentor_id' => $this->anotherMentor->getKey(),
+            ])->getKey(),
         ]);
 
         $anotherMentorEvent->calendarEventUsers()

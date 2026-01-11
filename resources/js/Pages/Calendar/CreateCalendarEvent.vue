@@ -323,17 +323,6 @@ watch(
 );
 
 watch(
-  //   () => form.fromTime,
-  //   (newFromTime) => {
-  //     if (newFromTime && form.fromDate === form.toDate) {
-  //       const [hours, minutes] = newFromTime.split(':').map(Number);
-  //       const newEndTime = new Date();
-  //       newEndTime.setHours(hours + 1, minutes);
-  //       form.toTime = newEndTime.toTimeString().slice(0, 5);
-  //     }
-  //   },
-  // );
-
   () => props.open,
   (isOpen) => {
     if (isOpen) {
@@ -500,15 +489,6 @@ watch(
                       </label>
                       <div class="mt-2">
                         {{ form.title }}
-
-                        <!--                        <input-->
-                        <!--                          id="title"-->
-                        <!--                          v-model="form.title"-->
-                        <!--                          type="text"-->
-                        <!--                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"-->
-                        <!--                          :class="{ 'ring-red-300': errors.title }"-->
-                        <!--                          placeholder="Enter event title"-->
-                        <!--                        />-->
                         <p
                           v-if="errors.title"
                           class="mt-2 text-sm text-red-600"
@@ -527,14 +507,6 @@ watch(
                       </label>
                       <div class="mt-2">
                         {{ form.webLink }}
-                        <!--                        <input-->
-                        <!--                          id="webLink"-->
-                        <!--                          v-model="form.webLink"-->
-                        <!--                          type="text"-->
-                        <!--                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"-->
-                        <!--                          :class="{ 'ring-red-300': errors.webLink }"-->
-                        <!--                          placeholder="Enter event title"-->
-                        <!--                        />-->
                         <p
                           v-if="errors.webLink"
                           class="mt-2 text-sm text-red-600"
@@ -552,14 +524,6 @@ watch(
                       </label>
                       <div class="mt-2">
                         {{ form.description }}
-                        <!--                        <input-->
-                        <!--                          id="description"-->
-                        <!--                          v-model="form.description"-->
-                        <!--                          type="text"-->
-                        <!--                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"-->
-                        <!--                          :class="{ 'ring-red-300': errors.description }"-->
-                        <!--                          placeholder="Enter event title"-->
-                        <!--                        />-->
                         <p
                           v-if="errors.description"
                           class="mt-2 text-sm text-red-600"
@@ -576,14 +540,6 @@ watch(
                       </label>
                       <Listbox v-model="form.type">
                         <div class="relative mt-2">
-                          <!--                          <ListboxButton-->
-                          <!--                            class="relative w-full cursor-default rounded-lg-->
-                          <!--                             border border-gray-300 bg-white py-2 pr-10 pl-3 text-left -->
-                          <!--                             shadow-md focus:outline-none focus-visible:border-indigo-500 -->
-                          <!--                             focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 -->
-                          <!--                             focus-visible:ring-offset-orange-300 sm:text-sm"-->
-                          <!--                          >-->
-
                           <span class="flex items-center">
                             <component
                               :is="selectedEventType?.icon"
@@ -593,15 +549,6 @@ watch(
                               selectedEventType?.label
                             }}</span>
                           </span>
-                          <!--                            <span-->
-                          <!--                              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"-->
-                          <!--                            >-->
-                          <!--                              <ChevronUpDownIcon-->
-                          <!--                                class="h-5 w-5 text-gray-400"-->
-                          <!--                                aria-hidden="true"-->
-                          <!--                              />-->
-                          <!--                            </span>-->
-                          <!--                          </ListboxButton>-->
                           <transition
                             leave-active-class="transition duration-100 ease-in"
                             leave-from-class="opacity-100"

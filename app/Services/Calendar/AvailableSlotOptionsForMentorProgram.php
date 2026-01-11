@@ -28,9 +28,9 @@ class AvailableSlotOptionsForMentorProgram
     {
         $availableSlots = new AvailableCalendarEventsSlotsService($this->mentor,
             $this->mentor->profile->timezone,
+            $this->mentorProgram,
             [],
-            true,
-            $this->mentorProgram
+            true
         )->getAvailableSlots();
 
         return new SplitSlotsPerSessionDuration($availableSlots,

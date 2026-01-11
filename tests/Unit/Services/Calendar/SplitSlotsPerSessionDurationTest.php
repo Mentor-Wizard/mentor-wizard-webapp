@@ -29,10 +29,32 @@ describe('SplitSlotsPerSessionDuration', function (): void {
             ->and($split['2026-01-10'][1]['end']->format('H:i'))->toBe('10:00');
     });
 
-    it('does not split when slot duration equals session duration', function (): void {
+    it('get one split period when slot duration equals session duration', function (): void {
         $tz = 'UTC';
         $start = Date::parse('2026-01-10 09:00:00', $tz);
         $end = Date::parse('2026-01-10 09:30:00', $tz); // 30 minutes equal to session
+
+        $service = new SplitSlotsPerSessionDuration([
+            ['start' => $start, 'end' => $end],
+        ], 30, $tz);
+
+        $result = $service->getSplitSlots();
+
+        expect($result)->toHaveCount(1);
+        expect($result)->not->toBeEmpty();
+
+        $firstSlot = $result['2026-01-10'][0];
+
+        expect($firstSlot)->toHaveKey('start');
+        expect($firstSlot)->toHaveKey('end');
+        expect($firstSlot['start']->toDateTimeString())->toBe('2026-01-10 09:00:00');
+        expect($firstSlot['end']->toDateTimeString())->toBe('2026-01-10 09:30:00');
+    });
+
+    it('does not split when slot duration less than session duration', function (): void {
+        $tz = 'UTC';
+        $start = Date::parse('2026-01-10 09:00:00', $tz);
+        $end = Date::parse('2026-01-10 09:29:00', $tz); // 30 minutes equal to session
 
         $service = new SplitSlotsPerSessionDuration([
             ['start' => $start, 'end' => $end],

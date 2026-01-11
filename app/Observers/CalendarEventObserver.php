@@ -18,12 +18,15 @@ class CalendarEventObserver
         }
 
         if ($event->status === CalendarEventStatusEnum::CONFIRMED->value && $event->mentor_program_id) {
-            $mentorSession = MentorSession::query()->create([
-                'mentor_id' => $event->calendarEventUsers->query()
-                    ->where('role', CalendarEventRoleEnum::HOST)->first()->user_id,
+            $hostUser = $event->calendarEventUsers()
+                ->wherePivot('role', CalendarEventRoleEnum::HOST->value)
+                ->first();
 
-            ]);
-
+            if ($hostUser !== null) {
+                MentorSession::query()->create([
+                    'mentor_id' => (int) $hostUser->getKey(),
+                ]);
+            }
         }
     }
 }

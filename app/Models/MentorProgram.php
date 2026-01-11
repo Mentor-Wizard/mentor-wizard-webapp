@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Observers\MentorProgramObserver;
+use Carbon\CarbonInterface;
 use Database\Factories\MentorProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -18,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperMentorProgram
+ *
+ * @property CarbonInterface|null $start_time
+ * @property CarbonInterface|null $end_time
  */
 #[ObservedBy(MentorProgramObserver::class)]
 #[UseFactory(MentorProgramFactory::class)]
@@ -76,16 +80,25 @@ class MentorProgram extends Model
         return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_program');
     }
 
+    /**
+     * @return HasMany<MentorSession, $this>
+     */
     public function mentorSession(): HasMany
     {
         return $this->hasMany(MentorSession::class, 'mentor_program_id');
     }
 
+    /**
+     * @return HasMany<CalendarEvent, $this>
+     */
     public function calendarEvents(): HasMany
     {
         return $this->hasMany(CalendarEvent::class, 'mentor_program_id');
     }
 
+    /**
+     * @return Attribute<int, never>
+     */
     protected function pendingEventsRequestsNumber(): Attribute
     {
         return Attribute::make(get: fn () => $this->calendarEvents()
@@ -93,10 +106,24 @@ class MentorProgram extends Model
             ->count());
     }
 
+    /**
+     * @return Attribute<int, never>
+     */
     protected function confirmedEventsNumber(): Attribute
     {
         return Attribute::make(get: fn () => $this->calendarEvents()
             ->where('status', CalendarEventStatusEnum::CONFIRMED)
             ->count());
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'start_time' => 'datetime',
+            'end_time'   => 'datetime',
+        ];
     }
 }

@@ -28,6 +28,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = createAndAuthenticateMentorForCalendar();
         $this->mentorProgram = MentorProgram::factory()->create(['mentor_id' => $this->user->getKey()]);
+
         $this->prepareRequest = function (StoreCalendarEventRequest $request): void {
             $request->setContainer(app());
             $request->setRedirector(resolve(Redirector::class));
@@ -205,6 +206,113 @@ describe('Store Calendar CalendarEvent', function (): void {
         expect((string) Date::parse($pivotRecord->created_at))->toBe((string) now());
         expect((string) Date::parse($pivotRecord->updated_at))->toBe((string) now());
     });
+
+    it('stores event with several users', function (): void {
+        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, config('app.timezone')));
+        $start = Date::tomorrow()->setTime(9, 0, 0);
+        $end = Date::tomorrow()->setTime(10, 0, 0);
+
+        $nonMentor = User::factory()->create();
+        $nonMentor->assignRole(RoleEnum::MENTI);
+        Auth::login($nonMentor);
+
+        $eventPayload = [
+            'title'             => 'Planning',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'fromDate'          => $start->format('Y-m-d'),
+            'toDate'            => $end->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'webLink'           => 'https://google.com',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Sprint planning',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request = Mockery::mock(StoreCalendarEventRequest::class);
+        $request->shouldReceive('validated')->andReturn($eventPayload);
+        $request->shouldReceive('user')->andReturn(Auth::user());
+
+        $response = (new StoreCalendarEvent)->handle($request);
+
+        expect($response)
+            ->toBeInstanceOf(RedirectResponse::class)
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
+
+        expect(CalendarEvent::query()->count())->toBe(1);
+
+        $event = CalendarEvent::query()->latest('id')->first();
+        expect($event)
+            ->title->toBe('Planning')
+            ->status->toBe(CalendarEventStatusEnum::CONFIRMED->value)
+            ->date->toBe($start->format('Y-m-d'));
+
+        $attachedUsers = $event->calendarEventUsers()
+            ->withPivot(['role', 'colour', 'created_at', 'updated_at'])
+            ->get();
+
+        // Should have 2 users: the mentor (HOST) and the non-mentor (MENTI)
+        expect($attachedUsers)->toHaveCount(2);
+
+        $host = $attachedUsers->firstWhere('id', $this->user->getKey());
+        $menti = $attachedUsers->firstWhere('id', $nonMentor->getKey());
+
+        expect($host)
+            ->not->toBeNull()
+            ->and($host->pivot->role)->toBe(CalendarEventRoleEnum::HOST->value)
+            ->and($host->pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
+
+        expect($menti)
+            ->not->toBeNull()
+            ->and($menti->pivot->role)->toBe(CalendarEventRoleEnum::MENTI->value)
+            ->and($menti->pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
+    });
+
+    it('stores event when mentor books their own program - attaches only mentor as HOST', function (): void {
+        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, config('app.timezone')));
+        $start = Date::tomorrow()->setTime(9, 0, 0);
+        $end = Date::tomorrow()->setTime(10, 0, 0);
+
+        // Mentor is already authenticated and owns the mentor program in beforeEach
+        $eventPayload = [
+            'title'             => 'Self Booking',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'fromDate'          => $start->format('Y-m-d'),
+            'toDate'            => $end->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'webLink'           => 'https://google.com',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Self planning',
+            'colour'            => CalendarEventColoursEnum::RED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request = Mockery::mock(StoreCalendarEventRequest::class);
+        $request->shouldReceive('validated')->andReturn($eventPayload);
+        $request->shouldReceive('user')->andReturn(Auth::user());
+
+        $response = (new StoreCalendarEvent)->handle($request);
+
+        expect($response)
+            ->toBeInstanceOf(RedirectResponse::class)
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
+
+        $event = CalendarEvent::query()->latest('id')->first();
+        $attachedUsers = $event->calendarEventUsers()
+            ->withPivot(['role', 'colour'])
+            ->get();
+
+        // Should have only 1 user: the mentor as HOST (since mentor_id === auth user)
+        expect($attachedUsers)->toHaveCount(1);
+
+        $host = $attachedUsers->first();
+        expect($host->id)->toBe($this->user->getKey())
+            ->and($host->pivot->role)->toBe(CalendarEventRoleEnum::HOST->value)
+            ->and($host->pivot->colour)->toBe(CalendarEventColoursEnum::RED->value);
+    });
+
 });
 
 function createAndAuthenticateMentorForCalendar(): User

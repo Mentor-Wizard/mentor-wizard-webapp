@@ -37,7 +37,7 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
 
         $this->event = EventModel::factory()->create([
             'title'             => 'Default event',
-            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'web_link'          => 'https://google.com',

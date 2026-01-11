@@ -78,4 +78,113 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         $this->event->load('calendarEventUsers');
         expect($this->policy->view($stranger, $this->event))->toBeTrue();
     });
+
+    test('view checks user access when calendar event users are eager loaded', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($user->id);
+
+        // Eager load the relation
+        $calendarEvent->load('calendarEventUsers');
+
+        expect($user->can('view', $calendarEvent))->toBeTrue();
+    });
+
+    test('view checks user access when calendar event users are not eager loaded', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($user->id);
+
+        // Don't load the relation - force a fresh instance
+        $calendarEvent = CalendarEvent::query()->find($calendarEvent->id);
+
+        expect($calendarEvent->relationLoaded('calendarEventUsers'))->toBeFalse();
+        expect($user->can('view', $calendarEvent))->toBeTrue();
+    });
+
+    test('view denies access when user is not attached and relation is eager loaded', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+
+        // Eager load the relation (will be empty)
+        $calendarEvent->load('calendarEventUsers');
+
+        expect($user->can('view', $calendarEvent))->toBeFalse();
+    });
+
+    test('view denies access when user is not attached and relation is not loaded', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+
+        // Don't load the relation
+        $calendarEvent = CalendarEvent::query()->find($calendarEvent->id);
+
+        expect($calendarEvent->relationLoaded('calendarEventUsers'))->toBeFalse();
+        expect($user->can('view', $calendarEvent))->toBeFalse();
+    });
+
+    test('delete uses collection when relation is eager loaded without db query', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($user->id);
+
+        $calendarEvent->load('calendarEventUsers');
+
+        DB::enableQueryLog();
+        $result = $user->can('delete', $calendarEvent);
+        $queryCount = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        expect($result)->toBeTrue();
+        expect($queryCount)->toBe(2);
+    });
+
+    test('delete queries database when relation is not loaded', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($user->id);
+
+        $calendarEvent = CalendarEvent::query()->find($calendarEvent->id);
+
+        DB::enableQueryLog();
+        $result = $user->can('delete', $calendarEvent);
+        $queryCount = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        expect($result)->toBeTrue();
+        expect($queryCount)->toBeGreaterThan(0);
+    });
+
+    test('view uses collection when relation is eager loaded without db query', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($user->id);
+
+        $calendarEvent->load('calendarEventUsers');
+
+        DB::enableQueryLog();
+        $result = $user->can('view', $calendarEvent);
+        $queryCount = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        expect($result)->toBeTrue();
+        expect($queryCount)->toBe(1);
+    });
+
+    test('view queries database when relation is not loaded', function (): void {
+        $user = User::factory()->create();
+        $calendarEvent = CalendarEvent::factory()->create();
+        $calendarEvent->calendarEventUsers()->attach($user->id);
+
+        $calendarEvent = CalendarEvent::query()->find($calendarEvent->id);
+
+        DB::enableQueryLog();
+        $result = $user->can('view', $calendarEvent);
+        $queryCount = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        expect($result)->toBeTrue();
+        expect($queryCount)->toBeGreaterThan(0);
+    });
+
 });

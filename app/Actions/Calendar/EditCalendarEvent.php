@@ -16,16 +16,19 @@ class EditCalendarEvent extends BaseCalendarEventAction
         // Only update web_link according to the new business rule
         $validated = $request->validated();
 
+        $webLink = array_key_exists('webLink', $validated) ? $validated['webLink'] : $calendarEvent->web_link;
+        $description = array_key_exists('description', $validated)
+            ? $validated['description']
+            : $calendarEvent->description;
         $calendarEvent->update([
-            'web_link'    => $validated['webLink'] ?? null,
-            'description' => $validated['description'] ?? null,
+            'web_link'    => $webLink,
+            'description' => $description,
         ]);
         $colour = Arr::get($validated, 'colour');
         $calendarEvent->calendarEventUsers()
-            ->wherePivot('user_id', auth()->id())
-            ->syncWithPivotValues(auth()->id(), [
-                'colour' => $colour,
-            ], false);
+            ->syncWithoutDetaching([
+                auth()->id() => ['colour' => $colour],
+            ]);
 
         return to_route('pages.calendar.index');
     }

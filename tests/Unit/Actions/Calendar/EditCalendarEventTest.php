@@ -140,6 +140,93 @@ describe('EditCalendarEvent', function (): void {
             ->and($event->duration)->toBe(60);
     });
 
+    it('updates description of event', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
+
+        $mentorProgram = MentorProgram::factory()->create(
+            ['mentor_id' => $this->user->getKey()]
+        );
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Original Title',
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'description'       => 'Original description',
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $data = [
+            'title'             => 'Updated Title',
+            'fromDate'          => Date::now()->addDays(3)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(3)->format('Y-m-d'),
+            'fromTime'          => '14:30',
+            'toTime'            => '15:30',
+            'description'       => null,
+            'type'              => 'Group',
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::PURPLE->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+        $request->validateResolved();
+
+        $action = new EditCalendarEvent;
+        $action->handle($request, $event);
+
+        $event->refresh();
+        expect($event->description)->toBeNull()
+            ->and($event->duration)->toBe(60);
+    });
+
+    it('no description of event in payload', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
+
+        $mentorProgram = MentorProgram::factory()->create(
+            ['mentor_id' => $this->user->getKey()]
+        );
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Original Title',
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'description'       => 'Original description',
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $data = [
+            'title'             => 'Updated Title',
+            'fromDate'          => Date::now()->addDays(3)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(3)->format('Y-m-d'),
+            'fromTime'          => '14:30',
+            'toTime'            => '15:30',
+            'type'              => 'Group',
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::PURPLE->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+        $request->validateResolved();
+
+        $action = new EditCalendarEvent;
+        $action->handle($request, $event);
+
+        $event->refresh();
+        expect($event->description)->toBe('Original description')
+            ->and($event->duration)->toBe(60);
+    });
+
     it('throws exception when event does not exist', function (): void {
         $event = new CalendarEvent;
         $event->id = 999;

@@ -88,7 +88,7 @@ onMounted(() => {
 
       <div class="space-y-4">
         <div
-          v-for="(calendarEvents, mentorProgramName) in props.calendarEvents"
+          v-for="(events, mentorProgramName) in props.calendarEvents"
           :key="mentorProgramName"
           class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
         >
@@ -98,26 +98,26 @@ onMounted(() => {
             </h2>
           </div>
           <div
-            v-for="calendarEvent in calendarEvents"
-            :key="calendarEvent.id"
+            v-for="event in events"
+            :key="event.id"
             class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
           >
             <div class="mb-2 flex items-center justify-between">
               <h3 class="text-base font-semibold text-gray-900">
-                {{ calendarEvent.title }}
+                {{ event.title }}
               </h3>
               <div class="flex items-center gap-2">
                 <button
                   type="button"
                   class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
-                  @click="openEvent(calendarEvent.id)"
+                  @click="openEvent(event.id)"
                 >
                   View / Edit
                 </button>
                 <button
                   type="button"
                   class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  @click="confirmCalendarEvent(calendarEvent.id)"
+                  @click="confirmCalendarEvent(event.id)"
                 >
                   <PlusIcon class="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
                   Confirm
@@ -126,9 +126,9 @@ onMounted(() => {
             </div>
             <p class="text-sm text-gray-600">
               <span class="font-medium">When:</span>
-              {{ new Date(calendarEvent.start_date_time).toLocaleString() }}
+              {{ new Date(event.start_date_time).toLocaleString() }}
               —
-              {{ new Date(calendarEvent.end_date_time).toLocaleString() }}
+              {{ new Date(event.end_date_time).toLocaleString() }}
             </p>
           </div>
         </div>

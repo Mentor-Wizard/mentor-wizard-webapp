@@ -329,4 +329,60 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         expect($eventEntry['calendarEvents'][0])->toHaveKey('datetime');
     });
 
+    it('correctly formats month dates with sequential numeric keys', function (): void {
+        $user = User::factory()->create();
+        $date = Date::parse('2025-01-15', 'UTC');
+
+        $service = new MonthCalendarEventsService($user, $date);
+        $result = $service->getMonthCalendarEvents();
+
+        // Verify calendarView has sequential numeric keys starting from 0
+        $keys = array_keys($result['calendarView']);
+        expect($keys)->toBeArray()
+            ->and($keys)->toBe(range(0, count($result['calendarView']) - 1))
+            ->and($result['calendarView'])->toHaveCount(35); // or 42 depending on month
+    });
+
+    it('detects events after the month end correctly including events at end of last day', function (): void {
+        $user = User::factory()->create();
+        $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $user->getKey()]);
+
+        // Set current date to January 2025
+        $date = Date::parse('2025-01-15', 'UTC');
+
+        // Create event at the very end of the last day of the visible period
+        // The visible period ends on endOfMonth()->endOfWeek()
+        $endOfVisiblePeriod = $date->copy()->endOfMonth()->endOfWeek();
+
+        // Create event at 23:59 on the last visible day (should NOT show hasEventsAfter)
+        $eventOnLastDay = CalendarEvent::factory()->create([
+            'start_date_time'   => $endOfVisiblePeriod->copy()->setTime(23, 59, 0),
+            'end_date_time'     => $endOfVisiblePeriod->copy()->setTime(23, 59, 30),
+            'status'            => 'confirmed',
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ]);
+        $user->calendarEvents()->attach($eventOnLastDay->getKey());
+
+        $service = new MonthCalendarEventsService($user, $date);
+        $result = $service->getMonthCalendarEvents();
+
+        // Should NOT have events after because event is within the last day
+        expect($result['hasEventsAfter'])->toBeFalse();
+
+        // Now create an event AFTER the last visible day (next day at 00:01)
+        $eventAfterPeriod = CalendarEvent::factory()->create([
+            'start_date_time'   => $endOfVisiblePeriod->copy()->addDay()->setTime(0, 1, 0),
+            'end_date_time'     => $endOfVisiblePeriod->copy()->addDay()->setTime(1, 0, 0),
+            'status'            => 'confirmed',
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ]);
+        $user->calendarEvents()->attach($eventAfterPeriod->getKey());
+
+        $service2 = new MonthCalendarEventsService($user, $date);
+        $result2 = $service2->getMonthCalendarEvents();
+
+        // NOW should have events after
+        expect($result2['hasEventsAfter'])->toBeTrue();
+    });
+
 });

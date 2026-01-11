@@ -11,10 +11,18 @@ use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
-use stdClass;
 
-class GetBookingCalendarEventsService
+class BookingCalendarEventsService
 {
+    /**
+     * @var array<int, array{
+     *   date: string,
+     *   slots: array<int, array{start: string, end: string}>,
+     *   isSelected?: bool,
+     *   isToday?: bool,
+     *   isCurrentMonth?: bool,
+     * }>
+     */
     private array $calendarView = [];
 
     public function __construct(
@@ -26,7 +34,17 @@ class GetBookingCalendarEventsService
     ) {}
 
     /**
-     * @return array<string, bool|mixed[]>
+     * @return array{
+     *   calendarSlots: array<int, array{
+     *     date: string,
+     *     slots: array<int, array{start: string, end: string}>,
+     *     isSelected?: bool,
+     *     isToday?: bool,
+     *     isCurrentMonth?: bool,
+     *   }>,
+     *   hasEventsBefore: bool,
+     *   hasEventsAfter: bool,
+     * }
      */
     public function getFormattedMonthAvailableSlots(): array
     {
@@ -41,6 +59,9 @@ class GetBookingCalendarEventsService
         ];
     }
 
+    /**
+     * @return array{startDate: CarbonInterface, endDate: CarbonInterface, monthDates: array<int, CarbonInterface>}
+     */
     private function prepareDateConfiguration(): array
     {
         $startDate = $this->date->copy()->startOfMonth()->startOfWeek();
@@ -54,35 +75,54 @@ class GetBookingCalendarEventsService
         ];
     }
 
+    /**
+     * @return array<string, array{
+     *   date: string,
+     *   slots: array<int, array{start: CarbonInterface, end: CarbonInterface}>,
+     *   isSelected?: bool,
+     *   isToday?: bool,
+     *   isCurrentMonth?: bool,
+     * }>
+     */
     private function getFormattedEventsSlots(): array
     {
         $availableSlots = (new AvailableCalendarEventsSlotsService(
             $this->user,
             $this->timezone,
+            $this->mentorProgram,
             [],
             $this->excludeSchedule,
-            $this->mentorProgram)
+        )
             ->getAvailableSlots());
 
+        /** @var array<int, array{start: CarbonInterface, end: CarbonInterface}> $availableSlots */
         $splitSlots = new SplitSlotsPerSessionDuration(
             $availableSlots,
             $this->mentorProgram->session_duration,
             $this->timezone)
             ->getSplitSlots();
 
-        $slotsCollection = collect($splitSlots)->map(fn ($slot): stdClass => (object) ($slot));
-
-        return $slotsCollection->map($this->formatDateEvents(...))->all();
+        return collect($splitSlots)->map($this->formatDateEvents(...))->all();
     }
 
-    private function formatDateEvents($dateSlots): array
+    /**
+     * @param  array<int, array{start: CarbonInterface, end: CarbonInterface}>  $dateSlots
+     * @return array{
+     *   date: string,
+     *   slots: array<int, array{start: CarbonInterface, end: CarbonInterface}>,
+     *   isSelected?: bool,
+     *   isToday?: bool,
+     *   isCurrentMonth?: bool,
+     * }
+     */
+    private function formatDateEvents(array $dateSlots): array
     {
         $dateSlots = collect($dateSlots);
 
         $firstEvent = $dateSlots->first();
         $payload = [
             'date'  => $firstEvent['start']->setTimezone($this->timezone)->format('Y-m-d'),
-            'slots' => $dateSlots,
+            'slots' => $dateSlots->all(),
         ];
 
         $parsedDate = Date::parse($this->date, $this->timezone);
@@ -103,6 +143,23 @@ class GetBookingCalendarEventsService
         return $payload;
     }
 
+    /**
+     * @param  array<int, CarbonInterface>  $monthDates
+     * @param array<string, array{
+     *   date: string,
+     *   slots: array<int, array{start: CarbonInterface, end: CarbonInterface}>,
+     *   isSelected?: bool,
+     *   isToday?: bool,
+     *   isCurrentMonth?: bool,
+     * }> $slots
+     * @return array<int, array{
+     *   date: string,
+     *   slots: array<int, array{start: string, end: string}>,
+     *   isSelected?: bool,
+     *   isToday?: bool,
+     *   isCurrentMonth?: bool,
+     * }>
+     */
     private function buildCalendarView(array $monthDates, array $slots): array
     {
         foreach ($monthDates as $monthDate) {

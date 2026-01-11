@@ -53,21 +53,11 @@ class StoreBatchUserScheduleRequest extends FormRequest
                 return;
             }
 
-            $user = Auth::user();
-            $schedules = $this->input('schedules') ?? [];
-            $deleteIds = $this->input('delete_ids') ?? [];
-
-            if (! $validator->errors()->hasAny(['schedules', 'delete_ids'])) {
-
-                $overLappingErrors = new CheckUserScheduleOverlap($schedules, $deleteIds, $user?->id)->verifyOverlappingErrors();
-
-                foreach ($overLappingErrors as $errorPair) {
-                    foreach ($errorPair as $key => $message) {
-                        $validator->errors()->add($key, $message);
-                    }
-                }
+            if ($validator->errors()->hasAny(['schedules', 'delete_ids'])) {
+                return;
             }
 
+            $this->validateScheduleOverlaps($validator);
         });
     }
 
@@ -114,5 +104,21 @@ class StoreBatchUserScheduleRequest extends FormRequest
         }
 
         $this->merge(['schedules' => $schedules]);
+    }
+
+    private function validateScheduleOverlaps(Validator $validator): void
+    {
+        $user = Auth::user();
+        $schedules = $this->input('schedules') ?? [];
+        $deleteIds = $this->input('delete_ids') ?? [];
+
+        $overLappingErrors = new CheckUserScheduleOverlap($schedules, $deleteIds, $user?->id)
+            ->verifyOverlappingErrors();
+
+        foreach ($overLappingErrors as $errorPair) {
+            foreach ($errorPair as $key => $message) {
+                $validator->errors()->add($key, $message);
+            }
+        }
     }
 }

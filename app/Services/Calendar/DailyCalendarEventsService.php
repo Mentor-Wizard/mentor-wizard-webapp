@@ -60,9 +60,8 @@ class DailyCalendarEventsService
 
         /** @var Collection<int, CalendarEvent> $dailyEvents */
         $dailyEvents = $this->user->calendarEvents()
-            ->where('start_date_time', '>=',
-                Date::now()->subMonth()->subDays(10)->startOfMonth())
-            ->where('start_date_time', '<=', Date::now()->addMonth()->addDays(10)->endOfMonth())
+            ->where('start_date_time', '>=', Date::now()->subMonth()->startOfMonth())
+            ->where('start_date_time', '<=', Date::now()->addMonth()->endOfMonth())
             ->get();
 
         /** @var ?CalendarEvent $firstEvent */
@@ -93,7 +92,7 @@ class DailyCalendarEventsService
             'todayDate'    => $todayDate,
             'tomorrowDate' => $tomorrowDate,
             'months'       => $months,
-            'daysEvents'   => array_values($dailyEvents->pluck('date')->unique()->toArray()),
+            'daysEvents'   => $dailyEvents->pluck('date')->unique()->values()->toArray(),
         ];
     }
 

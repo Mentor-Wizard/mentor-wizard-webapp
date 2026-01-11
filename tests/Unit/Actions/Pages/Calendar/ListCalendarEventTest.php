@@ -9,6 +9,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
@@ -30,6 +31,11 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $this->user->profile->timezone = 'Europe/Kyiv';
         $this->user->profile->save();
 
+        // Create mentor program for the logged-in mentor
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+
         $this->nonMentorUser = User::factory()->create();
         actingAs($this->user);
         auth()->login($this->user);
@@ -45,7 +51,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://www.google.com',
             'description'       => 'Test description',
-            'mentor_program_id' => null,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
         $this->monthEvent = CalendarEvent::factory()->create($this->data);
         $this->monthEvent->calendarEventUsers()->attach($this->user->getKey(),
@@ -59,16 +65,18 @@ describe('List Calendar CalendarEvent Page', function (): void {
         actingAs($this->user);
         auth()->login($this->user);
         $calendarEvent1 = CalendarEvent::factory()->create([
-            'start_date_time' => Date::parse('2025-01-15')->setTime(15, 0, 0),
-            'end_date_time'   => Date::parse('2025-01-15')->setTime(16, 0, 0),
-            'date'            => Date::parse('2025-01-15')->format('Y-m-d'),
-            'status'          => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => Date::parse('2025-01-15')->setTime(15, 0, 0),
+            'end_date_time'     => Date::parse('2025-01-15')->setTime(16, 0, 0),
+            'date'              => Date::parse('2025-01-15')->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $calendarEvent2 = CalendarEvent::factory()->create([
-            'start_date_time' => Date::parse('2025-01-20')->setTime(15, 0, 0),
-            'end_date_time'   => Date::parse('2025-01-20')->setTime(16, 0, 0),
-            'date'            => Date::parse('2025-01-20')->format('Y-m-d'),
-            'status'          => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => Date::parse('2025-01-20')->setTime(15, 0, 0),
+            'end_date_time'     => Date::parse('2025-01-20')->setTime(16, 0, 0),
+            'date'              => Date::parse('2025-01-20')->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
         $calendarEvent1->calendarEventUsers()->attach($this->user->getKey());

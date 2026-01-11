@@ -9,6 +9,7 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Auth;
@@ -28,12 +29,17 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         $this->mentee = User::factory()->create();
 
+        // Create mentor program for the host and ensure events reference it
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->host->getKey(),
+        ]);
+
         $this->event = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'mentor_program_id' => null,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
         $this->event->calendarEventUsers()->attach($this->host->getKey(), [
@@ -52,7 +58,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $response = new ConfirmCalendarEvent()->handle($this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'));
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
+            ->and(session('success'))->toBe('Event was successfully confirmed.');
 
         // Status should become CONFIRMED for host
         expect($this->event->fresh()->status)
@@ -77,5 +84,24 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         $pivot = $this->event->fresh()->calendarEventUsers()->where('user_id', $this->mentee->getKey())->first()?->pivot;
         expect($pivot?->confirmed_at)->not->toBeNull();
+    });
+
+    it('keeps status pending if CO-HOST not confirmed and shows waiting message', function (): void {
+        $cohost = User::factory()->create();
+        $this->event->calendarEventUsers()->attach($cohost->getKey(), [
+            'role'   => CalendarEventRoleEnum::COHOST,
+            'colour' => CalendarEventColoursEnum::RED->value,
+        ]);
+
+        Auth::login($this->host);
+
+        $response = new ConfirmCalendarEvent()->handle($this->event);
+
+        expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
+            ->and(session('success'))->toBe('Event is confirmed on your side, but waiting for confirmation from CO-HOST');
+
+        expect($this->event->fresh()->status)
+            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
     });
 });

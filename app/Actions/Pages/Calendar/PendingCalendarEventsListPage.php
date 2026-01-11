@@ -27,10 +27,9 @@ class PendingCalendarEventsListPage
         }
 
         $query->with(['mentorProgram:id,name']);
-
         $events = $query->get();
-
-        $grouped = $events->groupBy(fn (CalendarEvent $event) => $event->mentorProgram?->name ?? 'No program');
+        $grouped = $events->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram->name ?? 'Unknown Program'
+        );
 
         return Inertia::render('Calendar/ListPendingCalendarEventsPage', [
             'locale'            => app()->getLocale(),

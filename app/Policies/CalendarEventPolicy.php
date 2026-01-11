@@ -12,45 +12,41 @@ final class CalendarEventPolicy
     public function update(User $user, CalendarEvent $calendarEvent): bool
     {
         // Only the mentor of the related mentor program can update events
-        $mentorProgram = $calendarEvent->MentorProgram()->first();
+        $mentorProgram = $calendarEvent->mentorProgram()->first();
         if ($mentorProgram === null) {
             return false;
         }
 
-        return (int) $mentorProgram->mentor_id === (int) $user->getKey();
+        return $mentorProgram->mentor_id === $user->getKey();
     }
 
     public function delete(User $user, CalendarEvent $calendarEvent): bool
     {
         // Mentor of the program OR any attached participant (mentee/host/cohost) can delete
-        $mentorProgram = $calendarEvent->MentorProgram()->first();
-        $isMentor = $mentorProgram !== null && (int) $mentorProgram->mentor_id === (int) $user->getKey();
+        $mentorProgram = $calendarEvent->mentorProgram()->first();
+        $isMentor = $mentorProgram !== null && $mentorProgram->mentor_id === $user->getKey();
 
         if ($isMentor) {
             return true;
         }
 
-        if ($calendarEvent->relationLoaded('calendarEventUsers')) {
-            return $calendarEvent->calendarEventUsers
+        return $calendarEvent->relationLoaded('calendarEventUsers')
+            ? $calendarEvent->calendarEventUsers
                 ->where('id', $user->getKey())
-                ->isNotEmpty();
-        }
-
-        return $calendarEvent->calendarEventUsers()
-            ->where('user_id', $user->getKey())
-            ->exists();
+                ->isNotEmpty()
+            : $calendarEvent->calendarEventUsers()
+                ->where('user_id', $user->getKey())
+                ->exists();
     }
 
     public function view(User $user, CalendarEvent $calendarEvent): bool
     {
-        if ($calendarEvent->relationLoaded('calendarEventUsers')) {
-            return $calendarEvent->calendarEventUsers
+        return $calendarEvent->relationLoaded('calendarEventUsers')
+            ? $calendarEvent->calendarEventUsers
                 ->where('id', $user->getKey())
-                ->isNotEmpty();
-        }
-
-        return $calendarEvent->calendarEventUsers()
-            ->where('user_id', $user->getKey())
-            ->exists();
+                ->isNotEmpty()
+            : $calendarEvent->calendarEventUsers()
+                ->where('user_id', $user->getKey())
+                ->exists();
     }
 }

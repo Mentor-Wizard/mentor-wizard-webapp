@@ -27,7 +27,7 @@ class UserScheduleSeeder extends Seeder
                     'day_of_week' => $dayOfWeek,
                     'start_time'  => '09:00:00',
                     'end_time'    => '17:00:00',
-                    'type'        => UserScheduleRecordType::ALL_WORKING_DAYS,
+                    'type'        => UserScheduleRecordType::WORKING_DAY,
                     'timezone'    => 'UTC',
                 ]);
             }

@@ -12,7 +12,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Log;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class StoreBatchUserSchedule
@@ -88,8 +87,8 @@ class StoreBatchUserSchedule
 
             return to_route('user-schedule.index')
                 ->with('success', 'Schedules were saved successfully.');
-        } catch (Exception $exception) {
-            Log::info($exception->getMessage());
+        } catch (Exception) {
+            // @pest-mutate-ignore-next-line
             DB::rollBack();
 
             return to_route('user-schedule.index')

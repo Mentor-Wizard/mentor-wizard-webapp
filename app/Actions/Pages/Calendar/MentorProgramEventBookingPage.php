@@ -6,7 +6,7 @@ namespace App\Actions\Pages\Calendar;
 
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
-use App\Services\Calendar\GetBookingCalendarEventsService;
+use App\Services\Calendar\BookingCalendarEventsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
@@ -23,7 +23,7 @@ class MentorProgramEventBookingPage
         $timezone = $user->profile->timezone;
         $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
 
-        $calendarData = new GetBookingCalendarEventsService(
+        $calendarData = new BookingCalendarEventsService(
             $date,
             $user,
             $timezone,

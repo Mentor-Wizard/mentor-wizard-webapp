@@ -11,6 +11,7 @@ use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class CalendarEventSeeder extends Seeder
 {
@@ -19,15 +20,17 @@ class CalendarEventSeeder extends Seeder
      */
     public function run(): void
     {
+        /** @var Collection <int,User> $menti */
         $menti = User::query()->role(RoleEnum::MENTI)->get();
         $mentorPrograms = MentorProgram::query()->with('mentor')->get();
+        /** @var MentorProgram $mentorProgram */
         foreach ($mentorPrograms as $mentorProgram) {
 
             CalendarEvent::factory(['mentor_program_id' => $mentorProgram->id])
                 ->count(random_int(1, 3))
                 ->create()
                 ->each(function ($event) use ($menti, $mentorProgram): void {
-                    $mentor = $mentorProgram?->mentor;
+                    $mentor = $mentorProgram->mentor;
                     $mentor->calendarEvents()->attach($event, [
                         'role'   => CalendarEventRoleEnum::HOST,
                         'colour' => CalendarEventColoursEnum::RED,

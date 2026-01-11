@@ -15,7 +15,9 @@ class DeleteCalendarEvent
 
     public function handle(CalendarEvent $calendarEvent): RedirectResponse
     {
-        switch ($calendarEvent->status->value) {
+        /** @phpstan-ignore-next-line instanceof.alwaysFalse. enum casting is for feature tests purposes */
+        switch ($calendarEvent->status instanceof CalendarEventStatusEnum
+            ? $calendarEvent->status->value : $calendarEvent->status) {
             case CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value:
             case CalendarEventStatusEnum::PENDING_PAYMENT->value:
             case CalendarEventStatusEnum::CANCELLED->value:
@@ -23,7 +25,7 @@ class DeleteCalendarEvent
                 break;
 
             case CalendarEventStatusEnum::CONFIRMED->value:
-                $calendarEvent->update(['status' => CalendarEventStatusEnum::CANCELLED->value]);
+                $calendarEvent->update(['status' => CalendarEventStatusEnum::CANCELLED]);
 
                 return to_route('pages.calendar.index')
                     ->with('error', 'Confirmed event cannot be deleted.');
