@@ -1277,30 +1277,30 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
 
     it('allows day_off_date to be null when type is not DAY_OFF (nullable schedules.*.day_off_date)',
         function (): void {
-        $data = [
-            'schedules' => [
-                [
-                    'day_of_week'  => 1,
-                    'start_time'   => '09:00',
-                    'end_time'     => '17:00',
-                    'type'         => UserScheduleRecordType::WORKING_DAY->value,
-                    'day_off_date' => null,
+            $data = [
+                'schedules' => [
+                    [
+                        'day_of_week'  => 1,
+                        'start_time'   => '09:00',
+                        'end_time'     => '17:00',
+                        'type'         => UserScheduleRecordType::WORKING_DAY->value,
+                        'day_off_date' => null,
+                    ],
                 ],
-            ],
-            'delete_ids' => [],
-        ];
+                'delete_ids' => [],
+            ];
 
-        $request = StoreBatchUserScheduleRequest::create(route('user-schedule.batch'),
-            'POST', $data);
-        $request->setUserResolver(fn () => $this->user);
+            $request = StoreBatchUserScheduleRequest::create(route('user-schedule.batch'),
+                'POST', $data);
+            $request->setUserResolver(fn () => $this->user);
 
-        $validator = Validator::make($data, $request->rules());
-        $request->withValidator($validator);
+            $validator = Validator::make($data, $request->rules());
+            $request->withValidator($validator);
 
-        $validator->fails();
+            $validator->fails();
 
-        expect($validator->errors()->has('schedules.0.day_off_date'))->toBeFalse();
-    });
+            expect($validator->errors()->has('schedules.0.day_off_date'))->toBeFalse();
+        });
 
     it('allows delete_ids to be null (nullable delete_ids)', function (): void {
         $data = [
@@ -1322,45 +1322,45 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
 
     it('does not crash overlap check when schedules is invalid (hasAny must include schedules)',
         function (): void {
-        $data = [
-            'schedules'  => 'nope',
-            'delete_ids' => [],
-        ];
+            $data = [
+                'schedules'  => 'nope',
+                'delete_ids' => [],
+            ];
 
-        $request = StoreBatchUserScheduleRequest::create(route('user-schedule.batch'),
-            'POST', $data);
-        $request->setUserResolver(fn () => $this->user);
+            $request = StoreBatchUserScheduleRequest::create(route('user-schedule.batch'),
+                'POST', $data);
+            $request->setUserResolver(fn () => $this->user);
 
-        $validator = Validator::make($data, $request->rules());
-        $request->withValidator($validator);
+            $validator = Validator::make($data, $request->rules());
+            $request->withValidator($validator);
 
-        expect(fn () => $validator->fails())->not->toThrow(Throwable::class)
-            ->and($validator->errors()->has('schedules'))->toBeTrue();
-    });
+            expect(fn () => $validator->fails())->not->toThrow(Throwable::class)
+                ->and($validator->errors()->has('schedules'))->toBeTrue();
+        });
 
     it('does not crash overlap check when delete_ids is invalid (hasAny must include delete_ids)',
         function (): void {
-        $data = [
-            'schedules' => [
-                [
-                    'day_of_week' => 1,
-                    'start_time'  => '09:00',
-                    'end_time'    => '17:00',
-                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+            $data = [
+                'schedules' => [
+                    [
+                        'day_of_week' => 1,
+                        'start_time'  => '09:00',
+                        'end_time'    => '17:00',
+                        'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                    ],
                 ],
-            ],
-            'delete_ids' => 'nope',
-        ];
+                'delete_ids' => 'nope',
+            ];
 
-        $request = StoreBatchUserScheduleRequest::create(route('user-schedule.batch'),
-            'POST', $data);
-        $request->setUserResolver(fn () => $this->user);
+            $request = StoreBatchUserScheduleRequest::create(route('user-schedule.batch'),
+                'POST', $data);
+            $request->setUserResolver(fn () => $this->user);
 
-        $validator = Validator::make($data, $request->rules());
-        $request->withValidator($validator);
+            $validator = Validator::make($data, $request->rules());
+            $request->withValidator($validator);
 
-        expect(fn () => $validator->fails())->not->toThrow(Throwable::class)
-            ->and($validator->errors()->has('delete_ids'))->toBeTrue();
-    });
+            expect(fn () => $validator->fails())->not->toThrow(Throwable::class)
+                ->and($validator->errors()->has('delete_ids'))->toBeTrue();
+        });
 
 });

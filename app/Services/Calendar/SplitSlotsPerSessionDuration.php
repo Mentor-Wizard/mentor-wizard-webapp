@@ -28,7 +28,8 @@ class SplitSlotsPerSessionDuration
     public function getSplitSlots(): array
     {
         foreach ($this->slots as $slot) {
-            $slotDuration = $slot['start']->diffInMinutes($slot['end']);
+            $slotDuration = (int) $slot['start']->diffInMinutes($slot['end']);
+
             if ($slotDuration > $this->sessionDurationInMinutes) {
                 $periods = CarbonPeriod::create($slot['start'],
                     $this->sessionDurationInMinutes.' minutes', $slot['end'])

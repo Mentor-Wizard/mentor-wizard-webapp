@@ -102,48 +102,48 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
 
     it('handles delete call for non-mentor viewer and returns redirect (authorization handled in feature)',
         function (): void {
-        Auth::logout();
-        $viewer = User::factory()->create();
-        Auth::login($viewer);
+            Auth::logout();
+            $viewer = User::factory()->create();
+            Auth::login($viewer);
 
-        $response = new DeleteCalendarEvent()->handle($this->event);
+            $response = new DeleteCalendarEvent()->handle($this->event);
 
-        expect($response)
-            ->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getStatusCode())->toBe(302)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
-    });
+            expect($response)
+                ->toBeInstanceOf(RedirectResponse::class)
+                ->and($response->getStatusCode())->toBe(302)
+                ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
+        });
 
     it("handles another mentor's event and returns redirect (authorization handled in feature)",
         function (): void {
 
-        $this->actingAs($this->anotherMentor);
+            $this->actingAs($this->anotherMentor);
 
-        $anotherMentorEvent = CalendarEvent::factory()->create([
-            'title'             => 'Default event',
-            'status'            => CalendarEventStatusEnum::CONFIRMED,
-            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
-            'date'              => Date::tomorrow()->format('Y-m-d'),
-            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'web_link'          => 'https://google.com',
-            'description'       => 'Test description',
-            // Create a separate mentor program for another mentor to reflect ownership properly
-            'mentor_program_id' => MentorProgram::factory()->create([
-                'mentor_id' => $this->anotherMentor->getKey(),
-            ])->getKey(),
-        ]);
+            $anotherMentorEvent = CalendarEvent::factory()->create([
+                'title'             => 'Default event',
+                'status'            => CalendarEventStatusEnum::CONFIRMED,
+                'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
+                'date'              => Date::tomorrow()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'web_link'          => 'https://google.com',
+                'description'       => 'Test description',
+                // Create a separate mentor program for another mentor to reflect ownership properly
+                'mentor_program_id' => MentorProgram::factory()->create([
+                    'mentor_id' => $this->anotherMentor->getKey(),
+                ])->getKey(),
+            ]);
 
-        $anotherMentorEvent->calendarEventUsers()
-            ->attach($this->anotherMentor->getKey(),
-                ['role'      => CalendarEventRoleEnum::HOST,
-                    'colour' => 'blue']);
+            $anotherMentorEvent->calendarEventUsers()
+                ->attach($this->anotherMentor->getKey(),
+                    ['role'      => CalendarEventRoleEnum::HOST,
+                        'colour' => 'blue']);
 
-        $response = new DeleteCalendarEvent()->handle($anotherMentorEvent);
+            $response = new DeleteCalendarEvent()->handle($anotherMentorEvent);
 
-        expect($response)->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getStatusCode())->toBe(302)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
-    });
+            expect($response)->toBeInstanceOf(RedirectResponse::class)
+                ->and($response->getStatusCode())->toBe(302)
+                ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
+        });
 });
 
 function createAndAuthenticateMentorForDestroyUnit(): User

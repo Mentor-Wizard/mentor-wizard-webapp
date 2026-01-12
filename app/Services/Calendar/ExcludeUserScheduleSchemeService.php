@@ -101,8 +101,10 @@ class ExcludeUserScheduleSchemeService
     {
         $startTime = $eventSlot['start'];
         $endTime = $eventSlot['end'];
-        $carbonPeriod = CarbonPeriod::create($startTime->timezone($this->scheduleTimezone), '1 day',
-            $endTime->timezone($this->scheduleTimezone));
+        $carbonPeriod = CarbonPeriod::create(
+            $startTime->copy()->timezone($this->scheduleTimezone)->startOfDay(),
+            '1 day',
+            $endTime->copy()->timezone($this->scheduleTimezone)->startOfDay());
 
         foreach ($carbonPeriod as $date) {
             if ($carbonPeriod->count() === 1) {

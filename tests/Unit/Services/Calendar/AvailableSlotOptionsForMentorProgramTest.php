@@ -14,15 +14,18 @@ use Database\Seeders\RoleSeeder;
 mutates(AvailableSlotOptionsForMentorProgram::class);
 
 describe('AvailableSlotOptionsForMentorProgram (Unit)', function (): void {
-    it('builds from calendar event and returns SplitSlotsPerSessionDuration instance', function (): void {
+    beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
 
-        $mentor = User::factory()->create();
-        $mentor->profile->timezone = 'UTC';
-        $mentor->profile->save();
+        $this->mentor = User::factory()->create();
+        $this->mentor->profile->timezone = 'UTC';
+        $this->mentor->profile->save();
+
+    });
+    it('builds from calendar event and returns SplitSlotsPerSessionDuration instance', function (): void {
 
         $program = MentorProgram::factory()->create([
-            'mentor_id'        => $mentor->getKey(),
+            'mentor_id'        => $this->mentor->getKey(),
             'session_duration' => 30,
         ]);
 
@@ -42,18 +45,17 @@ describe('AvailableSlotOptionsForMentorProgram (Unit)', function (): void {
     it('respects mentor schedule when getting available slots', function (): void {
         $tz = 'Europe/Kyiv';
 
-        $mentor = User::factory()->create();
-        $mentor->profile->timezone = $tz;
-        $mentor->profile->save();
+        $this->mentor->profile->timezone = $tz;
+        $this->mentor->profile->save();
 
         $mentorProgram = MentorProgram::factory()->create([
-            'mentor_id'        => $mentor->getKey(),
+            'mentor_id'        => $this->mentor->getKey(),
             'session_duration' => 60,
         ]);
 
         // Create schedule: mentor only works Monday 9:00-17:00
         UserSchedule::query()->create([
-            'user_id'     => $mentor->getKey(),
+            'user_id'     => $this->mentor->getKey(),
             'day_of_week' => 1, // Monday
             'start_time'  => '09:00:00',
             'end_time'    => '17:00:00',
