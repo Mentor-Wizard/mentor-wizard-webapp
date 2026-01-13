@@ -426,9 +426,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('start_time')
-                ->and($e->errors()['start_time'][0])->toContain('Start time is required');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('start_time')
+                ->and($validationException->errors()['start_time'][0])->toContain('Start time is required');
         }
     });
 
@@ -445,9 +445,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('start_time')
-                ->and($e->errors()['start_time'][0])->toContain('HH:MM format');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('start_time')
+                ->and($validationException->errors()['start_time'][0])->toContain('HH:MM format');
         }
     });
 
@@ -463,9 +463,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $r1->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('end_time')
-                ->and($e->errors()['end_time'][0])->toContain('End time is required');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('end_time')
+                ->and($validationException->errors()['end_time'][0])->toContain('End time is required');
         }
 
         // invalid format
@@ -480,9 +480,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $r2->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('end_time')
-                ->and($e->errors()['end_time'][0])->toContain('HH:MM format');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('end_time')
+                ->and($validationException->errors()['end_time'][0])->toContain('HH:MM format');
         }
 
         // after:start_time message
@@ -497,9 +497,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $r3->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('end_time')
-                ->and($e->errors()['end_time'][0])->toContain('after start time');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('end_time')
+                ->and($validationException->errors()['end_time'][0])->toContain('after start time');
         }
     });
 
@@ -516,9 +516,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('type')
-                ->and($e->errors()['type'][0])->toContain('Invalid schedule type selected');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('type')
+                ->and($validationException->errors()['type'][0])->toContain('Invalid schedule type selected');
         }
     });
 
@@ -535,9 +535,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('day_of_week')
-                ->and($e->errors()['day_of_week'][0])->toContain('between 0 (Sunday) and 6 (Saturday)');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('day_of_week')
+                ->and($validationException->errors()['day_of_week'][0])->toContain('between 0 (Sunday) and 6 (Saturday)');
         }
     });
 
@@ -554,9 +554,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('day_of_week')
-                ->and($e->errors()['day_of_week'][0])->toContain('Day of week is required');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('day_of_week')
+                ->and($validationException->errors()['day_of_week'][0])->toContain('Day of week is required');
         }
     });
 
@@ -588,10 +588,10 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
+        } catch (ValidationException $validationException) {
             // Ensure no overlap error injected on start_time
-            expect($e->errors())->toHaveKey('day_of_week')
-                ->and($e->errors())->not->toHaveKey('start_time');
+            expect($validationException->errors())->toHaveKey('day_of_week')
+                ->and($validationException->errors())->not->toHaveKey('start_time');
         }
     });
 
@@ -608,9 +608,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('type')
-                ->and($e->errors()['type'][0])->toContain('Schedule type is required');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('type')
+                ->and($validationException->errors()['type'][0])->toContain('Schedule type is required');
         }
     });
 
@@ -626,9 +626,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('day_off_date')
-                ->and($e->errors()['day_off_date'][0])->toContain('match the format Y-m-d');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('day_off_date')
+                ->and($validationException->errors()['day_off_date'][0])->toContain('match the format Y-m-d');
         }
     });
 
@@ -645,9 +645,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('day_off_date');
-            $msg = $e->errors()['day_off_date'][0];
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('day_off_date');
+            $msg = $validationException->errors()['day_off_date'][0];
             // Accept either the date or date_format message depending on validator behavior
             expect($msg === null)->toBeFalse();
             $isValidDateMsg = str_contains($msg, 'must be a valid date');
@@ -677,9 +677,9 @@ describe('StoreUserScheduleRequest', function (): void {
         try {
             $request->validateResolved();
             $this->fail('Validation should have failed due to overlap');
-        } catch (ValidationException $e) {
-            expect($e->errors())->toHaveKey('start_time')
-                ->and($e->errors()['start_time'][0])
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('start_time')
+                ->and($validationException->errors()['start_time'][0])
                 ->toContain('overlaps with an existing schedule');
         }
     });

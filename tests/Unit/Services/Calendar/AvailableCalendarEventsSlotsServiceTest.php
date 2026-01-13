@@ -251,13 +251,13 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         // Attach mentor as well to ensure event is included for either participant
         $this->mentorProgram->mentor->calendarEvents()->attach($event->getKey());
 
-        $result = (new AvailableCalendarEventsSlotsService(
+        $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
             $this->mentorProgram,
             [],
             false,
-        ))->getAvailableSlots();
+        )->getAvailableSlots();
 
         // Initial gap should be included since session_duration is treated as 0
         $initial = $result[0];
@@ -349,13 +349,13 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         ]);
         $this->user->calendarEvents()->attach($event->getKey());
 
-        $result = (new AvailableCalendarEventsSlotsService(
+        $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
             $this->mentorProgram,
             [],
             false,
-        ))->getAvailableSlots();
+        )->getAvailableSlots();
 
         // Only the trailing slot should exist and should start at periodStart (no initial zero-length gap)
         expect($result)->toHaveCount(1);
@@ -393,13 +393,13 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         $this->user->calendarEvents()->attach([$e1->getKey(), $e2->getKey()]);
 
-        $result = (new AvailableCalendarEventsSlotsService(
+        $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
             $this->mentorProgram,
             [],
             false,
-        ))->getAvailableSlots();
+        )->getAvailableSlots();
 
         // Expect 3 slots: initial, zero-length middle, trailing
         expect($result)->toHaveCount(3);
@@ -440,13 +440,13 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         ]);
         $this->user->calendarEvents()->attach($eventB->getKey());
 
-        $result = (new AvailableCalendarEventsSlotsService(
+        $result = new AvailableCalendarEventsSlotsService(
             $this->user,
             $tz,
             $this->mentorProgram,
             [],
             false,
-        ))->getAvailableSlots();
+        )->getAvailableSlots();
 
         // With two events (one for mentor, one for user), there should be 3 slots
         expect($result)->toHaveCount(3);
