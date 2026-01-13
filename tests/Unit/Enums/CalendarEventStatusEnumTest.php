@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarViewModeEnum;
 
 mutates(CalendarEventStatusEnum::class);
+mutates(CalendarViewModeEnum::class);
 
 describe('CalendarEventStatusEnum', function (): void {
     it('returns all names and values', function (): void {
@@ -29,5 +31,29 @@ describe('CalendarEventStatusEnum', function (): void {
             ->toContain('Confirmed')
             ->toContain('Finished')
             ->toContain('Cancelled');
+    });
+});
+
+describe('CalendarViewModeEnum', function (): void {
+    it('returns all names and values', function (): void {
+        $names = CalendarViewModeEnum::names();
+        $values = CalendarViewModeEnum::values();
+
+        $caseNames = array_map(fn (CalendarViewModeEnum $c) => $c->name, CalendarViewModeEnum::cases());
+        $caseValues = array_map(fn (CalendarViewModeEnum $c) => $c->value, CalendarViewModeEnum::cases());
+
+        expect($names)->toEqual($caseNames)
+            ->and($values)->toEqual($caseValues)
+            ->and(array_unique($names))->toHaveCount(count($names))
+            ->and(array_unique($values))->toHaveCount(count($values))
+            ->and($names)->each->not->toBeEmpty()
+            ->and($values)->each->not->toBeEmpty();
+    });
+
+    it('contains the expected view labels', function (): void {
+        expect(CalendarViewModeEnum::values())
+            ->toContain('Day view')
+            ->toContain('Week view')
+            ->toContain('Month view');
     });
 });

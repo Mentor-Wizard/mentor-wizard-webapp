@@ -206,14 +206,12 @@ watch(
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
-              class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left
-              shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+              class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
             >
               <div class="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
                 <button
                   type="button"
-                  class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2
-                  focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
+                  class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
                   @click="handleClose"
                 >
                   <span class="sr-only">Close</span>
@@ -269,9 +267,7 @@ watch(
                           id="webLink"
                           v-model="form.webLink"
                           type="text"
-                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1
-                          ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600
-                          focus:ring-inset sm:text-sm sm:leading-6"
+                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                           :class="{ 'ring-red-300': errors.webLink }"
                           placeholder="Enter weblink"
                         />
@@ -297,9 +293,7 @@ watch(
                           v-model="form.description"
                           maxlength="2000"
                           rows="3"
-                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1
-                          ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600
-                          focus:ring-inset sm:text-sm sm:leading-6"
+                          class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
                           :class="{ 'ring-red-300': errors.description }"
                           placeholder="Enter event description"
                         />
@@ -345,10 +339,7 @@ watch(
                       <Listbox v-model="form.colour">
                         <div class="relative mt-2">
                           <ListboxButton
-                            class="relative w-full cursor-default rounded-lg border border-gray-300 bg-white py-2 pr-10
-                            pl-3 text-left shadow-md focus:outline-none focus-visible:border-indigo-500
-                            focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2
-                            focus-visible:ring-offset-orange-300 sm:text-sm"
+                            class="relative w-full cursor-default rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-3 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
                           >
                             <span class="flex items-center">
                               <span
@@ -375,8 +366,7 @@ watch(
                             leave-to-class="opacity-0"
                           >
                             <ListboxOptions
-                              class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1
-                              text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                              class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
                             >
                               <ListboxOption
                                 v-for="availableColour in availableColours"
@@ -766,9 +756,7 @@ watch(
                       <a
                         :href="event.webLink"
                         target="_blank"
-                        class="inline-flex items-center rounded-md border border-transparent bg-indigo-100
-                        px-4 py-2 text-sm font-medium text-indigo-700 transition-colors duration-200
-                        hover:bg-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
+                        class="inline-flex items-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 transition-colors duration-200 hover:bg-indigo-200 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
                       >
                         <svg
                           class="mr-2 h-4 w-4"
@@ -794,10 +782,7 @@ watch(
                 <button
                   v-if="mode === 'show' && permissions === 'edit'"
                   type="button"
-                  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold
-                  text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2
-                  focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed
-                  disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   @click="changeMode('edit')"
                 >
                   Edit Event
@@ -805,10 +790,7 @@ watch(
                 <button
                   v-if="permissions === 'edit'"
                   type="button"
-                  class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold
-                  text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2
-                  focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed
-                  disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   @click="deleteEvent()"
                 >
                   Delete Event
@@ -816,10 +798,7 @@ watch(
                 <button
                   v-if="mode === 'edit' && permissions === 'edit'"
                   type="button"
-                  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm
-                  font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2
-                   focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed
-                   disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   @click="changeMode('show')"
                 >
                   Show Event
@@ -827,10 +806,7 @@ watch(
                 <button
                   v-if="mode === 'edit' && permissions === 'edit'"
                   type="button"
-                  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold
-                  text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2
-                  focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed
-                  disabled:opacity-50 sm:ml-3 sm:w-auto"
+                  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-3 sm:w-auto"
                   :disabled="!isFormValid"
                   @click="handleSubmit"
                 >
@@ -838,9 +814,7 @@ watch(
                 </button>
                 <button
                   type="button"
-                  class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm
-                  font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset
-                  hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                  class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
                   @click="handleClose"
                 >
                   Cancel

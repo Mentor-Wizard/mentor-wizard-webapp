@@ -111,8 +111,7 @@ const goToMonth = (diff) => {
         <div class="mx-4 mt-4 flex items-center justify-between">
           <button
             type="button"
-            class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700
-            hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             :disabled="!days?.hasEventsAfter"
             @click="goToMonth(-1)"
           >
@@ -123,8 +122,7 @@ const goToMonth = (diff) => {
           </div>
           <button
             type="button"
-            class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700
-            hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             :disabled="!days?.hasEventsBefore"
             @click="goToMonth(1)"
           >
@@ -134,8 +132,7 @@ const goToMonth = (diff) => {
 
         <!-- Week day headers -->
         <div
-          class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center
-          text-xs/6 font-semibold text-gray-700 lg:flex-none"
+          class="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs/6 font-semibold text-gray-700 lg:flex-none"
         >
           <div v-for="weekDay in weekDays" :key="weekDay" class="bg-white py-2">
             {{ weekDay.slice(0, 1)

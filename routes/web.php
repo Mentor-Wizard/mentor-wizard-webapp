@@ -22,7 +22,7 @@ use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\ListMentorProfilePage;
-use App\Actions\Pages\UserSchedule\GetUserSchedulePage;
+use App\Actions\Pages\UserSchedule\UserSchedulePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
@@ -96,7 +96,7 @@ Route::middleware('auth')
     });
 
 Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')->group(function (): void {
-    Route::get('/', GetUserSchedulePage::class)->name('user-schedule.index');
+    Route::get('/', UserSchedulePage::class)->name('user-schedule.index');
     Route::post('/batch', StoreBatchUserSchedule::class)->name('user-schedule.batch');
 });
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Pages\UserSchedule\GetUserSchedulePage;
+use App\Actions\Pages\UserSchedule\UserSchedulePage;
 use App\Enums\RoleEnum;
 use App\Enums\UserScheduleRecordType;
 use App\Models\User;
@@ -14,9 +14,9 @@ use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 
-mutates(GetUserSchedulePage::class);
+mutates(UserSchedulePage::class);
 
-describe('GetUserSchedulePage', function (): void {
+describe('UserSchedulePage', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
@@ -26,7 +26,7 @@ describe('GetUserSchedulePage', function (): void {
     it('returns Inertia response with correct component name', function (): void {
         actingAs($this->user);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         expect($response)
@@ -36,7 +36,7 @@ describe('GetUserSchedulePage', function (): void {
     it('returns empty schedules when user has no schedule records', function (): void {
         actingAs($this->user);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
@@ -72,7 +72,7 @@ describe('GetUserSchedulePage', function (): void {
             'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
@@ -95,7 +95,7 @@ describe('GetUserSchedulePage', function (): void {
     it('includes schedule types collection in props', function (): void {
         actingAs($this->user);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
@@ -119,7 +119,7 @@ describe('GetUserSchedulePage', function (): void {
             'user_id'  => $this->user->id,
         ]);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
@@ -137,7 +137,7 @@ describe('GetUserSchedulePage', function (): void {
             'type'        => UserScheduleRecordType::WORKING_DAY,
         ]);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
@@ -156,7 +156,7 @@ describe('GetUserSchedulePage', function (): void {
             'day_off_date' => $dayOffDate,
         ]);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
@@ -174,7 +174,7 @@ describe('GetUserSchedulePage', function (): void {
             'day_off_date' => null,
         ]);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
@@ -195,7 +195,7 @@ describe('GetUserSchedulePage', function (): void {
             'user_id' => $otherUser->id,
         ]);
 
-        $action = new GetUserSchedulePage;
+        $action = new UserSchedulePage;
         $response = $action->handle();
 
         $props = inertiaProps($response);
