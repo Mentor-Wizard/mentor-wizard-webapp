@@ -31,7 +31,7 @@ class SendMessage
      */
     public function handle(Chat $chat, ChatMessageRequest $request): JsonResponse
     {
-        throw_if($chat->companionChat->status === ChatStatusEnum::BANNED, AuthorizationException::class);
+        throw_if($chat->companionChat->status !== ChatStatusEnum::ACTIVE, AuthorizationException::class);
 
         $data = $request->validated();
         $message = ChatMessage::query()->create([

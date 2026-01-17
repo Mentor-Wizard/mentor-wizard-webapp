@@ -36,7 +36,7 @@ class ChatListUser
             $lastMessage = $this->getLastMessage($chat);
             $listUsers[] = [
                 'id'            => $chat->id,
-                'owner_id'      => $chat->owner_id,
+                'companion_id'  => $companion->id,
                 'name'          => $companion->profile->name.' '.$companion->profile->last_name,
                 'avatar'        => $companion->profile->avatar,
                 'slug'          => $companion->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,

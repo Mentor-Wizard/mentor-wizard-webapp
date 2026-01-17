@@ -71,14 +71,18 @@ export function useCaseChat() {
   };
 
   const setArchive = async () => {
-    await axios.post(route('chat.set-archive', { chat: currentChat.value.id }));
-    const index = listChat.value.findIndex(
-      (user) => user.id === currentChat.value.id,
-    );
-    if (index !== -1) {
-      listChat.value.splice(index, 1);
-      if (sortedUsers.value.length > 0)
-        await fetchMessages(sortedUsers.value[0].id);
+    if (window.confirm('Are you sure you want to delete the chat?')) {
+      await axios.post(
+        route('chat.set-archive', { chat: currentChat.value.id }),
+      );
+      const index = listChat.value.findIndex(
+        (user) => user.id === currentChat.value.id,
+      );
+      if (index !== -1) {
+        listChat.value.splice(index, 1);
+        if (sortedUsers.value.length > 0)
+          await fetchMessages(sortedUsers.value[0].id);
+      }
     }
   };
   const setBan = async () => {
@@ -100,7 +104,9 @@ export function useCaseChat() {
 
   const subscribeUser = (user_id) => {
     const updateOnlineStatus = (userId, isOnline) => {
-      const userIndex = listChat.value.findIndex((u) => u.owner_id === userId);
+      const userIndex = listChat.value.findIndex(
+        (u) => u.companion_id === userId,
+      );
       if (userIndex !== -1) {
         listChat.value[userIndex].online = isOnline;
       }
@@ -122,8 +128,8 @@ export function useCaseChat() {
     channel = Echo.join('presence-online-users')
       .here((onlineUsersList) => {
         const onlineIds = new Set(onlineUsersList.map((u) => u.id));
-        listChat.value.forEach((user) => {
-          user.online = onlineIds.has(user.owner_id);
+        listChat.value.forEach((chat) => {
+          chat.online = onlineIds.has(chat.companion_id);
         });
       })
       .joining((user) => {
