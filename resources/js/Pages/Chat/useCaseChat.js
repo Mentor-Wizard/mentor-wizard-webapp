@@ -189,6 +189,7 @@ export function useCaseChat() {
 
   return {
     scrollContainer,
+    listChat,
     currentChat,
     subscribeUser,
     unsubscribeUser,
