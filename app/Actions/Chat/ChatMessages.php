@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Models\Chat;
 use App\Models\ChatMessage;
-use App\Models\User;
 use App\Repositories\Chat\ChatMessageRepository;
 use Illuminate\Http\JsonResponse;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -16,22 +16,20 @@ class ChatMessages
 
     public function __construct(private readonly ChatMessageRepository $repository) {}
 
-    public function handle(User $receiver): JsonResponse
+    public function handle(Chat $chat): JsonResponse
     {
-        $user = auth()->user();
-        $this->setReadMessages($user, $receiver);
+        $this->setReadMessages($chat);
 
         return response()->json([
-            'messages' => $this->repository->getMessages($user, $receiver),
-            'files'    => $this->repository->getFiles($user, $receiver),
+            'messages' => $this->repository->getMessages($chat),
+            'files'    => $this->repository->getFiles($chat),
         ]);
     }
 
-    private function setReadMessages(User $user, User $receiver): void
+    private function setReadMessages(Chat $chat): void
     {
         ChatMessage::query()
-            ->where('sender_id', $receiver->id)
-            ->where('receiver_id', $user->id)
+            ->where('chat_id', $chat->companion_chat_id)
             ->update(['is_read' => true]);
     }
 }

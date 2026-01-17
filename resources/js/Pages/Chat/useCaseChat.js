@@ -1,27 +1,26 @@
 import { computed, nextTick, ref } from 'vue';
-import { useAlerts } from '@/UseCases/useCaseAlert.js';
+
 const scrollContainer = ref(null);
-const listUsers = ref([]);
+const listChat = ref([]);
 const messageSortList = ['Resent', 'New', 'Name'];
 const messageSortBy = ref(1);
-const currentCompanion = ref(null);
+const currentChat = ref(null);
 const chatMessages = ref([]);
 const chatFiles = ref([]);
-const { mute } = useAlerts();
 let channel = null;
 
 export function useCaseChat() {
   const fetchUsers = async (user_id) => {
     const { data } = await axios.get(route('chat.users'));
-    listUsers.value = data.users;
+    listChat.value = data.users;
     if (sortedUsers.value.length > 0)
       await fetchMessages(sortedUsers.value[0].id);
     subscribeUser(user_id);
   };
 
   const fetchMessages = async (id) => {
-    currentCompanion.value = listUsers.value.find((user) => user.id === id);
-    const { data } = await axios.get(route('chat.messages', { receiver: id }));
+    currentChat.value = listChat.value.find((user) => user.id === id);
+    const { data } = await axios.get(route('chat.messages', { chat: id }));
     chatMessages.value = data.messages;
     chatFiles.value = data.files;
     await scrollToBottom();
@@ -35,22 +34,27 @@ export function useCaseChat() {
         formData.append(`files[${index}]`, file);
       });
     }
-    const { data } = await axios.post(
-      route('chat.send-messages', { receiver: currentCompanion.value.id }),
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } },
-    );
-    chatMessages.value.push(data.message);
-    chatFiles.value = [
-      ...(chatFiles.value ?? []),
-      ...(data.message.attachments ?? []),
-    ];
-    await scrollToBottom();
+    try {
+      const { data } = await axios.post(
+        route('chat.send-message', { chat: currentChat.value.id }),
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      );
+      chatMessages.value.push(data.message);
+      chatFiles.value = [
+        ...(chatFiles.value ?? []),
+        ...(data.message.attachments ?? []),
+      ];
+      await scrollToBottom();
+    } catch (error) {
+      currentChat.value.canSend = false;
+      alert('You cannot send messages to this user.');
+    }
   };
 
   const getMessages = async (id) => {
     const { data } = await axios.get(
-      route('chat.get-messages', { message: id }),
+      route('chat.get-message', { message: id }),
     );
     chatMessages.value.push(data.message);
     chatFiles.value = [
@@ -60,11 +64,28 @@ export function useCaseChat() {
     await scrollToBottom();
   };
 
-  const setMute = async (value) => {
-    await axios.post(route('chat.set-mute'), {
-      mute: value ? 1 : 0,
+  const setMute = async () => {
+    await axios.post(route('chat.set-mute', { chat: currentChat.value.id }), {
+      mute: currentChat.value.mute ? 1 : 0,
     });
-    mute.value = value;
+  };
+
+  const setArchive = async () => {
+    await axios.post(route('chat.set-archive', { chat: currentChat.value.id }));
+    const index = listChat.value.findIndex(
+      (user) => user.id === currentChat.value.id,
+    );
+    if (index !== -1) {
+      listChat.value.splice(index, 1);
+      if (sortedUsers.value.length > 0)
+        await fetchMessages(sortedUsers.value[0].id);
+    }
+  };
+  const setBan = async () => {
+    await axios.post(route('chat.set-ban', { chat: currentChat.value.id }), {
+      ban: currentChat.value.ban ? 0 : 1,
+    });
+    currentChat.value.ban = !currentChat.value.ban;
   };
 
   const scrollToBottom = async () => {
@@ -79,23 +100,21 @@ export function useCaseChat() {
 
   const subscribeUser = (user_id) => {
     const updateOnlineStatus = (userId, isOnline) => {
-      const userIndex = listUsers.value.findIndex((u) => u.id === userId);
-
+      const userIndex = listChat.value.findIndex((u) => u.owner_id === userId);
       if (userIndex !== -1) {
-        listUsers.value[userIndex].online = isOnline;
+        listChat.value[userIndex].online = isOnline;
       }
     };
 
     Echo.private(`Chat.${user_id}`).listen('Chats\\ChatMessageEvent', (e) => {
-      const chatMessage = e.chatMessage;
-      const index = listUsers.value.findIndex(
-        (user) => user.id === chatMessage.sender_id,
-      );
+      const chat = e.chat;
+      const message = e.message;
+      const index = listChat.value.findIndex((chat) => chat.id === chat.id);
       if (index !== -1) {
-        listUsers.value[index].last = 'now';
-        listUsers.value[index].message = chatMessage.message;
-        if (currentCompanion.value.id === chatMessage.sender_id) {
-          getMessages(chatMessage.id);
+        listChat.value[index].last = 'now';
+        listChat.value[index].message = message.message;
+        if (currentChat.value.id === chat.id) {
+          getMessages(message.id);
         }
       }
     });
@@ -103,9 +122,8 @@ export function useCaseChat() {
     channel = Echo.join('presence-online-users')
       .here((onlineUsersList) => {
         const onlineIds = new Set(onlineUsersList.map((u) => u.id));
-
-        listUsers.value.forEach((user) => {
-          user.online = onlineIds.has(user.id);
+        listChat.value.forEach((user) => {
+          user.online = onlineIds.has(user.owner_id);
         });
       })
       .joining((user) => {
@@ -126,7 +144,7 @@ export function useCaseChat() {
   };
 
   const sortedUsers = computed(() => {
-    const users = [...listUsers.value];
+    const users = [...listChat.value];
 
     const sortIndex = messageSortBy.value;
 
@@ -165,7 +183,7 @@ export function useCaseChat() {
 
   return {
     scrollContainer,
-    currentCompanion,
+    currentChat,
     subscribeUser,
     unsubscribeUser,
     fetchUsers,
@@ -177,5 +195,7 @@ export function useCaseChat() {
     chatFiles,
     sendMessage,
     setMute,
+    setArchive,
+    setBan,
   };
 }

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Enums\ChatStatusEnum;
 use App\Enums\RoleEnum;
 use App\Enums\TagEnum;
+use App\Models\Chat;
 use App\Models\ChatMessage;
-use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Date;
@@ -20,22 +21,34 @@ class ChatListUser
     public function handle(): JsonResponse
     {
         $user = auth()->user();
-        $companions = $this->getCompanions($user);
+        $chats = $user->chats()
+            ->with(
+                [
+                    'companionChat.owner.profile',
+                    'companionChat.owner.mentorProfile',
+                ])
+            ->whereIn('status', [ChatStatusEnum::ACTIVE, ChatStatusEnum::BANNED])
+            ->get();
+
         $listUsers = [];
-        foreach ($companions as $companion) {
-            $lastMessage = $this->getLastMessage($user, $companion);
-            $userCompanion = $lastMessage->sender_id === $user->id ? $lastMessage->userReceiver : $lastMessage->userSender;
+        foreach ($chats as $chat) {
+            $companion = $chat->companionChat->owner;
+            $lastMessage = $this->getLastMessage($chat);
             $listUsers[] = [
-                'id'         => $userCompanion->id,
-                'name'       => $userCompanion->profile->name.' '.$userCompanion->profile->last_name,
-                'avatar'     => $userCompanion->profile->avatar,
-                'slug'       => $userCompanion->hasRole(RoleEnum::MENTOR->value) ? $userCompanion->slug : null,
-                'message'    => $lastMessage->message,
-                'online'     => false,
-                'is_read'    => $lastMessage->is_read,
-                'created_at' => $lastMessage->created_at->format('d.m.Y'),
-                'tags'       => $userCompanion->mentorProfile?->mentorTags()->where('mentor_tags.type', TagEnum::STACK)->pluck('tag')->toArray(),
-                'last'       => $this->getLastDateInfo($lastMessage->created_at),
+                'id'            => $chat->id,
+                'owner_id'      => $chat->owner_id,
+                'name'          => $companion->profile->name.' '.$companion->profile->last_name,
+                'avatar'        => $companion->profile->avatar,
+                'slug'          => $companion->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,
+                'message'       => $lastMessage?->message,
+                'online'        => false,
+                'mute'          => $chat->mute,
+                'ban'           => $chat->status === ChatStatusEnum::BANNED,
+                'canSend'       => $chat->companionChat->status === ChatStatusEnum::ACTIVE,
+                'is_read'       => $lastMessage?->is_read,
+                'created_at'    => $lastMessage?->created_at?->format('d.m.Y'),
+                'tags'          => $companion->mentorProfile?->mentorTags()->where('mentor_tags.type', TagEnum::STACK)->pluck('tag')->toArray(),
+                'last'          => $lastMessage?->created_at ? $this->getLastDateInfo($lastMessage->created_at) : null,
             ];
         }
 
@@ -44,34 +57,11 @@ class ChatListUser
         ]);
     }
 
-    private function getCompanions(User $user): array
+    private function getLastMessage(Chat $chat)
     {
-        // We get everyone to whom the user sent messages
-        $senders = ChatMessage::query()->where('sender_id', $user->id)
-            ->distinct()
-            ->pluck('receiver_id');
-
-        // We get everyone who sent messages to the user
-        $receivers = ChatMessage::query()->where('receiver_id', $user->id)
-            ->distinct()
-            ->pluck('sender_id');
-
-        return $senders->merge($receivers)->unique()->values()->toArray();
-    }
-
-    private function getLastMessage(User $user, int $otherUserId)
-    {
-        return ChatMessage::query()
-            ->with(['userSender', 'userReceiver'])
-            ->where(function ($query) use ($user, $otherUserId): void {
-                $query->where(function ($q) use ($user, $otherUserId): void {
-                    $q->where('sender_id', $user->id)
-                        ->where('receiver_id', $otherUserId);
-                })->orWhere(function ($q) use ($user, $otherUserId): void {
-                    $q->where('sender_id', $otherUserId)
-                        ->where('receiver_id', $user->id);
-                });
-            })
+        return ChatMessage::query()->whereHas('chat', function ($q) use ($chat): void {
+            $q->whereIn('chat_id', [$chat->id, $chat->companion_chat_id]);
+        })
             ->latest('id')
             ->first();
     }

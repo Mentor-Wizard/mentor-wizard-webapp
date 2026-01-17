@@ -10,37 +10,35 @@ import ChatList from '@/Pages/Chat/Blocks/ChatList.vue';
 import TiptapInput from '@/Pages/Chat/Blocks/TiptapInput.vue';
 import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
-const { currentCompanion } = useCaseChat();
+const { currentChat } = useCaseChat();
 </script>
 
 <template>
-  <header v-if="currentCompanion" class="flex-shrink-0">
+  <header v-if="currentChat" class="flex-shrink-0">
     <div class="flex justify-between">
       <div class="mt-2 flex max-w-md items-start p-2">
         <div class="relative">
           <img
-            :src="currentCompanion?.avatar"
-            alt="{{ currentCompanion?.name}}"
+            :src="currentChat?.avatar"
+            alt="{{ currentChat?.name}}"
             class="h-12 w-12 rounded-full"
           />
           <!-- Status online -->
           <span
             class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white"
-            :class="currentCompanion?.online ? 'bg-green-600' : 'bg-gray-300'"
+            :class="currentChat?.online ? 'bg-green-600' : 'bg-gray-300'"
           ></span>
         </div>
 
         <div class="mt-1 ml-4 flex-1">
           <h4 class="text-[0.75rem] font-semibold text-gray-900">
-            {{ currentCompanion?.name }}
+            {{ currentChat?.name }}
           </h4>
           <p
             class="mt-1 line-clamp-2 text-[0.75rem]"
-            :class="
-              currentCompanion?.online ? 'text-green-600' : 'text-gray-300'
-            "
+            :class="currentChat?.online ? 'text-green-600' : 'text-gray-300'"
           >
-            {{ currentCompanion?.online ? 'Online' : 'Offline' }}
+            {{ currentChat?.online ? 'Online' : 'Offline' }}
           </p>
         </div>
       </div>

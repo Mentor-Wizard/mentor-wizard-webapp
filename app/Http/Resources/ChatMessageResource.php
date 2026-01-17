@@ -38,8 +38,8 @@ class ChatMessageResource extends JsonResource
 
         return [
             'id'            => $chatMessage->id,
-            'sender'        => $request->user()->id === $chatMessage->sender_id ? 'user' : 'other',
-            'avatar'        => $chatMessage->userSender->profile->avatar,
+            'sender'        => $request->user()->id === $chatMessage->chat->owner_id ? 'user' : 'other',
+            'avatar'        => $chatMessage->chat->owner->profile->avatar,
             'timestamp'     => $chatMessage->created_at,
             'content'       => $chatMessage->message,
             'isRead'        => $chatMessage->is_read,

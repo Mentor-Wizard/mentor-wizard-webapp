@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\ChatStatusEnum;
+use Database\Factories\ChatFactory;
 use Database\Factories\ChatMessageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+#[UseFactory(ChatFactory::class)]
 /**
- * @mixin IdeHelperChatMessage
+ * @mixin IdeHelperChat
  */
-#[UseFactory(ChatMessageFactory::class)]
-class ChatMessage extends Model implements HasMedia
+class Chat extends Model implements HasMedia
 {
     /** @use HasFactory<ChatMessageFactory> */
     use HasFactory;
@@ -24,20 +27,24 @@ class ChatMessage extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $fillable = [
-        'chat_id',
-        'message',
-        'is_read',
+        'owner_id',
+        'companion_chat_id',
+        'status',
     ];
 
-    public function chat(): BelongsTo
+    public function owner(): BelongsTo
     {
-        return $this->belongsTo(Chat::class, 'chat_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function registerMediaCollections(): void
+    public function companionChat(): BelongsTo
     {
-        $this->addMediaCollection('files')
-            ->useDisk('public');
+        return $this->belongsTo(self::class, 'companion_chat_id');
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(ChatMessage::class, 'chat_id');
     }
 
     /**
@@ -46,9 +53,7 @@ class ChatMessage extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-            'message'    => 'string',
-            'is_read'    => 'boolean',
-            'created_at' => 'datetime',
+            'status'    => ChatStatusEnum::class,
         ];
     }
 }

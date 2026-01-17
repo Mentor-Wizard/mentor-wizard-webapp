@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Models\Chat;
 use Illuminate\Http\JsonResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -11,12 +12,10 @@ class GetMute
 {
     use AsController;
 
-    public function handle(): JsonResponse
+    public function handle(Chat $chat): JsonResponse
     {
-        $user = auth()->user();
-
         return response()->json([
-            'mute' => $user->profile->mute,
+            'mute' => $chat->mute,
         ]);
     }
 }

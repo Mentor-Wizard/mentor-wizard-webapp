@@ -4,26 +4,38 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Enums\ChatStatusEnum;
 use App\Events\Chats\ChatMessageEvent;
 use App\Http\Requests\Chat\ChatMessageRequest;
 use App\Http\Resources\ChatMessageResource;
+use App\Models\Chat;
 use App\Models\ChatMessage;
-use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
+use Lorisleiva\Actions\Concerns\AsAction;
 use Lorisleiva\Actions\Concerns\AsController;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
+use Throwable;
 
 class SendMessage
 {
+    use AsAction;
     use AsController;
 
-    public function handle(User $receiver, ChatMessageRequest $request): JsonResponse
+    /**
+     * @throws Throwable
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
+     */
+    public function handle(Chat $chat, ChatMessageRequest $request): JsonResponse
     {
-        $user = auth()->user();
+        throw_if($chat->companionChat->status === ChatStatusEnum::BANNED, AuthorizationException::class);
+
         $data = $request->validated();
         $message = ChatMessage::query()->create([
-            'sender_id'   => $user->id,
-            'receiver_id' => $receiver->id,
+            'chat_id'     => $chat->id,
             'message'     => $data['message'],
             'is_read'     => false,
         ]);
@@ -36,7 +48,7 @@ class SendMessage
         }
 
         $message->refresh();
-        event(new ChatMessageEvent($message));
+        event(new ChatMessageEvent($message->chat->companionChat, $message));
 
         return response()->json([
             'message' => ChatMessageResource::make($message),

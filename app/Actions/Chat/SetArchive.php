@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Enums\ChatStatusEnum;
 use App\Models\Chat;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class SetMute
+class SetArchive
 {
     use AsController;
 
-    public function handle(Chat $chat, Request $request): JsonResponse
+    public function handle(Chat $chat): JsonResponse
     {
-        $chat->mute = (bool) $request->input('mute', 0);
+        $chat->status = ChatStatusEnum::ARCHIVED;
         $chat->save();
 
         return response()->json([
-            'mute' => $chat->mute,
+            'success' => true,
         ]);
     }
 }

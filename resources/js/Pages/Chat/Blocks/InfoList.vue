@@ -20,7 +20,7 @@ const user = usePage().props.auth.user;
 import { useCaseFileType } from '../useCaseFileType.js';
 import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 import { usePage } from '@inertiajs/vue3';
-const { chatFiles, currentCompanion, setMute } = useCaseChat();
+const { chatFiles, currentChat, setMute, setArchive, setBan } = useCaseChat();
 
 const { getColorByFileName, getIconByFileName } = useCaseFileType();
 </script>
@@ -30,8 +30,8 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
     <div class="flex justify-center">
       <div class="h-32 w-32 overflow-hidden rounded-full border-4 border-white">
         <img
-          :src="currentCompanion?.avatar"
-          :alt="currentCompanion?.name"
+          :src="currentChat?.avatar"
+          :alt="currentChat?.name"
           class="h-full w-full rounded-full object-cover"
         />
       </div>
@@ -39,13 +39,13 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
 
     <div class="mt-4 text-center">
       <h2 class="text-xl leading-tight font-bold text-gray-900">
-        {{ currentCompanion?.name }}
+        {{ currentChat?.name }}
       </h2>
-      <p v-if="currentCompanion?.tags" class="mt-1 text-base text-gray-600">
-        {{ currentCompanion.tags[0] }}
+      <p v-if="currentChat?.tags" class="mt-1 text-base text-gray-600">
+        {{ currentChat.tags[0] }}
       </p>
       <p class="mt-2 text-sm text-gray-500">
-        Member since {{ currentCompanion?.created_at }}
+        Member since {{ currentChat?.created_at }}
       </p>
     </div>
 
@@ -58,8 +58,8 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
       </button>
 
       <a
-        v-if="currentCompanion?.slug"
-        :href="route('page.mentor', { mentor: currentCompanion.slug })"
+        v-if="currentChat?.slug"
+        :href="route('page.mentor', { mentor: currentChat.slug })"
         target="_blank"
         class="flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition duration-150 ease-in-out hover:bg-gray-50"
       >
@@ -174,16 +174,37 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
           class="relative inline-flex cursor-pointer items-center"
         >
           <input
+            v-if="currentChat"
             id="toggle-mute"
             type="checkbox"
-            v-model="user.profile.mute"
+            v-model="currentChat.mute"
             class="peer sr-only"
-            @change="setMute(user.profile.mute)"
+            @change="setMute()"
           />
           <div
             class="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"
           ></div>
         </label>
+      </div>
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-700">Archive conversation</p>
+        <button class="text-gray-400 hover:text-gray-600">
+          <ArchiveBoxIcon
+            class="h-4 w-4 cursor-pointer text-gray-400"
+            @click="setArchive()"
+          />
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-700">Block user</p>
+        <button class="text-gray-400 hover:text-gray-600">
+          <NoSymbolIcon
+            class="h-4 w-4 cursor-pointer"
+            :class="currentChat?.ban ? 'text-red-400' : 'text-gray-400'"
+            @click="setBan()"
+          />
+        </button>
       </div>
     </div>
   </section>

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\Chat\ChatListUser;
 use App\Actions\Chat\ChatMessages;
+use App\Actions\Chat\CreateChat;
 use App\Actions\Chat\GetMessage;
 use App\Actions\Chat\GetMute;
 use App\Actions\Chat\SendMessage;
+use App\Actions\Chat\SetArchive;
+use App\Actions\Chat\SetBan;
 use App\Actions\Chat\SetMute;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
@@ -67,11 +70,14 @@ Route::middleware('auth')
     ->group(function (): void {
         Route::get('list', GetChatPage::class)->name('page.chat');
         Route::get('users', ChatListUser::class)->name('chat.users');
-        Route::get('messages/{receiver}', ChatMessages::class)->name('chat.messages');
-        Route::post('send-messages/{receiver}', SendMessage::class)->name('chat.send-messages');
-        Route::get('message/{message}', GetMessage::class)->name('chat.get-messages');
-        Route::get('mute', GetMute::class)->name('chat.get-mute');
-        Route::post('mute', SetMute::class)->name('chat.set-mute');
+        Route::get('messages/{chat}', ChatMessages::class)->name('chat.messages');
+        Route::post('message/{chat}', SendMessage::class)->name('chat.send-message');
+        Route::get('message/{message}', GetMessage::class)->name('chat.get-message');
+        Route::get('mute/{chat}', GetMute::class)->name('chat.get-mute');
+        Route::post('mute/{chat}', SetMute::class)->name('chat.set-mute');
+        Route::post('create/{user}', CreateChat::class)->name('chat.create');
+        Route::post('archive/{chat}', SetArchive::class)->name('chat.set-archive');
+        Route::post('ban/{chat}', SetBan::class)->name('chat.set-ban');
     });
 
 require __DIR__.'/auth.php';
