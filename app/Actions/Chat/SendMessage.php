@@ -6,6 +6,7 @@ namespace App\Actions\Chat;
 
 use App\Enums\ChatStatusEnum;
 use App\Events\Chats\ChatMessageEvent;
+use App\Events\Chats\UnreadMessagesEvent;
 use App\Http\Requests\Chat\ChatMessageRequest;
 use App\Http\Resources\ChatMessageResource;
 use App\Models\Chat;
@@ -49,6 +50,7 @@ class SendMessage
 
         $message->refresh();
         event(new ChatMessageEvent($message->chat->companionChat, $message));
+        event(new UnreadMessagesEvent($message->chat->companionChat->owner, UnreadMessages::run($message->chat->companionChat->owner)));
 
         return response()->json([
             'message' => ChatMessageResource::make($message),

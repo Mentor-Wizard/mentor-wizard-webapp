@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Events\Chats\UnreadMessagesEvent;
 use App\Http\Resources\ChatMessageResource;
 use App\Models\ChatMessage;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +22,8 @@ class GetMessage
     {
         $message->is_read = true;
         $message->save();
+
+        event(new UnreadMessagesEvent($message->chat->companionChat->owner, UnreadMessages::run($message->chat->owner)));
 
         return response()->json([
             'message' => ChatMessageResource::make($message),

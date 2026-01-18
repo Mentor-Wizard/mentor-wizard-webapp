@@ -7,6 +7,7 @@ namespace App\Actions\Chat;
 use App\Enums\ChatStatusEnum;
 use App\Enums\RoleEnum;
 use App\Enums\TagEnum;
+use App\Events\Chats\UnreadMessagesEvent;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use DateTimeInterface;
@@ -51,6 +52,8 @@ class ChatListUser
                 'last'          => $lastMessage?->created_at ? $this->getLastDateInfo($lastMessage->created_at) : null,
             ];
         }
+
+        event(new UnreadMessagesEvent($user, UnreadMessages::run($user)));
 
         return response()->json([
             'users' => $listUsers,

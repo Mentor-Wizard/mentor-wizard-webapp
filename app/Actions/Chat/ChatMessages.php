@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Chat;
 
+use App\Events\Chats\UnreadMessagesEvent;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Repositories\Chat\ChatMessageRepository;
@@ -19,6 +20,7 @@ class ChatMessages
     public function handle(Chat $chat): JsonResponse
     {
         $this->setReadMessages($chat);
+        event(new UnreadMessagesEvent($chat->owner, UnreadMessages::run($chat->owner)));
 
         return response()->json([
             'messages' => $this->repository->getMessages($chat),

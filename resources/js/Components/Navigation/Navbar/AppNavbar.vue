@@ -16,7 +16,7 @@ import { computed, onMounted, ref } from 'vue';
 import NavbarLogo from '@/Components/Navigation/Navbar/NavbarLogo.vue';
 import { useNavigation } from '@/Stores/navigation.js';
 import { useAlerts } from '@/UseCases/useCaseAlert.js';
-const { isRinging } = useAlerts();
+const { isRinging, notificationsCount } = useAlerts();
 
 defineProps({
   transparent: {
@@ -145,6 +145,21 @@ const mobileNavLinkClasses = (navItemHref) => {
                 ]"
                 aria-hidden="true"
               />
+              <Transition
+                enter-active-class="transition ease-out duration-[5000ms]"
+                enter-from-class="opacity-0 scale-75"
+                enter-to-class="opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-[1000ms]"
+                leave-from-class="opacity-100 scale-100"
+                leave-to-class="opacity-0 scale-75"
+              >
+                <span
+                  v-if="notificationsCount > 0"
+                  class="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white ring-2 ring-white"
+                >
+                  {{ notificationsCount > 99 ? '99+' : notificationsCount }}
+                </span>
+              </Transition>
             </button>
 
             <Menu as="div" class="relative ml-4 shrink-0">
@@ -272,6 +287,12 @@ const mobileNavLinkClasses = (navItemHref) => {
               ]"
               aria-hidden="true"
             />
+            <span
+              v-if="notificationsCount > 0"
+              class="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white ring-2 ring-white"
+            >
+              {{ notificationsCount > 99 ? '99+' : notificationsCount }}
+            </span>
           </button>
         </div>
         <div class="mt-3 space-y-1">
