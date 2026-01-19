@@ -6,6 +6,7 @@ use App\Actions\Calendar\EditCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -156,6 +157,7 @@ describe('EditCalendarEvent', function (): void {
             'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
             'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
             'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
             'description'       => 'Original description',
             'mentor_program_id' => $mentorProgram->getKey(),
         ]);
@@ -261,5 +263,150 @@ describe('EditCalendarEvent', function (): void {
         } catch (Throwable $throwable) {
             expect($throwable)->toBeInstanceOf(Error::class);
         }
+    });
+
+    it('rejects editing a CANCELLED calendar event with correct error message', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
+
+        $mentorProgram = MentorProgram::factory()->create(
+            ['mentor_id' => $this->user->getKey()]
+        );
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Cancelled Event',
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CANCELLED->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $data = [
+            'title'             => 'Updated Title',
+            'fromDate'          => Date::now()->addDays(3)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(3)->format('Y-m-d'),
+            'fromTime'          => '14:30',
+            'toTime'            => '15:30',
+            'description'       => 'Updated description',
+            'type'              => 'Individual',
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::PURPLE->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+        $request->validateResolved();
+
+        $action = new EditCalendarEvent;
+        $result = $action->handle($request, $event);
+
+        // Should redirect with error
+        expect($result->getSession()->get('error'))
+            ->toBe(CalendarEventStatusEnum::CANCELLED->value.' calendar event cannot be edited');
+
+        // Verify event was NOT updated
+        $event->refresh();
+        expect($event->title)->toBe('Cancelled Event');
+    });
+
+    it('rejects editing a FINISHED calendar event with correct error message', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
+
+        $mentorProgram = MentorProgram::factory()->create(
+            ['mentor_id' => $this->user->getKey()]
+        );
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Finished Event',
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::FINISHED->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $data = [
+            'title'             => 'Updated Title',
+            'fromDate'          => Date::now()->addDays(3)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(3)->format('Y-m-d'),
+            'fromTime'          => '14:30',
+            'toTime'            => '15:30',
+            'description'       => 'Updated description',
+            'type'              => 'Individual',
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::PURPLE->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+        $request->validateResolved();
+
+        $action = new EditCalendarEvent;
+        $result = $action->handle($request, $event);
+
+        // Should redirect with error
+        expect($result->getSession()->get('error'))
+            ->toBe(CalendarEventStatusEnum::FINISHED->value.' calendar event cannot be edited');
+
+        // Verify event was NOT updated
+        $event->refresh();
+        expect($event->title)->toBe('Finished Event');
+    });
+
+    it('error message includes status and correct text for CANCELLED events', function (): void {
+        Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, config('app.timezone')));
+
+        $mentorProgram = MentorProgram::factory()->create(
+            ['mentor_id' => $this->user->getKey()]
+        );
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Cancelled Event',
+            'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
+            'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
+            'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CANCELLED->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            ['colour' => CalendarEventColoursEnum::BLUE->value]);
+
+        $data = [
+            'title'             => 'Updated Title',
+            'fromDate'          => Date::now()->addDays(3)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(3)->format('Y-m-d'),
+            'fromTime'          => '14:30',
+            'toTime'            => '15:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::PURPLE->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+        $request->validateResolved();
+
+        $action = new EditCalendarEvent;
+        $result = $action->handle($request, $event);
+
+        $errorMessage = $result->getSession()->get('error');
+
+        // Verify error message contains status at the beginning
+        expect($errorMessage)->toStartWith(CalendarEventStatusEnum::CANCELLED->value);
+
+        // Verify error message contains the text part
+        expect($errorMessage)->toContain('calendar event cannot be edited');
+
+        // Verify the full message format (status + text)
+        expect($errorMessage)->toBe(CalendarEventStatusEnum::CANCELLED->value.' calendar event cannot be edited');
     });
 });

@@ -1364,3 +1364,141 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
         });
 
 });
+
+describe('Mutation Coverage - hasAny guard and null-safe operator', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        actingAs($this->user);
+    });
+
+    it('hasAny check prevents overlap validation when schedules has errors (kills ArrayItemRemoval mutation)', function (): void {
+        // Create existing schedule that WOULD overlap if overlap check ran
+        UserSchedule::query()->create([
+            'user_id'     => $this->user->getKey(),
+            'day_of_week' => 1,
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::WORKING_DAY,
+        ]);
+
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 8, // INVALID - out of range (0-6)
+                    'start_time'  => '10:00', // Would overlap if schedule was valid
+                    'end_time'    => '12:00',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [], // Valid
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules());
+        $request->withValidator($validator);
+        $validator->fails();
+
+        // Should have the validation error for day_of_week
+        expect($validator->errors()->has('schedules.0.day_of_week'))->toBeTrue();
+
+        // Should NOT have overlap error (hasAny guard must have prevented overlap check)
+        // If 'schedules' was removed from hasAny, overlap check would run and add overlap error
+        $allErrorKeys = array_keys($validator->errors()->toArray());
+        $overlapErrors = array_filter($allErrorKeys, fn (int|string $key): bool => str_contains($key, 'overlap')
+            || (str_contains($key, 'start_time') && ! str_contains($key, 'schedules.0')));
+        expect($overlapErrors)->toBeEmpty();
+    });
+
+    it('hasAny check prevents overlap validation when delete_ids has errors (kills ArrayItemRemoval mutation)', function (): void {
+        // Create existing schedule
+        $existingSchedule = UserSchedule::query()->create([
+            'user_id'     => $this->user->getKey(),
+            'day_of_week' => 2,
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::WORKING_DAY,
+        ]);
+
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 2,
+                    'start_time'  => '10:00', // Would overlap with existing
+                    'end_time'    => '12:00',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [999999999], // INVALID - does not exist
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules());
+        $request->withValidator($validator);
+        $validator->fails();
+
+        // Should have the validation error for delete_ids
+        expect($validator->errors()->has('delete_ids.0'))->toBeTrue();
+
+        // Should NOT have run overlap validation (hasAny guard prevented it)
+        // If 'delete_ids' was removed from hasAny, overlap check would run
+        // Note: We check there's no overlap-specific error added
+        $errorCount = count($validator->errors()->toArray());
+        expect($errorCount)->toBe(1); // Only delete_ids.0 error
+    });
+
+    it('overlap validation uses user id when user is authenticated (proves null-safe returns value)', function (): void {
+        // User is authenticated
+        expect(auth()->user())->not->toBeNull();
+
+        // Create existing schedule for THIS user
+        UserSchedule::query()->create([
+            'user_id'     => $this->user->getKey(),
+            'day_of_week' => 3,
+            'start_time'  => '09:00:00',
+            'end_time'    => '17:00:00',
+            'type'        => UserScheduleRecordType::WORKING_DAY,
+        ]);
+
+        // Create a schedule that overlaps
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 3,
+                    'start_time'  => '10:00', // Overlaps with 09:00-17:00
+                    'end_time'    => '12:00',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules());
+        $request->withValidator($validator);
+        $validator->fails();
+
+        // Should have overlap error - proving $user?->id returned the actual user ID
+        // and the overlap check ran with that user's schedules
+        expect($validator->errors())->not->toBeEmpty();
+    });
+
+});

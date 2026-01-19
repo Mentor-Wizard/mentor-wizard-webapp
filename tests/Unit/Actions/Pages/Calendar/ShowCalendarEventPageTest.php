@@ -435,3 +435,154 @@ describe('Show Calendar CalendarEvent Page', function (): void {
     });
 
 });
+
+describe('Mutation Coverage - permissions array parameter', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $this->mentor = User::factory()->create();
+        $this->mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->nonMentor = User::factory()->create();
+    });
+
+    it('permissions check uses calendarEvent from array (kills ArrayItemRemoval mutation)', function (): void {
+        // Create event where mentor owns the program
+        $mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->mentor->getKey(),
+        ]);
+
+        $event = CalendarEvent::factory()->create([
+            'mentor_program_id' => $mentorProgram->getKey(),
+            'start_date_time'   => Date::now()->addDay(),
+            'end_date_time'     => Date::now()->addDay()->addHour(),
+        ]);
+        $event->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        // Login as mentor who owns the program
+        auth()->login($this->mentor);
+
+        $response = (new ShowCalendarEventPage)->handle($event);
+        $props = inertiaProps($response);
+
+        // Mentor of the program should have 'edit' permission
+        // This proves $calendarEvent is correctly passed to the policy
+        // If ArrayItemRemoval removed $calendarEvent, the policy would fail/error
+        expect($props['permissions'])->toBe('edit');
+    });
+
+    it('permissions check correctly returns view for non-mentor (proves policy receives correct event)', function (): void {
+        // Create event where mentor owns the program
+        $mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->mentor->getKey(),
+        ]);
+
+        $event = CalendarEvent::factory()->create([
+            'mentor_program_id' => $mentorProgram->getKey(),
+            'start_date_time'   => Date::now()->addDay(),
+            'end_date_time'     => Date::now()->addDay()->addHour(),
+        ]);
+
+        // Attach both mentor and non-mentor to the event
+        $event->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+        $event->calendarEventUsers()->attach($this->nonMentor->getKey(), [
+            'role' => CalendarEventRoleEnum::MENTI->value,
+        ]);
+
+        // Login as non-mentor
+        auth()->login($this->nonMentor);
+
+        $response = (new ShowCalendarEventPage)->handle($event);
+        $props = inertiaProps($response);
+
+        // Non-mentor should have 'view' permission (not 'edit')
+        // This proves the policy correctly evaluates based on the calendarEvent
+        expect($props['permissions'])->toBe('view');
+    });
+
+    it('different events with different mentors return correct permissions (proves specific event is used)', function (): void {
+        // Mentor 1 owns program 1
+        $mentorProgram1 = MentorProgram::factory()->create([
+            'mentor_id' => $this->mentor->getKey(),
+        ]);
+
+        // Another mentor owns program 2
+        $otherMentor = User::factory()->create();
+        $otherMentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $mentorProgram2 = MentorProgram::factory()->create([
+            'mentor_id' => $otherMentor->getKey(),
+        ]);
+
+        // Event 1 belongs to mentor's program
+        $event1 = CalendarEvent::factory()->create([
+            'mentor_program_id' => $mentorProgram1->getKey(),
+            'start_date_time'   => Date::now()->addDay(),
+            'end_date_time'     => Date::now()->addDay()->addHour(),
+        ]);
+        $event1->calendarEventUsers()->attach($this->mentor->getKey());
+
+        // Event 2 belongs to other mentor's program
+        $event2 = CalendarEvent::factory()->create([
+            'mentor_program_id' => $mentorProgram2->getKey(),
+            'start_date_time'   => Date::now()->addDays(2),
+            'end_date_time'     => Date::now()->addDays(2)->addHour(),
+        ]);
+        $event2->calendarEventUsers()->attach($this->mentor->getKey());
+
+        // Login as the first mentor
+        auth()->login($this->mentor);
+
+        // For event1 (their own program) - should be 'edit'
+        $response1 = (new ShowCalendarEventPage)->handle($event1);
+        $props1 = inertiaProps($response1);
+        expect($props1['permissions'])->toBe('edit');
+
+        // For event2 (other mentor's program) - should be 'view'
+        $response2 = (new ShowCalendarEventPage)->handle($event2);
+        $props2 = inertiaProps($response2);
+        expect($props2['permissions'])->toBe('view');
+
+        // This proves the SPECIFIC calendarEvent passed to can() affects the result
+        // If the calendarEvent was removed from the array, both would have the same result
+    });
+
+    it('permissions evaluation requires the calendarEvent argument (explicit policy test)', function (): void {
+        $mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->mentor->getKey(),
+        ]);
+
+        $event = CalendarEvent::factory()->create([
+            'mentor_program_id' => $mentorProgram->getKey(),
+            'start_date_time'   => Date::now()->addDay(),
+            'end_date_time'     => Date::now()->addDay()->addHour(),
+        ]);
+        $event->calendarEventUsers()->attach($this->mentor->getKey());
+
+        auth()->login($this->mentor);
+
+        // Direct policy check - this is what the ShowCalendarEventPage does internally
+        $canUpdate = $this->mentor->can('update', [$event, $this->mentor]);
+
+        // The mentor of the program should be able to update
+        expect($canUpdate)->toBeTrue();
+
+        // If we check with a different event (not from this mentor's program), it should fail
+        $otherMentor = User::factory()->create();
+        $otherProgram = MentorProgram::factory()->create(['mentor_id' => $otherMentor->getKey()]);
+        $otherEvent = CalendarEvent::factory()->create([
+            'mentor_program_id' => $otherProgram->getKey(),
+            'start_date_time'   => Date::now()->addDay(),
+            'end_date_time'     => Date::now()->addDay()->addHour(),
+        ]);
+
+        $canUpdateOther = $this->mentor->can('update', [$otherEvent, $this->mentor]);
+
+        // Should NOT be able to update other mentor's event
+        expect($canUpdateOther)->toBeFalse();
+    });
+});

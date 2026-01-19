@@ -1242,5 +1242,69 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 expect(true)->toBeTrue('Exception caught as expected');
             }
         });
+
+        it('skips slot availability check when mentor_program_id is invalid', function (): void {
+            $event = CalendarEvent::query()->create([
+                'title'             => 'Busy block',
+                'status'            => CalendarEventStatusEnum::CONFIRMED,
+                'start_date_time'   => Date::now()->addDays(5)->setTime(10, 0),
+                'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
+                'date'              => Date::now()->addDays(5)->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'description'       => 'Busy',
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+            ]);
+            $event->calendarEventUsers()->attach($this->user->getKey());
+
+            $payload = [
+                'title'             => 'Conflicting slot',
+                'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+                'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+                'fromTime'          => '10:00',
+                'toTime'            => '11:30',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => 999999, // Non-existent mentor program ID
+            ];
+
+            $request = new StoreCalendarEventRequest;
+            $request->merge($payload);
+            ($this->prepareRequest)($request);
+
+            try {
+                $request->validateResolved();
+                expect(false)->toBeTrue('Should have failed validation');
+            } catch (ValidationException $validationException) {
+                // Should only have mentor_program_id error, not fromDate (slot availability) error
+                expect($validationException->errors())->toHaveKey('mentor_program_id')
+                    ->and($validationException->errors())->not->toHaveKey('fromDate');
+            }
+        });
+
+        it('does not add availability error when mentor_program_id is missing (guards withValidator)', function (): void {
+            $data = [
+                'title'       => 'Missing Mentor Program',
+                'fromDate'    => Date::now()->addDays(2)->format('Y-m-d'),
+                'toDate'      => Date::now()->addDays(2)->format('Y-m-d'),
+                'fromTime'    => '09:15',
+                'toTime'      => '10:45',
+                'description' => 'desc',
+                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'      => CalendarEventColoursEnum::BLUE->value,
+                // mentor_program_id is intentionally missing
+            ];
+
+            $request = new StoreCalendarEventRequest;
+            $request->merge($data);
+            ($this->prepareRequest)($request);
+
+            $validator = Validator::make($data, $request->rules());
+            $request->withValidator($validator);
+
+            expect($validator->fails())->toBeTrue()
+                ->and($validator->errors()->has('mentor_program_id'))->toBeTrue()
+                // The slot availability error should NOT be present
+                ->and($validator->errors()->has('fromDate'))->toBeFalse();
+        });
     });
 });

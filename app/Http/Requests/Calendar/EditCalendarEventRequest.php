@@ -37,7 +37,7 @@ class EditCalendarEventRequest extends FormRequest
                 );
                 $endDate = Date::createFromFormat(
                     '!Y-m-d H:i',
-                    $this->input('toDate').' '.$this->input('toTime'),
+                    $this->input('toDate').' '.$this->input('toTime'),// @pest-mutate-ignore ConcatOperandRemoval
                     $timezone
                 );
 

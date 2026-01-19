@@ -496,4 +496,209 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
         }
     });
 
+    it('does not add availability error when mentor_program_id is invalid (guards withValidator)', function (): void {
+        $data = [
+            'id'                => $this->event->getKey(),
+            'title'             => 'Invalid Mentor Program',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:30',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => 999999, // Non-existent mentor program ID
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        $validator = Validator::make($data, $request->rules());
+        $request->withValidator($validator);
+
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->has('mentor_program_id'))->toBeTrue()
+            // The slot availability error should NOT be present
+            ->and($validator->errors()->has('fromDate'))->toBeFalse();
+    });
+
+    it('does not add availability error when mentor_program_id is missing (guards withValidator)', function (): void {
+        $data = [
+            'id'          => $this->event->getKey(),
+            'title'       => 'Missing Mentor Program',
+            'fromDate'    => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'      => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'    => '10:00',
+            'toTime'      => '11:30',
+            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            // mentor_program_id is intentionally missing
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($data);
+        ($this->prepareRequest)($request);
+
+        $validator = Validator::make($data, $request->rules());
+        $request->withValidator($validator);
+
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->has('mentor_program_id'))->toBeTrue()
+            // The slot availability error should NOT be present
+            ->and($validator->errors()->has('fromDate'))->toBeFalse();
+    });
+
+});
+
+describe('Mutation Coverage - toDate and toTime concatenation', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        auth()->login($this->user);
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+        $this->prepareRequest = function (EditCalendarEventRequest $request): void {
+            $request->setContainer(app());
+            $request->setRedirector(resolve(Redirector::class));
+            $request->setUserResolver(fn () => $this->user);
+        };
+    });
+
+    it('uses both toDate AND toTime in end date calculation (kills ConcatRemoveRight mutation)', function (): void {
+        // Create a busy event from 10:00-11:00 on day+5
+        $busyStart = Date::now()->addDays(5)->setTime(10, 0, 0);
+        $busyEnd = Date::now()->addDays(5)->setTime(11, 0, 0);
+        $busyEvent = CalendarEvent::factory()->create([
+            'start_date_time'   => $busyStart,
+            'end_date_time'     => $busyEnd,
+            'date'              => $busyStart->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $this->user->calendarEvents()->attach($busyEvent->getKey());
+
+        $date = Date::now()->addDays(5)->format('Y-m-d');
+
+        // Request 1: End time 09:30 (before busy event) - should PASS
+        $data1 = [
+            'id'                => 999,
+            'title'             => 'Test Event 1',
+            'fromDate'          => $date,
+            'toDate'            => $date,
+            'fromTime'          => '08:00',
+            'toTime'            => '09:30', // Ends BEFORE busy event starts
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request1 = new EditCalendarEventRequest;
+        $request1->merge($data1);
+        ($this->prepareRequest)($request1);
+
+        $validator1 = Validator::make($data1, $request1->rules());
+        $request1->withValidator($validator1);
+
+        // This should pass - no overlap with 10:00-11:00
+        expect($validator1->fails())->toBeFalse()
+            ->and($validator1->errors()->has('fromDate'))->toBeFalse();
+
+        // Request 2: End time 10:30 (overlaps with busy event) - should FAIL
+        $data2 = [
+            'id'                => 998,
+            'title'             => 'Test Event 2',
+            'fromDate'          => $date,
+            'toDate'            => $date,
+            'fromTime'          => '08:00',
+            'toTime'            => '10:30', // Ends DURING busy event (10:00-11:00)
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request2 = new EditCalendarEventRequest;
+        $request2->merge($data2);
+        ($this->prepareRequest)($request2);
+
+        $validator2 = Validator::make($data2, $request2->rules());
+        $request2->withValidator($validator2);
+
+        // This should fail - overlaps with 10:00-11:00
+        // If toTime was ignored (mutation), both requests would have the same result
+        expect($validator2->fails())->toBeTrue()
+            ->and($validator2->errors()->has('fromDate'))->toBeTrue();
+    });
+
+    it('different toTime values produce different validation outcomes (proves toTime is used)', function (): void {
+        // Create events that leave only a specific slot available: 14:00-15:00
+        $morning = CalendarEvent::factory()->create([
+            'start_date_time'   => Date::now()->addDays(6)->setTime(8, 0, 0),
+            'end_date_time'     => Date::now()->addDays(6)->setTime(14, 0, 0),
+            'date'              => Date::now()->addDays(6)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $afternoon = CalendarEvent::factory()->create([
+            'start_date_time'   => Date::now()->addDays(6)->setTime(15, 0, 0),
+            'end_date_time'     => Date::now()->addDays(6)->setTime(18, 0, 0),
+            'date'              => Date::now()->addDays(6)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $this->user->calendarEvents()->attach([$morning->getKey(), $afternoon->getKey()]);
+
+        $date = Date::now()->addDays(6)->format('Y-m-d');
+
+        // Booking 14:00-15:00 should pass (fits in the gap)
+        $validData = [
+            'id'                => 888,
+            'title'             => 'Fits in gap',
+            'fromDate'          => $date,
+            'toDate'            => $date,
+            'fromTime'          => '14:00',
+            'toTime'            => '15:00', // Exactly fits the gap
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request = new EditCalendarEventRequest;
+        $request->merge($validData);
+        ($this->prepareRequest)($request);
+
+        $validator = Validator::make($validData, $request->rules());
+        $request->withValidator($validator);
+
+        expect($validator->fails())->toBeFalse();
+
+        // Booking 14:00-15:30 should fail (overlaps with afternoon event)
+        $invalidData = [
+            'id'                => 887,
+            'title'             => 'Overlaps afternoon',
+            'fromDate'          => $date,
+            'toDate'            => $date,
+            'fromTime'          => '14:00',
+            'toTime'            => '15:30', // Different toTime - overlaps with afternoon
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request2 = new EditCalendarEventRequest;
+        $request2->merge($invalidData);
+        ($this->prepareRequest)($request2);
+
+        $validator2 = Validator::make($invalidData, $request2->rules());
+        $request2->withValidator($validator2);
+
+        // If toTime was not used (mutation), this would pass like the first request
+        expect($validator2->fails())->toBeTrue()
+            ->and($validator2->errors()->has('fromDate'))->toBeTrue();
+    });
 });

@@ -28,7 +28,7 @@ class CalendarEventObserver
 
             if ($hostUser !== null && $participant !== null) {
                 MentorSession::query()->create([
-                    'mentor_id'         => (int) $hostUser->getKey(),
+                    'mentor_id'         => $hostUser->getKey(),
                     'menti_id'          => $participant->getKey(),
                     'date'              => $event->start_date_time,
                     'cost'              => $event->mentorProgram->cost,

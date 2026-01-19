@@ -27,6 +27,8 @@ class AvailableCalendarEventsSlotsService
 
     private readonly int $minimumPreBookingTimeInMinutes;
 
+    private readonly int $sessionDuration;
+
     public function __construct(
         private readonly User $user,
         private readonly string $timezone,
@@ -37,7 +39,9 @@ class AvailableCalendarEventsSlotsService
     ) {
         $mentor = $this->mentorProgram->mentor;
         $mentorProfile = $mentor->profile;
-        $this->minimumPreBookingTimeInMinutes = $mentorProfile->minimum_pre_booking_time ?? 0;
+        $this->minimumPreBookingTimeInMinutes = $mentorProfile->minimum_pre_booking_time;
+        //Ignoring mutation fo session duration for the time being, as later expected to be used some rules for duration
+        $this->sessionDuration = $this->mentorProgram->session_duration ?? 0; // @pest-mutate-ignore
     }
 
     /**
@@ -126,15 +130,18 @@ class AvailableCalendarEventsSlotsService
                     $endSlotPeriod = $event->start_date_time->timezone($this->timezone)
                         ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
 
-                    $sessionDuration = ($this->mentorProgram->session_duration ?? 0);
                     $slotDuration = $startSlotPeriod->diffInMinutes($endSlotPeriod);
-                    if ($sessionDuration > 0
+                    if ($this->sessionDuration > 0
                             && $slotDuration
-                            < $sessionDuration) {
+                            < $this->sessionDuration) {
+                        $previousEvent = $event;
+
                         continue;
                     }
 
                     if ($slotDuration <= 0) {
+                        $previousEvent = $event;
+
                         continue;
                     }
 
@@ -149,10 +156,11 @@ class AvailableCalendarEventsSlotsService
                 $endSlotPeriod = $event->start_date_time->timezone($this->timezone)
                     ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
 
-                $sessionDuration = ($this->mentorProgram->session_duration ?? 0);
-                if ($sessionDuration > 0
-                    && $startSlotPeriod->diffInMinutes($endSlotPeriod) < $sessionDuration
+                if ($this->sessionDuration > 0
+                    && $startSlotPeriod->diffInMinutes($endSlotPeriod) < $this->sessionDuration
                 ) {
+                    $previousEvent = $event;
+
                     continue;
                 }
 

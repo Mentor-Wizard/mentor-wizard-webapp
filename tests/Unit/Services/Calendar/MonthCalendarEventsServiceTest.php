@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -277,7 +278,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             'start_date_time'   => $startUtc,
             'end_date_time'     => $endUtc,
             'date'              => $startUtc?->format('Y-m-d'),
-            'type'              => 'individual',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -294,6 +295,54 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             ->firstWhere(fn ($day): bool => isset($day['calendarEvents']) && count($day['calendarEvents']) > 0);
 
         expect($eventEntry['calendarEvents'][0])->toHaveKey('datetime');
+    });
+
+    it('groups events by timezone-adjusted date when events cross midnight boundary', function (): void {
+        Date::setTestNow(Date::create(2025, 2, 10, 9, 0, 0));
+        $tz = 'America/New_York'; // UTC-5
+
+        // Create event at 23:00 UTC on Feb 10, which is 18:00 (6PM) Feb 10 in NY
+        $event1StartUtc = Date::create(2025, 2, 10, 23, 0, 0);
+        $event1 = CalendarEvent::query()->create([
+            'title'              => 'Late Evening Event',
+            'status'             => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'    => $event1StartUtc,
+            'end_date_time'      => $event1StartUtc->copy()->addHour(),
+            'date'               => $event1StartUtc->format('Y-m-d'), // Will be 2025-02-10 in UTC
+            'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id'  => $this->mentorProgram->getKey(),
+        ]);
+
+        // Create event at 02:00 UTC on Feb 11, which is 21:00 (9PM) Feb 10 in NY (same day!)
+        $event2StartUtc = Date::create(2025, 2, 11, 2, 0, 0);
+        $event2 = CalendarEvent::query()->create([
+            'title'              => 'Early Morning Event',
+            'status'             => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'    => $event2StartUtc,
+            'end_date_time'      => $event2StartUtc->copy()->addHour(),
+            'date'               => $event2StartUtc->format('Y-m-d'), // Will be 2025-02-11 in UTC
+            'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id'  => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
+
+        $checkedDate = Date::parse('2025-02-10');
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
+
+        $calendarView = $result['calendarView'];
+
+        // Both events should appear on Feb 10 when viewed in NY timezone
+        $feb10Entry = collect($calendarView)->firstWhere('date', '2025-02-10');
+
+        expect($feb10Entry)->not->toBeNull()
+            ->and($feb10Entry['calendarEvents'])->toBeArray()->toHaveCount(2)
+            ->and($feb10Entry['calendarEvents'][0]['name'])->toBe('Late Evening Event')
+            ->and($feb10Entry['calendarEvents'][1]['name'])->toBe('Early Morning Event');
+
+        // Feb 11 should have no events in NY timezone
+        $feb11Entry = collect($calendarView)->firstWhere('date', '2025-02-11');
+        expect($feb11Entry['calendarEvents'] ?? [])->toBeEmpty();
     });
 
     it('passes timezone to CalendarEventMonthViewResource via additional', function (): void {
@@ -583,5 +632,103 @@ describe('Boundary Date Tests - MonthCalendarEventsService', function (): void {
         // Ensure no Feb 29 exists
         $feb29Entry = collect($result['calendarView'])->firstWhere('date', '2025-02-29');
         expect($feb29Entry)->toBeNull();
+    });
+});
+
+describe('Mutation Coverage - each() Method', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+    });
+
+    it('each() method correctly updates event date property to timezone-adjusted value', function (): void {
+        // Create event at 23:30 UTC on Feb 10 - in UTC+5 this is Feb 11 04:30
+        $tz = 'Asia/Karachi'; // UTC+5
+        Date::setTestNow(Date::create(2025, 2, 10, 10, 0, 0, 'UTC'));
+
+        $startUtc = Date::create(2025, 2, 10, 23, 30, 0, 'UTC');
+        $endUtc = (clone $startUtc)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Late Night UTC Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => '2025-02-10', // Original UTC date
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $checkedDate = Date::parse('2025-02-10');
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
+
+        // The event should appear on Feb 11 (timezone-adjusted) NOT Feb 10 (UTC)
+        // This proves the each() method is being called and updating the date property
+        $feb10Entry = collect($result['calendarView'])->firstWhere('date', '2025-02-10');
+        $feb11Entry = collect($result['calendarView'])->firstWhere('date', '2025-02-11');
+
+        // Feb 10 should have NO events (the original UTC date)
+        expect($feb10Entry['calendarEvents'] ?? [])->toBeEmpty();
+
+        // Feb 11 should have the event (timezone-adjusted date)
+        expect($feb11Entry)->not->toBeNull()
+            ->and($feb11Entry['calendarEvents'])->toBeArray()->toHaveCount(1)
+            ->and($feb11Entry['calendarEvents'][0]['name'])->toBe('Late Night UTC Event');
+    });
+
+    it('each() method is essential for correct groupBy behavior with multiple events', function (): void {
+        $tz = 'Pacific/Auckland'; // UTC+12/+13
+        Date::setTestNow(Date::create(2025, 2, 10, 5, 0, 0, 'UTC'));
+
+        // Event 1: 10:00 UTC Feb 10 = 23:00 Feb 10 in Auckland (same day)
+        $event1Start = Date::create(2025, 2, 10, 10, 0, 0, 'UTC');
+        $event1 = CalendarEvent::factory()->create([
+            'title'             => 'Morning UTC',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $event1Start,
+            'end_date_time'     => $event1Start->copy()->addHour(),
+            'date'              => '2025-02-10',
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        // Event 2: 15:00 UTC Feb 10 = 04:00 Feb 11 in Auckland (next day!)
+        $event2Start = Date::create(2025, 2, 10, 15, 0, 0, 'UTC');
+        $event2 = CalendarEvent::factory()->create([
+            'title'             => 'Afternoon UTC',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $event2Start,
+            'end_date_time'     => $event2Start->copy()->addHour(),
+            'date'              => '2025-02-10',
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach([$event1->getKey(), $event2->getKey()], [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $checkedDate = Date::parse('2025-02-10');
+        $result = new MonthCalendarEventsService($this->user, $checkedDate, $tz)->getMonthCalendarEvents();
+
+        $feb10Entry = collect($result['calendarView'])->firstWhere('date', '2025-02-10');
+        $feb11Entry = collect($result['calendarView'])->firstWhere('date', '2025-02-11');
+
+        // Without each(), both events would be grouped under Feb 10 (UTC date)
+        // With each(), they should be split: event1 on Feb 10, event2 on Feb 11
+        expect($feb10Entry['calendarEvents'])->toBeArray()->toHaveCount(1)
+            ->and($feb10Entry['calendarEvents'][0]['name'])->toBe('Morning UTC');
+
+        expect($feb11Entry['calendarEvents'])->toBeArray()->toHaveCount(1)
+            ->and($feb11Entry['calendarEvents'][0]['name'])->toBe('Afternoon UTC');
     });
 });

@@ -104,4 +104,68 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         expect($this->event->fresh()->status)
             ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
     });
+
+    it('rejects confirmation when exactly ONE overlapping confirmed event exists', function (): void {
+        Auth::login($this->host);
+
+        // Create exactly one overlapping confirmed event for the mentor
+        $overlappingEvent = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => $this->event->start_date_time,
+            'end_date_time'     => $this->event->end_date_time,
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $overlappingEvent->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::RED->value,
+        ]);
+
+        $response = new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
+
+        expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
+            ->and(session('error'))->toBe('There are another confirmed event in this time slot.');
+
+        // Event should NOT be confirmed
+        expect($this->event->fresh()->status)
+            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+    });
+
+    it('excludes current event from overlap check (whereNotIn with event ID)', function (): void {
+        Auth::login($this->host);
+
+        // The event being confirmed should NOT be counted as overlapping with itself
+        // This test verifies that the current event is excluded from the whereNotIn check
+        $response = new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
+
+        // Should succeed since no OTHER confirmed events overlap
+        expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
+            ->and(session('success'))->toBe('Event was successfully confirmed.');
+
+        // Status should become CONFIRMED
+        expect($this->event->fresh()->status)
+            ->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+    });
+
+    it('rejects confirmation with error when start time is in the past', function (): void {
+        Auth::login($this->host);
+
+        // Update event to have start time in the past
+        $this->event->update([
+            'start_date_time' => Date::now()->subHour()->format('Y-m-d H:i:s'),
+        ]);
+
+        $response = new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
+
+        expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
+            ->and(session('error'))->toBe('Start time for this event is already past');
+
+        // Event should NOT be confirmed
+        expect($this->event->fresh()->status)
+            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+    });
 });

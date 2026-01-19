@@ -112,7 +112,7 @@ class StoreBatchUserScheduleRequest extends FormRequest
         $schedules = $this->input('schedules') ?? [];
         $deleteIds = $this->input('delete_ids') ?? [];
 
-        $overLappingErrors = new CheckUserScheduleOverlap($schedules, $deleteIds, $user?->id)
+        $overLappingErrors = new CheckUserScheduleOverlap($schedules, $deleteIds, $user->getKey())
             ->verifyOverlappingErrors();
 
         foreach ($overLappingErrors as $errorPair) {
