@@ -15,9 +15,9 @@ readonly class CheckTimeSlotReservedService
         private CarbonImmutable $endDateTime,
         private string $timezone,
         private User $user,
+        private MentorProgram $mentorProgram,
         /** @var array<int, int|string> $excludeEvents */
         private array $excludeEvents = [],
-        private ?MentorProgram $mentorProgram = null,
     ) {}
 
     public function isSlotAvailable(): bool

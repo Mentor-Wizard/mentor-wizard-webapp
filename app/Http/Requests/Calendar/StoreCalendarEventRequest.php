@@ -26,17 +26,18 @@ class StoreCalendarEventRequest extends FormRequest
             $user = auth()->user();
             $timezone = $user->profile->timezone;
 
-            $mentorProgram = MentorProgram::query()->find($this->input('mentor_program_id'))->first();
-            if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime'])) {
+            if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime', 'mentor_program_id'])) {
+                /** @var MentorProgram $mentorProgram */
+                $mentorProgram = MentorProgram::query()->findOrFail($this->input('mentor_program_id'));
                 $startDate = Date::createFromFormat(
                     '!Y-m-d H:i',
-                    $this->input('fromDate').$this->input('fromTime'),
+                    $this->input('fromDate').' '.$this->input('fromTime'), // @pest-mutate-ignore ConcatOperandRemoval
                     $timezone
                 );
 
                 $endDate = Date::createFromFormat(
                     '!Y-m-d H:i',
-                    $this->input('toDate').$this->input('toTime'),
+                    $this->input('toDate').' '.$this->input('toTime'),  // @pest-mutate-ignore ConcatOperandRemoval
                     $timezone
                 );
 
@@ -45,8 +46,7 @@ class StoreCalendarEventRequest extends FormRequest
                     $endDate,
                     $timezone,
                     auth()->user(),
-                    [],
-                    $mentorProgram
+                    $mentorProgram,
                 )->isSlotAvailable();
 
                 if (! $isWithinAvailableSlots) {

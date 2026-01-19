@@ -56,10 +56,15 @@ class CheckUserScheduleOverlap
 
     private function combineExistingAndNewSchedules(): void
     {
-        $existingSchedules = UserSchedule::query()->where('user_id', '=', $this->userId)
-            ->where('type', '!=', UserScheduleRecordType::DAY_OFF->value)
-            ->orWhere('type', '=', UserScheduleRecordType::DAY_OFF->value)
-            ->where('day_off_date', '>=', Date::today())
+        $existingSchedules = UserSchedule::query()
+            ->where('user_id', '=', $this->userId)
+            ->where(function ($query): void {
+                $query->where('type', '!=', UserScheduleRecordType::DAY_OFF->value)
+                    ->orWhere(function ($q): void {
+                        $q->where('type', '=', UserScheduleRecordType::DAY_OFF->value)
+                            ->where('day_off_date', '>=', Date::today());
+                    });
+            })
             ->get();
 
         $newIds = Arr::pluck($this->schedules, 'id');

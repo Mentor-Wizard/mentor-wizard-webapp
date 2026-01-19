@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
 use Database\Factories\CalendarEventFactory;
 use Database\Factories\CurrencyFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -33,6 +35,7 @@ use Illuminate\Support\Carbon;
  */
 #[UsePolicy(CalendarEventPolicy::class)]
 #[UseFactory(CalendarEventFactory::class)]
+#[ObservedBy(CalendarEventObserver::class)]
 class CalendarEvent extends Model
 {
     /** @use HasFactory<CurrencyFactory> */

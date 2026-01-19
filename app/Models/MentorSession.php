@@ -73,11 +73,11 @@ class MentorSession extends Model
     }
 
     /**
-     * @return HasOne<MentorProgram, $this>
+     * @return BelongsTo<MentorProgram, $this>
      */
-    public function mentorProgram(): HasOne
+    public function mentorProgram(): BelongsTo
     {
-        return $this->hasOne(MentorProgram::class);
+        return $this->belongsTo(MentorProgram::class);
     }
 
     /**

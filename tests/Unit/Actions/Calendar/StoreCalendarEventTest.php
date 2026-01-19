@@ -49,15 +49,15 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             $tomorrow = Date::tomorrow()->format('Y-m-d');
 
             return [
-                'title'       => 'Standup',
-                'fromDate'    => $tomorrow,
-                'toDate'      => $tomorrow,
-                'fromTime'    => '09:00',
-                'toTime'      => '10:00',
-                'description' => 'Daily standup',
-                'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'      => CalendarEventColoursEnum::BLUE->value,
-                'timezone'    => 'Europe/Kyiv',
+                'title'             => 'Standup',
+                'fromDate'          => $tomorrow,
+                'toDate'            => $tomorrow,
+                'fromTime'          => '09:00',
+                'toTime'            => '10:00',
+                'description'       => 'Daily standup',
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'colour'            => CalendarEventColoursEnum::BLUE->value,
+                'mentor_program_id' => $this->mentorProgram->id,
             ];
         },
         'multi day event' => function (): array {
@@ -65,15 +65,15 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             $dayAfter = Date::tomorrow()->addDay()->format('Y-m-d');
 
             return [
-                'title'       => 'Hackathon',
-                'fromDate'    => $tomorrow,
-                'toDate'      => $dayAfter,
-                'fromTime'    => '09:00',
-                'toTime'      => '10:00',
-                'description' => 'Team building',
-                'type'        => CalendarEventTypeEnum::GROUP->value,
-                'colour'      => CalendarEventColoursEnum::GREEN->value,
-                'timezone'    => 'Europe/Kyiv',
+                'title'             => 'Hackathon',
+                'fromDate'          => $tomorrow,
+                'toDate'            => $dayAfter,
+                'fromTime'          => '09:00',
+                'toTime'            => '10:00',
+                'description'       => 'Team building',
+                'type'              => CalendarEventTypeEnum::GROUP->value,
+                'colour'            => CalendarEventColoursEnum::GREEN->value,
+                'mentor_program_id' => $this->mentorProgram->id,
             ];
         },
     ]);

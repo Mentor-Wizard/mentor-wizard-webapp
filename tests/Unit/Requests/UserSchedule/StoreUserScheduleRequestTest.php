@@ -299,16 +299,15 @@ describe('StoreUserScheduleRequest validation rules', function (): void {
     it('allows missing day_off_date for non day off types', function (): void {
         actingAs($this->user);
 
-        $this->withoutMiddleware()
-            ->postJson(route('user-schedule.batch'),
-                [
-                    'schedules' => [[
-                        'day_of_week' => 1,
-                        'start_time'  => '09:00',
-                        'end_time'    => '17:00',
-                        'type'        => UserScheduleRecordType::WORKING_DAY->value,
-                    ]],
-                ])->assertStatus(302);
+        $this->postJson(route('user-schedule.batch'),
+            [
+                'schedules' => [[
+                    'day_of_week' => 1,
+                    'start_time'  => '09:00',
+                    'end_time'    => '17:00',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ]],
+            ])->assertStatus(302);
     });
 });
 describe('StoreUserScheduleRequest', function (): void {

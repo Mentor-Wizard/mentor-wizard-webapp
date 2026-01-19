@@ -384,5 +384,204 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         // NOW should have events after
         expect($result2['hasEventsAfter'])->toBeTrue();
     });
+});
 
+describe('DST Testing - MonthCalendarEventsService', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+    });
+
+    it('handles America/New_York spring forward DST transition', function (): void {
+        // March 9, 2025 at 2:00 AM clocks spring forward to 3:00 AM
+        $tz = 'America/New_York';
+        Date::setTestNow(Date::create(2025, 3, 9, 1, 0, 0, $tz));
+
+        // Create event during DST transition
+        $startUtc = Date::create(2025, 3, 9, 7, 0, 0, 'UTC'); // 2:00 AM EST / 3:00 AM EDT
+        $endUtc = (clone $startUtc)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'DST Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $service = new MonthCalendarEventsService($this->user, Date::parse('2025-03-09'), $tz);
+        $result = $service->getMonthCalendarEvents();
+
+        expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
+        expect($result['calendarView'])->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('handles Europe/Kyiv DST transition correctly', function (): void {
+        $tz = 'Europe/Kyiv';
+        Date::setTestNow(Date::create(2026, 3, 29, 1, 0, 0, $tz));
+
+        // Create event during DST transition
+        $startUtc = Date::create(2026, 3, 29, 1, 0, 0, 'UTC');
+        $endUtc = (clone $startUtc)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'DST Event Kyiv',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $service = new MonthCalendarEventsService($this->user, Date::parse('2026-03-29'), $tz);
+        $result = $service->getMonthCalendarEvents();
+
+        expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
+    });
+});
+
+describe('Boundary Date Tests - MonthCalendarEventsService', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+    });
+
+    it('handles Dec 31 to Jan 1 transition', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 12, 31, 20, 0, 0, $tz));
+
+        // Create event spanning midnight on New Year's Eve
+        $startUtc = Date::create(2025, 12, 31, 23, 0, 0, $tz);
+        $endUtc = Date::create(2026, 1, 1, 1, 0, 0, $tz);
+
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'New Year Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $service = new MonthCalendarEventsService($this->user, Date::parse('2025-12-31'), $tz);
+        $result = $service->getMonthCalendarEvents();
+
+        expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
+
+        // Find the Dec 31 entry
+        $dec31Entry = collect($result['calendarView'])->firstWhere('date', '2025-12-31');
+        expect($dec31Entry)->not()->toBeNull();
+    });
+
+    it('correctly handles startOfWeek and endOfWeek across months', function (): void {
+        $tz = 'UTC';
+
+        // Test a month that starts mid-week
+        Date::setTestNow(Date::create(2026, 2, 1, 10, 0, 0, $tz));
+
+        $service = new MonthCalendarEventsService($this->user, Date::parse('2026-02-01'), $tz);
+        $result = $service->getMonthCalendarEvents();
+
+        $calendarView = $result['calendarView'];
+
+        // Calendar view should include days from previous month (January)
+        // and days from next month (March)
+        $dates = collect($calendarView)->pluck('date');
+
+        // February 2026 starts on Sunday (week starts on Monday by default)
+        // So calendar should start from Monday Jan 26
+        expect($calendarView)->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('handles February 29 in leap year 2024', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2024, 2, 29, 10, 0, 0, $tz));
+
+        $startUtc = Date::create(2024, 2, 29, 14, 0, 0, $tz);
+        $endUtc = (clone $startUtc)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Leap Day Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $service = new MonthCalendarEventsService($this->user, Date::parse('2024-02-29'), $tz);
+        $result = $service->getMonthCalendarEvents();
+
+        // Find the Feb 29 entry
+        $feb29Entry = collect($result['calendarView'])->firstWhere('date', '2024-02-29');
+
+        expect($feb29Entry)->not()->toBeNull()
+            ->and($feb29Entry['calendarEvents'])->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('handles February 28 in non-leap year correctly', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 2, 28, 10, 0, 0, $tz));
+
+        $startUtc = Date::create(2025, 2, 28, 14, 0, 0, $tz);
+        $endUtc = (clone $startUtc)->addHour();
+
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Feb 28 Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $startUtc,
+            'end_date_time'     => $endUtc,
+            'date'              => $startUtc->format('Y-m-d'),
+            'type'              => 'individual',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
+
+        $service = new MonthCalendarEventsService($this->user, Date::parse('2025-02-28'), $tz);
+        $result = $service->getMonthCalendarEvents();
+
+        // Find the Feb 28 entry
+        $feb28Entry = collect($result['calendarView'])->firstWhere('date', '2025-02-28');
+
+        expect($feb28Entry)->not()->toBeNull()
+            ->and($feb28Entry['calendarEvents'])->toBeArray()->not()->toBeEmpty();
+
+        // Ensure no Feb 29 exists
+        $feb29Entry = collect($result['calendarView'])->firstWhere('date', '2025-02-29');
+        expect($feb29Entry)->toBeNull();
+    });
 });

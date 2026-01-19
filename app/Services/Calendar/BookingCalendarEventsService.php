@@ -29,8 +29,8 @@ class BookingCalendarEventsService
         private readonly CarbonInterface $date,
         private readonly User $user,
         private readonly string $timezone,
-        private readonly bool $excludeSchedule = false,
-        private readonly ?MentorProgram $mentorProgram = null,
+        private readonly bool $excludeSchedule,
+        private readonly MentorProgram $mentorProgram,
     ) {}
 
     /**
@@ -42,8 +42,8 @@ class BookingCalendarEventsService
      *     isToday?: bool,
      *     isCurrentMonth?: bool,
      *   }>,
-     *   hasEventsBefore: bool,
-     *   hasEventsAfter: bool,
+     *   hasSlotsBefore: bool,
+     *   hasSlotsAfter: bool,
      * }
      */
     public function getFormattedMonthAvailableSlots(): array
@@ -54,8 +54,8 @@ class BookingCalendarEventsService
 
         return [
             'calendarSlots'     => $this->calendarView,
-            'hasEventsBefore'   => $this->hasPreviousSlots(),
-            'hasEventsAfter'    => $this->hasFurtherSlots(),
+            'hasSlotsBefore'    => $this->hasPreviousSlots(),
+            'hasSlotsAfter'     => $this->hasFurtherSlots(),
         ];
     }
 
@@ -118,10 +118,10 @@ class BookingCalendarEventsService
     private function formatDateEvents(array $dateSlots): array
     {
         $dateSlots = collect($dateSlots);
-
         $firstEvent = $dateSlots->first();
         $payload = [
-            'date'  => $firstEvent['start']->setTimezone($this->timezone)->format('Y-m-d'),
+            'date'  => $firstEvent['start']
+                ->setTimezone($this->timezone)->format('Y-m-d'),
             'slots' => $dateSlots->all(),
         ];
 
@@ -165,6 +165,7 @@ class BookingCalendarEventsService
         foreach ($monthDates as $monthDate) {
             $dateKey = $monthDate->format('Y-m-d');
             $slotsPeriods = [];
+            $periods = null;
             if (Arr::has($slots, $dateKey)) {
                 $periods = Arr::get($slots, $dateKey);
                 foreach ($periods['slots'] as $period) {
@@ -178,9 +179,9 @@ class BookingCalendarEventsService
             $this->calendarView[] = [
                 'date'                      => $dateKey,
                 'slots'                     => $slotsPeriods,
-                'isSelected'                => isset($periods['isSelected']),
-                'isToday'                   => isset($periods['isToday']),
-                'isCurrentMonth'            => isset($periods['isCurrentMonth']),
+                'isSelected'                => $periods['isSelected'] ?? false,
+                'isToday'                   => $periods['isToday'] ?? false,
+                'isCurrentMonth'            => $periods['isCurrentMonth'] ?? false,
             ];
         }
 
@@ -189,13 +190,12 @@ class BookingCalendarEventsService
 
     private function hasPreviousSlots(): bool
     {
-        return ! $this->date->greaterThanOrEqualTo(Date::now()
-            ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET));
+        return $this->date->greaterThan(Date::now()->startOfMonth());
     }
 
     private function hasFurtherSlots(): bool
     {
-        return ! $this->date->lessThanOrEqualTo(Date::now()
-            ->subMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET));
+        return $this->date->lessThan(Date::now()
+            ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)->startOfMonth());
     }
 }

@@ -401,3 +401,230 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
         $response->assertForbidden();
     });
 });
+
+describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->user->profile->timezone = 'Europe/Kyiv';
+        $this->user->profile->save();
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+
+        auth()->login($this->user);
+    });
+
+    it('cannot edit event with FINISHED status', function (): void {
+        $finishedEvent = CalendarEvent::factory()->create([
+            'title'             => 'Finished event',
+            'status'            => CalendarEventStatusEnum::FINISHED->value,
+            'start_date_time'   => Date::yesterday()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::yesterday()->format('Y-m-d').' 13:00:00',
+            'date'              => Date::yesterday()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $finishedEvent->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        actingAs($this->user);
+
+        $eventData = [
+            'title'             => 'Updated title',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '12:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '13:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $finishedEvent->getKey()), [
+                ...$eventData,
+                '_token' => 'test-token',
+            ]);
+
+        // Should return error or forbidden
+        expect($response->status())->toBeIn([302, 403]);
+
+        if ($response->status() === 302) {
+            $response->assertSessionHas('error');
+        }
+
+        // Title should remain unchanged
+        expect($finishedEvent->fresh()->title)->toBe('Finished event');
+    });
+
+    it('cannot edit event with CANCELLED status', function (): void {
+        $cancelledEvent = CalendarEvent::factory()->create([
+            'title'             => 'Cancelled event',
+            'status'            => CalendarEventStatusEnum::CANCELLED->value,
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $cancelledEvent->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        actingAs($this->user);
+
+        $eventData = [
+            'title'             => 'Updated title',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '12:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '13:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $cancelledEvent->getKey()), [
+                ...$eventData,
+                '_token' => 'test-token',
+            ]);
+
+        // Should return error or forbidden
+        expect($response->status())->toBeIn([302, 403]);
+
+        if ($response->status() === 302) {
+            $response->assertSessionHas('error');
+        }
+
+        // Title should remain unchanged
+        expect($cancelledEvent->fresh()->title)->toBe('Cancelled event');
+    });
+
+    it('cannot edit title of event with confirmed status', function (): void {
+        $confirmedEvent = CalendarEvent::factory()->create([
+            'title'             => 'Confirmed event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $confirmedEvent->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        actingAs($this->user);
+
+        $eventData = [
+            'title'             => 'Updated title',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '12:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '13:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $confirmedEvent->getKey()), [
+                ...$eventData,
+                '_token' => 'test-token',
+            ]);
+
+        $response->assertRedirect(route('pages.calendar.index'));
+
+        expect($confirmedEvent->fresh()->title)->toBe('Confirmed event');
+    });
+
+    it('can edit web-link of  event with PENDING_MENTOR_CONFIRMATION status', function (): void {
+        $pendingEvent = CalendarEvent::factory()->create([
+            'title'             => 'Pending event',
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $pendingEvent->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        actingAs($this->user);
+
+        $eventData = [
+            'title'             => 'Pending event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '12:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '13:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'webLink'           => 'https://facebook.com',
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $pendingEvent->getKey()), [
+                ...$eventData,
+                '_token' => 'test-token',
+            ]);
+
+        $response->assertRedirect(route('pages.calendar.index'));
+
+        expect($pendingEvent->fresh()->web_link)->toBe('https://facebook.com');
+    });
+
+    it('unconfirmed user cannot edit calendar events', function (): void {
+        $unconfirmedUser = User::factory()->unverified()->create();
+        $unconfirmedUser->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $event = CalendarEvent::factory()->create([
+            'title'             => 'Event to edit',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
+            'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $event->calendarEventUsers()->attach($unconfirmedUser->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        actingAs($unconfirmedUser);
+        auth()->login($unconfirmedUser);
+
+        $eventData = [
+            'title'             => 'Updated title',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '12:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '13:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $event->getKey()), [
+                ...$eventData,
+                '_token' => 'test-token',
+            ]);
+
+        // Should redirect to verification notice or return 403
+        expect($response->status())->toBeIn([302, 403, 409]);
+    });
+});

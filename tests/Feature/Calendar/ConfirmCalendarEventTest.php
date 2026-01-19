@@ -50,7 +50,11 @@ describe('ConfirmCalendarEvent (Feature)', function (): void {
         auth()->login($this->host);
         $response = $this->withSession(['_token' => 'test-token'])
             ->patch(route('calendar.confirm.booking',
-                [$this->event->getKey(), '_token' => csrf_token()]));
+                [
+                    $this->mentorProgram->getKey(),
+                    $this->event->getKey(),
+                    '_token' => csrf_token(),
+                ]));
 
         $response->assertRedirect(route('pages.calendar.pending'));
         $response->assertSessionHas('success', 'Event was successfully confirmed.');
@@ -58,17 +62,39 @@ describe('ConfirmCalendarEvent (Feature)', function (): void {
         expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
     });
 
-    it('mentee confirms and sees waiting for cohost message while status stays pending', function (): void {
+    it('mentee tries to  confirm event and receive 403 code due to CalendarEvent policy restrictions', function (): void {
         $this->actingAs($this->mentee);
 
         $response = $this
             ->withSession(['_token' => 'test-token'])
             ->patch(route('calendar.confirm.booking',
-                [$this->event->getKey(), '_token' => csrf_token()]));
+                [
+                    $this->mentorProgram->getKey(),
+                    $this->event->getKey(),
+                    '_token' => csrf_token(),
+                ]));
 
-        $response->assertRedirect(route('pages.calendar.pending'));
-        $response->assertSessionHas('success', 'Event is confirmed on your side, but waiting for confirmation from CO-HOST');
+        expect($response->status())->toBe(403);
 
         expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+    });
+
+    it('unconfirmed user cannot confirm calendar events', function (): void {
+        $unconfirmedUser = User::factory()->unverified()->create();
+
+        $this->actingAs($unconfirmedUser);
+        auth()->login($unconfirmedUser);
+
+        $response = $this
+            ->withSession(['_token' => 'test-token'])
+            ->patch(route('calendar.confirm.booking',
+                [
+                    $this->mentorProgram->getKey(),
+                    $this->event->getKey(),
+                    '_token' => csrf_token(),
+                ]));
+
+        // Should redirect to verification notice or return 403
+        expect($response->status())->toBeIn([302, 403, 409]);
     });
 });

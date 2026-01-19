@@ -372,6 +372,7 @@ onMounted(() => {
     <MonthlyView
       v-if="currentTab === 'Month view'"
       :days="daysData"
+      :week-days="weekDays"
       :scroll-date="scrollDate"
       :open-show-edit-event-page="openShowEditEventPage"
     />

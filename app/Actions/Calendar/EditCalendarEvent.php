@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
+use App\Enums\CalendarEventStatusEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Illuminate\Support\Arr;
@@ -15,6 +16,13 @@ class EditCalendarEvent extends BaseCalendarEventAction
     {
         // Only update web_link according to the new business rule
         $validated = $request->validated();
+
+        if (in_array($calendarEvent->status, [
+            CalendarEventStatusEnum::FINISHED->value,
+            CalendarEventStatusEnum::CANCELLED->value])) {
+            return to_route('pages.calendar.index')
+                ->with('error', $calendarEvent->status.' calendar event cannot be edited');
+        }
 
         $webLink = array_key_exists('webLink', $validated) ? $validated['webLink'] : $calendarEvent->web_link;
         $description = array_key_exists('description', $validated)

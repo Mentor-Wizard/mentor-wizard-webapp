@@ -81,7 +81,8 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
     Route::patch('calendar-event/edit/{calendarEvent:id}', EditCalendarEvent::class)
         ->can('update', 'calendarEvent')
         ->name('pages.calendar.edit');
-    Route::patch('calendar-event/confirm/{calendarEvent:id}', ConfirmCalendarEvent::class)
+    Route::patch('mentor-programs/{mentorProgram:id}/calendar-events/{calendarEvent:id}/confirm', ConfirmCalendarEvent::class)
+        ->can('update', 'calendarEvent')
         ->name('calendar.confirm.booking');
     Route::delete('calendar-event/delete/{calendarEvent}', DeleteCalendarEvent::class)
         ->can('delete', 'calendarEvent')

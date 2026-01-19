@@ -55,7 +55,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
     it('confirms as host: updates pivot and sets event status to CONFIRMED', function (): void {
         Auth::login($this->host);
 
-        $response = new ConfirmCalendarEvent()->handle($this->event);
+        $response = new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
@@ -73,7 +73,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
     it('confirms as mentee: only updates pivot and keeps status pending', function (): void {
         Auth::login($this->mentee);
 
-        $response = new ConfirmCalendarEvent()->handle($this->event);
+        $response = new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'));
@@ -95,7 +95,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         Auth::login($this->host);
 
-        $response = new ConfirmCalendarEvent()->handle($this->event);
+        $response = new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))

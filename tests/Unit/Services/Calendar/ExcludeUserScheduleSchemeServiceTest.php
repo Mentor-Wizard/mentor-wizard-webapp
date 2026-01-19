@@ -889,4 +889,147 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         expect($slots[0]['start']->format('Y-m-d H:i'))->toBe($monday->format('Y-m-d').' 10:00')
             ->and($slots[0]['end']->format('Y-m-d H:i'))->toBe($monday->format('Y-m-d').' 15:00');
     });
+
+    describe('DST Testing', function (): void {
+        it('handles America/New_York spring forward DST transition', function (): void {
+            // DST in America/New_York 2026: March 8 at 2:00 AM skips to 3:00 AM
+            $tz = 'America/New_York';
+            $dstDay = Date::parse('2026-03-08', $tz);
+
+            /** @var User $user */
+            $user = User::factory()->create();
+            $user->profile->timezone = $tz;
+            $user->profile->save();
+
+            // Create schedule for Sunday (day 0): 00:00-23:59
+            UserSchedule::query()->create([
+                'user_id'     => $user->getKey(),
+                'day_of_week' => 0, // Sunday
+                'start_time'  => '00:00:00',
+                'end_time'    => '23:59:00',
+                'type'        => UserScheduleRecordType::WORKING_DAY,
+            ]);
+
+            // Event slot spanning the DST transition (1:00 AM to 4:00 AM)
+            $eventsSlots = [
+                [
+                    'start' => $dstDay->copy()->setTime(1, 0, 0),
+                    'end'   => $dstDay->copy()->setTime(4, 0, 0),
+                ],
+            ];
+
+            $result = new ExcludeUserScheduleSchemeService($user, $eventsSlots, $tz);
+            $slots = $result->getAvailableSlots();
+
+            // Should handle DST gracefully
+            expect($slots)->toBeArray()->not()->toBeEmpty();
+            expect($slots[0]['start']->timezone->getName())->toBe($tz);
+        });
+
+        it('handles America/New_York fall back DST transition', function (): void {
+            // DST ends in America/New_York 2026: November 1 at 2:00 AM falls back to 1:00 AM
+            $tz = 'America/New_York';
+            $dstDay = Date::parse('2026-11-01', $tz);
+
+            /** @var User $user */
+            $user = User::factory()->create();
+            $user->profile->timezone = $tz;
+            $user->profile->save();
+
+            // Create schedule for Sunday (day 0): 00:00-23:59
+            UserSchedule::query()->create([
+                'user_id'     => $user->getKey(),
+                'day_of_week' => 0, // Sunday
+                'start_time'  => '00:00:00',
+                'end_time'    => '23:59:00',
+                'type'        => UserScheduleRecordType::WORKING_DAY,
+            ]);
+
+            // Event slot spanning the DST transition (midnight to 4:00 AM)
+            $eventsSlots = [
+                [
+                    'start' => $dstDay->copy()->setTime(0, 0, 0),
+                    'end'   => $dstDay->copy()->setTime(4, 0, 0),
+                ],
+            ];
+
+            $result = new ExcludeUserScheduleSchemeService($user, $eventsSlots, $tz);
+            $slots = $result->getAvailableSlots();
+
+            // Should handle DST gracefully without errors
+            expect($slots)->toBeArray()->not()->toBeEmpty();
+            expect($slots[0]['start']->timezone->getName())->toBe($tz);
+        });
+
+        it('handles Europe/Kyiv DST transition correctly', function (): void {
+            // DST in Europe/Kyiv 2026: March 29 at 3:00 AM skips to 4:00 AM
+            $tz = 'Europe/Kyiv';
+            $dstDay = Date::parse('2026-03-29', $tz);
+
+            /** @var User $user */
+            $user = User::factory()->create();
+            $user->profile->timezone = $tz;
+            $user->profile->save();
+
+            // Create schedule for Sunday (day 0): 00:00-23:59
+            UserSchedule::query()->create([
+                'user_id'     => $user->getKey(),
+                'day_of_week' => 0, // Sunday
+                'start_time'  => '00:00:00',
+                'end_time'    => '23:59:00',
+                'type'        => UserScheduleRecordType::WORKING_DAY,
+            ]);
+
+            // Event slot spanning the DST transition
+            $eventsSlots = [
+                [
+                    'start' => $dstDay->copy()->setTime(2, 0, 0),
+                    'end'   => $dstDay->copy()->setTime(5, 0, 0),
+                ],
+            ];
+
+            $result = new ExcludeUserScheduleSchemeService($user, $eventsSlots, $tz);
+            $slots = $result->getAvailableSlots();
+
+            // Should handle DST gracefully
+            expect($slots)->toBeArray()->not()->toBeEmpty();
+            expect($slots[0]['start']->timezone->getName())->toBe($tz);
+        });
+
+        it('handles UserSchedule working hours during DST transition day', function (): void {
+            // DST in America/New_York 2026: March 8 at 2:00 AM skips to 3:00 AM
+            $tz = 'America/New_York';
+            $dstDay = Date::parse('2026-03-08', $tz);
+
+            /** @var User $user */
+            $user = User::factory()->create();
+            $user->profile->timezone = $tz;
+            $user->profile->save();
+
+            // Create schedule for Sunday (day 0): 09:00-17:00 (working hours)
+            UserSchedule::query()->create([
+                'user_id'     => $user->getKey(),
+                'day_of_week' => 0, // Sunday
+                'start_time'  => '09:00:00',
+                'end_time'    => '17:00:00',
+                'type'        => UserScheduleRecordType::WORKING_DAY,
+            ]);
+
+            // Event slot during normal working hours (after DST transition)
+            $eventsSlots = [
+                [
+                    'start' => $dstDay->copy()->setTime(8, 0, 0),
+                    'end'   => $dstDay->copy()->setTime(18, 0, 0),
+                ],
+            ];
+
+            $result = new ExcludeUserScheduleSchemeService($user, $eventsSlots, $tz);
+            $slots = $result->getAvailableSlots();
+
+            // Should get slot trimmed to working hours
+            expect($slots)->toBeArray()->toHaveCount(1);
+            expect($slots[0]['start']->format('H:i'))->toBe('09:00')
+                ->and($slots[0]['end']->format('H:i'))->toBe('17:00');
+        });
+    });
 });

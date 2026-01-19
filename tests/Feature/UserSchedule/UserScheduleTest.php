@@ -19,7 +19,6 @@ beforeEach(function (): void {
     $this->user = User::factory()->create();
     $this->user->assignRole(RoleEnum::MENTOR);
 
-    $this->withoutMiddleware();
 });
 
 it('displays user schedule page for authenticated user', function (): void {
@@ -37,7 +36,6 @@ it('displays user schedule page for authenticated user', function (): void {
 
 // Batch Operation Tests
 it('saves multiple schedules in one batch request', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $batchData = [
@@ -77,7 +75,6 @@ it('saves multiple schedules in one batch request', function (): void {
 });
 
 it('updates existing schedules in batch request', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $schedule = UserSchedule::factory()->create([
@@ -116,7 +113,6 @@ it('updates existing schedules in batch request', function (): void {
 });
 
 it('deletes schedules in batch request', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $schedule1 = UserSchedule::factory()->create([
@@ -155,7 +151,6 @@ it('deletes schedules in batch request', function (): void {
 });
 
 it('creates, updates, and deletes schedules in one batch request', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $existingSchedule = UserSchedule::factory()->create([
@@ -235,8 +230,7 @@ it('fails when exceeding maximum number of schedules per day', function (): void
         ];
     }
 
-    $response = $this->withoutMiddleware()
-        ->from(route('user-schedule.index'))
+    $response = $this->from(route('user-schedule.index'))
         ->post(route('user-schedule.batch'), [
             'schedules'  => $schedules,
             'delete_ids' => [],
@@ -247,7 +241,6 @@ it('fails when exceeding maximum number of schedules per day', function (): void
 });
 
 it('fails when exceeding maximum number of day-off exclusions', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $schedules = [];
@@ -272,7 +265,6 @@ it('fails when exceeding maximum number of day-off exclusions', function (): voi
 });
 
 it('validates overlapping schedules in batch request', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $batchData = [
@@ -326,7 +318,6 @@ it('prevents batch deletion of another users schedules', function (): void {
 });
 
 it('prevents batch update of another users schedules', function (): void {
-    $this->withoutMiddleware();
     actingAs($this->user);
 
     $otherUser = User::factory()->create();

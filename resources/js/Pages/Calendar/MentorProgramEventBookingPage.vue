@@ -112,7 +112,7 @@ const goToMonth = (diff) => {
           <button
             type="button"
             class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="!days?.hasEventsAfter"
+            :disabled="!days?.hasSlotsAfter"
             @click="goToMonth(-1)"
           >
             Prev
@@ -123,7 +123,7 @@ const goToMonth = (diff) => {
           <button
             type="button"
             class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="!days?.hasEventsBefore"
+            :disabled="!days?.hasSlotsBefore"
             @click="goToMonth(1)"
           >
             Next

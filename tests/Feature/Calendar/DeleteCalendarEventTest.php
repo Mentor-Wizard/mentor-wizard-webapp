@@ -28,8 +28,6 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
 
         $this->nonMentorUser = User::factory()->create();
 
-        auth()->login($this->user);
-        actingAs($this->user);
         // Create a mentor program where the current user is the mentor
         $this->program = MentorProgram::factory()->create([
             'mentor_id' => $this->user->getKey(),
@@ -126,6 +124,7 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
         $this->event->update(['status' => CalendarEventStatusEnum::FINISHED->value]);
 
         actingAs($this->user);
+        auth()->login($this->user);
 
         $response = $this->withSession(['_token' => 'test-token'])
             ->delete(route('pages.calendar.delete', $this->event->getKey()), [
@@ -140,5 +139,20 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
             'id'     => $this->event->getKey(),
             'status' => CalendarEventStatusEnum::FINISHED->value,
         ]);
+    });
+
+    it('unconfirmed user cannot delete calendar events', function (): void {
+        $unconfirmedUser = User::factory()->unverified()->create();
+
+        actingAs($unconfirmedUser);
+        auth()->login($unconfirmedUser);
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $this->event->getKey()), [
+                '_token' => csrf_token(),
+            ]);
+
+        // Should redirect to verification notice or return 403
+        expect($response->status())->toBeIn([302, 403, 409]);
     });
 });

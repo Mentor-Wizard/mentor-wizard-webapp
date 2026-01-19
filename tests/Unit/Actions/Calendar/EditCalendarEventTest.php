@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Calendar\EditCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -43,6 +44,7 @@ describe('EditCalendarEvent', function (): void {
             'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
             'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
             'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
             'mentor_program_id' => $mentorProgram->getKey(),
         ]);
 
@@ -83,6 +85,7 @@ describe('EditCalendarEvent', function (): void {
 
         // Refresh event and check both users are still attached
         $event->refresh();
+
         expect($event->calendarEventUsers)->toHaveCount(2)
             ->and($event->calendarEventUsers->pluck('id')->toArray())
             ->toContain($this->user->getKey(), $otherUser->getKey());
@@ -108,11 +111,13 @@ describe('EditCalendarEvent', function (): void {
             'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
             'date'              => Date::now()->addDays(2)->format('Y-m-d'),
             'description'       => 'Original description',
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
             'mentor_program_id' => $mentorProgram->getKey(),
         ]);
 
         $event->calendarEventUsers()->attach($this->user->getKey(),
-            ['colour' => CalendarEventColoursEnum::BLUE->value]);
+            ['colour'  => CalendarEventColoursEnum::BLUE->value,
+                'role' => CalendarEventRoleEnum::HOST->value]);
 
         $data = [
             'title'             => 'Updated Title',
@@ -133,7 +138,7 @@ describe('EditCalendarEvent', function (): void {
         $request->validateResolved();
 
         $action = new EditCalendarEvent;
-        $action->handle($request, $event);
+        $result = $action->handle($request, $event);
 
         $event->refresh();
         expect($event->web_link)->toBe('https://google.com')

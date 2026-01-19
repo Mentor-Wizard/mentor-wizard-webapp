@@ -37,26 +37,28 @@ class SplitSlotsPerSessionDuration
                     ->excludeEndDate();
                 foreach ($periods as $period) {
                     $date = $period->timezone($this->timezone)->format('Y-m-d');
-                    $slotElement = [
-                        'start' => $period->copy()->subMinutes($this->sessionDurationInMinutes),
-                        'end'   => $period,
-                    ];
-                    if (isset($this->splitSlots[$date])) {
-                        $this->splitSlots[$date][] = $slotElement;
-                    } else {
-                        $this->splitSlots[$date] = [$slotElement];
+                    if ($date === $period->copy()->subMinutes($this->sessionDurationInMinutes)->format('Y-m-d')) {
+                        $this->saveSlotToArray($period->copy()->subMinutes($this->sessionDurationInMinutes), $period, $date);
                     }
                 }
             } elseif ($slotDuration === $this->sessionDurationInMinutes) {
-                $this->splitSlots[$slot['start']->format('Y-m-d')]
-                = [[
-                    'start' => $slot['start'],
-                    'end'   => $slot['end'],
-
-                ]];
+                $this->saveSlotToArray($slot['start'], $slot['end'], $slot['start']->format('Y-m-d'));
             }
         }
 
         return $this->splitSlots;
+    }
+
+    private function saveSlotToArray(CarbonInterface $startTime, CarbonInterface $endTime, string $date): void
+    {
+        $slotElement = [
+            'start' => $startTime,
+            'end'   => $endTime,
+        ];
+        if (isset($this->splitSlots[$date])) {
+            $this->splitSlots[$date][] = $slotElement;
+        } else {
+            $this->splitSlots[$date] = [$slotElement];
+        }
     }
 }

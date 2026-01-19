@@ -32,9 +32,12 @@ const showNotification = (success, message) => {
   }, 5000);
 };
 
-const confirmCalendarEvent = (calendarEventId) => {
+const confirmCalendarEvent = (calendarEventId, mentorProgramId) => {
   router.patch(
-    route('calendar.confirm.booking', { id: calendarEventId }),
+    route('calendar.confirm.booking', {
+      mentorProgram: mentorProgramId,
+      calendarEvent: calendarEventId,
+    }),
     {},
     {
       preserveScroll: true,
@@ -47,7 +50,6 @@ const confirmCalendarEvent = (calendarEventId) => {
     },
   );
 };
-
 const openEvent = (calendarEventId) => {
   router.visit(route('pages.calendar.show', { id: calendarEventId }));
 };
@@ -117,7 +119,9 @@ onMounted(() => {
                 <button
                   type="button"
                   class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  @click="confirmCalendarEvent(event.id)"
+                  @click="
+                    confirmCalendarEvent(event.id, event.mentor_program_id)
+                  "
                 >
                   <PlusIcon class="mr-1.5 -ml-0.5 h-5 w-5" aria-hidden="true" />
                   Confirm

@@ -22,9 +22,17 @@ class CalendarEventObserver
                 ->wherePivot('role', CalendarEventRoleEnum::HOST->value)
                 ->first();
 
-            if ($hostUser !== null) {
+            $participant = $event->calendarEventUsers()
+                ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT->value)
+                ->first();
+
+            if ($hostUser !== null && $participant !== null) {
                 MentorSession::query()->create([
-                    'mentor_id' => (int) $hostUser->getKey(),
+                    'mentor_id'         => (int) $hostUser->getKey(),
+                    'menti_id'          => $participant->getKey(),
+                    'date'              => $event->start_date_time,
+                    'cost'              => $event->mentorProgram->cost,
+                    'mentor_program_id' => $event->mentor_program_id,
                 ]);
             }
         }

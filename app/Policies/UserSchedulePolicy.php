@@ -28,8 +28,10 @@ class UserSchedulePolicy
 
         return ! UserSchedule::query()
             ->whereIn('id', $allIdsToCheck)
-            ->where('user_id', '!=', $user->id)
-            ->orWhereNull('user_id')
+            ->where(function ($query) use ($user): void {
+                $query->where('user_id', '!=', $user->id)
+                    ->orWhereNull('user_id');
+            })
             ->exists();
     }
 }

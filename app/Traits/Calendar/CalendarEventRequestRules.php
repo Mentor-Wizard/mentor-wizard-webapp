@@ -24,10 +24,10 @@ trait CalendarEventRequestRules
             'fromTime'              => ['required', 'date_format:H:i', 'bail'],
             'toTime'                => ['required', 'date_format:H:i', 'after:fromTime', 'bail'],
             'colour'                => ['required', Rule::in(CalendarEventColoursEnum::values())],
-            'description'           => ['max:2000'],
+            'description'           => ['nullable', 'string', 'max:2000'],
             'webLink'               => ['sometimes', 'nullable', 'url'],
             'type'                  => ['required', Rule::in(CalendarEventTypeEnum::values())],
-            'mentor_program_id'     => ['required', 'integer'],
+            'mentor_program_id'     => ['required', 'integer', 'exists:mentor_programs,id'],
         ];
     }
 

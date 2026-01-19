@@ -124,10 +124,10 @@ class ExcludeUserScheduleSchemeService
         if ($startTime->format('Y-m-d') !== $endTime->format('Y-m-d')) {
             $this->checkedIntervals[] = [
                 'start' => $startTime,
-                'end'   => $startTime->endOfDay(),
+                'end'   => $startTime->copy()->endOfDay(),
             ];
             $this->checkedIntervals[] = [
-                'start' => clone ($endTime)->startOfDay(),
+                'start' => $endTime->copy()->startOfDay(),
                 'end'   => $endTime,
             ];
         } else {

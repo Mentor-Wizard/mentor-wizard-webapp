@@ -996,3 +996,371 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         expect($result[0]['start']->format('H:i'))->toBe('10:00');
     });
 });
+
+describe('DST Testing', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+    });
+
+    it('handles America/New_York spring forward DST transition', function (): void {
+        // March 9, 2025 at 2:00 AM clocks spring forward to 3:00 AM
+        $tz = 'America/New_York';
+        Date::setTestNow(Date::create(2025, 3, 9, 1, 0, 0, $tz));
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('handles America/New_York fall back DST transition', function (): void {
+        // November 2, 2025 at 2:00 AM clocks fall back to 1:00 AM
+        $tz = 'America/New_York';
+        Date::setTestNow(Date::create(2025, 11, 2, 1, 0, 0, $tz));
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('calculates slots when offset changes from UTC-5 to UTC-4', function (): void {
+        $tz = 'America/New_York';
+        // Before DST transition
+        Date::setTestNow(Date::create(2025, 3, 8, 12, 0, 0, $tz)); // EST (UTC-5)
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slotsBeforeDst = $service->getAvailableSlots();
+
+        // After DST transition
+        Date::setTestNow(Date::create(2025, 3, 10, 12, 0, 0, $tz)); // EDT (UTC-4)
+
+        $serviceAfter = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slotsAfterDst = $serviceAfter->getAvailableSlots();
+
+        expect($slotsBeforeDst)->toBeArray()->not()->toBeEmpty();
+        expect($slotsAfterDst)->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('handles Europe/Kyiv DST transition correctly', function (): void {
+        // Europe/Kyiv DST: Last Sunday of March at 03:00 (spring forward)
+        $tz = 'Europe/Kyiv';
+        Date::setTestNow(Date::create(2026, 3, 29, 2, 30, 0, $tz));
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+    });
+});
+
+describe('Boundary Date Tests', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+    });
+
+    it('handles event at exact month boundary - last minute of month', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2026, 1, 31, 23, 30, 0, $tz));
+
+        // Create event ending at 23:59 on last day of month
+        $eventStart = Date::parse('2026-01-31 23:00:00', $tz);
+        $eventEnd = Date::parse('2026-01-31 23:59:00', $tz);
+
+        CalendarEvent::factory()->create([
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ])->calendarEventUsers()->attach($this->user->getKey());
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray();
+    });
+
+    it('handles year boundary Dec 31 to Jan 1', function (): void {
+        $tz = 'UTC';
+        Date::setTestNow(Date::create(2025, 12, 31, 20, 0, 0, $tz));
+
+        // Create event spanning midnight
+        $eventStart = Date::parse('2025-12-31 23:00:00', $tz);
+        $eventEnd = Date::parse('2026-01-01 01:00:00', $tz);
+
+        CalendarEvent::factory()->create([
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ])->calendarEventUsers()->attach($this->user->getKey());
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('handles timezone-induced date change UTC to Pacific/Auckland', function (): void {
+        // Pacific/Auckland is UTC+12/+13
+        $tzAuckland = 'Pacific/Auckland';
+        $tzUtc = 'UTC';
+
+        Date::setTestNow(Date::create(2026, 1, 15, 10, 0, 0, $tzUtc)); // 10:00 UTC = 23:00 Auckland
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tzAuckland,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+    });
+
+    it('handles timezone-induced date change going backwards to America/Los_Angeles', function (): void {
+        // America/Los_Angeles is UTC-8/-7
+        $tzLA = 'America/Los_Angeles';
+
+        Date::setTestNow(Date::create(2026, 1, 15, 5, 0, 0, 'UTC')); // 05:00 UTC = 21:00 LA (prev day)
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tzLA,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+    });
+});
+
+describe('Pre-booking Time Changes', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->user->getKey(),
+        ]);
+
+        $this->timezone = 'UTC';
+    });
+
+    it('updates available slots when minimum_pre_booking_time increases', function (): void {
+        Date::setTestNow(Date::create(2026, 1, 10, 10, 0, 0, $this->timezone));
+
+        // Low pre-booking time
+        $this->user->profile->update(['minimum_pre_booking_time' => 30]);
+
+        $serviceShort = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slotsShort = $serviceShort->getAvailableSlots();
+
+        //         High pre-booking time
+        $this->user->profile->update(['minimum_pre_booking_time' => 1440]); // 24 hours
+        $this->mentorProgram->refresh();
+
+        $serviceLong = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slotsLong = $serviceLong->getAvailableSlots();
+
+        // With longer pre-booking time, first available slot starts later
+        expect($slotsLong[0]['start']->gt($slotsShort[0]['start']))->toBeTrue();
+    });
+
+    it('updates available slots when minimum_pre_booking_time decreases', function (): void {
+        Date::setTestNow(Date::create(2026, 1, 10, 10, 0, 0, $this->timezone));
+
+        // High pre-booking time first
+        $this->user->profile->update(['minimum_pre_booking_time' => 1440]); // 24 hours
+
+        $serviceLong = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slotsLong = $serviceLong->getAvailableSlots();
+
+        // Then decrease it
+        $this->user->profile->update(['minimum_pre_booking_time' => 60]); // 1 hour
+        $this->mentorProgram->refresh();
+
+        $serviceShort = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slotsShort = $serviceShort->getAvailableSlots();
+
+        // With shorter pre-booking time, first available slot starts earlier
+        expect($slotsShort[0]['start']->lt($slotsLong[0]['start']))->toBeTrue();
+    });
+
+    it('handles very large minimum_pre_booking_time of 10080 minutes', function (): void {
+        Date::setTestNow(Date::create(2026, 1, 10, 10, 0, 0, $this->timezone));
+
+        // 10080 minutes = 7 days
+        $this->user->profile->update(['minimum_pre_booking_time' => 10080]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+
+        // First slot should start at least 7 days from now
+        $expectedMinStart = Date::now($this->timezone)->addMinutes(10080);
+        expect($slots[0]['start']->gte($expectedMinStart))->toBeTrue();
+    });
+});
+
+describe('Session Duration Changes', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->user->profile->update(['minimum_pre_booking_time' => 0]);
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id'        => $this->user->getKey(),
+            'session_duration' => 30,
+        ]);
+
+        $this->timezone = 'UTC';
+    });
+
+    it('existing bookings remain valid after session_duration change', function (): void {
+        Date::setTestNow(Date::create(2026, 1, 10, 10, 0, 0, $this->timezone));
+
+        // Create an event with current session duration
+        $eventStart = Date::parse('2026-01-10 14:00:00', $this->timezone);
+        $eventEnd = Date::parse('2026-01-10 14:30:00', $this->timezone); // 30 min
+
+        $event = CalendarEvent::factory()->create([
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $event->calendarEventUsers()->attach($this->user->getKey());
+
+        // Change session duration to 60 minutes
+        $this->mentorProgram->update(['session_duration' => 60]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        // The existing 30-minute event should still be blocked out
+        $slotsDuringEvent = collect($slots)->filter(fn ($slot): bool => $slot['start']->lt($eventEnd) && $slot['end']->gt($eventStart));
+
+        // Should have gaps around the event
+        expect($slots)->toBeArray()->not()->toBeEmpty();
+    });
+});

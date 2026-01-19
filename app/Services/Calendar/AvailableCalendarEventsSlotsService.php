@@ -68,12 +68,13 @@ class AvailableCalendarEventsSlotsService
 
     public function definePeriodStartAndEnd(): void
     {
-        $this->periodStart = Date::now($this->timezone);
+        $now = Date::now($this->timezone);
+        $this->periodStart = $now->copy();
         if ($this->mentorProgram->start_time) {
             $this->periodStart = $this->mentorProgram->start_time
-                ->greaterThanOrEqualTo(Date::now())
-                ? $this->mentorProgram->start_time
-                : Date::now();
+                ->greaterThanOrEqualTo($now)
+                ? $this->mentorProgram->start_time->copy()->timezone($this->timezone)
+                : $now->copy();
         }
 
         $this->periodFinish = Date::now($this->timezone)
@@ -99,10 +100,10 @@ class AvailableCalendarEventsSlotsService
             ->whereHas('calendarEventUsers', fn ($q) => $q->whereIn('users.id', $ids))
             ->with(['calendarEventUsers' => fn ($q) => $q->whereIn('users.id', $ids)]);
 
-        $calendarEventRequestQuery->where('start_date_time', '>=',
-            $this->periodStart);
-        $calendarEventRequestQuery->where('end_date_time', '<=',
-            $this->periodFinish);
+        $calendarEventRequestQuery->where(function ($query): void {
+            $query->where('end_date_time', '>', $this->periodStart)
+                ->where('start_date_time', '<', $this->periodFinish);
+        });
 
         $this->events = $calendarEventRequestQuery
             ->orderBy('start_date_time')
