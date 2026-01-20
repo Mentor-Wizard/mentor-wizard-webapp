@@ -75,7 +75,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         Auth::login($mentor);
 
-        $action = new ConfirmCalendar3Event;
+        $action = new ConfirmCalendarEvent;
         $response = $action->handle($mentorProgram, $calendarEvent);
 
         // Should NOT fail with overlap error (the event shouldn't find itself)
