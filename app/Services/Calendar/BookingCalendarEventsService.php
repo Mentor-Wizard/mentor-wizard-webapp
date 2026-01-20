@@ -16,7 +16,6 @@ class BookingCalendarEventsService
 {
     /**
      * @var array<int, array{
-     *   date: string,
      *   slots: array<int, array{start: string, end: string}>,
      *   isSelected?: bool,
      *   isToday?: bool,
@@ -76,7 +75,6 @@ class BookingCalendarEventsService
 
     /**
      * @return array<string, array{
-     *   date: string,
      *   slots: array<int, array{start: CarbonInterface, end: CarbonInterface}>,
      *   isSelected?: bool,
      *   isToday?: bool,

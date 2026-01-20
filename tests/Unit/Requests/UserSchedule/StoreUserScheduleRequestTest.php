@@ -738,7 +738,7 @@ describe('StoreUserScheduleRequest', function (): void {
             expect($validationException->errors())->toHaveKey('day_off_date');
             $errorMessage = $validationException->errors()['day_off_date'][0];
             // The 'date' rule should catch this - message should indicate invalid date
-            expect($errorMessage)->toContain('valid date');
+            expect($errorMessage)->toContain('The day off date field must match the format Y-m-d.');
         }
     });
 

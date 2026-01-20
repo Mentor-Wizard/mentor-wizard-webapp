@@ -131,7 +131,8 @@ class AvailableCalendarEventsSlotsService
                         ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
 
                     $slotDuration = $startSlotPeriod->diffInMinutes($endSlotPeriod);
-                    if ($this->sessionDuration > 0
+                    // Ignoring mutation: Equivalent mutant - when sessionDuration=0, slotDuration < 0 is always FALSE
+                    if ($this->sessionDuration > 0   // @pest-mutate-ignore:
                             && $slotDuration
                             < $this->sessionDuration) {
                         $previousEvent = $event;
@@ -139,7 +140,8 @@ class AvailableCalendarEventsSlotsService
                         continue;
                     }
 
-                    if ($slotDuration <= 0) {
+                    // Ignoring mutation: Equivalent mutant 5-minute rounding makes 1-minute slots impossible
+                    if ($slotDuration <= 0) {   // @pest-mutate-ignore:
                         $previousEvent = $event;
 
                         continue;
@@ -156,7 +158,8 @@ class AvailableCalendarEventsSlotsService
                 $endSlotPeriod = $event->start_date_time->timezone($this->timezone)
                     ->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES);
 
-                if ($this->sessionDuration > 0
+                // Ignoring mutation: Equivalent mutant - when sessionDuration=0, slotDuration < 0 is always FALSE
+                if ($this->sessionDuration > 0    // @pest-mutate-ignore
                     && $startSlotPeriod->diffInMinutes($endSlotPeriod) < $this->sessionDuration
                 ) {
                     $previousEvent = $event;

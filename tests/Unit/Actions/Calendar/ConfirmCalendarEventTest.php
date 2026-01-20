@@ -37,6 +37,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $this->event = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 09:00:00',
+            'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 10:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),

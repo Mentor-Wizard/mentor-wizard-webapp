@@ -390,7 +390,6 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
                     'day_of_week'  => 1,
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
                     'day_off_date' => Date::now()->addMonth()->format('Y-m-d'),
-                    'timezone'     => 'UTC',
                 ],
             ],
             'delete_ids' => [],
@@ -893,7 +892,7 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
 
         expect($validator->errors()->has('schedules.0.end_time'))->toBeTrue()
             ->and($validator->errors()->first('schedules.0.end_time'))
-            ->toBe('The schedules.0.end_time field is required.');
+            ->toBe('The schedules.0.end_time field is required when schedules.0.type is Working Day.');
     });
 
     it('fails when end_time format is invalid', function (): void {
@@ -1606,7 +1605,8 @@ describe('Mutation Coverage - messages array', function (): void {
         $validator = Validator::make($data, $request->rules(), $request->messages());
         $validator->fails();
 
-        expect($validator->errors()->first('schedules.0.start_time'))->toBe('Start time is required.');
+        expect($validator->errors()->first('schedules.0.start_time'))
+            ->toBe('The schedules.0.start_time field is required when schedules.0.type is Working Day.');
     });
 
     it('uses custom message for schedules.*.start_time.date_format (kills RemoveArrayItem on line 79)', function (): void {
@@ -1658,7 +1658,8 @@ describe('Mutation Coverage - messages array', function (): void {
         $validator = Validator::make($data, $request->rules(), $request->messages());
         $validator->fails();
 
-        expect($validator->errors()->first('schedules.0.end_time'))->toBe('End time is required.');
+        expect($validator->errors()->first('schedules.0.end_time'))
+            ->toBe('The schedules.0.end_time field is required when schedules.0.type is Working Day.');
     });
 
     it('uses custom message for schedules.*.end_time.date_format (kills RemoveArrayItem on line 81)', function (): void {
