@@ -26,7 +26,7 @@ class ShowCalendarEventPage
         return Inertia::render('Calendar/ShowEditCalendarEvent', [
             'locale'                => app()->getLocale(),
             'availableColours'      => CalendarEventColoursEnum::values(),
-            'permissions'           => $user->can('update', [$calendarEvent, $user]) ? 'edit' : 'view',
+            'permissions'           => $user->can('update', $calendarEvent) ? 'edit' : 'view',
             'mentorProgramDuration' => $calendarEvent->mentorProgram->first()->session_duration,
             'availableSlots'        => new AvailableSlotOptionsForMentorProgram($calendarEvent)->getAvailableSlots(),
             'calendarEvent'         => CalendarEventData::fromModel(

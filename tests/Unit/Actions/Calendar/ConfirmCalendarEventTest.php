@@ -53,6 +53,34 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
     });
 
+    it('does not consider the event itself when checking for overlaps', function (): void {
+        // Setup: Event already has CONFIRMED status but user hasn't confirmed their participation
+        $mentor = User::factory()->create();
+        $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $mentor->id]);
+
+        $calendarEvent = CalendarEvent::factory()->create([
+            'status'          => CalendarEventStatusEnum::CONFIRMED->value, // Already confirmed
+            'start_date_time' => Date::now()->addDay(),
+            'end_date_time'   => Date::now()->addDay()->addHour(),
+        ]);
+
+        // Attach mentor to event (not yet confirmed on pivot)
+        $calendarEvent->calendarEventUsers()->attach($mentor->id, [
+            'role'         => CalendarEventRoleEnum::HOST->value,
+            'confirmed_at' => null,
+        ]);
+
+        // Load mentor's calendarEvents relation
+        $mentor->load('calendarEvents');
+
+        Auth::login($mentor);
+
+        $action = new ConfirmCalendar3Event;
+        $response = $action->handle($mentorProgram, $calendarEvent);
+
+        // Should NOT fail with overlap error (the event shouldn't find itself)
+        expect(session('error'))->not->toBe('There are another confirmed event in this time slot.');
+    });
     it('confirms as host: updates pivot and sets event status to CONFIRMED', function (): void {
         Auth::login($this->host);
 

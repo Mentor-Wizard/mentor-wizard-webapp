@@ -22,6 +22,46 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
         actingAs($this->user);
     });
 
+    it('allows explicit null start_time and end_time for DAY_OFF schedule (kills nullable mutation)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week'  => 1,
+                    'start_time'   => null,  // Explicitly null
+                    'end_time'     => null,  // Explicitly null
+                    'type'         => UserScheduleRecordType::DAY_OFF->value,
+                    'day_off_date' => Date::now()->addMonth()->format('Y-m-d'),
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = new StoreBatchUserScheduleRequest;
+        $validator = Validator::make($data, $request->rules());
+
+        expect($validator->passes())->toBeTrue();
+    });
+
+    it('uses custom message for schedules.*.id.exists (kills RemoveArrayItem)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'id'          => 999999999,
+                    'day_of_week' => 1,
+                    'start_time'  => '09:00',
+                    'end_time'    => '17:00',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+        ];
+
+        $request = new StoreBatchUserScheduleRequest;
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.id'))->toBe('Schedule ID does not exist.');
+    });
+
     it('passes validation with valid batch data', function (): void {
         $data = [
             'schedules' => [
@@ -1606,7 +1646,7 @@ describe('Mutation Coverage - messages array', function (): void {
         $validator->fails();
 
         expect($validator->errors()->first('schedules.0.start_time'))
-            ->toBe('The schedules.0.start_time field is required when schedules.0.type is Working Day.');
+            ->toBe('Start time is required.');
     });
 
     it('uses custom message for schedules.*.start_time.date_format (kills RemoveArrayItem on line 79)', function (): void {
@@ -1659,7 +1699,7 @@ describe('Mutation Coverage - messages array', function (): void {
         $validator->fails();
 
         expect($validator->errors()->first('schedules.0.end_time'))
-            ->toBe('The schedules.0.end_time field is required when schedules.0.type is Working Day.');
+            ->toBe('End time is required.');
     });
 
     it('uses custom message for schedules.*.end_time.date_format (kills RemoveArrayItem on line 81)', function (): void {

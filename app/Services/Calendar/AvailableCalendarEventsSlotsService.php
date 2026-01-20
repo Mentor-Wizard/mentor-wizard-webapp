@@ -101,8 +101,7 @@ class AvailableCalendarEventsSlotsService
     {
         $ids = [$this->user->getKey(), $this->mentorProgram->mentor_id];
         $calendarEventRequestQuery = CalendarEvent::query()
-            ->whereHas('calendarEventUsers', fn ($q) => $q->whereIn('users.id', $ids))
-            ->with(['calendarEventUsers' => fn ($q) => $q->whereIn('users.id', $ids)]);
+            ->whereHas('calendarEventUsers', fn ($q) => $q->whereIn('users.id', $ids));
 
         $calendarEventRequestQuery->where(function ($query): void {
             $query->where('end_date_time', '>', $this->periodStart)
@@ -132,7 +131,7 @@ class AvailableCalendarEventsSlotsService
 
                     $slotDuration = $startSlotPeriod->diffInMinutes($endSlotPeriod);
                     // Ignoring mutation: Equivalent mutant - when sessionDuration=0, slotDuration < 0 is always FALSE
-                    if ($this->sessionDuration > 0   // @pest-mutate-ignore:
+                    if ($this->sessionDuration > 0   // @pest-mutate-ignore
                             && $slotDuration
                             < $this->sessionDuration) {
                         $previousEvent = $event;
@@ -141,7 +140,7 @@ class AvailableCalendarEventsSlotsService
                     }
 
                     // Ignoring mutation: Equivalent mutant 5-minute rounding makes 1-minute slots impossible
-                    if ($slotDuration <= 0) {   // @pest-mutate-ignore:
+                    if ($slotDuration <= 0) {   // @pest-mutate-ignore
                         $previousEvent = $event;
 
                         continue;
