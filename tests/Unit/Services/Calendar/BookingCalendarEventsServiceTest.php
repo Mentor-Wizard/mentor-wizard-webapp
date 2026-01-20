@@ -432,4 +432,165 @@ describe('BookingCalendarEventsService', function (): void {
             }
         });
     });
+
+    describe('Mutation Coverage - Return value structure', function (): void {
+        it('returns startDate in getMonthDates (kills RemoveArrayItem on line 72)', function (): void {
+            Date::setTestNow(Date::create(2026, 2, 10, 10, 0, 0, $this->timezone));
+
+            $service = new BookingCalendarEventsService(
+                Date::parse('2026-02-10', $this->timezone),
+                $this->user,
+                $this->timezone,
+                true,
+                $this->mentorProgram,
+            );
+
+            // Use reflection to call private method
+            $reflection = new ReflectionClass($service);
+            $method = $reflection->getMethod('prepareDateConfiguration');
+
+            $result = $method->invoke($service);
+
+            expect($result)->toHaveKey('startDate')
+                ->and($result['startDate'])->not->toBeNull();
+        });
+
+        it('returns endDate in getMonthDates (kills RemoveArrayItem on line 73)', function (): void {
+            Date::setTestNow(Date::create(2026, 2, 10, 10, 0, 0, $this->timezone));
+
+            $service = new BookingCalendarEventsService(
+                Date::parse('2026-02-10', $this->timezone),
+                $this->user,
+                $this->timezone,
+                true,
+                $this->mentorProgram,
+            );
+
+            $reflection = new ReflectionClass($service);
+            $method = $reflection->getMethod('prepareDateConfiguration');
+
+            $result = $method->invoke($service);
+
+            expect($result)->toHaveKey('endDate')
+                ->and($result['endDate'])->not->toBeNull();
+        });
+
+        it('returns date in buildSlotPayload (kills RemoveArrayItem on line 123)', function (): void {
+            Date::setTestNow(Date::create(2026, 2, 10, 10, 0, 0, $this->timezone));
+
+            $service = new BookingCalendarEventsService(
+                Date::parse('2026-02-15', $this->timezone),
+                $this->user,
+                $this->timezone,
+                true,
+                $this->mentorProgram,
+            );
+
+            $result = $service->getFormattedMonthAvailableSlots();
+
+            // Each calendar slot entry should have a 'date' key
+            $entryWithSlots = collect($result['calendarSlots'])
+                ->first(fn (array $entry): bool => isset($entry['date']));
+
+            expect($entryWithSlots)->not->toBeNull()
+                ->and($entryWithSlots)->toHaveKey('date')
+                ->and($entryWithSlots['date'])->not->toBeNull();
+        });
+
+        it('isSelected defaults to false not true (kills FalseToTrue on line 182)', function (): void {
+            Date::setTestNow(Date::create(2026, 2, 10, 10, 0, 0, $this->timezone));
+
+            $selectedDate = Date::parse('2026-02-15', $this->timezone);
+
+            $service = new BookingCalendarEventsService(
+                $selectedDate,
+                $this->user,
+                $this->timezone,
+                true,
+                $this->mentorProgram,
+            );
+
+            $result = $service->getFormattedMonthAvailableSlots();
+
+            // Find a date that is NOT the selected date
+            $nonSelectedEntry = collect($result['calendarSlots'])
+                ->firstWhere('date', '2026-02-16');
+
+            // Non-selected dates should have isSelected = false
+            expect($nonSelectedEntry)->not->toBeNull()
+                ->and($nonSelectedEntry['isSelected'])->toBeFalse();
+        });
+
+        it('isToday defaults to false not true (kills FalseToTrue on line 183)', function (): void {
+            Date::setTestNow(Date::create(2026, 2, 10, 10, 0, 0, $this->timezone));
+
+            $service = new BookingCalendarEventsService(
+                Date::now($this->timezone),
+                $this->user,
+                $this->timezone,
+                true,
+                $this->mentorProgram,
+            );
+
+            $result = $service->getFormattedMonthAvailableSlots();
+
+            // Find a date that is NOT today
+            $notTodayEntry = collect($result['calendarSlots'])
+                ->firstWhere('date', '2026-02-11');
+
+            // Non-today dates should have isToday = false
+            expect($notTodayEntry)->not->toBeNull()
+                ->and($notTodayEntry['isToday'])->toBeFalse();
+        });
+
+        it('isCurrentMonth defaults to false not true (kills FalseToTrue on line 184)', function (): void {
+            Date::setTestNow(Date::create(2026, 2, 10, 10, 0, 0, $this->timezone));
+
+            $service = new BookingCalendarEventsService(
+                Date::parse('2026-02-15', $this->timezone),
+                $this->user,
+                $this->timezone,
+                true,
+                $this->mentorProgram,
+            );
+
+            $result = $service->getFormattedMonthAvailableSlots();
+
+            // The calendar view includes days from adjacent months (padding)
+            // Find a January day (previous month) if visible
+            $prevMonthEntry = collect($result['calendarSlots'])
+                ->first(fn (array $entry): bool => str_starts_with($entry['date'], '2026-01'));
+
+            if ($prevMonthEntry) {
+                // Days from previous month should have isCurrentMonth = false
+                expect($prevMonthEntry['isCurrentMonth'])->toBeFalse();
+            }
+
+            // Find a March day (next month) if visible
+            $nextMonthEntry = collect($result['calendarSlots'])
+                ->first(fn (array $entry): bool => str_starts_with($entry['date'], '2026-03'));
+
+            if ($nextMonthEntry) {
+                // Days from next month should have isCurrentMonth = false
+                expect($nextMonthEntry['isCurrentMonth'])->toBeFalse();
+            }
+        });
+
+        it('returns non-empty calendarSlots array (kills AlwaysReturnEmptyArray on line 188)', function (): void {
+            Date::setTestNow(Date::create(2026, 2, 10, 10, 0, 0, $this->timezone));
+
+            $service = new BookingCalendarEventsService(
+                Date::now($this->timezone),
+                $this->user,
+                $this->timezone,
+                true,
+                $this->mentorProgram,
+            );
+
+            $result = $service->getFormattedMonthAvailableSlots();
+
+            // The buildCalendarView method should return a non-empty array
+            expect($result['calendarSlots'])->toBeArray()->not->toBeEmpty();
+        });
+    });
 });

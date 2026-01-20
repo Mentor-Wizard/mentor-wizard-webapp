@@ -168,4 +168,36 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         expect($this->event->fresh()->status)
             ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
     });
+
+    it('whereNotIn must include event ID to exclude self from overlap check (kills RemoveArrayItem)', function (): void {
+        Auth::login($this->host);
+
+        // Pre-confirm the event first (simulate an already confirmed event)
+        $this->event->update(['status' => CalendarEventStatusEnum::CONFIRMED->value]);
+
+        // Create a NEW pending event with the SAME time slot
+        $newEvent = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+            'start_date_time'   => $this->event->start_date_time,
+            'end_date_time'     => $this->event->end_date_time,
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $newEvent->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        // Now try to confirm the new event - it should fail because there's an overlapping confirmed event
+        $response = new ConfirmCalendarEvent()->handle($this->mentorProgram, $newEvent);
+
+        // The whereNotIn([$calendarEvent->id]) should exclude the new event from its own check
+        // but still find the FIRST confirmed event as overlapping
+        expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
+            ->and(session('error'))->toBe('There are another confirmed event in this time slot.');
+
+        // If whereNotIn([]) was used (empty array from mutation), the self-check would
+        // incorrectly include the event being confirmed, potentially causing false positives
+    });
 });

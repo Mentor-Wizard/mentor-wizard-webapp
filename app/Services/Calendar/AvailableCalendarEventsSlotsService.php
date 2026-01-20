@@ -40,7 +40,7 @@ class AvailableCalendarEventsSlotsService
         $mentor = $this->mentorProgram->mentor;
         $mentorProfile = $mentor->profile;
         $this->minimumPreBookingTimeInMinutes = $mentorProfile->minimum_pre_booking_time;
-        //Ignoring mutation fo session duration for the time being, as later expected to be used some rules for duration
+        // Ignoring mutation fo session duration for the time being, as later expected to be used some rules for duration
         $this->sessionDuration = $this->mentorProgram->session_duration ?? 0; // @pest-mutate-ignore
     }
 

@@ -96,6 +96,7 @@ describe('Update Calendar CalendarEvent web link (mentor only)', function (): vo
         $this->event = CalendarEvent::factory()->create([
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'mentor_program_id' => $this->program->getKey(),
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
             'web_link'          => null,
         ]);
         $this->event->calendarEventUsers()->attach($this->user->getKey(), ['role' => CalendarEventRoleEnum::HOST]);

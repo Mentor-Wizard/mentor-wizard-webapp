@@ -720,4 +720,37 @@ describe('StoreUserScheduleRequest', function (): void {
         // prepareForValidation should set times and withValidator should skip overlap
         expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
     });
+
+    it('validates day_off_date with date rule - rejects invalid calendar date (kills RemoveArrayItem mutation)', function (): void {
+        $request = new StoreUserScheduleRequest;
+        $request->merge([
+            'day_of_week'  => 2,
+            'type'         => UserScheduleRecordType::DAY_OFF->value,
+            // Format is correct (Y-m-d) but date is invalid (Feb 30 doesn't exist)
+            'day_off_date' => '2025-02-30',
+        ]);
+        ($this->prepareRequest)($request);
+
+        try {
+            $request->validateResolved();
+            $this->fail('Validation should have failed for invalid calendar date');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('day_off_date');
+            $errorMessage = $validationException->errors()['day_off_date'][0];
+            // The 'date' rule should catch this - message should indicate invalid date
+            expect($errorMessage)->toContain('valid date');
+        }
+    });
+
+    it('validates day_off_date accepts valid calendar date (proves date rule works)', function (): void {
+        $request = new StoreUserScheduleRequest;
+        $request->merge([
+            'day_of_week'  => 2,
+            'type'         => UserScheduleRecordType::DAY_OFF->value,
+            'day_off_date' => '2025-02-28', // Valid date
+        ]);
+        ($this->prepareRequest)($request);
+
+        expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
+    });
 });

@@ -36,7 +36,6 @@ class BookingCalendarEventsService
     /**
      * @return array{
      *   calendarSlots: array<int, array{
-     *     date: string,
      *     slots: array<int, array{start: string, end: string}>,
      *     isSelected?: bool,
      *     isToday?: bool,
@@ -108,7 +107,6 @@ class BookingCalendarEventsService
     /**
      * @param  array<int, array{start: CarbonInterface, end: CarbonInterface}>  $dateSlots
      * @return array{
-     *   date: string,
      *   slots: array<int, array{start: CarbonInterface, end: CarbonInterface}>,
      *   isSelected?: bool,
      *   isToday?: bool,
@@ -120,8 +118,6 @@ class BookingCalendarEventsService
         $dateSlots = collect($dateSlots);
         $firstEvent = $dateSlots->first();
         $payload = [
-            'date'  => $firstEvent['start']
-                ->setTimezone($this->timezone)->format('Y-m-d'),
             'slots' => $dateSlots->all(),
         ];
 
@@ -146,21 +142,13 @@ class BookingCalendarEventsService
     /**
      * @param  array<int, CarbonInterface>  $monthDates
      * @param array<string, array{
-     *   date: string,
      *   slots: array<int, array{start: CarbonInterface, end: CarbonInterface}>,
      *   isSelected?: bool,
      *   isToday?: bool,
      *   isCurrentMonth?: bool,
      * }> $slots
-     * @return array<int, array{
-     *   date: string,
-     *   slots: array<int, array{start: string, end: string}>,
-     *   isSelected?: bool,
-     *   isToday?: bool,
-     *   isCurrentMonth?: bool,
-     * }>
      */
-    private function buildCalendarView(array $monthDates, array $slots): array
+    private function buildCalendarView(array $monthDates, array $slots): void
     {
         foreach ($monthDates as $monthDate) {
             $dateKey = $monthDate->format('Y-m-d');
@@ -184,8 +172,6 @@ class BookingCalendarEventsService
                 'isCurrentMonth'            => $periods['isCurrentMonth'] ?? false,
             ];
         }
-
-        return $this->calendarView;
     }
 
     private function hasPreviousSlots(): bool

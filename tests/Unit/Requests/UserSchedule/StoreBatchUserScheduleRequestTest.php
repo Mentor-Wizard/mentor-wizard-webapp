@@ -388,8 +388,6 @@ describe('StoreBatchUserScheduleRequest validation rules', function (): void {
             'schedules' => [
                 [
                     'day_of_week'  => 1,
-                    'start_time'   => '00:00',
-                    'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
                     'day_off_date' => Date::now()->addMonth()->format('Y-m-d'),
                     'timezone'     => 'UTC',
@@ -682,8 +680,6 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
             'schedules' => [
                 [
                     'day_of_week'  => 1,
-                    'start_time'   => '00:00',
-                    'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
                     'day_off_date' => Date::now()->addMonth()->format('Y-m-d'),
                     'timezone'     => 'UTC',
@@ -1024,8 +1020,6 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
             'schedules' => [
                 [
                     'day_of_week' => 1,
-                    'start_time'  => '00:00',
-                    'end_time'    => '23:59',
                     'type'        => UserScheduleRecordType::DAY_OFF->value,
                 ],
             ],
@@ -1056,8 +1050,6 @@ describe('StoreBatchUserScheduleRequest custom validation - overlap detection', 
             'schedules' => [
                 [
                     'day_of_week'  => 1,
-                    'start_time'   => '00:00',
-                    'end_time'     => '23:59',
                     'type'         => UserScheduleRecordType::DAY_OFF->value,
                     'day_off_date' => 'not-a-date',
                 ],
@@ -1500,5 +1492,366 @@ describe('Mutation Coverage - hasAny guard and null-safe operator', function ():
         // and the overlap check ran with that user's schedules
         expect($validator->errors())->not->toBeEmpty();
     });
+});
 
+describe('Mutation Coverage - messages array', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        $this->user = User::factory()->create();
+        actingAs($this->user);
+    });
+
+    it('uses custom message for schedules.required (kills AlwaysReturnEmptyArray and RemoveArrayItem)', function (): void {
+        // This test verifies that the custom messages() method is being used
+        $request = new StoreBatchUserScheduleRequest;
+        $messages = $request->messages();
+
+        expect($messages)->not->toBeEmpty()
+            ->and($messages)->toHaveKey('schedules.required')
+            ->and($messages['schedules.required'])->toBe('Schedules are required.');
+    });
+
+    it('uses custom message for schedules.array (kills RemoveArrayItem on line 74)', function (): void {
+        $data = [
+            'schedules'  => 'not-an-array',
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules'))->toBe('Schedules must be an array.');
+    });
+
+    it('uses custom message for schedules.*.day_of_week.required (kills RemoveArrayItem on line 76)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    // day_of_week is missing
+                    'start_time' => '09:00',
+                    'end_time'   => '17:00',
+                    'type'       => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.day_of_week'))->toBe('Day of week is required.');
+    });
+
+    it('uses custom message for schedules.*.day_of_week.between (kills RemoveArrayItem on line 77)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 9, // Invalid - out of range
+                    'start_time'  => '09:00',
+                    'end_time'    => '17:00',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.day_of_week'))
+            ->toBe('Day of week must be between 0 (Sunday) and 6 (Saturday).');
+    });
+
+    it('uses custom message for schedules.*.start_time.required (kills RemoveArrayItem on line 78)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    // start_time is missing
+                    'end_time' => '17:00',
+                    'type'     => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.start_time'))->toBe('Start time is required.');
+    });
+
+    it('uses custom message for schedules.*.start_time.date_format (kills RemoveArrayItem on line 79)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    'start_time'  => '9:00', // Invalid format
+                    'end_time'    => '17:00',
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.start_time'))->toBe('Start time must be in HH:MM format.');
+    });
+
+    it('uses custom message for schedules.*.end_time.required (kills RemoveArrayItem on line 80)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    'start_time'  => '09:00',
+                    // end_time is missing
+                    'type' => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.end_time'))->toBe('End time is required.');
+    });
+
+    it('uses custom message for schedules.*.end_time.date_format (kills RemoveArrayItem on line 81)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    'start_time'  => '09:00',
+                    'end_time'    => '5pm', // Invalid format
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.end_time'))->toBe('End time must be in HH:MM format.');
+    });
+
+    it('uses custom message for schedules.*.end_time.after (kills RemoveArrayItem on line 82)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    'start_time'  => '17:00',
+                    'end_time'    => '09:00', // Before start_time
+                    'type'        => UserScheduleRecordType::WORKING_DAY->value,
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.end_time'))->toBe('End time must be after start time.');
+    });
+
+    it('uses custom message for schedules.*.type.required (kills RemoveArrayItem on line 83)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    'start_time'  => '09:00',
+                    'end_time'    => '17:00',
+                    // type is missing
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.type'))->toBe('Schedule type is required.');
+    });
+
+    it('uses custom message for schedules.*.type.in (kills RemoveArrayItem on line 84)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    'start_time'  => '09:00',
+                    'end_time'    => '17:00',
+                    'type'        => 'invalid_type',
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.type'))->toBe('Invalid schedule type selected.');
+    });
+
+    it('uses custom message for schedules.*.day_off_date.required_if (kills RemoveArrayItem on line 85)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week' => 1,
+                    'type'        => UserScheduleRecordType::DAY_OFF->value,
+                    // day_off_date is missing
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.day_off_date'))
+            ->toBe('Day off date is required when type is Day off.');
+    });
+
+    it('uses custom message for schedules.*.day_off_date.date (kills RemoveArrayItem on line 86)', function (): void {
+        $data = [
+            'schedules' => [
+                [
+                    'day_of_week'  => 1,
+                    'type'         => UserScheduleRecordType::DAY_OFF->value,
+                    'day_off_date' => '2025-02-30', // Invalid date
+                ],
+            ],
+            'delete_ids' => [],
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('schedules.0.day_off_date'))
+            ->toBe('Day off date must be a valid date.');
+    });
+
+    it('uses custom message for delete_ids.array (kills RemoveArrayItem on line 87)', function (): void {
+        $data = [
+            'schedules'  => [],
+            'delete_ids' => 'not-an-array',
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('delete_ids'))->toBe('Delete IDs must be an array.');
+    });
+
+    it('uses custom message for delete_ids.*.exists (kills RemoveArrayItem on line 88)', function (): void {
+        $data = [
+            'schedules'  => [],
+            'delete_ids' => [999999999], // Non-existent ID
+        ];
+
+        $request = StoreBatchUserScheduleRequest::create(
+            route('user-schedule.batch'),
+            'POST',
+            $data
+        );
+        $request->setUserResolver(fn () => $this->user);
+
+        $validator = Validator::make($data, $request->rules(), $request->messages());
+        $validator->fails();
+
+        expect($validator->errors()->first('delete_ids.0'))->toBe('Schedule ID to delete does not exist.');
+    });
 });

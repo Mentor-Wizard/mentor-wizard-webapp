@@ -53,10 +53,6 @@ class StoreBatchUserScheduleRequest extends FormRequest
                 return;
             }
 
-            if ($validator->errors()->hasAny(['schedules', 'delete_ids'])) {
-                return;
-            }
-
             $this->validateScheduleOverlaps($validator);
         });
     }
@@ -89,22 +85,22 @@ class StoreBatchUserScheduleRequest extends FormRequest
         ];
     }
 
-    /**
-     * Prepare the data for validation.
-     */
-    protected function prepareForValidation(): void
-    {
-        $schedules = $this->input('schedules', []);
-
-        foreach ($schedules as $index => $schedule) {
-            if (isset($schedule['type']) && $schedule['type'] === UserScheduleRecordType::DAY_OFF->value) {
-                $schedules[$index]['start_time'] = '00:00';
-                $schedules[$index]['end_time'] = '23:59';
-            }
-        }
-
-        $this->merge(['schedules' => $schedules]);
-    }
+    //    /**
+    //     * Prepare the data for validation.
+    //     */
+    //    protected function prepareForValidation(): void
+    //    {
+    //        $schedules = $this->input('schedules', []);
+    //
+    //        foreach ($schedules as $index => $schedule) {
+    //            if (isset($schedule['type']) && $schedule['type'] === UserScheduleRecordType::DAY_OFF->value) {
+    //                $schedules[$index]['start_time'] = '00:00';
+    //                $schedules[$index]['end_time'] = '23:59';
+    //            }
+    //        }
+    //
+    //        $this->merge(['schedules' => $schedules]);
+    //    }
 
     private function validateScheduleOverlaps(Validator $validator): void
     {
