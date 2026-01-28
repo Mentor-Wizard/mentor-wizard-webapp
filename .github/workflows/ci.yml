@@ -121,11 +121,11 @@ jobs:
         command:
           - {
               name: '🧬 Pest',
-              command: ./vendor/bin/pest --coverage --compact --coverage-clover coverage/coverage-clover.xml --parallel,
+              command: php artisan test --coverage --compact --coverage-clover coverage/coverage-clover.xml --parallel,
             }
           - {
               name: '🦠 Mutation',
-              command: ./vendor/bin/pest --mutate --covered-only --min=100 --parallel,
+              command: php artisan test --mutate --covered-only --min=100 --parallel,
             }
 
     steps:
