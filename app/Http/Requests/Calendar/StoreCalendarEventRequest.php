@@ -23,6 +23,7 @@ class StoreCalendarEventRequest extends FormRequest
         }
 
         $mentorProgramId = $this->input('mentor_program_id');
+        /** @var MentorProgram|null $mentorProgram */
         $mentorProgram = MentorProgram::query()->find($mentorProgramId);
 
         if ($mentorProgram === null) {
