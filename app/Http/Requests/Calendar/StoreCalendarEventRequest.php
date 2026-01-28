@@ -29,8 +29,6 @@ class StoreCalendarEventRequest extends FormRequest
             return true;
         }
 
-        assert($mentorProgram instanceof MentorProgram);
-
         $user = auth()->user();
         $isMentorOfProgram = $mentorProgram->mentor_id === $user->getKey();
         $isMentor = $user->hasRole('mentor');
