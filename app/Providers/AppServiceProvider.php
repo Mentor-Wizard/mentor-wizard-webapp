@@ -8,7 +8,6 @@ use App\Enums\RoleEnum;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -60,10 +59,6 @@ class AppServiceProvider extends ServiceProvider
     {
         ParallelTesting::setUpProcess(function (int $token): void {
             config(['permission.cache.key' => 'spatie.permission.cache.'.$token]);
-        });
-
-        ParallelTesting::setUpTestDatabase(function (string $database, int $token): void {
-            Artisan::call('db:seed', ['--class' => 'RoleSeeder']);
         });
     }
 }
