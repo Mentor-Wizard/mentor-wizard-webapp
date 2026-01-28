@@ -95,6 +95,11 @@ jobs:
 
       - name: ${{ matrix.command.name }}
         run: ${{ matrix.command.command }}
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: testing
+          DB_USERNAME: db
+          DB_PASSWORD: db
 
   tests:
     name: '♻️ Tests | ${{ matrix.command.name }}'
