@@ -137,6 +137,9 @@ jobs:
         with:
           use-node: true
 
+      - name: '🗄️ Grant CREATEDB permission'
+        run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
+
       - name: '${{ matrix.command.name }} tests'
         run: ${{ matrix.command.command }}
         env:

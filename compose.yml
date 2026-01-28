@@ -29,6 +29,8 @@ services:
       POSTGRES_DB: test_mw_db
       POSTGRES_USER: test_mw_user
       POSTGRES_PASSWORD: test_mw_user_password
+    volumes:
+      - ./docker/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
     networks:
       - mw-db-network
 
