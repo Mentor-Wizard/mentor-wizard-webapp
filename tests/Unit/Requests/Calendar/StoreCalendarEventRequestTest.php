@@ -909,6 +909,82 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
         expect($request->authorize())->toBeTrue();
     });
 
+    it('authorizes mentor to create event for their own program', function (): void {
+        $this->seed(RoleSeeder::class);
+        $mentor = User::factory()->create();
+        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        actingAs($mentor);
+
+        $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $mentor->getKey()]);
+
+        $request = new StoreCalendarEventRequest;
+        $request->setUserResolver(fn () => $mentor);
+        $request->merge(['mentor_program_id' => $mentorProgram->getKey()]);
+
+        expect($request->authorize())->toBeTrue();
+    });
+
+    it('denies another mentor from creating event for other mentor program', function (): void {
+        $this->seed(RoleSeeder::class);
+        $programOwner = User::factory()->create();
+        $programOwner->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $anotherMentor = User::factory()->create();
+        $anotherMentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        actingAs($anotherMentor);
+
+        $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $programOwner->getKey()]);
+
+        $request = new StoreCalendarEventRequest;
+        $request->setUserResolver(fn () => $anotherMentor);
+        $request->merge(['mentor_program_id' => $mentorProgram->getKey()]);
+
+        expect($request->authorize())->toBeFalse();
+    });
+
+    it('authorizes non-mentor user to book event on mentor program', function (): void {
+        $this->seed(RoleSeeder::class);
+        $mentor = User::factory()->create();
+        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $mentee = User::factory()->create();
+        $mentee->assignRole(Role::findByName(RoleEnum::MENTI->value));
+        actingAs($mentee);
+
+        $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $mentor->getKey()]);
+
+        $request = new StoreCalendarEventRequest;
+        $request->setUserResolver(fn () => $mentee);
+        $request->merge(['mentor_program_id' => $mentorProgram->getKey()]);
+
+        expect($request->authorize())->toBeTrue();
+    });
+
+    it('authorizes when mentor_program_id is null', function (): void {
+        $this->seed(RoleSeeder::class);
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTI->value));
+        actingAs($user);
+
+        $request = new StoreCalendarEventRequest;
+        $request->setUserResolver(fn () => $user);
+        $request->merge(['mentor_program_id' => null]);
+
+        expect($request->authorize())->toBeTrue();
+    });
+
+    it('authorizes when mentor_program_id is not provided', function (): void {
+        $this->seed(RoleSeeder::class);
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTI->value));
+        actingAs($user);
+
+        $request = new StoreCalendarEventRequest;
+        $request->setUserResolver(fn () => $user);
+
+        expect($request->authorize())->toBeTrue();
+    });
+
     it('provides all expected validation rules', function (): void {
         $request = new StoreCalendarEventRequest;
         $rules = $request->rules();
