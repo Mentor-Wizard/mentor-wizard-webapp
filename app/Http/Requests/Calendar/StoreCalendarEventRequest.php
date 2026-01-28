@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
+use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use App\Traits\Calendar\CalendarEventRequestRules;
@@ -17,7 +18,33 @@ class StoreCalendarEventRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        if (! auth()->check()) {
+            return false;
+        }
+
+        if (! $this->user()->can('create', CalendarEvent::class)) {
+            return false;
+        }
+
+        $mentorProgramId = $this->input('mentor_program_id');
+        if ($mentorProgramId === null) {
+            return true;
+        }
+
+        $mentorProgram = MentorProgram::query()->find($mentorProgramId);
+        if ($mentorProgram === null) {
+            return true;
+        }
+
+        $user = auth()->user();
+        $isMentorOfProgram = $mentorProgram->mentor_id === $user->getKey();
+        $isMentor = $user->hasRole('mentor');
+
+        if ($isMentorOfProgram) {
+            return true;
+        }
+
+        return ! ($isMentor && ! $isMentorOfProgram);
     }
 
     public function withValidator(Validator $validator): void

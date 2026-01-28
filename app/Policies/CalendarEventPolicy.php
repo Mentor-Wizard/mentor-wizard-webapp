@@ -9,6 +9,11 @@ use App\Models\User;
 
 final class CalendarEventPolicy
 {
+    public function create(User $user): bool
+    {
+        return $user->hasVerifiedEmail();
+    }
+
     public function update(User $user, CalendarEvent $calendarEvent): bool
     {
         // Only the mentor of the related mentor program can update events

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Services\Calendar\SplitSlotsPerSessionDuration;
+use Carbon\Exceptions\InvalidIntervalException;
 use Illuminate\Support\Facades\Date;
 
 mutates(SplitSlotsPerSessionDuration::class);
@@ -124,6 +125,19 @@ describe('SplitSlotsPerSessionDuration', function (): void {
     });
 
     describe('Edge Cases', function (): void {
+        it('handles zero session duration parameter without infinite loop', function (): void {
+            $tz = 'UTC';
+            $start = Date::parse('2026-01-10 09:00:00', $tz);
+            $end = Date::parse('2026-01-10 10:00:00', $tz);
+
+            $service = new SplitSlotsPerSessionDuration([
+                ['start' => $start, 'end' => $end],
+            ], 0, $tz);
+
+            expect(fn (): array => $service->getSplitSlots())
+                ->toThrow(InvalidIntervalException::class, 'Empty interval is not accepted.');
+        });
+
         it('handles empty slots array', function (): void {
             $tz = 'UTC';
 
@@ -162,9 +176,9 @@ describe('SplitSlotsPerSessionDuration', function (): void {
 
             $split = $service->getSplitSlots();
 
-            expect($split)->toHaveKey('2026-01-10');
+            expect($split)->toHaveKey('2026-01-10')
+                ->and($split['2026-01-10'])->toHaveCount(2);
             // Two 60-min slots, each split into 30-min = 2 slots each
-            expect($split['2026-01-10'])->toHaveCount(2);
         });
 
         it('handles slots on different days', function (): void {
@@ -181,8 +195,8 @@ describe('SplitSlotsPerSessionDuration', function (): void {
 
             $split = $service->getSplitSlots();
 
-            expect($split)->toHaveKey('2026-01-10');
-            expect($split)->toHaveKey('2026-01-11');
+            expect($split)->toHaveKey('2026-01-10')
+                ->and($split)->toHaveKey('2026-01-11');
         });
     });
 
@@ -200,8 +214,8 @@ describe('SplitSlotsPerSessionDuration', function (): void {
             $split = $service->getSplitSlots();
 
             // Should handle DST transition gracefully
-            expect($split)->toHaveKey('2026-03-29');
-            expect($split['2026-03-29'])->toBeArray();
+            expect($split)->toHaveKey('2026-03-29')
+                ->and($split['2026-03-29'])->toBeArray();
         });
 
         it('handles February 29 in leap year 2024', function (): void {
@@ -215,8 +229,8 @@ describe('SplitSlotsPerSessionDuration', function (): void {
 
             $split = $service->getSplitSlots();
 
-            expect($split)->toHaveKey('2024-02-29');
-            expect($split['2024-02-29'])->toHaveCount(2);
+            expect($split)->toHaveKey('2024-02-29')
+                ->and($split['2024-02-29'])->toHaveCount(2);
         });
 
         it('handles event spanning leap day boundary', function (): void {

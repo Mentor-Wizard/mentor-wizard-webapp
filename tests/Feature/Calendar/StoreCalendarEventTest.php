@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\Response;
 
 use function Pest\Laravel\actingAs;
 
@@ -446,6 +447,9 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         $this->mentor->profile->timezone = 'Europe/Kyiv';
         $this->mentor->profile->save();
 
+        $this->anotherMentor = User::factory()->create();
+        $this->anotherMentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
         $this->nonMentorUser = User::factory()->create();
 
         $this->mentorProgram = MentorProgram::factory()->create([
@@ -503,6 +507,49 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
 
         // Should redirect to verification notice or return 403
         expect($response->status())->toBeIn([302, 403, 409]);
+    });
+
+    it('throws 403 when another mentor tries to create event for other mentor program', function (): void {
+        actingAs($this->anotherMentor);
+        auth()->login($this->anotherMentor);
+
+        $eventData = [
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+    });
+
+    it('allows non-mentor user to book calendar event with mentor', function (): void {
+        actingAs($this->nonMentorUser);
+        auth()->login($this->nonMentorUser);
+
+        $eventData = [
+            'title'             => 'Booking event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+            '_token'            => 'test-token',
+        ];
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->post(route('pages.calendar.store'), $eventData);
+
+        $response->assertRedirect(route('pages.calendar.index'));
     });
 });
 

@@ -28,7 +28,8 @@ Use `search-docs` for detailed Pest 4 patterns and documentation.
 
 ### Creating Tests
 
-All tests must be written using Pest. Use `php artisan make:test --pest {name}`.
+All tests must be written using Pest. Use
+`docker compose exec exec app php artisan make:test --pest {name}`.
 
 ### Test Organization
 
@@ -47,9 +48,10 @@ it('is true', function () { expect(true)->toBeTrue(); });
 ### Running Tests
 
 - Run minimal tests with filter before finalizing:
-  `php artisan test --compact --filter=testName`.
-- Run all tests: `php artisan test --compact`.
-- Run file: `php artisan test --compact tests/Feature/ExampleTest.php`.
+  `docker compose exec exec app php artisan test --compact --filter=testName`.
+- Run all tests: `docker compose exec exec app php artisan test --compact`.
+- Run file:
+  `docker compose exec exec app php artisan test --compact tests/Feature/ExampleTest.php`.
 
 ## Assertions
 

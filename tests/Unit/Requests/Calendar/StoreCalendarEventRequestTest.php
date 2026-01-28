@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
+
 mutates(StoreCalendarEventRequest::class);
 
 describe('StoreCalendarEventRequest getEventData and validator extras', function (): void {
@@ -895,8 +897,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 });
 
 describe('StoreCalendarEventRequest rules and messages', function (): void {
-    it('authorizes all requests', function (): void {
+    it('authorizes authenticated users with create permission', function (): void {
+        $this->seed(RoleSeeder::class);
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTI->value));
+        actingAs($user);
+
         $request = new StoreCalendarEventRequest;
+        $request->setUserResolver(fn () => $user);
 
         expect($request->authorize())->toBeTrue();
     });

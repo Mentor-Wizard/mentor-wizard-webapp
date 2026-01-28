@@ -313,6 +313,42 @@ describe('Store Calendar CalendarEvent', function (): void {
             ->and($host->pivot->colour)->toBe(CalendarEventColoursEnum::RED->value);
     });
 
+    it('throws exception when user profile has no timezone', function (): void {
+        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, config('app.timezone')));
+        $start = Date::tomorrow()->setTime(9, 0, 0);
+        $end = Date::tomorrow()->setTime(10, 0, 0);
+
+        $userWithoutTimezone = User::factory()->create();
+        $userWithoutTimezone->assignRole(RoleEnum::MENTOR);
+        Auth::login($userWithoutTimezone);
+
+        DB::table('user_profiles')->where('user_id', $userWithoutTimezone->getKey())->delete();
+        $userWithoutTimezone->unsetRelation('profile');
+
+        $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $userWithoutTimezone->getKey()]);
+
+        $eventPayload = [
+            'title'             => 'Test Event',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'fromDate'          => $start->format('Y-m-d'),
+            'toDate'            => $end->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'webLink'           => 'https://google.com',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'description'       => 'Test description',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $mentorProgram->getKey(),
+        ];
+
+        $request = Mockery::mock(StoreCalendarEventRequest::class);
+        $request->shouldReceive('validated')->andReturn($eventPayload);
+        $request->shouldReceive('user')->andReturn(Auth::user());
+
+        expect(fn (): RedirectResponse => (new StoreCalendarEvent)->handle($request))
+            ->toThrow(ErrorException::class, 'Attempt to read property "timezone" on null');
+    });
+
 });
 
 function createAndAuthenticateMentorForCalendar(): User
