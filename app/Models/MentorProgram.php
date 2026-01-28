@@ -18,10 +18,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @mixin IdeHelperMentorProgram
- *
  * @property CarbonInterface|null $start_time
  * @property CarbonInterface|null $end_time
+ *
+ * @mixin IdeHelperMentorProgram
  */
 #[ObservedBy(MentorProgramObserver::class)]
 #[UseFactory(MentorProgramFactory::class)]

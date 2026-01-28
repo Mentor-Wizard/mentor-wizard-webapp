@@ -8,6 +8,7 @@ use App\Enums\UserScheduleRecordType;
 use App\Models\User;
 use App\Models\UserSchedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 
 /**
@@ -22,6 +23,9 @@ class UserScheduleDayOffFactory extends Factory
      */
     protected $model = UserSchedule::class;
 
+    /**
+     * @return array<string, UserFactory|Carbon|int|string>
+     */
     public function definition(): array
     {
         return [

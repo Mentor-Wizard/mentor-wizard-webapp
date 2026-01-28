@@ -46,8 +46,8 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             endDateTime: $endDate,
             timezone: 'Europe/Kyiv',
             user: $this->user,
-            excludeEvents: [],
-            mentorProgram: $this->mentorProgram
+            mentorProgram: $this->mentorProgram,
+            excludeEvents: []
         );
 
         expect($service->isSlotAvailable())->toBeTrue();
@@ -224,8 +224,8 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             endDateTime: $endDate,
             timezone: $tz,
             user: $this->user,
-            excludeEvents: [$event1->getKey()],
-            mentorProgram: $this->mentorProgram
+            mentorProgram: $this->mentorProgram,
+            excludeEvents: [$event1->getKey()]
         );
 
         expect($service->isSlotAvailable())->toBeTrue();
@@ -264,8 +264,8 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             endDateTime: $endDate,
             timezone: $tz,
             user: $this->user,
-            excludeEvents: [],
-            mentorProgram: $this->mentorProgram
+            mentorProgram: $this->mentorProgram,
+            excludeEvents: []
         );
 
         expect($service->isSlotAvailable())->toBeFalse();
@@ -304,8 +304,8 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             endDateTime: $endDate,
             timezone: $tz,
             user: $this->user,
-            excludeEvents: [],
-            mentorProgram: $this->mentorProgram
+            mentorProgram: $this->mentorProgram,
+            excludeEvents: []
         );
 
         expect($service->isSlotAvailable())->toBeTrue();

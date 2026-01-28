@@ -1,0 +1,6 @@
+{
+    "agents": ["claude_code", "gemini", "junie"],
+    "guidelines": true,
+    "packages": ["filament/filament"],
+    "skills": ["pest-testing"]
+}
