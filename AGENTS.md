@@ -293,6 +293,17 @@ The project uses GitHub Actions with:
 - **Code Coverage**: Codecov integration
 - **Parallel Execution**: Tests run in parallel for faster feedback
 
+### Git Operations
+
+- **NEVER create commits automatically** - only commit when explicitly requested
+  by the user
+- **NEVER push to remote** without explicit user request
+- **NEVER force push** or run destructive git commands without explicit approval
+- When changes are ready, inform the user and wait for their instruction to
+  commit/push
+- Always show `git diff` or `git status` to let the user review changes before
+  committing
+
 ### Environment-Specific Notes
 
 - **Local Development**: Use Docker Compose for consistent environment
