@@ -25,7 +25,7 @@ return new class extends Migration
         $this->createRolesTable();
         $this->createPermissionsRelationTable();
 
-        app(Factory::class)
+        resolve(Factory::class)
             ->store(config('permission.cache.store') !== 'default' ? config('permission.cache.store') : null)
             ->forget(config('permission.cache.key'));
     }

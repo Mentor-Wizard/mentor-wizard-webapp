@@ -27,7 +27,7 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
         $this->user = createAndAuthenticateMentorForUpdate();
         $this->prepareRequest = function (UpdateMentorProgramRequest $request): void {
             $request->setContainer(app());
-            $request->setRedirector(app(Redirector::class));
+            $request->setRedirector(resolve(Redirector::class));
             $request->setUserResolver(fn () => $this->user);
         };
     });
