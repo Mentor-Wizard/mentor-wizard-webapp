@@ -1,6 +1,5 @@
 {
     "agents": ["claude_code"],
-    "guidelines": true,
     "packages": ["filament/filament"],
     "skills": ["pest-testing"]
 }
