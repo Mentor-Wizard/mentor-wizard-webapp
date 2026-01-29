@@ -95,6 +95,11 @@ jobs:
 
       - name: ${{ matrix.command.name }}
         run: ${{ matrix.command.command }}
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: testing
+          DB_USERNAME: db
+          DB_PASSWORD: db
 
   tests:
     name: '♻️ Tests | ${{ matrix.command.name }}'
@@ -119,14 +124,10 @@ jobs:
       fail-fast: false
       matrix:
         command:
-          - {
-              name: '🧬 Pest',
-              command: ./vendor/bin/pest --coverage --compact --coverage-clover coverage/coverage-clover.xml --parallel,
-            }
-          - {
-              name: '🦠 Mutation',
-              command: ./vendor/bin/pest --mutate --covered-only --min=100 --parallel,
-            }
+          - { name: '🔬 Unit',     command: 'php artisan test --testsuite=Unit --parallel',                                        report: false }
+          - { name: '🧬 Feature',  command: 'php artisan test --testsuite=Feature --parallel',                                     report: false }
+          - { name: '☂️ Coverage', command: 'php artisan test --coverage --compact --coverage-clover coverage/coverage-clover.xml', report: true  }
+          - { name: '🦠 Mutation', command: 'php artisan test --mutate --covered-only --min=100 --parallel',                       report: false }
 
     steps:
       - name: '🛎 Checkout'
@@ -137,6 +138,9 @@ jobs:
         with:
           use-node: true
 
+      - name: '🗄️ Grant CREATEDB permission'
+        run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
+
       - name: '${{ matrix.command.name }} tests'
         run: ${{ matrix.command.command }}
         env:
@@ -146,7 +150,7 @@ jobs:
           DB_PASSWORD: db
 
       - name: '☂️ Upload results to Codecov'
-        if: ${{ !cancelled() && matrix.command.name != '🦠 Mutation' }}
+        if: ${{ !cancelled() && matrix.command.report }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -159,7 +163,7 @@ jobs:
           commit_parent: ${{ github.event.pull_request.base.sha }}
 
       - name: '☂️ Upload test results to Codecov'
-        if: ${{ !cancelled() && matrix.command.name != '🦠 Mutation' }}
+        if: ${{ !cancelled() && matrix.command.report }}
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

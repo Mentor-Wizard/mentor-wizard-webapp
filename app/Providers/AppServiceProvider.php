@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configModels();
         $this->configDatabase();
+        $this->configTesting();
 
         if ($this->app->isProduction()) {
             URL::forceHttps();
@@ -56,5 +58,12 @@ class AppServiceProvider extends ServiceProvider
     private function configDatabase(): void
     {
         DB::prohibitDestructiveCommands($this->app->isProduction());
+    }
+
+    private function configTesting(): void
+    {
+        ParallelTesting::setUpProcess(function (int $token): void {
+            config(['permission.cache.key' => 'spatie.permission.cache.'.$token]);
+        });
     }
 }
