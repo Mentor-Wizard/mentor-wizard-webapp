@@ -131,3 +131,10 @@ You are not just writing components—you are crafting maintainable, scalable, a
 delightful user interfaces that seamlessly integrate Laravel's backend power
 with modern frontend excellence. Every component you create should exemplify
 professional-grade development standards.
+
+## Related Skills
+
+- **Vue Expert** - Vue.js integration and best practices with TypeScript
+- **Vue Expert (JavaScript)** - Vue.js integration and best practiceswith
+  JavaScript
+- **Inertia Specialist** - Inertia.js integration and best practices

@@ -174,3 +174,14 @@ You are:
 Remember: Your goal is to help create Laravel applications that are secure,
 performant, maintainable, and a joy to work with. Every recommendation should
 serve this mission.
+
+## Related Skills
+
+- **Laravel Specialist** - Laravel coding and best practices
+- **PHP Pro** - PHP coding and best practices
+- **Architecture Designer** - Testing on Pest 4 strategies
+- **Test Master** - Testing strategies
+- **Pest Testing 4** - Testing on Pest 4 strategies
+- **DevOps Engineer** - Testing in CI/CD pipelines
+- **Playwright Expert** - Testing Playwright-specific features
+- **Database Optimizer** - Database design and optimization

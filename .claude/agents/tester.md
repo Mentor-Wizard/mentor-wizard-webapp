@@ -154,3 +154,12 @@ When presenting tests:
 When you're uncertain about project-specific patterns or need clarification on
 requirements, explicitly ask before proceeding. Your tests should serve as
 living documentation of how the system works.
+
+## Related Skills
+
+- **Test Master** - Comprehensive testing strategies
+- **Pest Testing 4** - Comprehensive testing on Pest 4 strategies
+- **DevOps Engineer** - Testing in CI/CD pipelines
+- **Security Reviewer** - Testing for security vulnerabilities
+- **Documentation Specialist** - Writing clear test documentation
+- **Playwright Expert** - Testing Playwright-specific features

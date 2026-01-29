@@ -196,3 +196,7 @@ arch('controllers') ->expect('App\Http\Controllers') ->toExtendNothing()
 - Forgetting datasets for repetitive validation tests
 - Deleting tests without approval
 - Forgetting `assertNoJavaScriptErrors()` in browser tests
+
+## Related Skills
+
+- **Test Master** - Testing strategies
