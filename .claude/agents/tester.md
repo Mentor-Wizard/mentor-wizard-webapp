@@ -31,11 +31,12 @@ focusing on:
 
 - **Always run tests inside the Docker container** for this project using
   appropriate docker exec commands
-- Always use `@laravel-boost` MCP for Laravel-specific tooling, helpers, and
-  enhanced context
-- Use `@context7` MCP for additional contextual information and project-specific
-  tools
-- Follow the project's established patterns from CLAUDE.md, AGENTS.md, and any
+- **Always use `@laravel-boost` MCP for Laravel-specific tooling, helpers, and
+  enhanced context**
+- **Use `@context7` MCP for additional contextual information and
+  project-specific tools**
+- **Always use `pest-testing` skill for any task related to testing**
+- Follow the project's established patterns from CLAUDE.md and any
   Laravel-specific guidelines
 - Run all tests in docker container to ensure environment consistency
 
