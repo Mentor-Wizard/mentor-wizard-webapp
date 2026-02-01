@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\Profile\ListMentorProfilePage;
+use App\Filters\ExperienceLevelFilter;
 use App\Filters\ProfileRateFilter;
 use App\Filters\ProgramCostFilter;
+use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -37,10 +39,14 @@ describe('ListMentorProfilePage unit tests', function (): void {
             ->and(class_exists(ProgramCostFilter::class))->toBeTrue()
             ->and(class_exists(TagLanguagesFilter::class))->toBeTrue()
             ->and(class_exists(TagStacksFilter::class))->toBeTrue()
+            ->and(class_exists(ExperienceLevelFilter::class))->toBeTrue()
+            ->and(class_exists(RatingFilter::class))->toBeTrue()
             ->and(new ProfileRateFilter)->toBeInstanceOf(ProfileRateFilter::class)
             ->and(new ProgramCostFilter)->toBeInstanceOf(ProgramCostFilter::class)
             ->and(new TagLanguagesFilter)->toBeInstanceOf(TagLanguagesFilter::class)
-            ->and(new TagStacksFilter)->toBeInstanceOf(TagStacksFilter::class);
+            ->and(new TagStacksFilter)->toBeInstanceOf(TagStacksFilter::class)
+            ->and(new ExperienceLevelFilter)->toBeInstanceOf(ExperienceLevelFilter::class)
+            ->and(new RatingFilter)->toBeInstanceOf(RatingFilter::class);
     });
 
     it('has correct namespace and imports', function (): void {

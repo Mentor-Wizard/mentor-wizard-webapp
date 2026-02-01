@@ -6,6 +6,7 @@ use App\Actions\Pages\Profile\ListMentorProfilePage;
 use App\Enums\TagEnum;
 use App\Models\MentorProfile;
 use App\Models\MentorProgram;
+use App\Models\MentorReview;
 use App\Models\MentorTag;
 use Database\Seeders\RoleSeeder;
 
@@ -148,5 +149,152 @@ describe('ListMentorProfilePage filters and includes', function (): void {
 
         $titles = array_column($resp->json('data'), 'title');
         expect($titles)->toBe(['Python Master', 'Laravel Guru', 'React Ninja']);
+    });
+
+    it('filters by single experience level', function (): void {
+        MentorProfile::query()->delete();
+
+        MentorProfile::factory()->create([
+            'title'                 => 'Entry Level Dev',
+            'experience_started_at' => now()->subYears(2),
+        ]);
+        MentorProfile::factory()->create([
+            'title'                 => 'Mid Level Dev',
+            'experience_started_at' => now()->subYears(5),
+        ]);
+        MentorProfile::factory()->create([
+            'title'                 => 'Senior Dev',
+            'experience_started_at' => now()->subYears(10),
+        ]);
+        MentorProfile::factory()->create([
+            'title'                 => 'Expert Dev',
+            'experience_started_at' => now()->subYears(15),
+        ]);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'entry']]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['title' => 'Entry Level Dev']);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'mid']]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['title' => 'Mid Level Dev']);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'senior']]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['title' => 'Senior Dev']);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'expert']]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['title' => 'Expert Dev']);
+    });
+
+    it('filters by multiple experience levels', function (): void {
+        MentorProfile::query()->delete();
+
+        MentorProfile::factory()->create([
+            'title'                 => 'Entry Level Dev',
+            'experience_started_at' => now()->subYears(2),
+        ]);
+        MentorProfile::factory()->create([
+            'title'                 => 'Mid Level Dev',
+            'experience_started_at' => now()->subYears(5),
+        ]);
+        MentorProfile::factory()->create([
+            'title'                 => 'Senior Dev',
+            'experience_started_at' => now()->subYears(10),
+        ]);
+        MentorProfile::factory()->create([
+            'title'                 => 'Expert Dev',
+            'experience_started_at' => now()->subYears(15),
+        ]);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'mid,senior']]))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment(['title' => 'Mid Level Dev'])
+            ->assertJsonFragment(['title' => 'Senior Dev']);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'entry,expert']]))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment(['title' => 'Entry Level Dev'])
+            ->assertJsonFragment(['title' => 'Expert Dev']);
+    });
+
+    it('filters by minimum rating', function (): void {
+        MentorProfile::query()->delete();
+
+        $mentor1 = MentorProfile::factory()->create(['title' => 'Low Rated Mentor']);
+        $mentor2 = MentorProfile::factory()->create(['title' => 'Good Rated Mentor']);
+        $mentor3 = MentorProfile::factory()->create(['title' => 'Excellent Rated Mentor']);
+        $mentor4 = MentorProfile::factory()->create(['title' => 'No Rating Mentor']);
+
+        MentorReview::factory()->create(['mentor_id' => $mentor1->user_id, 'rating' => 2]);
+        MentorReview::factory()->create(['mentor_id' => $mentor1->user_id, 'rating' => 3]);
+
+        MentorReview::factory()->create(['mentor_id' => $mentor2->user_id, 'rating' => 4]);
+        MentorReview::factory()->create(['mentor_id' => $mentor2->user_id, 'rating' => 4]);
+
+        MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 5]);
+        MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 5]);
+        MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 4]);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['rating' => 4]]))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment(['title' => 'Good Rated Mentor'])
+            ->assertJsonFragment(['title' => 'Excellent Rated Mentor']);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['rating' => 4.5]]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['title' => 'Excellent Rated Mentor']);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['rating' => 3]]))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment(['title' => 'Good Rated Mentor'])
+            ->assertJsonFragment(['title' => 'Excellent Rated Mentor']);
+    });
+
+    it('combines experience and rating filters', function (): void {
+        MentorProfile::query()->delete();
+
+        $mentor1 = MentorProfile::factory()->create([
+            'title'                 => 'Senior High Rated',
+            'experience_started_at' => now()->subYears(10),
+        ]);
+        $mentor2 = MentorProfile::factory()->create([
+            'title'                 => 'Senior Low Rated',
+            'experience_started_at' => now()->subYears(9),
+        ]);
+        $mentor3 = MentorProfile::factory()->create([
+            'title'                 => 'Mid High Rated',
+            'experience_started_at' => now()->subYears(5),
+        ]);
+
+        MentorReview::factory()->create(['mentor_id' => $mentor1->user_id, 'rating' => 5]);
+        MentorReview::factory()->create(['mentor_id' => $mentor1->user_id, 'rating' => 5]);
+
+        MentorReview::factory()->create(['mentor_id' => $mentor2->user_id, 'rating' => 2]);
+        MentorReview::factory()->create(['mentor_id' => $mentor2->user_id, 'rating' => 3]);
+
+        MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 5]);
+        MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 4]);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'senior', 'rating' => 4]]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['title' => 'Senior High Rated']);
+
+        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'mid,senior', 'rating' => 4.5]]))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment(['title' => 'Senior High Rated'])
+            ->assertJsonFragment(['title' => 'Mid High Rated']);
     });
 });

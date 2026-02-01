@@ -8,6 +8,7 @@ local
 public
 .gitlab-ci.yml
 CLAUDE.md
+AGENTS.md
 compose.yml
 composer.lock
 taskfile.yml
