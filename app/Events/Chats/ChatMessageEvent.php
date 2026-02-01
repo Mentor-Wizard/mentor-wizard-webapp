@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Events\Chats;
 
-use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -22,7 +22,7 @@ class ChatMessageEvent implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(public Chat $chat, public ChatMessage $message) {}
+    public function __construct(public User $user, public ChatMessage $message, public bool $is_muted) {}
 
     /**
      * Get the channels the event should broadcast on.
@@ -32,7 +32,7 @@ class ChatMessageEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('Chat.'.$this->chat->owner_id),
+            new PrivateChannel('Chat.'.$this->user->id),
         ];
     }
 }

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -153,9 +154,11 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->hasMany(MentorSession::class, 'menti_id');
     }
 
-    public function chats(): HasMany
+    public function chats(): BelongsToMany
     {
-        return $this->hasMany(Chat::class, 'owner_id');
+        return $this->belongsToMany(Chat::class, 'chat_users')
+            ->withPivot(['status', 'is_muted'])
+            ->withTimestamps();
     }
 
     public function getFilamentName(): string

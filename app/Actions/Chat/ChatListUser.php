@@ -10,6 +10,7 @@ use App\Enums\TagEnum;
 use App\Events\Chats\UnreadMessagesEvent;
 use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Date;
@@ -23,33 +24,34 @@ class ChatListUser
     {
         $user = auth()->user();
         $chats = $user->chats()
-            ->with(
-                [
-                    'companionChat.owner.profile',
-                    'companionChat.owner.mentorProfile',
-                ])
-            ->whereIn('status', [ChatStatusEnum::ACTIVE, ChatStatusEnum::BANNED])
+            ->wherePivotIn('status', [ChatStatusEnum::ACTIVE, ChatStatusEnum::BANNED])
             ->get();
 
         $listUsers = [];
+        /** @var Chat $chat */
         foreach ($chats as $chat) {
-            $companion = $chat->companionChat->owner;
+            /** @var User $companion */
+            $companion = $chat->companion($user);
+            $companionChat = $companion->chats()
+                ->wherePivot('chat_id', $chat->id)
+                ->wherePivot('user_id', $companion->id)
+                ->first();
             $lastMessage = $this->getLastMessage($chat);
             $listUsers[] = [
-                'id'            => $chat->id,
-                'companion_id'  => $companion->id,
-                'name'          => $companion->profile->name.' '.$companion->profile->last_name,
-                'avatar'        => $companion->profile->avatar,
-                'slug'          => $companion->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,
-                'message'       => $lastMessage?->message,
-                'online'        => false,
-                'mute'          => $chat->mute,
-                'ban'           => $chat->status === ChatStatusEnum::BANNED,
-                'canSend'       => $chat->companionChat->status === ChatStatusEnum::ACTIVE,
-                'is_read'       => $lastMessage?->is_read,
-                'created_at'    => $lastMessage?->created_at?->format('d.m.Y'),
-                'tags'          => $companion->mentorProfile?->mentorTags()->where('mentor_tags.type', TagEnum::STACK)->pluck('tag')->toArray(),
-                'last'          => $lastMessage?->created_at ? $this->getLastDateInfo($lastMessage->created_at) : null,
+                'id'           => $companion->id,
+                'chatId'       => $chat->id,
+                'name'         => $companion->profile->name.' '.$companion->profile->last_name,
+                'avatar'       => $companion->profile->avatar,
+                'slug'         => $companion->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,
+                'message'      => $lastMessage?->message,
+                'online'       => false,
+                'isMuted'      => $chat->pivot->is_muted,
+                'ban'          => $chat->pivot->status === ChatStatusEnum::BANNED->value,
+                'canSend'      => $companionChat->pivot->status === ChatStatusEnum::ACTIVE->value,
+                'isRead'       => $lastMessage?->is_read,
+                'createdAt'    => $lastMessage?->created_at->format('d.m.Y'),
+                'tags'         => $companion->mentorProfile?->mentorTags()->where('mentor_tags.type', TagEnum::STACK)->pluck('tag')->toArray(),
+                'last'         => $lastMessage ? $this->getLastDateInfo($lastMessage->created_at) : null,
             ];
         }
 
@@ -62,16 +64,15 @@ class ChatListUser
 
     private function getLastMessage(Chat $chat)
     {
-        return ChatMessage::query()->whereHas('chat', function ($q) use ($chat): void {
-            $q->whereIn('chat_id', [$chat->id, $chat->companion_chat_id]);
-        })
+        return ChatMessage::query()
+            ->where('chat_id', $chat->id)
             ->latest('id')
             ->first();
     }
 
-    private function getLastDateInfo(DateTimeInterface $created_at): string
+    private function getLastDateInfo(DateTimeInterface $createdAt): string
     {
-        $carbonDate = Date::instance($created_at);
+        $carbonDate = Date::instance($createdAt);
 
         return $carbonDate->diffForHumans();
     }

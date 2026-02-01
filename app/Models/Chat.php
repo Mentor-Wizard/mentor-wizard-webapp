@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\ChatStatusEnum;
 use Database\Factories\ChatFactory;
 use Database\Factories\ChatMessageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -27,33 +26,28 @@ class Chat extends Model implements HasMedia
     use InteractsWithMedia;
 
     protected $fillable = [
-        'owner_id',
-        'companion_chat_id',
-        'status',
+        'name',
     ];
 
-    public function owner(): BelongsTo
+    public function users(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsToMany(User::class, 'chat_users')
+            ->withPivot(['status', 'is_muted'])
+            ->withTimestamps();
     }
 
-    public function companionChat(): BelongsTo
+    /**
+     * getting a chat partner
+     */
+    public function companion(User $user): ?User
     {
-        return $this->belongsTo(self::class, 'companion_chat_id');
+        return $this->users()
+            ->wherePivot('user_id', '!=', $user->id)
+            ->first();
     }
 
     public function messages(): HasMany
     {
-        return $this->hasMany(ChatMessage::class, 'chat_id');
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status'    => ChatStatusEnum::class,
-        ];
+        return $this->hasMany(ChatMessage::class);
     }
 }

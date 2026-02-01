@@ -15,8 +15,8 @@ class ChatMessageRepository
     public function getMessages(Chat $chat): array
     {
         return ChatMessage::query()
-            ->with('chat.owner.profile')
-            ->whereIn('chat_id', [$chat->id, $chat->companion_chat_id])
+            ->with('user.profile', 'chat')
+            ->where('chat_id', $chat->id)
             ->orderBy('id')
             ->get()
             ->map(fn ($message) => ChatMessageResource::make($message))
@@ -26,7 +26,7 @@ class ChatMessageRepository
     public function getFiles(Chat $chat): array
     {
         return ChatMessage::query()
-            ->whereIn('chat_id', [$chat->id, $chat->companion_chat_id])
+            ->where('chat_id', $chat->id)
             ->whereHas('media', fn ($q) => $q->where('collection_name', 'files'))
             ->get()
             ->flatMap(fn ($message): MediaCollection => $message->getMedia('files'))

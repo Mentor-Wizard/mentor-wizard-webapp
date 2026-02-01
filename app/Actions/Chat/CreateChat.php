@@ -18,35 +18,30 @@ class CreateChat
     use AsController;
 
     /**
+     * @param  User  $user  - companion
+     *
      * @throws Throwable
      */
     public function handle(User $user, ChatMessageRequest $request): JsonResponse
     {
+        /** @var User $owner */
         $owner = auth()->user();
-        $chat = Chat::query()->where('owner_id', $owner->id)
-            ->whereHas('companionChat', function ($q) use ($user): void {
-                $q->where('owner_id', $user->id);
-            })
+        $companionChat = $owner->chats()
+            ->wherePivot('user_id', $user->id)
             ->first();
-        if ($chat) {
-            throw_if($chat->companionChat->status === ChatStatusEnum::BANNED, AuthorizationException::class);
 
-            return SendMessage::run($chat, $request);
+        if ($companionChat) {
+            throw_if($companionChat->pivot->status === ChatStatusEnum::BANNED->value, AuthorizationException::class);
+
+            return SendMessage::run($companionChat, $request);
         }
 
         $chat = Chat::query()->create([
-            'owner_id' => $owner->id,
-            'status'   => ChatStatusEnum::ACTIVE,
+            'name' => $user->profile->name,
         ]);
-        $chatCompanion = Chat::query()->create([
-            'owner_id' => $user->id,
-            'status'   => ChatStatusEnum::ACTIVE,
-        ]);
-        $chat->companion_chat_id = $chatCompanion->id;
-        $chat->save();
 
-        $chatCompanion->companion_chat_id = $chat->id;
-        $chatCompanion->save();
+        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+        $chat->users()->attach($owner->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
 
         return SendMessage::run($chat, $request);
     }

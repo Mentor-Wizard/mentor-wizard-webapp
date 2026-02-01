@@ -78,7 +78,7 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
 
   <div
     v-for="user in sortedUsers"
-    @click="fetchMessages(user.id)"
+    @click="fetchMessages(user.chatId)"
     :key="user.id"
     class="mt-2 flex max-w-md cursor-pointer items-start rounded-lg border border-gray-200 p-2 shadow-sm"
     :class="user.active ? 'bg-gray-100' : 'bg-white'"
@@ -95,7 +95,7 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
     <div class="ml-4 flex-1">
       <div class="flex items-center justify-between">
         <h4 class="text-[0.75rem] font-semibold text-gray-900">
-          {{ user.name }}
+          {{ user.id }} {{ user.name }}
         </h4>
         <span class="text-[0.75rem] text-gray-500">{{ user.last }}</span>
       </div>

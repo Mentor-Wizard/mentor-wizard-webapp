@@ -22,11 +22,13 @@ class ChatMessagesPolicy
      */
     public function view(User $user, ChatMessage $chatMessage): bool
     {
-        if ($chatMessage->chat->owner_id === $user->getKey()) {
+        if ($chatMessage->user_id === $user->getKey()) {
             return true;
         }
 
-        return $chatMessage->chat->companion_id === $user->getKey();
+        $companion = $chatMessage->chat->companion($user);
+
+        return $companion->id === $user->getKey();
     }
 
     /**
@@ -42,6 +44,6 @@ class ChatMessagesPolicy
      */
     public function update(User $user, ChatMessage $chatMessage): bool
     {
-        return $chatMessage->chat->owner_id === $user->getKey();
+        return $chatMessage->user_id === $user->getKey();
     }
 }

@@ -1,26 +1,28 @@
 import { computed, nextTick, ref } from 'vue';
 
 const scrollContainer = ref(null);
-const listChat = ref([]);
+const listUser = ref([]);
 const messageSortList = ['Resent', 'New', 'Name'];
 const messageSortBy = ref(1);
-const currentChat = ref(null);
+const currentUser = ref(null);
 const chatMessages = ref([]);
 const chatFiles = ref([]);
+const alertRef = ref(null);
+const showArchiveModal = ref(false);
 let channel = null;
 
 export function useCaseChat() {
   const fetchUsers = async (user_id) => {
     const { data } = await axios.get(route('chat.users'));
-    listChat.value = data.users;
+    listUser.value = data.users;
     if (sortedUsers.value.length > 0)
-      await fetchMessages(sortedUsers.value[0].id);
+      await fetchMessages(sortedUsers.value[0].chatId);
     subscribeUser(user_id);
   };
 
-  const fetchMessages = async (id) => {
-    currentChat.value = listChat.value.find((user) => user.id === id);
-    const { data } = await axios.get(route('chat.messages', { chat: id }));
+  const fetchMessages = async (chatId) => {
+    currentUser.value = listUser.value.find((user) => user.chatId === chatId);
+    const { data } = await axios.get(route('chat.messages', { chat: chatId }));
     chatMessages.value = data.messages;
     chatFiles.value = data.files;
     await scrollToBottom();
@@ -36,7 +38,7 @@ export function useCaseChat() {
     }
     try {
       const { data } = await axios.post(
-        route('chat.send-message', { chat: currentChat.value.id }),
+        route('chat.send-message', { chat: currentUser.value.chatId }),
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } },
       );
@@ -47,8 +49,15 @@ export function useCaseChat() {
       ];
       await scrollToBottom();
     } catch (error) {
-      currentChat.value.canSend = false;
-      alert('You cannot send messages to this user.');
+      currentUser.value.canSend = false;
+      if (alertRef.value) {
+        alertRef.value.open({
+          title: 'Error',
+          message: 'You cannot send messages to this user.',
+          error: true,
+          timeout: 5000,
+        });
+      }
     }
   };
 
@@ -65,31 +74,37 @@ export function useCaseChat() {
   };
 
   const setMute = async () => {
-    await axios.post(route('chat.set-mute', { chat: currentChat.value.id }), {
-      mute: currentChat.value.mute ? 1 : 0,
-    });
+    const { data } = await axios.post(
+      route('chat.set-mute', { chat: currentUser.value.chatId }),
+      {
+        isMuted: currentUser.value.isMuted ? 1 : 0,
+      },
+    );
+    currentUser.value.isMuted = data.isMuted;
   };
 
   const setArchive = async () => {
-    if (window.confirm('Are you sure you want to delete the chat?')) {
-      await axios.post(
-        route('chat.set-archive', { chat: currentChat.value.id }),
-      );
-      const index = listChat.value.findIndex(
-        (user) => user.id === currentChat.value.id,
-      );
-      if (index !== -1) {
-        listChat.value.splice(index, 1);
-        if (sortedUsers.value.length > 0)
-          await fetchMessages(sortedUsers.value[0].id);
-      }
+    await axios.post(
+      route('chat.set-archive', { chat: currentUser.value.chatId }),
+    );
+    showArchiveModal.value = false;
+    const index = listUser.value.findIndex(
+      (user) => user.id === currentUser.value.id,
+    );
+    if (index !== -1) {
+      listUser.value.splice(index, 1);
+      if (sortedUsers.value.length > 0)
+        await fetchMessages(sortedUsers.value[0].id);
     }
   };
   const setBan = async () => {
-    await axios.post(route('chat.set-ban', { chat: currentChat.value.id }), {
-      ban: currentChat.value.ban ? 0 : 1,
-    });
-    currentChat.value.ban = !currentChat.value.ban;
+    await axios.post(
+      route('chat.set-ban', { chat: currentUser.value.chatId }),
+      {
+        ban: currentUser.value.ban ? 0 : 1,
+      },
+    );
+    currentUser.value.ban = !currentUser.value.ban;
   };
 
   const scrollToBottom = async () => {
@@ -104,22 +119,21 @@ export function useCaseChat() {
 
   const subscribeUser = (user_id) => {
     const updateOnlineStatus = (userId, isOnline) => {
-      const userIndex = listChat.value.findIndex(
-        (u) => u.companion_id === userId,
-      );
+      const userIndex = listUser.value.findIndex((u) => u.id === userId);
       if (userIndex !== -1) {
-        listChat.value[userIndex].online = isOnline;
+        listUser.value[userIndex].online = isOnline;
       }
     };
 
     Echo.private(`Chat.${user_id}`).listen('Chats\\ChatMessageEvent', (e) => {
-      const chat = e.chat;
       const message = e.message;
-      const index = listChat.value.findIndex((chat) => chat.id === chat.id);
+      const index = listUser.value.findIndex(
+        (user) => user.id === message.user_id,
+      );
       if (index !== -1) {
-        listChat.value[index].last = 'now';
-        listChat.value[index].message = message.message;
-        if (currentChat.value.id === chat.id) {
+        listUser.value[index].last = 'now';
+        listUser.value[index].message = message.message;
+        if (currentUser.value.id === message.user_id) {
           getMessages(message.id);
         }
       }
@@ -128,8 +142,8 @@ export function useCaseChat() {
     channel = Echo.join('presence-online-users')
       .here((onlineUsersList) => {
         const onlineIds = new Set(onlineUsersList.map((u) => u.id));
-        listChat.value.forEach((chat) => {
-          chat.online = onlineIds.has(chat.companion_id);
+        listUser.value.forEach((user) => {
+          user.online = onlineIds.has(user.id);
         });
       })
       .joining((user) => {
@@ -150,7 +164,7 @@ export function useCaseChat() {
   };
 
   const sortedUsers = computed(() => {
-    const users = [...listChat.value];
+    const users = [...listUser.value];
 
     const sortIndex = messageSortBy.value;
 
@@ -158,16 +172,16 @@ export function useCaseChat() {
       case 0: // 'Resent'
         return users.sort((a, b) => {
           // Використовуємо .getTime() для порівняння об'єктів Date
-          const dateA = new Date(a['created_at']).getTime();
-          const dateB = new Date(b['created_at']).getTime();
+          const dateA = new Date(a['createdAt']).getTime();
+          const dateB = new Date(b['createdAt']).getTime();
           // Сортування від більшого до меншого (новіші перші)
           return dateB - dateA;
         });
 
       case 1: // 'New'
         return users.sort((a, b) => {
-          const dateA = new Date(a['created_at']).getTime();
-          const dateB = new Date(b['created_at']).getTime();
+          const dateA = new Date(a['createdAt']).getTime();
+          const dateB = new Date(b['createdAt']).getTime();
           // Сортування від меншого до більшого (старіші перші)
           return dateB - dateA;
         });
@@ -189,8 +203,8 @@ export function useCaseChat() {
 
   return {
     scrollContainer,
-    listChat,
-    currentChat,
+    listUser,
+    currentUser,
     subscribeUser,
     unsubscribeUser,
     fetchUsers,
@@ -204,5 +218,7 @@ export function useCaseChat() {
     setMute,
     setArchive,
     setBan,
+    alertRef,
+    showArchiveModal,
   };
 }

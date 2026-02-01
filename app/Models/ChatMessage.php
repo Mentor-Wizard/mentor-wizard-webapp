@@ -25,13 +25,19 @@ class ChatMessage extends Model implements HasMedia
 
     protected $fillable = [
         'chat_id',
+        'user_id',
         'message',
         'is_read',
     ];
 
     public function chat(): BelongsTo
     {
-        return $this->belongsTo(Chat::class, 'chat_id');
+        return $this->belongsTo(Chat::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function registerMediaCollections(): void

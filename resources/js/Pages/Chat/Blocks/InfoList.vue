@@ -20,7 +20,18 @@ const user = usePage().props.auth.user;
 import { useCaseFileType } from '../useCaseFileType.js';
 import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 import { usePage } from '@inertiajs/vue3';
-const { chatFiles, currentChat, setMute, setArchive, setBan } = useCaseChat();
+import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
+import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+import AppModal from '@/Components/AppModal.vue';
+import { ref } from 'vue';
+const {
+  chatFiles,
+  currentUser,
+  setMute,
+  setArchive,
+  setBan,
+  showArchiveModal,
+} = useCaseChat();
 
 const { getColorByFileName, getIconByFileName } = useCaseFileType();
 </script>
@@ -30,8 +41,8 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
     <div class="flex justify-center">
       <div class="h-32 w-32 overflow-hidden rounded-full border-4 border-white">
         <img
-          :src="currentChat?.avatar"
-          :alt="currentChat?.name"
+          :src="currentUser?.avatar"
+          :alt="currentUser?.name"
           class="h-full w-full rounded-full object-cover"
         />
       </div>
@@ -39,13 +50,13 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
 
     <div class="mt-4 text-center">
       <h2 class="text-xl leading-tight font-bold text-gray-900">
-        {{ currentChat?.name }}
+        {{ currentUser?.name }}
       </h2>
-      <p v-if="currentChat?.tags" class="mt-1 text-base text-gray-600">
-        {{ currentChat.tags[0] }}
+      <p v-if="currentUser?.tags" class="mt-1 text-base text-gray-600">
+        {{ currentUser.tags[0] }}
       </p>
       <p class="mt-2 text-sm text-gray-500">
-        Member since {{ currentChat?.created_at }}
+        Member since {{ currentUser?.createdAt }}
       </p>
     </div>
 
@@ -58,8 +69,8 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
       </button>
 
       <a
-        v-if="currentChat?.slug"
-        :href="route('page.mentor', { mentor: currentChat.slug })"
+        v-if="currentUser?.slug"
+        :href="route('page.mentor', { mentor: currentUser.slug })"
         target="_blank"
         class="flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition duration-150 ease-in-out hover:bg-gray-50"
       >
@@ -118,7 +129,7 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
           />
           <div>
             <p class="text-sm font-medium text-gray-800">{{ file.name }}</p>
-            <p class="text-xs text-gray-500">{{ file.created_at }}</p>
+            <p class="text-xs text-gray-500">{{ file.createdAt }}</p>
           </div>
         </div>
         <a :href="file.url" download class="text-gray-400 hover:text-gray-600">
@@ -174,10 +185,10 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
           class="relative inline-flex cursor-pointer items-center"
         >
           <input
-            v-if="currentChat"
+            v-if="currentUser"
             id="toggle-mute"
             type="checkbox"
-            v-model="currentChat.mute"
+            v-model="currentUser.isMuted"
             class="peer sr-only"
             @change="setMute()"
           />
@@ -191,7 +202,7 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
         <button class="text-gray-400 hover:text-gray-600">
           <ArchiveBoxIcon
             class="h-4 w-4 cursor-pointer text-gray-400"
-            @click="setArchive()"
+            @click="showArchiveModal = true"
           />
         </button>
       </div>
@@ -201,13 +212,34 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
         <button class="text-gray-400 hover:text-gray-600">
           <NoSymbolIcon
             class="h-4 w-4 cursor-pointer"
-            :class="currentChat?.ban ? 'text-red-400' : 'text-gray-400'"
+            :class="currentUser?.ban ? 'text-red-400' : 'text-gray-400'"
             @click="setBan()"
           />
         </button>
       </div>
     </div>
   </section>
+
+  <AppModal v-model="showArchiveModal">
+    <div class="p-6">
+      <h2 class="text-lg font-medium text-gray-900">
+        Are you sure you want to archive this chat?
+      </h2>
+      <p class="mt-1 text-sm text-gray-600">
+        This chat will be archived, not deleted.<br />
+        At the moment, restoring it from the archive is not planned, but there
+        may come a time when it can be brought back with a single click.<br />
+        All messages and data will remain safely stored, ready to be accessed
+        again when this feature becomes available.
+      </p>
+      <div class="mt-6 flex justify-end space-x-3">
+        <PrimaryButton @click="showArchiveModal = false">
+          Cancel
+        </PrimaryButton>
+        <DangerButton @click="setArchive"> Delete Program </DangerButton>
+      </div>
+    </div>
+  </AppModal>
 </template>
 
 <style scoped></style>

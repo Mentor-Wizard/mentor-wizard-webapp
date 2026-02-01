@@ -1,9 +1,6 @@
 <?php
 
 declare(strict_types=1);
-
-use App\Models\Chat;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,17 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // old structure
-        Schema::dropIfExists('chats');
+        Schema::table('chats', function (Blueprint $table): void {
+            // drop foreign keys
+            $table->dropForeign(['menti_id']);
+            $table->dropForeign(['mentor_id']);
+            $table->dropForeign(['coach_id']);
 
-        // new structure
-        Schema::create('chats', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignIdFor(User::class, 'owner_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignIdFor(Chat::class, 'companion_chat_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('status');
-            $table->boolean('mute')->default(false);
-            $table->timestamps();
+            // drop columns
+            $table->dropColumn([
+                'menti_id',
+                'mentor_id',
+                'coach_id',
+            ]);
+
+            // add new column
+            $table->string('name')->after('id');
         });
     }
 
@@ -34,23 +35,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // drop new structure
-        Schema::table('chat_messages', function (Blueprint $table): void {
-            try {
-                $table->dropForeign(['chat_id']);
-            } catch (Throwable) {
-            }
-        });
-        Schema::dropIfExists('chats');
+        Schema::table('chats', function (Blueprint $table): void {
+            // remove new column
+            $table->dropColumn('name');
 
-        // restore old structure
-        Schema::create('chats', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignIdFor(User::class, 'menti_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignIdFor(User::class, 'mentor_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignIdFor(User::class, 'coach_id')->nullable()->constrained()->nullOnDelete();
-            $table->timestamps();
+            // restore old columns
+            $table->foreignId('menti_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('mentor_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('coach_id')->nullable()->constrained('users')->nullOnDelete();
         });
-
     }
 };

@@ -15,7 +15,7 @@ class GetMute
     public function handle(Chat $chat): JsonResponse
     {
         return response()->json([
-            'mute' => $chat->mute,
+            'isMuted' => $chat->is_muted,
         ]);
     }
 }

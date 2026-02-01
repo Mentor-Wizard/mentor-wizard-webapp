@@ -23,7 +23,8 @@ class GetMessage
         $message->is_read = true;
         $message->save();
 
-        event(new UnreadMessagesEvent($message->chat->companionChat->owner, UnreadMessages::run($message->chat->owner)));
+        $companion = $message->chat->companion($message->user);
+        event(new UnreadMessagesEvent($companion, UnreadMessages::run($message->user)));
 
         return response()->json([
             'message' => ChatMessageResource::make($message),

@@ -15,11 +15,16 @@ class SetMute
 
     public function handle(Chat $chat, Request $request): JsonResponse
     {
-        $chat->mute = (bool) $request->input('mute', 0);
-        $chat->save();
+        $user = $request->user();
+        $user->chats()->updateExistingPivot(
+            $chat->id,
+            [
+                'is_muted' => (bool) $request->input('isMuted', 0),
+            ]
+        );
 
         return response()->json([
-            'mute' => $chat->mute,
+            'isMuted' => (bool) $request->input('isMuted', 0),
         ]);
     }
 }

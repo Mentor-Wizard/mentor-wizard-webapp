@@ -15,8 +15,13 @@ class SetArchive
 
     public function handle(Chat $chat): JsonResponse
     {
-        $chat->status = ChatStatusEnum::ARCHIVED;
-        $chat->save();
+        $user = auth()->user();
+        $user->chats()->updateExistingPivot(
+            $chat->id,
+            [
+                'status' => ChatStatusEnum::ARCHIVED->value,
+            ]
+        );
 
         return response()->json([
             'success' => true,

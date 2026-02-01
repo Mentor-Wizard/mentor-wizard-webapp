@@ -36,9 +36,9 @@ class ChatFileResource extends JsonResource
         return [
             'id'         => $media->id,
             'name'       => $media->file_name,
-            'mime_type'  => $media->mime_type,
+            'mimeType'   => $media->mime_type,
             'size'       => $media->size,
-            'created_at' => $media->created_at,
+            'createdAt'  => $media->created_at,
             'url'        => $media->getUrl(),
         ];
     }

@@ -19,8 +19,9 @@ class ChatMessages
 
     public function handle(Chat $chat): JsonResponse
     {
+        $user = auth()->user();
         $this->setReadMessages($chat);
-        event(new UnreadMessagesEvent($chat->owner, UnreadMessages::run($chat->owner)));
+        event(new UnreadMessagesEvent($user, UnreadMessages::run($user)));
 
         return response()->json([
             'messages' => $this->repository->getMessages($chat),
@@ -31,7 +32,7 @@ class ChatMessages
     private function setReadMessages(Chat $chat): void
     {
         ChatMessage::query()
-            ->where('chat_id', $chat->companion_chat_id)
+            ->where('chat_id', $chat->id)
             ->update(['is_read' => true]);
     }
 }

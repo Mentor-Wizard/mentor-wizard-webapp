@@ -16,11 +16,7 @@ class UnreadMessages
     {
         return ChatMessage::query()
             ->where('is_read', false)
-            ->whereIn('chat_id', function ($query) use ($user): void {
-                $query->select('companion_chat_id')
-                    ->from('chats')
-                    ->where('owner_id', $user->id);
-            })
+            ->where('user_id', '<>', $user->id)
             ->count();
     }
 }

@@ -16,15 +16,24 @@ class SetBan
 
     public function handle(Chat $chat, Request $request): JsonResponse
     {
-        $chat->status = ChatStatusEnum::ACTIVE;
-        if ((bool) $request->input('ban', 0)) {
-            $chat->status = ChatStatusEnum::BANNED;
+        $user = auth()->user();
+
+        $status = ChatStatusEnum::ACTIVE->value;
+        if ($request->input('ban', 0)) {
+            $status = ChatStatusEnum::BANNED->value;
         }
+
+        $user->chats()->updateExistingPivot(
+            $chat->id,
+            [
+                'status' => $status,
+            ]
+        );
 
         $chat->save();
 
         return response()->json([
-            'ban' => $chat->status === ChatStatusEnum::BANNED,
+            'ban' => $status === ChatStatusEnum::BANNED->value,
         ]);
     }
 }

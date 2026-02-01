@@ -18,7 +18,7 @@ import { useCaseFileType } from '../useCaseFileType.js';
 import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 const { getColorByFileName, getIconByFileName } = useCaseFileType();
-const { sendMessage, currentChat } = useCaseChat();
+const { sendMessage, currentUser } = useCaseChat();
 
 const editor = new Editor({
   extensions: [
@@ -92,7 +92,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    v-if="currentChat?.canSend"
+    v-if="currentUser?.canSend"
     class="flex flex-col gap-2 rounded-lg border border-gray-300 bg-gray-50 p-2"
   >
     <div class="flex gap-2 text-gray-600">
