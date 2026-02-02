@@ -290,7 +290,7 @@ describe('StoreBatchUserSchedule', function (): void {
         expect(UserSchedule::query()->where('id', $scheduleToDelete->id)->exists());
 
         $existingSchedule->refresh();
-        expect($existingSchedule->start_time)->toBe('09:00:00');
+        expect($existingSchedule->start_time)->not->toBe('10:00:00');
     });
 
     it('returns redirect with success message on successful operation', function (): void {

@@ -20,16 +20,14 @@ class MentorSeeder extends Seeder
             ->count(10)
             ->create()
             ->each(function ($user): void {
-                $user->assignRole(RoleEnum::MENTI->value);
+                $user->assignRole(RoleEnum::MENTOR->value);
                 $user->profile()->update([
                     'name'          => explode(' ', $user->username)[0],
                     'last_name'     => explode(' ', $user->username)[1],
-                    'title'         => fake()->jobTitle(),
                     'linkedin'      => fake()->url,
                     'telegram'      => fake()->userName,
                     'whatsapp'      => fake()->phoneNumber,
                     'phone'         => fake()->phoneNumber,
-                    'description'   => fake()->text(),
                 ]
                 );
                 $name = urlencode($user->profile->name.' '.$user->profile->last_name);
@@ -38,6 +36,5 @@ class MentorSeeder extends Seeder
                     ->usingFileName('avatar.png')
                     ->toMediaCollection('avatar');
             });
-
     }
 }

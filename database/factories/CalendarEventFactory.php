@@ -16,11 +16,6 @@ use Illuminate\Support\Facades\Date;
 class CalendarEventFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password = null;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>

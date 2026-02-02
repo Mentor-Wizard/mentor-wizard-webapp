@@ -87,8 +87,8 @@ const props = defineProps({
                   class="items-center justify-center font-semibold text-gray-900"
                 >
                   {{ new Date(day.date).getDate() }}</span
-                ></span
-              >
+                >
+              </span>
             </div>
           </div>
         </div>

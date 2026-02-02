@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CalendarEventStatusEnum;
 use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
 use Database\Factories\CalendarEventFactory;
@@ -107,6 +108,7 @@ class CalendarEvent extends Model
         return [
             'start_date_time'   => 'datetime',
             'end_date_time'     => 'datetime',
+            'status'            => CalendarEventStatusEnum::class,
         ];
     }
 }

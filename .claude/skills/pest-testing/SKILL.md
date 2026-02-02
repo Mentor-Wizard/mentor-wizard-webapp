@@ -28,14 +28,40 @@ Use `search-docs` for detailed Pest 4 patterns and documentation.
 
 ### Creating Tests
 
-All tests must be written using Pest. Use
-`docker compose exec exec app php artisan make:test --pest {name}`.
+All tests must be written using Pest. Use `php artisan make:test --pest {name}`.
 
 ### Test Organization
 
 - Unit/Feature tests: `tests/Feature` and `tests/Unit` directories.
 - Browser tests: `tests/Browser/` directory.
 - Do NOT remove tests without approval - these are core application code.
+
+### Models Testing Policy
+
+- DO NOT create unit tests for Laravel Eloquent models.
+- Rationale:
+    - Laravel's Eloquent ORM is extensively tested by the Laravel team
+    - Testing basic CRUD operations, relationships, and standard functionality
+      provides no value
+    - Models are excluded from code coverage metrics (see phpunit.xml)
+- What NOT to test:
+    - Basic relationships (hasOne, hasMany, belongsTo, etc.)
+    - Simple CRUD operations (create, update, delete, find)
+    - Standard Eloquent functionality
+    - Factory creation without custom logic
+    - Basic fillable/guarded attributes
+    - Standard casting functionality
+- Exceptions — What TO test:
+    - Custom business logic methods
+    - Complex accessors/mutators with business rules
+    - Custom scopes with specific logic
+    - Observer behavior and side effects
+    - Mass assignment protection (if critical)
+- Where to test model functionality instead:
+    - Feature tests via HTTP endpoints and workflows
+    - Integration tests for model interactions
+    - Observer tests for event handlers
+    - Action/Service tests for business logic
 
 ### Basic Test Structure
 
@@ -48,10 +74,9 @@ it('is true', function () { expect(true)->toBeTrue(); });
 ### Running Tests
 
 - Run minimal tests with filter before finalizing:
-  `docker compose exec exec app php artisan test --compact --filter=testName`.
-- Run all tests: `docker compose exec exec app php artisan test --compact`.
-- Run file:
-  `docker compose exec exec app php artisan test --compact tests/Feature/ExampleTest.php`.
+  `php artisan test --compact --filter=testName`.
+- Run all tests: `php artisan test --compact`.
+- Run file: `php artisan test --compact tests/Feature/ExampleTest.php`.
 
 ## Assertions
 
@@ -171,3 +196,7 @@ arch('controllers') ->expect('App\Http\Controllers') ->toExtendNothing()
 - Forgetting datasets for repetitive validation tests
 - Deleting tests without approval
 - Forgetting `assertNoJavaScriptErrors()` in browser tests
+
+## Related Skills
+
+- **Test Master** - Testing strategies

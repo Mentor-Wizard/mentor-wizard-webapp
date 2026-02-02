@@ -39,7 +39,8 @@ class CalendarsListPage
                     ->getWeeklyCalendarEvents() ,
                 CalendarViewModeEnum::MONTH => new MonthCalendarEventsService($user, $date, $timezone)
                     ->getMonthCalendarEvents(),
-                default                     => [],
+                default                     => new MonthCalendarEventsService($user, $date, $timezone)
+                    ->getMonthCalendarEvents(),
             }]);
     }
 }

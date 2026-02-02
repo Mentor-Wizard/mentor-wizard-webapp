@@ -21,12 +21,12 @@ class ConfirmCalendarEvent extends BaseCalendarEventAction
                 ->with('error', 'Start time for this event is already past');
         }
 
-        if ($mentorProgram->mentor->calendarEvents
-            ->whereNotIn('id', [$calendarEvent->id])
+        if ($mentorProgram->mentor->calendarEvents()
+            ->whereNotIn('calendar_event_id', [$calendarEvent->id])
             ->where('status', CalendarEventStatusEnum::CONFIRMED->value)
             ->where('start_date_time', '<', $calendarEvent->end_date_time)
             ->where('end_date_time', '>', $calendarEvent->start_date_time)
-            ->count() > 0
+            ->exists()
         ) {
 
             return to_route('pages.calendar.pending')
@@ -34,18 +34,17 @@ class ConfirmCalendarEvent extends BaseCalendarEventAction
         }
 
         $calendarEvent->calendarEventUsers()
-            ->wherePivot('user_id', auth()->id())
             ->updateExistingPivot(auth()->id(), [
                 'confirmed_at' => now(),
             ]);
 
-        if ($calendarEvent->calendarEventUsers()
+        if (! $calendarEvent->calendarEventUsers()
             ->wherePivotIn('role', [
                 CalendarEventRoleEnum::HOST->value,
                 CalendarEventRoleEnum::COHOST->value,
             ])
             ->wherePivotNull('confirmed_at')
-            ->count() === 0) {
+            ->exists()) {
             $calendarEvent->update(['status' => CalendarEventStatusEnum::CONFIRMED->value]);
 
             return to_route('pages.calendar.pending')

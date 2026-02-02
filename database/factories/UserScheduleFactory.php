@@ -28,8 +28,8 @@ class UserScheduleFactory extends Factory
         return [
             'user_id'      => $user,
             'day_of_week'  => fake()->numberBetween(0, 6),
-            'start_time'   => '09:00',
-            'end_time'     => '17:00',
+            'start_time'   => fake()->dateTimeBetween('06:00', '12:00')->format('H:i'),
+            'end_time'     => fake()->dateTimeBetween('14:00', '22:00')->format('H:i'),
             'type'         => UserScheduleRecordType::WORKING_DAY->value,
         ];
     }
