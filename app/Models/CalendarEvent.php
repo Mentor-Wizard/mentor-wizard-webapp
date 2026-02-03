@@ -108,7 +108,6 @@ class CalendarEvent extends Model
         return [
             'start_date_time'   => 'datetime',
             'end_date_time'     => 'datetime',
-            'status'            => CalendarEventStatusEnum::class,
         ];
     }
 }
