@@ -792,23 +792,23 @@ class ProcessOrder
 
 1. **Action не знайдений в роутах**
 
-    ```php
-    // Перевірте неймспейс та назву класу
-    Route::post('login', \App\Actions\Auth\Login\Login::class);
-    ```
+   ```php
+   // Перевірте неймспейс та назву класу
+   Route::post('login', \App\Actions\Auth\Login\Login::class);
+   ```
 
 2. **Dependency Injection не працює**
 
-    ```php
-    // Перевірте, що сервіс зареєстрований в Service Container
-    $this->app->bind(PaymentService::class, StripePaymentService::class);
-    ```
+   ```php
+   // Перевірте, що сервіс зареєстрований в Service Container
+   $this->app->bind(PaymentService::class, StripePaymentService::class);
+   ```
 
 3. **Валідація не спрацьовує**
-    ```php
-    // Перевірте, що використовується правильний Form Request
-    public function handle(CorrectRequest $request) // не Request
-    ```
+   ```php
+   // Перевірте, що використовується правильний Form Request
+   public function handle(CorrectRequest $request) // не Request
+   ```
 
 Архітектура Laravel Actions забезпечує чистий, тестований та масштабований код
 для Mentor Wizard проекту.

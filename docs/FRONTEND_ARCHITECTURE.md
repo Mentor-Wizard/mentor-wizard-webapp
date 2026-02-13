@@ -13,14 +13,14 @@
 
 ```json
 {
-    "vue": "^3.5.13", // Vue.js 3 з Composition API
-    "@inertiajs/vue3": "^2.0.3", // Inertia.js для Vue 3
-    "pinia": "^3.0.1", // State management
-    "tailwindcss": "^4.1", // CSS framework
-    "@headlessui/vue": "^1.7.23", // Headless UI компоненти
-    "@heroicons/vue": "^2.2.0", // Іконки
-    "vite": "^7.0.0", // Build tool
-    "laravel-vite-plugin": "^1.2.0" // Laravel інтеграція
+  "vue": "^3.5.13", // Vue.js 3 з Composition API
+  "@inertiajs/vue3": "^2.0.3", // Inertia.js для Vue 3
+  "pinia": "^3.0.1", // State management
+  "tailwindcss": "^4.1", // CSS framework
+  "@headlessui/vue": "^1.7.23", // Headless UI компоненти
+  "@heroicons/vue": "^2.2.0", // Іконки
+  "vite": "^7.0.0", // Build tool
+  "laravel-vite-plugin": "^1.2.0" // Laravel інтеграція
 }
 ```
 
@@ -91,18 +91,18 @@ import { createPinia } from 'pinia';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 createInertiaApp({
-    resolve: (name) =>
-        resolvePageComponent(
-            `./Pages/${name}.vue`,
-            import.meta.glob('./Pages/**/*.vue'),
-        ),
-    setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            .use(plugin) // Inertia.js plugin
-            .use(createPinia()) // State management
-            .use(ZiggyVue) // Laravel routes
-            .mount(el);
-    },
+  resolve: (name) =>
+    resolvePageComponent(
+      `./Pages/${name}.vue`,
+      import.meta.glob('./Pages/**/*.vue'),
+    ),
+  setup({ el, App, props, plugin }) {
+    return createApp({ render: () => h(App, props) })
+      .use(plugin) // Inertia.js plugin
+      .use(createPinia()) // State management
+      .use(ZiggyVue) // Laravel routes
+      .mount(el);
+  },
 });
 ```
 
@@ -117,8 +117,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 // Props
 const props = defineProps({
-    user: Object,
-    mentorPrograms: Array,
+  user: Object,
+  mentorPrograms: Array,
 });
 
 // Reactive state
@@ -127,32 +127,32 @@ const selectedProgram = ref(null);
 
 // Computed properties
 const filteredPrograms = computed(() => {
-    return props.mentorPrograms.filter((program) => program.is_active);
+  return props.mentorPrograms.filter((program) => program.is_active);
 });
 
 // Methods
 const selectProgram = (program) => {
-    selectedProgram.value = program;
+  selectedProgram.value = program;
 };
 
 // Lifecycle hooks
 onMounted(() => {
-    console.log('Component mounted');
+  console.log('Component mounted');
 });
 </script>
 
 <template>
-    <Head title="Dashboard" />
+  <Head title="Dashboard" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold">Dashboard</h2>
-        </template>
+  <AuthenticatedLayout>
+    <template #header>
+      <h2 class="text-xl font-semibold">Dashboard</h2>
+    </template>
 
-        <div class="py-12">
-            <!-- Контент -->
-        </div>
-    </AuthenticatedLayout>
+    <div class="py-12">
+      <!-- Контент -->
+    </div>
+  </AuthenticatedLayout>
 </template>
 ```
 
@@ -173,28 +173,28 @@ onMounted(() => {
 <!-- Components/UI/Button/PrimaryButton.vue -->
 <script setup>
 const props = defineProps({
-    type: {
-        type: String,
-        default: 'button',
-    },
-    disabled: Boolean,
+  type: {
+    type: String,
+    default: 'button',
+  },
+  disabled: Boolean,
 });
 
 const emit = defineEmits(['click']);
 </script>
 
 <template>
-    <button
-        :type="type"
-        :disabled="disabled"
-        @click="emit('click', $event)"
-        class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-blue-700 focus:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none active:bg-blue-900"
-        :class="{
-            'opacity-25': disabled,
-        }"
-    >
-        <slot />
-    </button>
+  <button
+    :type="type"
+    :disabled="disabled"
+    @click="emit('click', $event)"
+    class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-blue-700 focus:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none active:bg-blue-900"
+    :class="{
+      'opacity-25': disabled,
+    }"
+  >
+    <slot />
+  </button>
 </template>
 ```
 
@@ -206,13 +206,13 @@ const emit = defineEmits(['click']);
 import { onMounted, ref } from 'vue';
 
 const props = defineProps({
-    modelValue: String,
-    placeholder: String,
-    required: Boolean,
-    type: {
-        type: String,
-        default: 'text',
-    },
+  modelValue: String,
+  placeholder: String,
+  required: Boolean,
+  type: {
+    type: String,
+    default: 'text',
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -222,24 +222,24 @@ const input = ref(null);
 const focus = () => input.value.focus();
 
 onMounted(() => {
-    if (input.value.hasAttribute('autofocus')) {
-        input.value.focus();
-    }
+  if (input.value.hasAttribute('autofocus')) {
+    input.value.focus();
+  }
 });
 
 defineExpose({ focus });
 </script>
 
 <template>
-    <input
-        ref="input"
-        :type="type"
-        :value="modelValue"
-        :placeholder="placeholder"
-        :required="required"
-        @input="emit('update:modelValue', $event.target.value)"
-        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-    />
+  <input
+    ref="input"
+    :type="type"
+    :value="modelValue"
+    :placeholder="placeholder"
+    :required="required"
+    @input="emit('update:modelValue', $event.target.value)"
+    class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+  />
 </template>
 ```
 
@@ -260,71 +260,69 @@ const page = usePage();
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen bg-gray-100">
-            <!-- Navigation -->
-            <nav class="border-b border-gray-100 bg-white">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <!-- Logo -->
-                        <div class="flex shrink-0 items-center">
-                            <Link :href="route('pages.dashboard')">
-                                <ApplicationLogo class="block h-9 w-auto" />
-                            </Link>
-                        </div>
+  <div>
+    <div class="min-h-screen bg-gray-100">
+      <!-- Navigation -->
+      <nav class="border-b border-gray-100 bg-white">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div class="flex h-16 justify-between">
+            <!-- Logo -->
+            <div class="flex shrink-0 items-center">
+              <Link :href="route('pages.dashboard')">
+                <ApplicationLogo class="block h-9 w-auto" />
+              </Link>
+            </div>
 
-                        <!-- Navigation Links -->
-                        <div
-                            class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                        >
-                            <NavLink
-                                :href="route('pages.dashboard')"
-                                :active="route().current('pages.dashboard')"
-                            >
-                                Dashboard
-                            </NavLink>
-                        </div>
+            <!-- Navigation Links -->
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+              <NavLink
+                :href="route('pages.dashboard')"
+                :active="route().current('pages.dashboard')"
+              >
+                Dashboard
+              </NavLink>
+            </div>
 
-                        <!-- Settings Dropdown -->
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <Dropdown align="right" width="48">
-                                <template #trigger>
-                                    <button class="inline-flex items-center">
-                                        {{ page.props.auth.user.username }}
-                                    </button>
-                                </template>
+            <!-- Settings Dropdown -->
+            <div class="hidden sm:ms-6 sm:flex sm:items-center">
+              <Dropdown align="right" width="48">
+                <template #trigger>
+                  <button class="inline-flex items-center">
+                    {{ page.props.auth.user.username }}
+                  </button>
+                </template>
 
-                                <template #content>
-                                    <DropdownLink :href="route('profile.edit')">
-                                        Profile
-                                    </DropdownLink>
-                                    <DropdownLink
-                                        :href="route('logout')"
-                                        method="post"
-                                        as="button"
-                                    >
-                                        Log Out
-                                    </DropdownLink>
-                                </template>
-                            </Dropdown>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <!-- Page Heading -->
-            <header class="bg-white shadow" v-if="$slots.header">
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
-                </div>
-            </header>
-
-            <!-- Page Content -->
-            <main>
-                <slot />
-            </main>
+                <template #content>
+                  <DropdownLink :href="route('profile.edit')">
+                    Profile
+                  </DropdownLink>
+                  <DropdownLink
+                    :href="route('logout')"
+                    method="post"
+                    as="button"
+                  >
+                    Log Out
+                  </DropdownLink>
+                </template>
+              </Dropdown>
+            </div>
+          </div>
         </div>
+      </nav>
+
+      <!-- Page Heading -->
+      <header class="bg-white shadow" v-if="$slots.header">
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <slot name="header" />
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main>
+        <slot />
+      </main>
     </div>
+  </div>
 </template>
 ```
 
@@ -338,35 +336,35 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
-    // State
-    const user = ref(null);
-    const isAuthenticated = ref(false);
+  // State
+  const user = ref(null);
+  const isAuthenticated = ref(false);
 
-    // Getters
-    const userName = computed(() => user.value?.username ?? 'Guest');
-    const hasRole = computed(() => (role) => {
-        return user.value?.roles?.includes(role) ?? false;
-    });
+  // Getters
+  const userName = computed(() => user.value?.username ?? 'Guest');
+  const hasRole = computed(() => (role) => {
+    return user.value?.roles?.includes(role) ?? false;
+  });
 
-    // Actions
-    function setUser(userData) {
-        user.value = userData;
-        isAuthenticated.value = !!userData;
-    }
+  // Actions
+  function setUser(userData) {
+    user.value = userData;
+    isAuthenticated.value = !!userData;
+  }
 
-    function logout() {
-        user.value = null;
-        isAuthenticated.value = false;
-    }
+  function logout() {
+    user.value = null;
+    isAuthenticated.value = false;
+  }
 
-    return {
-        user,
-        isAuthenticated,
-        userName,
-        hasRole,
-        setUser,
-        logout,
-    };
+  return {
+    user,
+    isAuthenticated,
+    userName,
+    hasRole,
+    setUser,
+    logout,
+  };
 });
 ```
 
@@ -401,8 +399,8 @@ router.get('/users');
 
 // POST з даними
 router.post('/users', {
-    name: 'John Doe',
-    email: 'john@example.com',
+  name: 'John Doe',
+  email: 'john@example.com',
 });
 
 // PUT/PATCH оновлення
@@ -413,12 +411,12 @@ router.delete(`/users/${user.id}`);
 
 // З колбеками
 router.post('/users', userData, {
-    onSuccess: (page) => {
-        console.log('Success!');
-    },
-    onError: (errors) => {
-        console.log('Validation errors:', errors);
-    },
+  onSuccess: (page) => {
+    console.log('Success!');
+  },
+  onError: (errors) => {
+    console.log('Validation errors:', errors);
+  },
 });
 ```
 
@@ -429,37 +427,37 @@ router.post('/users', userData, {
 import { useForm } from '@inertiajs/vue3';
 
 const form = useForm({
-    name: '',
-    email: '',
-    password: '',
+  name: '',
+  email: '',
+  password: '',
 });
 
 const submit = () => {
-    form.post('/register', {
-        onSuccess: () => {
-            form.reset();
-        },
-    });
+  form.post('/register', {
+    onSuccess: () => {
+      form.reset();
+    },
+  });
 };
 </script>
 
 <template>
-    <form @submit.prevent="submit">
-        <input v-model="form.name" type="text" />
-        <div v-if="form.errors.name" class="text-red-600">
-            {{ form.errors.name }}
-        </div>
+  <form @submit.prevent="submit">
+    <input v-model="form.name" type="text" />
+    <div v-if="form.errors.name" class="text-red-600">
+      {{ form.errors.name }}
+    </div>
 
-        <input v-model="form.email" type="email" />
-        <div v-if="form.errors.email" class="text-red-600">
-            {{ form.errors.email }}
-        </div>
+    <input v-model="form.email" type="email" />
+    <div v-if="form.errors.email" class="text-red-600">
+      {{ form.errors.email }}
+    </div>
 
-        <button type="submit" :disabled="form.processing">
-            <span v-if="form.processing">Loading...</span>
-            <span v-else>Register</span>
-        </button>
-    </form>
+    <button type="submit" :disabled="form.processing">
+      <span v-if="form.processing">Loading...</span>
+      <span v-else>Register</span>
+    </button>
+  </form>
 </template>
 ```
 
@@ -485,13 +483,13 @@ router.reload({ except: ['largeDataSet'] });
 
 /* Custom компоненти */
 @layer components {
-    .btn-primary {
-        @apply rounded bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700;
-    }
+  .btn-primary {
+    @apply rounded bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700;
+  }
 
-    .form-input {
-        @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
-    }
+  .form-input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+  }
 }
 ```
 
@@ -503,22 +501,22 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 
 export default {
-    content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
-        './resources/views/**/*.blade.php',
-        './resources/js/**/*.vue',
-    ],
+  content: [
+    './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+    './storage/framework/views/*.php',
+    './resources/views/**/*.blade.php',
+    './resources/js/**/*.vue',
+  ],
 
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-            },
-        },
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+      },
     },
+  },
 
-    plugins: [forms],
+  plugins: [forms],
 };
 ```
 
@@ -532,35 +530,33 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 </script>
 
 <template>
-    <Menu as="div" class="relative inline-block text-left">
-        <MenuButton class="btn-primary"> Options </MenuButton>
+  <Menu as="div" class="relative inline-block text-left">
+    <MenuButton class="btn-primary"> Options </MenuButton>
 
-        <transition
-            enter-active-class="transition duration-100 ease-out"
-            enter-from-class="transform scale-95 opacity-0"
-            enter-to-class="transform scale-100 opacity-1"
-            leave-active-class="transition duration-75 ease-in"
-            leave-from-class="transform scale-100 opacity-100"
-            leave-to-class="transform scale-95 opacity-0"
-        >
-            <MenuItems
-                class="absolute right-0 mt-2 w-56 origin-top-right bg-white shadow-lg"
-            >
-                <MenuItem v-slot="{ active }">
-                    <button
-                        :class="[
-                            active ?
-                                'bg-gray-100 text-gray-900'
-                            :   'text-gray-700',
-                            'group flex w-full items-center px-2 py-2 text-sm',
-                        ]"
-                    >
-                        Edit
-                    </button>
-                </MenuItem>
-            </MenuItems>
-        </transition>
-    </Menu>
+    <transition
+      enter-active-class="transition duration-100 ease-out"
+      enter-from-class="transform scale-95 opacity-0"
+      enter-to-class="transform scale-100 opacity-1"
+      leave-active-class="transition duration-75 ease-in"
+      leave-from-class="transform scale-100 opacity-100"
+      leave-to-class="transform scale-95 opacity-0"
+    >
+      <MenuItems
+        class="absolute right-0 mt-2 w-56 origin-top-right bg-white shadow-lg"
+      >
+        <MenuItem v-slot="{ active }">
+          <button
+            :class="[
+              active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+              'group flex w-full items-center px-2 py-2 text-sm',
+            ]"
+          >
+            Edit
+          </button>
+        </MenuItem>
+      </MenuItems>
+    </transition>
+  </Menu>
 </template>
 ```
 
@@ -574,11 +570,11 @@ import { UserIcon, CogIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 </script>
 
 <template>
-    <div class="flex items-center space-x-2">
-        <UserIcon class="h-5 w-5" />
-        <span>Profile</span>
-        <ChevronDownIcon class="h-4 w-4" />
-    </div>
+  <div class="flex items-center space-x-2">
+    <UserIcon class="h-5 w-5" />
+    <span>Profile</span>
+    <ChevronDownIcon class="h-4 w-4" />
+  </div>
 </template>
 ```
 
@@ -594,17 +590,17 @@ import Pusher from 'pusher-js';
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-    wsHost:
-        import.meta.env.VITE_PUSHER_HOST ?
-            import.meta.env.VITE_PUSHER_HOST
-        :   `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.io`,
-    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
+  broadcaster: 'pusher',
+  key: import.meta.env.VITE_PUSHER_APP_KEY,
+  cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
+  wsHost:
+    import.meta.env.VITE_PUSHER_HOST ?
+      import.meta.env.VITE_PUSHER_HOST
+    : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.io`,
+  wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
+  wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+  forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+  enabledTransports: ['ws', 'wss'],
 });
 ```
 
@@ -617,26 +613,26 @@ import { onMounted, onUnmounted, ref } from 'vue';
 const messages = ref([]);
 
 onMounted(() => {
-    // Слухання приватного каналу
-    window.Echo.private(`chat.${props.chatId}`).listen('MessageSent', (e) => {
-        messages.value.push(e.message);
-    });
+  // Слухання приватного каналу
+  window.Echo.private(`chat.${props.chatId}`).listen('MessageSent', (e) => {
+    messages.value.push(e.message);
+  });
 
-    // Слухання присутності
-    window.Echo.join(`chat.${props.chatId}`)
-        .here((users) => {
-            console.log('Users currently in chat:', users);
-        })
-        .joining((user) => {
-            console.log('User joined:', user);
-        })
-        .leaving((user) => {
-            console.log('User left:', user);
-        });
+  // Слухання присутності
+  window.Echo.join(`chat.${props.chatId}`)
+    .here((users) => {
+      console.log('Users currently in chat:', users);
+    })
+    .joining((user) => {
+      console.log('User joined:', user);
+    })
+    .leaving((user) => {
+      console.log('User left:', user);
+    });
 });
 
 onUnmounted(() => {
-    window.Echo.leaveChannel(`chat.${props.chatId}`);
+  window.Echo.leaveChannel(`chat.${props.chatId}`);
 });
 </script>
 ```
@@ -651,16 +647,16 @@ import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-    plugins: [vue()],
-    test: {
-        globals: true,
-        environment: 'jsdom',
+  plugins: [vue()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+  },
+  resolve: {
+    alias: {
+      '@': '/resources/js',
     },
-    resolve: {
-        alias: {
-            '@': '/resources/js',
-        },
-    },
+  },
 });
 ```
 
@@ -673,34 +669,34 @@ import { describe, it, expect } from 'vitest';
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
 
 describe('PrimaryButton', () => {
-    it('renders button with correct text', () => {
-        const wrapper = mount(PrimaryButton, {
-            slots: {
-                default: 'Click me',
-            },
-        });
-
-        expect(wrapper.text()).toBe('Click me');
-        expect(wrapper.find('button').exists()).toBe(true);
+  it('renders button with correct text', () => {
+    const wrapper = mount(PrimaryButton, {
+      slots: {
+        default: 'Click me',
+      },
     });
 
-    it('emits click event when clicked', async () => {
-        const wrapper = mount(PrimaryButton);
+    expect(wrapper.text()).toBe('Click me');
+    expect(wrapper.find('button').exists()).toBe(true);
+  });
 
-        await wrapper.find('button').trigger('click');
+  it('emits click event when clicked', async () => {
+    const wrapper = mount(PrimaryButton);
 
-        expect(wrapper.emitted()).toHaveProperty('click');
+    await wrapper.find('button').trigger('click');
+
+    expect(wrapper.emitted()).toHaveProperty('click');
+  });
+
+  it('is disabled when disabled prop is true', () => {
+    const wrapper = mount(PrimaryButton, {
+      props: {
+        disabled: true,
+      },
     });
 
-    it('is disabled when disabled prop is true', () => {
-        const wrapper = mount(PrimaryButton, {
-            props: {
-                disabled: true,
-            },
-        });
-
-        expect(wrapper.find('button').attributes('disabled')).toBeDefined();
-    });
+    expect(wrapper.find('button').attributes('disabled')).toBeDefined();
+  });
 });
 ```
 
@@ -715,26 +711,26 @@ import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-    plugins: [
-        laravel({
-            input: 'resources/js/app.js',
-            ssr: 'resources/js/ssr.js',
-            refresh: true,
-        }),
-        vue({
-            template: {
-                transformAssetUrls: {
-                    base: null,
-                    includeAbsolute: false,
-                },
-            },
-        }),
-    ],
-    resolve: {
-        alias: {
-            '@': '/resources/js',
+  plugins: [
+    laravel({
+      input: 'resources/js/app.js',
+      ssr: 'resources/js/ssr.js',
+      refresh: true,
+    }),
+    vue({
+      template: {
+        transformAssetUrls: {
+          base: null,
+          includeAbsolute: false,
         },
+      },
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': '/resources/js',
     },
+  },
 });
 ```
 
@@ -769,23 +765,23 @@ const LazyComponent = defineAsyncComponent(() => import('./LazyComponent.vue'));
 
 // ✅ Добре - мемоізація обчислень
 const expensiveValue = computed(() => {
-    return heavyCalculation(props.data);
+  return heavyCalculation(props.data);
 });
 
 // ✅ Добре - оптимізація v-for
 </script>
 
 <template>
-    <!-- ✅ Добре - key для списків -->
-    <div v-for="item in items" :key="item.id">
-        {{ item.name }}
-    </div>
+  <!-- ✅ Добре - key для списків -->
+  <div v-for="item in items" :key="item.id">
+    {{ item.name }}
+  </div>
 
-    <!-- ✅ Добре - v-show для часто перемикаємих елементів -->
-    <div v-show="isVisible">Content</div>
+  <!-- ✅ Добре - v-show для часто перемикаємих елементів -->
+  <div v-show="isVisible">Content</div>
 
-    <!-- ✅ Добре - v-if для рідко змінюваних умов -->
-    <div v-if="hasPermission">Admin panel</div>
+  <!-- ✅ Добре - v-if для рідко змінюваних умов -->
+  <div v-if="hasPermission">Admin panel</div>
 </template>
 ```
 
@@ -797,9 +793,9 @@ const expensiveValue = computed(() => {
 import { onMounted } from 'vue';
 
 onMounted(() => {
-    if (process.env.NODE_ENV === 'development') {
-        console.log('Component data:', props, state);
-    }
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Component data:', props, state);
+  }
 });
 </script>
 ```
@@ -813,17 +809,17 @@ import { Head } from '@inertiajs/vue3';
 // SEO метадані
 const pageTitle = computed(() => `${props.mentor.name} - Mentor Profile`);
 const pageDescription = computed(
-    () => `Learn from ${props.mentor.name}. ${props.mentor.bio}`,
+  () => `Learn from ${props.mentor.name}. ${props.mentor.bio}`,
 );
 </script>
 
 <template>
-    <Head :title="pageTitle">
-        <meta name="description" :content="pageDescription" />
-        <meta property="og:title" :content="pageTitle" />
-        <meta property="og:description" :content="pageDescription" />
-        <meta property="og:image" :content="props.mentor.avatar_url" />
-    </Head>
+  <Head :title="pageTitle">
+    <meta name="description" :content="pageDescription" />
+    <meta property="og:title" :content="pageTitle" />
+    <meta property="og:description" :content="pageDescription" />
+    <meta property="og:image" :content="props.mentor.avatar_url" />
+  </Head>
 </template>
 ```
 

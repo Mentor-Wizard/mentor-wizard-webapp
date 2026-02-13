@@ -91,16 +91,16 @@ xdebug.idekey=PHPSTORM
 #### PHPStorm:
 
 1. **Settings → PHP → Debug**
-    - Xdebug port: `9003`
-    - ✓ Can accept external connections
+   - Xdebug port: `9003`
+   - ✓ Can accept external connections
 
 2. **Settings → PHP → Servers**
-    - Name: `mentor-wizard` (має збігатися з `serverName` в конфігурації)
-    - Host: `localhost`
-    - Port: `80`
-    - Debugger: `Xdebug`
-    - ✓ Use path mappings:
-        - `/Users/your-path/mentor-wizard-webapp` → `/var/www/html`
+   - Name: `mentor-wizard` (має збігатися з `serverName` в конфігурації)
+   - Host: `localhost`
+   - Port: `80`
+   - Debugger: `Xdebug`
+   - ✓ Use path mappings:
+     - `/Users/your-path/mentor-wizard-webapp` → `/var/www/html`
 
 3. **Run → Start Listening for PHP Debug Connections** (або натисніть телефон в
    панелі)
@@ -111,18 +111,18 @@ xdebug.idekey=PHPSTORM
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Listen for Xdebug",
-            "type": "php",
-            "request": "launch",
-            "port": 9003,
-            "pathMappings": {
-                "/var/www/html": "${workspaceFolder}"
-            }
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Listen for Xdebug",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "pathMappings": {
+        "/var/www/html": "${workspaceFolder}"
+      }
+    }
+  ]
 }
 ```
 
@@ -146,16 +146,16 @@ php artisan queue:work --tries=1 --max-jobs=1
 #### Варіант B: Налаштуйте PHPStorm CLI Interpreter
 
 1. **Settings → PHP → CLI Interpreter**
-    - Add new `From Docker, Vagrant...`
-    - Select `Docker Compose`
-    - Configuration files: `./compose.yml`
-    - Service: `app`
+   - Add new `From Docker, Vagrant...`
+   - Select `Docker Compose`
+   - Configuration files: `./compose.yml`
+   - Service: `app`
 
 2. Створіть **Run Configuration**:
-    - Run → Edit Configurations → Add New → PHP Script
-    - File: `artisan`
-    - Arguments: `queue:work --tries=1 --max-jobs=1`
-    - Interpreter: ваш Docker CLI interpreter
+   - Run → Edit Configurations → Add New → PHP Script
+   - File: `artisan`
+   - Arguments: `queue:work --tries=1 --max-jobs=1`
+   - Interpreter: ваш Docker CLI interpreter
 
 ### 4. Встановіть точки зупинки (Breakpoints)
 
@@ -179,44 +179,44 @@ breakpoint на рядках:
 
 2. **Диспетчіруйте Job** одним з способів:
 
-    **Спосіб A: Через реєстрацію користувача**
-    - Відкрийте форму реєстрації у браузері
-    - Зареєструйте нового користувача
-    - Job автоматично додасться в чергу
+   **Спосіб A: Через реєстрацію користувача**
+   - Відкрийте форму реєстрації у браузері
+   - Зареєструйте нового користувача
+   - Job автоматично додасться в чергу
 
-    **Спосіб B: Через Tinker**
+   **Спосіб B: Через Tinker**
 
-    ```bash
-    docker compose exec app php artisan tinker
-    >>> $user = App\Models\User::factory()->create();
-    >>> $metadata = [
-    ...     'registration_source' => 'test',
-    ...     'settings' => [
-    ...         'locale' => ['language' => 'uk'],
-    ...         'override' => true,
-    ...     ],
-    ... ];
-    >>> App\Jobs\ProcessNewUserRegistration::dispatch($user, $metadata);
-    ```
+   ```bash
+   docker compose exec app php artisan tinker
+   >>> $user = App\Models\User::factory()->create();
+   >>> $metadata = [
+   ...     'registration_source' => 'test',
+   ...     'settings' => [
+   ...         'locale' => ['language' => 'uk'],
+   ...         'override' => true,
+   ...     ],
+   ... ];
+   >>> App\Jobs\ProcessNewUserRegistration::dispatch($user, $metadata);
+   ```
 
-    **Спосіб C: Через тест**
+   **Спосіб C: Через тест**
 
-    ```bash
-    docker compose exec app ./vendor/bin/pest tests/Unit/Jobs/ProcessNewUserRegistrationTest.php
-    ```
+   ```bash
+   docker compose exec app ./vendor/bin/pest tests/Unit/Jobs/ProcessNewUserRegistrationTest.php
+   ```
 
 3. **Запустіть Queue Worker** (якщо ще не запущений):
 
-    ```bash
-    docker compose exec app php artisan queue:work --tries=1 --max-jobs=1
-    ```
+   ```bash
+   docker compose exec app php artisan queue:work --tries=1 --max-jobs=1
+   ```
 
 4. **Дебажте!**
-    - IDE зупиниться на першому breakpoint
-    - Використовуйте **Step Over (F8)**, **Step Into (F7)**, **Step Out
-      (Shift+F8)**
-    - Перевіряйте значення змінних у вікні **Variables/Watches**
-    - Оцінюйте вирази у вікні **Evaluate Expression (Alt+F8)**
+   - IDE зупиниться на першому breakpoint
+   - Використовуйте **Step Over (F8)**, **Step Into (F7)**, **Step Out
+     (Shift+F8)**
+   - Перевіряйте значення змінних у вікні **Variables/Watches**
+   - Оцінюйте вирази у вікні **Evaluate Expression (Alt+F8)**
 
 ### 6. Виправте помилки
 
