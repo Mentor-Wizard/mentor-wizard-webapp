@@ -105,18 +105,18 @@ Route::delete('mentor-program/{mentorProgram:slug}', DeleteMentorProgram::class)
 
 1. **Використовуйте Artisan команду:**
 
-    ```bash
-    php artisan make:policy PostPolicy --model=Post
-    ```
+   ```bash
+   php artisan make:policy PostPolicy --model=Post
+   ```
 
 2. **Розміщення:** Всі політики розміщуються в `app/Policies/`
 
 3. **Структура методів:**
-    - `viewAny()` - перегляд списку ресурсів
-    - `view()` - перегляд конкретного ресурсу
-    - `create()` - створення нового ресурсу
-    - `update()` - оновлення ресурсу
-    - `delete()` - видалення ресурсу
+   - `viewAny()` - перегляд списку ресурсів
+   - `view()` - перегляд конкретного ресурсу
+   - `create()` - створення нового ресурсу
+   - `update()` - оновлення ресурсу
+   - `delete()` - видалення ресурсу
 
 ### Приклад повної політики
 
@@ -235,16 +235,16 @@ return Inertia::render('Posts/Show', [
 
 ```vue
 <template>
-    <div>
-        <button v-if="can.update" @click="editPost">Редагувати</button>
-        <button v-if="can.delete" @click="deletePost">Видалити</button>
-    </div>
+  <div>
+    <button v-if="can.update" @click="editPost">Редагувати</button>
+    <button v-if="can.delete" @click="deletePost">Видалити</button>
+  </div>
 </template>
 
 <script setup>
 defineProps({
-    post: Object,
-    can: Object,
+  post: Object,
+  can: Object,
 });
 </script>
 ```
@@ -308,9 +308,9 @@ if ($user->hasAllRoles(['mentor', 'verified'])) {
 
 1. **Кешуйте ролі та дозволи** - Spatie Permission автоматично кешує їх
 2. **Використовуйте eager loading** для ролей та дозволів при необхідності:
-    ```php
-    $users = User::with('roles', 'permissions')->get();
-    ```
+   ```php
+   $users = User::with('roles', 'permissions')->get();
+   ```
 
 ### Тестування
 

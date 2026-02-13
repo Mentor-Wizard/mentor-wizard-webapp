@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -22,7 +23,9 @@ class MentorProgramFactory extends Factory
     public function definition(): array
     {
         return [
-            'mentor_id'   => User::factory(),
+            'mentor_id'   => User::query()->role(RoleEnum::MENTOR->value)
+                ->inRandomOrder()
+                ->value('id'),
             'name'        => fake()->sentence(3),
             'slug'        => fake()->slug(),
             'description' => fake()->sentence(20),

@@ -51,9 +51,17 @@ const deleteProgram = () => {
 <template>
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="text-xl leading-tight font-semibold text-gray-800">
-        Mentor Programs
-      </h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl leading-tight font-semibold text-gray-800">
+          Mentor Programs
+        </h2>
+        <a
+          :href="route('pages.calendar.pending')"
+          class="rounded-md bg-yellow-50 px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-yellow-200 ring-inset hover:bg-yellow-100"
+        >
+          All Pending Events
+        </a>
+      </div>
     </template>
 
     <div class="py-12">
@@ -94,6 +102,35 @@ const deleteProgram = () => {
                         >, {{ program.name }}</span
                       ></a
                     >
+
+                    <a
+                      :href="route('pages.mentor.program.book', program.slug)"
+                      class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block"
+                      >Book event<span class="sr-only"
+                        >, {{ program.name }}</span
+                      ></a
+                    >
+
+                    <a
+                      :href="route('pages.calendar.pending', program.slug)"
+                      :class="[
+                        'hidden rounded-md px-2.5 py-1.5 text-sm font-semibold'
+                          + ' text-gray-900 shadow-xs ring-1 ring-inset sm:block',
+                        program.pending_events_requests_number === 0 ?
+                          'bg-green-50 ring-green-200 hover:bg-green-100'
+                        : 'bg-yellow-50 ring-yellow-200 hover:bg-yellow-100',
+                      ]"
+                    >
+                      Pending {{ program.pending_events_requests_number }}
+                    </a>
+
+                    <a
+                      :href="route('pages.mentor.program.book', program.slug)"
+                      class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block"
+                    >
+                      Confirmed {{ program.confirmed_events_number }}
+                    </a>
+
                     <Menu as="div" class="relative flex-none">
                       <MenuButton
                         class="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900"
@@ -139,6 +176,40 @@ const deleteProgram = () => {
                               Delete<span class="sr-only"
                                 >, {{ program.name }}</span
                               >
+                            </button>
+                          </MenuItem>
+
+                          <MenuItem v-slot="{ active }">
+                            <button
+                              type="button"
+                              :class="[
+                                active ? 'bg-gray-50 outline-hidden' : '',
+                                'block w-full px-3 py-1 text-left text-sm/6 text-gray-900',
+                              ]"
+                              @click="
+                                route('pages.mentor.program.book', program.slug)
+                              "
+                            >
+                              Book Event<span class="sr-only"
+                                >, {{ program.name }}</span
+                              >
+                            </button>
+
+                            <button
+                              type="button"
+                              :class="[
+                                program.pending_events_requests_number === 0 ?
+                                  'bg-green-200 outline-hidden'
+                                : 'bg-red-200 outline-hidden',
+                                'block w-full px-3 py-1 text-left text-sm/6 text-gray-900',
+                              ]"
+                              @click="
+                                route('pages.mentor.program.book', program.slug)
+                              "
+                            >
+                              Need confirmation
+                              {{ program.pending_events_requests_number }}
+                              <span class="sr-only bg-red-300"></span>
                             </button>
                           </MenuItem>
                         </MenuItems>

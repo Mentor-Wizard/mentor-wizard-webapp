@@ -1,5 +1,8 @@
+.cursor/guidelines.md
 .ddev
 .github
+.junie/guidelines.md
+.vscode/guidelines.md
 dist
 local
 public

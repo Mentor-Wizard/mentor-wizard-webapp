@@ -291,7 +291,7 @@ Vue.js з Inertia автоматично обробляє CSRF токени:
 import { useForm } from '@inertiajs/vue3';
 
 const form = useForm({
-    // Inertia автоматично додає CSRF токен
+  // Inertia автоматично додає CSRF токен
 });
 </script>
 ```
