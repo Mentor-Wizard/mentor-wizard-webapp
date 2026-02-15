@@ -16,6 +16,7 @@ class SetMute
     public function handle(Chat $chat, Request $request): JsonResponse
     {
         $user = $request->user();
+
         $user->chats()->updateExistingPivot(
             $chat->id,
             [

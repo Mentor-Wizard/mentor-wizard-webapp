@@ -1,0 +1,69 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\Chat\ChatMessages;
+use App\Events\Chats\UnreadMessagesEvent;
+use App\Models\Chat;
+use App\Models\ChatMessage;
+use App\Models\User;
+use Database\Seeders\RoleSeeder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Event;
+use Symfony\Component\HttpFoundation\Response;
+
+mutates(ChatMessages::class);
+
+describe('ChatMessages', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        Event::fake();
+        Date::setTestNow(Illuminate\Support\Facades\Date::parse('2026-02-01 12:00:00'));
+    });
+
+    it('returns messages and files, marks messages as read and dispatches unread event', function (): void {
+        $user = User::factory()->create();
+        $user->profile()->create([
+            'name'      => 'profile name 1',
+            'last_name' => 'profile last_name 1',
+        ]);
+        Auth::login($user);
+        request()->setUserResolver(fn () => $user);
+        $chat = Chat::factory()->create();
+
+        ChatMessage::factory()->create([
+            'chat_id' => $chat->id,
+            'user_id' => $user->id,
+            'is_read' => false,
+            'message' => 'Hello!',
+        ]);
+
+        /** @var ChatMessages $action */
+        $action = app(ChatMessages::class);
+        $result = $action->handle($chat);
+
+        expect($result)->toBeInstanceOf(JsonResponse::class)
+            ->and($result->getStatusCode())->toBe(Response::HTTP_OK);
+
+        $data = $result->getData(true);
+        expect($data)->toHaveKeys(['messages', 'files'])
+            ->and(ChatMessage::query()->where('chat_id', $chat->id)->where('is_read', false)->count())
+            ->toBe(0);
+
+        Event::assertDispatched(fn (UnreadMessagesEvent $event): bool => $event->user->id === $user->id);
+    });
+
+    it('returns empty lists if no messages exist', function (): void {
+        $user = User::factory()->create();
+        Auth::login($user);
+        $chat = Chat::factory()->create();
+
+        $action = app(ChatMessages::class);
+        $result = $action->handle($chat);
+
+        expect($result->getData(true))->toBe([
+            'messages' => [],
+            'files'    => [],
+        ]);
+    });
+});

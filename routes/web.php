@@ -6,7 +6,6 @@ use App\Actions\Chat\ChatListUser;
 use App\Actions\Chat\ChatMessages;
 use App\Actions\Chat\CreateChat;
 use App\Actions\Chat\GetMessage;
-use App\Actions\Chat\GetMute;
 use App\Actions\Chat\SendMessage;
 use App\Actions\Chat\SetArchive;
 use App\Actions\Chat\SetBan;
@@ -73,7 +72,6 @@ Route::middleware('auth')
         Route::get('messages/{chat}', ChatMessages::class)->name('chat.messages');
         Route::post('message/{chat}', SendMessage::class)->name('chat.send-message');
         Route::get('message/{message}', GetMessage::class)->name('chat.get-message');
-        Route::get('mute/{chat}', GetMute::class)->name('chat.get-mute');
         Route::post('mute/{chat}', SetMute::class)->name('chat.set-mute');
         Route::post('create/{user}', CreateChat::class)->name('chat.create');
         Route::post('archive/{chat}', SetArchive::class)->name('chat.set-archive');
