@@ -41,7 +41,7 @@ services:
     restart: unless-stopped
     container_name: mw-app
     environment:
-      COMMAND: php artisan octane:frankenphp --host=0.0.0.0 --port=80 --watch
+      COMMAND: php artisan octane:frankenphp --host=0.0.0.0 --port=80 --workers=4 --max-requests=500 --watch
       PROCESS: app
       XDEBUG_MODE: debug,coverage
     depends_on:
@@ -66,7 +66,7 @@ services:
       - mw-db-network
       - mw-redis-network
     healthcheck:
-      test: curl -s http://localhost/up >/dev/null || exit 1
+      test: curl -sf http://localhost/up || exit 1
       interval: 5s
       timeout: 10s
       retries: 20
@@ -75,7 +75,7 @@ services:
     <<: *app
     container_name: mw-worker
     environment:
-      COMMAND: php artisan queue:work
+      COMMAND: php artisan queue:work --tries=3 --max-jobs=500 --memory=256
       PROCESS: worker
     ports: []
     networks:

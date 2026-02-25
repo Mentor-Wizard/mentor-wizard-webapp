@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'server' => env('OCTANE_SERVER', 'roadrunner'),
+    'server' => env('OCTANE_SERVER', 'frankenphp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ return [
         ],
 
         RequestTerminated::class => [
-            // FlushUploadedFiles::class,
+            FlushUploadedFiles::class,
         ],
 
         TaskReceived::class => [
@@ -130,40 +130,7 @@ return [
     ],
 
     'flush' => [
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Octane Swoole Tables
-    |--------------------------------------------------------------------------
-    |
-    | While using Swoole, you may define additional tables as required by the
-    | application. These tables can be used to store data that needs to be
-    | quickly accessed by other workers on the particular Swoole server.
-    |
-    */
-
-    'tables' => [
-        'example:1000' => [
-            'name'  => 'string:1000',
-            'votes' => 'int',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Octane Swoole Cache Table
-    |--------------------------------------------------------------------------
-    |
-    | While using Swoole, you may leverage the Octane cache, which is powered
-    | by a Swoole table. You may set the maximum number of rows as well as
-    | the number of bytes per row using the configuration options below.
-    |
-    */
-
-    'cache' => [
-        'rows'  => 1000,
-        'bytes' => 10000,
+        Spatie\Permission\PermissionRegistrar::class,
     ],
 
     /*
@@ -200,7 +167,7 @@ return [
     |
     */
 
-    'garbage' => 50,
+    'garbage' => 128,
 
     /*
     |--------------------------------------------------------------------------

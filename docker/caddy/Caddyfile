@@ -4,19 +4,18 @@
 
 # HTTP configuration for localhost development
 localhost, 127.0.0.1, :80 {
-    # Use FrankenPHP's native PHP server with worker support
-    php_server {
-        root /var/www/public
-        # Use Laravel's index.php as the entry point
-        # FrankenPHP will handle routing automatically
+    request_body {
+        max_size 100MB
     }
 
-    # Security headers
-    header {
-        # Remove server information
-        -Server
+    encode gzip
 
-        # Basic security headers
+    php_server {
+        root /var/www/public
+    }
+
+    header {
+        -Server
         X-Content-Type-Options nosniff
         X-Frame-Options DENY
         Referrer-Policy no-referrer-when-downgrade

@@ -1,37 +1,19 @@
-FROM dunglas/frankenphp:1.9.1-php8.4-alpine
+# Stage 1: Build PHP extensions
+FROM dunglas/frankenphp:1.9.1-php8.4-alpine AS builder
 
-# Copy composer from official image
-COPY --from=composer:2.8.5 /usr/bin/composer /usr/bin/
-
-# Install system dependencies
-RUN \
-    set -ex && \
-    apk update && \
+RUN set -ex && \
     apk add --no-cache \
-        git \
-        nodejs \
-        npm \
         postgresql-dev \
         libzip-dev \
         libpng-dev \
         libjpeg-turbo-dev \
         freetype-dev \
         icu-dev \
-        jpegoptim \
-        optipng \
-        pngquant \
-        gifsicle \
-        libavif \
-        supervisor \
-        dcron \
         linux-headers \
         build-base \
         autoconf \
         cmake \
-        make
-
-# Install and configure PHP extensions
-RUN \
+        make && \
     docker-php-ext-configure gd --with-freetype --with-jpeg && \
     docker-php-ext-configure zip && \
     docker-php-ext-install -j$(nproc) \
@@ -45,21 +27,44 @@ RUN \
     pecl install redis && \
     docker-php-ext-enable redis
 
-# Configure PHP settings
-RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory-limit.ini
+# Stage 2: Production image (no build tools)
+FROM dunglas/frankenphp:1.9.1-php8.4-alpine
 
-# Install Node.js tools
-RUN npm install -g corepack
-RUN corepack enable && corepack prepare yarn@4.10.3 --activate
+COPY --from=composer:2.8.5 /usr/bin/composer /usr/bin/
 
-# Copy supervisor configuration
+RUN apk add --no-cache \
+    libpq \
+    libzip \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    icu-libs \
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    libavif \
+    nodejs \
+    npm \
+    supervisor \
+    curl
+
+COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+
+RUN echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/memory-limit.ini && \
+    echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.max_accelerated_files=20000" >> /usr/local/etc/php/conf.d/opcache-prod.ini && \
+    echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache-prod.ini
+
+RUN npm install -g corepack && \
+    corepack enable && corepack prepare yarn@4.10.3 --activate
+
 COPY docker/php/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set working directory
 WORKDIR /var/www
 
-# Expose ports for HTTP, HTTPS, and HTTP/3
 EXPOSE 80 443 443/udp
 
-# Use supervisor as entrypoint to manage multiple processes
 ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
