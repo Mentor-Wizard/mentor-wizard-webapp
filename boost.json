@@ -1,0 +1,5 @@
+{
+  "agents": ["claude_code"],
+  "packages": ["filament/filament"],
+  "skills": ["pest-testing"]
+}

@@ -11,7 +11,6 @@ use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\delete;
 
 describe('Mentor Program Destroy', function (): void {
     beforeEach(function (): void {
@@ -35,7 +34,9 @@ describe('Mentor Program Destroy', function (): void {
     it('deletes mentor program successfully', function (): void {
         actingAs($this->user);
 
-        $response = delete(route('mentor-program.destroy', $this->mentorProgram->slug));
+        $response = $this->withSession(['_token' => 'test token'])
+            ->delete(route('mentor-program.destroy', [$this->mentorProgram->slug,
+                '_token' => 'test token']));
 
         $response->assertRedirect(route('mentor-program.list'));
 
@@ -49,7 +50,12 @@ describe('Mentor Program Destroy', function (): void {
 
         $nonExistentSlug = 'non-existent-slug';
 
-        $response = delete(route('mentor-program.destroy', $nonExistentSlug));
+        $response = $this->withSession(['_token' => 'test token'])
+            ->delete(route('mentor-program.destroy',
+                [
+                    $nonExistentSlug,
+                    '_token' => 'test token',
+                ]));
 
         $response->assertNotFound();
     });
@@ -69,7 +75,13 @@ describe('Mentor Program Destroy', function (): void {
 
         actingAs($this->user);
 
-        $response = delete(route('mentor-program.destroy', $anotherMentorProgram->slug));
+        $response = $this->withSession(['_token' => 'test token'])
+            ->delete(route('mentor-program.destroy',
+                [
+                    $anotherMentorProgram->slug,
+                    '_token' => 'test token',
+                ]
+            ));
 
         $response->assertForbidden();
 

@@ -465,8 +465,8 @@ it('sends welcome email on registration', function (): void {
 
 - name: Run Mutation Tests
   run:
-      docker compose exec -T app ./vendor/bin/pest --mutate --covered-only
-      --parallel --min=95
+    docker compose exec -T app ./vendor/bin/pest --mutate --covered-only
+    --parallel --min=95
 
 - name: Upload Coverage
   uses: codecov/codecov-action@v3

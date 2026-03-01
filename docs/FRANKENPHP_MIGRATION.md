@@ -68,53 +68,53 @@ docker/
 
 1. **Start the application**:
 
-    ```bash
-    docker compose up app db redis --detach
-    ```
+   ```bash
+   docker compose up app db redis --detach
+   ```
 
 2. **Access the application**:
-    - **HTTPS** (recommended): https://localhost (may show certificate warning -
-      this is normal for self-signed certificates)
-    - **HTTP**: http://localhost (will redirect to HTTPS)
+   - **HTTPS** (recommended): https://localhost (may show certificate warning -
+     this is normal for self-signed certificates)
+   - **HTTP**: http://localhost (will redirect to HTTPS)
 
 3. **Run Laravel commands**:
 
-    ```bash
-    docker compose exec app php artisan migrate
-    docker compose exec app php artisan key:generate
-    ```
+   ```bash
+   docker compose exec app php artisan migrate
+   docker compose exec app php artisan key:generate
+   ```
 
 4. **Xdebug Usage**:
-    - Xdebug is automatically enabled in development
-    - IDE should connect to `host.docker.internal:9003`
-    - Coverage reports work as expected
+   - Xdebug is automatically enabled in development
+   - IDE should connect to `host.docker.internal:9003`
+   - Coverage reports work as expected
 
 ### Production Environment
 
 1. **Update Caddyfile for your domain**:
 
-    ```bash
-    # Edit docker/caddy/Caddyfile
-    # Uncomment and modify the production configuration:
-    your-domain.com {
-        php_server {
-            root /app/public
-        }
-        # ... rest of configuration
-    }
-    ```
+   ```bash
+   # Edit docker/caddy/Caddyfile
+   # Uncomment and modify the production configuration:
+   your-domain.com {
+       php_server {
+           root /app/public
+       }
+       # ... rest of configuration
+   }
+   ```
 
 2. **Build production image**:
 
-    ```bash
-    # Update compose.yml to use Dockerfile instead of Dockerfile-dev
-    docker compose build app
-    ```
+   ```bash
+   # Update compose.yml to use Dockerfile instead of Dockerfile-dev
+   docker compose build app
+   ```
 
 3. **Deploy**:
-    - Caddy will automatically obtain SSL certificates from Let's Encrypt
-    - No manual certificate configuration needed
-    - HTTPS will be enforced automatically
+   - Caddy will automatically obtain SSL certificates from Let's Encrypt
+   - No manual certificate configuration needed
+   - HTTPS will be enforced automatically
 
 ## Configuration Files
 
@@ -144,16 +144,16 @@ The application uses `compose.yml` as the configuration file:
 
 ```yaml
 app:
-    environment:
-        COMMAND: frankenphp run --config /etc/caddy/Caddyfile
-    volumes:
-        - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
-        - caddy_data:/data
-        - caddy_config:/config
-    ports:
-        - '80:80'
-        - '443:443'
-        - '443:443/udp' # HTTP/3 support
+  environment:
+    COMMAND: frankenphp run --config /etc/caddy/Caddyfile
+  volumes:
+    - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+    - caddy_data:/data
+    - caddy_config:/config
+  ports:
+    - '80:80'
+    - '443:443'
+    - '443:443/udp' # HTTP/3 support
 ```
 
 ## Performance Benefits
@@ -177,32 +177,32 @@ app:
 ### Common Issues
 
 1. **Certificate Warnings in Development**:
-    - Expected behavior with self-signed certificates
-    - Click "Advanced" → "Proceed to localhost" in browser
-    - Or add exception in browser settings
+   - Expected behavior with self-signed certificates
+   - Click "Advanced" → "Proceed to localhost" in browser
+   - Or add exception in browser settings
 
 2. **Port Conflicts**:
 
-    ```bash
-    # Stop conflicting services
-    docker compose down --remove-orphans
-    # Check port usage
-    lsof -i :80 -i :443
-    ```
+   ```bash
+   # Stop conflicting services
+   docker compose down --remove-orphans
+   # Check port usage
+   lsof -i :80 -i :443
+   ```
 
 3. **SSL Issues**:
 
-    ```bash
-    # Check Caddy logs
-    docker compose logs app
-    # Test certificate
-    openssl s_client -connect localhost:443 -servername localhost
-    ```
+   ```bash
+   # Check Caddy logs
+   docker compose logs app
+   # Test certificate
+   openssl s_client -connect localhost:443 -servername localhost
+   ```
 
 4. **Xdebug Connection Issues**:
-    - Ensure IDE listens on `host.docker.internal:9003`
-    - Check firewall settings
-    - Verify `XDEBUG_MODE=debug,coverage` in environment
+   - Ensure IDE listens on `host.docker.internal:9003`
+   - Check firewall settings
+   - Verify `XDEBUG_MODE=debug,coverage` in environment
 
 ## Migration Checklist
 
@@ -218,18 +218,18 @@ app:
 
 1. **Remove Legacy Files** (optional):
 
-    ```bash
-    rm -rf docker/nginx/
-    ```
+   ```bash
+   rm -rf docker/nginx/
+   ```
 
 2. **Update CI/CD** (if applicable):
-    - Update build scripts to use new Dockerfiles
-    - Verify SSL certificate handling in production
+   - Update build scripts to use new Dockerfiles
+   - Verify SSL certificate handling in production
 
 3. **Domain Configuration** (for production):
-    - Update Caddyfile with your actual domain
-    - Configure DNS to point to your server
-    - Caddy will automatically obtain SSL certificates
+   - Update Caddyfile with your actual domain
+   - Configure DNS to point to your server
+   - Caddy will automatically obtain SSL certificates
 
 ## Support
 

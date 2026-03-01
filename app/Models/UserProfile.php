@@ -45,6 +45,8 @@ class UserProfile extends Model implements HasMedia
         'phone',
         'cost_per_hour',
         'currency_id',
+        'timezone',
+        'minimum_pre_booking_time',
     ];
 
     protected $visible = [
@@ -58,6 +60,8 @@ class UserProfile extends Model implements HasMedia
         'avatar',
         'cost_per_hour',
         'currency_id',
+        'timezone',
+        'minimum_pre_booking_time',
     ];
 
     protected $appends = [

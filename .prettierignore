@@ -7,7 +7,9 @@ dist
 local
 public
 .gitlab-ci.yml
-CLAUDE.md
 compose.yml
 composer.lock
 taskfile.yml
+CLAUDE.md
+.claude/
+.ai/

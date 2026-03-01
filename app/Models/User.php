@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleGuardEnum;
+use App\Enums\UserScheduleRecordType;
 use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
@@ -13,8 +15,10 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
@@ -25,6 +29,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read UserProfile $profile
  * @property-read MentorProfile|null $mentorProfile
  * @property-read float $rating
+ * @property-read Pivot $pivot
  * @property string $username
  * @mixin IdeHelperUser
  */
@@ -169,11 +174,61 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
+     * @return BelongsToMany<CalendarEvent, static>
+     */
+    public function calendarEvents(): BelongsToMany
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->belongsToMany(CalendarEvent::class,
+            'calendar_event_user', 'user_id')
+            ->withPivot('colour')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<CalendarEvent, static>
+     */
+    public function hostedCalendarEvents(): BelongsToMany
+    {
+        return $this->calendarEvents()
+            ->wherePivot('role', CalendarEventRoleEnum::HOST);
+    }
+
+    /**
+     * @return BelongsToMany<CalendarEvent, static>
+     */
+    public function participatingCalendarEvents(): BelongsToMany
+    {
+        return $this->calendarEvents()
+            ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT);
+    }
+
+    /**
      * @return HasMany<Chat, $this>
      */
     public function coachChats(): HasMany
     {
         return $this->hasMany(Chat::class, 'coach_id');
+    }
+
+    /**
+     * @return HasMany<UserSchedule, $this>
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(UserSchedule::class);
+    }
+
+    /**
+     * @return HasMany<UserSchedule, $this>
+     */
+    public function activeScheduleRecords(): HasMany
+    {
+        return $this->schedules()
+            ->where('type', '!=', UserScheduleRecordType::DAY_OFF->value)
+            ->orWhere('type', '=', UserScheduleRecordType::DAY_OFF->value)
+            ->where('day_off_date', '>=', now()->format('Y-m-d'));
     }
 
     public function getFilamentName(): string

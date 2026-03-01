@@ -21,9 +21,8 @@ test('success create user test', function (): void {
 });
 
 test('user slug is incremented if not unique', function (): void {
-    // Створюємо роль, щоб avoid exception у assignRole
     Role::create([
-        'name'       => RoleEnum::USER,
+        'name' => RoleEnum::USER,
     ]);
 
     User::factory()->create([
