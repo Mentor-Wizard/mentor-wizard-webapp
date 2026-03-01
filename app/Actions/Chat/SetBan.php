@@ -18,10 +18,9 @@ class SetBan
     {
         $user = auth()->user();
 
-        $status = ChatStatusEnum::ACTIVE->value;
-        if ($request->input('ban', 0)) {
-            $status = ChatStatusEnum::BANNED->value;
-        }
+        $status = $request->boolean('ban')
+            ? ChatStatusEnum::BANNED->value
+            : ChatStatusEnum::ACTIVE->value;
 
         $user->chats()->updateExistingPivot(
             $chat->id,
@@ -29,8 +28,6 @@ class SetBan
                 'status' => $status,
             ]
         );
-
-        $chat->save();
 
         return response()->json([
             'ban' => $status === ChatStatusEnum::BANNED->value,

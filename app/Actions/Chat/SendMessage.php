@@ -37,8 +37,8 @@ class SendMessage
         $companion = $chat->companion($user);
         $companionChat = $companion->chats()
             ->wherePivot('chat_id', $chat->id)
-            ->wherePivot('user_id', $companion->id)
             ->first();
+
         throw_if($companionChat->pivot->status !== ChatStatusEnum::ACTIVE->value, AuthorizationException::class);
 
         $data = $request->validated();
@@ -46,7 +46,6 @@ class SendMessage
             'chat_id'     => $chat->id,
             'user_id'     => $user->id,
             'message'     => $data['message'],
-            'is_read'     => false,
         ]);
         if (isset($data['files'])) {
             foreach ($data['files'] as $file) {

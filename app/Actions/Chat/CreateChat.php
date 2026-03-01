@@ -27,9 +27,10 @@ class CreateChat
         /** @var User $owner */
         $owner = auth()->user();
         $companionChat = $owner->chats()
-            ->wherePivot('user_id', $user->id)
+            ->whereHas('users', function ($q) use ($user): void {
+                $q->where('users.id', $user->id);
+            })
             ->first();
-
         if ($companionChat) {
             throw_if($companionChat->pivot->status === ChatStatusEnum::BANNED->value, AuthorizationException::class);
 
@@ -40,8 +41,8 @@ class CreateChat
             'name' => $user->profile->name,
         ]);
 
-        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
-        $chat->users()->attach($owner->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value]);
+        $chat->users()->attach($owner->id, ['status' => ChatStatusEnum::ACTIVE->value]);
 
         return SendMessage::run($chat, $request);
     }

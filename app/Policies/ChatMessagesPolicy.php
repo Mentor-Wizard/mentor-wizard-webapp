@@ -28,7 +28,7 @@ class ChatMessagesPolicy
 
         $companion = $chatMessage->chat->companion($user);
 
-        return $companion->id === $user->getKey();
+        return $companion->id === $chatMessage->user_id;
     }
 
     /**

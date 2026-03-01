@@ -24,9 +24,8 @@ describe('SetMute', function (): void {
     });
 
     it('successfully updates is_muted status to true', function (): void {
-        // Arrange
         $chat = Chat::factory()->create();
-        // Спочатку встановлюємо false у півот
+
         $chat->users()->attach($this->owner->id, [
             'status'   => ChatStatusEnum::ACTIVE,
             'is_muted' => false,
@@ -35,15 +34,12 @@ describe('SetMute', function (): void {
         $request = new Request(['isMuted' => true]);
         $request->setUserResolver(fn () => $this->owner);
 
-        // Act
         $action = app(SetMute::class);
         $result = $action->handle($chat, $request);
 
-        // Assert
         expect($result->getStatusCode())->toBe(Response::HTTP_OK)
             ->and($result->getData(true))->toBe(['isMuted' => true]);
 
-        // Перевіряємо базу даних (pivot таблицю)
         $this->assertDatabaseHas('chat_users', [
             'chat_id'  => $chat->id,
             'user_id'  => $this->owner->id,
@@ -74,5 +70,43 @@ describe('SetMute', function (): void {
             'user_id'  => $this->owner->id,
             'is_muted' => false,
         ]);
+    });
+
+    it('uses default value false when isMuted is missing in request', function (): void {
+        $chat = Chat::factory()->create();
+        $chat->users()->attach($this->owner->id, [
+            'status'   => ChatStatusEnum::ACTIVE,
+            'is_muted' => true, // стартуємо з true, щоб побачити зміну на дефолтний false
+        ]);
+
+        // ПУСТИЙ ЗАПИТ (без isMuted)
+        $request = new Request([]);
+        $request->setUserResolver(fn () => $this->owner);
+
+        $action = app(SetMute::class);
+        $result = $action->handle($chat, $request);
+
+        // Перевіряємо, що спрацював дефолт 0, який перетворився на false
+        // Це вбиває Increment/Decrement Integer мутації (Line 23, 28)
+        expect($result->getData(true))->toBe(['isMuted' => false]);
+
+        $this->assertDatabaseHas('chat_users', [
+            'chat_id'  => $chat->id,
+            'user_id'  => $this->owner->id,
+            'is_muted' => false,
+        ]);
+    });
+
+    it('returns strictly boolean type even if integer is provided', function (): void {
+        $chat = Chat::factory()->create();
+        $chat->users()->attach($this->owner->id, ['status' => ChatStatusEnum::ACTIVE]);
+
+        $request = new Request(['isMuted' => 1]);
+        $request->setUserResolver(fn () => $this->owner);
+
+        $action = app(SetMute::class);
+        $result = $action->handle($chat, $request);
+
+        expect($result->getData(true)['isMuted'])->toBeTrue();
     });
 });
