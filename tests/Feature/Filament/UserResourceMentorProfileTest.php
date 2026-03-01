@@ -41,6 +41,7 @@ describe('UserResource Mentor Profile Fields', function (): void {
                 'mentorProfile.rate'                  => '100.00',
                 'mentorProfile.currency_id'           => $currency->id,
                 'mentorProfile.experience_started_at' => '2013-01-01',
+                'mentorProfile.timezone'              => 'UTC',
             ])
             ->call('create')
             ->assertHasNoFormErrors();

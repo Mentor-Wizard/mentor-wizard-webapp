@@ -62,12 +62,10 @@ describe('UserForm Schema', function (): void {
 
     it('accepts valid form data', function (): void {
         Livewire::test(CreateUser::class)
-            ->fillForm([
-                'username' => 'testuser',
-                'email'    => 'test@example.com',
-                'password' => 'password123',
-            ])
+            ->set('data.username', 'testuser')
+            ->set('data.email', 'test@example.com')
+            ->set('data.password', 'password123')
             ->call('create')
-            ->assertHasNoFormErrors(['username', 'email', 'password']);
+            ->assertHasNoErrors();
     });
 });

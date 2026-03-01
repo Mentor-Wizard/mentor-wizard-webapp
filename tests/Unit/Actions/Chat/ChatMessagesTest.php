@@ -39,7 +39,7 @@ describe('ChatMessages', function (): void {
         ]);
 
         /** @var ChatMessages $action */
-        $action = app(ChatMessages::class);
+        $action = resolve(ChatMessages::class);
         $result = $action->handle($chat);
 
         expect($result)->toBeInstanceOf(JsonResponse::class)
@@ -58,7 +58,7 @@ describe('ChatMessages', function (): void {
         Auth::login($user);
         $chat = Chat::factory()->create();
 
-        $action = app(ChatMessages::class);
+        $action = resolve(ChatMessages::class);
         $result = $action->handle($chat);
 
         expect($result->getData(true))->toBe([

@@ -29,6 +29,7 @@ class MentorSession extends Model
         'is_cancelled',
         'is_date_changed',
         'cost',
+        'mentor_program_id',
     ];
 
     /**
@@ -64,19 +65,36 @@ class MentorSession extends Model
     }
 
     /**
+     * @return HasOne<CalendarEvent, $this>
+     */
+    public function calendarEvent(): HasOne
+    {
+        return $this->hasOne(CalendarEvent::class);
+    }
+
+    /**
+     * @return BelongsTo<MentorProgram, $this>
+     */
+    public function mentorProgram(): BelongsTo
+    {
+        return $this->belongsTo(MentorProgram::class);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
-            'mentor_id'       => 'int',
-            'menti_id'        => 'int',
-            'date'            => 'datetime',
-            'is_success'      => 'boolean',
-            'is_paid'         => 'boolean',
-            'is_cancelled'    => 'boolean',
-            'is_date_changed' => 'boolean',
-            'cost'            => 'float',
+            'mentor_id'         => 'int',
+            'menti_id'          => 'int',
+            'mentor_program_id' => 'int',
+            'date'              => 'datetime',
+            'is_success'        => 'boolean',
+            'is_paid'           => 'boolean',
+            'is_cancelled'      => 'boolean',
+            'is_date_changed'   => 'boolean',
+            'cost'              => 'float',
         ];
     }
 }

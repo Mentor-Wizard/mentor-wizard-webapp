@@ -124,3 +124,9 @@ description:
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file
   in Vite manifest" error, you can run `npm run build` or ask the user to run
   `npm run dev` or `composer run dev`.
+
+## Related Skills
+
+- **Laravel Specialist** - Laravel coding and best practices
+- **PHP Pro** - PHP coding and best practices
+- **Architecture Designer** - Testing on Pest 4 strategies

@@ -34,7 +34,7 @@ describe('SetMute', function (): void {
         $request = new Request(['isMuted' => true]);
         $request->setUserResolver(fn () => $this->owner);
 
-        $action = app(SetMute::class);
+        $action = resolve(SetMute::class);
         $result = $action->handle($chat, $request);
 
         expect($result->getStatusCode())->toBe(Response::HTTP_OK)
@@ -59,7 +59,7 @@ describe('SetMute', function (): void {
         $request->setUserResolver(fn () => $this->owner);
 
         // Act
-        $action = app(SetMute::class);
+        $action = resolve(SetMute::class);
         $result = $action->handle($chat, $request);
 
         // Assert
@@ -83,7 +83,7 @@ describe('SetMute', function (): void {
         $request = new Request([]);
         $request->setUserResolver(fn () => $this->owner);
 
-        $action = app(SetMute::class);
+        $action = resolve(SetMute::class);
         $result = $action->handle($chat, $request);
 
         // Перевіряємо, що спрацював дефолт 0, який перетворився на false
@@ -104,7 +104,7 @@ describe('SetMute', function (): void {
         $request = new Request(['isMuted' => 1]);
         $request->setUserResolver(fn () => $this->owner);
 
-        $action = app(SetMute::class);
+        $action = resolve(SetMute::class);
         $result = $action->handle($chat, $request);
 
         expect($result->getData(true)['isMuted'])->toBeTrue();

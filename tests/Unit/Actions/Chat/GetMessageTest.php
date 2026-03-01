@@ -57,7 +57,7 @@ describe('GetMessage', function (): void {
             ->with(Mockery::on(fn ($user): bool => $user->id === $this->owner->id))
             ->andReturn(1);
 
-        $action = app(GetMessage::class);
+        $action = resolve(GetMessage::class);
         $result = $action->handle($message);
 
         expect($result)->toBeInstanceOf(JsonResponse::class)

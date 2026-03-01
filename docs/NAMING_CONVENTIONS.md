@@ -56,15 +56,15 @@ App\Actions\
 ### Іменування Action класів
 
 - **Page Actions** (відображення сторінок): закінчуються на `Page`
-    - `GetLoginPage` - отримання сторінки входу
-    - `DashboardPage` - сторінка дашборду
-    - `CreateMentorProgramPage` - сторінка створення програми
+  - `GetLoginPage` - отримання сторінки входу
+  - `DashboardPage` - сторінка дашборду
+  - `CreateMentorProgramPage` - сторінка створення програми
 
 - **Business Actions** (бізнес операції): дієслово + іменник
-    - `Login` - операція входу
-    - `Registration` - операція реєстрації
-    - `UpdateUser` - оновлення користувача
-    - `DeleteMentorProgram` - видалення програми ментора
+  - `Login` - операція входу
+  - `Registration` - операція реєстрації
+  - `UpdateUser` - оновлення користувача
+  - `DeleteMentorProgram` - видалення програми ментора
 
 ### Трейти для Actions
 
@@ -120,9 +120,9 @@ App\Services\
 ### Конвенції іменування Services
 
 - **Назва**: `{Призначення}Service`
-    - `PaymentService` - робота з платежами
-    - `NotificationService` - сповіщення
-    - `FileUploadService` - завантаження файлів
+  - `PaymentService` - робота з платежами
+  - `NotificationService` - сповіщення
+  - `FileUploadService` - завантаження файлів
 
 ### Приклад структури Service класу
 
