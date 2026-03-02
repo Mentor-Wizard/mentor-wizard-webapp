@@ -24,6 +24,7 @@ mutates(CalendarsListPage::class);
 
 describe('List Calendar CalendarEvent Page', function (): void {
     beforeEach(function (): void {
+        Date::setTestNow(Date::create(2026, 1, 15, 10, 0, 0, 'UTC'));
 
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
@@ -59,6 +60,10 @@ describe('List Calendar CalendarEvent Page', function (): void {
                 'role'   => CalendarEventRoleEnum::HOST,
                 'colour' => CalendarEventColoursEnum::BLUE->value,
             ]);
+    });
+
+    afterEach(function (): void {
+        Date::setTestNow();
     });
 
     it('uses provided date from request', function (): void {
