@@ -15,15 +15,13 @@ import {
   UserIcon,
   VideoCameraIcon,
 } from '@heroicons/vue/24/solid';
-const user = usePage().props.auth.user;
+
+import AppModal from '@/Components/AppModal.vue';
+import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
+import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import { useCaseFileType } from '../useCaseFileType.js';
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
-import { usePage } from '@inertiajs/vue3';
-import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
-import DangerButton from '@/Components/UI/Button/DangerButton.vue';
-import AppModal from '@/Components/AppModal.vue';
-import { ref } from 'vue';
 const {
   chatFiles,
   currentUser,
@@ -187,8 +185,8 @@ const { getColorByFileName, getIconByFileName } = useCaseFileType();
           <input
             v-if="currentUser"
             id="toggle-mute"
-            type="checkbox"
             v-model="currentUser.isMuted"
+            type="checkbox"
             class="peer sr-only"
             @change="setMute()"
           />

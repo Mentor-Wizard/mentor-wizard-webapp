@@ -1,14 +1,15 @@
 <script setup>
+import { usePage } from '@inertiajs/vue3';
+import { onMounted, onUnmounted } from 'vue';
+
+import AlertNotification from '@/Components/AlertNotification.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InfoList from '@/Pages/Chat/Blocks/InfoList.vue';
 import ListUser from '@/Pages/Chat/Blocks/ListUser.vue';
 import MainList from '@/Pages/Chat/Blocks/MainList.vue';
+
 import { useCaseChat } from './useCaseChat.js';
-import { onMounted, onUnmounted, ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import AlertNotification from '@/Components/AlertNotification.vue';
-const { subscribeUser, unsubscribeUser, fetchUsers, listUser, alertRef } =
-  useCaseChat();
+const { unsubscribeUser, fetchUsers, listUser, alertRef } = useCaseChat();
 const user = usePage().props.auth.user;
 
 onMounted(() => {

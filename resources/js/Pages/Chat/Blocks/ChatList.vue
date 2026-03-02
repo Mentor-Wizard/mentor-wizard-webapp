@@ -1,11 +1,10 @@
 <script setup>
-import { computed, nextTick, ref } from 'vue';
+import { computed } from 'vue';
+
+import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import { useCaseFileType } from '../useCaseFileType.js';
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
-import { usePage } from '@inertiajs/vue3';
 
-const user = usePage().props.auth.user;
 const { getColorByFileName, getIconByFileName, formatFileSize } =
   useCaseFileType();
 

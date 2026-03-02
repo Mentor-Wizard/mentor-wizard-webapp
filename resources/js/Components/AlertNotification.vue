@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue';
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
+import { ref } from 'vue';
 
 const show = ref(false);
 const title = ref('');
@@ -74,8 +74,8 @@ defineExpose({
               <div class="ml-4 flex shrink-0">
                 <button
                   type="button"
-                  @click="close"
                   class="inline-flex rounded-md text-gray-400 hover:text-gray-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600"
+                  @click="close"
                 >
                   <span class="sr-only">Close</span>
                   <XMarkIcon class="h-5 w-5" aria-hidden="true" />

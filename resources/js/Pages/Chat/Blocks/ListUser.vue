@@ -2,9 +2,9 @@
 import { Tab, TabGroup, TabList } from '@headlessui/vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid/index.js';
 import { ref } from 'vue';
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
+import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
 
 const { sortedUsers, messageSortList, messageSortBy, fetchMessages } =
@@ -78,10 +78,10 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
 
   <div
     v-for="user in sortedUsers"
-    @click="fetchMessages(user.chatId)"
     :key="user.id"
     class="mt-2 flex max-w-md cursor-pointer items-start rounded-lg border border-gray-200 p-2 shadow-sm"
     :class="user.active ? 'bg-gray-100' : 'bg-white'"
+    @click="fetchMessages(user.chatId)"
   >
     <div class="relative">
       <img :src="user.avatar" :alt="user.name" class="h-12 w-12 rounded-full" />
@@ -100,8 +100,8 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
         <span class="text-[0.75rem] text-gray-500">{{ user.last }}</span>
       </div>
       <p
-        v-html="user.message"
         class="mt-1 line-clamp-2 text-[0.75rem] text-gray-800"
+        v-html="user.message"
       ></p>
     </div>
   </div>

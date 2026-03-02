@@ -158,6 +158,9 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->hasMany(MentorSession::class, 'menti_id');
     }
 
+    /**
+     * @return BelongsToMany<Chat, $this>
+     */
     public function chats(): BelongsToMany
     {
         return $this->belongsToMany(Chat::class, 'chat_users')

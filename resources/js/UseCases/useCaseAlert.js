@@ -1,3 +1,4 @@
+/* global Echo */
 import { ref } from 'vue';
 
 const isRinging = ref(false);

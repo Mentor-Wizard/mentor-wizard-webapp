@@ -12,6 +12,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 
 class ChatMessageRepository
 {
+    /**
+     * @return ChatMessageResource[]
+     */
     public function getMessages(Chat $chat): array
     {
         return ChatMessage::query()
@@ -23,6 +26,9 @@ class ChatMessageRepository
             ->all();
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function getFiles(Chat $chat): array
     {
         return ChatMessage::query()

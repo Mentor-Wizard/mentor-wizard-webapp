@@ -14,8 +14,9 @@ import { Editor, EditorContent } from '@tiptap/vue-3';
 import emojiList from 'unicode-emoji-json';
 import { onBeforeUnmount, ref } from 'vue';
 
-import { useCaseFileType } from '../useCaseFileType.js';
 import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
+
+import { useCaseFileType } from '../useCaseFileType.js';
 
 const { getColorByFileName, getIconByFileName } = useCaseFileType();
 const { sendMessage, currentUser } = useCaseChat();

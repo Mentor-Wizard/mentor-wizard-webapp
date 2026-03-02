@@ -30,11 +30,17 @@ class ChatMessage extends Model implements HasMedia
         'is_read',
     ];
 
+    /**
+     * @return BelongsTo<Chat, $this>
+     */
     public function chat(): BelongsTo
     {
         return $this->belongsTo(Chat::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

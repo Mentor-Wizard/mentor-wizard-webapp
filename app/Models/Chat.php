@@ -29,6 +29,9 @@ class Chat extends Model implements HasMedia
         'name',
     ];
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'chat_users')
@@ -37,7 +40,8 @@ class Chat extends Model implements HasMedia
     }
 
     /**
-     * getting a chat partner
+     * @return User
+     *              getting a chat partner
      */
     public function companion(User $user): ?User
     {
@@ -46,6 +50,9 @@ class Chat extends Model implements HasMedia
             ->first();
     }
 
+    /**
+     * @return HasMany<ChatMessage, $this>
+     */
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);

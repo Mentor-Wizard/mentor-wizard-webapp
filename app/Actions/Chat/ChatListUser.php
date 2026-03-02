@@ -12,6 +12,7 @@ use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -29,14 +30,21 @@ class ChatListUser
 
         $listUsers = [];
         /** @var Chat $chat */
+        /**
+         * @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $chat
+         */
         foreach ($chats as $chat) {
             /** @var User $companion */
             $companion = $chat->companion($user);
+            /**
+             * @var Chat&object{pivot: Pivot&object{status: string}} $companionChat
+             */
             $companionChat = $companion->chats()
                 ->wherePivot('chat_id', $chat->id)
                 ->wherePivot('user_id', $companion->id)
                 ->first();
             $lastMessage = $this->getLastMessage($chat);
+
             $listUsers[] = [
                 'id'           => $companion->id,
                 'chatId'       => $chat->id,
@@ -46,12 +54,12 @@ class ChatListUser
                 'message'      => $lastMessage?->message,
                 'online'       => false,
                 'isMuted'      => $chat->pivot->is_muted,
-                'ban'          => $chat->pivot->status === ChatStatusEnum::BANNED->value,
-                'canSend'      => $companionChat->pivot->status === ChatStatusEnum::ACTIVE->value,
+                'ban'          => (string) $chat->pivot->status === ChatStatusEnum::BANNED->value,
+                'canSend'      => (string) $companionChat->pivot->status === ChatStatusEnum::ACTIVE->value,
                 'isRead'       => $lastMessage?->is_read,
                 'createdAt'    => $lastMessage?->created_at->format('d.m.Y'),
                 'tags'         => $companion->mentorProfile?->mentorTags()->where('mentor_tags.type', TagEnum::STACK)->pluck('tag')->toArray(),
-                'last'         => $lastMessage ? $this->getLastDateInfo($lastMessage->created_at) : null,
+                'last'         => $lastMessage instanceof ChatMessage ? $this->getLastDateInfo($lastMessage->created_at) : null,
             ];
         }
 
@@ -62,7 +70,7 @@ class ChatListUser
         ]);
     }
 
-    private function getLastMessage(Chat $chat)
+    private function getLastMessage(Chat $chat): ?ChatMessage
     {
         return ChatMessage::query()
             ->where('chat_id', $chat->id)

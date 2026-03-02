@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
 
@@ -26,7 +27,9 @@ class ChatMessagesPolicy
             return true;
         }
 
-        $companion = $chatMessage->chat->companion($user);
+        /** @var Chat|null $chat */
+        $chat = $chatMessage->chat;
+        $companion = $chat?->companion($user);
 
         return $companion->id === $chatMessage->user_id;
     }

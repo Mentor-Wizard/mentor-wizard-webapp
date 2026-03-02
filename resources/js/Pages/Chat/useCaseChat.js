@@ -1,3 +1,5 @@
+/* global Echo */
+import axios from 'axios';
 import { computed, nextTick, ref } from 'vue';
 
 const scrollContainer = ref(null);
@@ -50,6 +52,7 @@ export function useCaseChat() {
       await scrollToBottom();
     } catch (error) {
       currentUser.value.canSend = false;
+      console.log(error);
       if (alertRef.value) {
         alertRef.value.open({
           title: 'Error',
