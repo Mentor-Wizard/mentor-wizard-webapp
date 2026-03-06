@@ -1,9 +1,11 @@
 ---
 name: database-optimizer
-description:
+description: |
     Use when investigating slow queries, analyzing execution plans, or
     optimizing database performance. Invoke for index design, query rewrites,
     configuration tuning, partitioning strategies, lock contention resolution.
+
+    Українською: Оптимізуй базу, повільний запит, план виконання, індекси, N+1, кешування запитів, профілювання, блокування, партиціювання, перепиши запит, аналіз продуктивності.
 triggers:
     - database optimization
     - slow query
