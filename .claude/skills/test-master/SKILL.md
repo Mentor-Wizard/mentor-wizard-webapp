@@ -1,6 +1,9 @@
 ---
 name: test-master
-description: Use when writing tests, creating test strategies, or building automation frameworks. Invoke for unit tests, integration tests, E2E, coverage analysis, performance testing, security testing.
+description: |
+    Use when writing tests, creating test strategies, or building automation frameworks. Invoke for unit tests, integration tests, E2E, coverage analysis, performance testing, security testing.
+
+    Українською: тестова стратегія, тестовий фреймворк, автоматизація тестів, тестове покриття, тест план, рефакторинг тестів, написати тест, створи тест, інтеграційне тестування, E2E тест, якість коду
 triggers:
   - test
   - testing
