@@ -3,6 +3,10 @@ name: vue-expert-js
 description:
     Use when building Vue 3 applications with JavaScript only (no TypeScript).
     Invoke for JSDoc typing, vanilla JS composables, .mjs modules.
+
+    Українською: Vue JavaScript, JSDoc, vanilla JS, компонент без TS,
+    реактивність, composable, ref, computed, без TypeScript, чистий JS,
+    модулі ESM, типізація через JSDoc.
 triggers:
     - Vue JavaScript
     - Vue without TypeScript

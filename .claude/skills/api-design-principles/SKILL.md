@@ -1,6 +1,6 @@
 ---
 name: api-design-principles
-description: "Master REST and GraphQL API design principles to build intuitive, scalable, and maintainable APIs that delight developers. Use when designing new APIs, reviewing API specifications, or establishing... Українською: Принципи проектування API (REST, GraphQL), масштабованість, документація API."
+description: "Master REST and GraphQL API design principles to build intuitive, scalable, and maintainable APIs that delight developers. Use when designing new APIs, reviewing API specifications, or establishing... Українською: проектуй API, спроектувати ендпоінт, API дизайн, REST, GraphQL, версіонування API, контракт API, документація API, масштабованість, ресурси, маршрути, HTTP методи, відповідь сервера, структура запиту."
 risk: unknown
 source: community
 ---

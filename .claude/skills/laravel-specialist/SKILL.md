@@ -4,6 +4,8 @@ description:
     Use when building Laravel 10+ applications requiring Eloquent ORM, API
     resources, or queue systems. Invoke for Laravel models, Livewire components,
     Sanctum authentication, Horizon queues.
+
+    Українською: Laravel спеціаліст, Eloquent, черги, API ресурси, авторизація, кешування, сесії, роутинг, middleware, конфігурація, створи модель, додай чергу, налаштування Laravel, Livewire компонент, Sanctum
 triggers:
     - Laravel
     - Eloquent

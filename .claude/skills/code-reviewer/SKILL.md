@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: "Elite code review expert specializing in modern AI-powered code analysis, security vulnerabilities, performance optimization, and production reliability. Masters static analysis tools, security scanning, and configuration review with 2024/2025 best practices. Use PROACTIVELY for code quality assurance. Українською: Експерт з рев'ю коду, аналіз безпеки, продуктивності та надійності."
+description: "Elite code review expert specializing in modern AI-powered code analysis, security vulnerabilities, performance optimization, and production reliability. Masters static analysis tools, security scanning, and configuration review with 2024/2025 best practices. Use PROACTIVELY for code quality assurance.\n\nУкраїнською: Перевір код, рев'ю коду, якість коду, знайди баги, вразливості безпеки, стандарти кодування, рефакторинг, код смел, статичний аналіз, продуктивність коду, надійність."
 metadata:
   model: opus
 risk: unknown

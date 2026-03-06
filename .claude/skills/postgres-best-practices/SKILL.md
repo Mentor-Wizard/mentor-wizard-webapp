@@ -1,6 +1,6 @@
 ---
 name: postgres-best-practices
-description: "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations. Українською: Кращі практики та оптимізація продуктивності Postgres від Supabase."
+description: "Postgres performance optimization and best practices from Supabase. Use this skill when writing, reviewing, or optimizing Postgres queries, schema designs, or database configurations.\n\nУкраїнською: Кращі практики Postgres, оптимізуй базу, продуктивність запитів, індексування, конфігурація бази, пул з'єднань, RLS, схема даних, аналіз запиту, масштабування."
 license: MIT
 metadata:
   author: supabase

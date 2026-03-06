@@ -1,6 +1,6 @@
 ---
 name: plan-writing
-description: "Structured task planning with clear breakdowns, dependencies, and verification criteria. Use when implementing features, refactoring, or any multi-step work. Українською: Структуроване планування завдань, розбиття на етапи, критерії перевірки."
+description: "Structured task planning with clear breakdowns, dependencies, and verification criteria. Use when implementing features, refactoring, or any multi-step work. Українською: написання плану, планування задач, декомпозиція, залежності між задачами, верифікація, крок за кроком, розбиття на підзадачі, порядок виконання, критерії перевірки, структурований план, підготовка до реалізації."
 allowed-tools: Read, Glob, Grep
 risk: unknown
 source: community

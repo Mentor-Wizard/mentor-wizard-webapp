@@ -1,6 +1,6 @@
 ---
 name: postgresql-optimization
-description: "PostgreSQL database optimization workflow for query tuning, indexing strategies, performance analysis, and production database management. Українською: Workflow оптимізації PostgreSQL, тюнінг запитів, стратегії індексації, аналіз продуктивності."
+description: "PostgreSQL database optimization workflow for query tuning, indexing strategies, performance analysis, and production database management.\n\nУкраїнською: Оптимізуй PostgreSQL, тюнінг запитів, стратегії індексації, аналіз продуктивності, EXPLAIN ANALYZE, план запиту, повільний запит, vacuum, конфігурація бази, профілювання."
 source: personal
 risk: safe
 domain: database

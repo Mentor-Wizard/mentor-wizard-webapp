@@ -1,6 +1,6 @@
 ---
 name: postgresql
-description: "Design a PostgreSQL-specific schema. Covers best-practices, data types, indexing, constraints, performance patterns, and advanced features. Українською: Проектування схем PostgreSQL, типи даних, індексація, обмеження, продуктивність."
+description: "Design a PostgreSQL-specific schema. Covers best-practices, data types, indexing, constraints, performance patterns, and advanced features.\n\nУкраїнською: Проєктуй схему PostgreSQL, типи даних, індексація, обмеження, продуктивність, партиціювання, тригери, функції, представлення, зовнішні ключі, міграція схеми, масштабування бази."
 risk: unknown
 source: community
 ---

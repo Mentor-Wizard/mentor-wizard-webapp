@@ -375,6 +375,13 @@ The project uses GitHub Actions with:
 - Always show `git diff` or `git status` to let the user review changes before
   committing
 
+### Pull Request Descriptions
+
+- **NEVER mention AI tools** (Claude, Copilot, Gemini, etc.) in PR title or body
+- **NEVER include change statistics** (file count, lines added/removed)
+- **NEVER add test plan checklists** — there is no QA team to execute them
+- Keep PR descriptions focused on **what** changed and **why**
+
 ### Environment-Specific Notes
 
 - **Local Development**: Use Docker Compose for consistent environment

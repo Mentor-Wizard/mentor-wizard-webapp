@@ -1,6 +1,6 @@
 ---
 name: docker-expert
-description: "Docker containerization expert with deep knowledge of multi-stage builds, image optimization, container security, Docker Compose orchestration, and production deployment patterns. Use PROACTIVELY f... Українською: Експерт з Docker, контейнеризація, оптимізація образів, безпека, Docker Compose."
+description: "Docker containerization expert with deep knowledge of multi-stage builds, image optimization, container security, Docker Compose orchestration, and production deployment patterns. Use PROACTIVELY f... Українською: Експерт з Docker, контейнеризація, оптимізація образів, безпека, Docker Compose, multi-stage збірка, мережі Docker, volume, налаштувати контейнер, запустити образ, docker-compose файл."
 category: devops
 color: blue
 displayName: Docker Expert

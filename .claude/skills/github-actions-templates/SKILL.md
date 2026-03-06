@@ -1,6 +1,6 @@
 ---
 name: github-actions-templates
-description: "Create production-ready GitHub Actions workflows for automated testing, building, and deploying applications. Use when setting up CI/CD with GitHub Actions, automating development workflows, or cre... Українською: Шаблони GitHub Actions для тестування, збірки та деплою."
+description: "Create production-ready GitHub Actions workflows for automated testing, building, and deploying applications. Use when setting up CI/CD with GitHub Actions, automating development workflows, or cre... Українською: GitHub Actions шаблони, CI/CD воркфлоу, автоматичне тестування, деплой, збірка проекту, лінтинг, налаштувати пайплайн, автоматизація розробки, тригери на push, секрети GitHub, матриця версій."
 risk: unknown
 source: community
 ---

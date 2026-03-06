@@ -1,6 +1,6 @@
 ---
 name: playwright-skill
-description: "Complete browser automation with Playwright. Auto-detects dev servers, writes clean test scripts to /tmp. Test pages, fill forms, take screenshots, check responsive design, validate UX, test login ... Українською: Автоматизація браузера з Playwright, тестування сторінок, скріншоти, перевірка UX."
+description: "Complete browser automation with Playwright. Auto-detects dev servers, writes clean test scripts to /tmp. Test pages, fill forms, take screenshots, check responsive design, validate UX, test login ... Українською: Playwright, автоматизація браузера, тестовий скрипт, навігація сторінками, кліки, заповнення форм, зробити скріншот, перевірка UX, адаптивний дизайн, тест логіну, перевірити сторінку."
 risk: unknown
 source: community
 ---

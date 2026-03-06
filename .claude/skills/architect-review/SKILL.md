@@ -1,6 +1,6 @@
 ---
 name: architect-review
-description: "Master software architect specializing in modern architecture patterns, clean architecture, microservices, event-driven systems, and DDD. Reviews system designs and code changes for architectural integrity, scalability, and maintainability. Use PROACTIVELY for architectural decisions. Українською: Архітектурний рев'ю, патерни проектування, мікросервіси, чиста архітектура."
+description: "Master software architect specializing in modern architecture patterns, clean architecture, microservices, event-driven systems, and DDD. Reviews system designs and code changes for architectural integrity, scalability, and maintainability. Use PROACTIVELY for architectural decisions.\n\nУкраїнською: Архітектурний огляд, рев'ю архітектури, патерни проектування, чиста архітектура, мікросервіси, SOLID, DDD, зв'язність, пов'язаність, масштабованість."
 metadata:
   model: opus
 risk: unknown

@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "Use before creative or constructive work (features, architecture, behavior). Transforms vague ideas into validated designs through disciplined reasoning and collaboration. Українською: Бреймстормінг та проектування, перетворення ідей у валідовані дизайни та специфікації."
+description: "Use before creative or constructive work (features, architecture, behavior). Transforms vague ideas into validated designs through disciplined reasoning and collaboration. Українською: брейнсторм, мозковий штурм, генерація ідей, аналіз варіантів, підходи до вирішення, накидати ідеї, обговорити рішення, вибрати підхід, проектування фічі, валідація ідеї, творче мислення, дизайн рішення."
 risk: unknown
 source: community
 ---
