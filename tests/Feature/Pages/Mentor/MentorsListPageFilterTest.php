@@ -8,6 +8,7 @@ use App\Models\MentorProfile;
 use App\Models\MentorReview;
 use App\Models\MentorTag;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia;
 
 mutates(MentorsListPage::class);
@@ -443,6 +444,194 @@ describe('MentorsListPage - Edge Cases', function (): void {
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
                 ->has('mentors.data', 1)
+            );
+    });
+});
+
+describe('MentorsListPage - Sorting', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $this->cheapMentor = MentorProfile::factory()->create([
+            'title'                 => 'Cheap Mentor',
+            'rate'                  => 25.0,
+            'experience_started_at' => now()->subYears(2),
+        ]);
+
+        $this->midMentor = MentorProfile::factory()->create([
+            'title'                 => 'Mid Mentor',
+            'rate'                  => 75.0,
+            'experience_started_at' => now()->subYears(6),
+        ]);
+
+        $this->expensiveMentor = MentorProfile::factory()->create([
+            'title'                 => 'Expensive Mentor',
+            'rate'                  => 150.0,
+            'experience_started_at' => now()->subYears(12),
+        ]);
+    });
+
+    it('sorts mentors by rate ascending', function (): void {
+        $this->get(route('pages.mentors', ['sort' => 'rate']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 3)
+                ->where('mentors.data.0.title', 'Cheap Mentor')
+                ->where('mentors.data.1.title', 'Mid Mentor')
+                ->where('mentors.data.2.title', 'Expensive Mentor')
+            );
+    });
+
+    it('sorts mentors by rate descending', function (): void {
+        $this->get(route('pages.mentors', ['sort' => '-rate']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 3)
+                ->where('mentors.data.0.title', 'Expensive Mentor')
+                ->where('mentors.data.1.title', 'Mid Mentor')
+                ->where('mentors.data.2.title', 'Cheap Mentor')
+            );
+    });
+
+    it('sorts mentors by newest (id descending)', function (): void {
+        $this->get(route('pages.mentors', ['sort' => '-id']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 3)
+                ->where('mentors.data.0.title', 'Expensive Mentor')
+                ->where('mentors.data.1.title', 'Mid Mentor')
+                ->where('mentors.data.2.title', 'Cheap Mentor')
+            );
+    });
+
+    it('sorts mentors by most experienced', function (): void {
+        $this->get(route('pages.mentors', ['sort' => 'experience_started_at']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 3)
+                ->where('mentors.data.0.title', 'Expensive Mentor')
+                ->where('mentors.data.1.title', 'Mid Mentor')
+                ->where('mentors.data.2.title', 'Cheap Mentor')
+            );
+    });
+
+    it('preserves sort with filters', function (): void {
+        $laravelTag = MentorTag::factory()->create(['type' => TagEnum::STACK, 'tag' => 'Laravel']);
+        $this->cheapMentor->mentorTags()->attach($laravelTag);
+        $this->expensiveMentor->mentorTags()->attach($laravelTag);
+
+        $this->get(route('pages.mentors', [
+            'filter' => ['stacks' => 'Laravel'],
+            'sort'   => '-rate',
+        ]))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 2)
+                ->where('mentors.data.0.title', 'Expensive Mentor')
+                ->where('mentors.data.1.title', 'Cheap Mentor')
+            );
+    });
+
+    it('preserves sort in query params', function (): void {
+        $this->get(route('pages.mentors', ['sort' => '-rate']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->where('queryParams.sort', '-rate')
+            );
+    });
+});
+
+describe('MentorsListPage - Data Integrity & Edge Cases', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+    });
+
+    it('handles mentor without currency gracefully', function (): void {
+        $mentor = MentorProfile::factory()->create();
+
+        DB::statement('ALTER TABLE mentor_profiles ALTER COLUMN currency_id DROP NOT NULL');
+        DB::table('mentor_profiles')
+            ->where('id', $mentor->getKey())
+            ->update(['currency_id' => null]);
+
+        $this->get(route('pages.mentors'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.currency.code', 'USD')
+                ->where('mentors.data.0.currency.symbol', '$')
+            );
+    });
+
+    it('returns unique tag options without duplicates', function (): void {
+        MentorTag::factory()->count(3)->create(['type' => TagEnum::STACK, 'tag' => 'Laravel']);
+
+        $this->get(route('pages.mentors'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('filtersData.stackOptions', 1)
+                ->where('filtersData.stackOptions.0.label', 'Laravel')
+            );
+    });
+
+    it('returns slug in mentor data for profile links', function (): void {
+        $mentor = MentorProfile::factory()->create();
+        $user = $mentor->user;
+
+        $this->get(route('pages.mentors'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 1)
+                ->has('mentors.data.0.slug')
+                ->where('mentors.data.0.slug', $user->slug)
+            );
+    });
+
+    it('returns rating from eager loaded avg without N+1', function (): void {
+        $mentor = MentorProfile::factory()->create();
+
+        MentorReview::factory()->create(['mentor_id' => $mentor->user_id, 'rating' => 5]);
+        MentorReview::factory()->create(['mentor_id' => $mentor->user_id, 'rating' => 4]);
+        MentorReview::factory()->create(['mentor_id' => $mentor->user_id, 'rating' => 3]);
+
+        DB::enableQueryLog();
+
+        $this->get(route('pages.mentors'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.rating', fn ($rating): bool => (float) $rating === 4.0)
+            );
+
+        $queryCount = count(DB::getQueryLog());
+        expect($queryCount)->toBeLessThan(15);
+
+        DB::disableQueryLog();
+    });
+
+    it('handles page beyond last page gracefully', function (): void {
+        MentorProfile::factory()->count(3)->create();
+
+        $this->get(route('pages.mentors', ['page' => 999]))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 0)
+            );
+    });
+
+    it('paginates at 6 items per page', function (): void {
+        MentorProfile::factory()->count(8)->create();
+
+        $this->get(route('pages.mentors'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 6)
+            );
+
+        $this->get(route('pages.mentors', ['page' => 2]))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 2)
             );
     });
 });

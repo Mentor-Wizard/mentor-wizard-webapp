@@ -30,17 +30,16 @@ class MentorsListPage
         /** @var QueryBuilder<MentorProfile> $query */
         $query = QueryBuilder::for(MentorProfile::class, $request);
 
-        $mentors = $query
-            ->with(['mentorPrograms', 'mentorTags', 'user.profile', 'currency'])
-            ->with(['user' => function ($query): void {
-                $query->withCount('mentorReviews');
-            }])
-            ->allowedIncludes(['mentorPrograms', 'mentorTags', 'currency'])
+        $mentors = $query /** @phpstan-ignore method.notFound */
+            ->with([
+                'mentorPrograms',
+                'mentorTags',
+                'currency',
+                'user' => fn ($q) => $q->with('profile')
+                    ->withCount('mentorReviews')
+                    ->withAvg('mentorReviews', 'rating'),
+            ])
             ->allowedFilters([
-                'title',
-                'description',
-                'mentorPrograms.name',
-                'mentorPrograms.description',
                 AllowedFilter::custom('rate', new ProfileRateFilter),
                 AllowedFilter::custom('cost', new ProgramCostFilter),
                 AllowedFilter::custom('languages', new TagLanguagesFilter),
@@ -56,24 +55,25 @@ class MentorsListPage
                 $profile = $user?->profile;
 
                 return [
-                    'id'       => $mentor->id,
-                    'name'     => mb_trim($profile->name.' '.$profile->last_name),
+                    'id'       => $mentor->getKey(),
+                    'slug'     => $user->slug,
+                    'name'     => mb_trim(($profile?->name ?? '').' '.($profile?->last_name ?? '')), /** @phpstan-ignore nullsafe.neverNull, nullsafe.neverNull */
                     'title'    => $mentor->title,
                     'price'    => $mentor->rate ?? $profile?->cost_per_hour,
                     'currency' => [
-                        'code'   => $mentor->currency->name,
-                        'symbol' => $mentor->currency->symbol,
+                        'code'   => $mentor->currency?->name ?? 'USD', /** @phpstan-ignore nullsafe.neverNull */
+                        'symbol' => $mentor->currency?->symbol ?? '$', /** @phpstan-ignore nullsafe.neverNull */
                     ],
                     'tags' => $mentor->mentorTags
                         ->where('type', TagEnum::STACK)
                         ->pluck('tag')
                         ->toArray(),
-                    'rating'     => $user->rating ? round($user->rating, 1) : 0,
+                    'rating'     => $user->mentor_reviews_avg_rating ? round((float) $user->mentor_reviews_avg_rating, 1) : 0,
                     'reviews'    => $user->mentor_reviews_count ?? 0,
                     'experience' => $mentor->experience_started_at
                         ? now()->diff($mentor->experience_started_at)->y
                         : 0,
-                    'image'             => $profile->avatar,
+                    'image'             => $profile?->avatar,
                     'availability'      => 'today',
                     'availabilityLabel' => 'Available now',
                 ];
@@ -86,7 +86,7 @@ class MentorsListPage
                 'languageOptions' => $this->getLanguageOptions(),
                 'currencyOptions' => $this->getCurrencyOptions(),
             ],
-            'queryParams' => $request->all(),
+            'queryParams' => $request->only(['filter', 'sort', 'page']),
         ]);
     }
 
@@ -95,15 +95,7 @@ class MentorsListPage
      */
     private function getStackOptions(): array
     {
-        return MentorTag::query()->where('type', TagEnum::STACK)
-            ->orderBy('tag')
-            ->get()
-            ->map(fn (MentorTag $tag): array => [
-                'value' => $tag->tag,
-                'label' => $tag->tag,
-            ])
-            ->values()
-            ->all();
+        return $this->getTagOptions(TagEnum::STACK);
     }
 
     /**
@@ -111,7 +103,17 @@ class MentorsListPage
      */
     private function getLanguageOptions(): array
     {
-        return MentorTag::query()->where('type', TagEnum::LANGUAGE)
+        return $this->getTagOptions(TagEnum::LANGUAGE);
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function getTagOptions(TagEnum $type): array
+    {
+        return MentorTag::query()->where('type', $type)
+            ->select('tag')
+            ->distinct()
             ->orderBy('tag')
             ->get()
             ->map(fn (MentorTag $tag): array => [

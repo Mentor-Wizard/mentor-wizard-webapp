@@ -1,6 +1,6 @@
 <script setup>
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/solid';
-import { computed, defineEmits, defineProps } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps({
   page: { type: Number, required: true },
@@ -9,12 +9,34 @@ const props = defineProps({
 
 const emit = defineEmits(['update:page']);
 
-const pages = computed(() => {
-  const arr = [];
-  for (let i = 1; i <= props.totalPages; i++) {
-    arr.push(i);
+const visiblePages = computed(() => {
+  const total = props.totalPages;
+  const current = props.page;
+
+  if (total <= 5) {
+    return Array.from({ length: total }, (_, i) => i + 1);
   }
-  return arr;
+
+  const pages = new Set([1, total]);
+  for (
+    let i = Math.max(2, current - 1);
+    i <= Math.min(total - 1, current + 1);
+    i++
+  ) {
+    pages.add(i);
+  }
+
+  const sorted = [...pages].sort((a, b) => a - b);
+  const result = [];
+
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) {
+      result.push('...');
+    }
+    result.push(sorted[i]);
+  }
+
+  return result;
 });
 
 function goToPage(p) {
@@ -26,10 +48,11 @@ function goToPage(p) {
 <template>
   <div
     v-if="totalPages > 1"
-    class="mt-8 flex items-center justify-center space-x-1"
+    class="mt-8 flex items-center justify-center gap-1"
   >
     <button
       :disabled="page <= 1"
+      aria-label="Previous page"
       class="rounded p-2 text-sm"
       :class="
         page <= 1 ?
@@ -41,21 +64,25 @@ function goToPage(p) {
       <ChevronLeftIcon class="h-4 w-4" />
     </button>
 
-    <button
-      v-for="p in pages"
-      :key="p"
-      class="rounded px-3 py-1 text-sm font-semibold"
-      :class="{
-        'bg-blue-600 text-white': p === page,
-        'text-gray-500 hover:text-blue-600': p !== page,
-      }"
-      @click="goToPage(p)"
-    >
-      {{ p }}
-    </button>
+    <template v-for="(p, idx) in visiblePages" :key="idx">
+      <span v-if="p === '...'" class="px-2 text-gray-400">...</span>
+      <button
+        v-else
+        class="rounded px-3 py-1 text-sm font-semibold"
+        :class="{
+          'bg-blue-600 text-white': p === page,
+          'text-gray-500 hover:bg-gray-100 hover:text-blue-600': p !== page,
+        }"
+        :aria-current="p === page ? 'page' : undefined"
+        @click="goToPage(p)"
+      >
+        {{ p }}
+      </button>
+    </template>
 
     <button
       :disabled="page >= totalPages"
+      aria-label="Next page"
       class="rounded p-2 text-sm"
       :class="
         page >= totalPages ?

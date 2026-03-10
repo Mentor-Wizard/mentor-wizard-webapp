@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
 export const useMentorFilters = defineStore('mentorFilters', () => {
   // ============ State ============
   const selectedStacks = ref([]);
   const selectedLanguages = ref([]);
   const selectedExperience = ref([]);
-  const minRate = ref(null);
-  const maxRate = ref(null);
+  const minRate = ref(0);
+  const maxRate = ref(200);
   const selectedCurrency = ref('USD');
   const minRating = ref(null);
 
@@ -30,15 +30,50 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
     { value: 3, label: '3.0 & up' },
   ];
 
-  // ============ Computed ============
   const activeFilterCount = computed(() => {
     let count = 0;
     if (selectedStacks.value.length > 0) count++;
     if (selectedLanguages.value.length > 0) count++;
     if (selectedExperience.value.length > 0) count++;
-    if (minRate.value !== null || maxRate.value !== null) count++;
+    if (minRate.value > 0 || maxRate.value < 200) count++;
     if (minRating.value !== null) count++;
     return count;
+  });
+
+  const activeFilters = computed(() => {
+    const filters = [];
+    selectedStacks.value.forEach((s) =>
+      filters.push({ type: 'stacks', label: s, value: s }),
+    );
+    selectedLanguages.value.forEach((l) =>
+      filters.push({ type: 'languages', label: l, value: l }),
+    );
+    selectedExperience.value.forEach((e) => {
+      const opt = experienceOptions.find((o) => o.value === e);
+      filters.push({ type: 'experience', label: opt?.label || e, value: e });
+    });
+    if (minRate.value > 0) {
+      filters.push({
+        type: 'minRate',
+        label: `Min ${selectedCurrency.value} ${minRate.value}/hr`,
+        value: minRate.value,
+      });
+    }
+    if (maxRate.value < 200) {
+      filters.push({
+        type: 'maxRate',
+        label: `Max ${selectedCurrency.value} ${maxRate.value}/hr`,
+        value: maxRate.value,
+      });
+    }
+    if (minRating.value !== null) {
+      filters.push({
+        type: 'rating',
+        label: `${minRating.value}+ stars`,
+        value: minRating.value,
+      });
+    }
+    return filters;
   });
 
   // ============ Methods ============
@@ -62,11 +97,11 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
       params['filter[experience]'] = selectedExperience.value.join(',');
     }
 
-    if (minRate.value !== null && minRate.value > 0) {
+    if (minRate.value > 0) {
       params['filter[rate][min]'] = minRate.value;
     }
 
-    if (maxRate.value !== null && maxRate.value < 200) {
+    if (maxRate.value < 200) {
       params['filter[rate][max]'] = maxRate.value;
     }
 
@@ -103,13 +138,12 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
       selectedExperience.value = filter.experience.split(',');
     }
 
-    // Parse rate min/max
     if (filter.rate) {
       if (filter.rate.min) {
-        minRate.value = parseFloat(filter.rate.min);
+        minRate.value = Math.max(0, parseFloat(filter.rate.min));
       }
       if (filter.rate.max) {
-        maxRate.value = parseFloat(filter.rate.max);
+        maxRate.value = Math.min(200, parseFloat(filter.rate.max));
       }
     }
 
@@ -119,12 +153,39 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
     }
   }
 
+  function removeFilter(type, value) {
+    switch (type) {
+      case 'stacks':
+        selectedStacks.value = selectedStacks.value.filter((s) => s !== value);
+        break;
+      case 'languages':
+        selectedLanguages.value = selectedLanguages.value.filter(
+          (l) => l !== value,
+        );
+        break;
+      case 'experience':
+        selectedExperience.value = selectedExperience.value.filter(
+          (e) => e !== value,
+        );
+        break;
+      case 'minRate':
+        minRate.value = 0;
+        break;
+      case 'maxRate':
+        maxRate.value = 200;
+        break;
+      case 'rating':
+        minRating.value = null;
+        break;
+    }
+  }
+
   function clearAllFilters() {
     selectedStacks.value = [];
     selectedLanguages.value = [];
     selectedExperience.value = [];
-    minRate.value = null;
-    maxRate.value = null;
+    minRate.value = 0;
+    maxRate.value = 200;
     minRating.value = null;
   }
 
@@ -153,10 +214,12 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
 
     // Computed
     activeFilterCount,
+    activeFilters,
 
     // Methods
     buildQueryParams,
     parseQueryParams,
+    removeFilter,
     clearAllFilters,
     setOptions,
   };
