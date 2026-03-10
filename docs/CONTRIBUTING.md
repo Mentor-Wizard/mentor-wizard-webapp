@@ -22,6 +22,8 @@
 
 **Додаткові ресурси:**
 
+- [docs/KANBAN_WORKFLOW.md](./KANBAN_WORKFLOW.md) - робота з Kanban дошкою та
+  GitHub Project Board
 - [docs/TESTING_STRATEGY.md](./TESTING_STRATEGY.md) - підхід до тестування
 - [docs/SECURITY_GUIDELINES.md](./SECURITY_GUIDELINES.md) - безпека проекту
 - [docs/AUTHORIZATION_POLICIES.md](./AUTHORIZATION_POLICIES.md) - політики
