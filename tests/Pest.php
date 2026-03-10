@@ -44,7 +44,34 @@ expect()->extend('toBeOne', fn () => $this->toBe(1));
 |
 */
 
-function something(): void
+use Inertia\Response as InertiaResponse;
+
+function inertiaProps(InertiaResponse $response): array
 {
-    // ..
+    $httpResponse = $response->toResponse(request());
+
+    $original = $httpResponse->getOriginalContent();
+    if (is_object($original) && method_exists($original, 'getData')) {
+        $data = $original->getData();
+        if (is_array($data) && isset($data['page']) && is_array($data['page']) && isset($data['page']['props'])) {
+            $props = $data['page']['props'];
+
+            return is_array($props) ? $props : (array) $props;
+        }
+    }
+
+    // Fallback via reflection for different Inertia versions
+    try {
+        $ref = new ReflectionClass($response);
+        if ($ref->hasProperty('props')) {
+            $prop = $ref->getProperty('props');
+            $props = $prop->getValue($response);
+
+            return is_array($props) ? $props : (array) $props;
+        }
+    } catch (Throwable) {
+        // ignore
+    }
+
+    return [];
 }

@@ -10,7 +10,6 @@ use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\post;
 
 describe('Mentor Program Store Page', function (): void {
     beforeEach(function (): void {
@@ -30,9 +29,12 @@ describe('Mentor Program Store Page', function (): void {
             'description' => 'This is a description for the new mentor program.',
             'cost'        => 200.0,
             'currency_id' => array_key_first($this->currencies),
+            'mentor_id'   => $this->user->getKey(),
+            '_token'      => 'test_token',
         ];
 
-        $response = post(route('mentor-program.store'), $programData);
+        $response = $this->withSession(['_token' => 'test_token'])
+            ->post(route('mentor-program.store'), $programData);
 
         $response->assertRedirect(route('mentor-program.create'));
 
@@ -53,9 +55,11 @@ describe('Mentor Program Store Page', function (): void {
             'description' => '',
             'cost'        => -50,
             'currency_id' => null,
+            '_token'      => 'test_token',
         ];
 
-        $response = post(route('mentor-program.store'), $invalidData);
+        $response = $this->withSession(['_token' => 'test_token'])
+            ->post(route('mentor-program.store'), $invalidData);
 
         $response->assertSessionHasErrors(['name', 'description', 'cost', 'currency_id']);
     });
@@ -70,9 +74,11 @@ describe('Mentor Program Store Page', function (): void {
             'description' => 'This should not be created.',
             'cost'        => 100.0,
             'currency_id' => array_key_first($this->currencies),
+            '_token'      => 'test_token',
         ];
 
-        $response = post(route('mentor-program.store'), $programData);
+        $response = $this->withSession(['_token' => 'test_token'])
+            ->post(route('mentor-program.store'), $programData);
 
         $response->assertForbidden();
 

@@ -4,6 +4,8 @@ import globals from 'globals';
 import js from '@eslint/js';
 import oxlint from 'eslint-plugin-oxlint';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import vueParser from 'vue-eslint-parser';
+import tsParser from '@typescript-eslint/parser';
 
 export default [
   ...pluginVue.configs['flat/recommended'],
@@ -11,7 +13,7 @@ export default [
   js.configs.recommended,
   prettierConfig,
   {
-    files: ['resources/js/**/*.{js,vue}'],
+    files: ['resources/js/**/*.{js,vue,ts}'],
     plugins: {
       'simple-import-sort': simpleImportSort,
     },
@@ -26,6 +28,12 @@ export default [
       ],
     },
     languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        parser: tsParser,
+      },
       globals: {
         ...globals.browser,
         route: true,

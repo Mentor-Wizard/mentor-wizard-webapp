@@ -20,6 +20,7 @@ final class DatabaseSeeder extends Seeder
             CoachSeeder::class,
             MentorTagSeeder::class,
             MentorProgramSeeder::class,
+            CalendarEventSeeder::class,
             MentorReviewSeeder::class,
         ]);
     }

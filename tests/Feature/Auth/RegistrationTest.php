@@ -23,6 +23,7 @@ describe('Successful Scenarios', function (): void {
             'email'                 => 'test@example.com',
             'password'              => 'password',
             'password_confirmation' => 'password',
+            'timezone'              => 'Europe/Kyiv',
         ];
 
         $response = $this->postJson('register', $newUserData)
@@ -46,6 +47,7 @@ describe('Unsuccessful Scenarios', function (): void {
             'email'                 => 'test@example.com',
             'password'              => 'p',
             'password_confirmation' => 'p',
+            'timezone'              => 'Europe/Kyiv',
         ];
 
         $response = $this->postJson('register', $newUserData)
@@ -61,6 +63,7 @@ describe('Unsuccessful Scenarios', function (): void {
             'email'                 => 'test@example.com',
             'password'              => 'password',
             'password_confirmation' => '',
+            'timezone'              => 'Europe/Kyiv',
         ];
 
         $response = $this->postJson('register', $newUserData)
@@ -78,6 +81,7 @@ describe('Unsuccessful Scenarios', function (): void {
             'email'                 => $user->email,
             'password'              => 'password',
             'password_confirmation' => '',
+            'timezone'              => 'Europe/Kyiv',
         ];
 
         $response = $this->postJson('register', $newUserData)
@@ -93,6 +97,7 @@ describe('Unsuccessful Scenarios', function (): void {
             'email'                 => 'test@example.com',
             'password'              => 'password',
             'password_confirmation' => '',
+            'timezone'              => 'Europe/Kyiv',
         ];
 
         $response = $this->postJson('register', $newUserData)

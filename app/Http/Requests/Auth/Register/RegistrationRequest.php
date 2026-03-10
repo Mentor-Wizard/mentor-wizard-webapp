@@ -6,6 +6,7 @@ namespace App\Http\Requests\Auth\Register;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegistrationRequest extends FormRequest
@@ -25,10 +26,13 @@ class RegistrationRequest extends FormRequest
      */
     public function rules(): array
     {
+        $allValidZones = array_merge(config('app.custom_timezones'), timezone_identifiers_list());
+
         return [
             'username' => ['required', 'string', 'max:255', 'min:5'],
             'email'    => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Password::defaults()],
+            'timezone' => ['required', 'string', Rule::in($allValidZones)],
         ];
     }
 }

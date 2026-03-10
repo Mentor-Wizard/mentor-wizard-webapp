@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                     'permissions',
                     'profile',
                 ]),
+                'locale' => app()->getLocale(),
                 'avatar' => $request->user()?->profile?->avatar,
                 'roles'  => $request->user()?->getRoleNames(),
             ],

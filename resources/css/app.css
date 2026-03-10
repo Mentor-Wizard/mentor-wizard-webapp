@@ -3,5 +3,5 @@
 @plugin '@tailwindcss/forms';
 
 @theme {
-    --font-sans: InterVariable, sans-serif;
+  --font-sans: InterVariable, sans-serif;
 }

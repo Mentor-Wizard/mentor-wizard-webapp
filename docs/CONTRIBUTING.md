@@ -93,9 +93,9 @@ docker compose exec app yarn dev
   [Conventional Commits](https://www.conventionalcommits.org/)
 - Перевіряє формат: `type(scope): description`
 - Приклади валідних повідомлень:
-    - `feat(auth): add user avatar upload`
-    - `fix(mentor): resolve program validation`
-    - `docs(api): update authentication endpoints`
+  - `feat(auth): add user avatar upload`
+  - `fix(mentor): resolve program validation`
+  - `docs(api): update authentication endpoints`
 
 **pre-push:**
 
@@ -359,14 +359,14 @@ import { useForm } from '@inertiajs/vue3';
 
 // ✅ Типізація props
 const props = defineProps({
-    user: {
-        type: Object,
-        required: true,
-    },
-    canEdit: {
-        type: Boolean,
-        default: false,
-    },
+  user: {
+    type: Object,
+    required: true,
+  },
+  canEdit: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // ✅ Reactive refs
@@ -374,38 +374,38 @@ const isEditing = ref(false);
 
 // ✅ Computed properties
 const displayName = computed(
-    () => props.user.profile?.display_name || props.user.username,
+  () => props.user.profile?.display_name || props.user.username,
 );
 
 // ✅ Form handling
 const form = useForm({
-    username: props.user.username,
-    email: props.user.email,
+  username: props.user.username,
+  email: props.user.email,
 });
 </script>
 
 <template>
-    <!-- ✅ Semantic HTML -->
-    <article class="user-profile">
-        <header>
-            <h1>{{ displayName }}</h1>
-        </header>
+  <!-- ✅ Semantic HTML -->
+  <article class="user-profile">
+    <header>
+      <h1>{{ displayName }}</h1>
+    </header>
 
-        <!-- ✅ Conditional rendering -->
-        <form
-            v-if="canEdit && isEditing"
-            @submit.prevent="form.put(`/users/${user.id}`)"
-        >
-            <!-- Form fields -->
-        </form>
+    <!-- ✅ Conditional rendering -->
+    <form
+      v-if="canEdit && isEditing"
+      @submit.prevent="form.put(`/users/${user.id}`)"
+    >
+      <!-- Form fields -->
+    </form>
 
-        <!-- ✅ List rendering with keys -->
-        <ul>
-            <li v-for="program in user.mentor_programs" :key="program.id">
-                {{ program.title }}
-            </li>
-        </ul>
-    </article>
+    <!-- ✅ List rendering with keys -->
+    <ul>
+      <li v-for="program in user.mentor_programs" :key="program.id">
+        {{ program.title }}
+      </li>
+    </ul>
+  </article>
 </template>
 ```
 
@@ -630,7 +630,7 @@ console.log('Debug data:', props, state);
 
 // Laravel Echo debugging
 window.Echo.connector.pusher.connection.bind('connected', () => {
-    console.log('WebSocket connected');
+  console.log('WebSocket connected');
 });
 ```
 
@@ -739,24 +739,24 @@ MentorProgram::query()
 <script setup>
 // ✅ Lazy loading компонентів
 const HeavyComponent = defineAsyncComponent(
-    () => import('./HeavyComponent.vue'),
+  () => import('./HeavyComponent.vue'),
 );
 
 // ✅ Обчислювані властивості для дорогих операцій
 const filteredPrograms = computed(() =>
-    props.programs.filter((p) => p.is_active && p.price <= maxPrice.value),
+  props.programs.filter((p) => p.is_active && p.price <= maxPrice.value),
 );
 </script>
 
 <template>
-    <!-- ✅ v-show для часто перемикаємих елементів -->
-    <div v-show="isVisible">Content</div>
+  <!-- ✅ v-show для часто перемикаємих елементів -->
+  <div v-show="isVisible">Content</div>
 
-    <!-- ✅ v-if для рідко змінюваних умов -->
-    <div v-if="user.hasRole('admin')">Admin panel</div>
+  <!-- ✅ v-if для рідко змінюваних умов -->
+  <div v-if="user.hasRole('admin')">Admin panel</div>
 
-    <!-- ✅ Key для оптимізації списків -->
-    <div v-for="item in items" :key="item.id">{{ item.name }}</div>
+  <!-- ✅ Key для оптимізації списків -->
+  <div v-for="item in items" :key="item.id">{{ item.name }}</div>
 </template>
 ```
 

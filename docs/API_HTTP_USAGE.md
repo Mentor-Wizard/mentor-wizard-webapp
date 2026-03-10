@@ -16,24 +16,23 @@ Web Application endpoints.
 ### Step-by-Step: Register a New User
 
 1. **Open the api.http file** in your JetBrains IDE
-    - Located at the project root: `api.http`
+   - Located at the project root: `api.http`
 
 2. **Get CSRF Token** (Required first step)
-    - Navigate to the "CSRF Token Setup (Run This First!)" section
-    - Click the ▶️ run icon next to "Get CSRF Token"
-    - The response handler script will automatically:
-        - Extract the XSRF-TOKEN cookie from the response
-        - Decode it
-        - Set the `{{csrfToken}}` variable
-    - You'll see a console message: "CSRF Token extracted and set:
-      [token-value]"
+   - Navigate to the "CSRF Token Setup (Run This First!)" section
+   - Click the ▶️ run icon next to "Get CSRF Token"
+   - The response handler script will automatically:
+     - Extract the XSRF-TOKEN cookie from the response
+     - Decode it
+     - Set the `{{csrfToken}}` variable
+   - You'll see a console message: "CSRF Token extracted and set: [token-value]"
 
 3. **Register New User**
-    - Navigate to the "Authentication - Guest Routes" section
-    - Find the "Register New User" request
-    - Click the ▶️ run icon
-    - The request will use the `{{csrfToken}}` variable automatically
-    - Check the response for success or validation errors
+   - Navigate to the "Authentication - Guest Routes" section
+   - Find the "Register New User" request
+   - Click the ▶️ run icon
+   - The request will use the `{{csrfToken}}` variable automatically
+   - Check the response for success or validation errors
 
 ### Example Registration Request
 
@@ -138,16 +137,16 @@ For better token management, create an `http-client.env.json` file:
 
 ```json
 {
-    "dev": {
-        "baseUrl": "http://localhost",
-        "csrfToken": "your-token-here",
-        "sessionCookie": "your-session-cookie-here"
-    },
-    "production": {
-        "baseUrl": "https://your-production-url.com",
-        "csrfToken": "",
-        "sessionCookie": ""
-    }
+  "dev": {
+    "baseUrl": "http://localhost",
+    "csrfToken": "your-token-here",
+    "sessionCookie": "your-session-cookie-here"
+  },
+  "production": {
+    "baseUrl": "https://your-production-url.com",
+    "csrfToken": "",
+    "sessionCookie": ""
+  }
 }
 ```
 
