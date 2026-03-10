@@ -1,0 +1,73 @@
+language: 'uk-UA'
+tone_instructions:
+  'Be concise. Focus on critical issues, security, and architecture. Skip
+  trivial style remarks — linters handle that.'
+early_access: false
+enable_free_tier: true
+
+reviews:
+  profile: 'chill'
+  high_level_summary: true
+  high_level_summary_placeholder: '@coderabbitai summary'
+  collapse_walkthrough: true
+  changed_files_summary: true
+  sequence_diagrams: false
+  estimate_code_review_effort: true
+  poem: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - develop
+    ignore_title_keywords:
+      - 'WIP'
+      - 'DO NOT MERGE'
+      - 'SKIP REVIEW'
+
+  path_filters:
+    - '!**/*.lock'
+    - '!**/coverage/**'
+    - '!**/*.min.js'
+    - '!**/*.min.css'
+    - '!**/ide-helper/**'
+    - '!**/_ide_helper*'
+    - '!**/storage/**'
+
+  path_instructions:
+    - path: 'app/Actions/**'
+      instructions:
+        'Actions must be single-responsibility. Check for proper type hints,
+        return types, and that business logic is not leaking into controllers.'
+    - path: 'app/Models/**'
+      instructions:
+        'Models must use getKey() instead of ->id. Check for proper relationship
+        return types and eager loading usage.'
+    - path: 'database/migrations/**'
+      instructions:
+        'Migrations must be reversible. Check for proper column types, indexes,
+        and foreign key constraints.'
+    - path: 'resources/js/**'
+      instructions:
+        'Vue components should use Composition API with script setup. Check for
+        proper TypeScript types and Inertia.js patterns.'
+    - path: 'tests/**'
+      instructions:
+        'Tests use Pest PHP. Check for proper use of factories, meaningful
+        assertions, and that test names describe behavior.'
+
+  suggested_labels: false
+  suggested_reviewers: false
+  request_changes_workflow: false
+  commit_status: true
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+  learnings:
+    scope: 'auto'
+  pull_requests:
+    scope: 'auto'
+
+chat:
+  auto_reply: true
