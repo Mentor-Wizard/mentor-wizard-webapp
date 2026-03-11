@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Pages\Mentor\MentorsListPage;
 use App\Enums\TagEnum;
+use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\MentorReview;
 use App\Models\MentorTag;
@@ -537,6 +538,41 @@ describe('MentorsListPage - Sorting', function (): void {
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
                 ->where('queryParams.sort', '-rate')
+            );
+    });
+
+    it('sorts by rate normalized to USD across different currencies', function (): void {
+        MentorProfile::query()->delete();
+
+        $usd = Currency::factory()->create(['name' => 'USD', 'symbol' => '$', 'exchange_rate' => 1.0]);
+        $uah = Currency::factory()->create(['name' => 'UAH', 'symbol' => '₴', 'exchange_rate' => 0.024]);
+        $eur = Currency::factory()->create(['name' => 'EUR', 'symbol' => '€', 'exchange_rate' => 1.08]);
+
+        MentorProfile::factory()->create([
+            'title'       => 'UAH Mentor',
+            'rate'        => 1000.0,
+            'currency_id' => $uah->getKey(),
+        ]);
+
+        MentorProfile::factory()->create([
+            'title'       => 'EUR Mentor',
+            'rate'        => 50.0,
+            'currency_id' => $eur->getKey(),
+        ]);
+
+        MentorProfile::factory()->create([
+            'title'       => 'USD Mentor',
+            'rate'        => 30.0,
+            'currency_id' => $usd->getKey(),
+        ]);
+
+        $this->get(route('pages.mentors', ['sort' => 'rate']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('mentors.data', 3)
+                ->where('mentors.data.0.title', 'UAH Mentor')
+                ->where('mentors.data.1.title', 'USD Mentor')
+                ->where('mentors.data.2.title', 'EUR Mentor')
             );
     });
 });

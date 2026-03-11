@@ -33,12 +33,12 @@ const sortOptions = [
   { value: '-id', label: 'Latest' },
   { value: 'rate', label: 'Price: Low to High' },
   { value: '-rate', label: 'Price: High to Low' },
-  { value: '-experience_started_at', label: 'Most Experienced' },
+  { value: 'experience_started_at', label: 'Most Experienced' },
 ];
 
-const pageProps = usePage().props;
-const filtersData = computed(() => pageProps.filtersData || {});
-const mentorsPagination = computed(() => pageProps.mentors || {});
+const inertiaPage = usePage();
+const filtersData = computed(() => inertiaPage.props.filtersData || {});
+const mentorsPagination = computed(() => inertiaPage.props.mentors || {});
 const mentors = computed(() => mentorsPagination.value.data || []);
 const totalPages = computed(() => mentorsPagination.value.last_page || 1);
 const totalMentors = computed(() => mentorsPagination.value.total || 0);
@@ -51,8 +51,39 @@ function debounce(fn, delay) {
   };
 }
 
+let lastRequestedParams = '';
+let lastFilterSnapshot = '';
+let initialized = false;
+
+function buildFullParams() {
+  const params = { ...mentorFilters.buildQueryParams() };
+  if (page.value > 1) params.page = page.value;
+  if (sortBy.value) params.sort = sortBy.value;
+  return params;
+}
+
+function applyFilters() {
+  const params = buildFullParams();
+  const paramsKey = JSON.stringify(params);
+
+  if (paramsKey === lastRequestedParams) return;
+  lastRequestedParams = paramsKey;
+
+  router.get('/mentors', params, {
+    preserveScroll: true,
+    preserveState: true,
+    replace: true,
+    onBefore: () => {
+      isLoading.value = true;
+    },
+    onFinish: () => {
+      isLoading.value = false;
+    },
+  });
+}
+
 onMounted(() => {
-  const query = pageProps.queryParams || {};
+  const query = inertiaPage.props.queryParams || {};
 
   mentorFilters.parseQueryParams(query);
 
@@ -65,40 +96,29 @@ onMounted(() => {
 
   if (query.sort) sortBy.value = query.sort;
   if (query.page) page.value = Number(query.page);
+
+  lastRequestedParams = JSON.stringify(buildFullParams());
+  lastFilterSnapshot = JSON.stringify(mentorFilters.buildQueryParams());
+  initialized = true;
 });
 
-function applyFilters() {
-  const params = { ...mentorFilters.buildQueryParams() };
-
-  if (page.value > 1) {
-    params.page = page.value;
-  }
-
-  if (sortBy.value) {
-    params.sort = sortBy.value;
-  }
-
-  router.get('/mentors', params, {
-    preserveScroll: true,
-    replace: true,
-    only: ['mentors'],
-    onBefore: () => {
-      isLoading.value = true;
-    },
-    onFinish: () => {
-      isLoading.value = false;
-    },
-  });
-}
-
 const debouncedApply = debounce(() => {
+  const currentSnapshot = JSON.stringify(mentorFilters.buildQueryParams());
+  if (currentSnapshot === lastFilterSnapshot) return;
+  lastFilterSnapshot = currentSnapshot;
   page.value = 1;
   applyFilters();
 }, 300);
 
-watch(() => mentorFilters.buildQueryParams(), debouncedApply, { deep: true });
+watch(
+  () => JSON.stringify(mentorFilters.buildQueryParams()),
+  () => {
+    if (initialized) debouncedApply();
+  },
+);
 
 watch(sortBy, () => {
+  if (!initialized) return;
   page.value = 1;
   applyFilters();
 });
@@ -252,7 +272,9 @@ function goToPage(newPage) {
       <main class="lg:grid lg:grid-cols-4 lg:gap-x-8">
         <!-- Desktop sidebar -->
         <aside class="hidden lg:block">
-          <div class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+          <div
+            class="sidebar-scroll sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto"
+          >
             <FiltersSidebar />
           </div>
         </aside>
@@ -376,3 +398,31 @@ function goToPage(newPage) {
     </TransitionRoot>
   </LandingLayout>
 </template>
+
+<style scoped>
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.sidebar-scroll:hover {
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+</style>

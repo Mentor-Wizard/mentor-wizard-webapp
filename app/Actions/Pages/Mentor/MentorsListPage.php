@@ -8,6 +8,7 @@ use App\Enums\TagEnum;
 use App\Filters\ExperienceLevelFilter;
 use App\Filters\ProfileRateFilter;
 use App\Filters\ProgramCostFilter;
+use App\Filters\RateInUsdSort;
 use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
@@ -19,6 +20,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class MentorsListPage
@@ -47,7 +49,11 @@ class MentorsListPage
                 AllowedFilter::custom('experience', new ExperienceLevelFilter),
                 AllowedFilter::custom('rating', new RatingFilter),
             ])
-            ->allowedSorts(['id', 'rate', 'experience_started_at'])
+            ->allowedSorts([
+                'id',
+                AllowedSort::custom('rate', new RateInUsdSort),
+                'experience_started_at',
+            ])
             ->paginate(6)
             ->appends($request->query())
             ->through(function ($mentor): array {

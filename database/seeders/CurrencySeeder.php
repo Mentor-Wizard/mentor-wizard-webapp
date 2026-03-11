@@ -17,8 +17,9 @@ class CurrencySeeder extends Seeder
     {
         foreach (CurrencyEnum::cases() as $currency) {
             Currency::factory()->create([
-                'name'   => $currency->name,
-                'symbol' => $currency->value,
+                'name'          => $currency->name,
+                'symbol'        => $currency->value,
+                'exchange_rate' => $currency->exchangeRate(),
             ]);
         }
     }

@@ -6,7 +6,9 @@ const MENTORS_URL = `${BASE_URL}/mentors`;
 
 async function waitForPageReady(page) {
   await page.waitForLoadState('domcontentloaded');
-  await page.getByRole('heading', { name: 'Find Mentors', level: 1 }).waitFor({ state: 'visible' });
+  await page
+    .getByRole('heading', { name: 'Find Mentors', level: 1 })
+    .waitFor({ state: 'visible' });
 }
 
 test.describe('Mentors Search Page', () => {
@@ -16,7 +18,9 @@ test.describe('Mentors Search Page', () => {
     await page.goto(MENTORS_URL);
     await waitForPageReady(page);
 
-    await expect(page.getByRole('heading', { name: 'Find Mentors', level: 1 })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Find Mentors', level: 1 }),
+    ).toBeVisible();
     await expect(page.getByRole('status')).toBeVisible();
     await expect(page.getByRole('status')).toContainText('mentors');
     await expect(page.getByLabel('Sort mentors')).toBeVisible();
@@ -34,12 +38,14 @@ test.describe('Mentors Search Page', () => {
       'Technology Stacks',
       'Languages',
       'Experience Level',
-      'Price Range (per hour)',
+      'Price Range',
       'Minimum Rating',
     ];
 
     for (const heading of sectionHeadings) {
-      await expect(sidebar.getByRole('button', { name: new RegExp(heading) })).toBeVisible();
+      await expect(
+        sidebar.getByRole('button', { name: new RegExp(heading) }),
+      ).toBeVisible();
     }
   });
 
@@ -56,7 +62,9 @@ test.describe('Mentors Search Page', () => {
     const drawerHeading = page.getByRole('heading', { name: 'Filters' });
     await expect(drawerHeading).toBeVisible();
 
-    const showResultsButton = page.getByRole('button', { name: /Show results/ });
+    const showResultsButton = page.getByRole('button', {
+      name: /Show results/,
+    });
     await expect(showResultsButton).toBeVisible();
 
     await showResultsButton.click();
@@ -71,7 +79,7 @@ test.describe('Mentors Search Page', () => {
     const sortSelect = page.getByLabel('Sort mentors');
     await sortSelect.selectOption({ label: 'Price: Low to High' });
 
-    await waitForPageReady(page);
+    await page.waitForURL(/sort=rate/);
 
     expect(page.url()).toContain('sort=rate');
   });
@@ -97,12 +105,14 @@ test.describe('Mentors Search Page', () => {
     }
 
     await page2Button.click();
-    await waitForPageReady(page);
+    await page.waitForURL(/page=2/);
 
     expect(page.url()).toContain('page=2');
   });
 
-  test('empty state displays when impossible filter is applied', async ({ page }) => {
+  test('empty state displays when impossible filter is applied', async ({
+    page,
+  }) => {
     await page.goto(`${MENTORS_URL}?filter[stacks]=ThisStackDoesNotExist99999`);
     await waitForPageReady(page);
 
@@ -135,7 +145,9 @@ test.describe('Mentors Search Page', () => {
     await expect(sortSelect).toHaveValue('-rate');
   });
 
-  test('filter chips appear when filtering and clear all removes them', async ({ page }) => {
+  test('filter chips appear when filtering and clear all removes them', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(MENTORS_URL);
     await waitForPageReady(page);
@@ -154,27 +166,35 @@ test.describe('Mentors Search Page', () => {
     }
 
     await stackCheckboxes.first().check();
-    await waitForPageReady(page);
+    await page.waitForURL(/filter/);
 
     expect(page.url()).toContain('filter');
 
-    const clearAllButton = page.getByRole('button', { name: 'Clear all', exact: true });
+    const clearAllButton = page.getByRole('button', {
+      name: 'Clear all',
+      exact: true,
+    });
     const hasClearAll = (await clearAllButton.count()) > 0;
 
     if (hasClearAll) {
       await clearAllButton.click();
-      await waitForPageReady(page);
+      await page.waitForURL((url) => !url.toString().includes('filter'));
 
       expect(page.url()).not.toContain('filter%5Bstacks%5D');
     }
   });
 
-  test('responsive grid adjusts columns at different viewports', async ({ page }) => {
+  test('responsive grid adjusts columns at different viewports', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(MENTORS_URL);
     await waitForPageReady(page);
 
-    const mentorCards = page.locator('section').locator('[class*="grid"]').first();
+    const mentorCards = page
+      .locator('section')
+      .locator('[class*="grid"]')
+      .first();
     const hasCards = (await mentorCards.count()) > 0;
 
     if (!hasCards) {
@@ -206,7 +226,9 @@ test.describe('Mentors Search Page', () => {
     expect(mobileCols).toBe(1);
   });
 
-  test('accessibility attributes are present on key elements', async ({ page }) => {
+  test('accessibility attributes are present on key elements', async ({
+    page,
+  }) => {
     await page.goto(MENTORS_URL);
     await waitForPageReady(page);
 
