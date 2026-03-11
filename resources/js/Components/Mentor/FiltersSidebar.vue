@@ -349,7 +349,8 @@ const clearFilters = () => mentorFilters.clearAllFilters();
           </span>
           <span>
             {{ mentorFilters.selectedCurrency }}
-            {{ mentorFilters.maxRate }}{{ mentorFilters.maxRate >= 200 ? '+' : '' }}
+            {{ mentorFilters.maxRate
+            }}{{ mentorFilters.maxRate >= 200 ? '+' : '' }}
           </span>
         </div>
 

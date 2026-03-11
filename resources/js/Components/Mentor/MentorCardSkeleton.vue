@@ -14,9 +14,9 @@ defineProps({
   >
     <div
       :class="
-        view === 'list'
-          ? 'h-48 w-48 flex-shrink-0 animate-pulse bg-gray-200 sm:w-56'
-          : 'aspect-[4/3] w-full animate-pulse bg-gray-200'
+        view === 'list' ?
+          'h-48 w-48 flex-shrink-0 animate-pulse bg-gray-200 sm:w-56'
+        : 'aspect-[4/3] w-full animate-pulse bg-gray-200'
       "
     />
     <div
@@ -33,11 +33,15 @@ defineProps({
         <div class="h-6 w-20 animate-pulse rounded-full bg-gray-200" />
         <div class="h-6 w-14 animate-pulse rounded-full bg-gray-200" />
       </div>
-      <div
-        :class="view === 'list' ? 'flex items-center gap-4 mb-3' : ''"
-      >
-        <div class="h-4 w-24 animate-pulse rounded bg-gray-200" :class="view === 'list' ? '' : 'mb-3'" />
-        <div class="h-4 w-32 animate-pulse rounded bg-gray-200" :class="view === 'list' ? '' : 'mb-3'" />
+      <div :class="view === 'list' ? 'mb-3 flex items-center gap-4' : ''">
+        <div
+          class="h-4 w-24 animate-pulse rounded bg-gray-200"
+          :class="view === 'list' ? '' : 'mb-3'"
+        />
+        <div
+          class="h-4 w-32 animate-pulse rounded bg-gray-200"
+          :class="view === 'list' ? '' : 'mb-3'"
+        />
       </div>
       <div
         class="mt-auto animate-pulse rounded-lg bg-gray-200"

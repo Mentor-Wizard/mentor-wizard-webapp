@@ -40,9 +40,9 @@ defineProps({
 
     <div
       :class="
-        view === 'list'
-          ? 'h-auto w-48 flex-shrink-0 sm:w-56'
-          : 'aspect-[4/3] w-full'
+        view === 'list' ?
+          'h-auto w-48 flex-shrink-0 sm:w-56'
+        : 'aspect-[4/3] w-full'
       "
       class="overflow-hidden"
     >
@@ -88,7 +88,9 @@ defineProps({
 
       <div
         class="flex items-center gap-4"
-        :class="view === 'list' ? 'mb-3 flex-wrap' : 'mb-3 flex-col items-start gap-1'"
+        :class="
+          view === 'list' ? 'mb-3 flex-wrap' : 'mb-3 flex-col items-start gap-1'
+        "
       >
         <div class="flex items-center text-sm">
           <div
