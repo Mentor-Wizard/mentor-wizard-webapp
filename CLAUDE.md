@@ -29,6 +29,14 @@
 5. **Document Results**: Add review section to `docs/todo.md`
 6. **Capture Lessons**: Update `docs/lessons.md` after corrections
 
+## Agent Dispatch (MANDATORY)
+
+- **ALWAYS** follow the agent pipeline defined in `.claude/rules/workflow.md`
+- **ALWAYS** run independent pipeline steps in parallel (e.g., Security Scanner + QA + Tester can run simultaneously after Developer completes)
+- **ALWAYS** autonomously determine which agents from `.claude/agents/` should execute each part of the user's task — do NOT ask the user which agent to use
+- Available agents: `ba`, `developer`, `frontend`, `tester`, `qa`, `reviewer`, `debugger`, `security-scanner`, `dba`, `ddd-architect`, `filament`, `devops`, `ci-cd-engineer`, `integration-architect`, `laravel-refactoring-expert`, `queue-specialist`, `docs-writer`
+- For every non-trivial task: analyze → select agents → dispatch in parallel where possible → collect results → verify
+
 ## Rules (auto-loaded from `.claude/rules/`)
 
 - `code-style.md` — PHP 8.4 strict types, Eloquent conventions, code quality tools
