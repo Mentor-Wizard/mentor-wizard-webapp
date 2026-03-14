@@ -24,6 +24,7 @@ class ListMentorProfilePage
 
     public function handle(): Response
     {
+        // @phpstan-ignore method.notFound (Larastan's with() return type narrows to Builder, losing QueryBuilder type)
         $mentors = QueryBuilder::for(MentorProfile::class)
             ->with([
                 'user.profile',
@@ -58,8 +59,8 @@ class ListMentorProfilePage
                 'rate'            => $mentor->rate,
                 'currency'        => ['symbol' => $mentor->currency?->symbol],
                 'userSlug'        => $mentor->user->slug,
-                'userName'        => $mentor->user->profile?->name,
-                'userAvatar'      => $mentor->user->profile?->avatar,
+                'userName'        => $mentor->user->profile->name,
+                'userAvatar'      => $mentor->user->profile->avatar,
                 'mainProgramSlug' => $mentor->user->mentorPrograms
                     ->where('isMain', '=', true)->first()?->slug,
             ]);

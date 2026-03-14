@@ -66,7 +66,7 @@ class MentorProfilePageResource extends JsonResource
             'reviews'           => $user->mentorReviews->count(),
             'experience'        => $years.' '.trans_choice('messages.years', $years, ['count' => $years]),
             'mentiCount'        => $user->mentorSessions->unique('menti_id')->count(),
-            'mainProgramSlug'   => $user->mentorPrograms->where('isMain', '=', true)->first()?->slug,
+            'mainProgramSlug'   => $user->mentorPrograms->where('is_main', '=', true)->first()?->slug,
         ];
     }
 
