@@ -410,10 +410,12 @@ describe('ListMentorProfilePage filters and includes', function (): void {
         ]);
 
         // Create a non-main program
-        MentorProgram::factory()->create([
+        $mentorProgram = MentorProgram::factory()->create([
             'mentor_id' => $user->getKey(),
-            'is_main'   => false,
         ]);
+
+        $mentorProgram->update(['is_main' => false]);
+        $mentorProgram->save();
 
         $response = $this->get(route('page.profile-programs'));
 

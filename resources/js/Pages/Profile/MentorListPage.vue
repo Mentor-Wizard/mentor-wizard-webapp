@@ -21,7 +21,7 @@ defineProps({
         <div class="space-y-6">
           <div
             v-for="(mentor, index) in mentors.data"
-            :key="index"
+            :key="mentor.userSlug"
             class="overflow-hidden rounded-lg bg-white shadow-sm"
           >
             <div class="flex items-start gap-6 p-6">

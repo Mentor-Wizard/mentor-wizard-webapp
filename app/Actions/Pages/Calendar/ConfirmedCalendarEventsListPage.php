@@ -7,6 +7,7 @@ namespace App\Actions\Pages\Calendar;
 use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -31,9 +32,12 @@ class ConfirmedCalendarEventsListPage
 
         $events = $query->orderBy('start_date_time')->get();
 
-        $grouped = $events->groupBy(
-            fn (CalendarEvent $event): string => $event->mentorProgram->name ?? 'Unknown Program'
-        );
+        $grouped = $events
+            ->groupBy(fn (CalendarEvent $event): int => $event->mentor_program_id ?? 0)
+            ->map(fn (Collection $group): array => [
+                'name'   => $group->first()->mentorProgram->name ?? 'Unknown Program',
+                'events' => $group->values(),
+            ]);
 
         return Inertia::render('Calendar/ListConfirmedCalendarEventsPage', [
             'locale'         => app()->getLocale(),

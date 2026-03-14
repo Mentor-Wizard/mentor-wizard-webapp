@@ -36,7 +36,7 @@ describe('Mentor Program Store Page', function (): void {
         $response = $this->withSession(['_token' => 'test_token'])
             ->post(route('mentor-program.store'), $programData);
 
-        $response->assertRedirect(route('mentor-program.create'));
+        $response->assertRedirect(route('mentor-program.list'));
 
         $this->assertDatabaseHas('mentor_programs', [
             'mentor_id'   => $this->user->getKey(),

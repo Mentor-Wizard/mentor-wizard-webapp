@@ -30,8 +30,7 @@ class ListMentorProfilePage
                 'user.profile',
                 'currency',
                 'user.mentorPrograms' => fn (mixed $query) => $query
-                    ->where('is_main', true)
-                    ->select(['id', 'mentor_id', 'slug']),
+                    ->select(['id', 'mentor_id', 'slug', 'is_main']),
             ])
             ->allowedFilters([
                 'title',
@@ -62,7 +61,7 @@ class ListMentorProfilePage
                 'userName'        => $mentor->user->profile->name,
                 'userAvatar'      => $mentor->user->profile->avatar,
                 'mainProgramSlug' => $mentor->user->mentorPrograms
-                    ->where('isMain', '=', true)->first()?->slug,
+                    ->where('is_main', '=', true)->first()?->slug,
             ]);
 
         return Inertia::render('Profile/MentorListPage', [

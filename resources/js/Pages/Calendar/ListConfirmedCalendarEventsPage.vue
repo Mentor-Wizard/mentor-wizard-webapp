@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 const openEvent = (calendarEventId) => {
-  router.visit(route('pages.calendar.show', { id: calendarEventId }));
+  router.visit(route('pages.calendar.show', { calendarEvent: calendarEventId }));
 };
 </script>
 
@@ -42,18 +42,18 @@ const openEvent = (calendarEventId) => {
 
       <div class="space-y-4">
         <div
-          v-for="(events, mentorProgramName) in props.calendarEvents"
-          :key="mentorProgramName"
+          v-for="(group, programId) in props.calendarEvents"
+          :key="programId"
           class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
         >
           <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900">
-              {{ mentorProgramName }}
+              {{ group.name }}
             </h2>
           </div>
 
           <div
-            v-for="event in events"
+            v-for="event in group.events"
             :key="event.id"
             class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
           >
