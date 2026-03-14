@@ -123,11 +123,14 @@ defineProps({
               <BookmarkIcon class="h-5 w-5 fill-none stroke-blue-600" />
               Save Profile
             </button>
-            <button
-              class="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+
+            <a
+              v-if="data.mainProgramSlug"
+              :href="route('pages.mentor.program.book', data.mainProgramSlug)"
+              class="hover:bg-blue-70 rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors"
             >
               Book Consultation
-            </button>
+            </a>
           </div>
         </div>
       </div>

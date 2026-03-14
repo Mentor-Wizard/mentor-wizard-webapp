@@ -11,7 +11,9 @@ use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
 use App\Models\MentorProfile;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Models\User;
+use Inertia\Inertia;
+use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -20,13 +22,16 @@ class ListMentorProfilePage
 {
     use AsController;
 
-    /**
-     * @return LengthAwarePaginator<int, MentorProfile>
-     */
-    public function handle(): LengthAwarePaginator
+    public function handle(): Response
     {
-        return QueryBuilder::for(MentorProfile::class)
-            ->allowedIncludes(['mentorPrograms', 'mentorTags'])
+        $mentors = QueryBuilder::for(MentorProfile::class)
+            ->with([
+                'user.profile',
+                'currency',
+                'user.mentorPrograms' => fn (mixed $query) => $query
+                    ->where('is_main', true)
+                    ->select(['id', 'mentor_id', 'slug']),
+            ])
             ->allowedFilters([
                 'title',
                 'description',
@@ -45,7 +50,22 @@ class ListMentorProfilePage
                 'rate',
                 'experience_started_at',
             ])
-            ->paginate()
-            ->appends(request()->query());
+            ->paginate(User::DEFAULT_MENTOR_PAGE_PAGINATION)
+            ->appends(request()->query())
+            ->through(fn (MentorProfile $mentor): array => [
+                'title'           => $mentor->title,
+                'description'     => $mentor->description,
+                'rate'            => $mentor->rate,
+                'currency'        => ['symbol' => $mentor->currency?->symbol],
+                'userSlug'        => $mentor->user->slug,
+                'userName'        => $mentor->user->profile?->name,
+                'userAvatar'      => $mentor->user->profile?->avatar,
+                'mainProgramSlug' => $mentor->user->mentorPrograms
+                    ->where('isMain', '=', true)->first()?->slug,
+            ]);
+
+        return Inertia::render('Profile/MentorListPage', [
+            'mentors' => $mentors,
+        ]);
     }
 }

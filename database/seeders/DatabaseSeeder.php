@@ -19,6 +19,7 @@ final class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             CoachSeeder::class,
             MentorTagSeeder::class,
+            MentorProfileSeeder::class,
             MentorProgramSeeder::class,
             CalendarEventSeeder::class,
             MentorReviewSeeder::class,

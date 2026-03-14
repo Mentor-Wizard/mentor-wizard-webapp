@@ -161,7 +161,7 @@ describe('Store Mentor Program', function (): void {
         $response = (new StoreMentorProgramPage)->handle($request);
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and($response->getTargetUrl())->toBe(route('mentor-program.create'));
+            ->and($response->getTargetUrl())->toBe(route('mentor-program.list'));
     });
 
 });

@@ -87,6 +87,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     protected $visible = [
         'id',
         'username',
+        'slug',
         'email',
         'created_at',
         'updated_at',

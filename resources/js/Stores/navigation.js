@@ -11,6 +11,7 @@ export const useNavigation = defineStore('navigation', () => {
   const landingNavigation = ref([
     { name: 'Product', href: '#' },
     { name: 'Features', href: '#' },
+    { name: 'Mentors', href: route('page.profile-programs') },
     { name: 'Marketplace', href: '#' },
     { name: 'Company', href: '#' },
   ]);
@@ -18,6 +19,7 @@ export const useNavigation = defineStore('navigation', () => {
   const authenticatedNavigation = computed(() => {
     const base = [
       { name: 'Dashboard', href: route('pages.dashboard') },
+      { name: 'Mentors', href: route('page.profile-programs') },
       { name: 'Team', href: '#' },
       { name: 'Projects', href: '#' },
       { name: 'Calendar', href: route('pages.calendar.index') },

@@ -535,6 +535,7 @@ import { GlobeAltIcon } from '@heroicons/vue/16/solid/index.js';
       <GlobeAltIcon class="h-4 w-4 text-gray-500" />
       <p class="ms-2 text-gray-500">Times shows in your local timezone</p>
     </div>
+
     <button
       class="mt-4 w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
     >

@@ -28,9 +28,15 @@ class MentorProgramFactory extends Factory
                 ->value('id'),
             'name'        => fake()->sentence(3),
             'slug'        => fake()->slug(),
+            'is_main'     => false,
             'description' => fake()->sentence(20),
             'cost'        => fake()->randomFloat(2, 10, 1000),
             'currency_id' => Currency::query()->inRandomOrder()->value('id') ?? Currency::factory(),
         ];
+    }
+
+    public function main(): static
+    {
+        return $this->state(['is_main' => true]);
     }
 }

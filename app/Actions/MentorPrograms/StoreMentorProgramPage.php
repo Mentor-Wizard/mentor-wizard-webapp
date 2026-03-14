@@ -22,6 +22,6 @@ class StoreMentorProgramPage
             'mentor_id' => Auth::id(),
         ]);
 
-        return Inertia::location(route('mentor-program.create'));
+        return Inertia::location(route('mentor-program.list'));
     }
 }

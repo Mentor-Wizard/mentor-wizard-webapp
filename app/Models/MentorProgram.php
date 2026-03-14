@@ -34,6 +34,7 @@ class MentorProgram extends Model
         'mentor_id',
         'name',
         'slug',
+        'is_main',
         'description',
         'cost',
         'currency_id',
@@ -122,6 +123,7 @@ class MentorProgram extends Model
     protected function casts(): array
     {
         return [
+            'is_main'    => 'boolean',
             'start_time' => 'datetime',
             'end_time'   => 'datetime',
         ];

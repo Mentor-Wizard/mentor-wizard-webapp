@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 import AppModal from '@/Components/AppModal.vue';
@@ -69,9 +69,17 @@ const deleteProgram = () => {
 <template>
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="text-xl leading-tight font-semibold text-gray-800">
-        {{ isEdit ? 'Edit Mentor Program' : 'Create New Mentor Program' }}
-      </h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl leading-tight font-semibold text-gray-800">
+          {{ isEdit ? 'Edit Mentor Program' : 'Create New Mentor Program' }}
+        </h2>
+        <Link
+          :href="route('mentor-program.list')"
+          class="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+        >
+          &larr; Back to Programs
+        </Link>
+      </div>
     </template>
 
     <div class="py-12">
