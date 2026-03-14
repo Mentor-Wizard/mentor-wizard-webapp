@@ -15,7 +15,7 @@ const props = defineProps({
 });
 
 const openEvent = (calendarEventId) => {
-  router.visit(route('pages.calendar.show', { calendarEvent: calendarEventId }));
+  router.visit(route('pages.calendar.show', { id: calendarEventId }));
 };
 </script>
 

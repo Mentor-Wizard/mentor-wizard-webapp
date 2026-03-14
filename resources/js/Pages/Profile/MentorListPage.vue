@@ -20,7 +20,7 @@ defineProps({
 
         <div class="space-y-6">
           <div
-            v-for="(mentor, index) in mentors.data"
+            v-for="mentor in mentors.data"
             :key="mentor.userSlug"
             class="overflow-hidden rounded-lg bg-white shadow-sm"
           >
