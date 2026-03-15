@@ -62,12 +62,13 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $response = $this->get(route('pages.calendar.confirmed'));
 
         $response->assertStatus(Response::HTTP_OK);
+
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('Calendar/ListConfirmedCalendarEventsPage')
             ->has('locale')
             ->has('calendarEvents', fn (AssertableJson $events): AssertableJson => $events
-                ->whereType('Program A', 'array')
-                ->whereType('Program B', 'array')
+                ->whereType((string) $this->programA->getKey(), 'array')
+                ->whereType((string) $this->programB->getKey(), 'array')
                 ->etc()
             )
         );
@@ -146,7 +147,7 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('Calendar/ListConfirmedCalendarEventsPage')
             ->has('calendarEvents', fn (AssertableJson $events): AssertableJson => $events
-                ->has('Program A')
+                ->has((string) $this->programA->getKey())
             )
         );
     });

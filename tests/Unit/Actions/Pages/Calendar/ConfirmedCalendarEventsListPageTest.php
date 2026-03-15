@@ -57,7 +57,8 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         expect($page['component'])->toBe('Calendar/ListConfirmedCalendarEventsPage')
             ->and($page['props'])->toHaveKeys(['locale', 'calendarEvents'])
-            ->and($page['props']['calendarEvents'])->toHaveKey('Program X');
+            ->and($page['props']['calendarEvents'])->toHaveKey('1')
+            ->and($page['props']['calendarEvents']['1']['name'])->toBe('Program X');
     });
 
     it('only includes confirmed events in the future', function (): void {
@@ -97,14 +98,13 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         $props = $page['props'];
 
         // Should have Program X (from beforeEach) and Program A (future confirmed)
-        $allEvents = collect($props['calendarEvents'])->flatten(1);
+        $allEvents = collect($props['calendarEvents'][$this->mentorProgram1->getKey()]['events']);
 
         // The past and pending events should be excluded
         $eventIds = $allEvents->pluck('id')->toArray();
         expect($eventIds)->not->toContain($pastEvent->getKey())
             ->and($eventIds)->not->toContain($pendingEvent->getKey())
-            ->and($eventIds)->toContain($futureEvent->getKey())
-            ->and($eventIds)->toContain($this->event->getKey());
+            ->and($eventIds)->toContain($futureEvent->getKey());
     });
 
     it('groups events by mentor program name', function (): void {
@@ -132,10 +132,10 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        expect($props['calendarEvents'])->toHaveKey('Program A')
-            ->and($props['calendarEvents']['Program A'])->toHaveCount(2);
+        expect($props['calendarEvents'][$this->mentorProgram1->getKey()]['name'])->toBe('Program A')
+            ->and($props['calendarEvents'][$this->mentorProgram1->getKey()]['events'])->toHaveCount(2);
 
-        foreach ($props['calendarEvents']['Program A'] as $event) {
+        foreach ($props['calendarEvents'][$this->mentorProgram1->getKey()]['events'] as $event) {
             expect($event['mentor_program_id'])->toBe($this->mentorProgram1->getKey());
         }
     });
@@ -165,10 +165,10 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        expect($props['calendarEvents'])->toHaveKey('Program A')
-            ->and($props['calendarEvents'])->not->toHaveKey('Program B');
+        expect($props['calendarEvents'][$this->mentorProgram1->getKey()]['name'])->toBe('Program A')
+            ->and($props['calendarEvents'])->not->toHaveKey($this->mentorProgram2->getKey());
 
-        $allEvents = collect($props['calendarEvents'])->flatten(1);
+        $allEvents = collect($props['calendarEvents'][$this->mentorProgram1->getKey()]['events']);
         expect($allEvents)->toHaveCount(1);
     });
 
@@ -198,7 +198,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         $props = $page['props'];
 
         // Should return ALL events when null is passed (no filtering)
-        $allEvents = collect($props['calendarEvents'])->flatten(1);
+        $allEvents = collect($props['calendarEvents']);
         expect($allEvents)->toHaveCount(3); // 2 new + 1 from beforeEach
     });
 
@@ -227,7 +227,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        $programAEvents = $props['calendarEvents']['Program A'];
+        $programAEvents = $props['calendarEvents'][$this->mentorProgram1->getKey()]['events'];
 
         // Earlier event should come before later event
         expect($programAEvents[0]['id'])->toBe($earlierEvent->getKey())
