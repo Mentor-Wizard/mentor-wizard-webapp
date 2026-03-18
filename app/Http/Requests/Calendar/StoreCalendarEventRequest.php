@@ -31,10 +31,9 @@ class StoreCalendarEventRequest extends FormRequest
         }
 
         $user = auth()->user();
-        $isMentorOfProgram = $mentorProgram->mentor_id === $user->getKey();
         $isMentor = $user->hasRole('mentor');
 
-        return $isMentorOfProgram || ! $isMentor;
+        return ! $isMentor;
     }
 
     public function withValidator(Validator $validator): void

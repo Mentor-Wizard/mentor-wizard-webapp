@@ -2,6 +2,8 @@
 import { usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
+const page = usePage();
+
 import LandingLayout from '@/Layouts/LandingLayout.vue';
 import AboutMentor from '@/Pages/Profile/Mentor/Blocks/AboutMentor.vue';
 import AvailablePrograms from '@/Pages/Profile/Mentor/Blocks/AvailablePrograms.vue';
@@ -12,7 +14,7 @@ import ReviewsMentor from '@/Pages/Profile/Mentor/Blocks/ReviewsMentor.vue';
 import SimilarMentors from '@/Pages/Profile/Mentor/Blocks/SimilarMentors.vue';
 import TitleProfile from '@/Pages/Profile/Mentor/Blocks/TitleProfile.vue';
 
-const mentor = usePage().props.mentor;
+const mentor = page.props.mentor;
 const reviewsArray = ref(Object.values(mentor.reviewBlock));
 </script>
 
@@ -59,7 +61,13 @@ const reviewsArray = ref(Object.values(mentor.reviewBlock));
               <main
                 class="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:max-w-7xl lg:px-8"
               >
-                <CalendarMentor />
+                <CalendarMentor
+                  :calendar-block="page.props.calendarBlock"
+                  :main-program-slug="page.props.mainProgramSlug"
+                  :main-program="page.props.mainProgram"
+                  :week-days="page.props.weekDays"
+                  :current-date="page.props.currentDate"
+                />
               </main>
             </div>
             <div class="mt-4 overflow-hidden bg-white shadow-xs sm:rounded-lg">

@@ -7,6 +7,7 @@ use App\Actions\Calendar\DeleteCalendarEvent;
 use App\Actions\Calendar\EditCalendarEvent;
 use App\Actions\Calendar\StoreCalendarEvent;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
+use App\Actions\MentorPrograms\SetMainMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Pages\Calendar\CalendarsListPage;
@@ -60,6 +61,9 @@ Route::prefix('mentor-program')->middleware(['auth', 'role:mentor'])->group(func
     Route::patch('/{mentorProgram:slug}', UpdateMentorProgramPage::class)
         ->can('update', 'mentorProgram')
         ->name('mentor-program.update');
+    Route::patch('/{mentorProgram:slug}/set-main', SetMainMentorProgram::class)
+        ->can('update', 'mentorProgram')
+        ->name('mentor-program.set-main');
     Route::delete('/{mentorProgram:slug}', DeleteMentorProgram::class)
         ->can('delete', 'mentorProgram')
         ->name('mentor-program.destroy');

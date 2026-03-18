@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MentorSessionTypeEnum;
 use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
 use Database\Factories\CalendarEventFactory;
@@ -52,6 +53,7 @@ class CalendarEvent extends Model
         'end_date_time',
         'date',
         'type',
+        'session_type',
         'web_link',
         'description',
         'mentor_program_id',
@@ -105,8 +107,9 @@ class CalendarEvent extends Model
     protected function casts(): array
     {
         return [
-            'start_date_time'   => 'datetime',
-            'end_date_time'     => 'datetime',
+            'start_date_time' => 'datetime',
+            'end_date_time'   => 'datetime',
+            'session_type'    => MentorSessionTypeEnum::class,
         ];
     }
 }

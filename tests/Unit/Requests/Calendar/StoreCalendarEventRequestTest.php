@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
@@ -47,6 +48,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -92,6 +94,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];

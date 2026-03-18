@@ -6,6 +6,7 @@ namespace App\Traits\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\In;
 use Override;
@@ -27,6 +28,7 @@ trait CalendarEventRequestRules
             'description'           => ['nullable', 'string', 'max:2000'],
             'webLink'               => ['sometimes', 'nullable', 'url'],
             'type'                  => ['required', Rule::in(CalendarEventTypeEnum::values())],
+            'session_type'          => ['required', Rule::in(MentorSessionTypeEnum::values())],
             'mentor_program_id'     => ['required', 'integer', 'exists:mentor_programs,id'],
         ];
     }
@@ -56,6 +58,8 @@ trait CalendarEventRequestRules
             'webLink.url'             => 'Weblink to event is not valid',
             'type.required'           => 'CalendarEvent type is required.',
             'type.in'                 => 'CalendarEvent type must be either individual or group.',
+            'session_type.required'   => 'Session type is required.',
+            'session_type.in'         => 'Session type must be a valid option.',
             'mentor_program_id'       => 'CalendarEvent should be related to mentor program.',
         ];
     }

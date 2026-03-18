@@ -187,10 +187,17 @@ export function isFormValid(form) {
         && form.toDate
         && form.fromTime
         && form.colour
-        && form.toTime,
+        && form.toTime
+        && form.session_type,
     ),
   );
 }
+
+export const sessionTypes = [
+  { value: 'Video Session', label: 'Video Session' },
+  { value: 'Voice Session', label: 'Voice Session' },
+  { value: 'Code Review', label: 'Code Review' },
+];
 
 // CalendarEvent types
 export const eventTypes = [

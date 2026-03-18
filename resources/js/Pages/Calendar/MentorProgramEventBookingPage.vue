@@ -1,6 +1,6 @@
 <script setup>
 import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import CreateCalendarEvent from '@/Pages/Calendar/CreateCalendarEvent.vue';
@@ -79,6 +79,17 @@ const addMonths = (dateStr, diff) => {
   return d.toISOString().slice(0, 10);
 };
 
+// Set of week-row indices (0–5) that contain at least one day with available slots
+const weeksWithSlots = computed(() => {
+  const weeks = new Set();
+  (props.days?.calendarSlots ?? []).forEach((day, index) => {
+    if (day.slots && day.slots.length > 0) {
+      weeks.add(Math.floor(index / 7));
+    }
+  });
+  return weeks;
+});
+
 const goToMonth = (diff) => {
   const target = addMonths(props.currentDate, diff);
   router.visit(route('pages.mentor.program.book', props.mentorProgram.slug), {
@@ -144,18 +155,18 @@ const goToMonth = (diff) => {
 
         <!-- Calendar grid -->
         <div class="flex bg-gray-200 text-xs/6 text-gray-700 lg:flex-auto">
-          <div
-            class="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-6 lg:gap-px"
-          >
+          <div class="hidden w-full lg:grid lg:grid-cols-7 lg:gap-px">
             <div
-              v-for="day in days.calendarSlots"
+              v-for="(day, index) in days.calendarSlots"
               :key="day.date"
               :class="[
                 day.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-500',
                 day.slots && day.slots.length > 0 ?
                   'cursor-pointer hover:bg-gray-100'
                 : 'cursor-not-allowed',
-                'relative min-h-[100px] px-3 py-2',
+                'relative px-3',
+                weeksWithSlots.has(Math.floor(index / 7)) ? 'min-h-[100px] py-2'
+                : 'py-1',
               ]"
               :title="getDaySlots(day.slots)"
               @click="

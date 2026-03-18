@@ -38,7 +38,7 @@ class MentorProfilePageResource extends JsonResource
             'id'             => $user->id,
             'slug'           => $user->slug,
             'titleBlock'     => $this->titleBlock($user),
-            'programsBlock'  => MentorProgramsResource::collection($user->mentorPrograms),
+            'programsBlock'  => MentorProgramsResource::collection($user->mentorPrograms->where('is_main', false)),
             'statisticBlock' => $this->statisticBlock($user),
             'reviewBlock'    => MentorReviewResource::collectionWithMentor($this->reviewBlock($user), $user),
             'similarMentors' => SimilarMentorResource::collection($this->similarMentor($user)),

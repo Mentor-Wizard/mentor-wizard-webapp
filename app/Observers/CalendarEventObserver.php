@@ -27,13 +27,14 @@ class CalendarEventObserver
                 ->first();
 
             if ($hostUser !== null && $participant !== null) {
-                MentorSession::query()->create([
+                $mentorSession = MentorSession::query()->create([
                     'mentor_id'         => $hostUser->getKey(),
                     'menti_id'          => $participant->getKey(),
                     'date'              => $event->start_date_time,
                     'cost'              => $event->mentorProgram->cost,
                     'mentor_program_id' => $event->mentor_program_id,
                 ]);
+                $event->update(['mentor_session_id' => $mentorSession->getKey()]);
             }
         }
     }

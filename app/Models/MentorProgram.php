@@ -42,6 +42,8 @@ class MentorProgram extends Model
         'end_time',
         'session_duration',
         'session_duration_options',
+        'session_type_options',
+        'need_confirmation',
     ];
 
     protected $appends = [
@@ -123,9 +125,11 @@ class MentorProgram extends Model
     protected function casts(): array
     {
         return [
-            'is_main'    => 'boolean',
-            'start_time' => 'datetime',
-            'end_time'   => 'datetime',
+            'is_main'              => 'boolean',
+            'need_confirmation'    => 'boolean',
+            'session_type_options' => 'array',
+            'start_time'           => 'datetime',
+            'end_time'             => 'datetime',
         ];
     }
 }

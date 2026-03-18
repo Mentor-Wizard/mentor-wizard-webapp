@@ -6,8 +6,10 @@ namespace App\Actions\Calendar;
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Models\MentorProgram;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -50,17 +52,24 @@ class BaseCalendarEventAction
             default      => CalendarEventTypeEnum::INDIVIDUAL->value,
         };
 
+        /** @var MentorProgram $mentorProgram */
+        $mentorProgram = MentorProgram::query()->findOrFail($mentorProgramId);
+        $status = $mentorProgram->need_confirmation
+            ? CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION
+            : CalendarEventStatusEnum::CONFIRMED;
+
         return [
-            'title'                 => Arr::get($validated, 'title'),
-            'start_date_time'       => $startDateTimeUTC,
-            'end_date_time'         => $endDateTimeUTC,
-            'type'                  => $eventType,
-            'web_link'              => Arr::get($validated, 'webLink'),
-            'colour'                => Arr::get($validated, 'colour'),
-            'description'           => Arr::get($validated, 'description'),
-            'status'                => CalendarEventStatusEnum::CONFIRMED,
-            'date'                  => $startDateTimeUTC?->format('Y-m-d'),
-            'mentor_program_id'     => $mentorProgramId,
+            'title'             => Arr::get($validated, 'title'),
+            'start_date_time'   => $startDateTimeUTC,
+            'end_date_time'     => $endDateTimeUTC,
+            'type'              => $eventType,
+            'session_type'      => MentorSessionTypeEnum::from($validated['session_type']),
+            'web_link'          => Arr::get($validated, 'webLink'),
+            'colour'            => Arr::get($validated, 'colour'),
+            'description'       => Arr::get($validated, 'description'),
+            'status'            => $status,
+            'date'              => $startDateTimeUTC?->format('Y-m-d'),
+            'mentor_program_id' => $mentorProgramId,
         ];
     }
 }

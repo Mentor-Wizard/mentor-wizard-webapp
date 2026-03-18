@@ -18,14 +18,13 @@ import {
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import {
   capitalize,
   errors,
-  eventTypes,
   isFormValid,
-  selectedEventTypeHelper,
+  sessionTypes,
   timeZone,
   validateForm,
 } from '@/Stores/Calendar/helpers.js';
@@ -68,33 +67,47 @@ const props = defineProps({
   },
 });
 
+const availableSessionTypes = computed(() => {
+  const options = props.mentorProgram?.session_type_options;
+  if (options && options.length > 0) {
+    return sessionTypes.filter((t) => options.includes(t.value));
+  }
+  return sessionTypes;
+});
+
+const availableDurations = computed(() => {
+  const options = props.mentorProgram?.session_duration_options;
+  if (options && options.length > 0) {
+    return options.map((minutes) => ({
+      value: minutes,
+      label: `${minutes} min`,
+    }));
+  }
+  return [];
+});
+
 let form = useForm({
   title: 'Event for ' + props.mentorProgram?.name,
   webLink: '',
-  fromDate: '',
-  toDate: '',
+  fromDate: props.selectedDate,
+  toDate: props.selectedDate,
   fromTime: '09:00',
   toTime: '10:00',
   type: 'Individual',
+  session_type: availableSessionTypes.value[0]?.value ?? '',
   description: props.mentorProgram?.description ?? '',
   colour: 'blue',
   timezone: timeZone,
   mentor_program_id: props.mentor_program_id,
+  selectedDuration: props.mentorProgram?.session_duration ?? 60,
 });
 
 const availableColoursList = ref([]);
 const availableColoursScheme = ref({});
-const selectedEventType = selectedEventTypeHelper(form);
 const usingSlotsMode = ref(false);
 const activeSelectedSlot = ref(null);
 
-const getSessionDurationMinutes = () => {
-  if (props?.mentorProgram?.session_duration) {
-    return Number(props.mentorProgram.session_duration);
-  }
-  // default 60 minutes if not provided
-  return 60;
-};
+const getSessionDurationMinutes = () => Number(form.selectedDuration) || 60;
 
 const roundDateToMinutes = (date, minutes) => {
   const ms = 1000 * 60 * minutes;
@@ -196,14 +209,6 @@ onMounted(() => {
 
 if (!form.title.trim()) {
   errors.value.title = 'Title is required';
-}
-
-if (!form.fromDate) {
-  errors.value.fromDate = 'Start date is required';
-}
-
-if (!form.toDate) {
-  errors.value.toDate = 'End date is required';
 }
 
 if (!form.fromTime) {
@@ -469,9 +474,78 @@ watch(
                       </div>
                     </div>
 
-                    <!-- Session duration display -->
+                    <!-- Session duration: selector if options available, static display otherwise -->
+                    <div v-if="availableDurations.length > 0">
+                      <label
+                        class="block text-sm leading-6 font-medium text-gray-900"
+                      >
+                        Session Duration
+                      </label>
+                      <Listbox v-model="form.selectedDuration">
+                        <div class="relative mt-2">
+                          <ListboxButton
+                            class="relative w-full cursor-default rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-3 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
+                          >
+                            <span class="block truncate"
+                              >{{ form.selectedDuration }} min</span
+                            >
+                            <span
+                              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
+                            >
+                              <ChevronUpDownIcon
+                                class="h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          </ListboxButton>
+                          <transition
+                            leave-active-class="transition duration-100 ease-in"
+                            leave-from-class="opacity-100"
+                            leave-to-class="opacity-0"
+                          >
+                            <ListboxOptions
+                              class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+                            >
+                              <ListboxOption
+                                v-for="duration in availableDurations"
+                                :key="duration.value"
+                                v-slot="{ active, selected }"
+                                :value="duration.value"
+                                as="template"
+                              >
+                                <li
+                                  :class="[
+                                    active ?
+                                      'bg-amber-100 text-amber-900'
+                                    : 'text-gray-900',
+                                    'relative cursor-default py-2 pr-4 pl-10 select-none',
+                                  ]"
+                                >
+                                  <span
+                                    :class="[
+                                      selected ? 'font-medium' : 'font-normal',
+                                      'block truncate',
+                                    ]"
+                                    >{{ duration.label }}</span
+                                  >
+                                  <span
+                                    v-if="selected"
+                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600"
+                                  >
+                                    <CheckIcon
+                                      class="h-5 w-5"
+                                      aria-hidden="true"
+                                    />
+                                  </span>
+                                </li>
+                              </ListboxOption>
+                            </ListboxOptions>
+                          </transition>
+                        </div>
+                      </Listbox>
+                    </div>
                     <div
-                      v-if="mentorProgram?.session_duration"
+                      v-else-if="mentorProgram?.session_duration"
                       class="rounded-md border border-gray-200 bg-gray-50 p-2 text-sm text-gray-700"
                     >
                       Session duration:
@@ -536,19 +610,25 @@ watch(
                       <label
                         class="block text-sm leading-6 font-medium text-gray-900"
                       >
-                        Event Type
+                        Session Type
                       </label>
-                      <Listbox v-model="form.type">
+                      <Listbox v-model="form.session_type">
                         <div class="relative mt-2">
-                          <span class="flex items-center">
-                            <component
-                              :is="selectedEventType?.icon"
-                              class="mr-3 h-5 w-5 text-gray-400"
-                            />
+                          <ListboxButton
+                            class="relative w-full cursor-default rounded-lg border border-gray-300 bg-white py-2 pr-10 pl-3 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
+                          >
                             <span class="block truncate">{{
-                              selectedEventType?.label
+                              form.session_type || 'Select session type'
                             }}</span>
-                          </span>
+                            <span
+                              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
+                            >
+                              <ChevronUpDownIcon
+                                class="h-5 w-5 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          </ListboxButton>
                           <transition
                             leave-active-class="transition duration-100 ease-in"
                             leave-from-class="opacity-100"
@@ -558,7 +638,7 @@ watch(
                               class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
                             >
                               <ListboxOption
-                                v-for="type in eventTypes"
+                                v-for="type in availableSessionTypes"
                                 :key="type.value"
                                 v-slot="{ active, selected }"
                                 :value="type.value"
@@ -575,15 +655,10 @@ watch(
                                   <span
                                     :class="[
                                       selected ? 'font-medium' : 'font-normal',
-                                      'flex items-center truncate',
+                                      'block truncate',
                                     ]"
+                                    >{{ type.label }}</span
                                   >
-                                    <component
-                                      :is="type.icon"
-                                      class="mr-3 h-5 w-5"
-                                    />
-                                    {{ type.label }}
-                                  </span>
                                   <span
                                     v-if="selected"
                                     class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600"

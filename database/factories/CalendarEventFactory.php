@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
@@ -34,6 +35,7 @@ class CalendarEventFactory extends Factory
             'end_date_time'     => $endTime,
             'date'              => $date,
             'type'              => fake()->randomElement(CalendarEventTypeEnum::values()),
+            'session_type'      => fake()->randomElement(MentorSessionTypeEnum::cases()),
             'web_link'          => fake()->url(),
             'description'       => fake()->text(),
         ];

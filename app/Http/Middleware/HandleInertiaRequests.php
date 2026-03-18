@@ -54,6 +54,9 @@ class HandleInertiaRequests extends Middleware
             'project' => [
                 'name' => config('app.name'),
             ],
+            'flash'   => [
+                'success' => fn (): ?string => $request->session()->get('success'),
+            ],
         ];
     }
 }
