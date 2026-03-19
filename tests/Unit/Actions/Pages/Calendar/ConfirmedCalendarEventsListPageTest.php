@@ -55,10 +55,12 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         expect($response)->toBeInstanceOf(Response::class);
 
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+        $programKey = $this->program->getKey();
+
         expect($page['component'])->toBe('Calendar/ListConfirmedCalendarEventsPage')
             ->and($page['props'])->toHaveKeys(['locale', 'calendarEvents'])
-            ->and($page['props']['calendarEvents'])->toHaveKey('1')
-            ->and($page['props']['calendarEvents']['1']['name'])->toBe('Program X');
+            ->and($page['props']['calendarEvents'])->toHaveKey($programKey)
+            ->and($page['props']['calendarEvents'][$programKey]['name'])->toBe('Program X');
     });
 
     it('only includes confirmed events in the future', function (): void {
