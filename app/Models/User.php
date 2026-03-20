@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -252,6 +253,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
      *
      * @return array<string, string>
      */
+    #[Override]
     protected function casts(): array
     {
         return [

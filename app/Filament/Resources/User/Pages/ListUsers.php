@@ -7,6 +7,7 @@ namespace App\Filament\Resources\User\Pages;
 use App\Filament\Resources\User\UserResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListUsers extends ListRecords
 {
@@ -15,6 +16,7 @@ class ListUsers extends ListRecords
     /**
      * @return CreateAction[]
      */
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [
