@@ -10,7 +10,9 @@ use App\Enums\TagEnum;
 use App\Events\Chats\UnreadMessagesEvent;
 use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Models\User;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Date;
@@ -24,7 +26,29 @@ class ChatListUser
     public function handle(): JsonResponse
     {
         $user = auth()->user();
-        $chats = $user->chats()
+        $userId = $user->getKey();
+
+        $chats = $this->getChatsWithRelations($user);
+
+        $listUsers = [];
+        /** @var Chat $chat */
+        foreach ($chats as $chat) {
+            $listUsers[] = $this->buildChatUserItem($chat, $userId);
+        }
+
+        event(new UnreadMessagesEvent($user, UnreadMessages::run($user)));
+
+        return response()->json([
+            'users' => $listUsers,
+        ]);
+    }
+
+    /**
+     * @return Collection<int, Chat>
+     */
+    private function getChatsWithRelations(User $user)
+    {
+        return $user->chats()
             ->wherePivotIn('status', [ChatStatusEnum::ACTIVE, ChatStatusEnum::BANNED])
             ->with([
                 'users.profile',
@@ -34,56 +58,71 @@ class ChatListUser
                 },
             ])
             ->get();
+    }
 
-        $listUsers = [];
-        /** @var Chat $chat */
-        /**
-         * @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $chat
-         */
-        $userId = $user->getKey();
-        foreach ($chats as $chat) {
-            $companion = $chat->users
-                ->where('id', '!=', $userId)
-                ->first();
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildChatUserItem(Chat $chat, int $userId): array
+    {
+        $companion = $chat->users
+            ->where('id', '!=', $userId)
+            ->first();
 
-            /** @var ?ChatMessage $lastMessage */
-            $lastMessage = $chat->messages->first();
-            $companionChatPivot = $companion?->pivot;
+        /** @var ?ChatMessage $lastMessage */
+        $lastMessage = $chat->messages->first();
+        /** @var Pivot|null $companionChatPivot */
+        $companionChatPivot = $companion?->pivot;
 
-            $tags = null;
-            if ($companion?->mentorProfile) {
-                $tags = $companion->mentorProfile->mentorTags
-                    ->where('type', TagEnum::STACK)
-                    ->pluck('tag')
-                    ->toArray();
-                if ($tags === []) {
-                    $tags = null;
-                }
-            }
+        $tags = $this->getCompanionTags($companion);
 
-            $listUsers[] = [
-                'id'           => $companion?->getKey(),
-                'chatId'       => $chat->getKey(),
-                'name'         => $companion?->profile ? $companion->profile->name.' '.$companion->profile->last_name : null,
-                'avatar'       => $companion?->profile?->avatar,
-                'slug'         => $companion?->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,
-                'message'      => $lastMessage ? Purify::clean($lastMessage->message) : '',
-                'online'       => false,
-                'isMuted'      => $chat->pivot->is_muted,
-                'ban'          => $chat->pivot->status === ChatStatusEnum::BANNED->value,
-                'canSend'      => $companionChatPivot?->status === ChatStatusEnum::ACTIVE->value,
-                'isRead'       => $lastMessage?->is_read,
-                'createdAt'    => $lastMessage?->created_at->format('d.m.Y'),
-                'tags'         => $tags,
-                'last'         => $lastMessage instanceof ChatMessage ? $this->getLastDateInfo($lastMessage->created_at) : null,
-            ];
+        $chatUser = $chat->users->where('id', $userId)->first();
+
+        return [
+            'id'           => $companion?->getKey(),
+            'chatId'       => $chat->getKey(),
+            'name'         => $companion?->profile ? $companion->profile->name.' '.$companion->profile->last_name : null,
+            'avatar'       => $companion?->profile?->avatar,
+            'slug'         => $companion?->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,
+            'message'      => $lastMessage ? Purify::clean($lastMessage->message) : '',
+            'online'       => false,
+            'isMuted'      => $this->getPivotValue($chatUser?->pivot, 'is_muted'),
+            'ban'          => $this->getPivotValue($chatUser?->pivot, 'status') === ChatStatusEnum::BANNED->value,
+            'canSend'      => $this->getPivotValue($companionChatPivot, 'status') === ChatStatusEnum::ACTIVE->value,
+            'isRead'       => $lastMessage?->is_read,
+            'createdAt'    => $lastMessage?->created_at->format('d.m.Y'),
+            'tags'         => $tags,
+            'last'         => $lastMessage instanceof ChatMessage ? $this->getLastDateInfo($lastMessage->created_at) : null,
+        ];
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getPivotValue(?Pivot $pivot, string $key)
+    {
+        if (! $pivot instanceof Pivot) {
+            return null;
         }
 
-        event(new UnreadMessagesEvent($user, UnreadMessages::run($user)));
+        return $pivot->{$key};
+    }
 
-        return response()->json([
-            'users' => $listUsers,
-        ]);
+    /**
+     * @return array<string>|null
+     */
+    private function getCompanionTags(?User $companion): ?array
+    {
+        if (! $companion?->mentorProfile) {
+            return null;
+        }
+
+        $tags = $companion->mentorProfile->mentorTags
+            ->where('type', TagEnum::STACK)
+            ->pluck('tag')
+            ->toArray();
+
+        return $tags === [] ? null : $tags;
     }
 
     private function getLastDateInfo(DateTimeInterface $createdAt): string

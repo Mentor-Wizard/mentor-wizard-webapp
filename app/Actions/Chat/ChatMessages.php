@@ -36,6 +36,9 @@ class ChatMessages
             ->update(['is_read' => true]);
     }
 
+    /**
+     * @return array<int, ChatMessageResource>
+     */
     private function getMessages(Chat $chat): array
     {
         return ChatMessage::query()
