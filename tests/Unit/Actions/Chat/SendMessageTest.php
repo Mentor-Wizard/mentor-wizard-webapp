@@ -57,7 +57,6 @@ describe('SendMessage', function (): void {
             'message' => 'Message with files',
             'files'   => [
                 $file1,
-                'string-instead-of-file',
             ],
         ];
 

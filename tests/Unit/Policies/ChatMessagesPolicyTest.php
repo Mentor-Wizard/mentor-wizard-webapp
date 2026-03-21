@@ -30,7 +30,19 @@ describe('ChatMessagesPolicy', function (): void {
 
     describe('view', function (): void {
         it('allows the author to view their own message', function (): void {
-            $message = ChatMessage::factory()->create(['user_id' => $this->user->id]);
+            $companion = User::factory()->create();
+
+            $chat = Chat::factory()->create();
+
+            $chat->users()->attach([
+                $this->user->id => ['status' => ChatStatusEnum::ACTIVE->value],
+                $companion->id  => ['status' => ChatStatusEnum::ACTIVE->value],
+            ]);
+
+            $message = ChatMessage::factory()->create([
+                'chat_id' => $chat->id,
+                'user_id' => $this->user->id,
+            ]);
 
             expect($this->policy->view($this->user, $message))->toBeTrue();
         });

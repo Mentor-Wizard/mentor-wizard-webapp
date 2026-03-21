@@ -50,6 +50,7 @@ class SendMessage
             'chat_id'     => $chat->getKey(),
             'user_id'     => $user->getKey(),
             'message'     => $data['message'],
+            'is_read'     => false,
         ]);
         if (isset($data['files'])) {
             foreach ($data['files'] as $file) {

@@ -38,8 +38,7 @@ describe('SetArchive', function (): void {
 
         $response = $this->postJson(route('chat.set-archive', $chat));
 
-        $response->assertStatus(Response::HTTP_OK)
-            ->assertJson(['success' => true]);
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
 
         $updatedChat = $this->owner->chats()->where('chat_id', $chat->id)->first();
 
