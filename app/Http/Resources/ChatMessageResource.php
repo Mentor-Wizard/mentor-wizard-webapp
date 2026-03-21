@@ -8,6 +8,7 @@ use App\Models\ChatMessage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
+use Stevebauman\Purify\Facades\Purify;
 
 /**
  * Class UserProfileResource
@@ -40,7 +41,7 @@ class ChatMessageResource extends JsonResource
             'sender'        => $request->user()->getKey() === $this->resource->user_id ? 'user' : 'other',
             'avatar'        => $this->resource->user->profile->avatar,
             'timestamp'     => $this->resource->created_at,
-            'content'       => strip_tags((string) $this->resource->message, '<b><i><em><strong><u>'),
+            'content'       => Purify::clean($this->resource->message ?? ''),
             'isRead'        => $this->resource->is_read,
             'attachments'   => $files,
         ];

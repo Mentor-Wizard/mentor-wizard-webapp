@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\ChatFactory;
-use Database\Factories\ChatMessageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +19,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  */
 class Chat extends Model implements HasMedia
 {
-    /** @use HasFactory<ChatMessageFactory> */
+    /** @use HasFactory<ChatFactory> */
     use HasFactory;
 
     use InteractsWithMedia;
@@ -40,8 +39,8 @@ class Chat extends Model implements HasMedia
     }
 
     /**
-     * @return User
-     *              getting a chat partner
+     * @return User|null
+     *                   getting a chat partner
      */
     public function companion(User $user): ?User
     {

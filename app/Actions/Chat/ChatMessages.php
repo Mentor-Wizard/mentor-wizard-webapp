@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Actions\Chat;
 
 use App\Events\Chats\UnreadMessagesEvent;
+use App\Http\Resources\ChatFileResource;
+use App\Http\Resources\ChatMessageResource;
 use App\Models\Chat;
 use App\Models\ChatMessage;
-use App\Repositories\Chat\ChatMessageRepository;
 use Illuminate\Http\JsonResponse;
 use Lorisleiva\Actions\Concerns\AsController;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 
 class ChatMessages
 {
     use AsController;
-
-    public function __construct(private readonly ChatMessageRepository $repository) {}
 
     public function handle(Chat $chat): JsonResponse
     {
@@ -24,8 +24,8 @@ class ChatMessages
         event(new UnreadMessagesEvent($user, UnreadMessages::run($user)));
 
         return response()->json([
-            'messages' => $this->repository->getMessages($chat),
-            'files'    => $this->repository->getFiles($chat),
+            'messages' => $this->getMessages($chat),
+            'files'    => $this->getFiles($chat),
         ]);
     }
 
@@ -34,5 +34,31 @@ class ChatMessages
         ChatMessage::query()
             ->where('chat_id', $chat->getKey())
             ->update(['is_read' => true]);
+    }
+
+    private function getMessages(Chat $chat): array
+    {
+        return ChatMessage::query()
+            ->with('user.profile', 'chat')
+            ->where('chat_id', $chat->getKey())
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($message) => ChatMessageResource::make($message))
+            ->all();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function getFiles(Chat $chat): array
+    {
+        return ChatMessage::query()
+            ->where('chat_id', $chat->getKey())
+            ->whereHas('media', fn ($q) => $q->where('collection_name', 'files'))
+            ->get()
+            ->flatMap(fn ($message): MediaCollection => $message->getMedia('files'))
+            ->map(fn ($media): array => new ChatFileResource($media)->toArray(request()))
+            ->values()
+            ->all();
     }
 }

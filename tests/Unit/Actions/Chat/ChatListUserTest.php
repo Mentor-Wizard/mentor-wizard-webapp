@@ -232,19 +232,20 @@ describe('ChatListUser', function (): void {
 
     });
 
-    it('gets last message', function (): void {
+    it('gets last message via eager loading', function (): void {
+        $user = User::factory()->create();
+        $companion = User::factory()->create();
         $chat = Chat::factory()->create();
+        $chat->users()->attach([$user->id, $companion->id], ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+
         $message1 = ChatMessage::factory()->create(['chat_id' => $chat->id]);
         $message2 = ChatMessage::factory()->create(['chat_id' => $chat->id]);
 
-        $action = new ChatListUser;
+        $chat->load(['messages' => static function ($query): void {
+            $query->latest('id')->limit(1);
+        }]);
 
-        $reflection = new ReflectionClass(ChatListUser::class);
-        $method = $reflection->getMethod('getLastMessage');
-
-        $lastMessage = $method->invoke($action, $chat);
-
-        expect($lastMessage->id)->toBe($message2->id);
+        expect($chat->messages->first()?->id)->toBe($message2->id);
     });
 
     it('returns human readable diff', function (): void {

@@ -44,7 +44,7 @@ class UserProfile extends Model implements HasMedia
         'telegram',
         'whatsapp',
         'phone',
-        'mute',
+        'is_mute',
         'cost_per_hour',
         'currency_id',
         'timezone',
@@ -60,7 +60,7 @@ class UserProfile extends Model implements HasMedia
         'whatsapp',
         'phone',
         'avatar',
-        'mute',
+        'is_mute',
         'cost_per_hour',
         'currency_id',
         'timezone',
@@ -108,7 +108,7 @@ class UserProfile extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-            'mute' => 'boolean',
+            'is_mute' => 'boolean',
         ];
     }
 

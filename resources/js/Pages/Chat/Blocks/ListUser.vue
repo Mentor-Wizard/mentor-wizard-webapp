@@ -95,7 +95,7 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
     <div class="ml-4 flex-1">
       <div class="flex items-center justify-between">
         <h4 class="text-[0.75rem] font-semibold text-gray-900">
-          {{ user.id }} {{ user.name }}
+          {{ user.name }}
         </h4>
         <span class="text-[0.75rem] text-gray-500">{{ user.last }}</span>
       </div>
