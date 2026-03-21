@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Policies\ChatMessagesPolicy;
 use Database\Factories\ChatMessageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +18,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperChatMessage
  */
 #[UseFactory(ChatMessageFactory::class)]
+#[UsePolicy(ChatMessagesPolicy::class)]
 class ChatMessage extends Model implements HasMedia
 {
     /** @use HasFactory<ChatMessageFactory> */

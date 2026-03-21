@@ -103,13 +103,13 @@ Route::middleware('auth')
     ->group(function (): void {
         Route::get('list', GetChatPage::class)->name('page.chat');
         Route::get('users', ChatListUser::class)->name('chat.users');
-        Route::get('messages/{chat}', ChatMessages::class)->name('chat.messages');
-        Route::post('message/{chat}', SendMessage::class)->name('chat.send-message');
-        Route::get('message/{message}', GetMessage::class)->name('chat.get-message');
-        Route::post('mute/{chat}', SetMute::class)->name('chat.set-mute');
+        Route::get('messages/{chat}', ChatMessages::class)->name('chat.messages')->can('view,chat');
+        Route::post('message/{chat}', SendMessage::class)->name('chat.send-message')->can('update,chat');
+        Route::get('message/{message}', GetMessage::class)->name('chat.get-message')->can('view,message');
+        Route::post('mute/{chat}', SetMute::class)->name('chat.set-mute')->can('update,chat');
         Route::post('create/{user}', CreateChat::class)->name('chat.create');
-        Route::post('archive/{chat}', SetArchive::class)->name('chat.set-archive');
-        Route::post('ban/{chat}', SetBan::class)->name('chat.set-ban');
+        Route::post('archive/{chat}', SetArchive::class)->name('chat.set-archive')->can('update,chat');
+        Route::post('ban/{chat}', SetBan::class)->name('chat.set-ban')->can('update,chat');
     });
 
 Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')->group(function (): void {

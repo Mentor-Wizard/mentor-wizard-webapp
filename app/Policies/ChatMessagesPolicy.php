@@ -23,19 +23,10 @@ class ChatMessagesPolicy
      */
     public function view(User $user, ChatMessage $chatMessage): bool
     {
-        if ($chatMessage->user_id === $user->getKey()) {
-            return true;
-        }
-
         /** @var Chat|null $chat */
         $chat = $chatMessage->chat;
-        $companion = $chat?->companion($user);
 
-        if ($companion) {
-            return $companion->getKey() === $chatMessage->user_id;
-        }
-
-        return false;
+        return $chat?->users()->where('users.id', $user->getKey())->exists() ?? false;
     }
 
     /**
