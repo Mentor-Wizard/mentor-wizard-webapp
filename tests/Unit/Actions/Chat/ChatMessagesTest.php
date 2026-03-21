@@ -9,6 +9,7 @@ use App\Models\ChatMessage;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -47,10 +48,39 @@ describe('ChatMessages', function (): void {
 
         $data = $result->getData(true);
         expect($data)->toHaveKeys(['messages', 'files'])
+            ->and($data['messages'])->not->toBeEmpty()
+            ->and($data['messages'][0]['content'])->toBe('Hello!')
             ->and(ChatMessage::query()->where('chat_id', $chat->id)->where('is_read', false)->count())
             ->toBe(0);
 
         Event::assertDispatched(fn (UnreadMessagesEvent $event): bool => $event->user->id === $user->id);
+    });
+
+    it('returns files when messages have attachments', function (): void {
+        $user = User::factory()->create();
+        $user->profile()->create([
+            'name'      => 'profile name 1',
+            'last_name' => 'profile last_name 1',
+        ]);
+        Auth::login($user);
+        request()->setUserResolver(fn () => $user);
+        $chat = Chat::factory()->create();
+
+        $message = ChatMessage::factory()->create([
+            'chat_id' => $chat->id,
+            'user_id' => $user->id,
+            'is_read' => false,
+            'message' => 'Hello with file!',
+        ]);
+
+        $message->addMedia(UploadedFile::fake()->image('test.jpg'))->toMediaCollection('files');
+
+        /** @var ChatMessages $action */
+        $action = resolve(ChatMessages::class);
+        $result = $action->handle($chat);
+
+        $data = $result->getData(true);
+        expect($data['files'])->not->toBeEmpty();
     });
 
     it('returns empty lists if no messages exist', function (): void {
