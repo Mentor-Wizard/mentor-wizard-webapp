@@ -27,9 +27,7 @@ class ChatListUser
         $chats = $user->chats()
             ->wherePivotIn('status', [ChatStatusEnum::ACTIVE, ChatStatusEnum::BANNED])
             ->with([
-                'users',
                 'users.profile',
-                'users.mentorProfile',
                 'users.mentorProfile.mentorTags',
                 'messages' => static function ($query): void {
                     $query->latest('id')->limit(1);
@@ -67,9 +65,9 @@ class ChatListUser
                 'id'           => $companion?->getKey(),
                 'chatId'       => $chat->getKey(),
                 'name'         => $companion?->profile ? $companion->profile->name.' '.$companion->profile->last_name : null,
-                'avatar'       => $companion?->profile->avatar,
+                'avatar'       => $companion?->profile?->avatar,
                 'slug'         => $companion?->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,
-                'message'      => Purify::clean($lastMessage?->message ?? ''),
+                'message'      => $lastMessage ? Purify::clean($lastMessage->message) : '',
                 'online'       => false,
                 'isMuted'      => $chat->pivot->is_muted,
                 'ban'          => $chat->pivot->status === ChatStatusEnum::BANNED->value,

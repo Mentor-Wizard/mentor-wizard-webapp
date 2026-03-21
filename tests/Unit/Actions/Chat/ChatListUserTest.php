@@ -5,9 +5,12 @@ declare(strict_types=1);
 use App\Actions\Chat\ChatListUser;
 use App\Enums\ChatStatusEnum;
 use App\Enums\RoleEnum;
+use App\Enums\TagEnum;
 use App\Events\Chats\UnreadMessagesEvent;
 use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Models\MentorProfile;
+use App\Models\MentorTag;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\JsonResponse;
@@ -248,6 +251,175 @@ describe('ChatListUser', function (): void {
         expect($chat->messages->first()?->id)->toBe($message2->id);
     });
 
+    it('returns tags for companion with mentorProfile and STACK type tags', function (): void {
+        $user = User::factory()->create();
+        $user->profile()->create([
+            'name'      => 'profile name 1',
+            'last_name' => 'profile last_name 1',
+        ]);
+        $companion = User::factory()->create([
+            'username' => 'user 2',
+        ]);
+        $companion->profile()->create([
+            'name'        => 'profile name 2',
+            'last_name'   => 'profile last_name 2',
+        ]);
+        $companion->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        /** @var MentorProfile $mentorProfile */
+        $mentorProfile = MentorProfile::factory()->create(['user_id' => $companion->id]);
+
+        $tag1 = MentorTag::factory()->create([
+            'type' => TagEnum::STACK,
+            'tag'  => 'PHP',
+        ]);
+        $tag2 = MentorTag::factory()->create([
+            'type' => TagEnum::STACK,
+            'tag'  => 'Laravel',
+        ]);
+        $tag3 = MentorTag::factory()->create([
+            'type' => TagEnum::LANGUAGE,
+            'tag'  => 'English',
+        ]);
+
+        $mentorProfile->mentorTags()->attach([$tag1->id, $tag2->id, $tag3->id]);
+
+        Auth::login($user);
+        $chat = Chat::factory()->create();
+        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+        $chat->users()->attach($companion->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+
+        ChatMessage::factory()->create([
+            'chat_id'    => $chat->id,
+            'user_id'    => $companion->id,
+            'message'    => 'test',
+            'is_read'    => false,
+            'created_at' => '2026-02-01 12:10:00',
+            'updated_at' => '2026-02-01 12:10:00',
+        ]);
+
+        $action = new ChatListUser;
+        $result = $action->handle();
+
+        $resultData = $result->getData(true);
+
+        expect($resultData['users'][0]['tags'])->toBeArray()
+            ->toContain('PHP')
+            ->toContain('Laravel')
+            ->not->toContain('English');
+    });
+
+    it('returns null tags when companion has mentorProfile but no STACK tags', function (): void {
+        $user = User::factory()->create();
+        $user->profile()->create([
+            'name'      => 'profile name 1',
+            'last_name' => 'profile last_name 1',
+        ]);
+        $companion = User::factory()->create([
+            'username' => 'user 2',
+        ]);
+        $companion->profile()->create([
+            'name'        => 'profile name 2',
+            'last_name'   => 'profile last_name 2',
+        ]);
+        $companion->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        /** @var MentorProfile $mentorProfile */
+        $mentorProfile = MentorProfile::factory()->create(['user_id' => $companion->id]);
+
+        $tag = MentorTag::factory()->create([
+            'type' => TagEnum::LANGUAGE,
+            'tag'  => 'English',
+        ]);
+
+        $mentorProfile->mentorTags()->attach($tag->id);
+
+        Auth::login($user);
+        $chat = Chat::factory()->create();
+        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+        $chat->users()->attach($companion->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+
+        ChatMessage::factory()->create([
+            'chat_id'    => $chat->id,
+            'user_id'    => $companion->id,
+            'message'    => 'test',
+            'is_read'    => false,
+            'created_at' => '2026-02-01 12:10:00',
+            'updated_at' => '2026-02-01 12:10:00',
+        ]);
+
+        $action = new ChatListUser;
+        $result = $action->handle();
+
+        $resultData = $result->getData(true);
+
+        expect($resultData['users'][0]['tags'])->toBeNull();
+    });
+
+    it('handles chat with no messages correctly', function (): void {
+        $user = User::factory()->create();
+        $user->profile()->create([
+            'name'      => 'profile name 1',
+            'last_name' => 'profile last_name 1',
+        ]);
+        $companion = User::factory()->create([
+            'username' => 'user 2',
+        ]);
+        $companion->profile()->create([
+            'name'        => 'profile name 2',
+            'last_name'   => 'profile last_name 2',
+        ]);
+
+        Auth::login($user);
+        $chat = Chat::factory()->create();
+        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+        $chat->users()->attach($companion->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+
+        $action = new ChatListUser;
+        $result = $action->handle();
+
+        $resultData = $result->getData(true);
+
+        expect($resultData['users'][0]['message'])->toBe('');
+        expect($resultData['users'][0]['message'])->toBeString();
+        expect($resultData['users'][0]['isRead'])->toBeNull();
+        expect($resultData['users'][0]['createdAt'])->toBeNull();
+        expect($resultData['users'][0]['last'])->toBeNull();
+    });
+
+    it('handles companion without profile correctly', function (): void {
+        $user = User::factory()->create();
+        $user->profile()->create([
+            'name'      => 'profile name 1',
+            'last_name' => 'profile last_name 1',
+        ]);
+        $companion = User::factory()->create([
+            'username' => 'user 2',
+        ]);
+
+        Auth::login($user);
+        $chat = Chat::factory()->create();
+        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+        $chat->users()->attach($companion->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
+
+        ChatMessage::factory()->create([
+            'chat_id'    => $chat->id,
+            'user_id'    => $companion->id,
+            'message'    => 'test',
+            'is_read'    => false,
+            'created_at' => '2026-02-01 12:10:00',
+            'updated_at' => '2026-02-01 12:10:00',
+        ]);
+
+        $action = new ChatListUser;
+        $result = $action->handle();
+
+        $resultData = $result->getData(true);
+
+        expect($resultData['users'][0]['name'])->toBeNull();
+        expect($resultData['users'][0]['avatar'])->toBeNull();
+    });
+
     it('returns human readable diff', function (): void {
         $action = new ChatListUser;
 
@@ -260,5 +432,141 @@ describe('ChatListUser', function (): void {
         $result = $method->invoke($action, $date);
 
         expect($result)->toBe('0 seconds ago'); // Carbon::diffForHumans()
+    });
+
+    it('eager loads users relationship to prevent N+1', function (): void {
+        $user = User::factory()->create();
+        Auth::login($user);
+
+        Chat::factory(3)->create()->each(function ($chat) use ($user): void {
+            $companion = User::factory()->create();
+            $chat->users()->attach([
+                $user->id      => ['status' => ChatStatusEnum::ACTIVE->value],
+                $companion->id => ['status' => ChatStatusEnum::ACTIVE->value],
+            ]);
+        });
+
+        Illuminate\Support\Facades\DB::enableQueryLog();
+
+        (new ChatListUser)->handle();
+
+        $queries = Illuminate\Support\Facades\DB::getQueryLog();
+
+        expect(count($queries))->toBeLessThan(10);
+    });
+
+    it('loads only the latest message to avoid overfetching', function (): void {
+        $user = User::factory()->create();
+        $companion = User::factory()->create();
+        Auth::login($user);
+
+        $chat = Chat::factory()->create();
+        $chat->users()->attach([
+            $user->id      => ['status' => ChatStatusEnum::ACTIVE->value],
+            $companion->id => ['status' => ChatStatusEnum::ACTIVE->value],
+        ]);
+
+        ChatMessage::factory()->create(['chat_id' => $chat->id, 'id' => 100]);
+        ChatMessage::factory()->create(['chat_id' => $chat->id, 'id' => 101]);
+        ChatMessage::factory()->create(['chat_id' => $chat->id, 'id' => 102]);
+
+        $action = new ChatListUser;
+
+        $result = $action->handle();
+
+        DB::enableQueryLog();
+        (new ChatListUser)->handle();
+        $log = DB::getQueryLog();
+
+        $messageQuery = collect($log)->first(fn ($q): bool => str_contains((string) $q['query'], 'chat_messages'));
+
+        expect($messageQuery['query'])->toContain('"laravel_row" <= 1');
+    });
+
+    it('does not crash when chat has no companion', function (): void {
+        $user = User::factory()->create();
+        Auth::login($user);
+
+        $chat = Chat::factory()->create();
+
+        $chat->users()->attach($user->id, [
+            'status'   => ChatStatusEnum::ACTIVE->value,
+            'is_muted' => false,
+        ]);
+
+        $action = new ChatListUser;
+
+        $result = $action->handle();
+
+        expect($result->getStatusCode())->toBe(Response::HTTP_OK);
+
+        $data = $result->getData(true);
+        expect($data['users'])->toBeArray();
+    });
+
+    it('kills null-safe mutation for lastMessage message', function (): void {
+        $user = User::factory()->create();
+        $companion = User::factory()->create();
+        Auth::login($user);
+
+        $chat = Chat::factory()->create();
+        $chat->users()->attach([
+            $user->id      => ['status' => ChatStatusEnum::ACTIVE->value],
+            $companion->id => ['status' => ChatStatusEnum::ACTIVE->value],
+        ]);
+
+        $action = new ChatListUser;
+        $result = $action->handle();
+
+        expect($result->getStatusCode())->toBe(Response::HTTP_OK);
+
+        $data = $result->getData(true);
+        expect($data['users'][0]['message'])->toBe('');
+    });
+
+    it('kills null-safe mutation for messages in empty chat', function (): void {
+        $user = User::factory()->create();
+        $companion = User::factory()->create();
+        Auth::login($user);
+
+        $chat = Chat::factory()->create();
+        $chat->users()->attach([
+            $user->id      => ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false],
+            $companion->id => ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false],
+        ]);
+
+        $action = new ChatListUser;
+        $result = $action->handle();
+
+        expect($result->getStatusCode())->toBe(Response::HTTP_OK);
+
+        $data = $result->getData(true);
+
+        expect($data['users'][0]['message'])->toBe('')
+            ->and($data['users'][0]['isRead'])->toBeNull();
+    });
+
+    it('does not crash and returns empty message when chat has no messages', function (): void {
+        $user = User::factory()->create();
+        $companion = User::factory()->create();
+        Auth::login($user);
+
+        $chat = Chat::factory()->create();
+        $chat->users()->attach([
+            $user->id      => ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false],
+            $companion->id => ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false],
+        ]);
+
+        $action = new ChatListUser;
+
+        $result = $action->handle();
+
+        expect($result->getStatusCode())->toBe(Response::HTTP_OK);
+
+        $data = $result->getData(true);
+
+        expect($data['users'][0]['message'])->toBe('')
+            ->and($data['users'][0]['isRead'])->toBeNull()
+            ->and($data['users'][0]['createdAt'])->toBeNull();
     });
 });
