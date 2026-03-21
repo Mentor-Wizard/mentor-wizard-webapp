@@ -3,6 +3,8 @@ name: laravel-architecture
 description:
     Generates a Laravel architecture based on best practices for modern Laravel
     applications.
+
+    Українською: архітектура Laravel, структура проєкту, патерни Laravel, сервісний шар, екшни, доменна логіка, організація коду, спроєктуй архітектуру, створи структуру, рефакторинг архітектури, доменна структура, Action клас
 ---
 
 # Laravel Architecture

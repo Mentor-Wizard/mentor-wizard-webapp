@@ -3,6 +3,10 @@ name: devops
 description:
     Generates DevOps configurations and scripts for deploying and managing
     Laravel applications. Run local commands to debug and deploy.
+
+    Українською: DevOps, деплой, розгортання, інфраструктура, CI/CD, сервер,
+    конфігурація, моніторинг, налаштувати сервер, автоматизація деплою,
+    керування інфраструктурою, збірка та випуск.
 ---
 
 # Devops

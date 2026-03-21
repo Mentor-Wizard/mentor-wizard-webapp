@@ -4,6 +4,8 @@ description:
     Use when conducting security audits, reviewing code for vulnerabilities, or
     analyzing infrastructure security. Invoke for SAST scans, penetration
     testing, DevSecOps practices, cloud security reviews.
+
+    Українською: безпека коду, аудит безпеки, вразливості, XSS, SQL ін'єкція, авторизація, автентифікація, CSRF, шифрування, перевір безпеку, знайди вразливість, DevSecOps, пентест
 triggers:
     - security review
     - vulnerability scan

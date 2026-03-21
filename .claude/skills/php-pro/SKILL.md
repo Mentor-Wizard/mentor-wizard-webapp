@@ -4,6 +4,8 @@ description:
     Use when building PHP applications with modern PHP 8.3+ features, Laravel,
     or Symfony frameworks. Invoke for strict typing, PHPStan level 9, async
     patterns with Swoole, PSR standards.
+
+    Українською: PHP код, сучасний PHP, типізація, enum, match, readonly, fiber, атрибути, інтерфейс, абстрактний клас, напиши PHP, оптимізуй PHP, PHPStan, рефакторинг PHP
 triggers:
     - PHP
     - Laravel
