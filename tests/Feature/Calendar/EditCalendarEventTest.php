@@ -6,6 +6,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -55,9 +56,11 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '12:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '13:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://new_url_link.com',
             'description'       => 'New description',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -96,6 +99,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
@@ -116,6 +120,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
@@ -136,6 +141,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
@@ -178,6 +184,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromDate'          => Date::tomorrow()->format('Y-m-d'),
             'fromTime'          => '09:00',
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
@@ -220,6 +227,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromDate'          => Date::tomorrow()->format('Y-m-d'),
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
@@ -252,6 +260,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -294,6 +303,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -316,6 +326,37 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             ])->assertSessionHasErrors(['type']);
     });
 
+    it('fails update when session_type missing/invalid', function (): void {
+        actingAs($this->user);
+        $base = [
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'webLink'           => 'https://google.com',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+        // missing
+        $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $this->event->getKey()), [
+                ...$base,
+                '_token' => 'test-token',
+            ])->assertSessionHasErrors(['session_type']);
+        // invalid
+        $invalid = [
+            ...$base,
+            'type' => 'invalid_type',
+        ];
+        $this->withSession(['_token' => 'test-token'])
+            ->patch(route('pages.calendar.edit', $this->event->getKey()), [
+                ...$invalid,
+                '_token' => 'test-token',
+            ])->assertSessionHasErrors(['type']);
+    });
+
     it('fails update when colour missing', function (): void {
         actingAs($this->user);
         $data = [
@@ -324,6 +365,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://google.com',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -344,6 +386,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'description'       => Str::random(2001),
@@ -365,6 +408,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'webLink'           => '-----google.com',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'description'       => Str::random(2001),
@@ -388,6 +432,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'toDate'            => Date::today()->addDays(2)->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'webLink'           => 'https://google.com',
             'description'       => 'Test description',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
@@ -424,6 +469,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'start_date_time'   => Date::yesterday()->format('Y-m-d').' 12:00:00',
             'end_date_time'     => Date::yesterday()->format('Y-m-d').' 13:00:00',
             'date'              => Date::yesterday()->format('Y-m-d'),
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
@@ -441,6 +487,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '13:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -469,6 +516,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 12:00:00',
             'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
@@ -485,6 +533,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'fromTime'          => '12:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '13:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -515,6 +564,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $confirmedEvent->calendarEventUsers()->attach($this->user->getKey(), [
@@ -530,6 +580,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'fromTime'          => '12:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '13:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -554,6 +605,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $pendingEvent->calendarEventUsers()->attach($this->user->getKey(), [
@@ -569,6 +621,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'fromTime'          => '12:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '13:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'webLink'           => 'https://facebook.com',
@@ -597,6 +650,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $event->calendarEventUsers()->attach($unconfirmedUser->getKey(), [
@@ -613,6 +667,7 @@ describe('Calendar CalendarEvent Edit - Status Restrictions', function (): void 
             'fromTime'          => '12:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '13:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),

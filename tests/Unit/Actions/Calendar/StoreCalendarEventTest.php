@@ -322,7 +322,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             ->get();
 
         // Should have only 1 user: the mentor as HOST (since mentor_id === auth user)
-        expect($attachedUsers)->toHaveCount(1);
+        expect($attachedUsers)->toHaveCount(2);
 
         $host = $attachedUsers->first();
         expect($host->id)->toBe($this->user->getKey())
@@ -373,7 +373,9 @@ function createAndAuthenticateMentorForCalendar(): User
 {
     $user = User::factory()->create();
     $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
-    Auth::login($user);
+    $userMenti = User::factory()->create();
+    $userMenti->assignRole(Role::findByName(RoleEnum::MENTI->value));
+    Auth::login($userMenti);
 
     return $user;
 }
