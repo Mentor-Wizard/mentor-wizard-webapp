@@ -10,6 +10,6 @@ class ChatChannel
 {
     public function join(User $user, int|string $id): bool
     {
-        return $user->id === (int) $id;
+        return $user->getKey() === (int) $id;
     }
 }

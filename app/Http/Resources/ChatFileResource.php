@@ -26,20 +26,19 @@ class ChatFileResource extends JsonResource
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
+     *
+     * @property Media $resource
      */
     #[Override]
     public function toArray(Request $request): array
     {
-        /** @var Media $media */
-        $media = $this->resource;
-
         return [
-            'id'         => $media->id,
-            'name'       => $media->file_name,
-            'mimeType'   => $media->mime_type,
-            'size'       => $media->size,
-            'createdAt'  => $media->created_at,
-            'url'        => $media->getUrl(),
+            'id'         => $this->resource->getKey(),
+            'name'       => $this->resource->file_name,
+            'mimeType'   => $this->resource->mime_type,
+            'size'       => $this->resource->size,
+            'createdAt'  => $this->resource->created_at,
+            'url'        => $this->resource->getUrl(),
         ];
     }
 }

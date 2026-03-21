@@ -37,7 +37,7 @@ class CreateChat
          */
         $companionChat = $owner->chats()
             ->whereHas('users', function ($q) use ($user): void {
-                $q->where('users.id', $user->id);
+                $q->where('users.id', $user->getKey());
             })
             ->first();
         if ($companionChat) {
@@ -50,8 +50,8 @@ class CreateChat
             'name' => $user->profile->name,
         ]);
 
-        $chat->users()->attach($user->id, ['status' => ChatStatusEnum::ACTIVE->value]);
-        $chat->users()->attach($owner->id, ['status' => ChatStatusEnum::ACTIVE->value]);
+        $chat->users()->attach($user->getKey(), ['status' => ChatStatusEnum::ACTIVE->value]);
+        $chat->users()->attach($owner->getKey(), ['status' => ChatStatusEnum::ACTIVE->value]);
 
         return SendMessage::run($chat, $request);
     }

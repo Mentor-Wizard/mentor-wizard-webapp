@@ -32,7 +32,7 @@ class ChatMessages
     private function setReadMessages(Chat $chat): void
     {
         ChatMessage::query()
-            ->where('chat_id', $chat->id)
+            ->where('chat_id', $chat->getKey())
             ->update(['is_read' => true]);
     }
 }

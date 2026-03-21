@@ -23,7 +23,7 @@ class SetBan
             : ChatStatusEnum::ACTIVE->value;
 
         $user->chats()->updateExistingPivot(
-            $chat->id,
+            $chat->getKey(),
             [
                 'status' => $status,
             ]

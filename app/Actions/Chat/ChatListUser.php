@@ -40,14 +40,14 @@ class ChatListUser
              * @var Chat&object{pivot: Pivot&object{status: string}} $companionChat
              */
             $companionChat = $companion->chats()
-                ->wherePivot('chat_id', $chat->id)
-                ->wherePivot('user_id', $companion->id)
+                ->wherePivot('chat_id', $chat->getKey())
+                ->wherePivot('user_id', $companion->getKey())
                 ->first();
             $lastMessage = $this->getLastMessage($chat);
 
             $listUsers[] = [
-                'id'           => $companion->id,
-                'chatId'       => $chat->id,
+                'id'           => $companion->getKey(),
+                'chatId'       => $chat->getKey(),
                 'name'         => $companion->profile->name.' '.$companion->profile->last_name,
                 'avatar'       => $companion->profile->avatar,
                 'slug'         => $companion->hasRole(RoleEnum::MENTOR->value) ? $companion->slug : null,
@@ -73,7 +73,7 @@ class ChatListUser
     private function getLastMessage(Chat $chat): ?ChatMessage
     {
         return ChatMessage::query()
-            ->where('chat_id', $chat->id)
+            ->where('chat_id', $chat->getKey())
             ->latest('id')
             ->first();
     }

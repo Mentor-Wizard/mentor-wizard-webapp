@@ -15,7 +15,11 @@ class ChatMessageRequest extends FormRequest
     {
         return [
             'message' => ['required', 'string'],
-            'files'   => ['nullable', 'array'],
+            'files'   => ['nullable', 'array', 'max:5'],
+            'files.*' => [
+                'file',
+                'max:2048',
+            ],
         ];
     }
 }

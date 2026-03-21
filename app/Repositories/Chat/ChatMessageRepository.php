@@ -19,7 +19,7 @@ class ChatMessageRepository
     {
         return ChatMessage::query()
             ->with('user.profile', 'chat')
-            ->where('chat_id', $chat->id)
+            ->where('chat_id', $chat->getKey())
             ->orderBy('id')
             ->get()
             ->map(fn ($message) => ChatMessageResource::make($message))
@@ -32,7 +32,7 @@ class ChatMessageRepository
     public function getFiles(Chat $chat): array
     {
         return ChatMessage::query()
-            ->where('chat_id', $chat->id)
+            ->where('chat_id', $chat->getKey())
             ->whereHas('media', fn ($q) => $q->where('collection_name', 'files'))
             ->get()
             ->flatMap(fn ($message): MediaCollection => $message->getMedia('files'))

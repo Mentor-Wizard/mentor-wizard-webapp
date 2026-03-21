@@ -18,7 +18,7 @@ class SetMute
         $user = $request->user();
         $isMuted = $request->boolean('isMuted');
         $user->chats()->updateExistingPivot(
-            $chat->id,
+            $chat->getKey(),
             [
                 'is_muted' => $isMuted,
             ]

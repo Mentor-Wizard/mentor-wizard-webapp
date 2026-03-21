@@ -6,25 +6,23 @@ namespace App\Actions\Chat;
 
 use App\Enums\ChatStatusEnum;
 use App\Models\Chat;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class SetArchive
 {
     use AsController;
 
-    public function handle(Chat $chat): JsonResponse
+    public function handle(Chat $chat): Response
     {
         $user = auth()->user();
         $user->chats()->updateExistingPivot(
-            $chat->id,
+            $chat->getKey(),
             [
                 'status' => ChatStatusEnum::ARCHIVED->value,
             ]
         );
 
-        return response()->json([
-            'success' => true,
-        ]);
+        return response()->noContent();
     }
 }

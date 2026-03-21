@@ -40,15 +40,15 @@ class SendMessage
          * @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $companionChat
          */
         $companionChat = $companion->chats()
-            ->wherePivot('chat_id', $chat->id)
+            ->wherePivot('chat_id', $chat->getKey())
             ->first();
 
         throw_if($companionChat->pivot->status !== ChatStatusEnum::ACTIVE->value, AuthorizationException::class);
 
         $data = $request->validated();
         $message = ChatMessage::query()->create([
-            'chat_id'     => $chat->id,
-            'user_id'     => $user->id,
+            'chat_id'     => $chat->getKey(),
+            'user_id'     => $user->getKey(),
             'message'     => $data['message'],
         ]);
         if (isset($data['files'])) {

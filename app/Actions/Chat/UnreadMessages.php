@@ -15,8 +15,11 @@ class UnreadMessages
     public function handle(User $user): int
     {
         return ChatMessage::query()
+            ->whereHas('chat.users', function ($query) use ($user): void {
+                $query->where('users.id', $user->getKey());
+            })
             ->where('is_read', false)
-            ->where('user_id', '<>', $user->id)
+            ->where('user_id', '<>', $user->getKey())
             ->count();
     }
 }

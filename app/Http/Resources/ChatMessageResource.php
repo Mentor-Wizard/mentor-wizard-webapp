@@ -19,6 +19,7 @@ use Override;
  * @property string $whatsapp
  * @property string $phone
  * @property string $avatar
+ * @property ChatMessage $resource
  */
 class ChatMessageResource extends JsonResource
 {
@@ -30,19 +31,17 @@ class ChatMessageResource extends JsonResource
     #[Override]
     public function toArray(Request $request): array
     {
-        /** @var ChatMessage $chatMessage */
-        $chatMessage = $this->resource;
         $files = ChatFileResource::collection(
-            $chatMessage->getMedia('files')
+            $this->resource->getMedia('files')
         );
 
         return [
-            'id'            => $chatMessage->id,
-            'sender'        => $request->user()->id === $chatMessage->user_id ? 'user' : 'other',
-            'avatar'        => $chatMessage->user->profile->avatar,
-            'timestamp'     => $chatMessage->created_at,
-            'content'       => $chatMessage->message,
-            'isRead'        => $chatMessage->is_read,
+            'id'            => $this->resource->getKey(),
+            'sender'        => $request->user()->getKey() === $this->resource->user_id ? 'user' : 'other',
+            'avatar'        => $this->resource->user->profile->avatar,
+            'timestamp'     => $this->resource->created_at,
+            'content'       => strip_tags((string) $this->resource->message, '<b><i><em><strong><u>'),
+            'isRead'        => $this->resource->is_read,
             'attachments'   => $files,
         ];
     }

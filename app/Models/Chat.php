@@ -46,7 +46,7 @@ class Chat extends Model implements HasMedia
     public function companion(User $user): ?User
     {
         return $this->users()
-            ->wherePivot('user_id', '!=', $user->id)
+            ->wherePivot('user_id', '!=', $user->getKey())
             ->first();
     }
 

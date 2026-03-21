@@ -32,7 +32,7 @@ class ChatMessageEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('Chat.'.$this->user->id),
+            new PrivateChannel('Chat.'.$this->user->getKey()),
         ];
     }
 }
