@@ -6,6 +6,7 @@ use App\Actions\Chat\SendMessage;
 use App\Enums\ChatStatusEnum;
 use App\Events\Chats\ChatMessageEvent;
 use App\Events\Chats\UnreadMessagesEvent;
+use App\Http\Requests\Chat\ChatMessageRequest;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
@@ -119,5 +120,66 @@ describe('SendMessage', function (): void {
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
         $this->assertDatabaseEmpty('chat_messages');
+    });
+
+    it('ensures message is refreshed after adding media', function (): void {
+        Storage::fake('public');
+
+        $companion = User::factory()->create();
+        $companion->profile()->create(['name' => 'Companion']);
+
+        $chat = Chat::factory()->create();
+        $chat->users()->attach([
+            $this->owner->id => [
+                'status'   => ChatStatusEnum::ACTIVE->value,
+                'is_muted' => false,
+            ],
+            $companion->id => [
+                'status'   => ChatStatusEnum::ACTIVE->value,
+                'is_muted' => false,
+            ],
+        ]);
+
+        $file1 = UploadedFile::fake()->image('photo1.jpg');
+
+        $payload = [
+            'message' => 'Message to refresh',
+            'files'   => [$file1],
+        ];
+
+        $response = $this->postJson(route('chat.send-message', $chat), $payload);
+
+        $response->assertStatus(200);
+
+        $responseData = $response->json('message');
+        expect($responseData['attachments'])->not->toBeEmpty();
+
+        $message = ChatMessage::query()->orderByDesc('id')->first();
+        expect($message->is_read)->toBeFalse();
+    });
+
+    it('skips file attachment if the item is not an instance of UploadedFile', function (): void {
+        Storage::fake('public');
+        $companion = User::factory()->create();
+        $chat = Chat::factory()->create();
+        $chat->users()->attach([
+            $this->owner->id => ['status' => ChatStatusEnum::ACTIVE->value],
+            $companion->id   => ['status' => ChatStatusEnum::ACTIVE->value],
+        ]);
+
+        $mockRequest = Mockery::mock(ChatMessageRequest::class);
+
+        $mockRequest->shouldReceive('validated')->andReturn([
+            'message' => 'Manual call with garbage',
+            'files'   => ['not-an-uploaded-file-instance'],
+        ]);
+
+        $action = new SendMessage;
+
+        $response = $action->handle($chat, $mockRequest);
+
+        expect($response->getStatusCode())->toBe(200);
+        $message = ChatMessage::query()->where('message', 'Manual call with garbage')->first();
+        expect($message->getMedia('files'))->toHaveCount(0);
     });
 });
