@@ -57,15 +57,45 @@ watch(
   { immediate: true },
 );
 
+const toDateInput = (datetimeStr) => {
+  if (!datetimeStr) return '';
+  return new Date(datetimeStr).toISOString().slice(0, 10);
+};
+
+const toTimeInput = (datetimeStr) => {
+  if (!datetimeStr) return '08:00';
+  const d = new Date(datetimeStr);
+  return d.toTimeString().slice(0, 5);
+};
+
+const combineDateTime = (date, time) => (date ? `${date} ${time}` : null);
+
+const startDate = ref(toDateInput(props.program?.start_time));
+const startTimeOfDay = ref(toTimeInput(props.program?.start_time));
+const endDate = ref(toDateInput(props.program?.end_time));
+const endTimeOfDay = ref(toTimeInput(props.program?.end_time));
+
 const form = useForm({
   name: props.program?.name ?? '',
   description: props.program?.description ?? '',
   cost: props.program?.cost ?? '',
   currency_id: props.program?.currency_id ?? '',
   slug: props.program?.slug ?? '',
-  session_type_options: props.program?.session_type_options ?? [],
+  session_type_options: props.program?.session_type_options ?? [
+    ...props.sessionTypeOptions,
+  ],
   session_duration: props.program?.session_duration ?? 60,
   need_confirmation: props.program?.need_confirmation ?? false,
+  start_time: combineDateTime(startDate.value, startTimeOfDay.value),
+  end_time: combineDateTime(endDate.value, endTimeOfDay.value),
+});
+
+watch([startDate, startTimeOfDay], () => {
+  form.start_time = combineDateTime(startDate.value, startTimeOfDay.value);
+});
+
+watch([endDate, endTimeOfDay], () => {
+  form.end_time = combineDateTime(endDate.value, endTimeOfDay.value);
 });
 
 const isEdit = computed(() => {
@@ -245,6 +275,66 @@ const setAsMain = () => {
                           New bookings will be created as pending and require
                           your confirmation.
                         </p>
+                      </div>
+                    </div>
+
+                    <div class="space-y-4">
+                      <div>
+                        <p class="mb-1 text-sm font-medium text-gray-700">
+                          Available From
+                        </p>
+                        <div class="grid grid-cols-2 gap-x-4">
+                          <div>
+                            <InputLabel for="start_date" value="Date" />
+                            <TextInput
+                              id="start_date"
+                              v-model="startDate"
+                              type="date"
+                            />
+                          </div>
+                          <div>
+                            <InputLabel for="start_time_of_day" value="Time" />
+                            <TextInput
+                              id="start_time_of_day"
+                              v-model="startTimeOfDay"
+                              type="time"
+                            />
+                          </div>
+                        </div>
+                        <InputError
+                          v-if="form.errors.start_time"
+                          :message="form.errors.start_time"
+                          class="mt-2"
+                        />
+                      </div>
+
+                      <div>
+                        <p class="mb-1 text-sm font-medium text-gray-700">
+                          Available Until
+                        </p>
+                        <div class="grid grid-cols-2 gap-x-4">
+                          <div>
+                            <InputLabel for="end_date" value="Date" />
+                            <TextInput
+                              id="end_date"
+                              v-model="endDate"
+                              type="date"
+                            />
+                          </div>
+                          <div>
+                            <InputLabel for="end_time_of_day" value="Time" />
+                            <TextInput
+                              id="end_time_of_day"
+                              v-model="endTimeOfDay"
+                              type="time"
+                            />
+                          </div>
+                        </div>
+                        <InputError
+                          v-if="form.errors.end_time"
+                          :message="form.errors.end_time"
+                          class="mt-2"
+                        />
                       </div>
                     </div>
 

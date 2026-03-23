@@ -17,6 +17,24 @@ const props = defineProps({
 const openEvent = (calendarEventId) => {
   router.visit(route('pages.calendar.show', { id: calendarEventId }));
 };
+
+const formatDateTime = (datetimeStr) => {
+  if (!datetimeStr) return '—';
+  const d = new Date(datetimeStr);
+  return (
+    d.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+    + ' '
+    + d.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+  );
+};
 </script>
 
 <template>
@@ -70,10 +88,14 @@ const openEvent = (calendarEventId) => {
               </button>
             </div>
             <p class="text-sm text-gray-600">
+              <span class="font-medium">From:</span>
+              {{ event.participant[0]?.username ?? 'Unknown' }}
+            </p>
+            <p class="text-sm text-gray-600">
               <span class="font-medium">When:</span>
-              {{ new Date(event.start_date_time).toLocaleString() }}
+              {{ formatDateTime(event.start_date_time) }}
               —
-              {{ new Date(event.end_date_time).toLocaleString() }}
+              {{ formatDateTime(event.end_date_time) }}
             </p>
           </div>
         </div>

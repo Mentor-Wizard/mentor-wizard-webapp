@@ -56,7 +56,6 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'fromTime'          => '12:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '13:00',
-            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'webLink'           => 'https://new_url_link.com',
             'description'       => 'New description',

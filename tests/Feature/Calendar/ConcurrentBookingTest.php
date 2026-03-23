@@ -104,7 +104,7 @@ describe('Concurrent Booking (Feature)', function (): void {
             $response2->assertSessionHas('error');
 
             // Second event should still be PENDING
-            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
         });
 
         it('allows booking adjacent slots without overlap', function (): void {

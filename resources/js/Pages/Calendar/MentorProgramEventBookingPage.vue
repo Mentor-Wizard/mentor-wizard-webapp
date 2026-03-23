@@ -1,5 +1,5 @@
 <script setup>
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
@@ -23,6 +23,14 @@ const props = defineProps({
     default: 5,
   },
   currentDate: {
+    type: String,
+    default: null,
+  },
+  isMentorProgramOwner: {
+    type: Boolean,
+    default: false,
+  },
+  mentorSlug: {
     type: String,
     default: null,
   },
@@ -74,7 +82,7 @@ const monthLabel = () => {
 
 const addMonths = (dateStr, diff) => {
   const d = dateStr ? new Date(dateStr) : new Date();
-  d.setDate(1);
+  d.setDate(2);
   d.setMonth(d.getMonth() + diff);
   return d.toISOString().slice(0, 10);
 };
@@ -90,8 +98,36 @@ const weeksWithSlots = computed(() => {
   return weeks;
 });
 
+const formatDateTime = (datetimeStr) => {
+  if (!datetimeStr) return null;
+  const d = new Date(datetimeStr);
+  const date = d.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  const time = d
+    .toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    })
+    .replace(' ', '');
+  return `${date} ${time}`;
+};
+
+const programPeriod = computed(() => {
+  const start = formatDateTime(props.mentorProgram?.start_time);
+  const end = formatDateTime(props.mentorProgram?.end_time);
+  if (!start && !end) return null;
+  if (start && end) return `${start} — ${end}`;
+  if (start) return `${start} — no end date`;
+  return `no start date — ${end}`;
+});
+
 const goToMonth = (diff) => {
   const target = addMonths(props.currentDate, diff);
+
   router.visit(route('pages.mentor.program.book', props.mentorProgram.slug), {
     preserveScroll: true,
     preserveState: true,
@@ -108,21 +144,61 @@ const goToMonth = (diff) => {
       >
         <!-- Mentor program header -->
         <div
-          class="mx-4 mt-4 rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm"
+          class="mx-4 mt-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
         >
-          <h1 class="text-xl font-semibold text-gray-900">
-            {{ mentorProgram.name }}
-          </h1>
-          <p class="mt-1 text-sm text-gray-600">
-            {{ mentorProgram.description }}
-          </p>
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex justify-end">
+              <Link
+                v-if="mentorSlug"
+                :href="route('page.mentor', mentorSlug)"
+                class="shrink-0 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                &larr; Back to Profile
+              </Link>
+            </div>
+            <div class="flex-1 text-center">
+              <h1 class="text-xl font-semibold text-gray-900">
+                {{ mentorProgram.name }}
+              </h1>
+              <p class="mt-2 text-sm text-gray-600">
+                {{ mentorProgram.description }}
+              </p>
+              <p v-if="programPeriod" class="mt-2 text-sm text-gray-600">
+                {{ programPeriod }}
+              </p>
+              <p class="mt-2 text-sm text-gray-600">
+                Session duration: {{ mentorProgram.session_duration }} min
+              </p>
+              <p
+                v-if="
+                  mentorProgram.session_type_options
+                  && mentorProgram.session_type_options.length
+                "
+                class="mt-2 text-sm text-gray-600"
+              >
+                Session types:
+                <span
+                  v-for="type in mentorProgram.session_type_options"
+                  :key="type"
+                  class="ml-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200 ring-inset"
+                  >{{ type }}</span
+                >
+              </p>
+              <p
+                v-if="isMentorProgramOwner"
+                class="mt-1 text-sm text-gray-600 italic"
+              >
+                You are owner of this mentor program, so cannot create an event.
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Month navigation + Week day headers -->
         <div class="mx-4 mt-4 flex items-center justify-between">
           <button
             type="button"
-            class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            class="mb-1 rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             :disabled="!days?.hasSlotsAfter"
             @click="goToMonth(-1)"
           >
@@ -133,7 +209,7 @@ const goToMonth = (diff) => {
           </div>
           <button
             type="button"
-            class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            class="mb-1 rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             :disabled="!days?.hasSlotsBefore"
             @click="goToMonth(1)"
           >
@@ -199,6 +275,7 @@ const goToMonth = (diff) => {
                     v-for="slot in day.slots.slice(0, 10)"
                     :key="slot.start + '-' + slot.end"
                     type="button"
+                    :disabled="isMentorProgramOwner"
                     class="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-[10px]/[14px] font-medium text-indigo-700 hover:bg-indigo-100"
                     @click.stop="
                       openCreateEventModal(day.date, day.slots, slot)

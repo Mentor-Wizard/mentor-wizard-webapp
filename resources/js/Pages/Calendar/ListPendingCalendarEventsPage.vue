@@ -1,11 +1,12 @@
 <script setup>
-import { PlusIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { router, usePage } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 
 import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
+const page = usePage();
 const timezoneCalculated = ref(null);
 const props = defineProps({
   locale: {
@@ -42,7 +43,14 @@ const confirmCalendarEvent = (calendarEventId, mentorProgramId) => {
     {
       preserveScroll: true,
       onSuccess: () => {
-        showNotification(true, 'Event was successfully confirmed.');
+        if (page.props.flash?.error) {
+          showNotification(false, page.props.flash.error);
+        } else {
+          showNotification(
+            true,
+            page.props.flash?.success ?? 'Event was successfully confirmed.',
+          );
+        }
       },
       onError: () => {
         showNotification(false, 'Failed to confirm the event.');
@@ -50,8 +58,41 @@ const confirmCalendarEvent = (calendarEventId, mentorProgramId) => {
     },
   );
 };
+
+const cancelEvent = (calendarEventId) => {
+  router.delete(
+    route('pages.calendar.delete', { calendarEvent: calendarEventId }),
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        showNotification(true, 'Event was successfully cancelled.');
+      },
+      onError: () => {
+        showNotification(false, 'Failed to cancel the event.');
+      },
+    },
+  );
+};
 const openEvent = (calendarEventId) => {
   router.visit(route('pages.calendar.show', { id: calendarEventId }));
+};
+
+const formatDateTime = (datetimeStr) => {
+  if (!datetimeStr) return '—';
+  const d = new Date(datetimeStr);
+  return (
+    d.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+    + ' '
+    + d.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+  );
 };
 
 // Check for flash messages on mount
@@ -118,6 +159,17 @@ onMounted(() => {
                 </button>
                 <button
                   type="button"
+                  class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-red-600 shadow-xs ring-1 ring-red-300 ring-inset hover:bg-red-50"
+                  @click="cancelEvent(event.id)"
+                >
+                  <XMarkIcon
+                    class="mr-1.5 -ml-0.5 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                  Cancel
+                </button>
+                <button
+                  type="button"
                   class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   @click="
                     confirmCalendarEvent(event.id, event.mentor_program_id)
@@ -129,10 +181,14 @@ onMounted(() => {
               </div>
             </div>
             <p class="text-sm text-gray-600">
+              <span class="font-medium">From:</span>
+              {{ event.participant[0]?.username ?? 'Unknown' }}
+            </p>
+            <p class="text-sm text-gray-600">
               <span class="font-medium">When:</span>
-              {{ new Date(event.start_date_time).toLocaleString() }}
+              {{ formatDateTime(event.start_date_time) }}
               —
-              {{ new Date(event.end_date_time).toLocaleString() }}
+              {{ formatDateTime(event.end_date_time) }}
             </p>
           </div>
         </div>

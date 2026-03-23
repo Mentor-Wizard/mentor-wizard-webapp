@@ -141,7 +141,7 @@ const timeClass = (day) => [
 
 <template>
   <div class="mt-2">
-    <h3 class="text-lg font-semibold text-gray-900">Book a lesson</h3>
+    <h3 class="text-lg font-semibold text-gray-900">Book a consultation</h3>
   </div>
 
   <!-- No main consultation -->

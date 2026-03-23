@@ -141,6 +141,60 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
         ]);
     });
 
+    it('mentor can cancel a pending event and it is deleted from the database', function (): void {
+        $pendingEvent = EventModel::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 10:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->program->getKey(),
+        ]);
+        $pendingEvent->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        actingAs($this->user);
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $pendingEvent->getKey()), [
+                '_token' => 'test-token',
+            ]);
+
+        $response->assertRedirect(route('pages.calendar.index'));
+        $this->assertDatabaseMissing('calendar_events', ['id' => $pendingEvent->getKey()]);
+    });
+
+    it('participant (mentee) can cancel their own pending event and it is deleted', function (): void {
+        $mentee = User::factory()->create();
+
+        $pendingEvent = EventModel::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
+            'start_date_time'   => Date::tomorrow()->format('Y-m-d').' 11:00:00',
+            'date'              => Date::tomorrow()->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->program->getKey(),
+        ]);
+        $pendingEvent->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+        $pendingEvent->calendarEventUsers()->attach($mentee->getKey(), [
+            'role'   => CalendarEventRoleEnum::MENTI,
+            'colour' => CalendarEventColoursEnum::GREEN->value,
+        ]);
+
+        actingAs($mentee);
+
+        $response = $this->withSession(['_token' => 'test-token'])
+            ->delete(route('pages.calendar.delete', $pendingEvent->getKey()), [
+                '_token' => csrf_token(),
+            ]);
+
+        $response->assertRedirect(route('pages.calendar.index'));
+        $this->assertDatabaseMissing('calendar_events', ['id' => $pendingEvent->getKey()]);
+    });
+
     it('unconfirmed user cannot delete calendar events', function (): void {
         $unconfirmedUser = User::factory()->unverified()->create();
 

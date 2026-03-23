@@ -34,7 +34,8 @@ class CalendarEventObserver
                     'cost'              => $event->mentorProgram->cost,
                     'mentor_program_id' => $event->mentor_program_id,
                 ]);
-                $event->update(['mentor_session_id' => $mentorSession->getKey()]);
+                $event->mentor_session_id = $mentorSession->getKey();
+                $event->saveQuietly();
             }
         }
     }

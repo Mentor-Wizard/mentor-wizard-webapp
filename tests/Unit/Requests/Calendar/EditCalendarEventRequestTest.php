@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
@@ -71,6 +72,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -91,6 +93,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => 'individual',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -213,6 +216,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -240,6 +244,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '08:00',
             'toTime'            => '08:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -264,6 +269,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '--:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -289,6 +295,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => ' 10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -313,6 +320,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'id'                => 1,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -339,6 +347,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '--:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'id'                => 1,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -364,6 +373,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'id'                => 1,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -389,6 +399,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '--:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'id'                => 1,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -417,6 +428,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -441,6 +453,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
             'date'              => Date::now()->addDays(5)->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
@@ -454,6 +467,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => null,
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -478,6 +492,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -505,6 +520,7 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => 999999, // Non-existent mentor program ID
         ];
@@ -524,14 +540,15 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
     it('does not add availability error when mentor_program_id is missing (guards withValidator)', function (): void {
         $data = [
-            'id'          => $this->event->getKey(),
-            'title'       => 'Missing Mentor Program',
-            'fromDate'    => Date::now()->addDays(5)->format('Y-m-d'),
-            'toDate'      => Date::now()->addDays(5)->format('Y-m-d'),
-            'fromTime'    => '10:00',
-            'toTime'      => '11:30',
-            'type'        => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'colour'      => CalendarEventColoursEnum::BLUE->value,
+            'id'           => $this->event->getKey(),
+            'title'        => 'Missing Mentor Program',
+            'fromDate'     => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'       => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'     => '10:00',
+            'toTime'       => '11:30',
+            'type'         => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type' => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'colour'       => CalendarEventColoursEnum::BLUE->value,
             // mentor_program_id is intentionally missing
         ];
 
@@ -577,6 +594,7 @@ describe('Mutation Coverage - toDate and toTime concatenation', function (): voi
             'date'              => $busyStart->format('Y-m-d'),
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $this->user->calendarEvents()->attach($busyEvent->getKey());
@@ -592,6 +610,7 @@ describe('Mutation Coverage - toDate and toTime concatenation', function (): voi
             'fromTime'          => '08:00',
             'toTime'            => '09:30', // Ends BEFORE busy event starts
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -616,6 +635,7 @@ describe('Mutation Coverage - toDate and toTime concatenation', function (): voi
             'fromTime'          => '08:00',
             'toTime'            => '10:30', // Ends DURING busy event (10:00-11:00)
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -641,6 +661,7 @@ describe('Mutation Coverage - toDate and toTime concatenation', function (): voi
             'date'              => Date::now()->addDays(6)->format('Y-m-d'),
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $afternoon = CalendarEvent::factory()->create([
@@ -649,6 +670,7 @@ describe('Mutation Coverage - toDate and toTime concatenation', function (): voi
             'date'              => Date::now()->addDays(6)->format('Y-m-d'),
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $this->user->calendarEvents()->attach([$morning->getKey(), $afternoon->getKey()]);
@@ -664,6 +686,7 @@ describe('Mutation Coverage - toDate and toTime concatenation', function (): voi
             'fromTime'          => '14:00',
             'toTime'            => '15:00', // Exactly fits the gap
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -686,6 +709,7 @@ describe('Mutation Coverage - toDate and toTime concatenation', function (): voi
             'fromTime'          => '14:00',
             'toTime'            => '15:30', // Different toTime - overlaps with afternoon
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];

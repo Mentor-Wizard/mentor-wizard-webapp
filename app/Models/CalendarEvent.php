@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
@@ -70,6 +71,17 @@ class CalendarEvent extends Model
             'calendar_event_user', 'calendar_event_id')
             ->withPivot('colour', 'confirmed_at', 'role')
             ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<User, $this>
+     */
+    public function participant(): BelongsToMany
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
+            ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT->value)
+            ->withPivot('role');
     }
 
     /**

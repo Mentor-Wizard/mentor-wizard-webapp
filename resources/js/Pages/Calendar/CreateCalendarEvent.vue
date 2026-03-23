@@ -87,7 +87,7 @@ const availableDurations = computed(() => {
 });
 
 let form = useForm({
-  title: 'Event for ' + props.mentorProgram?.name,
+  title: props.mentorProgram?.name,
   webLink: '',
   fromDate: props.selectedDate,
   toDate: props.selectedDate,
@@ -559,7 +559,7 @@ watch(
                         for="title"
                         class="block text-sm leading-6 font-medium text-gray-900"
                       >
-                        Event Title
+                        Mentor program name
                       </label>
                       <div class="mt-2">
                         {{ form.title }}
@@ -594,7 +594,7 @@ watch(
                         for="description"
                         class="block text-sm leading-6 font-medium text-gray-900"
                       >
-                        Description
+                        Mentor program description
                       </label>
                       <div class="mt-2">
                         {{ form.description }}

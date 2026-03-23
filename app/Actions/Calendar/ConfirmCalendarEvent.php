@@ -47,6 +47,19 @@ class ConfirmCalendarEvent extends BaseCalendarEventAction
             ->exists()) {
             $calendarEvent->update(['status' => CalendarEventStatusEnum::CONFIRMED->value]);
 
+            $overlappingIds = $mentorProgram->mentor->calendarEvents()
+                ->whereNotIn('calendar_event_id', [$calendarEvent->getKey()])
+                ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value)
+                ->where('start_date_time', '<', $calendarEvent->end_date_time)
+                ->where('end_date_time', '>', $calendarEvent->start_date_time)
+                ->pluck('calendar_events.id');
+
+            if ($overlappingIds->isNotEmpty()) {
+                CalendarEvent::query()
+                    ->whereIn('id', $overlappingIds)
+                    ->update(['status' => CalendarEventStatusEnum::CANCELLED->value]);
+            }
+
             return to_route('pages.calendar.pending')
                 ->with('success', 'Event was successfully confirmed.');
         }

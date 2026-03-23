@@ -26,7 +26,7 @@ class PendingCalendarEventsListPage
             $query->where('mentor_program_id', $mentorProgram->id);
         }
 
-        $query->with(['mentorProgram:id,name']);
+        $query->with(['mentorProgram:id,name', 'participant:id,username']);
         $events = $query->get();
         $grouped = $events->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram->name ?? 'Unknown Program'
         );

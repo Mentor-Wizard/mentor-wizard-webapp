@@ -198,6 +198,113 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
             ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
     });
 
+    it('cancels all overlapping pending events after confirming', function (): void {
+        Auth::login($this->host);
+
+        $overlapping1 = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+            'start_date_time'   => $this->event->start_date_time,
+            'end_date_time'     => $this->event->end_date_time,
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $overlapping1->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::RED->value,
+        ]);
+
+        $overlapping2 = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+            'start_date_time'   => $this->event->start_date_time->addMinutes(15),
+            'end_date_time'     => $this->event->end_date_time->subMinutes(15),
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $overlapping2->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::GREEN->value,
+        ]);
+
+        new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
+
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+        expect($overlapping1->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
+        expect($overlapping2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
+    });
+
+    it('does not cancel pending events in non-overlapping time slots', function (): void {
+        Auth::login($this->host);
+
+        $nonOverlapping = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+            'start_date_time'   => $this->event->end_date_time->addHour(),
+            'end_date_time'     => $this->event->end_date_time->addHours(2),
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $nonOverlapping->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::RED->value,
+        ]);
+
+        new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
+
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+        expect($nonOverlapping->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+    });
+
+    it('cancels overlapping pending events across different mentor programs of the same mentor', function (): void {
+        Auth::login($this->host);
+
+        $otherProgram = MentorProgram::factory()->create([
+            'mentor_id' => $this->host->getKey(),
+        ]);
+
+        $overlappingOtherProgram = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+            'start_date_time'   => $this->event->start_date_time,
+            'end_date_time'     => $this->event->end_date_time,
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $otherProgram->getKey(),
+        ]);
+        $overlappingOtherProgram->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::RED->value,
+        ]);
+
+        new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
+
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+        expect($overlappingOtherProgram->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
+    });
+
+    it('does not cancel already confirmed or cancelled events in overlapping slots', function (): void {
+        Auth::login($this->host);
+
+        $alreadyConfirmed = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => $this->event->start_date_time,
+            'end_date_time'     => $this->event->end_date_time,
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $alreadyConfirmed->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::RED->value,
+        ]);
+
+        // The confirmed overlap check fires first, so the response will be an error redirect.
+        // What matters is the already-confirmed event stays confirmed.
+        new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
+
+        expect($alreadyConfirmed->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+    });
+
     it('whereNotIn must include event ID to exclude self from overlap check (kills RemoveArrayItem)', function (): void {
         Auth::login($this->host);
 

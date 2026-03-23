@@ -28,7 +28,7 @@ class ConfirmedCalendarEventsListPage
             $query->where('mentor_program_id', $mentorProgram->getKey());
         }
 
-        $query->with(['mentorProgram:id,name']);
+        $query->with(['mentorProgram:id,name', 'participant:id,username']);
 
         $events = $query->orderBy('start_date_time')->get();
 

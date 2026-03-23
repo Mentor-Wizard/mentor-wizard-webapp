@@ -7,6 +7,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
@@ -59,6 +60,7 @@ describe('EditCalendarEventRequest Validation (web link only)', function (): voi
             'toTime'            => '10:00',
             'webLink'           => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'description'       => 'Sprint planning',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => MentorProgram::factory()->create()->getKey(),

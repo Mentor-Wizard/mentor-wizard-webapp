@@ -71,9 +71,9 @@ defineProps({
       preserve-state
       class="text-sm text-gray-700 hover:text-gray-900"
     >
-      &laquo; Previous
+      Previous
     </Link>
-    <span v-else class="text-sm text-gray-400">&laquo; Previous</span>
+    <span v-else class="text-sm text-gray-400"> Previous</span>
 
     <Link
       v-if="data.next_page_url"
@@ -82,8 +82,8 @@ defineProps({
       preserve-state
       class="text-sm text-gray-700 hover:text-gray-900"
     >
-      Next &raquo;
+      Next
     </Link>
-    <span v-else class="text-sm text-gray-400">Next &raquo;</span>
+    <span v-else class="text-sm text-gray-400">Next</span>
   </div>
 </template>

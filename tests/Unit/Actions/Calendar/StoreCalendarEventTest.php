@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\MentorSession;
 use App\Actions\Calendar\StoreCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
@@ -13,6 +12,7 @@ use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
+use App\Models\MentorSession;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -373,6 +373,7 @@ function createAndAuthenticateMentorForCalendar(): User
 {
     $user = User::factory()->create();
     $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
     $userMenti = User::factory()->create();
     $userMenti->assignRole(Role::findByName(RoleEnum::MENTI->value));
     Auth::login($userMenti);
