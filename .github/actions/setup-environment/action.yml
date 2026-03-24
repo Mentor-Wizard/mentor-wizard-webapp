@@ -65,7 +65,7 @@ runs:
 
     - name: '❇️ Setup Node.js ${{ inputs.node }}'
       if: ${{ inputs.use-node == 'true' }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         cache: yarn
         node-version: ${{ inputs.node }}
