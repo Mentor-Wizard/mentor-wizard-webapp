@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\MentorSessionTypeEnum;
@@ -28,6 +29,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         auth()->login($this->user);
 
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->mentiUser = User::factory()->create();
+        $this->mentiUser->assignRole(Role::findByName(RoleEnum::MENTI->value));
 
         $this->mentorProgram = MentorProgram::factory()->create([
             'mentor_id' => $this->user->getKey(),
@@ -118,6 +121,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '10:45',
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -145,6 +149,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '10:45',
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -172,6 +177,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '10:45',
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -199,6 +205,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '10:45',
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -226,6 +233,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '09:00',
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -253,6 +261,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => null,
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -280,6 +289,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '10:45',
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -307,6 +317,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => 'not-a-time', // Invalid time
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -326,6 +337,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
     it('validates time slots and adds error when slot is reserved', function (): void {
         Date::setTestNow(Date::create(2025, 6, 1, 8, 0, 0, 'UTC'));
 
+        auth()->login($this->mentiUser);
         // Create an existing event that will conflict
         $existingEvent = CalendarEvent::factory()->create([
             'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
@@ -343,6 +355,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '10:45',
             'description'       => 'desc',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'UTC',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -357,7 +370,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
         } catch (ValidationException $validationException) {
             expect($validationException->errors())->toHaveKey('fromDate')
-                ->and($validationException->errors()['fromDate'])->toContain('there are another events on this time');
+                ->and($validationException->errors()['fromDate'])
+                ->toContain('there are another events on this time');
         }
     });
     it('rejects when title is missing', function (): void {
@@ -368,6 +382,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => 'individual',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -388,6 +403,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -407,6 +423,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10----:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -428,6 +445,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => 'not-a-time',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -448,6 +466,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -468,6 +487,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'toTime'            => '11:00',
             'title'             => 'Test Event',
             'description'       => 'Test Description',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
@@ -494,6 +516,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '1-----1:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -515,6 +538,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '1------0:00',
             'toTime'            => '1-----1:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -536,6 +560,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -557,6 +582,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => 'not-a-time',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -577,6 +603,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => 'wrong colour',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -609,6 +636,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -646,6 +674,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -684,6 +713,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -724,6 +754,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => null,
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -747,6 +778,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -912,7 +944,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
         expect($request->authorize())->toBeTrue();
     });
 
-    it('authorizes mentor to create event for their own program', function (): void {
+    it('prevents mentor to create event for their own program', function (): void {
         $this->seed(RoleSeeder::class);
         $mentor = User::factory()->create();
         $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
@@ -924,7 +956,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
         $request->setUserResolver(fn () => $mentor);
         $request->merge(['mentor_program_id' => $mentorProgram->getKey()]);
 
-        expect($request->authorize())->toBeTrue();
+        expect($request->authorize())->toBeFalse();
     });
 
     it('denies another mentor from creating event for other mentor program', function (): void {
@@ -1085,12 +1117,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'end_date_time'     => $end->copy(),
                 'date'              => $start->copy()->format('Y-m-d'),
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+                'status'            => CalendarEventStatusEnum::CONFIRMED->value,
                 'title'             => 'existing overlap',
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
             // Attach event to the authenticated user via pivot so availability service sees it
             $this->user->calendarEvents()->attach($event->getKey(), [
                 'colour' => CalendarEventColoursEnum::BLUE->value,
+                'role'   => CalendarEventRoleEnum::HOST->value,
             ]);
         });
 
@@ -1103,6 +1138,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'toTime'            => '10:45',
                 'description'       => 'desc',
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
@@ -1130,6 +1166,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'toTime'            => '10:45',
                 'description'       => 'desc',
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
@@ -1155,6 +1192,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'toTime'            => '10:45',
                 'description'       => 'desc',
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
@@ -1180,6 +1218,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'toTime'            => '--:45', // invalid
                 'description'       => 'desc',
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
@@ -1207,6 +1246,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'toTime'            => '10:45',
                 'description'       => 'desc',
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ];
@@ -1216,6 +1256,8 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
             ($this->prepareRequest)($request1);
             $validator1 = Validator::make($valid, $request1->rules());
             $request1->withValidator($validator1);
+
+            $events = DB::table('calendar_events')->get();
 
             expect($validator1->fails())->toBeTrue()
                 ->and($validator1->errors()->has('fromDate'))->toBeTrue()
@@ -1231,6 +1273,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'toTime'            => '11:00',
                 'description'       => 'desc',
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ];

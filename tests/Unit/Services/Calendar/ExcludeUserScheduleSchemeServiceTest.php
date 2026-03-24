@@ -356,6 +356,8 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
 
         /** @var User $user */
         $user = User::factory()->create();
+        $user->profile->timezone = $tz;
+        $user->profile->save();
 
         // Create schedule: Monday 9:00-17:00
         UserSchedule::query()->create([

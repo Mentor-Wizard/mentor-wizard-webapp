@@ -76,9 +76,8 @@ class CalendarEvent extends Model
     /**
      * @return BelongsToMany<User, $this>
      */
-    public function participant(): BelongsToMany
+    public function participants(): BelongsToMany
     {
-        /** @phpstan-ignore-next-line */
         return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
             ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT->value)
             ->withPivot('role');

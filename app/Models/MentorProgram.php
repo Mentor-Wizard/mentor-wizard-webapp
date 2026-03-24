@@ -41,7 +41,6 @@ class MentorProgram extends Model
         'start_time',
         'end_time',
         'session_duration',
-        'session_duration_options',
         'session_type_options',
         'need_confirmation',
     ];

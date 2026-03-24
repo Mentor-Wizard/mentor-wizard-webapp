@@ -347,13 +347,13 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
         // invalid
         $invalid = [
             ...$base,
-            'type' => 'invalid_type',
+            'session_type' => 'invalid_type',
         ];
         $this->withSession(['_token' => 'test-token'])
             ->patch(route('pages.calendar.edit', $this->event->getKey()), [
                 ...$invalid,
                 '_token' => 'test-token',
-            ])->assertSessionHasErrors(['type']);
+            ])->assertSessionHasErrors(['session_type']);
     });
 
     it('fails update when colour missing', function (): void {

@@ -59,7 +59,6 @@ class GetMentorProfilePage
                 'description'              => $mainProgram->description,
                 'session_type_options'     => $mainProgram->session_type_options,
                 'session_duration'         => $mainProgram->session_duration,
-                'session_duration_options' => $mainProgram->session_duration_options,
             ] : null,
             'currentDate'     => $currentDate,
             'weekDays'        => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],

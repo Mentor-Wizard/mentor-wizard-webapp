@@ -17,6 +17,16 @@ class CalendarEventObserver
             return;
         }
 
+        $this->manageConfirmedCalendarEvent($event);
+    }
+
+    public function created(CalendarEvent $event): void
+    {
+        $this->manageConfirmedCalendarEvent($event);
+    }
+
+    private function manageConfirmedCalendarEvent(CalendarEvent $event): void
+    {
         if ($event->status === CalendarEventStatusEnum::CONFIRMED->value && $event->mentor_program_id) {
             $hostUser = $event->calendarEventUsers()
                 ->wherePivot('role', CalendarEventRoleEnum::HOST->value)

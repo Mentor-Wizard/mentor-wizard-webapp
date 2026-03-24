@@ -18,7 +18,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('calendar_events', function (Blueprint $table): void {
-            //            $table->dropColumn('session_type');
+            $table->dropColumn('session_type');
         });
     }
 };
