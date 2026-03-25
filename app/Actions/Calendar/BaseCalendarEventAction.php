@@ -48,8 +48,8 @@ class BaseCalendarEventAction
         $endDateTimeUTC = $endDateTime?->timezone('UTC');
 
         $eventType = match ($validated['type']) {
-            'group'      => CalendarEventTypeEnum::GROUP->value,
-            default      => CalendarEventTypeEnum::INDIVIDUAL->value,
+            CalendarEventTypeEnum::GROUP->value      => CalendarEventTypeEnum::GROUP->value,
+            default                                  => CalendarEventTypeEnum::INDIVIDUAL->value,
         };
 
         /** @var MentorProgram $mentorProgram */

@@ -7,12 +7,12 @@ namespace Database\Factories;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\MentorSessionTypeEnum;
-use App\Models\User;
+use App\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
 
 /**
- * @extends Factory<User>
+ * @extends Factory<CalendarEvent>
  */
 class CalendarEventFactory extends Factory
 {

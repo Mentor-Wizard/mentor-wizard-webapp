@@ -38,6 +38,8 @@ class StoreCalendarEvent extends BaseCalendarEventAction
             ]);
         }
 
+        (new CreateMentorSessionForCalendarEvent)->handle($calendarEvent);
+
         return to_route('pages.calendar.index');
     }
 }

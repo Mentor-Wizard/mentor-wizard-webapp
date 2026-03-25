@@ -345,7 +345,11 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'date'              => Date::now()->addDays(2)->format('Y-m-d'),
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $existingEvent->calendarEventUsers()->attach($this->user->getKey());
+        $existingEvent->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $data = [
             'title'             => 'Conflicting Event',
@@ -365,6 +369,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request->merge($data);
         ($this->prepareRequest)($request);
 
+        actingAs($this->mentiUser);
         try {
             $request->validateResolved();
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
@@ -627,7 +632,11 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $payload = [
             'title'             => 'Conflicting slot',
@@ -645,6 +654,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request->merge($payload);
         ($this->prepareRequest)($request);
 
+        actingAs($this->mentiUser);
         try {
             $request->validateResolved();
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
@@ -662,10 +672,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
             'date'              => Date::now()->addDays(5)->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $payload = [
             'title'             => 'Conflicting slot',
@@ -683,6 +698,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request->merge($payload);
         ($this->prepareRequest)($request);
 
+        actingAs($this->mentiUser);
         try {
             $request->validateResolved();
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
@@ -704,7 +720,12 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $payload = [
             'title'             => 'Conflicting slot',
@@ -722,6 +743,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request->merge($payload);
         ($this->prepareRequest)($request);
 
+        actingAs($this->mentiUser);
         try {
             $request->validateResolved();
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
@@ -742,10 +764,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
             'date'              => Date::now()->addDays(5)->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $payload = [
             'title'             => 'Conflicting slot',
@@ -763,6 +790,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request->merge($payload);
         ($this->prepareRequest)($request);
 
+        actingAs($this->mentiUser);
         try {
             $request->validateResolved();
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
@@ -805,10 +833,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
             'date'              => Date::now()->addDays(5)->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $payload = [
             'title'             => 'Conflicting slot',
@@ -817,6 +850,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '10:00',
             'toTime'            => '-------',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -825,6 +859,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request->merge($payload);
         ($this->prepareRequest)($request);
 
+        actingAs($this->mentiUser);
         try {
             $request->validateResolved();
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
@@ -843,10 +878,15 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
             'date'              => Date::now()->addDays(5)->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]
+        );
 
         $payload = [
             'title'             => 'Conflicting slot',
@@ -862,6 +902,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request = new StoreCalendarEventRequest;
         $request->merge($payload);
         ($this->prepareRequest)($request);
+        actingAs($this->mentiUser);
 
         try {
             $request->validateResolved();
@@ -892,10 +933,14 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
             'date'              => Date::now()->addDays(5)->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'              => CalendarEventRoleEnum::HOST->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $payload = [
             'title'             => 'Conflicting slot',
@@ -904,6 +949,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'fromTime'          => '25:99', // Invalid time that passes string format but fails parsing
             'toTime'            => '11:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -912,6 +958,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $request->merge($payload);
         ($this->prepareRequest)($request);
 
+        actingAs($this->mentiUser);
         try {
             $request->validateResolved();
             expect(false)->toBeTrue('Should have failed validation due to invalid fromTime');
@@ -959,7 +1006,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
         expect($request->authorize())->toBeFalse();
     });
 
-    it('denies another mentor from creating event for other mentor program', function (): void {
+    it('checks another mentor successfully creating event for other mentor program', function (): void {
         $this->seed(RoleSeeder::class);
         $programOwner = User::factory()->create();
         $programOwner->assignRole(Role::findByName(RoleEnum::MENTOR->value));
@@ -974,7 +1021,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
         $request->setUserResolver(fn () => $anotherMentor);
         $request->merge(['mentor_program_id' => $mentorProgram->getKey()]);
 
-        expect($request->authorize())->toBeFalse();
+        expect($request->authorize())->toBeTrue();
     });
 
     it('authorizes non-mentor user to book event on mentor program', function (): void {
@@ -1301,7 +1348,11 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'description'       => 'Busy',
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
-            $event->calendarEventUsers()->attach($this->user->getKey());
+            $event->calendarEventUsers()->attach($this->user->getKey(),
+                [
+                    'role' => CalendarEventRoleEnum::HOST->value,
+                ]
+            );
 
             $payload = [
                 'title'             => 'Conflicting slot',
@@ -1344,7 +1395,11 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'description'       => 'Busy',
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
-            $event->calendarEventUsers()->attach($this->user->getKey());
+            $event->calendarEventUsers()->attach($this->user->getKey(),
+                [
+                    'role' => CalendarEventRoleEnum::HOST->value,
+                ]
+            );
 
             $payload = [
                 'title'             => 'Conflicting slot',
@@ -1381,10 +1436,15 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
                 'end_date_time'     => Date::now()->addDays(5)->setTime(11, 30),
                 'date'              => Date::now()->addDays(5)->format('Y-m-d'),
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'description'       => 'Busy',
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
-            $event->calendarEventUsers()->attach($this->user->getKey());
+            $event->calendarEventUsers()->attach($this->user->getKey(),
+                [
+                    'role' => CalendarEventRoleEnum::HOST->value,
+                ]
+            );
 
             $payload = [
                 'title'             => 'Conflicting slot',

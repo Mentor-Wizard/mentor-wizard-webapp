@@ -68,10 +68,6 @@ describe('CalendarEvent model', function (): void {
             'description',
             'mentor_program_id',
             'mentor_session_id',
-            'web_link',
-            'description',
-            'mentor_program_id',
-            'mentor_session_id',
         ]);
     });
 

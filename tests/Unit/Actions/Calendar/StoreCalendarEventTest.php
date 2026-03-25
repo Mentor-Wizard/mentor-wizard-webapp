@@ -102,6 +102,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '10:00',
             'description'       => 'x',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -114,6 +115,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '10:00',
             'description'       => 'x',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -126,6 +128,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '09:00',
             'description'       => 'x',
             'type'              => CalendarEventTypeEnum::GROUP->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -138,6 +141,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '10:00',
             'description'       => 'x',
             'type'              => 'Invalid',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -263,7 +267,7 @@ describe('Store Calendar CalendarEvent', function (): void {
 
         $host = $attachedUsers->firstWhere('id', $this->user->getKey());
         $menti = $attachedUsers->firstWhere('id', $nonMentor->getKey());
-
+        //        dd($attachedUsers->toArray(),$this->user->getKey(), $nonMentor->getKey(),$host->toArray(),$menti->toArray());
         expect($host)
             ->not->toBeNull()
             ->and($host->pivot->role)->toBe(CalendarEventRoleEnum::HOST->value)
@@ -328,6 +332,34 @@ describe('Store Calendar CalendarEvent', function (): void {
         expect($host->id)->toBe($this->user->getKey())
             ->and($host->pivot->role)->toBe(CalendarEventRoleEnum::HOST->value)
             ->and($host->pivot->colour)->toBe(CalendarEventColoursEnum::RED->value);
+    });
+
+    it('stores event with GROUP type', function (): void {
+        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, config('app.timezone')));
+        $start = Date::tomorrow()->setTime(9, 0, 0);
+        $end = Date::tomorrow()->setTime(10, 0, 0);
+
+        $eventPayload = [
+            'title'             => 'Group Session',
+            'fromDate'          => $start->format('Y-m-d'),
+            'toDate'            => $end->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::GROUP->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'description'       => 'Group planning',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request = Mockery::mock(StoreCalendarEventRequest::class);
+        $request->shouldReceive('validated')->andReturn($eventPayload);
+        $request->shouldReceive('user')->andReturn(Auth::user());
+
+        (new StoreCalendarEvent)->handle($request);
+
+        $event = CalendarEvent::query()->latest('id')->first();
+        expect($event->type)->toBe(CalendarEventTypeEnum::GROUP->value);
     });
 
     it('throws exception when user profile has no timezone', function (): void {
