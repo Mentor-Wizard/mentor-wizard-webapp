@@ -6,6 +6,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -37,6 +38,7 @@ describe('Calendar Pages - ShowCalendarEvent', function (): void {
             'end_date_time'     => Date::tomorrow()->format('Y-m-d').' 13:00:00',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Details',
             'mentor_program_id' => $mentorProgram->getKey(),
         ]);
