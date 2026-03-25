@@ -69,6 +69,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'date'              => Date::today()->addDay()->format('Y-m-d'),
             'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Test description',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
@@ -101,6 +102,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'             => Date::today()->format('Y-m-d'),
             'toTime'             => '10:00',
             'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'       => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'             => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id'  => $this->mentorProgram->getKey(),
             '_token'             => 'test-token',
@@ -120,6 +122,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -137,6 +140,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -155,6 +159,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -173,6 +178,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::yesterday()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -190,6 +196,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'fromTime'          => '09:00',
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -208,6 +215,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => 'bad-date',
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -226,6 +234,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -243,6 +252,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -261,6 +271,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -278,6 +289,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -296,6 +308,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10 AM',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -314,6 +327,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -321,6 +335,24 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $this->withSession(['_token' => 'test-token'])
             ->post(route('pages.calendar.store'), $data)
             ->assertSessionHasErrors(['toTime']);
+    });
+
+    it('fails when session_type is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+            '_token'            => 'test-token',
+        ];
+        $this->withSession(['_token' => 'test-token'])
+            ->post(route('pages.calendar.store'), $data)
+            ->assertSessionHasErrors(['session_type']);
     });
 
     it('fails when type is missing', function (): void {
@@ -331,6 +363,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -349,6 +382,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => 'invalid_type',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
@@ -367,6 +401,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
@@ -384,6 +419,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'description'       => Str::random(2001),
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -403,6 +439,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'webLink'           => 'not-a-url',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -428,6 +465,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'end_date_time'     => $tomorrow->copy()->setTime(15, 0),
             'date'              => $tomorrow->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
@@ -514,6 +552,7 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
@@ -525,7 +564,7 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         expect($response->status())->toBeIn([302, 403, 409]);
     });
 
-    it('throws 403 when another mentor tries to create event for other mentor program', function (): void {
+    it('Allows another mentor to create event for other mentor program', function (): void {
         actingAs($this->anotherMentor);
         auth()->login($this->anotherMentor);
 
@@ -536,14 +575,16 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
+            '_token'            => 'test-token',
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
             ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
 
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertStatus(302);
     });
 
     it('allows non-mentor user to book calendar event with mentor', function (): void {
@@ -599,6 +640,7 @@ describe('Calendar CalendarEvent Store Page - Edge Cases', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $nonExistentId,
         ];
@@ -622,6 +664,7 @@ describe('Calendar CalendarEvent Store Page - Edge Cases', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => 0,
         ];

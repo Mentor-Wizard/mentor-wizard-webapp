@@ -64,6 +64,7 @@ describe('CalendarEvent model', function (): void {
             'end_date_time',
             'date',
             'type',
+            'session_type',
             'web_link',
             'description',
             'mentor_program_id',

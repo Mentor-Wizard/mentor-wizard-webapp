@@ -343,6 +343,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             'start_date_time'   => Date::now()->addDays(2)->setTime(10, 0, 0),
             'end_date_time'     => Date::now()->addDays(2)->setTime(11, 0, 0),
             'date'              => Date::now()->addDays(2)->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $existingEvent->calendarEventUsers()->attach($this->user->getKey(),
