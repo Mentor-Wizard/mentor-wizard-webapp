@@ -43,6 +43,7 @@ jobs:
     name: '🐳 Build & Push'
     runs-on: ubuntu-latest
     needs: resolve
+    environment: ${{ needs.resolve.outputs.environment }}
     permissions:
       contents: read
       packages: write
@@ -80,6 +81,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_REVERB_APP_KEY=${{ vars.VITE_REVERB_APP_KEY }}
+            VITE_REVERB_SCHEME=${{ vars.VITE_REVERB_SCHEME }}
+            VITE_REVERB_PORT=${{ vars.VITE_REVERB_PORT }}
+            VITE_REVERB_HOST=${{ vars.VITE_REVERB_HOST }}
 
   cleanup:
     name: '️🧹 Cleanup'
@@ -107,13 +113,15 @@ jobs:
         with:
           retain_days: 7
           keep_minimum_runs: 1
-          delete_workflow_pattern: cd-symfony.yml
+          delete_workflow_pattern: cd.yml
 
   deploy:
     name: '🚀 Deploy'
     runs-on: ubuntu-latest
     needs: [resolve, cleanup]
-    environment: ${{ needs.resolve.outputs.environment }}
+    environment:
+      name: ${{ needs.resolve.outputs.environment }}
+      url: ${{ vars.APP_URL }}
 
     steps:
       - name: '🌐 Dokploy | ${{ needs.resolve.outputs.deploy_name }}'

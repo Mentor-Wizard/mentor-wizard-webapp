@@ -32,9 +32,9 @@ RUN composer install --no-progress --no-scripts --no-interaction --prefer-dist
 COPY --chown=www-data:www-data . .
 
 ARG VITE_REVERB_APP_KEY
-ARG VITE_REVERB_HOST
-ARG VITE_REVERB_PORT
 ARG VITE_REVERB_SCHEME
+ARG VITE_REVERB_PORT
+ARG VITE_REVERB_HOST
 
 RUN yarn install --frozen-lockfile && yarn build
 

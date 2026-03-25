@@ -33,6 +33,14 @@ services:
       retries: 20
 
   app: &app
+#    build:
+#      context: ../
+#      dockerfile: .docker/dev/php/Dockerfile
+#      args:
+#        VITE_REVERB_APP_KEY: ${VITE_REVERB_APP_KEY}
+#        VITE_REVERB_HOST: ${VITE_REVERB_HOST}
+#        VITE_REVERB_PORT: ${VITE_REVERB_PORT}
+#        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME}
     image: ghcr.io/mentor-wizard/mentor-wizard-webapp:dev
     pull_policy: always
     restart: unless-stopped
@@ -53,12 +61,16 @@ services:
     command: ['php', 'artisan', 'octane:start', '--server=frankenphp', '--host=0.0.0.0', '--port=8080']
     expose:
       - '8080'
+      - '8443'
     healthcheck:
       test: ['CMD', 'healthcheck-octane']
       interval: 10s
       timeout: 5s
       retries: 20
       start_period: 30s
+    post_start:
+      - command: chown -R www-data:www-data /var/www/html/storage && chmod -R 775 /var/www/html/storage
+        user: root
 
   workers:
     <<: *app
@@ -84,6 +96,8 @@ services:
   mailpit:
     image: axllent/mailpit:latest
     restart: unless-stopped
+    environment:
+      MP_UI_AUTH: ${MP_UI_AUTH}
     expose:
       - '1025'
       - '8025'
