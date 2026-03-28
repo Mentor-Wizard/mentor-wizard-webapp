@@ -98,7 +98,7 @@ let form = useForm({
   description: props.mentorProgram?.description ?? '',
   colour: 'blue',
   timezone: timeZone,
-  mentor_program_id: props.mentor_program_id,
+  mentor_program_id: props.mentorProgramId,
   selectedDuration: props.mentorProgram?.session_duration ?? 60,
 });
 

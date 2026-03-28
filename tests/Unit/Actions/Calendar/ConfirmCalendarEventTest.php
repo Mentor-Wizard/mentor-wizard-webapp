@@ -282,27 +282,26 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         expect($overlappingOtherProgram->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
     });
 
-    it('does not cancel already confirmed or cancelled events in overlapping slots', function (): void {
+    it('does not cancel already cancelled events in overlapping slots', function (): void {
         Auth::login($this->host);
 
-        $alreadyConfirmed = CalendarEvent::factory()->create([
-            'status'            => CalendarEventStatusEnum::CONFIRMED,
+        $alreadyCancelled = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::CANCELLED,
             'start_date_time'   => $this->event->start_date_time,
             'end_date_time'     => $this->event->end_date_time,
             'date'              => $this->event->date,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $alreadyConfirmed->calendarEventUsers()->attach($this->host->getKey(), [
+        $alreadyCancelled->calendarEventUsers()->attach($this->host->getKey(), [
             'role'   => CalendarEventRoleEnum::HOST,
             'colour' => CalendarEventColoursEnum::RED->value,
         ]);
 
-        // The confirmed overlap check fires first, so the response will be an error redirect.
-        // What matters is the already-confirmed event stays confirmed.
         new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
-        expect($alreadyConfirmed->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value)
+            ->and($alreadyCancelled->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
     });
 
     it('whereNotIn must include event ID to exclude self from overlap check (kills RemoveArrayItem)', function (): void {

@@ -8,7 +8,7 @@ enum MentorSessionDurationOptionsEnum: int
 {
     case FIFTEEN_MINUTES = 15;
     case HALF_HOUR = 30;
-    case FOURTY_FIVE_MINUTES = 45;
+    case FORTY_FIVE_MINUTES = 45;
     case HOUR = 60;
     case ONE_AND_HALF_HOURS = 90;
     case TWO_HOURS = 120;

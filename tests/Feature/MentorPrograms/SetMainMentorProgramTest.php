@@ -101,7 +101,7 @@ describe('Set Main Mentor Program', function (): void {
         $response->assertNotFound();
     });
 
-    it('throws 403 for unauthenticated user', function (): void {
+    it('redirects unauthenticated user to login', function (): void {
         $response = patch(route('mentor-program.set-main', $this->otherProgram->slug));
 
         $response->assertRedirect(route('login'));

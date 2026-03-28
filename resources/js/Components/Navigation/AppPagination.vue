@@ -73,7 +73,7 @@ defineProps({
     >
       Previous
     </Link>
-    <span v-else class="text-sm text-gray-400"> Previous</span>
+    <span v-else class="text-sm text-gray-400">Previous</span>
 
     <Link
       v-if="data.next_page_url"

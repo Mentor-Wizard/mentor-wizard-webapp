@@ -35,7 +35,7 @@ class CalendarEventFactory extends Factory
             'end_date_time'     => $endTime,
             'date'              => $date,
             'type'              => fake()->randomElement(CalendarEventTypeEnum::values()),
-            'session_type'      => fake()->randomElement(MentorSessionTypeEnum::cases()),
+            'session_type'      => fake()->randomElement(MentorSessionTypeEnum::values()),
             'web_link'          => fake()->url(),
             'description'       => fake()->text(),
         ];

@@ -101,7 +101,7 @@ class MentorProfilePageResource extends JsonResource
     {
         return User::query()->role(RoleEnum::MENTOR)
             ->with('profile')
-            ->where('id', '<>', $user->id)
+            ->where('id', '<>', $user->getKey())
             ->limit(self::MENTOR_PER_PAGE)
             ->get();
     }

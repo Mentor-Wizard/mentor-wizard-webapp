@@ -81,6 +81,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'web_link'          => 'https://new_url_link.com',
             'description'       => 'New description',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 

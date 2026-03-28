@@ -30,7 +30,7 @@ class StoreMentorProgramRequest extends FormRequest
             'session_type_options'          => ['required', 'array', 'min:1'],
             'session_type_options.*'        => ['string', Rule::in(MentorSessionTypeEnum::values())],
             'session_duration'              => ['required', 'integer', Rule::in(MentorSessionDurationOptionsEnum::values())],
-            'need_confirmation'             => ['boolean'],
+            'need_confirmation'             => ['nullable', 'boolean'],
             'start_time'                    => ['nullable', 'date_format:Y-m-d H:i'],
             'end_time'                      => ['nullable', 'date_format:Y-m-d H:i'],
         ];

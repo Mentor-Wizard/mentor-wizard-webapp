@@ -127,7 +127,7 @@ defineProps({
             <a
               v-if="data.mainProgramSlug"
               :href="route('pages.mentor.program.book', data.mainProgramSlug)"
-              class="hover:bg-blue-70 rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors"
+              class="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700"
             >
               Book Consultation
             </a>

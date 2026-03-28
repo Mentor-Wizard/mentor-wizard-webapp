@@ -99,7 +99,7 @@ describe('Calendar CalendarEvent Delete Page', function (): void {
         // Attach a mentee (non-mentor user) to the event
         $mentee = User::factory()->create();
         $this->event->calendarEventUsers()->attach($mentee->getKey(), [
-            'role'   => CalendarEventRoleEnum::MENTI,
+            'role'   => CalendarEventRoleEnum::PARTICIPANT->value,
             'colour' => CalendarEventColoursEnum::GREEN->value,
         ]);
 

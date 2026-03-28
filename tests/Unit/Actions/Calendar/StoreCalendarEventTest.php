@@ -262,12 +262,13 @@ describe('Store Calendar CalendarEvent', function (): void {
             ->withPivot(['role', 'colour', 'created_at', 'updated_at'])
             ->get();
 
-        // Should have 2 users: the mentor (HOST) and the non-mentor (PARTICIPANT)
+        //  Should have 2 users: the mentor (HOST) and the authenticated menti (PARTICIPANT)
+        // + expect($attachedUsers)->toHaveCount(2);
         expect($attachedUsers)->toHaveCount(2);
 
         $host = $attachedUsers->firstWhere('id', $this->user->getKey());
         $menti = $attachedUsers->firstWhere('id', $nonMentor->getKey());
-        //        dd($attachedUsers->toArray(),$this->user->getKey(), $nonMentor->getKey(),$host->toArray(),$menti->toArray());
+
         expect($host)
             ->not->toBeNull()
             ->and($host->pivot->role)->toBe(CalendarEventRoleEnum::HOST->value)
