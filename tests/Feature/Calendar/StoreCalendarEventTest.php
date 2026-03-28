@@ -38,6 +38,8 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     });
 
     it('creates an event successfully', function (): void {
+
+        Date::setTestNow(Date::create(2026, 1, 15, 10, 0, 0, 'UTC'));
         actingAs($this->user);
 
         $eventData = [

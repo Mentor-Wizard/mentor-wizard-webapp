@@ -40,6 +40,7 @@ describe('Calendar CalendarEvent Edit Page', function (): void {
             'web_link'          => 'https://google.com',
             'date'              => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Test description',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
