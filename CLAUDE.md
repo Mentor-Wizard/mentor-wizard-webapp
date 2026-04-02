@@ -20,12 +20,12 @@
 
 ## Task Management
 
-1. **Plan First**: Write plan to `docs/todo.md` with checkable items
+1. **Plan First**: Write plan to `./docs/todo.md` with checkable items
 2. **Verify Plan**: Check in before starting implementation
 3. **Track Progress**: Mark items complete as you go
 4. **Explain Changes**: High-level summary at each step
-5. **Document Results**: Add review section to `docs/todo.md`
-6. **Capture Lessons**: Update `docs/lessons.md` after corrections
+5. **Document Results**: Add review section to `./docs/todo.md`
+6. **Capture Lessons**: Update `./docs/lessons.md` after corrections
 
 ## Agent Dispatch (MANDATORY)
 
