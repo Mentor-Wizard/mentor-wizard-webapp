@@ -33,14 +33,6 @@ services:
       retries: 20
 
   app: &app
-#    build:
-#      context: ../
-#      dockerfile: .docker/dev/php/Dockerfile
-#      args:
-#        VITE_REVERB_APP_KEY: ${VITE_REVERB_APP_KEY}
-#        VITE_REVERB_HOST: ${VITE_REVERB_HOST}
-#        VITE_REVERB_PORT: ${VITE_REVERB_PORT}
-#        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME}
     image: ghcr.io/mentor-wizard/mentor-wizard-webapp:dev
     pull_policy: always
     restart: unless-stopped
@@ -58,7 +50,7 @@ services:
     volumes:
       - ../../files/storage/logs:/var/www/html/storage/logs
       - ../../files/storage/app:/var/www/html/storage/app
-    command: ['php', 'artisan', 'octane:start', '--server=frankenphp', '--host=0.0.0.0', '--port=8080']
+    command: ['php', 'artisan', 'octane:start', '--server=frankenphp', '--host=0.0.0.0', '--port=8080', '--workers=20', '--log-level=DEBUG']
     expose:
       - '8080'
       - '8443'
