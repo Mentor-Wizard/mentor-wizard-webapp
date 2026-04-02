@@ -2,5 +2,11 @@
     "enabledPlugins": {
         "superpowers@superpowers-marketplace": true
     },
-    "enabledMcpjsonServers": ["laravel-boost", "context7", "figma", "github-mw"]
+    "enabledMcpjsonServers": ["laravel-boost", "context7", "figma", "github-mw"],
+  "permissions": {
+    "deny": [
+      "Read(./.env)"
+    ]
+  },
+  "model": "opusplan"
 }
