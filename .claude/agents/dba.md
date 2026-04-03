@@ -19,7 +19,7 @@ You are a Senior Database Architect with 10+ years of experience designing and o
 | Skill | When to Activate |
 |-------|------------------|
 | `database-optimizer` | **Always** — query and schema optimization |
-| `postgresql` / `postgres-best-practices` / `postgresql-optimization` | **Always** — PostgreSQL-specific patterns |
+| `postgresql` / `postgres-best-practices` | **Always** — PostgreSQL-specific patterns |
 | `laravel-specialist` | Eloquent models, migrations, relationships |
 | `laravel-architecture` | Model relationships and domain modeling |
 | `php-pro` | Migration and model PHP code |
