@@ -18,10 +18,10 @@ class EditCalendarEvent extends BaseCalendarEventAction
         $validated = $request->validated();
 
         if (in_array($calendarEvent->status, [
-            CalendarEventStatusEnum::FINISHED->value,
-            CalendarEventStatusEnum::CANCELLED->value])) {
+            CalendarEventStatusEnum::FINISHED,
+            CalendarEventStatusEnum::CANCELLED])) {
             return to_route('pages.calendar.index')
-                ->with('error', $calendarEvent->status.' calendar event cannot be edited');
+                ->with('error', $calendarEvent->status->value.' calendar event cannot be edited');
         }
 
         $webLink = array_key_exists('webLink', $validated) ? $validated['webLink'] : $calendarEvent->web_link;

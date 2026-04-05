@@ -2,20 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Pages\Profile;
+namespace App\Actions\Pages\Settings;
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use App\Models\UserProfile;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
-class GetProfilePage
+class ExternalCalendarSettingsPage
 {
     use AsController;
 
@@ -31,12 +29,12 @@ class GetProfilePage
             ->keyBy(fn (UserCalendarIntegration $i): string => $i->provider->value)
             ->all();
 
-        $calendarProviders = [];
+        $providers = [];
 
         foreach (CalendarProviderEnum::cases() as $provider) {
             $integration = $integrations[$provider->value] ?? null;
 
-            $calendarProviders[] = [
+            $providers[] = [
                 'key'                => $provider->value,
                 'connected'          => $integration !== null,
                 'needs_reauth'       => $integration?->needs_reauth ?? false,
@@ -48,11 +46,8 @@ class GetProfilePage
             ];
         }
 
-        return Inertia::render('Profile/EditPage', [
-            'mustVerifyEmail'   => $user instanceof MustVerifyEmail, // @pest-mutate-ignore
-            'status'            => session('status'),
-            'avatar'            => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
-            'calendarProviders' => $calendarProviders,
+        return Inertia::render('Settings/ExternalCalendarPage', [
+            'providers' => $providers,
         ]);
     }
 }

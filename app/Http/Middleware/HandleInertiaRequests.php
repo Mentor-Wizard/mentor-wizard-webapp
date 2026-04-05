@@ -55,8 +55,9 @@ class HandleInertiaRequests extends Middleware
                 'name' => config('app.name'),
             ],
             'flash'   => [
-                'success' => fn (): ?string => $request->session()->get('success'),
-                'error'   => fn (): ?string => $request->session()->get('error'),
+                'success'   => fn (): ?string => $request->session()->get('success'),
+                'error'     => fn (): ?string => $request->session()->get('error'),
+                'calendars' => fn (): ?array => $request->session()->get('calendars'),
             ],
         ];
     }

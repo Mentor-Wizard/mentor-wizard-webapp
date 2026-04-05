@@ -5,6 +5,10 @@ declare(strict_types=1);
 use App\Actions\Calendar\ConfirmCalendarEvent;
 use App\Actions\Calendar\DeleteCalendarEvent;
 use App\Actions\Calendar\EditCalendarEvent;
+use App\Actions\Calendar\ExternalCalendarConnectCallback;
+use App\Actions\Calendar\ExternalCalendarConnectRedirect;
+use App\Actions\Calendar\ExternalCalendarDisconnect;
+use App\Actions\Calendar\ExternalCalendarSelectCalendar;
 use App\Actions\Calendar\StoreCalendarEvent;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\SetMainMentorProgram;
@@ -24,6 +28,7 @@ use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\ListMentorProfilePage;
+use App\Actions\Pages\Settings\ExternalCalendarSettingsPage;
 use App\Actions\Pages\UserSchedule\UserSchedulePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
@@ -108,5 +113,20 @@ Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')-
     Route::get('/', UserSchedulePage::class)->name('user-schedule.index');
     Route::post('/batch', StoreBatchUserSchedule::class)->name('user-schedule.batch');
 });
+
+Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->group(function (): void {
+    Route::get('/', ExternalCalendarSettingsPage::class)
+        ->name('pages.settings.external-calendar');
+    Route::post('connect/{provider}', ExternalCalendarConnectRedirect::class)
+        ->name('external-calendar.connect.redirect');
+    Route::post('select/{provider}', ExternalCalendarSelectCalendar::class)
+        ->name('external-calendar.select');
+    Route::delete('disconnect/{provider}', ExternalCalendarDisconnect::class)
+        ->name('external-calendar.disconnect');
+});
+
+// Callback is outside auth middleware — user is identified via encrypted state param
+Route::get('settings/external-calendar/callback/{provider}', ExternalCalendarConnectCallback::class)
+    ->name('external-calendar.connect.callback');
 
 require __DIR__.'/auth.php';

@@ -1,12 +1,13 @@
 <script setup>
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
-import { BellIcon, CreditCardIcon, UserIcon } from '@heroicons/vue/20/solid';
+import { BellIcon, CalendarIcon, CreditCardIcon, UserIcon } from '@heroicons/vue/20/solid';
 import { ref, shallowRef } from 'vue';
 
 import MainPageText from '@/Components/MainPageText.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
 import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
+import ExternalCalendarTab from '@/Pages/Profile/Tab/ExternalCalendarTab.vue';
 import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
 import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
 
@@ -24,6 +25,7 @@ const navigation = ref([
     component: shallowRef(NotificationTab),
   },
   { name: 'Billing', icon: CreditCardIcon, component: shallowRef(BillingTab) },
+  { name: 'Calendars', icon: CalendarIcon, component: shallowRef(ExternalCalendarTab) },
 ]);
 </script>
 

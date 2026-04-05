@@ -40,9 +40,9 @@ class AppServiceProvider extends ServiceProvider
         $this->configDatabase();
         $this->configTesting();
 
-        if ($this->app->isProduction()) {
-            URL::forceHttps();
-        }
+        //        if ($this->app->isProduction()) {
+        URL::forceHttps();
+        //        }
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
         Gate::policy(CalendarEvent::class, CalendarEventPolicy::class);

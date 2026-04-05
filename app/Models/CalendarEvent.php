@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
@@ -25,7 +26,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $end_date_time
  * @property string $date
  * @property string $title
- * @property string $status
+ * @property CalendarEventStatusEnum $status
  * @property int $duration
  * @property string $type
  * @property string|null $web_link
@@ -121,6 +122,7 @@ class CalendarEvent extends Model
             'start_date_time' => 'datetime',
             'end_date_time'   => 'datetime',
             'session_type'    => MentorSessionTypeEnum::class,
+            'status'          => CalendarEventStatusEnum::class,
         ];
     }
 }
