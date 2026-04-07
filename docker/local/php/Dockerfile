@@ -68,7 +68,7 @@ RUN npm install -g corepack
 RUN corepack enable && corepack prepare yarn@4.10.3 --activate
 
 # Copy supervisor configuration
-COPY docker/php/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/local/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Set working directory
 WORKDIR /var/www

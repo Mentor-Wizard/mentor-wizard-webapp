@@ -38,7 +38,6 @@ tests/
 *.md
 local
 .coderabbit.yaml
-.gitlab-ci.yml
 .validate-branch-namerc.json
 commitlint.config.js
 

@@ -1,16 +1,13 @@
-FROM serversideup/php:8.5-frankenphp
+FROM serversideup/php:8.4-frankenphp
 
 USER root
 
-# Install Node.js 24
 RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Yarn 4.10.3
 RUN corepack enable && corepack prepare yarn@4.10.3 --activate
 
-# Install PHP extensions
 RUN install-php-extensions \
     pdo_pgsql \
     gd \
@@ -38,7 +35,6 @@ ARG VITE_REVERB_HOST
 
 RUN yarn install --frozen-lockfile && yarn build
 
-# Publish vendor assets (log-viewer, filament)
 RUN APP_KEY=base64:placeholder php artisan vendor:publish \
     --tag=laravel-assets \
     --tag=log-viewer-assets \
