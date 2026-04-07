@@ -33,17 +33,38 @@
 
 #### Вимоги
 
-- **PHP 8.4+** (критично важливо!)
-- **Node.js** з **Yarn 4.6.0**
-- **Docker & Docker Compose**
-- **PostgreSQL 17** (через Docker)
-- **Redis 7.2+** (через Docker)
+- **Docker & Docker Compose** (обов'язково)
+- **PHP 8.4+**, **Node.js**, **Yarn 4.10.3** — надаються Docker-контейнером
+
+#### Структура Docker
+
+```
+docker/
+├── local/          # Локальна розробка
+│   ├── php/
+│   │   ├── Dockerfile          # Dev образ з Xdebug, PCOV, Yarn
+│   │   ├── caddy/Caddyfile     # Конфіг Caddy web server
+│   │   └── caddy/Caddyfile-ssl # Конфіг Caddy SSL
+│   ├── postgres/
+│   │   └── init-test-db.sql    # Ініціалізація тестової БД
+│   ├── schedule/
+│   │   └── crontab             # Cron jobs для scheduler
+│   └── supervisord/
+│       └── supervisord.conf    # Process manager (Octane, queue тощо)
+└── dev/
+    └── php/Dockerfile          # Образ для dev деплою (CI/Dokploy)
+```
+
+- **`compose.yml`** — локальна розробка, використовує
+  `docker/local/php/Dockerfile`
+- **`.dokploy/compose.dev.yml`** — деплой dev-середовища через pre-built образ
+  `ghcr.io`
 
 #### Швидкий старт
 
 ```bash
 # 1. Клонування репозиторію
-git clone https://github.com/your-org/mentor-wizard-webapp.git
+git clone https://github.com/Mentor-Wizard/mentor-wizard-webapp.git
 cd mentor-wizard-webapp
 
 # 2. Копіювання environment файлу
@@ -65,12 +86,13 @@ docker compose exec app php artisan migrate
 # 7. Створення symlink для storage
 docker compose exec app php artisan storage:link
 
-# 8. Запуск frontend збірки
-docker compose exec app yarn dev
-
-# 9. Налаштування Git hooks
+# 8. Налаштування Git hooks
 ./setup-git-hooks.sh
 ```
+
+> Контейнер запускається через **supervisord**, який автоматично стартує Laravel
+> Octane, queue worker, scheduler та Vite dev server. Окремо запускати
+> `yarn dev` не потрібно.
 
 #### Налаштування Git Hooks
 
