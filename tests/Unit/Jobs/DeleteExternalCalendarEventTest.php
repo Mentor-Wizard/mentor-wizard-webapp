@@ -54,7 +54,7 @@ describe('DeleteExternalCalendarEvent job', function (): void {
                 'ext-event-456',
             );
 
-        app()->instance($this->integration->provider->serviceClass(), $service);
+        app()->instance($this->integration->provider->getService(), $service);
 
         (new DeleteExternalCalendarEvent($this->event->getKey()))->handle();
 
@@ -75,7 +75,7 @@ describe('DeleteExternalCalendarEvent job', function (): void {
             ->once()
             ->andThrow(new RuntimeException('Google API error'));
 
-        app()->instance($this->integration->provider->serviceClass(), $service);
+        app()->instance($this->integration->provider->getService(), $service);
 
         (new DeleteExternalCalendarEvent($this->event->getKey()))->handle();
 
@@ -91,7 +91,7 @@ describe('DeleteExternalCalendarEvent job', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
         $service->shouldNotReceive('deleteEvent');
 
-        app()->instance($this->integration->provider->serviceClass(), $service);
+        app()->instance($this->integration->provider->getService(), $service);
 
         (new DeleteExternalCalendarEvent($this->event->getKey()))->handle();
     });

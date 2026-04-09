@@ -18,7 +18,7 @@ class CalendarCredentialEncrypter
      */
     public function encrypt(string $value): string
     {
-        $key = $this->currentKey();
+        $key = $this->getCurrentKey();
         $iv = random_bytes(self::IV_BYTES);
 
         $encrypted = openssl_encrypt($value, self::CIPHER, $key, OPENSSL_RAW_DATA, $iv);
@@ -66,7 +66,7 @@ class CalendarCredentialEncrypter
         return $decrypted === false ? null : $decrypted;
     }
 
-    private function currentKey(): string
+    private function getCurrentKey(): string
     {
         return $this->resolveKey('calendar.encryption_key1', 'CALENDAR_ENCRYPTION_KEY1');
     }
@@ -76,12 +76,12 @@ class CalendarCredentialEncrypter
      */
     private function decryptionKeys(): array
     {
-        $keys = [$this->currentKey()];
+        $keys = [$this->getCurrentKey()];
 
         $key2 = config('calendar.encryption_key2');
 
         if (is_string($key2) && $key2 !== '') {
-            $keys[] = $this->resolveKey('calendar.encryption_key2', 'CALENDAR_ENCRYPTION_KEY2');
+            $keys[] = $this->resolveKey('calendar.encryption_key2', 'CALENDAR_ENCRYPTION_KEY_PREVIOUS');
         }
 
         return $keys;

@@ -14,7 +14,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Log;
 use Throwable;
 
 class SyncCalendarEventToExternalCalendar implements ShouldQueue
@@ -50,11 +49,10 @@ class SyncCalendarEventToExternalCalendar implements ShouldQueue
     {
         try {
             /** @var ExternalCalendarServiceInterface $service */
-            $service = app($integration->provider->serviceClass());
+            $service = app($integration->provider->getService());
 
             $externalEventId = $service->createEvent($this->calendarEvent, $integration);
 
-            Log::info("Created external event {$externalEventId} for calendar event {$this->calendarEvent->getKey()}");
             ExternalCalendarEvent::query()->updateOrCreate(
                 [
                     'calendar_event_id' => $this->calendarEvent->getKey(),

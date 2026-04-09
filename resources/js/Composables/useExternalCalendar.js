@@ -41,9 +41,14 @@ export function useExternalCalendar(providers) {
   );
 
   function authorize(providerKey) {
-    // POST saves credentials and backend returns redirect to Google OAuth
     credentialForms[providerKey].post(
       route('external-calendar.connect.redirect', { provider: providerKey }),
+    );
+  }
+
+  function authorizeCalDav(providerKey) {
+    credentialForms[providerKey].post(
+      route('external-calendar.connect.direct', { provider: providerKey }),
     );
   }
 
@@ -68,6 +73,7 @@ export function useExternalCalendar(providers) {
     needsCalendarSelection,
     credentialForms,
     authorize,
+    authorizeCalDav,
     selectCalendar,
     disconnect,
   };

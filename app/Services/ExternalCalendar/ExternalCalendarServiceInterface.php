@@ -10,9 +10,9 @@ use App\Models\UserCalendarIntegration;
 
 interface ExternalCalendarServiceInterface
 {
-    public function saveCredentials(User $user, string $clientId, string $clientSecret): UserCalendarIntegration;
+    public function saveCredentials(User $user, ?string $clientId, ?string $clientSecret): UserCalendarIntegration;
 
-    public function buildOAuthUrl(string $clientId, string $state): string;
+    public function buildOAuthUrl(?string $clientId, string $state): string;
 
     public function handleCallback(User $user, string $code): UserCalendarIntegration;
 
@@ -21,7 +21,7 @@ interface ExternalCalendarServiceInterface
     /**
      * @return array{success: bool, calendars: list<array{id: string, name: string, primary: bool}>, error: string|null}
      */
-    public function fetchCalendars(string $accessToken): array;
+    public function fetchCalendars(UserCalendarIntegration $integration): array;
 
     /**
      * Creates an event in the external calendar.

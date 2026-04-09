@@ -55,7 +55,7 @@ class UpdateExternalCalendarEvent implements ShouldQueue
     {
         try {
             /** @var ExternalCalendarServiceInterface $service */
-            $service = app($integration->provider->serviceClass());
+            $service = app($integration->provider->getService());
 
             $service->updateEvent($this->calendarEvent, $integration, $externalEvent->external_event_id);
 

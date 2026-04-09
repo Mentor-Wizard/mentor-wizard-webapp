@@ -37,14 +37,16 @@ class GetProfilePage
             $integration = $integrations[$provider->value] ?? null;
 
             $calendarProviders[] = [
-                'key'                => $provider->value,
-                'connected'          => $integration !== null,
-                'needs_reauth'       => $integration?->needs_reauth ?? false,
-                'sync_status'        => $integration?->sync_status->value ?? CalendarSyncStatusEnum::Disconnected->value,
-                'calendar_id'        => $integration?->calendar_id,
-                'calendar_name'      => $integration?->calendar_name,
-                'last_synced_at'     => $integration?->last_synced_at?->toIso8601String(),
-                'last_error_message' => $integration?->last_error_message,
+                'key'                  => $provider->value,
+                'connected'            => $integration !== null,
+                'needs_reauth'         => $integration?->needs_reauth ?? false,
+                'sync_status'          => $integration?->sync_status->value ?? CalendarSyncStatusEnum::Disconnected->value,
+                'calendar_id'          => $integration?->calendar_id,
+                'calendar_name'        => $integration?->calendar_name,
+                'last_synced_at'       => $integration?->last_synced_at?->toIso8601String(),
+                'last_error_message'   => $integration?->last_error_message,
+                'uses_app_credentials' => $provider->usesAppCredentials(),
+                'is_cal_dav'           => $provider->isCalDav(),
             ];
         }
 

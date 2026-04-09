@@ -27,20 +27,35 @@ class ExternalCalendarConnectRedirect
             abort(Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $request->validate([
-            'client_id'     => ['required', 'string', 'min:10'],
-            'client_secret' => ['required', 'string', 'min:10'],
-        ]);
+        $calendarProvider = CalendarProviderEnum::from($provider);
+
+        $clientId = null;
+        $clientSecret = null;
+
+        if (! $calendarProvider->usesAppCredentials()) {
+            $request->validate([
+                'client_id'     => ['required', 'string', 'min:10'],
+                'client_secret' => ['required', 'string', 'min:10'],
+            ]);
+
+            $clientId = $request->string('client_id')->toString();
+            $clientSecret = $request->string('client_secret')->toString();
+        }
 
         /** @var User $user */
         $user = $request->user();
 
         $oauthUrl = $this->synchronizationService->saveCredentialsAndBuildOAuthUrl(
             $user,
-            CalendarProviderEnum::from($provider),
-            $request->string('client_id')->toString(),
-            $request->string('client_secret')->toString(),
+            $calendarProvider,
+            $clientId,
+            $clientSecret,
         );
+
+        $request->session()->put('calendar_oauth_pending', [
+            'user_id'  => $user->getKey(),
+            'provider' => $calendarProvider->value,
+        ]);
 
         return Inertia::location($oauthUrl);
     }

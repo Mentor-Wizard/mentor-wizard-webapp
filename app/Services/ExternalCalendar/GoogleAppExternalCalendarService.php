@@ -9,7 +9,7 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 
-class GoogleExternalCalendarService extends AbstractGoogleExternalCalendarService
+class GoogleAppExternalCalendarService extends AbstractGoogleExternalCalendarService
 {
     public function callbackUrl(): string
     {
@@ -22,11 +22,11 @@ class GoogleExternalCalendarService extends AbstractGoogleExternalCalendarServic
         return UserCalendarIntegration::query()->updateOrCreate(
             [
                 'user_id'  => $user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::Google,
             ],
             [
-                'client_id'          => $clientId,
-                'client_secret'      => $clientSecret,
+                'client_id'          => null,
+                'client_secret'      => null,
                 'access_token'       => null,
                 'refresh_token'      => null,
                 'token_expires_at'   => null,
@@ -41,16 +41,18 @@ class GoogleExternalCalendarService extends AbstractGoogleExternalCalendarServic
 
     protected function provider(): CalendarProviderEnum
     {
-        return CalendarProviderEnum::GooglePersonalApp;
+        return CalendarProviderEnum::Google;
     }
 
     protected function clientId(?UserCalendarIntegration $integration = null): ?string
     {
-        return $integration?->client_id;
+        /** @var ?string */
+        return config('calendar.google_client_id');
     }
 
     protected function clientSecret(?UserCalendarIntegration $integration = null): string
     {
-        return (string) $integration?->client_secret;
+        /** @var string */
+        return config('calendar.google_client_secret');
     }
 }

@@ -36,6 +36,6 @@ class ExternalCalendarDisconnect
 
         $this->handle($user, CalendarProviderEnum::from($provider));
 
-        return to_route('pages.settings.external-calendar');
+        return to_route('profile.edit');
     }
 }

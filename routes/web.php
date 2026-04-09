@@ -6,6 +6,7 @@ use App\Actions\Calendar\ConfirmCalendarEvent;
 use App\Actions\Calendar\DeleteCalendarEvent;
 use App\Actions\Calendar\EditCalendarEvent;
 use App\Actions\Calendar\ExternalCalendarConnectCallback;
+use App\Actions\Calendar\ExternalCalendarConnectDirect;
 use App\Actions\Calendar\ExternalCalendarConnectRedirect;
 use App\Actions\Calendar\ExternalCalendarDisconnect;
 use App\Actions\Calendar\ExternalCalendarSelectCalendar;
@@ -119,6 +120,8 @@ Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->g
         ->name('pages.settings.external-calendar');
     Route::post('connect/{provider}', ExternalCalendarConnectRedirect::class)
         ->name('external-calendar.connect.redirect');
+    Route::post('connect-direct/{provider}', ExternalCalendarConnectDirect::class)
+        ->name('external-calendar.connect.direct');
     Route::post('select/{provider}', ExternalCalendarSelectCalendar::class)
         ->name('external-calendar.select');
     Route::delete('disconnect/{provider}', ExternalCalendarDisconnect::class)

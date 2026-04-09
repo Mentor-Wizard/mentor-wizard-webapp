@@ -10,14 +10,27 @@ use App\Models\UserCalendarIntegration;
 
 class ExternalCalendarSynchronizationService
 {
-    public function saveCredentialsAndBuildOAuthUrl(User $user, CalendarProviderEnum $provider, string $clientId, string $clientSecret): string
-    {
+    public function saveCredentialsAndBuildOAuthUrl(
+        User $user,
+        CalendarProviderEnum $provider,
+        ?string $clientId,
+        ?string $clientSecret,
+    ): string {
         $service = $this->resolveService($provider);
         $service->saveCredentials($user, $clientId, $clientSecret);
 
         $state = encrypt(json_encode(['user_id' => $user->getKey(), 'provider' => $provider->value]));
 
         return $service->buildOAuthUrl($clientId, $state);
+    }
+
+    public function saveCredentials(
+        User $user,
+        CalendarProviderEnum $provider,
+        ?string $clientId,
+        ?string $clientSecret,
+    ): void {
+        $this->resolveService($provider)->saveCredentials($user, $clientId, $clientSecret);
     }
 
     public function handleCallback(User $user, CalendarProviderEnum $provider, string $code): UserCalendarIntegration
@@ -35,7 +48,7 @@ class ExternalCalendarSynchronizationService
             ->where('provider', $provider)
             ->firstOrFail();
 
-        return $this->resolveService($provider)->fetchCalendars((string) $integration->access_token);
+        return $this->resolveService($provider)->fetchCalendars($integration);
     }
 
     public function selectCalendar(User $user, CalendarProviderEnum $provider, string $calendarId, string $calendarName): UserCalendarIntegration
@@ -53,6 +66,6 @@ class ExternalCalendarSynchronizationService
 
     private function resolveService(CalendarProviderEnum $provider): ExternalCalendarServiceInterface
     {
-        return app($provider->serviceClass());
+        return app($provider->getService());
     }
 }

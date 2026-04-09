@@ -55,7 +55,7 @@ describe('UpdateExternalCalendarEvent job', function (): void {
                 'ext-event-123',
             );
 
-        app()->instance($this->integration->provider->serviceClass(), $service);
+        app()->instance($this->integration->provider->getService(), $service);
 
         (new UpdateExternalCalendarEvent($this->event))->handle();
     });
@@ -66,7 +66,7 @@ describe('UpdateExternalCalendarEvent job', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
         $service->shouldNotReceive('updateEvent');
 
-        app()->instance($this->integration->provider->serviceClass(), $service);
+        app()->instance($this->integration->provider->getService(), $service);
 
         (new UpdateExternalCalendarEvent($this->event))->handle();
     });
@@ -77,7 +77,7 @@ describe('UpdateExternalCalendarEvent job', function (): void {
             ->once()
             ->andThrow(new RuntimeException('Google API error'));
 
-        app()->instance($this->integration->provider->serviceClass(), $service);
+        app()->instance($this->integration->provider->getService(), $service);
 
         (new UpdateExternalCalendarEvent($this->event))->handle();
 
@@ -91,7 +91,7 @@ describe('UpdateExternalCalendarEvent job', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
         $service->shouldNotReceive('updateEvent');
 
-        app()->instance($this->integration->provider->serviceClass(), $service);
+        app()->instance($this->integration->provider->getService(), $service);
 
         (new UpdateExternalCalendarEvent($this->event))->handle();
     });

@@ -9,7 +9,9 @@ use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsController;
+use Throwable;
 
 class ExternalCalendarConnectCallback
 {
@@ -21,16 +23,23 @@ class ExternalCalendarConnectCallback
 
     public function asController(Request $request, string $provider): RedirectResponse
     {
+
+        Log::info('Callback request', $request->all());
         if ($request->has('error')) {
-            return to_route('pages.settings.external-calendar')
-                ->with('error', 'Google authorization was denied or cancelled.');
+            return to_route('profile.edit')
+                ->with('error', 'Authorization was denied or cancelled.');
         }
 
-        /** @var array{user_id: int, provider: string} $state */
-        $state = json_decode(decrypt((string) $request->query('state', '')), true);
+        $statePayload = $this->resolveStatePayload($request);
+        Log::info('$statePayload', $statePayload);
 
-        $user = User::query()->findOrFail($state['user_id']);
-        $enum = CalendarProviderEnum::from($state['provider']);
+        if ($statePayload === null) {
+            return to_route('profile.edit')
+                ->with('error', 'Authorization session expired or invalid. Please try again.');
+        }
+
+        $user = User::query()->findOrFail($statePayload['user_id']);
+        $enum = CalendarProviderEnum::from($statePayload['provider']);
 
         $this->synchronizationService->handleCallback($user, $enum, (string) $request->query('code'));
 
@@ -39,9 +48,43 @@ class ExternalCalendarConnectCallback
         if (! $result['success'] || empty($result['calendars'])) {
             $error = $result['error'] ?? 'No calendars found on this Google account.';
 
-            return to_route('pages.settings.external-calendar')->with('error', $error);
+            return to_route('profile.edit')->with('error', $error);
         }
 
-        return to_route('pages.settings.external-calendar')->with('calendars', $result['calendars']);
+        return to_route('profile.edit')->with('calendars', $result['calendars']);
+    }
+
+    /**
+     * Resolves user_id + provider from the OAuth state parameter, falling back
+     * to the session for providers (e.g. Outlook personal accounts) that do not
+     * reliably return the state in the callback.
+     *
+     * @return array{user_id: int, provider: string}|null
+     */
+    private function resolveStatePayload(Request $request): ?array
+    {
+        $rawState = (string) $request->query('state', '');
+
+        if ($rawState !== '') {
+            try {
+                /** @var array{user_id: int, provider: string} $payload */
+                $payload = json_decode(decrypt($rawState), true);
+
+                Log::info('$payload', $payload);
+
+                if (isset($payload['user_id'], $payload['provider'])) {
+                    $request->session()->forget('calendar_oauth_pending');
+
+                    return $payload;
+                }
+            } catch (Throwable) {
+                // state present but could not be decrypted — fall through to session
+            }
+        }
+
+        /** @var array{user_id: int, provider: string}|null $session */
+        $session = $request->session()->pull('calendar_oauth_pending');
+
+        return isset($session['user_id'], $session['provider']) ? $session : null;
     }
 }
