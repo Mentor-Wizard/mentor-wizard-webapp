@@ -38,7 +38,10 @@ defineExpose({ open });
 </script>
 
 <template>
-  <AppModal v-model="isOpen">
+  <AppModal
+    v-model="isOpen"
+    panel-class="sm:max-w-3xl"
+  >
     <div>
       <div class="flex items-start justify-between">
         <DialogTitle class="text-base font-semibold text-gray-900">
@@ -58,7 +61,7 @@ defineExpose({ open });
           <img
             :src="steps[currentStep].image"
             :alt="`Step ${currentStep + 1}`"
-            class="h-64 w-full object-contain"
+            class="h-[28rem] w-full object-contain"
           />
         </div>
 

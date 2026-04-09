@@ -1,12 +1,11 @@
 <script setup>
 import { usePage } from '@inertiajs/vue3';
-import { QuestionMarkCircleIcon } from '@heroicons/vue/20/solid';
+import { InformationCircleIcon, QuestionMarkCircleIcon } from '@heroicons/vue/20/solid';
 import { computed, ref } from 'vue';
 
 import GuideCarouselModal from '@/Components/GuideCarouselModal.vue';
 import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import { useExternalCalendar } from '@/Composables/useExternalCalendar';
-import { InformationCircleIcon } from '@heroicons/vue/20/solid';
 
 const page = usePage();
 const providers = page.props.calendarProviders ?? [];
@@ -14,7 +13,7 @@ const providers = page.props.calendarProviders ?? [];
 const {
   notification,
   availableCalendars,
-  needsCalendarSelection,
+  calendarProviderForSelection,
   credentialForms,
   authorize,
   authorizeCalDav,
@@ -30,11 +29,30 @@ const otherProviders = computed(() => page.props.calendarProviders?.filter((p) =
 const googleConnected = computed(() => googleProvider.value?.connected && !googleProvider.value?.needs_reauth);
 const googlePersonalConnected = computed(() => googlePersonalProvider.value?.connected && !googlePersonalProvider.value?.needs_reauth);
 
+// Which Google integration is currently active (drives status badge / calendar name)
+const activeGoogleIntegration = computed(() => {
+  if (googleConnected.value) return googleProvider.value;
+  if (googlePersonalConnected.value) return googlePersonalProvider.value;
+  if (googleProvider.value?.needs_reauth) return googleProvider.value;
+  if (googlePersonalProvider.value?.needs_reauth) return googlePersonalProvider.value;
+  return googleProvider.value;
+});
+
+const anyGoogleConnected = computed(() => googleConnected.value || googlePersonalConnected.value);
+
+// Toggle: show personal-credentials form instead of the one-click authorize button.
+// Pre-selected when the personal variant is connected or needs re-auth.
+const usePersonalGoogle = ref(
+  googlePersonalProvider.value?.connected === true || googlePersonalProvider.value?.needs_reauth === true,
+);
+
 const googleGuideSteps = [
-  { image: '/images/guides/google-calendar/step-1.png', caption: 'Go to Google Cloud Console → APIs & Services → Credentials. Click "Create Credentials" → "OAuth client ID".' },
-  { image: '/images/guides/google-calendar/step-2.png', caption: 'Set application type to "Web application". Under "Authorized redirect URIs" add the callback URL shown below.' },
-  { image: '/images/guides/google-calendar/step-3.png', caption: 'Copy the Client ID and Client Secret shown after creation.' },
-  { image: '/images/guides/google-calendar/step-4.png', caption: 'Paste both values into the fields below and click "Authorize".' },
+  { image: '/images/guides/google-calendar/step-1.png', caption: 'Go to console.cloud.google.com. Create a new project or select an existing one.' },
+  { image: '/images/guides/google-calendar/step-2.png', caption: 'Open the left menu → "APIs & Services".' },
+  { image: '/images/guides/google-calendar/step-3.png', caption: 'Click "Enable APIs and Services", search for "Google Calendar API" and enable it.' },
+  { image: '/images/guides/google-calendar/step-4.png', caption: 'Go to "Credentials" → "Create Credentials" → "OAuth client ID".' },
+  { image: '/images/guides/google-calendar/step-5.png', caption: 'Choose "Web application". Under "Authorized JavaScript origins" add your site URL. Under "Authorized redirect URIs" add the callback URL shown in the form.' },
+  { image: '/images/guides/google-calendar/step-6.png', caption: 'After creation, copy the Client ID and Client Secret and paste them into the form.' },
 ];
 
 const callbackUrl = `${window.location.origin}/settings/external-calendar/callback/google`;
@@ -43,10 +61,10 @@ const guideModal = ref(null);
 const appleGuideModal = ref(null);
 
 const appleGuideSteps = [
-  { image: '/images/guides/apple-calendar/step-1.png', caption: 'Go to appleid.apple.com and sign in. Navigate to "Sign-In and Security" → "App-Specific Passwords".' },
-  { image: '/images/guides/apple-calendar/step-2.png', caption: 'Click "Generate an app-specific password". Enter a label like "MentorWizard" and click Create.' },
-  { image: '/images/guides/apple-calendar/step-3.png', caption: 'Copy the generated password (format: xxxx-xxxx-xxxx-xxxx). You won\'t be able to see it again.' },
-  { image: '/images/guides/apple-calendar/step-4.png', caption: 'Enter your Apple ID (email) and the app-specific password below, then click Connect.' },
+  { image: '/images/guides/apple-calendar/step-1.png', caption: 'Go to appleid.apple.com and sign in with your Apple Account.' },
+  { image: '/images/guides/apple-calendar/step-2.png', caption: 'Navigate to "Sign-In and Security" → "App-Specific Passwords" and click "Generate an app-specific password".' },
+  { image: '/images/guides/apple-calendar/step-3.png', caption: 'Enter any name — it\'s just for your reference (e.g. "MentorWizard"). Tap Create and copy the generated password.' },
+  { image: '/images/guides/apple-calendar/step-4.png', caption: 'Enter your Apple Account email and the app-specific password in the form below, then click "Connect Apple Calendar".' },
 ];
 
 const statusLabels = { active: 'Connected', pending: 'Pending', error: 'Error', disconnected: 'Disconnected' };
@@ -70,257 +88,218 @@ const providerLabels = {
       Confirmed sessions will be automatically synced to your connected calendars.
     </p>
 
-    <ul class="mt-6 divide-y divide-gray-100">
+    <ul class="mt-6 divide-y divide-gray-200">
 
-      <!-- Google group (both providers in one framed block) -->
-      <li class="py-5">
-        <div class="rounded-lg border border-gray-200 divide-y divide-gray-100">
-
-          <!-- Google Calendar (multi-tenant) -->
-          <div
-            v-if="googleProvider"
-            class="p-4"
-          >
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-gray-900">Google Calendar</p>
-                <p class="text-xs text-gray-400 mt-0.5">Connect via the shared app — no credentials needed</p>
-                <p
-                  v-if="googleProvider.calendar_name"
-                  class="text-xs text-gray-500 mt-0.5"
-                >
-                  Calendar: {{ googleProvider.calendar_name }}
-                </p>
-                <p
-                  v-if="googleProvider.last_synced_at"
-                  class="text-xs text-gray-400 mt-0.5"
-                >
-                  Last synced: {{ new Date(googleProvider.last_synced_at).toLocaleString() }}
-                </p>
-                <p
-                  v-if="googleProvider.last_error_message"
-                  class="text-xs text-red-500 mt-0.5"
-                >
-                  {{ googleProvider.last_error_message }}
-                </p>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <span
-                  class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
-                  :class="statusClasses[googleProvider.sync_status] ?? statusClasses.disconnected"
-                >
-                  {{ statusLabels[googleProvider.sync_status] ?? googleProvider.sync_status }}
-                </span>
-                <button
-                  v-if="googleConnected"
-                  type="button"
-                  class="rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
-                  @click="disconnect(googleProvider.key)"
-                >
-                  Disconnect
-                </button>
-              </div>
-            </div>
-
-            <!-- Blocked: personal app is active -->
+      <!-- Google Calendar -->
+      <li
+        v-if="googleProvider || googlePersonalProvider"
+        class="py-8"
+      >
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-900">Google Calendar</p>
             <p
-              v-if="!googleConnected && googlePersonalConnected"
-              class="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700"
+              v-if="googlePersonalConnected"
+              class="text-xs text-gray-400 mt-0.5"
             >
-              Disconnect <span class="font-medium">Google Calendar (Personal App)</span> first to use the shared Google connection.
+              Connected via your personal Google Cloud app
             </p>
-
-            <!-- Authorize button -->
-            <button
-              v-else-if="!googleConnected"
-              type="button"
-              class="mt-3 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-              @click="authorize(googleProvider.key)"
+            <p
+              v-else-if="googleConnected"
+              class="text-xs text-gray-400 mt-0.5"
             >
-              Authorize with Google
-            </button>
-
-            <!-- Calendar picker -->
-            <div
-              v-if="googleConnected && needsCalendarSelection"
-              class="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-4"
+              Connected via shared app
+            </p>
+            <p
+              v-if="activeGoogleIntegration?.calendar_name"
+              class="text-xs text-gray-500 mt-0.5"
             >
-              <p class="text-xs font-medium text-indigo-800 mb-2">
-                Choose which calendar to sync sessions to:
-              </p>
-              <ul class="space-y-1">
-                <li
-                  v-for="calendar in availableCalendars"
-                  :key="calendar.id"
-                >
-                  <button
-                    type="button"
-                    class="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-indigo-100 flex items-center gap-2"
-                    @click="selectCalendar(googleProvider.key, calendar)"
-                  >
-                    <span class="font-medium text-gray-900">{{ calendar.name }}</span>
-                    <span
-                      v-if="calendar.primary"
-                      class="text-xs text-indigo-600"
-                    >(primary)</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
+              Calendar: {{ activeGoogleIntegration.calendar_name }}
+            </p>
+            <p
+              v-if="activeGoogleIntegration?.last_synced_at"
+              class="text-xs text-gray-400 mt-0.5"
+            >
+              Last synced: {{ new Date(activeGoogleIntegration.last_synced_at).toLocaleString() }}
+            </p>
+            <p
+              v-if="activeGoogleIntegration?.last_error_message"
+              class="text-xs text-red-500 mt-0.5"
+            >
+              {{ activeGoogleIntegration.last_error_message }}
+            </p>
           </div>
 
-          <!-- Google Calendar (Personal App) -->
+          <div class="flex items-center gap-2">
+            <span
+              class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
+              :class="statusClasses[activeGoogleIntegration?.sync_status] ?? statusClasses.disconnected"
+            >
+              {{ statusLabels[activeGoogleIntegration?.sync_status] ?? activeGoogleIntegration?.sync_status ?? 'Disconnected' }}
+            </span>
+            <button
+              v-if="anyGoogleConnected"
+              type="button"
+              class="rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+              @click="disconnect(googlePersonalConnected ? googlePersonalProvider.key : googleProvider.key)"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+
+        <!-- Not connected: authorize or credential form -->
+        <template v-if="!anyGoogleConnected">
+          <!-- Shared app one-click authorize -->
+          <button
+            v-if="!usePersonalGoogle"
+            type="button"
+            class="mt-3 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+            @click="authorize(googleProvider.key)"
+          >
+            Authorize with Google
+          </button>
+
+          <!-- Personal app credential form -->
           <div
-            v-if="googlePersonalProvider"
-            class="p-4"
+            v-else
+            class="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-4 space-y-3"
           >
             <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-gray-900">Google Calendar (Personal App)</p>
-                <p class="text-xs text-gray-400 mt-0.5">Use your own Google Cloud OAuth app credentials</p>
-                <p
-                  v-if="googlePersonalProvider.calendar_name"
-                  class="text-xs text-gray-500 mt-0.5"
-                >
-                  Calendar: {{ googlePersonalProvider.calendar_name }}
-                </p>
-                <p
-                  v-if="googlePersonalProvider.last_synced_at"
-                  class="text-xs text-gray-400 mt-0.5"
-                >
-                  Last synced: {{ new Date(googlePersonalProvider.last_synced_at).toLocaleString() }}
-                </p>
-                <p
-                  v-if="googlePersonalProvider.last_error_message"
-                  class="text-xs text-red-500 mt-0.5"
-                >
-                  {{ googlePersonalProvider.last_error_message }}
-                </p>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <span
-                  class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
-                  :class="statusClasses[googlePersonalProvider.sync_status] ?? statusClasses.disconnected"
-                >
-                  {{ statusLabels[googlePersonalProvider.sync_status] ?? googlePersonalProvider.sync_status }}
-                </span>
-                <button
-                  v-if="googlePersonalConnected"
-                  type="button"
-                  class="rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
-                  @click="disconnect(googlePersonalProvider.key)"
-                >
-                  Disconnect
-                </button>
-              </div>
-            </div>
-
-            <!-- Blocked: shared app is active -->
-            <p
-              v-if="!googlePersonalConnected && googleConnected"
-              class="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700"
-            >
-              Disconnect <span class="font-medium">Google Calendar</span> first to use your own Personal App credentials.
-            </p>
-
-            <!-- Credentials form -->
-            <div
-              v-else-if="!googlePersonalConnected"
-              class="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-4 space-y-3"
-            >
-              <div class="flex items-center justify-between">
-                <p class="text-xs font-medium text-gray-700">
-                  Enter your Google OAuth credentials
-                </p>
-                <button
-                  type="button"
-                  class="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800"
-                  @click="guideModal.open()"
-                >
-                  <QuestionMarkCircleIcon class="size-3.5" />
-                  How to get these?
-                </button>
-              </div>
-
-              <div class="rounded border border-gray-200 bg-white px-3 py-2 text-xs text-gray-500">
-                Add this URL to your Google OAuth app's <span class="font-medium">Authorized redirect URIs</span>:
-                <p class="mt-1 font-mono text-gray-800 break-all select-all">{{ callbackUrl }}</p>
-              </div>
-
-              <input
-                v-model="credentialForms[googlePersonalProvider.key].client_id"
-                type="text"
-                placeholder="Client ID"
-                class="block w-full rounded-md border-0 py-1.5 text-sm text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset"
-              />
-              <p
-                v-if="credentialForms[googlePersonalProvider.key].errors.client_id"
-                class="text-xs text-red-500"
-              >
-                {{ credentialForms[googlePersonalProvider.key].errors.client_id }}
+              <p class="text-xs font-medium text-gray-700">
+                Enter your Google OAuth credentials
               </p>
-
-              <input
-                v-model="credentialForms[googlePersonalProvider.key].client_secret"
-                type="password"
-                placeholder="Client Secret"
-                class="block w-full rounded-md border-0 py-1.5 text-sm text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset"
-              />
-              <p
-                v-if="credentialForms[googlePersonalProvider.key].errors.client_secret"
-                class="text-xs text-red-500"
-              >
-                {{ credentialForms[googlePersonalProvider.key].errors.client_secret }}
-              </p>
-
               <button
                 type="button"
-                class="w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
-                :disabled="!credentialForms[googlePersonalProvider.key].client_id || !credentialForms[googlePersonalProvider.key].client_secret || credentialForms[googlePersonalProvider.key].processing"
-                @click="authorize(googlePersonalProvider.key)"
+                class="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800"
+                @click="guideModal.open()"
               >
-                Authorize with Google
+                <QuestionMarkCircleIcon class="size-3.5" />
+                How to get these?
               </button>
             </div>
 
-            <!-- Calendar picker -->
-            <div
-              v-if="googlePersonalConnected && needsCalendarSelection"
-              class="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-4"
-            >
-              <p class="text-xs font-medium text-indigo-800 mb-2">
-                Choose which calendar to sync sessions to:
-              </p>
-              <ul class="space-y-1">
-                <li
-                  v-for="calendar in availableCalendars"
-                  :key="calendar.id"
-                >
-                  <button
-                    type="button"
-                    class="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-indigo-100 flex items-center gap-2"
-                    @click="selectCalendar(googlePersonalProvider.key, calendar)"
-                  >
-                    <span class="font-medium text-gray-900">{{ calendar.name }}</span>
-                    <span
-                      v-if="calendar.primary"
-                      class="text-xs text-indigo-600"
-                    >(primary)</span>
-                  </button>
-                </li>
-              </ul>
+            <div class="rounded border border-gray-200 bg-white px-3 py-2 text-xs text-gray-500">
+              Add this URL to your Google OAuth app's <span class="font-medium">Authorized redirect URIs</span>:
+              <p class="mt-1 font-mono text-gray-800 break-all select-all">{{ callbackUrl }}</p>
             </div>
+
+            <input
+              v-model="credentialForms[googlePersonalProvider.key].client_id"
+              type="text"
+              placeholder="Client ID"
+              class="block w-full rounded-md border-0 py-1.5 text-sm text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset"
+            />
+            <p
+              v-if="credentialForms[googlePersonalProvider.key].errors.client_id"
+              class="text-xs text-red-500"
+            >
+              {{ credentialForms[googlePersonalProvider.key].errors.client_id }}
+            </p>
+
+            <input
+              v-model="credentialForms[googlePersonalProvider.key].client_secret"
+              type="password"
+              placeholder="Client Secret"
+              class="block w-full rounded-md border-0 py-1.5 text-sm text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset"
+            />
+            <p
+              v-if="credentialForms[googlePersonalProvider.key].errors.client_secret"
+              class="text-xs text-red-500"
+            >
+              {{ credentialForms[googlePersonalProvider.key].errors.client_secret }}
+            </p>
+
+            <button
+              type="button"
+              class="w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+              :disabled="!credentialForms[googlePersonalProvider.key].client_id || !credentialForms[googlePersonalProvider.key].client_secret || credentialForms[googlePersonalProvider.key].processing"
+              @click="authorize(googlePersonalProvider.key)"
+            >
+              Authorize with Google
+            </button>
           </div>
 
+          <!-- Toggle -->
+          <label class="mt-3 flex items-center gap-2 cursor-pointer select-none w-fit">
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="usePersonalGoogle"
+              class="relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+              :class="usePersonalGoogle ? 'bg-indigo-600' : 'bg-gray-200'"
+              @click="usePersonalGoogle = !usePersonalGoogle"
+            >
+              <span
+                class="pointer-events-none inline-block size-4 rounded-full bg-white shadow ring-0 transition-transform duration-200"
+                :class="usePersonalGoogle ? 'translate-x-4' : 'translate-x-0'"
+              />
+            </button>
+            <span class="text-xs text-gray-600">Use my own Google Cloud credentials</span>
+          </label>
+        </template>
+
+        <!-- Calendar picker (shared app) -->
+        <div
+          v-if="googleConnected && calendarProviderForSelection === googleProvider?.key"
+          class="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-4"
+        >
+          <p class="text-xs font-medium text-indigo-800 mb-2">
+            Choose which calendar to sync sessions to:
+          </p>
+          <ul class="space-y-1">
+            <li
+              v-for="calendar in availableCalendars"
+              :key="calendar.id"
+            >
+              <button
+                type="button"
+                class="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-indigo-100 flex items-center gap-2"
+                @click="selectCalendar(googleProvider.key, calendar)"
+              >
+                <span class="font-medium text-gray-900">{{ calendar.name }}</span>
+                <span
+                  v-if="calendar.primary"
+                  class="text-xs text-indigo-600"
+                >(primary)</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Calendar picker (personal app) -->
+        <div
+          v-if="googlePersonalConnected && calendarProviderForSelection === googlePersonalProvider?.key"
+          class="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-4"
+        >
+          <p class="text-xs font-medium text-indigo-800 mb-2">
+            Choose which calendar to sync sessions to:
+          </p>
+          <ul class="space-y-1">
+            <li
+              v-for="calendar in availableCalendars"
+              :key="calendar.id"
+            >
+              <button
+                type="button"
+                class="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-indigo-100 flex items-center gap-2"
+                @click="selectCalendar(googlePersonalProvider.key, calendar)"
+              >
+                <span class="font-medium text-gray-900">{{ calendar.name }}</span>
+                <span
+                  v-if="calendar.primary"
+                  class="text-xs text-indigo-600"
+                >(primary)</span>
+              </button>
+            </li>
+          </ul>
         </div>
       </li>
 
-      <!-- Apple Calendar (CalDAV — dedicated section) -->
+      <!-- Apple Calendar (CalDAV) -->
       <li
         v-if="appleProvider"
-        class="py-5"
+        class="py-8"
       >
         <div class="flex items-center justify-between">
           <div>
@@ -421,9 +400,9 @@ const providerLabels = {
           </button>
         </div>
 
-        <!-- Calendar picker after connection -->
+        <!-- Calendar picker -->
         <div
-          v-if="appleProvider.connected && !appleProvider.needs_reauth && needsCalendarSelection"
+          v-if="appleProvider.connected && !appleProvider.needs_reauth && calendarProviderForSelection === appleProvider.key"
           class="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-4"
         >
           <p class="text-xs font-medium text-indigo-800 mb-2">
@@ -446,11 +425,11 @@ const providerLabels = {
         </div>
       </li>
 
-      <!-- Outlook and any other providers -->
+      <!-- Outlook and other OAuth providers -->
       <li
         v-for="provider in otherProviders"
         :key="provider.key"
-        class="py-5"
+        class="py-8"
       >
         <div class="flex items-center justify-between">
           <div>
@@ -501,7 +480,6 @@ const providerLabels = {
           </div>
         </div>
 
-        <!-- OAuth redirect providers (e.g. Outlook): simple authorize button -->
         <button
           v-if="provider.uses_app_credentials && (!provider.connected || provider.needs_reauth)"
           type="button"
@@ -513,7 +491,7 @@ const providerLabels = {
 
         <!-- Calendar picker -->
         <div
-          v-if="provider.connected && !provider.needs_reauth && needsCalendarSelection"
+          v-if="provider.connected && !provider.needs_reauth && calendarProviderForSelection === provider.key"
           class="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-4"
         >
           <p class="text-xs font-medium text-indigo-800 mb-2">

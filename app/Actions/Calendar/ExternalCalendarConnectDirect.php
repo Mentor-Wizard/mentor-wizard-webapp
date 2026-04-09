@@ -55,6 +55,8 @@ class ExternalCalendarConnectDirect
             return to_route('profile.edit')->with('error', $error);
         }
 
-        return to_route('profile.edit')->with('calendars', $result['calendars']);
+        return to_route('profile.edit')
+            ->with('calendar_provider', $calendarProvider->value)
+            ->with('calendars', $result['calendars']);
     }
 }

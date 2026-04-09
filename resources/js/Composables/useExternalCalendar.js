@@ -1,11 +1,12 @@
 import { useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 export function useExternalCalendar(providers) {
   const page = usePage();
 
   const notification = ref({ show: false, success: false, message: '' });
   const availableCalendars = ref([]);
+  const calendarProviderForSelection = ref('');
 
   function showNotification(success, message) {
     notification.value = { show: true, success, message };
@@ -26,7 +27,20 @@ export function useExternalCalendar(providers) {
 
   watch(
     () => page.props.flash?.calendars,
-    (value) => { if (value?.length) availableCalendars.value = value; },
+    (value) => {
+      if (value?.length) {
+        availableCalendars.value = value;
+      } else {
+        availableCalendars.value = [];
+        calendarProviderForSelection.value = '';
+      }
+    },
+    { immediate: true },
+  );
+
+  watch(
+    () => page.props.flash?.calendar_provider,
+    (value) => { if (value) calendarProviderForSelection.value = value; },
     { immediate: true },
   );
 
@@ -57,7 +71,12 @@ export function useExternalCalendar(providers) {
     selectForms[providerKey].calendar_name = calendar.name;
     selectForms[providerKey].post(
       route('external-calendar.select', { provider: providerKey }),
-      { onSuccess: () => { availableCalendars.value = []; } },
+      {
+        onSuccess: () => {
+          availableCalendars.value = [];
+          calendarProviderForSelection.value = '';
+        },
+      },
     );
   }
 
@@ -65,12 +84,10 @@ export function useExternalCalendar(providers) {
     useForm({}).delete(route('external-calendar.disconnect', { provider: providerKey }));
   }
 
-  const needsCalendarSelection = computed(() => availableCalendars.value.length > 0);
-
   return {
     notification,
     availableCalendars,
-    needsCalendarSelection,
+    calendarProviderForSelection,
     credentialForms,
     authorize,
     authorizeCalDav,

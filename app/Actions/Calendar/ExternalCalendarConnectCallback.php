@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsController;
 use Throwable;
 
@@ -23,15 +22,12 @@ class ExternalCalendarConnectCallback
 
     public function asController(Request $request, string $provider): RedirectResponse
     {
-
-        Log::info('Callback request', $request->all());
         if ($request->has('error')) {
             return to_route('profile.edit')
                 ->with('error', 'Authorization was denied or cancelled.');
         }
 
         $statePayload = $this->resolveStatePayload($request);
-        Log::info('$statePayload', $statePayload);
 
         if ($statePayload === null) {
             return to_route('profile.edit')
@@ -51,7 +47,9 @@ class ExternalCalendarConnectCallback
             return to_route('profile.edit')->with('error', $error);
         }
 
-        return to_route('profile.edit')->with('calendars', $result['calendars']);
+        return to_route('profile.edit')
+            ->with('calendar_provider', $enum->value)
+            ->with('calendars', $result['calendars']);
     }
 
     /**
@@ -69,8 +67,6 @@ class ExternalCalendarConnectCallback
             try {
                 /** @var array{user_id: int, provider: string} $payload */
                 $payload = json_decode(decrypt($rawState), true);
-
-                Log::info('$payload', $payload);
 
                 if (isset($payload['user_id'], $payload['provider'])) {
                     $request->session()->forget('calendar_oauth_pending');
