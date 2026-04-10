@@ -907,7 +907,7 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         $event = CalendarEvent::query()->create([
             'title'             => 'Monday Event',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $eventStart,
             'end_date_time'     => $eventEnd,
             'date'              => $eventStart?->format('Y-m-d'),
@@ -984,7 +984,7 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'Event on Working Monday',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $event1Start,
             'end_date_time'     => $event1End,
             'date'              => $event1Start->format('Y-m-d'),
@@ -995,7 +995,7 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         $event2 = CalendarEvent::query()->create([
             'title'             => 'Event on Day Off',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $event2Start,
             'end_date_time'     => $event2End,
             'date'              => $event2Start->format('Y-m-d'),

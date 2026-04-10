@@ -13,13 +13,14 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
 mutates(SyncCalendarEventToExternalCalendar::class);
 
 describe('SyncCalendarEventToExternalCalendar job', function (): void {
     beforeEach(function (): void {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $this->mentor = User::factory()->create();
         $this->mentee = User::factory()->create();
         $this->mentorProgram = MentorProgram::factory()->create(['mentor_id' => $this->mentor->getKey()]);
@@ -47,14 +48,14 @@ describe('SyncCalendarEventToExternalCalendar job', function (): void {
         $service->shouldReceive('createEvent')
             ->once()
             ->with(
-                Mockery::on(fn ($e) => $e->getKey() === $this->event->getKey()),
-                Mockery::on(fn ($i) => $i->getKey() === $this->integration->getKey()),
+                Mockery::on(fn ($e): bool => $e->getKey() === $this->event->getKey()),
+                Mockery::on(fn ($i): bool => $i->getKey() === $this->integration->getKey()),
             )
             ->andReturn('ext-new-event-id');
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new SyncCalendarEventToExternalCalendar($this->event))->handle();
+        new SyncCalendarEventToExternalCalendar($this->event)->handle();
 
         $externalEvent = ExternalCalendarEvent::query()
             ->where('calendar_event_id', $this->event->getKey())
@@ -86,7 +87,7 @@ describe('SyncCalendarEventToExternalCalendar job', function (): void {
         app()->instance(CalendarProviderEnum::Google->getService(), $googleService);
         app()->instance(CalendarProviderEnum::Outlook->getService(), $outlookService);
 
-        (new SyncCalendarEventToExternalCalendar($this->event))->handle();
+        new SyncCalendarEventToExternalCalendar($this->event)->handle();
 
         expect(ExternalCalendarEvent::query()->where('calendar_event_id', $this->event->getKey())->count())->toBe(2);
     });
@@ -99,7 +100,7 @@ describe('SyncCalendarEventToExternalCalendar job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new SyncCalendarEventToExternalCalendar($this->event))->handle();
+        new SyncCalendarEventToExternalCalendar($this->event)->handle();
 
         expect(ExternalCalendarEvent::query()->where('calendar_event_id', $this->event->getKey())->count())->toBe(0);
     });
@@ -112,7 +113,7 @@ describe('SyncCalendarEventToExternalCalendar job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new SyncCalendarEventToExternalCalendar($this->event))->handle();
+        new SyncCalendarEventToExternalCalendar($this->event)->handle();
 
         expect($this->integration->refresh()->sync_status)->toBe(CalendarSyncStatusEnum::Error)
             ->and($this->integration->refresh()->last_error_message)->toBe('API rate limit exceeded');
@@ -121,7 +122,7 @@ describe('SyncCalendarEventToExternalCalendar job', function (): void {
     it('does nothing when no users have calendar integrations', function (): void {
         $this->integration->delete();
 
-        (new SyncCalendarEventToExternalCalendar($this->event))->handle();
+        new SyncCalendarEventToExternalCalendar($this->event)->handle();
 
         expect(ExternalCalendarEvent::query()->where('calendar_event_id', $this->event->getKey())->count())->toBe(0);
     });

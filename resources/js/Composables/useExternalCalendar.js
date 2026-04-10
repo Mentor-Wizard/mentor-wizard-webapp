@@ -84,6 +84,10 @@ export function useExternalCalendar(providers) {
     useForm({}).delete(route('external-calendar.disconnect', { provider: providerKey }));
   }
 
+  function retrySync(providerKey) {
+    useForm({}).post(route('external-calendar.retry', { provider: providerKey }));
+  }
+
   return {
     notification,
     availableCalendars,
@@ -93,5 +97,6 @@ export function useExternalCalendar(providers) {
     authorizeCalDav,
     selectCalendar,
     disconnect,
+    retrySync,
   };
 }

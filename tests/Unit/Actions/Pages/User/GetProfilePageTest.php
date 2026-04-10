@@ -25,7 +25,7 @@ describe('User Page', function (): void {
 
         session(['status' => 'test-status']);
         $action = new GetProfilePage;
-        $result = $action->handle();
+        $result = $action->handle(request());
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
@@ -48,7 +48,7 @@ describe('User Page', function (): void {
         session(['status' => $status]);
 
         $action = new GetProfilePage;
-        $result = $action->handle();
+        $result = $action->handle(request());
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)

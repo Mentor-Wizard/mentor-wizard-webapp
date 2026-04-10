@@ -7,14 +7,16 @@ use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
+use Database\Seeders\RoleSeeder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 mutates(ExternalCalendarSynchronizationService::class);
 
 describe('ExternalCalendarSynchronizationService', function (): void {
     beforeEach(function (): void {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
-        $this->service = new ExternalCalendarSynchronizationService();
+        $this->service = new ExternalCalendarSynchronizationService;
     });
 
     describe('saveCredentialsAndBuildOAuthUrl', function (): void {
@@ -23,7 +25,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
             $mockService->shouldReceive('saveCredentials')
                 ->once()
                 ->with(
-                    Mockery::on(fn ($u) => $u->getKey() === $this->user->getKey()),
+                    Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
                     'client-id',
                     'client-secret',
                 );
@@ -51,7 +53,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
             $mockService->shouldReceive('saveCredentials')
                 ->once()
                 ->with(
-                    Mockery::on(fn ($u) => $u->getKey() === $this->user->getKey()),
+                    Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
                     'apple-id',
                     'app-password',
                 );
@@ -78,7 +80,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
             $mockService->shouldReceive('handleCallback')
                 ->once()
                 ->with(
-                    Mockery::on(fn ($u) => $u->getKey() === $this->user->getKey()),
+                    Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
                     'auth-code-123',
                 )
                 ->andReturn($integration);
@@ -105,7 +107,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
             $mockService = Mockery::mock(ExternalCalendarServiceInterface::class);
             $mockService->shouldReceive('fetchCalendars')
                 ->once()
-                ->with(Mockery::on(fn ($i) => $i->getKey() === $integration->getKey()))
+                ->with(Mockery::on(fn ($i): bool => $i->getKey() === $integration->getKey()))
                 ->andReturn([
                     'success'   => true,
                     'calendars' => [
@@ -125,7 +127,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
 
         it('throws when no integration exists', function (): void {
             $this->service->fetchCalendars($this->user, CalendarProviderEnum::Google);
-        })->throws(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        })->throws(ModelNotFoundException::class);
     });
 
     describe('selectCalendar', function (): void {
@@ -139,7 +141,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
             $mockService->shouldReceive('selectCalendar')
                 ->once()
                 ->with(
-                    Mockery::on(fn ($u) => $u->getKey() === $this->user->getKey()),
+                    Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
                     'cal-123',
                     'My Calendar',
                 )

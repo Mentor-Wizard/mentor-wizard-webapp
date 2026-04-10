@@ -22,15 +22,11 @@ class ExternalCalendarConnectDirect
 
     public function asController(Request $request, string $provider): RedirectResponse
     {
-        if (! CalendarProviderEnum::isValid($provider)) {
-            abort(Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+        abort_unless(CalendarProviderEnum::isValid($provider), Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $calendarProvider = CalendarProviderEnum::from($provider);
 
-        if (! $calendarProvider->isCalDav()) {
-            abort(Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+        abort_unless($calendarProvider->isCalDav(), Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $request->validate([
             'client_id'     => ['required', 'string', 'email'],

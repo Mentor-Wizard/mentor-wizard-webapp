@@ -55,17 +55,17 @@ class UpdateExternalCalendarEvent implements ShouldQueue
     {
         try {
             /** @var ExternalCalendarServiceInterface $service */
-            $service = app($integration->provider->getService());
+            $service = resolve($integration->provider->getService());
 
             $service->updateEvent($this->calendarEvent, $integration, $externalEvent->external_event_id);
 
-            Log::info("Updated external event {$externalEvent->external_event_id} for calendar event {$this->calendarEvent->getKey()}");
-        } catch (Throwable $e) {
-            Log::error("Failed to update calendar event {$this->calendarEvent->getKey()} for integration {$integration->getKey()}: {$e->getMessage()}");
+            Log::info(sprintf('Updated external event %s for calendar event %s', $externalEvent->external_event_id, $this->calendarEvent->getKey()));
+        } catch (Throwable $throwable) {
+            Log::error(sprintf('Failed to update calendar event %s for integration %s: %s', $this->calendarEvent->getKey(), $integration->getKey(), $throwable->getMessage()));
 
             $integration->update([
                 'sync_status'        => CalendarSyncStatusEnum::Error,
-                'last_error_message' => $e->getMessage(),
+                'last_error_message' => $throwable->getMessage(),
             ]);
         }
     }

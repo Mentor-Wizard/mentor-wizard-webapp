@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Actions\Calendar\ExternalCalendarSelectCalendar;
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use Database\Seeders\RoleSeeder;
 
-mutates(App\Actions\Calendar\ExternalCalendarSelectCalendar::class);
+mutates(ExternalCalendarSelectCalendar::class);
 
 describe('ExternalCalendarSelectCalendar', function (): void {
     beforeEach(function (): void {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
     });
 
@@ -25,7 +27,7 @@ describe('ExternalCalendarSelectCalendar', function (): void {
         $service->shouldReceive('selectCalendar')
             ->once()
             ->with(
-                Mockery::on(fn ($u) => $u->getKey() === $this->user->getKey()),
+                Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
                 'primary-calendar-id',
                 'My Primary Calendar',
             )

@@ -113,7 +113,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             ->put($eventUrl);
 
         if (! $response->successful()) {
-            throw new RuntimeException("Apple CalDAV event creation failed: HTTP {$response->status()}");
+            throw new RuntimeException('Apple CalDAV event creation failed: HTTP '.$response->status());
         }
 
         return $eventUrl;
@@ -131,7 +131,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             ->put($externalEventId);
 
         if (! $response->successful()) {
-            throw new RuntimeException("Apple CalDAV event update failed: HTTP {$response->status()}");
+            throw new RuntimeException('Apple CalDAV event update failed: HTTP '.$response->status());
         }
     }
 
@@ -144,7 +144,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
 
         // 404 means the event was already removed externally — treat as success
         if (! $response->successful() && $response->status() !== 404) {
-            throw new RuntimeException("Apple CalDAV event deletion failed: HTTP {$response->status()}");
+            throw new RuntimeException('Apple CalDAV event deletion failed: HTTP '.$response->status());
         }
     }
 
@@ -204,12 +204,12 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             ->send('PROPFIND', $calendarHomeUrl);
 
         if (! $response->successful()) {
-            $error = "Unable to list calendars: HTTP {$response->status()}";
+            $error = 'Unable to list calendars: HTTP '.$response->status();
 
             return ['success' => false, 'calendars' => [], 'error' => $error];
         }
 
-        $calendars = $this->parseCalendarList($response->body(), $calendarHomeUrl);
+        $calendars = $this->parseCalendarList($response->body());
 
         return ['success' => true, 'calendars' => $calendars, 'error' => null];
     }
@@ -249,7 +249,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
     /**
      * @return list<array{id: string, name: string, primary: bool}>
      */
-    private function parseCalendarList(string $xml, string $calendarHomeUrl): array
+    private function parseCalendarList(string $xml): array
     {
         $doc = new DOMDocument;
 
@@ -341,7 +341,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             ."DTSTART:{$start}\r\n"
             ."DTEND:{$end}\r\n"
             ."SUMMARY:{$event->title}\r\n"
-            ."{$description}"
+            .$description
             ."END:VEVENT\r\n"
             ."END:VCALENDAR\r\n";
     }
@@ -363,9 +363,9 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
         $xpath->registerNamespace('C', 'urn:ietf:params:xml:ns:caldav');
 
         $queries = [
-            "//{$elementName}/D:{$childElement}",
-            "//D:{$elementName}/D:{$childElement}",
-            "//C:{$elementName}/D:{$childElement}",
+            sprintf('//%s/D:%s', $elementName, $childElement),
+            sprintf('//D:%s/D:%s', $elementName, $childElement),
+            sprintf('//C:%s/D:%s', $elementName, $childElement),
         ];
 
         foreach ($queries as $query) {

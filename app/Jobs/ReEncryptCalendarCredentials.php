@@ -69,8 +69,10 @@ class ReEncryptCalendarCredentials implements ShouldQueue
 
         foreach (self::ENCRYPTED_FIELDS as $field) {
             $raw = $integration->getRawOriginal($field);
-
-            if ($raw === null || $raw === '') {
+            if ($raw === null) {
+                continue;
+            }
+            if ($raw === '') {
                 continue;
             }
 

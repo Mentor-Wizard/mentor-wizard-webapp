@@ -92,7 +92,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         // Status should become CONFIRMED for host
         expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+            ->toBe(CalendarEventStatusEnum::CONFIRMED);
 
         // Pivot confirmed_at should be set for the host
         $pivot = $this->event->fresh()->calendarEventUsers()->where('user_id', $this->host->getKey())->first()?->pivot;
@@ -109,7 +109,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         // Status should remain pending when mentee confirms
         expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
 
         $pivot = $this->event->fresh()->calendarEventUsers()->where('user_id', $this->mentee->getKey())->first()?->pivot;
         expect($pivot?->confirmed_at)->not->toBeNull();
@@ -131,7 +131,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
             ->and(session('success'))->toBe('Event is confirmed on your side, but waiting for confirmation from CO-HOST');
 
         expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('rejects confirmation when exactly ONE overlapping confirmed event exists', function (): void {
@@ -159,7 +159,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         // Event should NOT be confirmed
         expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('excludes current event from overlap check (whereNotIn with event ID)', function (): void {
@@ -176,7 +176,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         // Status should become CONFIRMED
         expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+            ->toBe(CalendarEventStatusEnum::CONFIRMED);
     });
 
     it('rejects confirmation with error when start time is in the past', function (): void {
@@ -195,7 +195,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         // Event should NOT be confirmed
         expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('cancels all overlapping pending events after confirming', function (): void {
@@ -229,9 +229,9 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
-        expect($overlapping1->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
-        expect($overlapping2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
+        expect($overlapping1->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
+        expect($overlapping2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('does not cancel pending events in non-overlapping time slots', function (): void {
@@ -252,8 +252,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
-        expect($nonOverlapping->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
+        expect($nonOverlapping->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('cancels overlapping pending events across different mentor programs of the same mentor', function (): void {
@@ -278,8 +278,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
-        expect($overlappingOtherProgram->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
+        expect($overlappingOtherProgram->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('does not cancel already cancelled events in overlapping slots', function (): void {
@@ -300,8 +300,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         new ConfirmCalendarEvent()->handle($this->mentorProgram, $this->event);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value)
-            ->and($alreadyCancelled->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
+            ->and($alreadyCancelled->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('whereNotIn must include event ID to exclude self from overlap check (kills RemoveArrayItem)', function (): void {

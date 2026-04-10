@@ -27,9 +27,7 @@ class ExternalCalendarDisconnect
 
     public function asController(Request $request, string $provider): RedirectResponse
     {
-        if (! CalendarProviderEnum::isValid($provider)) {
-            abort(Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+        abort_unless(CalendarProviderEnum::isValid($provider), Response::HTTP_UNPROCESSABLE_ENTITY);
 
         /** @var User $user */
         $user = $request->user();

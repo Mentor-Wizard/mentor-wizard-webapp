@@ -19,6 +19,7 @@ const {
   authorizeCalDav,
   selectCalendar,
   disconnect,
+  retrySync,
 } = useExternalCalendar(providers);
 
 const googleProvider = computed(() => page.props.calendarProviders?.find((p) => p.key === 'google'));
@@ -137,6 +138,14 @@ const providerLabels = {
             >
               {{ statusLabels[activeGoogleIntegration?.sync_status] ?? activeGoogleIntegration?.sync_status ?? 'Disconnected' }}
             </span>
+            <button
+              v-if="anyGoogleConnected && activeGoogleIntegration?.sync_status === 'error'"
+              type="button"
+              class="rounded-md bg-yellow-50 px-3 py-1.5 text-sm font-semibold text-yellow-800 shadow-xs ring-1 ring-yellow-300 ring-inset hover:bg-yellow-100"
+              @click="retrySync(googlePersonalConnected ? googlePersonalProvider.key : googleProvider.key)"
+            >
+              Retry Sync
+            </button>
             <button
               v-if="anyGoogleConnected"
               type="button"
@@ -333,6 +342,14 @@ const providerLabels = {
               {{ statusLabels[appleProvider.sync_status] ?? appleProvider.sync_status }}
             </span>
             <button
+              v-if="appleProvider.connected && !appleProvider.needs_reauth && appleProvider.sync_status === 'error'"
+              type="button"
+              class="rounded-md bg-yellow-50 px-3 py-1.5 text-sm font-semibold text-yellow-800 shadow-xs ring-1 ring-yellow-300 ring-inset hover:bg-yellow-100"
+              @click="retrySync(appleProvider.key)"
+            >
+              Retry Sync
+            </button>
+            <button
               v-if="appleProvider.connected && !appleProvider.needs_reauth"
               type="button"
               class="rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
@@ -469,6 +486,14 @@ const providerLabels = {
             >
               {{ statusLabels[provider.sync_status] ?? provider.sync_status }}
             </span>
+            <button
+              v-if="provider.connected && !provider.needs_reauth && provider.sync_status === 'error'"
+              type="button"
+              class="rounded-md bg-yellow-50 px-3 py-1.5 text-sm font-semibold text-yellow-800 shadow-xs ring-1 ring-yellow-300 ring-inset hover:bg-yellow-100"
+              @click="retrySync(provider.key)"
+            >
+              Retry Sync
+            </button>
             <button
               v-if="provider.connected && !provider.needs_reauth"
               type="button"

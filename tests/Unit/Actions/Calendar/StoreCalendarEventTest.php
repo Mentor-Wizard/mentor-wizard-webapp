@@ -191,7 +191,7 @@ describe('Store Calendar CalendarEvent', function (): void {
         $event = CalendarEvent::query()->latest('id')->first();
         expect($event)
             ->title->toBe('Planning')
-            ->status->toBe(CalendarEventStatusEnum::CONFIRMED->value)
+            ->status->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->date->toBe($start->format('Y-m-d'));
 
         $pivot = $event->calendarEventUsers()
@@ -255,7 +255,7 @@ describe('Store Calendar CalendarEvent', function (): void {
         $event = CalendarEvent::query()->latest('id')->first();
         expect($event)
             ->title->toBe('Planning')
-            ->status->toBe(CalendarEventStatusEnum::CONFIRMED->value)
+            ->status->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->date->toBe($start->format('Y-m-d'));
 
         $attachedUsers = $event->calendarEventUsers()

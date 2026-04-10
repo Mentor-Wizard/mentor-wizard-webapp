@@ -9,6 +9,8 @@ use App\Actions\Calendar\ExternalCalendarConnectCallback;
 use App\Actions\Calendar\ExternalCalendarConnectDirect;
 use App\Actions\Calendar\ExternalCalendarConnectRedirect;
 use App\Actions\Calendar\ExternalCalendarDisconnect;
+use App\Actions\Calendar\ExternalCalendarRetrySync;
+use App\Actions\Calendar\ExternalCalendarSyncSingleEvent;
 use App\Actions\Calendar\ExternalCalendarSelectCalendar;
 use App\Actions\Calendar\StoreCalendarEvent;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
@@ -126,6 +128,10 @@ Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->g
         ->name('external-calendar.select');
     Route::delete('disconnect/{provider}', ExternalCalendarDisconnect::class)
         ->name('external-calendar.disconnect');
+    Route::post('retry/{provider}', ExternalCalendarRetrySync::class)
+        ->name('external-calendar.retry');
+    Route::post('sync-event/{calendarEvent}/{provider}', ExternalCalendarSyncSingleEvent::class)
+        ->name('external-calendar.sync-event');
 });
 
 // Callback is outside auth middleware — user is identified via encrypted state param

@@ -66,6 +66,6 @@ class ExternalCalendarSynchronizationService
 
     private function resolveService(CalendarProviderEnum $provider): ExternalCalendarServiceInterface
     {
-        return app($provider->getService());
+        return resolve($provider->getService());
     }
 }

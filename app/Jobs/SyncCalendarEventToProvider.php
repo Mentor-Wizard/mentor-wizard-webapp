@@ -16,7 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Throwable;
 
-class SyncCalendarEventToExternalCalendar implements ShouldQueue
+class SyncCalendarEventToProvider implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -27,44 +27,31 @@ class SyncCalendarEventToExternalCalendar implements ShouldQueue
 
     public int $backoff = 60;
 
-    public function __construct(public readonly CalendarEvent $calendarEvent) {}
+    public function __construct(
+        public readonly CalendarEvent $calendarEvent,
+        public readonly UserCalendarIntegration $integration,
+    ) {}
 
     public function handle(): void
     {
-        $userIds = $this->calendarEvent
-            ->calendarEventUsers()
-            ->pluck('users.id');
-
-        $integrations = UserCalendarIntegration::query()
-            ->whereIn('user_id', $userIds)
-            ->where('sync_status', CalendarSyncStatusEnum::Active)
-            ->get();
-
-        foreach ($integrations as $integration) {
-            $this->syncForIntegration($integration);
-        }
-    }
-
-    private function syncForIntegration(UserCalendarIntegration $integration): void
-    {
         try {
             /** @var ExternalCalendarServiceInterface $service */
-            $service = resolve($integration->provider->getService());
+            $service = resolve($this->integration->provider->getService());
 
-            $externalEventId = $service->createEvent($this->calendarEvent, $integration);
+            $externalEventId = $service->createEvent($this->calendarEvent, $this->integration);
 
             ExternalCalendarEvent::query()->updateOrCreate(
                 [
                     'calendar_event_id' => $this->calendarEvent->getKey(),
-                    'user_id'           => $integration->user_id,
-                    'provider'          => $integration->provider,
+                    'user_id'           => $this->integration->user_id,
+                    'provider'          => $this->integration->provider,
                 ],
                 [
                     'external_event_id' => $externalEventId,
                 ]
             );
         } catch (Throwable $throwable) {
-            $integration->update([
+            $this->integration->update([
                 'sync_status'        => CalendarSyncStatusEnum::Error,
                 'last_error_message' => $throwable->getMessage(),
             ]);

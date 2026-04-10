@@ -66,7 +66,7 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
 
         expect(CalendarEvent::query()->find($this->event->getKey()))->not->toBeNull();
         expect(CalendarEvent::query()->find($this->event->getKey())?->status)
-            ->toBe(CalendarEventStatusEnum::CANCELLED->value);
+            ->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('deletes event when status is pending or cancelled', function (): void {

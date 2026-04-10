@@ -105,6 +105,7 @@ class MentorProgram extends Model
     {
         return Attribute::make(get: fn () => $this->calendarEvents()
             ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION)
+            ->where('start_date_time', '>=', today())
             ->count());
     }
 
@@ -115,6 +116,7 @@ class MentorProgram extends Model
     {
         return Attribute::make(get: fn () => $this->calendarEvents()
             ->where('status', CalendarEventStatusEnum::CONFIRMED)
+            ->where('start_date_time', '>=', today())
             ->count());
     }
 

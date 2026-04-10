@@ -19,6 +19,8 @@ mutates(UpdateExternalCalendarEvent::class);
 
 describe('UpdateExternalCalendarEvent job', function (): void {
     beforeEach(function (): void {
+        config(['calendar.encryption_key1' => base64_encode(random_bytes(32))]);
+
         $this->user = User::factory()->create();
         $this->mentorProgram = MentorProgram::factory()->create(['mentor_id' => $this->user->getKey()]);
 
@@ -50,14 +52,14 @@ describe('UpdateExternalCalendarEvent job', function (): void {
         $service->shouldReceive('updateEvent')
             ->once()
             ->with(
-                Mockery::on(fn ($e) => $e->getKey() === $this->event->getKey()),
-                Mockery::on(fn ($i) => $i->getKey() === $this->integration->getKey()),
+                Mockery::on(fn ($e): bool => $e->getKey() === $this->event->getKey()),
+                Mockery::on(fn ($i): bool => $i->getKey() === $this->integration->getKey()),
                 'ext-event-123',
             );
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new UpdateExternalCalendarEvent($this->event))->handle();
+        new UpdateExternalCalendarEvent($this->event)->handle();
     });
 
     it('skips integrations that are not active', function (): void {
@@ -68,7 +70,7 @@ describe('UpdateExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new UpdateExternalCalendarEvent($this->event))->handle();
+        new UpdateExternalCalendarEvent($this->event)->handle();
     });
 
     it('marks integration as error and logs when update fails', function (): void {
@@ -79,7 +81,7 @@ describe('UpdateExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new UpdateExternalCalendarEvent($this->event))->handle();
+        new UpdateExternalCalendarEvent($this->event)->handle();
 
         expect($this->integration->refresh()->sync_status)->toBe(CalendarSyncStatusEnum::Error)
             ->and($this->integration->refresh()->last_error_message)->toBe('Google API error');
@@ -93,6 +95,6 @@ describe('UpdateExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new UpdateExternalCalendarEvent($this->event))->handle();
+        new UpdateExternalCalendarEvent($this->event)->handle();
     });
 });

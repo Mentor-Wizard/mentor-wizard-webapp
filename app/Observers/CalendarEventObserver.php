@@ -10,7 +10,6 @@ use App\Jobs\DeleteExternalCalendarEvent;
 use App\Jobs\SyncCalendarEventToExternalCalendar;
 use App\Jobs\UpdateExternalCalendarEvent;
 use App\Models\CalendarEvent;
-use Illuminate\Support\Facades\Log;
 
 class CalendarEventObserver
 {
@@ -25,34 +24,30 @@ class CalendarEventObserver
 
     public function created(CalendarEvent $event): void
     {
-        Log::info('Calendar event created'.$event->getKey().var_export($event->status, true));
-
         if ($event->status === CalendarEventStatusEnum::CONFIRMED) {
-            SyncCalendarEventToExternalCalendar::dispatch($event);
+            dispatch(new SyncCalendarEventToExternalCalendar($event));
         }
     }
 
     public function updated(CalendarEvent $event): void
     {
-        Log::info('Calendar event updated'.$event->getKey().var_export($event->status, true));
-
         if ($event->wasChanged('status')) {
             (new CreateMentorSessionForCalendarEvent)->handle($event);
 
             if ($event->status === CalendarEventStatusEnum::CONFIRMED) {
-                SyncCalendarEventToExternalCalendar::dispatch($event);
+                dispatch(new SyncCalendarEventToExternalCalendar($event));
             }
 
             if ($event->status === CalendarEventStatusEnum::CANCELLED) {
-                DeleteExternalCalendarEvent::dispatch($event->getKey());
+                dispatch(new DeleteExternalCalendarEvent($event->getKey()));
             }
         } elseif ($event->status === CalendarEventStatusEnum::CONFIRMED && $event->wasChanged(self::CONTENT_FIELDS)) {
-            UpdateExternalCalendarEvent::dispatch($event);
+            dispatch(new UpdateExternalCalendarEvent($event));
         }
     }
 
     public function deleting(CalendarEvent $event): void
     {
-        DeleteExternalCalendarEvent::dispatch($event->getKey());
+        dispatch(new DeleteExternalCalendarEvent($event->getKey()));
     }
 }

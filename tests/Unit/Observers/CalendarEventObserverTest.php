@@ -256,7 +256,7 @@ describe('CalendarEventObserver', function (): void {
 
             $event->update(['status' => CalendarEventStatusEnum::CANCELLED]);
 
-            Queue::assertPushed(DeleteExternalCalendarEvent::class, fn ($job) => $job->calendarEventId === $event->getKey());
+            Queue::assertPushed(DeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $event->getKey());
         });
 
         it('dispatches UpdateExternalCalendarEvent when CONFIRMED event content fields change', function (): void {
@@ -273,7 +273,7 @@ describe('CalendarEventObserver', function (): void {
 
             $event->update(['title' => 'Updated title']);
 
-            Queue::assertPushed(UpdateExternalCalendarEvent::class, fn ($job) => $job->calendarEvent->getKey() === $event->getKey());
+            Queue::assertPushed(UpdateExternalCalendarEvent::class, fn ($job): bool => $job->calendarEvent->getKey() === $event->getKey());
         });
 
         it('does not dispatch UpdateExternalCalendarEvent when non-content fields change', function (): void {
@@ -312,7 +312,7 @@ describe('CalendarEventObserver', function (): void {
             $eventId = $event->getKey();
             $event->delete();
 
-            Queue::assertPushed(DeleteExternalCalendarEvent::class, fn ($job) => $job->calendarEventId === $eventId);
+            Queue::assertPushed(DeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $eventId);
         });
     });
 

@@ -22,17 +22,25 @@ class ConfirmedCalendarEventsListPage
 
         $query = $user->calendarEvents()
             ->where('status', CalendarEventStatusEnum::CONFIRMED->value)
-            ->where('start_date_time', '>=', now());
+            ->with(['mentorProgram:id,name', 'participants:id,username']);
 
         if ($mentorProgram instanceof MentorProgram) {
             $query->where('mentor_program_id', $mentorProgram->getKey());
         }
 
-        $query->with(['mentorProgram:id,name', 'participants:id,username']);
-
         $events = $query->orderBy('start_date_time')->get();
 
-        $grouped = $events
+        $upcomingCalendarEvents = $events
+            ->filter(fn (CalendarEvent $event): bool => $event->start_date_time >= today())
+            ->groupBy(fn (CalendarEvent $event): int => $event->mentor_program_id ?? 0)
+            ->map(fn (Collection $group): array => [
+                'name'   => $group->first()->mentorProgram->name ?? 'Unknown Program',
+                'events' => $group->values(),
+            ]);
+
+        $pastCalendarEvents = $events
+            ->filter(fn (CalendarEvent $event): bool => $event->start_date_time < today())
+            ->sortByDesc('start_date_time')
             ->groupBy(fn (CalendarEvent $event): int => $event->mentor_program_id ?? 0)
             ->map(fn (Collection $group): array => [
                 'name'   => $group->first()->mentorProgram->name ?? 'Unknown Program',
@@ -40,8 +48,9 @@ class ConfirmedCalendarEventsListPage
             ]);
 
         return Inertia::render('Calendar/ListConfirmedCalendarEventsPage', [
-            'locale'         => app()->getLocale(),
-            'calendarEvents' => $grouped,
+            'locale'                 => app()->getLocale(),
+            'upcomingCalendarEvents' => $upcomingCalendarEvents,
+            'pastCalendarEvents'     => $pastCalendarEvents,
         ]);
     }
 }

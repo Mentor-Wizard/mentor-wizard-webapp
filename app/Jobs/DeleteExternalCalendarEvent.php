@@ -55,19 +55,19 @@ class DeleteExternalCalendarEvent implements ShouldQueue
     {
         try {
             /** @var ExternalCalendarServiceInterface $service */
-            $service = app($integration->provider->getService());
+            $service = resolve($integration->provider->getService());
 
             $service->deleteEvent($integration, $externalEvent->external_event_id);
 
-            Log::info("Deleted external event {$externalEvent->external_event_id} for calendar event {$this->calendarEventId}");
+            Log::info(sprintf('Deleted external event %s for calendar event %d', $externalEvent->external_event_id, $this->calendarEventId));
 
             $externalEvent->delete();
-        } catch (Throwable $e) {
-            Log::error("Failed to delete calendar event {$this->calendarEventId} for integration {$integration->getKey()}: {$e->getMessage()}");
+        } catch (Throwable $throwable) {
+            Log::error(sprintf('Failed to delete calendar event %d for integration %s: %s', $this->calendarEventId, $integration->getKey(), $throwable->getMessage()));
 
             $integration->update([
                 'sync_status'        => CalendarSyncStatusEnum::Error,
-                'last_error_message' => $e->getMessage(),
+                'last_error_message' => $throwable->getMessage(),
             ]);
         }
     }

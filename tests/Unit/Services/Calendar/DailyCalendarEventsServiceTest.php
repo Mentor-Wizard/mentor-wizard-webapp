@@ -46,7 +46,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
             /** @var CalendarEvent $event */
             $event = CalendarEvent::query()->create([
                 'title'             => 'Daily CalendarEvent',
-                'status'            => 'confirmed',
+                'status'            => CalendarEventStatusEnum::CONFIRMED->value,
                 'start_date_time'   => $start,
                 'end_date_time'     => $end,
                 'date'              => $start?->format('Y-m-d'),
@@ -122,7 +122,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
             'title'             => 'Daily CalendarEvent',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -138,7 +138,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $event2 = CalendarEvent::query()->create([
             'title'             => 'Daily CalendarEvent two months later',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -184,7 +184,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
             'title'             => 'Daily CalendarEvent',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -200,7 +200,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $event2 = CalendarEvent::query()->create([
             'title'             => 'Daily CalendarEvent two months later',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -245,7 +245,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $nextMonthEvent = CalendarEvent::query()->create([
             'title'             => 'Daily CalendarEvent',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -261,7 +261,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $priorMonthEvent = CalendarEvent::query()->create([
             'title'             => 'Daily CalendarEvent',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -296,7 +296,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
             'title'             => 'Daily CalendarEvent',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -395,7 +395,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
             'title'             => 'Late Event',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),
@@ -430,7 +430,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
             /** @var CalendarEvent $event */
             $event = CalendarEvent::query()->create([
                 'title'             => 'Late Event',
-                'status'            => 'confirmed',
+                'status'            => CalendarEventStatusEnum::CONFIRMED->value,
                 'start_date_time'   => $start,
                 'end_date_time'     => $end,
                 'date'              => $start?->format('Y-m-d'),
@@ -465,7 +465,7 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         /** @var CalendarEvent $event */
         $event = CalendarEvent::query()->create([
             'title'             => 'Late Event',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $start,
             'end_date_time'     => $end,
             'date'              => $start?->format('Y-m-d'),

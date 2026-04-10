@@ -146,7 +146,7 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
         if (! $response->successful()) {
             $error = $response->json('error.message') ?? 'Unknown error';
 
-            throw new RuntimeException("Google Calendar event creation failed: {$error}");
+            throw new RuntimeException('Google Calendar event creation failed: '.$error);
         }
 
         return (string) $response->json('id');
@@ -180,7 +180,7 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
         if (! $response->successful()) {
             $error = $response->json('error.message') ?? 'Unknown error';
 
-            throw new RuntimeException("Google Calendar event update failed: {$error}");
+            throw new RuntimeException('Google Calendar event update failed: '.$error);
         }
     }
 
@@ -202,7 +202,7 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
         if (! $response->successful() && $response->status() !== 404) {
             $error = $response->json('error.message') ?? 'Unknown error';
 
-            throw new RuntimeException("Google Calendar event deletion failed: {$error}");
+            throw new RuntimeException('Google Calendar event deletion failed: '.$error);
         }
     }
 

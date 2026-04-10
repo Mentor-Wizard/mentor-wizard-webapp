@@ -163,7 +163,7 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
         if (! $response->successful()) {
             $error = $response->json('error.message') ?? 'Unknown error';
 
-            throw new RuntimeException("Outlook Calendar event creation failed: {$error}");
+            throw new RuntimeException('Outlook Calendar event creation failed: '.$error);
         }
 
         return (string) $response->json('id');
@@ -200,7 +200,7 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
         if (! $response->successful()) {
             $error = $response->json('error.message') ?? 'Unknown error';
 
-            throw new RuntimeException("Outlook Calendar event update failed: {$error}");
+            throw new RuntimeException('Outlook Calendar event update failed: '.$error);
         }
     }
 
@@ -222,7 +222,7 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
         if (! $response->successful() && $response->status() !== 404) {
             $error = $response->json('error.message') ?? 'Unknown error';
 
-            throw new RuntimeException("Outlook Calendar event deletion failed: {$error}");
+            throw new RuntimeException('Outlook Calendar event deletion failed: '.$error);
         }
     }
 

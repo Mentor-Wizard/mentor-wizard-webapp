@@ -66,7 +66,7 @@ class ExternalCalendarConnectCallback
         if ($rawState !== '') {
             try {
                 /** @var array{user_id: int, provider: string} $payload */
-                $payload = json_decode(decrypt($rawState), true);
+                $payload = json_decode((string) decrypt($rawState), true);
 
                 if (isset($payload['user_id'], $payload['provider'])) {
                     $request->session()->forget('calendar_oauth_pending');

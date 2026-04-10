@@ -207,7 +207,7 @@ onMounted(() => {
   }
 });
 
-if (!form.title.trim()) {
+if (!form.title?.trim()) {
   errors.value.title = 'Title is required';
 }
 
@@ -219,7 +219,7 @@ if (!form.toTime) {
   errors.value.toTime = 'End time is required';
 }
 
-if (form.description.length > 2000) {
+if ((form.description?.length ?? 0) > 2000) {
   errors.value.description = 'Description is more than 2000 characters';
 }
 
@@ -762,126 +762,150 @@ watch(
                       </Listbox>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label
-                          for="from-date"
-                          class="block text-sm leading-6 font-medium text-gray-900"
-                        >
-                          <CalendarIcon class="mr-1 inline h-4 w-4" />
-                          From Date
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="from-date"
-                            v-model="form.fromDate"
-                            type="date"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.fromDate }"
-                            @input="onCustomEdit"
-                          />
-                          <p
-                            v-if="errors.fromDate"
-                            class="mt-1 text-sm text-red-600"
-                          >
-                            {{ errors.fromDate }}
-                          </p>
-                        </div>
+                    <!-- Date/time: read-only when slots available -->
+                    <div
+                      v-if="availableSlots && availableSlots.length"
+                      class="rounded-md border border-gray-200 bg-gray-50 p-3"
+                    >
+                      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-700">
+                        <span class="flex items-center gap-1">
+                          <CalendarIcon class="h-4 w-4 text-gray-400" />
+                          <span class="font-medium">Date:</span>
+                          {{ form.fromDate }}
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <ClockIcon class="h-4 w-4 text-gray-400" />
+                          <span class="font-medium">Time:</span>
+                          {{ form.fromTime }} – {{ form.toTime }}
+                        </span>
                       </div>
-
-                      <div>
-                        <label
-                          for="to-date"
-                          class="block text-sm leading-6 font-medium text-gray-900"
-                        >
-                          <CalendarIcon class="mr-1 inline h-4 w-4" />
-                          To Date
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="to-date"
-                            v-model="form.toDate"
-                            type="date"
-                            :min="form.fromDate"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.toDate }"
-                            @input="onCustomEdit"
-                          />
-                          <p
-                            v-if="errors.toDate"
-                            class="mt-1 text-sm text-red-600"
-                          >
-                            {{ errors.toDate }}
-                          </p>
-                        </div>
-                      </div>
+                      <p
+                        v-if="errors.fromTime || errors.fromDate"
+                        class="mt-1 text-sm text-red-600"
+                      >
+                        {{ errors.fromTime || errors.fromDate }}
+                      </p>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label
-                          for="from-time"
-                          class="block text-sm leading-6 font-medium text-gray-900"
-                        >
-                          <ClockIcon class="mr-1 inline h-4 w-4" />
-                          From Time
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="from-time"
-                            v-model="form.fromTime"
-                            type="time"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.fromTime }"
-                            @input="onCustomEdit"
-                            @blur="
-                              form.fromTime = roundTimeString(
-                                form.fromTime,
-                                roundingMinutes,
-                              )
-                            "
-                          />
-                          <p
-                            v-if="errors.fromTime"
-                            class="mt-1 text-sm text-red-600"
+                    <!-- Date/time: editable when no slots -->
+                    <template v-else>
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                          <label
+                            for="from-date"
+                            class="block text-sm leading-6 font-medium text-gray-900"
                           >
-                            {{ errors.fromTime }}
-                          </p>
+                            <CalendarIcon class="mr-1 inline h-4 w-4" />
+                            From Date
+                          </label>
+                          <div class="mt-2">
+                            <input
+                              id="from-date"
+                              v-model="form.fromDate"
+                              type="date"
+                              class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                              :class="{ 'ring-red-300': errors.fromDate }"
+                            />
+                            <p
+                              v-if="errors.fromDate"
+                              class="mt-1 text-sm text-red-600"
+                            >
+                              {{ errors.fromDate }}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label
+                            for="to-date"
+                            class="block text-sm leading-6 font-medium text-gray-900"
+                          >
+                            <CalendarIcon class="mr-1 inline h-4 w-4" />
+                            To Date
+                          </label>
+                          <div class="mt-2">
+                            <input
+                              id="to-date"
+                              v-model="form.toDate"
+                              type="date"
+                              :min="form.fromDate"
+                              class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                              :class="{ 'ring-red-300': errors.toDate }"
+                            />
+                            <p
+                              v-if="errors.toDate"
+                              class="mt-1 text-sm text-red-600"
+                            >
+                              {{ errors.toDate }}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
-                      <div>
-                        <label
-                          for="to-time"
-                          class="block text-sm leading-6 font-medium text-gray-900"
-                        >
-                          <ClockIcon class="mr-1 inline h-4 w-4" />
-                          To Time
-                        </label>
-                        <div class="mt-2">
-                          <input
-                            id="to-time"
-                            v-model="form.toTime"
-                            type="time"
-                            class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-                            :class="{ 'ring-red-300': errors.toTime }"
-                            @input="onCustomEdit"
-                            @blur="
-                              form.toTime = roundTimeString(
-                                form.toTime,
-                                roundingMinutes,
-                              )
-                            "
-                          />
-                          <p
-                            v-if="errors.toTime"
-                            class="mt-1 text-sm text-red-600"
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                          <label
+                            for="from-time"
+                            class="block text-sm leading-6 font-medium text-gray-900"
                           >
-                            {{ errors.toTime }}
-                          </p>
+                            <ClockIcon class="mr-1 inline h-4 w-4" />
+                            From Time
+                          </label>
+                          <div class="mt-2">
+                            <input
+                              id="from-time"
+                              v-model="form.fromTime"
+                              type="time"
+                              class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                              :class="{ 'ring-red-300': errors.fromTime }"
+                              @blur="
+                                form.fromTime = roundTimeString(
+                                  form.fromTime,
+                                  roundingMinutes,
+                                )
+                              "
+                            />
+                            <p
+                              v-if="errors.fromTime"
+                              class="mt-1 text-sm text-red-600"
+                            >
+                              {{ errors.fromTime }}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label
+                            for="to-time"
+                            class="block text-sm leading-6 font-medium text-gray-900"
+                          >
+                            <ClockIcon class="mr-1 inline h-4 w-4" />
+                            To Time
+                          </label>
+                          <div class="mt-2">
+                            <input
+                              id="to-time"
+                              v-model="form.toTime"
+                              type="time"
+                              class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+                              :class="{ 'ring-red-300': errors.toTime }"
+                              @blur="
+                                form.toTime = roundTimeString(
+                                  form.toTime,
+                                  roundingMinutes,
+                                )
+                              "
+                            />
+                            <p
+                              v-if="errors.toTime"
+                              class="mt-1 text-sm text-red-600"
+                            >
+                              {{ errors.toTime }}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </template>
                   </form>
                 </div>
               </div>

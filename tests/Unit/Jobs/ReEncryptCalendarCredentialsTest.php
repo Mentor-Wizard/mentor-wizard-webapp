@@ -6,13 +6,14 @@ use App\Enums\CalendarProviderEnum;
 use App\Jobs\ReEncryptCalendarCredentials;
 use App\Models\UserCalendarIntegration;
 use App\Services\Encryption\CalendarCredentialEncrypter;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Log;
 
 mutates(ReEncryptCalendarCredentials::class);
 
 describe('ReEncryptCalendarCredentials job', function (): void {
     beforeEach(function (): void {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $this->key1 = base64_encode(random_bytes(32));
 
         config([
@@ -20,12 +21,12 @@ describe('ReEncryptCalendarCredentials job', function (): void {
             'calendar.encryption_key2' => null,
         ]);
 
-        $this->encrypter = new CalendarCredentialEncrypter();
+        $this->encrypter = new CalendarCredentialEncrypter;
     });
 
     it('re-encrypts all credential fields for existing integrations', function (): void {
-        $originalToken = 'my-access-token-' . fake()->sha256();
-        $originalRefresh = 'my-refresh-token-' . fake()->sha256();
+        $originalToken = 'my-access-token-'.fake()->sha256();
+        $originalRefresh = 'my-refresh-token-'.fake()->sha256();
 
         $integration = UserCalendarIntegration::factory()->create([
             'provider'      => CalendarProviderEnum::Google,
@@ -36,7 +37,7 @@ describe('ReEncryptCalendarCredentials job', function (): void {
         // Capture the raw encrypted values before re-encryption
         $rawBefore = $integration->getRawOriginal('access_token');
 
-        (new ReEncryptCalendarCredentials())->handle($this->encrypter);
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
 
         $integration->refresh();
 
@@ -55,7 +56,7 @@ describe('ReEncryptCalendarCredentials job', function (): void {
             'last_encrypted_at' => null,
         ]);
 
-        (new ReEncryptCalendarCredentials())->handle($this->encrypter);
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
 
         $integration->refresh();
         expect($integration->last_encrypted_at)->not->toBeNull();
@@ -70,7 +71,7 @@ describe('ReEncryptCalendarCredentials job', function (): void {
             'client_secret' => null,
         ]);
 
-        (new ReEncryptCalendarCredentials())->handle($this->encrypter);
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
 
         $integration->refresh();
         expect($integration->access_token)->toBeNull()
@@ -84,10 +85,10 @@ describe('ReEncryptCalendarCredentials job', function (): void {
             'provider' => CalendarProviderEnum::Google,
         ]);
 
-        (new ReEncryptCalendarCredentials())->handle($this->encrypter);
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
 
         Log::shouldHaveReceived('info')
-            ->withArgs(fn ($message, $context) => str_contains($message, 'completed')
+            ->withArgs(fn ($message, $context): bool => str_contains($message, 'completed')
                 && $context['processed'] === 2
                 && $context['failed'] === 0)
             ->once();
@@ -110,13 +111,13 @@ describe('ReEncryptCalendarCredentials job', function (): void {
             ->where('id', $badIntegration->getKey())
             ->update(['access_token' => 'corrupted:data']);
 
-        (new ReEncryptCalendarCredentials())->handle($this->encrypter);
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
 
         Log::shouldHaveReceived('error')
             ->once();
 
         Log::shouldHaveReceived('info')
-            ->withArgs(fn ($message, $context) => str_contains($message, 'completed')
+            ->withArgs(fn ($message, $context): bool => str_contains($message, 'completed')
                 && $context['failed'] === 1)
             ->once();
     });

@@ -101,7 +101,7 @@ describe('CalendarEvent model', function (): void {
         expect($event)
             ->toBeInstanceOf(CalendarEvent::class)
             ->and($event->title)->toBe('CalendarEvent Create Test')
-            ->and($event->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value)
+            ->and($event->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->and($event->start_date_time->format('Y-m-d H:i'))->toBe('2025-08-22 09:00')
             ->and($event->end_date_time->format('Y-m-d H:i'))->toBe('2025-08-22 10:30')
             ->and($event->duration)->toBe((int) $start?->diffInMinutes($end))

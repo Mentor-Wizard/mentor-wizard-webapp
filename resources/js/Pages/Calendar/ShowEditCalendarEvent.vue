@@ -11,6 +11,7 @@ import {
   TransitionRoot,
 } from '@headlessui/vue';
 import {
+  ArrowPathIcon,
   CalendarIcon,
   CheckIcon,
   ChevronUpDownIcon,
@@ -45,6 +46,10 @@ const props = defineProps({
   calendarEvent: {
     type: Object,
     default: () => {},
+  },
+  unsyncedProviders: {
+    type: Array,
+    default: () => [],
   },
 });
 const mode = ref('show');
@@ -148,9 +153,28 @@ const handleSubmit = () => {
 };
 
 const handleClose = () => {
-  console.log('close');
-  console.log(props.calendarEvents);
   router.visit(route('pages.calendar.index'), {});
+};
+
+const syncingProvider = ref(null);
+
+const syncToProvider = (providerKey) => {
+  syncingProvider.value = providerKey;
+  useForm({}).post(
+    route('external-calendar.sync-event', {
+      calendarEvent: event.value.id,
+      provider: providerKey,
+    }),
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        router.reload({ only: ['unsyncedProviders'] });
+      },
+      onFinish: () => {
+        syncingProvider.value = null;
+      },
+    },
+  );
 };
 
 watch(
@@ -773,6 +797,33 @@ watch(
                         </svg>
                         Join Event
                       </a>
+                    </div>
+
+                    <!-- Sync to external calendar -->
+                    <div
+                      v-if="unsyncedProviders.length > 0"
+                      class="border-t border-gray-200 pt-4"
+                    >
+                      <h4 class="mb-2 flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                        <ArrowPathIcon class="h-4 w-4 text-gray-400" />
+                        Sync to calendar
+                      </h4>
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          v-for="provider in unsyncedProviders"
+                          :key="provider.key"
+                          type="button"
+                          :disabled="syncingProvider === provider.key"
+                          class="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          @click="syncToProvider(provider.key)"
+                        >
+                          <ArrowPathIcon
+                            class="h-3.5 w-3.5"
+                            :class="{ 'animate-spin': syncingProvider === provider.key }"
+                          />
+                          {{ provider.label }}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

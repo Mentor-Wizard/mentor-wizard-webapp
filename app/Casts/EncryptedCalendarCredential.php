@@ -19,7 +19,7 @@ class EncryptedCalendarCredential implements CastsAttributes
             return null;
         }
 
-        return app(CalendarCredentialEncrypter::class)->decrypt((string) $value);
+        return resolve(CalendarCredentialEncrypter::class)->decrypt((string) $value);
     }
 
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string
@@ -28,6 +28,6 @@ class EncryptedCalendarCredential implements CastsAttributes
             return null;
         }
 
-        return app(CalendarCredentialEncrypter::class)->encrypt((string) $value);
+        return resolve(CalendarCredentialEncrypter::class)->encrypt((string) $value);
     }
 }

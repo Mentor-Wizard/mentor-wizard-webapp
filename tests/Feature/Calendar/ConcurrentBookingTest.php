@@ -90,7 +90,7 @@ describe('Concurrent Booking (Feature)', function (): void {
 
             $response1->assertRedirect();
 
-            expect($event1->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+            expect($event1->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
 
             // Try to confirm second event - should fail due to overlap
             $response2 = $this->withSession(['_token' => 'test-token'])
@@ -104,7 +104,7 @@ describe('Concurrent Booking (Feature)', function (): void {
             $response2->assertSessionHas('error');
 
             // Second event should still be PENDING
-            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED->value);
+            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
         });
 
         it('allows booking adjacent slots without overlap', function (): void {
@@ -162,7 +162,7 @@ describe('Concurrent Booking (Feature)', function (): void {
                         '_token' => csrf_token(),
                     ]));
 
-            expect($event1->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+            expect($event1->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
 
             // Confirm second event - should succeed because no overlap
             $response2 = $this->withSession(['_token' => 'test-token'])
@@ -174,7 +174,7 @@ describe('Concurrent Booking (Feature)', function (): void {
 
             $response2->assertRedirect(route('pages.calendar.pending'));
 
-            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
         });
 
         it('blocks partial overlap scenarios', function (): void {
@@ -232,7 +232,7 @@ describe('Concurrent Booking (Feature)', function (): void {
             $response->assertSessionHas('error');
 
             // Second event should still be PENDING
-            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
         });
 
         it('blocks event completely inside another confirmed event', function (): void {
@@ -289,7 +289,7 @@ describe('Concurrent Booking (Feature)', function (): void {
             $response->assertRedirect(route('pages.calendar.pending'));
             $response->assertSessionHas('error');
 
-            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            expect($event2->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
         });
     });
 });

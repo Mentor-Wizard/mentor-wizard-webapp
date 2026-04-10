@@ -19,6 +19,8 @@ mutates(DeleteExternalCalendarEvent::class);
 
 describe('DeleteExternalCalendarEvent job', function (): void {
     beforeEach(function (): void {
+        config(['calendar.encryption_key1' => base64_encode(random_bytes(32))]);
+
         $this->user = User::factory()->create();
         $this->mentorProgram = MentorProgram::factory()->create(['mentor_id' => $this->user->getKey()]);
 
@@ -50,13 +52,13 @@ describe('DeleteExternalCalendarEvent job', function (): void {
         $service->shouldReceive('deleteEvent')
             ->once()
             ->with(
-                Mockery::on(fn ($i) => $i->getKey() === $this->integration->getKey()),
+                Mockery::on(fn ($i): bool => $i->getKey() === $this->integration->getKey()),
                 'ext-event-456',
             );
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new DeleteExternalCalendarEvent($this->event->getKey()))->handle();
+        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
@@ -64,7 +66,7 @@ describe('DeleteExternalCalendarEvent job', function (): void {
     it('deletes the ExternalCalendarEvent record when integration no longer exists', function (): void {
         $this->integration->delete();
 
-        (new DeleteExternalCalendarEvent($this->event->getKey()))->handle();
+        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
@@ -77,7 +79,7 @@ describe('DeleteExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new DeleteExternalCalendarEvent($this->event->getKey()))->handle();
+        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
 
         expect($this->integration->refresh()->sync_status)->toBe(CalendarSyncStatusEnum::Error)
             ->and($this->integration->refresh()->last_error_message)->toBe('Google API error');
@@ -93,6 +95,6 @@ describe('DeleteExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        (new DeleteExternalCalendarEvent($this->event->getKey()))->handle();
+        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
     });
 });

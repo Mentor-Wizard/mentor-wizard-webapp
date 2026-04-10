@@ -7,12 +7,13 @@ use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
+use Database\Seeders\RoleSeeder;
 
 mutates(ExternalCalendarDisconnect::class);
 
 describe('ExternalCalendarDisconnect', function (): void {
     beforeEach(function (): void {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
     });
 
@@ -27,7 +28,7 @@ describe('ExternalCalendarDisconnect', function (): void {
             $syncService->shouldReceive('disconnect')
                 ->once()
                 ->with(
-                    Mockery::on(fn ($u) => $u->getKey() === $this->user->getKey()),
+                    Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
                     CalendarProviderEnum::Google,
                 );
 
