@@ -1,4 +1,55 @@
+x-app-base: &app-base
+  image: ghcr.io/mentor-wizard/mentor-wizard-webapp:dev
+  pull_policy: always
+  restart: unless-stopped
+  env_file:
+    - .env
+  environment:
+    AUTORUN_ENABLED: 'true'
+    AUTORUN_LARAVEL_MIGRATION: 'true'
+    AUTORUN_LARAVEL_STORAGE_LINK: 'true'
+  volumes:
+    - ../../files/storage/logs:/var/www/html/storage/logs
+    - ../../files/storage/app:/var/www/html/storage/app
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
 services:
+  app:
+    <<: *app-base
+    command: ['php', 'artisan', 'octane:start', '--server=frankenphp', '--host=0.0.0.0', '--port=8080', '--workers=2']
+    expose:
+      - 8080
+      - 8443
+    healthcheck:
+      test: ['CMD', 'healthcheck-octane']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    post_start:
+      - command: chown -R www-data:www-data /var/www/html/storage && chmod -R 775 /var/www/html/storage
+        user: root
+
+  workers:
+    <<: *app-base
+    command: ['php', 'artisan', 'queue:work', '--sleep=1', '--tries=3', '--max-time=3600']
+    environment:
+      AUTORUN_ENABLED: 'false'
+
+  websockets:
+    <<: *app-base
+    command: ['php', 'artisan', 'reverb:start', '--host=0.0.0.0', '--port=8080', '--debug']
+    environment:
+      AUTORUN_ENABLED: 'false'
+    expose:
+      - 8080
+    healthcheck:
+      disable: true
+
   db:
     image: postgres:17-alpine3.20
     restart: unless-stopped
@@ -31,59 +82,6 @@ services:
       interval: 5s
       timeout: 10s
       retries: 20
-
-  app: &app
-    image: ghcr.io/mentor-wizard/mentor-wizard-webapp:dev
-    pull_policy: always
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      AUTORUN_ENABLED: 'true'
-      AUTORUN_LARAVEL_MIGRATION: 'true'
-      AUTORUN_LARAVEL_STORAGE_LINK: 'true'
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ../../files/storage/logs:/var/www/html/storage/logs
-      - ../../files/storage/app:/var/www/html/storage/app
-    command: ['php', 'artisan', 'octane:start', '--server=frankenphp', '--host=0.0.0.0', '--port=8080', '--workers=20', '--log-level=DEBUG']
-    expose:
-      - '8080'
-      - '8443'
-    healthcheck:
-      test: ['CMD', 'healthcheck-octane']
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
-    post_start:
-      - command: chown -R www-data:www-data /var/www/html/storage && chmod -R 775 /var/www/html/storage
-        user: root
-
-  workers:
-    <<: *app
-    environment:
-      AUTORUN_ENABLED: 'false'
-    command: ['php', 'artisan', 'queue:work', '--sleep=1', '--tries=3', '--max-time=3600']
-    expose: []
-    healthcheck:
-      disable: true
-    labels:
-      - 'traefik.enable=false'
-
-  websockets:
-    <<: *app
-    environment:
-      AUTORUN_ENABLED: 'false'
-    command: ['php', 'artisan', 'reverb:start', '--host=0.0.0.0', '--port=8080', '--debug']
-    expose:
-      - '8080'
-    healthcheck:
-      disable: true
 
   mailpit:
     image: axllent/mailpit:latest
