@@ -4,79 +4,64 @@ declare(strict_types=1);
 
 namespace App\DTO\Calendar;
 
-use App\Models\CalendarEvent;
-use App\Models\User;
-use App\Traits\Calendar\RetrievesUserPivotData;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
+use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Models\MentorProgram;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Date;
 
-final readonly class CalendarEventData
+readonly class CalendarEventData
 {
-    use RetrievesUserPivotData;
-
     public function __construct(
-        public int|string $id,
         public string $title,
-        public string $fromDateFormatted,
-        public string $fromDate,
-        public string $fromTime,
-        public string $toDate,
-        public string $type,
-        public string $toDateFormatted,
-        public string $toTime,
-        public int $duration,
+        public CarbonImmutable $startDateTime,
+        public CarbonImmutable $endDateTime,
+        public CalendarEventTypeEnum $type,
+        public MentorSessionTypeEnum $sessionType,
         public ?string $webLink,
+        public string $colour,
         public ?string $description,
-        public ?string $colour,
+        public CalendarEventStatusEnum $status,
+        public MentorProgram $mentorProgram,
     ) {}
 
-    public static function fromModel(CalendarEvent $event, string $timezone, ?User $user = null): self
+    public static function fromRequest(StoreCalendarEventRequest $request): self
     {
-        $user ??= auth()->user();
+        $validated = $request->validated();
 
-        $startDateTime = $event->start_date_time->copy()->tz($timezone);
-        $endDateTime = $event->end_date_time->copy()->tz($timezone);
+        $timezone = $request->user()->profile->timezone;
 
-        $userPivot = $event->calendarEventUsers
-            ->firstWhere('id', $user?->getKey())
-            ?->pivot;
+        /** @var CarbonImmutable $startDateTime */
+        $startDateTime = Date::createFromFormat('Y-m-d H:i', $validated['fromDate'].' '.$validated['fromTime'], $timezone)->timezone('UTC');
 
-        /** @var Pivot|null $userPivot */
+        /** @var CarbonImmutable $endDateTime */
+        $endDateTime = Date::createFromFormat('Y-m-d H:i', $validated['toDate'].' '.$validated['toTime'], $timezone)->timezone('UTC');
+
+        /** @var MentorProgram $mentorProgram */
+        $mentorProgram = MentorProgram::query()->findOrFail((int) $validated['mentor_program_id']);
+
+        $type = $validated['type'] === CalendarEventTypeEnum::GROUP->value
+            ? CalendarEventTypeEnum::GROUP
+            : CalendarEventTypeEnum::INDIVIDUAL;
+
+        $status = $mentorProgram->need_confirmation
+            ? CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION
+            : CalendarEventStatusEnum::CONFIRMED;
+
         return new self(
-            id: $event->getKey(),
-            title: $event->title,
-            fromDateFormatted: $startDateTime->format('Y-M-d'),
-            fromDate: $startDateTime->format('Y-m-d'),
-            fromTime: $startDateTime->format('H:i'),
-            toDate: $endDateTime->format('Y-m-d'),
-            type: $event->type,
-            toDateFormatted: $endDateTime->format('Y-M-d'),
-            toTime: $endDateTime->format('H:i'),
-            duration: (int) $startDateTime->diffInMinutes($endDateTime),
-            webLink: $event->web_link,
-            description: $event->description,
-            colour: $userPivot?->getAttribute('colour'),
+            title: (string) Arr::get($validated, 'title'),
+            startDateTime: $startDateTime,
+            endDateTime: $endDateTime,
+            type: $type,
+            sessionType: MentorSessionTypeEnum::from($validated['session_type']),
+            webLink: Arr::get($validated, 'webLink'),
+            colour: (string) Arr::get($validated, 'colour'),
+            description: Arr::get($validated, 'description'),
+            status: $status,
+            mentorProgram: $mentorProgram,
         );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function toArray(): array
-    {
-        return [
-            'id'                => $this->id,
-            'title'             => $this->title,
-            'fromDateFormatted' => $this->fromDateFormatted,
-            'fromDate'          => $this->fromDate,
-            'fromTime'          => $this->fromTime,
-            'toDate'            => $this->toDate,
-            'type'              => $this->type,
-            'toDateFormatted'   => $this->toDateFormatted,
-            'toTime'            => $this->toTime,
-            'duration'          => $this->duration,
-            'webLink'           => $this->webLink,
-            'description'       => $this->description,
-            'colour'            => $this->colour,
-        ];
     }
 }

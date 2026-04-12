@@ -23,12 +23,14 @@ describe('ExternalCalendarRetrySync', function (): void {
         $this->user = User::factory()->create();
     });
 
-    it('aborts with 422 for unknown provider', function (): void {
+    it('redirects to profile.edit with error for unknown provider', function (): void {
         Queue::fake();
 
-        $this->actingAs($this->user)
-            ->post(route('external-calendar.retry', ['provider' => 'unknown']))
-            ->assertStatus(422);
+        $response = $this->actingAs($this->user)
+            ->post(route('external-calendar.retry', ['provider' => 'unknown']));
+
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
     it('requires authentication', function (): void {
@@ -38,12 +40,14 @@ describe('ExternalCalendarRetrySync', function (): void {
             ->assertRedirect(route('login'));
     });
 
-    it('returns 404 when no integration exists for the provider', function (): void {
+    it('redirects to profile.edit with error when no integration exists for the provider', function (): void {
         Queue::fake();
 
-        $this->actingAs($this->user)
-            ->post(route('external-calendar.retry', ['provider' => 'google']))
-            ->assertNotFound();
+        $response = $this->actingAs($this->user)
+            ->post(route('external-calendar.retry', ['provider' => 'google']));
+
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->toBe('No calendar integration found for this provider.');
     });
 
     it('resets sync_status to active and clears last_error_message', function (): void {

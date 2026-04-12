@@ -9,11 +9,12 @@ import {
   MenuItems,
 } from '@headlessui/vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 import NavbarLogo from '@/Components/Navigation/Navbar/NavbarLogo.vue';
+import NotificationBell from '@/Components/UI/Notifications/NotificationBell.vue';
 import { useNavigation } from '@/Stores/navigation.js';
 
 defineProps({
@@ -124,14 +125,7 @@ const mobileNavLinkClasses = (navItemHref) => {
 
         <div class="hidden lg:ml-4 lg:flex lg:items-center">
           <div v-if="isLoggedIn" class="flex items-center">
-            <button
-              type="button"
-              class="relative shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
-            >
-              <span class="absolute -inset-1.5" />
-              <span class="sr-only">View notifications</span>
-              <BellIcon class="size-6" aria-hidden="true" />
-            </button>
+            <NotificationBell />
 
             <Menu as="div" class="relative ml-4 shrink-0">
               <div>
@@ -245,14 +239,9 @@ const mobileNavLinkClasses = (navItemHref) => {
               {{ currentUser.email }}
             </div>
           </div>
-          <button
-            type="button"
-            class="relative ml-auto shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
-          >
-            <span class="absolute -inset-1.5" />
-            <span class="sr-only">View notifications</span>
-            <BellIcon class="size-6" aria-hidden="true" />
-          </button>
+          <div class="ml-auto">
+            <NotificationBell />
+          </div>
         </div>
         <div class="mt-3 space-y-1">
           <DisclosureButton

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
-use App\Enums\CalendarProviderEnum;
+use App\Http\Requests\Calendar\ExternalCalendarConnectRedirectRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
-use Illuminate\Http\Request;
+use App\Traits\Calendar\HandlesCalendarIntegrationCleanup;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -16,26 +16,20 @@ use Symfony\Component\HttpFoundation\Response;
 class ExternalCalendarConnectRedirect
 {
     use AsController;
+    use HandlesCalendarIntegrationCleanup;
 
     public function __construct(
         private readonly ExternalCalendarSynchronizationService $synchronizationService,
     ) {}
 
-    public function asController(Request $request, string $provider): InertiaResponse|Response
+    public function handle(ExternalCalendarConnectRedirectRequest $request): InertiaResponse|Response
     {
-        abort_unless(CalendarProviderEnum::isValid($provider), Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        $calendarProvider = CalendarProviderEnum::from($provider);
+        $calendarProvider = $request->resolveProvider();
 
         $clientId = null;
         $clientSecret = null;
 
         if (! $calendarProvider->usesAppCredentials()) {
-            $request->validate([
-                'client_id'     => ['required', 'string', 'min:10'],
-                'client_secret' => ['required', 'string', 'min:10'],
-            ]);
-
             $clientId = $request->string('client_id')->toString();
             $clientSecret = $request->string('client_secret')->toString();
         }

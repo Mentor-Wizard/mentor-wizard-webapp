@@ -10,8 +10,8 @@ use App\Actions\Calendar\ExternalCalendarConnectDirect;
 use App\Actions\Calendar\ExternalCalendarConnectRedirect;
 use App\Actions\Calendar\ExternalCalendarDisconnect;
 use App\Actions\Calendar\ExternalCalendarRetrySync;
-use App\Actions\Calendar\ExternalCalendarSyncSingleEvent;
 use App\Actions\Calendar\ExternalCalendarSelectCalendar;
+use App\Actions\Calendar\ExternalCalendarSyncSingleEvent;
 use App\Actions\Calendar\StoreCalendarEvent;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\SetMainMentorProgram;
@@ -27,11 +27,11 @@ use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
+use App\Actions\Pages\Profile\ExternalCalendarSettingsPage;
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\ListMentorProfilePage;
-use App\Actions\Pages\Settings\ExternalCalendarSettingsPage;
 use App\Actions\Pages\UserSchedule\UserSchedulePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
@@ -137,5 +137,23 @@ Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->g
 // Callback is outside auth middleware — user is identified via encrypted state param
 Route::get('settings/external-calendar/callback/{provider}', ExternalCalendarConnectCallback::class)
     ->name('external-calendar.connect.callback');
+
+Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function (): void {
+    Route::get('/', fn () => response()->json(
+        auth()->user()->notifications()->latest()->limit(20)->get()
+    ))->name('notifications.index');
+
+    Route::post('{id}/read', function (string $id) {
+        auth()->user()->notifications()->where('id', $id)->update(['read_at' => now()]);
+
+        return response()->noContent();
+    })->name('notifications.read');
+
+    Route::post('read-all', function () {
+        auth()->user()->unreadNotifications()->update(['read_at' => now()]);
+
+        return response()->noContent();
+    })->name('notifications.read-all');
+});
 
 require __DIR__.'/auth.php';

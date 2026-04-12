@@ -6,6 +6,7 @@ namespace App\Http\Requests\Calendar;
 
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
+use App\Services\Calendar\CheckBookingSlotService;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use App\Traits\Calendar\CalendarEventRequestRules;
 use Illuminate\Contracts\Validation\Validator;
@@ -53,6 +54,19 @@ class StoreCalendarEventRequest extends FormRequest
                     $this->input('toDate').' '.$this->input('toTime'),  // @pest-mutate-ignore ConcatOperandRemoval
                     $timezone
                 );
+
+                $sessionDuration = (int) ($this->integer('selectedDuration') ?: $mentorProgram->session_duration);
+
+                $isValidSlot = new CheckBookingSlotService(
+                    $startDate,
+                    $endDate,
+                    $mentorProgram,
+                    $sessionDuration,
+                )->isValidSlot();
+
+                if (! $isValidSlot) {
+                    $validator->errors()->add('fromTime', 'The selected time must be one of the available time slots.');
+                }
 
                 $isWithinAvailableSlots = new CheckTimeSlotReservedService(
                     $startDate,

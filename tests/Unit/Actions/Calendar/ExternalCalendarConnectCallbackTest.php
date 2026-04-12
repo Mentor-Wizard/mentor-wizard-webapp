@@ -141,7 +141,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit'));
-        expect(session('error'))->toBe('No calendars found on this Google account.');
+        expect(session('error'))->toBe('No calendars found on this account.');
     });
 
     it('redirects with service error message when fetchCalendars fails', function (): void {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Calendar;
 
-use App\DTO\Calendar\CalendarEventData;
+use App\DTO\Calendar\CalendarUIEventData;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
@@ -52,7 +52,7 @@ class ShowCalendarEventPage
             'mentorProgramDuration' => $calendarEvent->mentorProgram->first()->session_duration,
             'availableSlots'        => new AvailableSlotOptionsForMentorProgram($calendarEvent)->getAvailableSlots(),
             'unsyncedProviders'     => $unsyncedProviders,
-            'calendarEvent'         => CalendarEventData::fromModel(
+            'calendarEvent'         => CalendarUIEventData::fromModel(
                 $calendarEvent->load('calendarEventUsers'),
                 $timezone,
                 $user

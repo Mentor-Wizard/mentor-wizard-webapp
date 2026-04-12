@@ -30,6 +30,7 @@ trait CalendarEventRequestRules
             'type'                  => ['required', Rule::in(CalendarEventTypeEnum::values())],
             'session_type'          => ['required', Rule::in(MentorSessionTypeEnum::values())],
             'mentor_program_id'     => ['required', 'integer', 'exists:mentor_programs,id'],
+            'selectedDuration'      => ['nullable', 'integer', 'min:1'],
         ];
     }
 

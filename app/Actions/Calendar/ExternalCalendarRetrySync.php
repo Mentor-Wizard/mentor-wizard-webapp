@@ -5,27 +5,23 @@ declare(strict_types=1);
 namespace App\Actions\Calendar;
 
 use App\Enums\CalendarEventStatusEnum;
-use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
+use App\Http\Requests\Calendar\ExternalCalendarRetrySyncRequest;
 use App\Jobs\SyncCalendarEventToExternalCalendar;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
-use Symfony\Component\HttpFoundation\Response;
 
 class ExternalCalendarRetrySync
 {
     use AsController;
 
-    public function asController(Request $request, string $provider): RedirectResponse
+    public function handle(ExternalCalendarRetrySyncRequest $request): RedirectResponse
     {
-        abort_unless(CalendarProviderEnum::isValid($provider), Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        $calendarProvider = CalendarProviderEnum::from($provider);
+        $calendarProvider = $request->resolveProvider();
 
         /** @var User $user */
         $user = $request->user();
@@ -33,7 +29,12 @@ class ExternalCalendarRetrySync
         $integration = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
             ->where('provider', $calendarProvider)
-            ->firstOrFail();
+            ->first();
+
+        if ($integration === null) {
+            return to_route('profile.edit')
+                ->with('error', 'No calendar integration found for this provider.');
+        }
 
         $integration->update([
             'sync_status'        => CalendarSyncStatusEnum::Active,

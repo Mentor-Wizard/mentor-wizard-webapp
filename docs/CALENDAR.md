@@ -246,9 +246,15 @@ The application supports two Google flows that cannot be active simultaneously:
 1. Go to [Google Cloud Console](https://console.cloud.google.com/) and create
    or select a project.
 
+   ![Google Cloud Console — create or select project](images/google-calendar/step-1.png)
+
 2. Enable the **Google Calendar API**:
    - Navigate to **APIs & Services → Library**
    - Search for "Google Calendar API" and click **Enable**
+
+   ![APIs & Services → Library](images/google-calendar/step-2.png)
+
+   ![Search and enable Google Calendar API](images/google-calendar/step-3.png)
 
 3. Configure the OAuth consent screen:
    - Go to **APIs & Services → OAuth consent screen**
@@ -258,6 +264,10 @@ The application supports two Google flows that cannot be active simultaneously:
    - Add your domain to **Authorized domains**
    - Submit for verification if you plan to allow more than 100 test users
 
+   ![OAuth consent screen — External](images/google-calendar/step-4.png)
+
+   ![OAuth consent screen — scopes and domain](images/google-calendar/step-5.png)
+
 4. Create OAuth 2.0 credentials:
    - Go to **APIs & Services → Credentials → Create Credentials → OAuth client ID**
    - Application type: **Web application**
@@ -266,6 +276,10 @@ The application supports two Google flows that cannot be active simultaneously:
      https://your-domain.com/settings/external-calendar/callback/google
      ```
    - Copy the **Client ID** and **Client Secret**
+
+   ![Create OAuth client ID](images/google-calendar/step-6.png)
+
+   ![Copy Client ID and Client Secret](images/google-calendar/step-7.png)
 
 5. Add to `.env`:
    ```env
@@ -303,30 +317,70 @@ free account. A free tier is sufficient for development.
 3. Fill in:
    - **Name**: e.g. `MentorWizard Calendar`
    - **Supported account types**: select  
-     **Accounts in any organizational directory (Any Azure AD directory – Multitenant) and personal Microsoft accounts**  
-     This is what makes it multi-tenant and allows personal Outlook/Hotmail accounts.
-   - **Redirect URI**: Web →  
-     `https://your-domain.com/settings/external-calendar/callback/outlook`
+     **Accounts in any organizational directory (Any Microsoft Entra ID tenant – Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)**  
+     This allows both work/school Entra ID accounts and personal Outlook/Hotmail accounts.
+   - **Redirect URI**: leave empty for now — you will add it in the next step.
 4. Click **Register**.
 5. Copy the **Application (client) ID** — this is `MICROSOFT_CLIENT_ID`.
 
-#### 3. Create a client secret
+![Azure — New app registration form](images/azure-calendar-app/azure_outlook1_app_registration.png)
+
+#### 3. Set the MPN ID (Branding & properties)
+
+1. In the left sidebar click **Branding & properties**.
+2. Find the **Publisher domain** and **MPN ID** fields.
+3. Enter your **Microsoft Partner Network (MPN) ID** in the MPN ID field. This
+   is required for the app to be shown as a verified publisher to users during
+   the OAuth consent screen — without it the consent dialog will display an
+   "unverified" warning.
+4. Click **Save**.
+
+> If you don't have an MPN ID yet, enroll at
+> [partner.microsoft.com](https://partner.microsoft.com). A free membership
+> tier is sufficient.
+
+![Azure — Branding & properties with MPN ID](images/azure-calendar-app/azure_outlook_4-branding.png)
+
+#### 4. Configure the redirect URI (Authentication tab)
+
+After registration you are taken to the app overview page.
+
+1. In the left sidebar click **Authentication**.
+2. Under **Platform configurations** click **Add a platform** and choose **Web**.
+3. Enter the redirect URI:
+   ```
+   https://your-domain.com/settings/external-calendar/callback/outlook
+   ```
+4. Click **Configure**, then **Save**.
+
+> You can add additional redirect URIs here later (e.g. a localhost URI for
+> local development: `http://localhost:8080/settings/external-calendar/callback/outlook`).
+
+![Azure — Authentication tab with redirect URI](images/azure-calendar-app/azure_outlook_2_redirect.png)
+
+#### 5. Create a client secret
 
 1. Inside the app registration, go to **Certificates & secrets → New client secret**.
 2. Set a description and expiry (choose 24 months for convenience).
 3. Copy the **Value** immediately — it is only shown once. This is `MICROSOFT_CLIENT_SECRET`.
 
-#### 4. Add API permissions
+![Azure — Certificates & secrets](images/azure-calendar-app/azure_outlook_5_client_secret.png)
+
+#### 6. Add API permissions
 
 1. Go to **API permissions → Add a permission → Microsoft Graph**.
 2. Select **Delegated permissions** and add:
+   - `Calendars.Read`
+   - `Calendars.ReadBasic.All`
    - `Calendars.ReadWrite`
    - `offline_access` (required for refresh tokens)
    - `User.Read`
 3. Click **Grant admin consent for [your tenant]** (if you have admin rights).
    If not, users will be prompted to consent on first login.
 
-#### 5. Add to `.env`
+![Azure — API permissions with Microsoft Graph delegated permissions](images/azure-calendar-app/azure_outlook_3_permissions.png)
+
+#### 7. Add to `.env`
 
 ```env
 MICROSOFT_CLIENT_ID=<application-client-id>
@@ -351,13 +405,24 @@ user-arranged.
 **What the user must do:**
 
 1. Sign in to [appleid.apple.com](https://appleid.apple.com).
+
+   ![Sign in to Apple ID](images/apple-calendar/step-1.png)
+
 2. Under **Sign-In and Security → App-Specific Passwords**, generate an
    app-specific password. This is required because Apple does not allow
    third-party apps to use the main Apple ID password.
+
+   ![Sign-In and Security section](images/apple-calendar/step-2.png)
+
+   ![Generate app-specific password](images/apple-calendar/step-3.png)
+
 3. In the application under **Settings → External Calendars**, select Apple
    Calendar and enter:
    - **Email / username**: their Apple ID email address
    - **Password**: the app-specific password generated above
+
+   ![Enter credentials in the app](images/apple-calendar/step-4.png)
+
 4. The CalDAV server URL used internally is
    `https://caldav.icloud.com` — this is hardcoded in the service and does
    not need to be configured.

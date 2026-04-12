@@ -7,6 +7,7 @@ namespace App\Services\ExternalCalendar;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use DateTimeInterface;
 
 interface ExternalCalendarServiceInterface
 {
@@ -22,6 +23,13 @@ interface ExternalCalendarServiceInterface
      * @return array{success: bool, calendars: list<array{id: string, name: string, primary: bool}>, error: string|null}
      */
     public function fetchCalendars(UserCalendarIntegration $integration): array;
+
+    /**
+     * Fetches events from the external calendar within the given UTC time range.
+     *
+     * @return list<FetchedCalendarEventData>
+     */
+    public function fetchEvents(UserCalendarIntegration $integration, DateTimeInterface $from, DateTimeInterface $to): array;
 
     /**
      * Creates an event in the external calendar.

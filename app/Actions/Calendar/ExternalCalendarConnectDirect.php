@@ -4,34 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
-use App\Enums\CalendarProviderEnum;
+use App\Http\Requests\Calendar\ExternalCalendarConnectDirectRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
+use App\Traits\Calendar\HandlesCalendarIntegrationCleanup;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
-use Symfony\Component\HttpFoundation\Response;
 
 class ExternalCalendarConnectDirect
 {
     use AsController;
+    use HandlesCalendarIntegrationCleanup;
 
     public function __construct(
         private readonly ExternalCalendarSynchronizationService $synchronizationService,
     ) {}
 
-    public function asController(Request $request, string $provider): RedirectResponse
+    public function handle(ExternalCalendarConnectDirectRequest $request): RedirectResponse
     {
-        abort_unless(CalendarProviderEnum::isValid($provider), Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        $calendarProvider = CalendarProviderEnum::from($provider);
-
-        abort_unless($calendarProvider->isCalDav(), Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        $request->validate([
-            'client_id'     => ['required', 'string', 'email'],
-            'client_secret' => ['required', 'string', 'min:10'],
-        ]);
+        $calendarProvider = $request->resolveProvider();
 
         /** @var User $user */
         $user = $request->user();
@@ -46,6 +37,8 @@ class ExternalCalendarConnectDirect
         $result = $this->synchronizationService->fetchCalendars($user, $calendarProvider);
 
         if (! $result['success'] || empty($result['calendars'])) {
+            $this->cleanupIntegration($user, $calendarProvider);
+
             $error = $result['error'] ?? 'No calendars found. Check your Apple ID and App-Specific Password.';
 
             return to_route('profile.edit')->with('error', $error);

@@ -17,11 +17,12 @@ describe('ExternalCalendarConnectRedirect', function (): void {
         $this->user = User::factory()->create();
     });
 
-    it('aborts with 422 for unknown provider', function (): void {
+    it('redirects to profile.edit with error for unknown provider', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.redirect', ['provider' => 'unknown']));
 
-        $response->assertStatus(422);
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
     it('redirects to OAuth URL for app-credentials provider without requiring client credentials', function (): void {
@@ -61,21 +62,23 @@ describe('ExternalCalendarConnectRedirect', function (): void {
         ]);
     });
 
-    it('validates client_id and client_secret are required for personal-credentials provider', function (): void {
+    it('redirects to profile.edit with error when client credentials are missing for personal-credentials provider', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.redirect', ['provider' => 'google_personal_app']));
 
-        $response->assertSessionHasErrors(['client_id', 'client_secret']);
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('validates minimum length for client credentials', function (): void {
+    it('redirects to profile.edit with error when client credentials are too short', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.redirect', ['provider' => 'google_personal_app']), [
                 'client_id'     => 'short',
                 'client_secret' => 'short',
             ]);
 
-        $response->assertSessionHasErrors(['client_id', 'client_secret']);
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
     it('redirects to OAuth URL for personal-credentials provider with client credentials', function (): void {

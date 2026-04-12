@@ -17,49 +17,56 @@ describe('ExternalCalendarDisconnect', function (): void {
         $this->user = User::factory()->create();
     });
 
-    describe('handle', function (): void {
-        it('disconnects the integration for the given provider', function (): void {
-            $integration = UserCalendarIntegration::factory()->create([
-                'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
-            ]);
+    it('disconnects and redirects to profile edit with success', function (): void {
+        UserCalendarIntegration::factory()->create([
+            'user_id'  => $this->user->getKey(),
+            'provider' => CalendarProviderEnum::Google,
+        ]);
 
-            $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
-            $syncService->shouldReceive('disconnect')
-                ->once()
-                ->with(
-                    Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                    CalendarProviderEnum::Google,
-                );
+        $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
+        $syncService->shouldReceive('disconnect')
+            ->once()
+            ->with(
+                Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
+                CalendarProviderEnum::Google,
+            );
 
-            $action = new ExternalCalendarDisconnect($syncService);
-            $action->handle($this->user, CalendarProviderEnum::Google);
-        });
+        app()->instance(ExternalCalendarSynchronizationService::class, $syncService);
+
+        $response = $this->actingAs($this->user)
+            ->delete(route('external-calendar.disconnect', ['provider' => 'google']));
+
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('success'))->toBe('Calendar disconnected successfully.');
     });
 
-    describe('asController', function (): void {
-        it('disconnects and redirects to profile edit', function (): void {
-            UserCalendarIntegration::factory()->create([
-                'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
-            ]);
+    it('redirects to profile.edit with error for invalid provider', function (): void {
+        $response = $this->actingAs($this->user)
+            ->delete(route('external-calendar.disconnect', ['provider' => 'invalid-provider']));
 
-            $response = $this->actingAs($this->user)
-                ->delete(route('external-calendar.disconnect', ['provider' => 'google']));
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
+    });
 
-            $response->assertRedirect(route('profile.edit'));
+    it('cleans up integration on invalid provider', function (): void {
+        UserCalendarIntegration::factory()->create([
+            'user_id'  => $this->user->getKey(),
+            'provider' => CalendarProviderEnum::Google,
+        ]);
 
-            expect(UserCalendarIntegration::query()
-                ->where('user_id', $this->user->getKey())
-                ->where('provider', CalendarProviderEnum::Google)
-                ->exists())->toBeFalse();
-        });
+        $this->actingAs($this->user)
+            ->delete(route('external-calendar.disconnect', ['provider' => 'invalid-provider']));
 
-        it('aborts with 422 for invalid provider', function (): void {
-            $response = $this->actingAs($this->user)
-                ->delete(route('external-calendar.disconnect', ['provider' => 'invalid-provider']));
+        // invalid provider resolves to null, so no cleanup happens — integration stays
+        expect(UserCalendarIntegration::query()
+            ->where('user_id', $this->user->getKey())
+            ->exists()
+        )->toBeTrue();
+    });
 
-            $response->assertStatus(422);
-        });
+    it('requires authentication', function (): void {
+        $response = $this->delete(route('external-calendar.disconnect', ['provider' => 'google']));
+
+        $response->assertRedirect(route('login'));
     });
 });

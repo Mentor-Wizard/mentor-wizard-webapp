@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
-use App\Enums\CalendarProviderEnum;
+use App\Http\Requests\Calendar\ExternalCalendarDisconnectRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
-use Symfony\Component\HttpFoundation\Response;
 
 class ExternalCalendarDisconnect
 {
@@ -20,20 +18,14 @@ class ExternalCalendarDisconnect
         private readonly ExternalCalendarSynchronizationService $synchronizationService,
     ) {}
 
-    public function handle(User $user, CalendarProviderEnum $provider): void
+    public function handle(ExternalCalendarDisconnectRequest $request): RedirectResponse
     {
-        $this->synchronizationService->disconnect($user, $provider);
-    }
-
-    public function asController(Request $request, string $provider): RedirectResponse
-    {
-        abort_unless(CalendarProviderEnum::isValid($provider), Response::HTTP_UNPROCESSABLE_ENTITY);
-
         /** @var User $user */
         $user = $request->user();
 
-        $this->handle($user, CalendarProviderEnum::from($provider));
+        $this->synchronizationService->disconnect($user, $request->resolveProvider());
 
-        return to_route('profile.edit');
+        return to_route('profile.edit')
+            ->with('success', 'Calendar disconnected successfully.');
     }
 }

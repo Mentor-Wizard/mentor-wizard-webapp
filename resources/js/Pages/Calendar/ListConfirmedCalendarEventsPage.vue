@@ -1,11 +1,27 @@
 <script setup>
 import { ChevronDownIcon } from '@heroicons/vue/20/solid';
-import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { onMounted, ref } from 'vue';
 
+import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
+const page = usePage();
 const pastExpanded = ref(false);
+const notification = ref({ show: false, success: false, message: '' });
+
+const showNotification = (success, message) => {
+  notification.value = { show: true, success, message };
+  setTimeout(() => { notification.value.show = false; }, 5000);
+};
+
+onMounted(() => {
+  if (page.props.flash?.success) {
+    showNotification(true, page.props.flash.success);
+  } else if (page.props.flash?.error) {
+    showNotification(false, page.props.flash.error);
+  }
+});
 
 const props = defineProps({
   locale: {
@@ -43,6 +59,12 @@ const hasUpcomingEvents = () => Object.keys(props.upcomingCalendarEvents ?? {}).
 <template>
   <AuthenticatedLayout>
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <PopUp
+        :show-status="notification.show"
+        :success="notification.success"
+        :message="notification.message"
+      />
+
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Confirmed & Upcoming Events</h1>
         <p class="mt-2 text-sm text-gray-600">All confirmed sessions scheduled for today or later.</p>

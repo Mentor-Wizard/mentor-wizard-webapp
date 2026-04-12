@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CalendarEventStatusEnum;
 use App\Observers\MentorProgramObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\MentorProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property CarbonInterface|null $start_time
  * @property CarbonInterface|null $end_time
- *
  * @mixin IdeHelperMentorProgram
  */
 #[ObservedBy(MentorProgramObserver::class)]
@@ -45,12 +42,7 @@ class MentorProgram extends Model
         'need_confirmation',
     ];
 
-    protected $appends = [
-        'pending_events_requests_number',
-        'confirmed_events_number',
-    ];
-
-    /**
+/**
      * @return BelongsTo<User, $this>
      */
     public function mentor(): BelongsTo
@@ -98,29 +90,7 @@ class MentorProgram extends Model
         return $this->hasMany(CalendarEvent::class, 'mentor_program_id');
     }
 
-    /**
-     * @return Attribute<int, never>
-     */
-    protected function pendingEventsRequestsNumber(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->calendarEvents()
-            ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION)
-            ->where('start_date_time', '>=', today())
-            ->count());
-    }
-
-    /**
-     * @return Attribute<int, never>
-     */
-    protected function confirmedEventsNumber(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->calendarEvents()
-            ->where('status', CalendarEventStatusEnum::CONFIRMED)
-            ->where('start_date_time', '>=', today())
-            ->count());
-    }
-
-    /**
+/**
      * @return array<string, string>
      */
     protected function casts(): array

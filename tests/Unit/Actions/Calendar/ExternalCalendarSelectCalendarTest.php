@@ -45,31 +45,43 @@ describe('ExternalCalendarSelectCalendar', function (): void {
             ->assertSessionHas('success', 'Calendar selected successfully.');
     });
 
-    it('aborts with 422 for invalid provider', function (): void {
+    it('redirects to profile.edit with error for invalid provider', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.select', ['provider' => 'not-a-provider']), [
                 'calendar_id'   => 'some-id',
                 'calendar_name' => 'Some Calendar',
             ]);
 
-        $response->assertStatus(422);
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('validates calendar_id is required', function (): void {
+    it('redirects to profile.edit with error when calendar_id is missing', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.select', ['provider' => 'google']), [
                 'calendar_name' => 'My Calendar',
             ]);
 
-        $response->assertSessionHasErrors('calendar_id');
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('validates calendar_name is required', function (): void {
+    it('redirects to profile.edit with error when calendar_name is missing', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.select', ['provider' => 'google']), [
                 'calendar_id' => 'some-id',
             ]);
 
-        $response->assertSessionHasErrors('calendar_name');
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
+    });
+
+    it('requires authentication', function (): void {
+        $response = $this->post(route('external-calendar.select', ['provider' => 'google']), [
+            'calendar_id'   => 'some-id',
+            'calendar_name' => 'My Calendar',
+        ]);
+
+        $response->assertRedirect(route('login'));
     });
 });

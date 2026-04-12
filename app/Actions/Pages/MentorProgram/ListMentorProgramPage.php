@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\MentorProgram;
 
+use App\Enums\CalendarEventStatusEnum;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
+use Illuminate\Support\Facades\Date;
 
 class ListMentorProgramPage
 {
@@ -19,6 +21,14 @@ class ListMentorProgramPage
             ->mentorPrograms()
             ->select('id', 'name', 'slug', 'is_main', 'description', 'cost', 'currency_id', 'created_at')
             ->with(['currency:id,symbol'])
+            ->withCount([
+                'calendarEvents as pending_events_requests_number' => fn ($q) => $q
+                    ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION)
+                    ->where('start_date_time', '>=', Date::today()),
+                'calendarEvents as confirmed_events_number' => fn ($q) => $q
+                    ->where('status', CalendarEventStatusEnum::CONFIRMED)
+                    ->where('start_date_time', '>=', Date::today()),
+            ])
             ->orderByDesc('is_main')
             ->orderByDesc('created_at')
             ->get()

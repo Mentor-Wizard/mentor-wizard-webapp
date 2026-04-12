@@ -9,8 +9,9 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
@@ -22,6 +23,8 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
     private const string CALENDAR_LIST_URL = 'https://graph.microsoft.com/v1.0/me/calendars';
 
     private const string CALENDAR_EVENTS_URL = 'https://graph.microsoft.com/v1.0/me/calendars/{calendarId}/events';
+
+    private const string CALENDAR_VIEW_URL = 'https://graph.microsoft.com/v1.0/me/calendars/{calendarId}/calendarView';
 
     private const string CALENDAR_EVENT_URL = 'https://graph.microsoft.com/v1.0/me/calendars/{calendarId}/events/{eventId}';
 
@@ -76,8 +79,6 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
             'redirect_uri'  => $this->callbackUrl(),
             'grant_type'    => 'authorization_code',
         ]);
-        Log::info(var_export($response->json(), true));
-
         $data = $response->json();
 
         $integration->update([
@@ -134,6 +135,42 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
         $error = $response->json('error.message') ?? 'Unable to fetch calendars.';
 
         return ['success' => false, 'calendars' => [], 'error' => $error];
+    }
+
+    /**
+     * @return list<FetchedCalendarEventData>
+     */
+    public function fetchEvents(UserCalendarIntegration $integration, DateTimeInterface $from, DateTimeInterface $to): array
+    {
+        $integration = $this->refreshTokenIfExpired($integration);
+
+        $calendarId = $integration->calendar_id ?? 'me';
+
+        // calendarView expands recurring events and respects the time-range filter correctly
+        $url = str_replace('{calendarId}', urlencode($calendarId), self::CALENDAR_VIEW_URL);
+
+        // MS Graph requires ISO 8601 without timezone suffix for calendarView parameters
+        $fromFormatted = Carbon::instance($from)->utc()->format('Y-m-d\TH:i:s.0000000');
+        $toFormatted = Carbon::instance($to)->utc()->format('Y-m-d\TH:i:s.0000000');
+
+        $response = Http::withToken((string) $integration->access_token)
+            ->withHeaders(['Prefer' => 'outlook.timezone="UTC"'])
+            ->get($url, [
+                'startDateTime' => $fromFormatted,
+                'endDateTime'   => $toFormatted,
+                '$select'       => 'id,subject,body,start,end,bodyPreview',
+            ]);
+
+        if (! $response->successful()) {
+            $error = $response->json('error.message') ?? 'Unknown error';
+
+            throw new RuntimeException('Outlook Calendar fetch events failed: '.$error);
+        }
+
+        return array_values(array_map(
+            fn (array $item): FetchedCalendarEventData => $this->mapOutlookEvent($item),
+            $response->json('value', [])
+        ));
     }
 
     public function createEvent(CalendarEvent $event, UserCalendarIntegration $integration): string
@@ -229,6 +266,34 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
     public function callbackUrl(): string
     {
         return route('external-calendar.connect.callback', ['provider' => CalendarProviderEnum::Outlook->value]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function mapOutlookEvent(array $item): FetchedCalendarEventData
+    {
+        $startData = $item['start'] ?? [];
+        $endData = $item['end'] ?? [];
+
+        // Because we sent `Prefer: outlook.timezone="UTC"`, the provider normalises to UTC
+        $providerTimezone = (string) ($startData['timeZone'] ?? 'UTC');
+
+        $startUtc = Carbon::parse((string) $startData['dateTime'])->utc();
+        $endUtc = Carbon::parse((string) $endData['dateTime'])->utc();
+
+        $description = $item['body']['content'] ?? $item['bodyPreview'] ?? null;
+        $description = $description !== null ? mb_trim((string) $description) : null;
+        $description = ($description === '') ? null : $description;
+
+        return new FetchedCalendarEventData(
+            externalId: (string) $item['id'],
+            title: (string) ($item['subject'] ?? ''),
+            startUtc: $startUtc,
+            endUtc: $endUtc,
+            description: $description,
+            providerTimezone: $providerTimezone,
+        );
     }
 
     private function clientId(): string

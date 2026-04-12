@@ -9,6 +9,8 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use Carbon\Carbon;
+use DateTimeInterface;
 use DOMDocument;
 use DOMElement;
 use DOMXPath;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use LogicException;
 use RuntimeException;
+use Throwable;
 
 class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInterface
 {
@@ -99,6 +102,34 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
         return $this->listCalendars($appleId, $password, $home);
     }
 
+    /**
+     * Fetches events from the Apple CalDAV calendar within the given UTC time range.
+     *
+     * @return list<FetchedCalendarEventData>
+     */
+    public function fetchEvents(UserCalendarIntegration $integration, DateTimeInterface $from, DateTimeInterface $to): array
+    {
+        $appleId = (string) $integration->client_id;
+        $password = (string) $integration->client_secret;
+        $calendarId = (string) $integration->calendar_id;
+
+        $fromStr = Carbon::instance($from)->utc()->format('Ymd\THis\Z');
+        $toStr = Carbon::instance($to)->utc()->format('Ymd\THis\Z');
+
+        $body = $this->calendarQueryReport($fromStr, $toStr);
+
+        $response = Http::withBasicAuth($appleId, $password)
+            ->withHeaders(['Depth' => '1', 'Content-Type' => 'text/xml'])
+            ->withBody($body, 'text/xml')
+            ->send('REPORT', $calendarId);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('Apple CalDAV fetch events failed: HTTP '.$response->status());
+        }
+
+        return $this->parseCalendarReport($response->body());
+    }
+
     public function createEvent(CalendarEvent $event, UserCalendarIntegration $integration): string
     {
         $appleId = (string) $integration->client_id;
@@ -151,6 +182,163 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
     public function callbackUrl(): string
     {
         throw new LogicException('Apple CalDAV does not have an OAuth callback URL.');
+    }
+
+    private function calendarQueryReport(string $from, string $to): string
+    {
+        return '<?xml version="1.0" encoding="UTF-8"?>
+<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:D="DAV:">
+  <D:prop>
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:time-range start="'.$from.'" end="'.$to.'"/>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>';
+    }
+
+    /**
+     * Parses a CalDAV multistatus REPORT response and extracts event data.
+     *
+     * @return list<FetchedCalendarEventData>
+     */
+    private function parseCalendarReport(string $xml): array
+    {
+        $doc = new DOMDocument;
+
+        if (! @$doc->loadXML($xml)) {
+            return [];
+        }
+
+        $xpath = new DOMXPath($doc);
+        $xpath->registerNamespace('D', 'DAV:');
+        $xpath->registerNamespace('C', 'urn:ietf:params:xml:ns:caldav');
+
+        $responses = $xpath->query('//D:response');
+
+        if ($responses === false) {
+            return [];
+        }
+
+        $events = [];
+
+        foreach ($responses as $response) {
+            $event = $this->parseResponseNode($xpath, $response);
+
+            if ($event !== null) {
+                $events[] = $event;
+            }
+        }
+
+        return $events;
+    }
+
+    private function parseResponseNode(DOMXPath $xpath, mixed $response): ?FetchedCalendarEventData
+    {
+        if (! $response instanceof DOMElement) {
+            return null;
+        }
+
+        $hrefNodes = $xpath->query('D:href', $response);
+        $calDataNodes = $xpath->query('.//C:calendar-data', $response);
+
+        $hrefNode = $hrefNodes !== false ? $hrefNodes->item(0) : null;
+        $calDataNode = $calDataNodes !== false ? $calDataNodes->item(0) : null;
+
+        if (! $hrefNode instanceof DOMElement || ! $calDataNode instanceof DOMElement) {
+            return null;
+        }
+
+        return $this->parseIcsEvent(
+            $this->absoluteUrl(mb_trim($hrefNode->textContent)),
+            mb_trim($calDataNode->textContent),
+        );
+    }
+
+    private function parseIcsEvent(string $eventUrl, string $ics): ?FetchedCalendarEventData
+    {
+        if ($ics === '') {
+            return null;
+        }
+
+        $uid = $this->extractIcsValue($ics, 'UID') ?? $this->uidFromUrl($eventUrl);
+        $summary = $this->extractIcsValue($ics, 'SUMMARY') ?? '';
+        $description = $this->extractIcsValue($ics, 'DESCRIPTION');
+        $dtstart = $this->extractIcsValue($ics, 'DTSTART');
+        $dtend = $this->extractIcsValue($ics, 'DTEND');
+        $tzidStart = $this->extractIcsTzid($ics, 'DTSTART');
+        $tzidEnd = $this->extractIcsTzid($ics, 'DTEND');
+
+        if ($dtstart === null || $dtend === null) {
+            return null;
+        }
+
+        $providerTimezone = $tzidStart ?? $tzidEnd ?? 'UTC';
+
+        $startUtc = $this->parseIcsDateTime($dtstart, $tzidStart);
+        $endUtc = $this->parseIcsDateTime($dtend, $tzidEnd);
+
+        if ($startUtc === null || $endUtc === null) {
+            return null;
+        }
+
+        return new FetchedCalendarEventData(
+            externalId: $eventUrl,
+            title: $summary,
+            startUtc: $startUtc,
+            endUtc: $endUtc,
+            description: $description !== null ? $this->unescapeIcsText($description) : null,
+            providerTimezone: $providerTimezone,
+        );
+    }
+
+    private function extractIcsValue(string $ics, string $property): ?string
+    {
+        // Match PROPERTY: or PROPERTY;param=value: — capture until next line
+        if (preg_match('/^'.$property.'(?:;[^:]+)?:(.+)$/mi', $ics, $matches)) {
+            return mb_trim($matches[1]);
+        }
+
+        return null;
+    }
+
+    private function extractIcsTzid(string $ics, string $property): ?string
+    {
+        if (preg_match('/^'.$property.';TZID=([^:]+):/mi', $ics, $matches)) {
+            return mb_trim($matches[1]);
+        }
+
+        return null;
+    }
+
+    private function parseIcsDateTime(string $value, ?string $tzid): ?Carbon
+    {
+        try {
+            // UTC: value ends with Z (e.g. 20260615T140000Z)
+            if (str_ends_with($value, 'Z')) {
+                return Carbon::createFromFormat('Ymd\THis\Z', $value, 'UTC');
+            }
+
+            // With explicit TZID (e.g. 20260615T170000 with TZID=Europe/Kyiv)
+            if ($tzid !== null) {
+                return Carbon::createFromFormat('Ymd\THis', $value, $tzid)->utc();
+            }
+
+            // Floating time — assume UTC
+            return Carbon::createFromFormat('Ymd\THis', $value, 'UTC');
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function unescapeIcsText(string $text): string
+    {
+        return str_replace(['\\n', '\\,', '\\;', '\\\\'], ["\n", ',', ';', '\\'], $text);
     }
 
     /**

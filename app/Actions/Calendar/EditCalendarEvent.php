@@ -8,10 +8,13 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Http\Requests\Calendar\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Illuminate\Support\Arr;
+use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
-class EditCalendarEvent extends BaseCalendarEventAction
+class EditCalendarEvent
 {
+    use AsController;
+
     public function handle(EditCalendarEventRequest $request, CalendarEvent $calendarEvent): Response
     {
         // Only update web_link according to the new business rule

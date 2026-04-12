@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Calendar\ExternalCalendarConnectDirect;
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
+use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use Database\Seeders\RoleSeeder;
 
@@ -17,62 +18,87 @@ describe('ExternalCalendarConnectDirect', function (): void {
         $this->user = User::factory()->create();
     });
 
-    it('aborts with 422 for unknown provider', function (): void {
+    it('redirects to profile.edit with error for unknown provider', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.direct', ['provider' => 'unknown']), [
                 'client_id'     => 'apple@example.com',
                 'client_secret' => 'app-specific-password-123',
             ]);
 
-        $response->assertStatus(422);
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('aborts with 422 for non-CalDAV provider', function (): void {
+    it('redirects to profile.edit with error for non-CalDAV provider', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.direct', ['provider' => 'google']), [
                 'client_id'     => 'apple@example.com',
                 'client_secret' => 'app-specific-password-123',
             ]);
 
-        $response->assertStatus(422);
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('validates client_id is required', function (): void {
+    it('redirects to profile.edit with error when client_id is missing', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.direct', ['provider' => 'apple']), [
                 'client_secret' => 'app-specific-password-123',
             ]);
 
-        $response->assertSessionHasErrors('client_id');
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('validates client_id must be an email', function (): void {
+    it('redirects to profile.edit with error when client_id is not an email', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.direct', ['provider' => 'apple']), [
                 'client_id'     => 'not-an-email',
                 'client_secret' => 'app-specific-password-123',
             ]);
 
-        $response->assertSessionHasErrors('client_id');
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('validates client_secret is required', function (): void {
+    it('redirects to profile.edit with error when client_secret is missing', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.direct', ['provider' => 'apple']), [
                 'client_id' => 'apple@example.com',
             ]);
 
-        $response->assertSessionHasErrors('client_secret');
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
     });
 
-    it('validates client_secret minimum length', function (): void {
+    it('redirects to profile.edit with error when client_secret is too short', function (): void {
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.connect.direct', ['provider' => 'apple']), [
                 'client_id'     => 'apple@example.com',
                 'client_secret' => 'short',
             ]);
 
-        $response->assertSessionHasErrors('client_secret');
+        $response->assertRedirect(route('profile.edit'));
+        expect(session('error'))->not->toBeEmpty();
+    });
+
+    it('cleans up integration on validation failure', function (): void {
+        UserCalendarIntegration::factory()->create([
+            'user_id'  => $this->user->getKey(),
+            'provider' => CalendarProviderEnum::Apple,
+        ]);
+
+        $this->actingAs($this->user)
+            ->post(route('external-calendar.connect.direct', ['provider' => 'apple']), [
+                'client_id'     => 'not-an-email',
+                'client_secret' => 'app-specific-password-123',
+            ]);
+
+        expect(UserCalendarIntegration::query()
+            ->where('user_id', $this->user->getKey())
+            ->where('provider', CalendarProviderEnum::Apple)
+            ->exists()
+        )->toBeFalse();
     });
 
     it('saves credentials and redirects with calendars on success', function (): void {
@@ -111,7 +137,12 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ->and(session('calendars'))->toHaveCount(1);
     });
 
-    it('redirects with error when no calendars are found', function (): void {
+    it('redirects with error and cleans up integration when no calendars are found', function (): void {
+        UserCalendarIntegration::factory()->create([
+            'user_id'  => $this->user->getKey(),
+            'provider' => CalendarProviderEnum::Apple,
+        ]);
+
         $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
         $syncService->shouldReceive('saveCredentials')->once();
         $syncService->shouldReceive('fetchCalendars')
@@ -131,7 +162,12 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
-        expect(session('error'))->toBe('Authentication failed. Check your Apple ID and App-Specific Password.');
+        expect(session('error'))->toBe('Authentication failed. Check your Apple ID and App-Specific Password.')
+            ->and(UserCalendarIntegration::query()
+                ->where('user_id', $this->user->getKey())
+                ->where('provider', CalendarProviderEnum::Apple)
+                ->exists()
+            )->toBeFalse();
     });
 
     it('uses default error message when fetchCalendars returns no error string', function (): void {

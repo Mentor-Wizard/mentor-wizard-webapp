@@ -33,7 +33,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $description
  * @property int|null $mentor_program_id
  * @property int|null $mentor_session_id
- *
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]

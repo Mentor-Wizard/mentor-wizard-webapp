@@ -4,42 +4,53 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
+use App\DTO\Calendar\CalendarEventData;
 use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
-use App\Models\MentorProgram;
 use Illuminate\Http\RedirectResponse;
+use Lorisleiva\Actions\Concerns\AsController;
 
-class StoreCalendarEvent extends BaseCalendarEventAction
+class StoreCalendarEvent
 {
+    use AsController;
+
     public function handle(StoreCalendarEventRequest $request): RedirectResponse
     {
-        $validatedData = $this->getCalendarEventData($request);
+        $data = CalendarEventData::fromRequest($request);
 
-        $colour = $validatedData['colour'];
-        unset($validatedData['colour']);
         $calendarEvent = CalendarEvent::query()->create([
-            ...$validatedData,
+            'title'             => $data->title,
+            'start_date_time'   => $data->startDateTime,
+            'end_date_time'     => $data->endDateTime,
+            'type'              => $data->type,
+            'session_type'      => $data->sessionType,
+            'web_link'          => $data->webLink,
+            'description'       => $data->description,
+            'status'            => $data->status,
+            'date'              => $data->startDateTime->format('Y-m-d'),
+            'mentor_program_id' => $data->mentorProgram->getKey(),
         ]);
 
-        // If this is a mentor program booking, attach the mentor as a participant
-        $mentorProgramId = $validatedData['mentor_program_id'];
-        /** @var MentorProgram $mentorProgram */
-        $mentorProgram = MentorProgram::query()->findOrFail($mentorProgramId);
-        $calendarEvent->calendarEventUsers()->attach($mentorProgram->mentor_id, [
+        $calendarEvent->calendarEventUsers()->attach($data->mentorProgram->mentor_id, [
             'role'   => CalendarEventRoleEnum::HOST->value,
-            'colour' => $colour,
+            'colour' => $data->colour,
         ]);
 
-        if ($mentorProgram->mentor_id !== auth()->user()->getKey()) {
+        if ($data->mentorProgram->mentor_id !== auth()->user()->getKey()) {
             $calendarEvent->calendarEventUsers()->attach(auth()->user()->getKey(), [
                 'role'   => CalendarEventRoleEnum::PARTICIPANT->value,
-                'colour' => $colour,
+                'colour' => $data->colour,
             ]);
         }
 
         (new CreateMentorSessionForCalendarEvent)->handle($calendarEvent);
 
-        return to_route('pages.calendar.index');
+        $message = $calendarEvent->status === CalendarEventStatusEnum::CONFIRMED
+            ? 'Your session has been booked and confirmed!'
+            : 'Your session request has been submitted and is awaiting mentor confirmation.';
+
+        return to_route('pages.calendar.index')->with('success', $message);
     }
 }

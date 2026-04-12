@@ -9,6 +9,8 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -122,6 +124,35 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
         return ['success' => false, 'calendars' => [], 'error' => $error];
     }
 
+    /**
+     * @return list<FetchedCalendarEventData>
+     */
+    public function fetchEvents(UserCalendarIntegration $integration, DateTimeInterface $from, DateTimeInterface $to): array
+    {
+        $integration = $this->refreshTokenIfExpired($integration);
+
+        $calendarId = $integration->calendar_id ?? 'primary';
+        $url = str_replace('{calendarId}', urlencode($calendarId), self::CALENDAR_EVENTS_URL);
+
+        $response = Http::withToken((string) $integration->access_token)->get($url, [
+            'timeMin'      => Carbon::instance($from)->utc()->toRfc3339String(),
+            'timeMax'      => Carbon::instance($to)->utc()->toRfc3339String(),
+            'singleEvents' => 'true',
+            'orderBy'      => 'startTime',
+        ]);
+
+        if (! $response->successful()) {
+            $error = $response->json('error.message') ?? 'Unknown error';
+
+            throw new RuntimeException('Google Calendar fetch events failed: '.$error);
+        }
+
+        return array_values(array_map(
+            fn (array $item): FetchedCalendarEventData => $this->mapGoogleEvent($item),
+            $response->json('items', [])
+        ));
+    }
+
     public function createEvent(CalendarEvent $event, UserCalendarIntegration $integration): string
     {
         $integration = $this->refreshTokenIfExpired($integration);
@@ -204,6 +235,35 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
 
             throw new RuntimeException('Google Calendar event deletion failed: '.$error);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private function mapGoogleEvent(array $item): FetchedCalendarEventData
+    {
+        $startData = $item['start'] ?? [];
+        $endData = $item['end'] ?? [];
+
+        $providerTimezone = (string) ($startData['timeZone'] ?? $endData['timeZone'] ?? 'UTC');
+
+        // Google may return all-day events with `date` instead of `dateTime`
+        $startUtc = isset($startData['dateTime'])
+            ? Carbon::parse($startData['dateTime'])->utc()
+            : Carbon::parse((string) $startData['date'], $providerTimezone)->startOfDay()->utc();
+
+        $endUtc = isset($endData['dateTime'])
+            ? Carbon::parse($endData['dateTime'])->utc()
+            : Carbon::parse((string) $endData['date'], $providerTimezone)->endOfDay()->utc();
+
+        return new FetchedCalendarEventData(
+            externalId: (string) $item['id'],
+            title: (string) ($item['summary'] ?? ''),
+            startUtc: $startUtc,
+            endUtc: $endUtc,
+            description: isset($item['description']) ? (string) $item['description'] : null,
+            providerTimezone: $providerTimezone,
+        );
     }
 
     private function refreshTokenIfExpired(UserCalendarIntegration $integration): UserCalendarIntegration
