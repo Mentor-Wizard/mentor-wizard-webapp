@@ -6,7 +6,7 @@ use App\Actions\Calendar\ExternalCalendarRetrySync;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Jobs\SyncCalendarEventToExternalCalendar;
+use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
@@ -86,7 +86,7 @@ describe('ExternalCalendarRetrySync', function (): void {
             ->post(route('external-calendar.retry', ['provider' => 'google']));
 
         Queue::assertPushed(
-            SyncCalendarEventToExternalCalendar::class,
+            ProcessCalendarEventExternalCalendarIntegrations::class,
             fn ($job): bool => $job->calendarEvent->getKey() === $event->getKey(),
         );
     });
@@ -170,6 +170,6 @@ describe('ExternalCalendarRetrySync', function (): void {
         $this->actingAs($this->user)
             ->post(route('external-calendar.retry', ['provider' => 'google']));
 
-        Queue::assertPushed(SyncCalendarEventToExternalCalendar::class, 3);
+        Queue::assertPushed(ProcessCalendarEventExternalCalendarIntegrations::class, 3);
     });
 });

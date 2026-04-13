@@ -6,9 +6,9 @@ namespace App\Observers;
 
 use App\Actions\Calendar\CreateMentorSessionForCalendarEvent;
 use App\Enums\CalendarEventStatusEnum;
-use App\Jobs\DeleteExternalCalendarEvent;
-use App\Jobs\SyncCalendarEventToExternalCalendar;
-use App\Jobs\UpdateExternalCalendarEvent;
+use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
+use App\Jobs\ProcessDeleteExternalCalendarEvent;
+use App\Jobs\ProcessUpdateExternalCalendarEvent;
 use App\Models\CalendarEvent;
 
 class CalendarEventObserver
@@ -25,7 +25,7 @@ class CalendarEventObserver
     public function created(CalendarEvent $event): void
     {
         if ($event->status === CalendarEventStatusEnum::CONFIRMED) {
-            dispatch(new SyncCalendarEventToExternalCalendar($event));
+            dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event));
         }
     }
 
@@ -35,19 +35,19 @@ class CalendarEventObserver
             (new CreateMentorSessionForCalendarEvent)->handle($event);
 
             if ($event->status === CalendarEventStatusEnum::CONFIRMED) {
-                dispatch(new SyncCalendarEventToExternalCalendar($event));
+                dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event));
             }
 
             if ($event->status === CalendarEventStatusEnum::CANCELLED) {
-                dispatch(new DeleteExternalCalendarEvent($event->getKey()));
+                dispatch(new ProcessDeleteExternalCalendarEvent($event->getKey()));
             }
         } elseif ($event->status === CalendarEventStatusEnum::CONFIRMED && $event->wasChanged(self::CONTENT_FIELDS)) {
-            dispatch(new UpdateExternalCalendarEvent($event));
+            dispatch(new ProcessUpdateExternalCalendarEvent($event));
         }
     }
 
     public function deleting(CalendarEvent $event): void
     {
-        dispatch(new DeleteExternalCalendarEvent($event->getKey()));
+        dispatch(new ProcessDeleteExternalCalendarEvent($event->getKey()));
     }
 }

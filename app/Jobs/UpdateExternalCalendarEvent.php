@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Enums\CalendarSyncStatusEnum;
+use App\Enums\ExternalCalendarEventLogTypeEnum;
+use App\Enums\ExternalCalendarEventSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
+use App\Models\ExternalCalendarEventLog;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
 use Illuminate\Bus\Queueable;
@@ -28,44 +30,42 @@ class UpdateExternalCalendarEvent implements ShouldQueue
 
     public int $backoff = 60;
 
-    public function __construct(public readonly CalendarEvent $calendarEvent) {}
+    public function __construct(
+        public readonly CalendarEvent $calendarEvent,
+        public readonly ExternalCalendarEvent $externalEvent,
+        public readonly UserCalendarIntegration $integration,
+    ) {}
 
     public function handle(): void
     {
-        $externalEvents = ExternalCalendarEvent::query()
-            ->where('calendar_event_id', $this->calendarEvent->getKey())
-            ->get();
-
-        foreach ($externalEvents as $externalEvent) {
-            $integration = UserCalendarIntegration::query()
-                ->where('user_id', $externalEvent->user_id)
-                ->where('provider', $externalEvent->provider)
-                ->where('sync_status', CalendarSyncStatusEnum::Active)
-                ->first();
-
-            if ($integration === null) {
-                continue;
-            }
-
-            $this->updateForIntegration($integration, $externalEvent);
-        }
-    }
-
-    private function updateForIntegration(UserCalendarIntegration $integration, ExternalCalendarEvent $externalEvent): void
-    {
         try {
             /** @var ExternalCalendarServiceInterface $service */
-            $service = resolve($integration->provider->getService());
+            $service = resolve($this->integration->provider->getService());
 
-            $service->updateEvent($this->calendarEvent, $integration, $externalEvent->external_event_id);
+            $service->updateEvent($this->calendarEvent, $this->integration, $this->externalEvent->external_event_id);
 
-            Log::info(sprintf('Updated external event %s for calendar event %s', $externalEvent->external_event_id, $this->calendarEvent->getKey()));
+            $this->externalEvent->update(['sync_status' => ExternalCalendarEventSyncStatusEnum::Synced]);
+
+            ExternalCalendarEventLog::query()->create([
+                'external_calendar_event_id' => $this->externalEvent->getKey(),
+                'calendar_event_id'          => $this->calendarEvent->getKey(),
+                'user_id'                    => $this->externalEvent->user_id,
+                'provider'                   => $this->externalEvent->provider,
+                'type'                       => ExternalCalendarEventLogTypeEnum::Success,
+                'message'                    => sprintf('Event successfully updated in %s.', $this->externalEvent->provider->value),
+            ]);
         } catch (Throwable $throwable) {
-            Log::error(sprintf('Failed to update calendar event %s for integration %s: %s', $this->calendarEvent->getKey(), $integration->getKey(), $throwable->getMessage()));
+            Log::error(sprintf('Failed to update external event %s for integration %s: %s', $this->externalEvent->external_event_id, $this->integration->getKey(), $throwable->getMessage()));
 
-            $integration->update([
-                'sync_status'        => CalendarSyncStatusEnum::Error,
-                'last_error_message' => $throwable->getMessage(),
+            $this->externalEvent->update(['sync_status' => ExternalCalendarEventSyncStatusEnum::Error]);
+
+            ExternalCalendarEventLog::query()->create([
+                'external_calendar_event_id' => $this->externalEvent->getKey(),
+                'calendar_event_id'          => $this->calendarEvent->getKey(),
+                'user_id'                    => $this->externalEvent->user_id,
+                'provider'                   => $this->externalEvent->provider,
+                'type'                       => ExternalCalendarEventLogTypeEnum::Error,
+                'message'                    => $throwable->getMessage(),
             ]);
         }
     }

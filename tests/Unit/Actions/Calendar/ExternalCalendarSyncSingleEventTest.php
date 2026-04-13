@@ -6,7 +6,7 @@ use App\Actions\Calendar\ExternalCalendarSyncSingleEvent;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Jobs\SyncCalendarEventToProvider;
+use App\Jobs\CreateExternalCalendarEvent;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
@@ -43,7 +43,7 @@ describe('ExternalCalendarSyncSingleEvent', function (): void {
 
         $response->assertRedirect();
         expect(session('success'))->toBe('Event sync has been queued.');
-        Queue::assertPushed(SyncCalendarEventToProvider::class);
+        Queue::assertPushed(CreateExternalCalendarEvent::class);
     });
 
     it('redirects back with error for unknown provider', function (): void {

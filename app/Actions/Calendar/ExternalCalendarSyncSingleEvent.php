@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
+use App\Enums\CalendarSyncStatusEnum;
 use App\Http\Requests\Calendar\ExternalCalendarSyncSingleEventRequest;
-use App\Jobs\SyncCalendarEventToProvider;
+use App\Jobs\CreateExternalCalendarEvent;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use App\Enums\CalendarSyncStatusEnum;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -31,7 +31,7 @@ class ExternalCalendarSyncSingleEvent
             ->where('sync_status', CalendarSyncStatusEnum::Active)
             ->first();
 
-        dispatch(new SyncCalendarEventToProvider($calendarEvent, $integration));
+        dispatch(new CreateExternalCalendarEvent($calendarEvent, $integration));
 
         return back()->with('success', 'Event sync has been queued.');
     }

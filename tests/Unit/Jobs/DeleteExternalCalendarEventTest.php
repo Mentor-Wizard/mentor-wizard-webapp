@@ -13,12 +13,14 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
 mutates(DeleteExternalCalendarEvent::class);
 
 describe('DeleteExternalCalendarEvent job', function (): void {
     beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
         config(['calendar.encryption_key1' => base64_encode(random_bytes(32))]);
 
         $this->user = User::factory()->create();
@@ -58,15 +60,13 @@ describe('DeleteExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
+        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
 
-    it('deletes the ExternalCalendarEvent record when integration no longer exists', function (): void {
-        $this->integration->delete();
-
-        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
+    it('deletes the ExternalCalendarEvent record when integration is null', function (): void {
+        new DeleteExternalCalendarEvent($this->externalEvent, null)->handle();
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
@@ -79,22 +79,11 @@ describe('DeleteExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
+        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
 
         expect($this->integration->refresh()->sync_status)->toBe(CalendarSyncStatusEnum::Error)
             ->and($this->integration->refresh()->last_error_message)->toBe('Google API error');
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->not->toBeNull();
-    });
-
-    it('does nothing when no external events exist', function (): void {
-        $this->externalEvent->delete();
-
-        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldNotReceive('deleteEvent');
-
-        app()->instance($this->integration->provider->getService(), $service);
-
-        new DeleteExternalCalendarEvent($this->event->getKey())->handle();
     });
 });

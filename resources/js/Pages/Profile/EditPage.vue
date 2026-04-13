@@ -11,7 +11,10 @@ import ExternalCalendarTab from '@/Pages/Profile/Tab/ExternalCalendarTab.vue';
 import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
 import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
 
-const selectedTab = ref(0);
+const CALENDARS_TAB_INDEX = 3;
+
+const tabFromUrl = new URLSearchParams(window.location.search).get('tab');
+const selectedTab = ref(tabFromUrl === 'calendars' ? CALENDARS_TAB_INDEX : 0);
 
 function changeTab(index) {
   selectedTab.value = index;

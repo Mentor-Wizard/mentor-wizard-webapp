@@ -7,9 +7,9 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
-use App\Jobs\DeleteExternalCalendarEvent;
-use App\Jobs\SyncCalendarEventToExternalCalendar;
-use App\Jobs\UpdateExternalCalendarEvent;
+use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
+use App\Jobs\ProcessDeleteExternalCalendarEvent;
+use App\Jobs\ProcessUpdateExternalCalendarEvent;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\MentorSession;
@@ -195,7 +195,7 @@ describe('CalendarEventObserver', function (): void {
     });
 
     describe('External calendar job dispatch', function (): void {
-        it('dispatches SyncCalendarEventToExternalCalendar when created with CONFIRMED status', function (): void {
+        it('dispatches ProcessCalendarEventExternalCalendarIntegrations when created with CONFIRMED status', function (): void {
             Queue::fake();
 
             CalendarEvent::factory()->create([
@@ -207,7 +207,7 @@ describe('CalendarEventObserver', function (): void {
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
 
-            Queue::assertPushed(SyncCalendarEventToExternalCalendar::class);
+            Queue::assertPushed(ProcessCalendarEventExternalCalendarIntegrations::class);
         });
 
         it('does not dispatch sync job when created with non-CONFIRMED status', function (): void {
@@ -222,10 +222,10 @@ describe('CalendarEventObserver', function (): void {
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
 
-            Queue::assertNotPushed(SyncCalendarEventToExternalCalendar::class);
+            Queue::assertNotPushed(ProcessCalendarEventExternalCalendarIntegrations::class);
         });
 
-        it('dispatches SyncCalendarEventToExternalCalendar when status changes to CONFIRMED', function (): void {
+        it('dispatches ProcessCalendarEventExternalCalendarIntegrations when status changes to CONFIRMED', function (): void {
             Queue::fake();
 
             $event = CalendarEvent::factory()->create([
@@ -239,10 +239,10 @@ describe('CalendarEventObserver', function (): void {
 
             $event->update(['status' => CalendarEventStatusEnum::CONFIRMED]);
 
-            Queue::assertPushed(SyncCalendarEventToExternalCalendar::class);
+            Queue::assertPushed(ProcessCalendarEventExternalCalendarIntegrations::class);
         });
 
-        it('dispatches DeleteExternalCalendarEvent when status changes to CANCELLED', function (): void {
+        it('dispatches ProcessDeleteExternalCalendarEvent when status changes to CANCELLED', function (): void {
             Queue::fake();
 
             $event = CalendarEvent::factory()->create([
@@ -256,10 +256,10 @@ describe('CalendarEventObserver', function (): void {
 
             $event->update(['status' => CalendarEventStatusEnum::CANCELLED]);
 
-            Queue::assertPushed(DeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $event->getKey());
+            Queue::assertPushed(ProcessDeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $event->getKey());
         });
 
-        it('dispatches UpdateExternalCalendarEvent when CONFIRMED event content fields change', function (): void {
+        it('dispatches ProcessUpdateExternalCalendarEvent when CONFIRMED event content fields change', function (): void {
             Queue::fake();
 
             $event = CalendarEvent::factory()->create([
@@ -273,10 +273,10 @@ describe('CalendarEventObserver', function (): void {
 
             $event->update(['title' => 'Updated title']);
 
-            Queue::assertPushed(UpdateExternalCalendarEvent::class, fn ($job): bool => $job->calendarEvent->getKey() === $event->getKey());
+            Queue::assertPushed(ProcessUpdateExternalCalendarEvent::class, fn ($job): bool => $job->calendarEvent->getKey() === $event->getKey());
         });
 
-        it('does not dispatch UpdateExternalCalendarEvent when non-content fields change', function (): void {
+        it('does not dispatch ProcessUpdateExternalCalendarEvent when non-content fields change', function (): void {
             Queue::fake();
 
             $event = CalendarEvent::factory()->create([
@@ -294,10 +294,10 @@ describe('CalendarEventObserver', function (): void {
             $event->update(['web_link' => null]); // no actual change in content
             $event->update(['type' => CalendarEventTypeEnum::GROUP->value]);
 
-            Queue::assertNotPushed(UpdateExternalCalendarEvent::class);
+            Queue::assertNotPushed(ProcessUpdateExternalCalendarEvent::class);
         });
 
-        it('dispatches DeleteExternalCalendarEvent when event is being deleted', function (): void {
+        it('dispatches ProcessDeleteExternalCalendarEvent when event is being deleted', function (): void {
             Queue::fake();
 
             $event = CalendarEvent::factory()->create([
@@ -312,7 +312,7 @@ describe('CalendarEventObserver', function (): void {
             $eventId = $event->getKey();
             $event->delete();
 
-            Queue::assertPushed(DeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $eventId);
+            Queue::assertPushed(ProcessDeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $eventId);
         });
     });
 

@@ -9,6 +9,7 @@ use App\Http\Requests\Calendar\ExternalCalendarConnectCallbackRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use App\Traits\Calendar\HandlesCalendarIntegrationCleanup;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -34,21 +35,22 @@ class ExternalCalendarConnectCallback
         if ($request->has('error')) {
             $this->cleanupIntegration($this->user, $this->enum);
 
-            return to_route('profile.edit')
+            return to_route('profile.edit', ['tab' => 'calendars'])
                 ->with('error', 'Authorization was denied or cancelled.');
         }
 
         if ($statePayload === null || $this->user === null || $this->enum === null) {
-            return to_route('profile.edit')
+            return to_route('profile.edit', ['tab' => 'calendars'])
                 ->with('error', 'Authorization session expired or invalid. Please try again.');
         }
 
         try {
             $this->synchronizationService->handleCallback($this->user, $this->enum, (string) $request->query('code'));
-        } catch (Throwable) {
+        } catch (Exception $e) {
+            Log::error('Calendar authorization failed.'.$e->getMessage(), []);
             $this->cleanupIntegration($this->user, $this->enum);
 
-            return to_route('profile.edit')
+            return to_route('profile.edit', ['tab' => 'calendars'])
                 ->with('error', 'Failed to complete calendar authorization. Please try again.');
         }
 
@@ -59,10 +61,10 @@ class ExternalCalendarConnectCallback
 
             $error = $result['error'] ?? 'No calendars found on this account.';
 
-            return to_route('profile.edit')->with('error', $error);
+            return to_route('profile.edit', ['tab' => 'calendars'])->with('error', $error);
         }
 
-        return to_route('profile.edit')
+        return to_route('profile.edit', ['tab' => 'calendars'])
             ->with('calendar_provider', $this->enum->value)
             ->with('calendars', $result['calendars']);
     }

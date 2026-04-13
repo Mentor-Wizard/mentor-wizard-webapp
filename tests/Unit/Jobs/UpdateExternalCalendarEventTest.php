@@ -13,12 +13,14 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
 mutates(UpdateExternalCalendarEvent::class);
 
 describe('UpdateExternalCalendarEvent job', function (): void {
     beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
         config(['calendar.encryption_key1' => base64_encode(random_bytes(32))]);
 
         $this->user = User::factory()->create();
@@ -59,21 +61,10 @@ describe('UpdateExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        new UpdateExternalCalendarEvent($this->event)->handle();
+        new UpdateExternalCalendarEvent($this->event, $this->externalEvent, $this->integration)->handle();
     });
 
-    it('skips integrations that are not active', function (): void {
-        $this->integration->update(['sync_status' => CalendarSyncStatusEnum::Error]);
-
-        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldNotReceive('updateEvent');
-
-        app()->instance($this->integration->provider->getService(), $service);
-
-        new UpdateExternalCalendarEvent($this->event)->handle();
-    });
-
-    it('marks integration as error and logs when update fails', function (): void {
+    it('marks integration as error when update fails', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
         $service->shouldReceive('updateEvent')
             ->once()
@@ -81,20 +72,9 @@ describe('UpdateExternalCalendarEvent job', function (): void {
 
         app()->instance($this->integration->provider->getService(), $service);
 
-        new UpdateExternalCalendarEvent($this->event)->handle();
+        new UpdateExternalCalendarEvent($this->event, $this->externalEvent, $this->integration)->handle();
 
         expect($this->integration->refresh()->sync_status)->toBe(CalendarSyncStatusEnum::Error)
             ->and($this->integration->refresh()->last_error_message)->toBe('Google API error');
-    });
-
-    it('does nothing when no external events exist', function (): void {
-        $this->externalEvent->delete();
-
-        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldNotReceive('updateEvent');
-
-        app()->instance($this->integration->provider->getService(), $service);
-
-        new UpdateExternalCalendarEvent($this->event)->handle();
     });
 });

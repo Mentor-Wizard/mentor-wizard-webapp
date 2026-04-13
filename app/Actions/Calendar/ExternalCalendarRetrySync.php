@@ -7,7 +7,7 @@ namespace App\Actions\Calendar;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Http\Requests\Calendar\ExternalCalendarRetrySyncRequest;
-use App\Jobs\SyncCalendarEventToExternalCalendar;
+use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
@@ -50,7 +50,7 @@ class ExternalCalendarRetrySync
             ->whereHas('calendarEventUsers', fn ($q) => $q->where('users.id', $user->getKey()))
             ->where('status', CalendarEventStatusEnum::CONFIRMED)
             ->whereNotIn('id', $syncedEventIds)
-            ->each(fn (CalendarEvent $event) => dispatch(new SyncCalendarEventToExternalCalendar($event)));
+            ->each(fn (CalendarEvent $event) => dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event)));
 
         return to_route('profile.edit')
             ->with('success', 'Calendar sync has been queued. Your events will be synced shortly.');

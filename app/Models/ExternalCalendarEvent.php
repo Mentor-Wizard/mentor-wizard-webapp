@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CalendarProviderEnum;
+use App\Enums\ExternalCalendarEventSyncStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperExternalCalendarEvent
@@ -21,6 +23,7 @@ class ExternalCalendarEvent extends Model
         'user_id',
         'provider',
         'external_event_id',
+        'sync_status',
     ];
 
     /**
@@ -40,12 +43,21 @@ class ExternalCalendarEvent extends Model
     }
 
     /**
+     * @return HasMany<ExternalCalendarEventLog, $this>
+     */
+    public function logs(): HasMany
+    {
+        return $this->hasMany(ExternalCalendarEventLog::class);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     protected function casts(): array
     {
         return [
-            'provider' => CalendarProviderEnum::class,
+            'provider'    => CalendarProviderEnum::class,
+            'sync_status' => ExternalCalendarEventSyncStatusEnum::class,
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Calendar\AcknowledgeExternalCalendarEventLog;
 use App\Actions\Calendar\ConfirmCalendarEvent;
 use App\Actions\Calendar\DeleteCalendarEvent;
 use App\Actions\Calendar\EditCalendarEvent;
@@ -12,7 +13,9 @@ use App\Actions\Calendar\ExternalCalendarDisconnect;
 use App\Actions\Calendar\ExternalCalendarRetrySync;
 use App\Actions\Calendar\ExternalCalendarSelectCalendar;
 use App\Actions\Calendar\ExternalCalendarSyncSingleEvent;
+use App\Actions\Calendar\RerunExternalCalendarEventSync;
 use App\Actions\Calendar\StoreCalendarEvent;
+use App\Actions\Calendar\SyncCalendarEventToIntegration;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\SetMainMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
@@ -132,9 +135,16 @@ Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->g
         ->name('external-calendar.retry');
     Route::post('sync-event/{calendarEvent}/{provider}', ExternalCalendarSyncSingleEvent::class)
         ->name('external-calendar.sync-event');
+    Route::post('rerun/{calendarEvent:id}/{externalCalendarEvent:id}', RerunExternalCalendarEventSync::class)
+        ->name('external-calendar.rerun')
+        ->withoutScopedBindings();
+    Route::post('sync-integration/{calendarEvent:id}/{integration:id}', SyncCalendarEventToIntegration::class)
+        ->name('external-calendar.sync-integration')
+        ->withoutScopedBindings();
+    Route::patch('log/{log:id}/acknowledge', AcknowledgeExternalCalendarEventLog::class)
+        ->name('external-calendar.log.acknowledge');
 });
 
-// Callback is outside auth middleware — user is identified via encrypted state param
 Route::get('settings/external-calendar/callback/{provider}', ExternalCalendarConnectCallback::class)
     ->name('external-calendar.connect.callback');
 
