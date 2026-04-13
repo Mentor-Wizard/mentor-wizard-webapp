@@ -18,14 +18,6 @@ Follow the pipeline in `.claude/rules/workflow.md`. Run independent steps in par
 
 Available agents: `ba`, `developer`, `frontend`, `tester`, `qa`, `reviewer`, `debugger`, `security-scanner`, `dba`, `ddd-architect`, `filament`, `devops`, `ci-cd-engineer`, `integration-architect`, `laravel-refactoring-expert`, `queue-specialist`, `docs-writer`
 
-## Rules (auto-loaded from `.claude/rules/`)
-
-- `code-style.md` — PHP 8.4 strict types, Eloquent conventions, code quality tools
-- `architecture.md` — Actions pattern, Inertia.js, domain organization, database patterns
-- `testing.md` — Pest 4, mutation testing, model testing policy, test structure
-- `git-operations.md` — Commit/push rules, PR description format
-- `workflow.md` — Agent pipeline: BA → Developer → Tester → Security → QA → DocsWriter
-
 ## Setup
 
 See `docs/SETUP.md` for system requirements, Docker setup, and common commands.
