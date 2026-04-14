@@ -45,7 +45,7 @@ If none apply (e.g. typo fix, config value) — skip the pipeline.
 
 | Phase | Mode | Agent(s) | Output |
 |-------|------|----------|--------|
-| 1–2. Planning | **team** `plan-{slug}` *(if arch decision needed); else `ba` sequential only* | `ba`, `ddd-architect`, `devil` | Validated stories + domain model |
+| 1. Planning | **team** `plan-{slug}` *(if arch decision needed); else `ba` sequential only* | `ba`, `ddd-architect`, `devil` | Validated stories + domain model |
 | 3. Implementation | sequential | `developer` | Code + Pint + PHPStan |
 | 4. Quality Gate | **team** | `tester`, `reviewer`, `security-scanner`, `qa` | Parallel reports |
 | 5. Documentation | sequential | `docs-writer` | PR description + `gh pr create` |
@@ -58,13 +58,18 @@ Team name: `plan-{feature-slug}` (e.g. `plan-mentor-booking`)
 - Task involves architectural decisions → spawn 3 teammates: `ba`, `ddd-architect`, `devil`
 - Simple feature, no arch decision needed → run `ba` sequentially only (skip team entirely)
 
+**Protocol:**
+- `ba` sends completed user stories to `devil` via SendMessage
+- `ddd-architect` sends architecture decision to `devil` via SendMessage
+- `devil` responds with challenges or stays silent
+
 **Resolution:**
 - `devil` challenges via `SendMessage` to `ba` or `ddd-architect`
 - Challenged agent responds directly
 - `devil` accepts response → silent on that point
 - `devil` escalates ignored challenge → orchestrator asks the challenged agent to address it; if still unresolved, document the concern and proceed
 
-**Done condition:** When `devil` sends "No further objections" → call TeamDelete → proceed to `developer`.
+**Done condition:** When `devil` sends "No further objections" → call TeamDelete → proceed to `developer`. If `devil` has not closed after all challenges appear resolved or the planning conversation has concluded, treat it as "no further objections" and proceed.
 
 ### Quality Gate Team
 
