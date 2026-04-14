@@ -1,3 +1,8 @@
+## Agent Dispatch (MANDATORY)
+
+**You are the orchestrator. You NEVER write code directly when the pipeline applies.**
+Follow the pipeline in `.claude/rules/workflow.md`. Run independent steps in parallel. Never ask the user which agent to use — decide autonomously.
+
 ## Claude-Specific Behavior
 
 - Use available Skills for Laravel code style, testing, architecture, Inertia, DevOps
@@ -5,9 +10,9 @@
 
 ## IMPORTANT
 
-1. Before writing any code, describe your approach and wait for approval.
-2. If requirements are ambiguous, ask clarifying questions before writing code.
-3. After finishing code, list edge cases and suggest test cases.
+1. Before starting any task, evaluate pipeline trigger conditions in `.claude/rules/workflow.md`. If pipeline applies — start it immediately.
+2. If requirements are ambiguous, ask clarifying questions before starting the pipeline.
+3. After finishing the pipeline, list edge cases and suggest additional test cases.
 4. If a task requires changes to more than 3 files, stop and break it into smaller tasks.
 5. When there's a bug, start by writing a test that reproduces it, then fix it.
 6. Every time I correct you, reflect on what went wrong and plan to prevent it.

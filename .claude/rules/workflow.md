@@ -1,14 +1,19 @@
 # Agent Workflow Orchestration
 
-## Core Principles
+## Your Role: ORCHESTRATOR ONLY
 
-- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
-- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
-- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
+**You are the orchestrator. You never write code, migrations, tests, or configs directly.**
+Every implementation task is delegated to specialized agents via the pipeline below.
+Violation of this rule means the pipeline has failed.
 
-## When to Use the Pipeline
+## First Action on Every Task
 
-Use when ANY applies:
+Before doing anything else, evaluate the pipeline trigger conditions below.
+If ANY condition matches → start the pipeline immediately, do not ask for approval first.
+If NONE match → handle directly (typo fix, config value, etc.).
+
+## Pipeline Trigger: REQUIRED When ANY Applies
+
 - Creates or modifies a Laravel Action class
 - Requires a database migration
 - Adds or changes a route, controller, or Form Request
@@ -17,6 +22,12 @@ Use when ANY applies:
 - Touches more than 2 files
 
 If none apply (e.g. typo fix, config value) — skip the pipeline.
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
 
 ## Execution Model
 
