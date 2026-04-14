@@ -1,8 +1,11 @@
 {
-    "enabledPlugins": {
-        "superpowers@superpowers-marketplace": true
-    },
-    "enabledMcpjsonServers": ["laravel-boost", "context7", "figma", "github-mw"],
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "enabledPlugins": {
+      "superpowers@superpowers-marketplace": true
+  },
+  "enabledMcpjsonServers": ["laravel-boost", "context7", "figma", "github-mw"],
   "permissions": {
     "deny": [
       "Read(./.env)"
