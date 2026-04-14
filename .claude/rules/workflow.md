@@ -27,24 +27,44 @@ If none apply (e.g. typo fix, config value) — skip the pipeline.
 ## Standard Feature Pipeline
 
 ```
-ba → ddd-architect? → developer ═══╗
-                                    ║
-                        ╔═══════════╩═══════════╗
-                        ║   Quality Gate Team    ║
-                        ║  tester | reviewer |   ║
-                        ║  security-scanner | qa ║
-                        ╚═══════════╤═══════════╝
-                                    ║
-                              docs-writer
+╔════════════════════════════════════╗
+║          Planning Team             ║
+║  ba  |  ddd-architect  |  devil    ║  ← team only when arch decision needed; else ba runs sequentially
+╚════════════════════════════════════╝
+                 ║
+             developer ═══╗
+                           ║
+               ╔═══════════╩═══════════╗
+               ║   Quality Gate Team    ║
+               ║  tester | reviewer |   ║
+               ║  security-scanner | qa ║
+               ╚═══════════╤═══════════╝
+                           ║
+                     docs-writer
 ```
 
 | Phase | Mode | Agent(s) | Output |
 |-------|------|----------|--------|
-| 1. Requirements | sequential | `ba` | User stories, scope |
-| 2. Architecture | sequential *(skip if no arch decision)* | `ddd-architect` | Domain model, placement |
+| 1–2. Planning | **team** `plan-{slug}` *(if arch decision needed); else `ba` sequential only* | `ba`, `ddd-architect`, `devil` | Validated stories + domain model |
 | 3. Implementation | sequential | `developer` | Code + Pint + PHPStan |
 | 4. Quality Gate | **team** | `tester`, `reviewer`, `security-scanner`, `qa` | Parallel reports |
 | 5. Documentation | sequential | `docs-writer` | PR description + `gh pr create` |
+
+### Planning Team
+
+Team name: `plan-{feature-slug}` (e.g. `plan-mentor-booking`)
+
+**When to use:**
+- Task involves architectural decisions → spawn 3 teammates: `ba`, `ddd-architect`, `devil`
+- Simple feature, no arch decision needed → run `ba` sequentially only (skip team entirely)
+
+**Resolution:**
+- `devil` challenges via `SendMessage` to `ba` or `ddd-architect`
+- Challenged agent responds directly
+- `devil` accepts response → silent on that point
+- `devil` escalates ignored challenge → orchestrator asks the challenged agent to address it; if still unresolved, document the concern and proceed
+
+**Done condition:** When `devil` sends "No further objections" → call TeamDelete → proceed to `developer`.
 
 ### Quality Gate Team
 
@@ -87,5 +107,5 @@ Quality gate reduces to `reviewer` + `security-scanner` (no tester/qa for infra 
 
 - **Naming**: `{purpose}-{slug}` — e.g. `qg-mentor-booking`, `verify-403-calendar`
 - **Lifecycle**: TeamCreate before phase → spawn teammates → collect results → shutdown → TeamDelete
-- **No chatter**: quality gate agents report independently, orchestrator reads all reports and decides
+- **No chatter (Quality Gate)**: quality gate agents report independently, orchestrator reads all reports and decides; Planning Team agents communicate via SendMessage by design
 - **Always cleanup**: TeamDelete after phase completes (pass or fail)

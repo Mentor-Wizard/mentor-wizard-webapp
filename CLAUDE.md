@@ -16,7 +16,7 @@
 
 Follow the pipeline in `.claude/rules/workflow.md`. Run independent steps in parallel. Never ask the user which agent to use — decide autonomously.
 
-Available agents: `ba`, `developer`, `frontend`, `tester`, `qa`, `reviewer`, `debugger`, `security-scanner`, `dba`, `ddd-architect`, `filament`, `devops`, `ci-cd-engineer`, `integration-architect`, `laravel-refactoring-expert`, `queue-specialist`, `docs-writer`
+Available agents: `ba`, `developer`, `frontend`, `tester`, `qa`, `reviewer`, `debugger`, `security-scanner`, `dba`, `ddd-architect`, `devil`, `filament`, `devops`, `ci-cd-engineer`, `integration-architect`, `laravel-refactoring-expert`, `queue-specialist`, `docs-writer`
 
 ## Setup
 
