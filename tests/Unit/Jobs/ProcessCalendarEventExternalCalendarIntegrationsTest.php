@@ -48,11 +48,8 @@ describe('ProcessCalendarEventExternalCalendarIntegrations job', function (): vo
 
         new ProcessCalendarEventExternalCalendarIntegrations($this->event)->handle();
 
-        Bus::assertDispatched(
-            CreateExternalCalendarEvent::class,
-            fn (CreateExternalCalendarEvent $job): bool => $job->calendarEvent->getKey() === $this->event->getKey()
-                && $job->integration->getKey() === $this->integration->getKey(),
-        );
+        Bus::assertDispatched(fn (CreateExternalCalendarEvent $job): bool => $job->calendarEvent->getKey() === $this->event->getKey()
+            && $job->integration->getKey() === $this->integration->getKey());
     });
 
     it('dispatches one job per active integration across users', function (): void {
@@ -67,14 +64,8 @@ describe('ProcessCalendarEventExternalCalendarIntegrations job', function (): vo
         new ProcessCalendarEventExternalCalendarIntegrations($this->event)->handle();
 
         Bus::assertDispatchedTimes(CreateExternalCalendarEvent::class, 2);
-        Bus::assertDispatched(
-            CreateExternalCalendarEvent::class,
-            fn (CreateExternalCalendarEvent $job): bool => $job->integration->getKey() === $this->integration->getKey(),
-        );
-        Bus::assertDispatched(
-            CreateExternalCalendarEvent::class,
-            fn (CreateExternalCalendarEvent $job): bool => $job->integration->getKey() === $menteeIntegration->getKey(),
-        );
+        Bus::assertDispatched(fn (CreateExternalCalendarEvent $job): bool => $job->integration->getKey() === $this->integration->getKey());
+        Bus::assertDispatched(fn (CreateExternalCalendarEvent $job): bool => $job->integration->getKey() === $menteeIntegration->getKey());
     });
 
     it('skips integrations that are not active', function (): void {

@@ -53,6 +53,7 @@ describe('ExternalCalendarSelectCalendar', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -63,6 +64,7 @@ describe('ExternalCalendarSelectCalendar', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -73,6 +75,7 @@ describe('ExternalCalendarSelectCalendar', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 

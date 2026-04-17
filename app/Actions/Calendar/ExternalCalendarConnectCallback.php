@@ -8,7 +8,7 @@ use App\Enums\CalendarProviderEnum;
 use App\Http\Requests\Calendar\ExternalCalendarConnectCallbackRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
-use App\Traits\Calendar\HandlesCalendarIntegrationCleanup;
+use App\Traits\ExternalCalendar\HandlesCalendarIntegrationCleanup;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -39,15 +39,15 @@ class ExternalCalendarConnectCallback
                 ->with('error', 'Authorization was denied or cancelled.');
         }
 
-        if ($statePayload === null || $this->user === null || $this->enum === null) {
+        if ($statePayload === null || ! $this->user instanceof User || ! $this->enum instanceof CalendarProviderEnum) {
             return to_route('profile.edit', ['tab' => 'calendars'])
                 ->with('error', 'Authorization session expired or invalid. Please try again.');
         }
 
         try {
             $this->synchronizationService->handleCallback($this->user, $this->enum, (string) $request->query('code'));
-        } catch (Exception $e) {
-            Log::error('Calendar authorization failed.'.$e->getMessage(), []);
+        } catch (Exception $exception) {
+            Log::error('Calendar authorization failed.'.$exception->getMessage(), []);
             $this->cleanupIntegration($this->user, $this->enum);
 
             return to_route('profile.edit', ['tab' => 'calendars'])

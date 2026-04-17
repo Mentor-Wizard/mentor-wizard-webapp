@@ -24,6 +24,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->toBe('Authorization was denied or cancelled.');
     });
 
@@ -36,6 +37,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->toBe('Authorization session expired or invalid. Please try again.');
     });
 
@@ -112,6 +114,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('calendar_provider'))->toBe(CalendarProviderEnum::Outlook->value);
     });
 
@@ -141,6 +144,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->toBe('No calendars found on this account.');
     });
 
@@ -170,6 +174,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->toBe('Token exchange failed.');
     });
 
@@ -183,6 +188,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->toBe('Authorization session expired or invalid. Please try again.');
     });
 });

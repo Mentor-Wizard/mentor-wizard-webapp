@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon|null $token_expires_at
  * @property Carbon|null $last_synced_at
  * @property Carbon|null $last_encrypted_at
+ *
  * @mixin IdeHelperUserCalendarIntegration
  */
 #[UseFactory(UserCalendarIntegrationFactory::class)]

@@ -12,6 +12,7 @@ use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -50,7 +51,7 @@ class ExternalCalendarRetrySync
             ->whereHas('calendarEventUsers', fn ($q) => $q->where('users.id', $user->getKey()))
             ->where('status', CalendarEventStatusEnum::CONFIRMED)
             ->whereNotIn('id', $syncedEventIds)
-            ->each(fn (CalendarEvent $event) => dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event)));
+            ->each(fn (CalendarEvent $event): PendingDispatch => dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event)));
 
         return to_route('profile.edit')
             ->with('success', 'Calendar sync has been queued. Your events will be synced shortly.');

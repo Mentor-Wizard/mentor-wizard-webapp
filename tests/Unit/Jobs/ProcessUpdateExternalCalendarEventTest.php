@@ -55,12 +55,9 @@ describe('ProcessUpdateExternalCalendarEvent job', function (): void {
 
         new ProcessUpdateExternalCalendarEvent($this->event)->handle();
 
-        Bus::assertDispatched(
-            UpdateExternalCalendarEvent::class,
-            fn (UpdateExternalCalendarEvent $job): bool => $job->calendarEvent->getKey() === $this->event->getKey()
-                && $job->externalEvent->getKey() === $this->externalEvent->getKey()
-                && $job->integration->getKey() === $this->integration->getKey(),
-        );
+        Bus::assertDispatched(fn (UpdateExternalCalendarEvent $job): bool => $job->calendarEvent->getKey() === $this->event->getKey()
+            && $job->externalEvent->getKey() === $this->externalEvent->getKey()
+            && $job->integration->getKey() === $this->integration->getKey());
     });
 
     it('skips external events whose integration is not active', function (): void {
@@ -93,16 +90,10 @@ describe('ProcessUpdateExternalCalendarEvent job', function (): void {
         new ProcessUpdateExternalCalendarEvent($this->event)->handle();
 
         Bus::assertDispatchedTimes(UpdateExternalCalendarEvent::class, 2);
-        Bus::assertDispatched(
-            UpdateExternalCalendarEvent::class,
-            fn (UpdateExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
-                && $job->integration->getKey() === $this->integration->getKey(),
-        );
-        Bus::assertDispatched(
-            UpdateExternalCalendarEvent::class,
-            fn (UpdateExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $secondExternalEvent->getKey()
-                && $job->integration->getKey() === $secondIntegration->getKey(),
-        );
+        Bus::assertDispatched(fn (UpdateExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
+            && $job->integration->getKey() === $this->integration->getKey());
+        Bus::assertDispatched(fn (UpdateExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $secondExternalEvent->getKey()
+            && $job->integration->getKey() === $secondIntegration->getKey());
     });
 
     it('does nothing when no external events exist', function (): void {

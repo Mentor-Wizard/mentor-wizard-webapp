@@ -4,26 +4,31 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
+use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\UserCalendarIntegration;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Validator as ValidatorImpl;
+use Override;
 
 class ExternalCalendarSyncSingleEventRequest extends ExternalCalendarRequest
 {
+    /**
+     * @return array{}
+     */
     public function rules(): array
     {
         return [];
     }
 
-    public function withValidator(ValidatorImpl $validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function (ValidatorImpl $validator): void {
+        $validator->after(function (Validator $validator): void {
             $provider = $this->resolveProvider();
 
-            if ($provider === null) {
+            if (! $provider instanceof CalendarProviderEnum) {
                 $validator->errors()->add('provider', 'Invalid calendar provider.');
 
                 return;
@@ -63,7 +68,8 @@ class ExternalCalendarSyncSingleEventRequest extends ExternalCalendarRequest
         });
     }
 
-    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator): never
+    #[Override]
+    protected function failedValidation(Validator $validator): never
     {
         throw new HttpResponseException(
             back()->with('error', $validator->errors()->first()),

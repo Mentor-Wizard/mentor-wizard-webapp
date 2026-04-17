@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\ExternalCalendar;
 
+use App\DTO\ExternalCalendar\ExternalCalendarEventData;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use Carbon\Carbon;
 use DateTimeInterface;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -33,6 +34,7 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
     public function saveCredentials(User $user, ?string $clientId, ?string $clientSecret): UserCalendarIntegration
     {
         /** @var UserCalendarIntegration */
+        // For Outlook/Azure app - no need to save client id and secret, since tokens are received using already provided initially refresh token
         return UserCalendarIntegration::query()->updateOrCreate(
             [
                 'user_id'  => $user->getKey(),
@@ -138,7 +140,7 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
     }
 
     /**
-     * @return list<FetchedCalendarEventData>
+     * @return list<ExternalCalendarEventData>
      */
     public function fetchEvents(UserCalendarIntegration $integration, DateTimeInterface $from, DateTimeInterface $to): array
     {
@@ -150,11 +152,11 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
         $url = str_replace('{calendarId}', urlencode($calendarId), self::CALENDAR_VIEW_URL);
 
         // MS Graph requires ISO 8601 without timezone suffix for calendarView parameters
-        $fromFormatted = Carbon::instance($from)->utc()->format('Y-m-d\TH:i:s.0000000');
-        $toFormatted = Carbon::instance($to)->utc()->format('Y-m-d\TH:i:s.0000000');
+        $fromFormatted = Date::instance($from)->utc()->format('Y-m-d\TH:i:s.0000000');
+        $toFormatted = Date::instance($to)->utc()->format('Y-m-d\TH:i:s.0000000');
 
         $response = Http::withToken((string) $integration->access_token)
-            ->withHeaders(['Prefer' => 'outlook.timezone="UTC"'])
+            ->withHeaders(['Prefer' => 'outlook.timezone="'.config('app.timezone').'"'])
             ->get($url, [
                 'startDateTime' => $fromFormatted,
                 'endDateTime'   => $toFormatted,
@@ -168,7 +170,7 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
         }
 
         return array_values(array_map(
-            fn (array $item): FetchedCalendarEventData => $this->mapOutlookEvent($item),
+            $this->mapOutlookEvent(...),
             $response->json('value', [])
         ));
     }
@@ -189,11 +191,11 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
             ],
             'start'   => [
                 'dateTime' => $event->start_date_time->toIso8601String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
             'end'     => [
                 'dateTime' => $event->end_date_time->toIso8601String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
         ]);
 
@@ -226,11 +228,11 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
             ],
             'start'   => [
                 'dateTime' => $event->start_date_time->toIso8601String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
             'end'     => [
                 'dateTime' => $event->end_date_time->toIso8601String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
         ]);
 
@@ -271,22 +273,22 @@ class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
     /**
      * @param  array<string, mixed>  $item
      */
-    private function mapOutlookEvent(array $item): FetchedCalendarEventData
+    private function mapOutlookEvent(array $item): ExternalCalendarEventData
     {
         $startData = $item['start'] ?? [];
         $endData = $item['end'] ?? [];
 
         // Because we sent `Prefer: outlook.timezone="UTC"`, the provider normalises to UTC
-        $providerTimezone = (string) ($startData['timeZone'] ?? 'UTC');
+        $providerTimezone = (string) ($startData['timeZone'] ?? config('app.timezone'));
 
-        $startUtc = Carbon::parse((string) $startData['dateTime'])->utc();
-        $endUtc = Carbon::parse((string) $endData['dateTime'])->utc();
+        $startUtc = Date::parse((string) $startData['dateTime'])->timezone(config('app.timezone'));
+        $endUtc = Date::parse((string) $endData['dateTime'])->timezone(config('app.timezone'));
 
         $description = $item['body']['content'] ?? $item['bodyPreview'] ?? null;
         $description = $description !== null ? mb_trim((string) $description) : null;
         $description = ($description === '') ? null : $description;
 
-        return new FetchedCalendarEventData(
+        return new ExternalCalendarEventData(
             externalId: (string) $item['id'],
             title: (string) ($item['subject'] ?? ''),
             startUtc: $startUtc,

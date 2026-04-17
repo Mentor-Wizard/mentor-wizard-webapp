@@ -19,6 +19,7 @@ class GoogleAppExternalCalendarService extends AbstractGoogleExternalCalendarSer
     public function saveCredentials(User $user, ?string $clientId, ?string $clientSecret): UserCalendarIntegration
     {
         /** @var UserCalendarIntegration */
+        // For google app - no need to save client id and secret, since tokens are received using already provided initially refresh token
         return UserCalendarIntegration::query()->updateOrCreate(
             [
                 'user_id'  => $user->getKey(),

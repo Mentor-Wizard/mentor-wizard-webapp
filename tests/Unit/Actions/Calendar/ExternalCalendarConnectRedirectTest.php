@@ -22,6 +22,7 @@ describe('ExternalCalendarConnectRedirect', function (): void {
             ->post(route('external-calendar.connect.redirect', ['provider' => 'unknown']));
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -67,6 +68,7 @@ describe('ExternalCalendarConnectRedirect', function (): void {
             ->post(route('external-calendar.connect.redirect', ['provider' => 'google_personal_app']));
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -78,6 +80,7 @@ describe('ExternalCalendarConnectRedirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 

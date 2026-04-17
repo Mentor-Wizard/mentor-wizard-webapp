@@ -30,6 +30,7 @@ describe('ExternalCalendarRetrySync', function (): void {
             ->post(route('external-calendar.retry', ['provider' => 'unknown']));
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -47,6 +48,7 @@ describe('ExternalCalendarRetrySync', function (): void {
             ->post(route('external-calendar.retry', ['provider' => 'google']));
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->toBe('No calendar integration found for this provider.');
     });
 

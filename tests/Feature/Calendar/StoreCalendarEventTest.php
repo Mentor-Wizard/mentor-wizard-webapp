@@ -452,7 +452,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             ->assertSessionHasErrors(['webLink']);
     });
 
-    // fromDate invalid already covered above
+    //        // fromDate invalid already covered above
 
     it('adds custom error when timeslot overlaps existing event', function (): void {
         actingAs($this->user);
@@ -471,7 +471,15 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->mentor->getKey());
+        $event->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::PARTICIPANT,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $payload = [
             'title'             => 'Overlap attempt',
@@ -480,16 +488,16 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => $tomorrow->format('Y-m-d'),
             'toTime'            => '15:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Should fail due to overlap',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
-
         $response = $this->withSession(['_token' => 'test-token'])->post(route('pages.calendar.store'), $payload);
 
         $response->assertSessionHasErrors([
-            'fromDate' => 'there are another events on this time',
+            'fromTime' => 'The selected time must be one of the available time slots.',
         ]);
     });
 });
@@ -596,9 +604,9 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         $eventData = [
             'title'             => 'Booking event',
             'fromDate'          => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'          => '09:00',
+            'fromTime'          => '14:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
-            'toTime'            => '10:00',
+            'toTime'            => '15:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,

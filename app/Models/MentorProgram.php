@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property CarbonInterface|null $start_time
  * @property CarbonInterface|null $end_time
+ *
  * @mixin IdeHelperMentorProgram
  */
 #[ObservedBy(MentorProgramObserver::class)]
@@ -42,7 +43,7 @@ class MentorProgram extends Model
         'need_confirmation',
     ];
 
-/**
+    /**
      * @return BelongsTo<User, $this>
      */
     public function mentor(): BelongsTo
@@ -90,7 +91,7 @@ class MentorProgram extends Model
         return $this->hasMany(CalendarEvent::class, 'mentor_program_id');
     }
 
-/**
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

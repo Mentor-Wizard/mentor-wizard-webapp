@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\Calendar\ConfirmedCalendarEventsListPage;
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
@@ -37,15 +39,18 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'name'      => 'Program B',
         ]);
 
-        $this->event = CalendarEvent::factory()->create([
+        $this->upcomingEvent = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->program->getKey(),
             'date'              => Date::tomorrow()->toDateString(),
-            'start_date_time'   => Date::now()->addDay(),
-            'end_date_time'     => Date::now()->addDay()->addHour(),
+            'start_date_time'   => Date::tomorrow()->startOfDay(),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHour(),
         ]);
-        $this->event->calendarEventUsers()->attach($this->mentor->getKey());
+        $this->upcomingEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         auth()->login($this->mentor);
     });
@@ -55,184 +60,313 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         expect($response)->toBeInstanceOf(Response::class);
 
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
-        $programKey = $this->program->getKey();
 
         expect($page['component'])->toBe('Calendar/ListConfirmedCalendarEventsPage')
-            ->and($page['props'])->toHaveKeys(['locale', 'calendarEvents'])
-            ->and($page['props']['calendarEvents'])->toHaveKey($programKey)
-            ->and($page['props']['calendarEvents'][$programKey]['name'])->toBe('Program X');
+            ->and($page['props'])->toHaveKeys(['locale', 'upcomingCalendarEvents', 'pastCalendarEvents']);
     });
 
-    it('only includes confirmed events in the future', function (): void {
-        // Create a confirmed past event
-        $pastEvent = CalendarEvent::factory()->create([
-            'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->subDay(),
-            'end_date_time'     => Date::now()->subDay()->addHour(),
-        ]);
-        $pastEvent->calendarEventUsers()->attach($this->mentor->getKey());
-
-        // Create a pending future event
-        $pendingEvent = CalendarEvent::factory()->create([
-            'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value,
-            'start_date_time'   => Date::now()->addDays(3),
-            'end_date_time'     => Date::now()->addDays(3)->addHour(),
-        ]);
-        $pendingEvent->calendarEventUsers()->attach($this->mentor->getKey());
-
-        // Create a confirmed future event
-        $futureEvent = CalendarEvent::factory()->create([
-            'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->addDays(2),
-            'end_date_time'     => Date::now()->addDays(2)->addHour(),
-        ]);
-        $futureEvent->calendarEventUsers()->attach($this->mentor->getKey());
-
-        $action = new ConfirmedCalendarEventsListPage;
-        $response = $action->handle();
-
-        expect($response)->toBeInstanceOf(Response::class);
-
+    it('places confirmed future events in upcomingCalendarEvents', function (): void {
+        $response = new ConfirmedCalendarEventsListPage()->handle();
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        // Should have Program X (from beforeEach) and Program A (future confirmed)
-        $allEvents = collect($props['calendarEvents'][$this->mentorProgram1->getKey()]['events']);
+        $programKey = $this->program->getKey();
 
-        // The past and pending events should be excluded
-        $eventIds = $allEvents->pluck('id')->toArray();
-        expect($eventIds)->not->toContain($pastEvent->getKey())
-            ->and($eventIds)->not->toContain($pendingEvent->getKey())
-            ->and($eventIds)->toContain($futureEvent->getKey());
+        expect($props['upcomingCalendarEvents'])->toHaveKey($programKey)
+            ->and($props['upcomingCalendarEvents'][$programKey]['name'])->toBe('Program X')
+            ->and($props['upcomingCalendarEvents'][$programKey]['events'])->toHaveCount(1);
     });
 
-    it('groups events by mentor program name', function (): void {
+    it('places confirmed past events in pastCalendarEvents', function (): void {
+        $pastEvent = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
+            'mentor_program_id' => $this->program->getKey(),
+            'date'              => Date::yesterday()->toDateString(),
+            'start_date_time'   => Date::yesterday()->startOfDay(),
+            'end_date_time'     => Date::yesterday()->startOfDay()->addHour(),
+        ]);
+        $pastEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+        $props = $page['props'];
+
+        $programKey = $this->program->getKey();
+
+        expect($props['pastCalendarEvents'])->toHaveKey($programKey)
+            ->and($props['pastCalendarEvents'][$programKey]['name'])->toBe('Program X')
+            ->and($props['pastCalendarEvents'][$programKey]['events'])->toHaveCount(1);
+    });
+
+    it('excludes non-confirmed events from both props', function (): void {
+        $pendingEvent = CalendarEvent::factory()->create([
+            'mentor_program_id' => $this->mentorProgram1->getKey(),
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+            'start_date_time'   => Date::tomorrow()->startOfDay(),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHour(),
+        ]);
+        $pendingEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+        $props = $page['props'];
+
+        $upcomingIds = collect($props['upcomingCalendarEvents'])
+            ->flatMap(fn (array $group): array => collect($group['events'])->pluck('id')->toArray())
+            ->toArray();
+
+        $pastIds = collect($props['pastCalendarEvents'])
+            ->flatMap(fn (array $group): array => collect($group['events'])->pluck('id')->toArray())
+            ->toArray();
+
+        expect($upcomingIds)->not->toContain($pendingEvent->getKey())
+            ->and($pastIds)->not->toContain($pendingEvent->getKey());
+    });
+
+    it('groups upcomingCalendarEvents by mentor program id', function (): void {
         $event1 = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->addDay(),
-            'end_date_time'     => Date::now()->addDay()->addHour(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::tomorrow()->startOfDay(),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHour(),
+        ]);
+        $event1->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
         $event2 = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->addDays(2),
-            'end_date_time'     => Date::now()->addDays(2)->addHour(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::tomorrow()->startOfDay()->addHours(2),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHours(3),
+        ]);
+        $event2->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $this->mentor->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
-
-        $action = new ConfirmedCalendarEventsListPage;
-        $response = $action->handle();
-
-        expect($response)->toBeInstanceOf(Response::class);
-
+        $response = new ConfirmedCalendarEventsListPage()->handle();
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        expect($props['calendarEvents'][$this->mentorProgram1->getKey()]['name'])->toBe('Program A')
-            ->and($props['calendarEvents'][$this->mentorProgram1->getKey()]['events'])->toHaveCount(2);
+        $programKey = $this->mentorProgram1->getKey();
 
-        foreach ($props['calendarEvents'][$this->mentorProgram1->getKey()]['events'] as $event) {
-            expect($event['mentor_program_id'])->toBe($this->mentorProgram1->getKey());
+        expect($props['upcomingCalendarEvents'])->toHaveKey($programKey)
+            ->and($props['upcomingCalendarEvents'][$programKey]['name'])->toBe('Program A')
+            ->and($props['upcomingCalendarEvents'][$programKey]['events'])->toHaveCount(2);
+
+        foreach ($props['upcomingCalendarEvents'][$programKey]['events'] as $event) {
+            expect($event['mentor_program_id'])->toBe($programKey);
         }
     });
 
-    it('filters by mentor program when provided', function (): void {
+    it('groups pastCalendarEvents by mentor program id', function (): void {
+        $past1 = CalendarEvent::factory()->create([
+            'mentor_program_id' => $this->mentorProgram1->getKey(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::yesterday()->startOfDay(),
+            'end_date_time'     => Date::yesterday()->startOfDay()->addHour(),
+        ]);
+        $past1->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $past2 = CalendarEvent::factory()->create([
+            'mentor_program_id' => $this->mentorProgram1->getKey(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::yesterday()->startOfDay()->subHour(),
+            'end_date_time'     => Date::yesterday()->startOfDay(),
+        ]);
+        $past2->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+        $props = $page['props'];
+
+        $programKey = $this->mentorProgram1->getKey();
+
+        expect($props['pastCalendarEvents'])->toHaveKey($programKey)
+            ->and($props['pastCalendarEvents'][$programKey]['name'])->toBe('Program A')
+            ->and($props['pastCalendarEvents'][$programKey]['events'])->toHaveCount(2);
+
+        foreach ($props['pastCalendarEvents'][$programKey]['events'] as $event) {
+            expect($event['mentor_program_id'])->toBe($programKey);
+        }
+    });
+
+    it('filters upcomingCalendarEvents by mentor program when provided', function (): void {
         $event1 = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->addDay(),
-            'end_date_time'     => Date::now()->addDay()->addHour(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::tomorrow()->startOfDay(),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHour(),
+        ]);
+        $event1->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
         $event2 = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram2->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->addDays(2),
-            'end_date_time'     => Date::now()->addDays(2)->addHour(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::tomorrow()->startOfDay()->addHours(2),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHours(3),
+        ]);
+        $event2->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $this->mentor->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
-
-        $action = new ConfirmedCalendarEventsListPage;
-        $response = $action->handle($this->mentorProgram1);
-
-        expect($response)->toBeInstanceOf(Response::class);
-
+        $response = new ConfirmedCalendarEventsListPage()->handle($this->mentorProgram1);
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        expect($props['calendarEvents'][$this->mentorProgram1->getKey()]['name'])->toBe('Program A')
-            ->and($props['calendarEvents'])->not->toHaveKey($this->mentorProgram2->getKey());
-
-        $allEvents = collect($props['calendarEvents'][$this->mentorProgram1->getKey()]['events']);
-        expect($allEvents)->toHaveCount(1);
+        expect($props['upcomingCalendarEvents'])->toHaveKey($this->mentorProgram1->getKey())
+            ->and($props['upcomingCalendarEvents'])->not->toHaveKey($this->mentorProgram2->getKey())
+            ->and($props['upcomingCalendarEvents'][$this->mentorProgram1->getKey()]['events'])->toHaveCount(1);
     });
 
-    it('does not filter when no mentor program provided', function (): void {
+    it('filters pastCalendarEvents by mentor program when provided', function (): void {
+        $past1 = CalendarEvent::factory()->create([
+            'mentor_program_id' => $this->mentorProgram1->getKey(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::yesterday()->startOfDay(),
+            'end_date_time'     => Date::yesterday()->startOfDay()->addHour(),
+        ]);
+        $past1->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $past2 = CalendarEvent::factory()->create([
+            'mentor_program_id' => $this->mentorProgram2->getKey(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::yesterday()->startOfDay()->subHour(),
+            'end_date_time'     => Date::yesterday()->startOfDay(),
+        ]);
+        $past2->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $response = new ConfirmedCalendarEventsListPage()->handle($this->mentorProgram1);
+        $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+        $props = $page['props'];
+
+        expect($props['pastCalendarEvents'])->toHaveKey($this->mentorProgram1->getKey())
+            ->and($props['pastCalendarEvents'])->not->toHaveKey($this->mentorProgram2->getKey())
+            ->and($props['pastCalendarEvents'][$this->mentorProgram1->getKey()]['events'])->toHaveCount(1);
+    });
+
+    it('returns all programs when no mentor program filter provided', function (): void {
         $event1 = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->addDay(),
-            'end_date_time'     => Date::now()->addDay()->addHour(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::tomorrow()->startOfDay(),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHour(),
+        ]);
+        $event1->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
         $event2 = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram2->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::now()->addDays(2),
-            'end_date_time'     => Date::now()->addDays(2)->addHour(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::tomorrow()->startOfDay()->addHours(2),
+            'end_date_time'     => Date::tomorrow()->startOfDay()->addHours(3),
+        ]);
+        $event2->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $this->mentor->calendarEvents()->attach([$event1->getKey(), $event2->getKey()]);
-
-        $action = new ConfirmedCalendarEventsListPage;
-        $response = $action->handle();
-
-        expect($response)->toBeInstanceOf(Response::class);
-
+        $response = new ConfirmedCalendarEventsListPage()->handle();
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        // Should return ALL events when null is passed (no filtering)
-        $allEvents = collect($props['calendarEvents']);
-        expect($allEvents)->toHaveCount(3); // 2 new + 1 from beforeEach
+        // upcomingCalendarEvents should include Program X (beforeEach), Program A, and Program B
+        expect($props['upcomingCalendarEvents'])
+            ->toHaveKey($this->program->getKey())
+            ->toHaveKey($this->mentorProgram1->getKey())
+            ->toHaveKey($this->mentorProgram2->getKey());
     });
 
-    it('orders events by start_date_time ascending', function (): void {
+    it('orders upcomingCalendarEvents by start_date_time ascending', function (): void {
         $laterEvent = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => Date::now()->addDays(5),
             'end_date_time'     => Date::now()->addDays(5)->addHour(),
+        ]);
+        $laterEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
         $earlierEvent = CalendarEvent::factory()->create([
             'mentor_program_id' => $this->mentorProgram1->getKey(),
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
             'start_date_time'   => Date::now()->addDays(2),
             'end_date_time'     => Date::now()->addDays(2)->addHour(),
         ]);
+        $earlierEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
-        $this->mentor->calendarEvents()->attach([$laterEvent->getKey(), $earlierEvent->getKey()]);
-
-        $action = new ConfirmedCalendarEventsListPage;
-        $response = $action->handle();
-
-        expect($response)->toBeInstanceOf(Response::class);
-
+        $response = new ConfirmedCalendarEventsListPage()->handle();
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
-        $programAEvents = $props['calendarEvents'][$this->mentorProgram1->getKey()]['events'];
+        $events = $props['upcomingCalendarEvents'][$this->mentorProgram1->getKey()]['events'];
 
-        // Earlier event should come before later event
-        expect($programAEvents[0]['id'])->toBe($earlierEvent->getKey())
-            ->and($programAEvents[1]['id'])->toBe($laterEvent->getKey());
+        expect($events[0]['id'])->toBe($earlierEvent->getKey())
+            ->and($events[1]['id'])->toBe($laterEvent->getKey());
+    });
+
+    it('orders pastCalendarEvents by start_date_time descending', function (): void {
+        $olderEvent = CalendarEvent::factory()->create([
+            'mentor_program_id' => $this->mentorProgram1->getKey(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->subDays(5),
+            'end_date_time'     => Date::now()->subDays(5)->addHour(),
+        ]);
+        $olderEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $recentPastEvent = CalendarEvent::factory()->create([
+            'mentor_program_id' => $this->mentorProgram1->getKey(),
+            'status'            => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time'   => Date::now()->subDays(2),
+            'end_date_time'     => Date::now()->subDays(2)->addHour(),
+        ]);
+        $recentPastEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
+        $props = $page['props'];
+
+        $events = $props['pastCalendarEvents'][$this->mentorProgram1->getKey()]['events'];
+
+        expect($events[0]['id'])->toBe($recentPastEvent->getKey())
+            ->and($events[1]['id'])->toBe($olderEvent->getKey());
     });
 });

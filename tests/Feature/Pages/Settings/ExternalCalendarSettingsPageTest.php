@@ -26,7 +26,7 @@ describe('ExternalCalendarSettingsPage', function (): void {
             ->assertInertia(
                 fn ($page) => $page
                     ->component('Settings/ExternalCalendarPage', false)
-                    ->has('providers'),
+                    ->has('calendarIntegrations'),
             );
     });
 
@@ -40,7 +40,7 @@ describe('ExternalCalendarSettingsPage', function (): void {
             ->get(route('pages.settings.external-calendar'));
 
         $response->assertInertia(
-            fn ($page) => $page->has('providers', count(CalendarProviderEnum::cases())),
+            fn ($page) => $page->has('calendarIntegrations', count(CalendarProviderEnum::cases())),
         );
     });
 
@@ -49,11 +49,11 @@ describe('ExternalCalendarSettingsPage', function (): void {
             ->get(route('pages.settings.external-calendar'));
 
         $response->assertInertia(
-            fn ($page) => $page->where('providers.0.connected', false)
-                ->where('providers.0.sync_status', CalendarSyncStatusEnum::Disconnected->value)
-                ->where('providers.0.needs_reauth', false)
-                ->where('providers.0.calendar_id', null)
-                ->where('providers.0.calendar_name', null),
+            fn ($page) => $page->where('calendarIntegrations.0.connected', false)
+                ->where('calendarIntegrations.0.sync_status', CalendarSyncStatusEnum::Disconnected->value)
+                ->where('calendarIntegrations.0.needs_reauth', false)
+                ->where('calendarIntegrations.0.calendar_id', null)
+                ->where('calendarIntegrations.0.calendar_name', null),
         );
     });
 
@@ -72,12 +72,12 @@ describe('ExternalCalendarSettingsPage', function (): void {
             ->get(route('pages.settings.external-calendar'))
             ->assertInertia(
                 fn ($page) => $page
-                    ->where('providers.0.key', CalendarProviderEnum::Google->value)
-                    ->where('providers.0.connected', true)
-                    ->where('providers.0.sync_status', CalendarSyncStatusEnum::Active->value)
-                    ->where('providers.0.calendar_id', 'primary')
-                    ->where('providers.0.calendar_name', 'My Calendar')
-                    ->where('providers.0.needs_reauth', false),
+                    ->where('calendarIntegrations.0.key', CalendarProviderEnum::Google->value)
+                    ->where('calendarIntegrations.0.connected', true)
+                    ->where('calendarIntegrations.0.sync_status', CalendarSyncStatusEnum::Active->value)
+                    ->where('calendarIntegrations.0.calendar_id', 'primary')
+                    ->where('calendarIntegrations.0.calendar_name', 'My Calendar')
+                    ->where('calendarIntegrations.0.needs_reauth', false),
             );
     });
 
@@ -91,9 +91,9 @@ describe('ExternalCalendarSettingsPage', function (): void {
             ->get(route('pages.settings.external-calendar'))
             ->assertInertia(
                 fn ($page) => $page
-                    ->where('providers.0.key', CalendarProviderEnum::Google->value)
-                    ->where('providers.0.needs_reauth', true)
-                    ->where('providers.0.sync_status', CalendarSyncStatusEnum::Error->value),
+                    ->where('calendarIntegrations.0.key', CalendarProviderEnum::Google->value)
+                    ->where('calendarIntegrations.0.needs_reauth', true)
+                    ->where('calendarIntegrations.0.sync_status', CalendarSyncStatusEnum::Error->value),
             );
     });
 
@@ -109,8 +109,8 @@ describe('ExternalCalendarSettingsPage', function (): void {
             ->get(route('pages.settings.external-calendar'))
             ->assertInertia(
                 fn ($page) => $page
-                    ->where('providers.0.key', CalendarProviderEnum::Google->value)
-                    ->where('providers.0.last_error_message', 'Token expired.'),
+                    ->where('calendarIntegrations.0.key', CalendarProviderEnum::Google->value)
+                    ->where('calendarIntegrations.0.last_error_message', 'Token expired.'),
             );
     });
 
@@ -126,8 +126,8 @@ describe('ExternalCalendarSettingsPage', function (): void {
             ->get(route('pages.settings.external-calendar'))
             ->assertInertia(
                 fn ($page) => $page
-                    ->where('providers.0.key', CalendarProviderEnum::Google->value)
-                    ->where('providers.0.connected', false),
+                    ->where('calendarIntegrations.0.key', CalendarProviderEnum::Google->value)
+                    ->where('calendarIntegrations.0.connected', false),
             );
     });
 });

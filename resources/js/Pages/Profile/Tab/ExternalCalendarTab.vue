@@ -8,7 +8,7 @@ import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import { useExternalCalendar } from '@/Composables/useExternalCalendar';
 
 const page = usePage();
-const providers = page.props.calendarProviders ?? [];
+const providers = page.props.calendarIntegrations ?? [];
 
 const {
   notification,
@@ -22,10 +22,10 @@ const {
   retrySync,
 } = useExternalCalendar(providers);
 
-const googleProvider = computed(() => page.props.calendarProviders?.find((p) => p.key === 'google'));
-const googlePersonalProvider = computed(() => page.props.calendarProviders?.find((p) => p.key === 'google_personal_app'));
-const appleProvider = computed(() => page.props.calendarProviders?.find((p) => p.key === 'apple'));
-const otherProviders = computed(() => page.props.calendarProviders?.filter((p) => !['google', 'google_personal_app', 'apple'].includes(p.key)) ?? []);
+const googleProvider = computed(() => page.props.calendarIntegrations?.find((p) => p.key === 'google'));
+const googlePersonalProvider = computed(() => page.props.calendarIntegrations?.find((p) => p.key === 'google_personal_app'));
+const appleProvider = computed(() => page.props.calendarIntegrations?.find((p) => p.key === 'apple'));
+const otherProviders = computed(() => page.props.calendarIntegrations?.filter((p) => !['google', 'google_personal_app', 'apple'].includes(p.key)) ?? []);
 
 const googleConnected = computed(() => googleProvider.value?.connected && !googleProvider.value?.needs_reauth);
 const googlePersonalConnected = computed(() => googlePersonalProvider.value?.connected && !googlePersonalProvider.value?.needs_reauth);

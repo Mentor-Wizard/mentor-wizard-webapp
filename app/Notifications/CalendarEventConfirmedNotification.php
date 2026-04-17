@@ -34,7 +34,7 @@ class CalendarEventConfirmedNotification extends Notification implements ShouldQ
             ->line('**'.$event->title.'**')
             ->line('Date: '.$event->start_date_time->format('D, d M Y'))
             ->line('Time: '.$event->start_date_time->format('H:i').' – '.$event->end_date_time->format('H:i').' UTC')
-            ->action('View Event', route('pages.calendar.show', ['id' => $event->getKey()]))
+            ->action('View Event', route('pages.calendar.show', $event))
             ->line('See you there!');
     }
 

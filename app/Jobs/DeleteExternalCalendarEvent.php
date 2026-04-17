@@ -36,7 +36,7 @@ class DeleteExternalCalendarEvent implements ShouldQueue
 
     public function handle(): void
     {
-        if ($this->integration === null) {
+        if (! $this->integration instanceof UserCalendarIntegration) {
             ExternalCalendarEventLog::query()->create([
                 'external_calendar_event_id' => $this->externalEvent->getKey(),
                 'calendar_event_id'          => $this->externalEvent->calendar_event_id,

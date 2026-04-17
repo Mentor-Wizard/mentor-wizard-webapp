@@ -7,7 +7,7 @@ namespace App\Actions\Calendar;
 use App\Http\Requests\Calendar\ExternalCalendarConnectDirectRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
-use App\Traits\Calendar\HandlesCalendarIntegrationCleanup;
+use App\Traits\ExternalCalendar\HandlesCalendarIntegrationCleanup;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 

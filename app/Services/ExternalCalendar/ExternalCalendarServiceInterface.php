@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\ExternalCalendar;
 
+use App\DTO\ExternalCalendar\ExternalCalendarEventData;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
@@ -27,7 +28,7 @@ interface ExternalCalendarServiceInterface
     /**
      * Fetches events from the external calendar within the given UTC time range.
      *
-     * @return list<FetchedCalendarEventData>
+     * @return list<ExternalCalendarEventData>
      */
     public function fetchEvents(UserCalendarIntegration $integration, DateTimeInterface $from, DateTimeInterface $to): array;
 

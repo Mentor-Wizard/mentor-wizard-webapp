@@ -72,6 +72,7 @@ class ReEncryptCalendarCredentials implements ShouldQueue
             if ($raw === null) {
                 continue;
             }
+
             if ($raw === '') {
                 continue;
             }

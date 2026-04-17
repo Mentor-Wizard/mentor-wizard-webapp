@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\CalendarEventColoursEnum;
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -42,22 +45,30 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $eventA = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
             'mentor_program_id' => $this->programA->getKey(),
             'date'              => Date::tomorrow()->toDateString(),
             'start_date_time'   => Date::now()->addDay(),
             'end_date_time'     => Date::now()->addDay()->addHour(),
         ]);
-        $eventA->calendarEventUsers()->attach($this->mentor->getKey());
+        $eventA->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $eventB = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
             'mentor_program_id' => $this->programB->getKey(),
             'date'              => Date::tomorrow()->toDateString(),
             'start_date_time'   => Date::now()->addDays(2),
             'end_date_time'     => Date::now()->addDays(2)->addHour(),
         ]);
-        $eventB->calendarEventUsers()->attach($this->mentor->getKey());
+        $eventB->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $response = $this->get(route('pages.calendar.confirmed'));
 
@@ -66,7 +77,7 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('Calendar/ListConfirmedCalendarEventsPage')
             ->has('locale')
-            ->has('calendarEvents', fn (AssertableJson $events): AssertableJson => $events
+            ->has('upcomingCalendarEvents', fn (AssertableJson $events): AssertableJson => $events
                 ->whereType((string) $this->programA->getKey(), 'array')
                 ->whereType((string) $this->programB->getKey(), 'array')
                 ->etc()
@@ -80,19 +91,23 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $pastEvent = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
             'mentor_program_id' => $this->programA->getKey(),
             'date'              => Date::yesterday()->toDateString(),
             'start_date_time'   => Date::now()->subDay(),
             'end_date_time'     => Date::now()->subDay()->addHour(),
         ]);
-        $pastEvent->calendarEventUsers()->attach($this->mentor->getKey());
+        $pastEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $response = $this->get(route('pages.calendar.confirmed'));
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('Calendar/ListConfirmedCalendarEventsPage')
-            ->where('calendarEvents', [])
+            ->where('upcomingCalendarEvents', [])
         );
     });
 
@@ -102,19 +117,23 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $pendingEvent = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
             'mentor_program_id' => $this->programA->getKey(),
             'date'              => Date::tomorrow()->toDateString(),
             'start_date_time'   => Date::now()->addDay(),
             'end_date_time'     => Date::now()->addDay()->addHour(),
         ]);
-        $pendingEvent->calendarEventUsers()->attach($this->mentor->getKey());
+        $pendingEvent->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $response = $this->get(route('pages.calendar.confirmed'));
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('Calendar/ListConfirmedCalendarEventsPage')
-            ->where('calendarEvents', [])
+            ->where('upcomingCalendarEvents', [])
         );
     });
 
@@ -124,35 +143,43 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $eventA = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
             'mentor_program_id' => $this->programA->getKey(),
             'date'              => Date::tomorrow()->toDateString(),
             'start_date_time'   => Date::now()->addDay(),
             'end_date_time'     => Date::now()->addDay()->addHour(),
         ]);
-        $eventA->calendarEventUsers()->attach($this->mentor->getKey());
+        $eventA->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $eventB = CalendarEvent::factory()->create([
             'status'            => CalendarEventStatusEnum::CONFIRMED,
             'type'              => CalendarEventTypeEnum::INDIVIDUAL,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
             'mentor_program_id' => $this->programB->getKey(),
             'date'              => Date::tomorrow()->toDateString(),
             'start_date_time'   => Date::now()->addDays(2),
             'end_date_time'     => Date::now()->addDays(2)->addHour(),
         ]);
-        $eventB->calendarEventUsers()->attach($this->mentor->getKey());
+        $eventB->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $response = $this->get(route('pages.calendar.confirmed', $this->programA->slug));
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('Calendar/ListConfirmedCalendarEventsPage')
-            ->has('calendarEvents', fn (AssertableJson $events): AssertableJson => $events
+            ->has('upcomingCalendarEvents', fn (AssertableJson $events): AssertableJson => $events
                 ->has((string) $this->programA->getKey())
             )
         );
     });
 
-    it('returns empty calendarEvents when no confirmed future events exist', function (): void {
+    it('returns empty upcomingCalendarEvents when no confirmed future events exist', function (): void {
         $this->actingAs($this->mentor);
 
         $response = $this->get(route('pages.calendar.confirmed'));
@@ -161,7 +188,7 @@ describe('ConfirmedCalendarEventsListPage (Feature)', function (): void {
         $response->assertInertia(fn (Assert $page): AssertableJson => $page
             ->component('Calendar/ListConfirmedCalendarEventsPage')
             ->has('locale')
-            ->where('calendarEvents', [])
+            ->where('upcomingCalendarEvents', [])
         );
     });
 });

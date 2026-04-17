@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
+use App\Enums\CalendarProviderEnum;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\Validator as ValidatorImpl;
+use Override;
 
 class ExternalCalendarConnectDirectRequest extends ExternalCalendarRequest
 {
+    /**
+     * @return array<string, array<int, string>>
+     */
     public function rules(): array
     {
         return [
@@ -17,12 +21,12 @@ class ExternalCalendarConnectDirectRequest extends ExternalCalendarRequest
         ];
     }
 
-    public function withValidator(ValidatorImpl $validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function (ValidatorImpl $validator): void {
+        $validator->after(function (Validator $validator): void {
             $provider = $this->resolveProvider();
 
-            if ($provider === null) {
+            if (! $provider instanceof CalendarProviderEnum) {
                 $validator->errors()->add('provider', 'Invalid calendar provider.');
 
                 return;
@@ -34,6 +38,7 @@ class ExternalCalendarConnectDirectRequest extends ExternalCalendarRequest
         });
     }
 
+    #[Override]
     protected function failedValidation(Validator $validator): never
     {
         $this->cleanupIntegration($this->user(), $this->resolveProvider());

@@ -45,4 +45,35 @@ return [
     */
     'google_client_id'     => env('GOOGLE_CALENDAR_CLIENT_ID'),
     'google_client_secret' => env('GOOGLE_CALENDAR_CLIENT_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Integration Test Credentials
+    |--------------------------------------------------------------------------
+    |
+    | Real provider credentials used only when running the Integration test
+    | suite against live APIs. Set the corresponding env variables in
+    | .env.testing (or export them before running) and never commit real
+    | tokens to the repository.
+    |
+    */
+    'testing' => [
+        'outlook' => [
+            'access_token'  => env('TEST_OUTLOOK_ACCESS_TOKEN'),
+            'refresh_token' => env('TEST_OUTLOOK_REFRESH_TOKEN'),
+            'calendar_id'   => env('TEST_OUTLOOK_CALENDAR_ID', 'me'),
+        ],
+        'google' => [
+            'access_token'  => env('TEST_GOOGLE_ACCESS_TOKEN'),
+            'refresh_token' => env('TEST_GOOGLE_REFRESH_TOKEN'),
+            'client_id'     => env('TEST_GOOGLE_CLIENT_ID'),
+            'client_secret' => env('TEST_GOOGLE_CLIENT_SECRET'),
+            'calendar_id'   => env('TEST_GOOGLE_CALENDAR_ID', 'primary'),
+        ],
+        'apple' => [
+            'id'           => env('TEST_APPLE_ID'),
+            'app_password' => env('TEST_APPLE_APP_PASSWORD'),
+            'calendar_url' => env('TEST_APPLE_CALENDAR_URL'),
+        ],
+    ],
 ];

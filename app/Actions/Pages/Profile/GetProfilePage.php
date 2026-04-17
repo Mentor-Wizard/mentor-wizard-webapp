@@ -31,12 +31,12 @@ class GetProfilePage
             ->keyBy(fn (UserCalendarIntegration $i): string => $i->provider->value)
             ->all();
 
-        $calendarProviders = [];
+        $calendarIntegrations = [];
 
         foreach (CalendarProviderEnum::cases() as $provider) {
             $integration = $integrations[$provider->value] ?? null;
 
-            $calendarProviders[] = [
+            $calendarIntegrations[] = [
                 'key'                  => $provider->value,
                 'connected'            => $integration !== null,
                 'needs_reauth'         => $integration?->needs_reauth ?? false,
@@ -51,10 +51,10 @@ class GetProfilePage
         }
 
         return Inertia::render('Profile/EditPage', [
-            'mustVerifyEmail'   => $user instanceof MustVerifyEmail, // @pest-mutate-ignore
-            'status'            => session('status'),
-            'avatar'            => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
-            'calendarProviders' => $calendarProviders,
+            'mustVerifyEmail'      => $user instanceof MustVerifyEmail, // @pest-mutate-ignore
+            'status'               => session('status'),
+            'avatar'               => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
+            'calendarIntegrations' => $calendarIntegrations,
         ]);
     }
 }

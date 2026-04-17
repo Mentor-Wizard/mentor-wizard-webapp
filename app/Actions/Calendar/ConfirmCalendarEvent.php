@@ -47,7 +47,6 @@ class ConfirmCalendarEvent
             ->wherePivotNull('confirmed_at')
             ->exists()) {
 
-
             $calendarEvent->update(['status' => CalendarEventStatusEnum::CONFIRMED->value]);
             $this->notifyUserAboutConfirmation($calendarEvent);
             $this->checkEventsForCancellation($mentorProgram, $calendarEvent);

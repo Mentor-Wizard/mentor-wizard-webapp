@@ -16,7 +16,7 @@ describe('CalendarCredentialEncrypter', function (): void {
             'calendar.encryption_key2' => null,
         ]);
 
-        $this->encrypter = new CalendarCredentialEncrypter();
+        $this->encrypter = new CalendarCredentialEncrypter;
     });
 
     describe('encrypt and decrypt', function (): void {
@@ -71,7 +71,7 @@ describe('CalendarCredentialEncrypter', function (): void {
                 'calendar.encryption_key2' => $this->key1,
             ]);
 
-            $rotatedEncrypter = new CalendarCredentialEncrypter();
+            $rotatedEncrypter = new CalendarCredentialEncrypter;
 
             expect($rotatedEncrypter->decrypt($encrypted))->toBe($plaintext);
         });
@@ -83,7 +83,7 @@ describe('CalendarCredentialEncrypter', function (): void {
             // Set a second key that cannot decrypt this value
             config(['calendar.encryption_key2' => $this->key1]);
 
-            $sameEncrypter = new CalendarCredentialEncrypter();
+            $sameEncrypter = new CalendarCredentialEncrypter;
 
             expect($sameEncrypter->decrypt($encrypted))->toBe($plaintext);
         });
@@ -93,28 +93,28 @@ describe('CalendarCredentialEncrypter', function (): void {
         it('throws when key1 is not configured', function (): void {
             config(['calendar.encryption_key1' => null]);
 
-            $encrypter = new CalendarCredentialEncrypter();
+            $encrypter = new CalendarCredentialEncrypter;
             $encrypter->encrypt('test');
         })->throws(RuntimeException::class, 'CALENDAR_ENCRYPTION_KEY1 is not configured.');
 
         it('throws when key1 is empty string', function (): void {
             config(['calendar.encryption_key1' => '']);
 
-            $encrypter = new CalendarCredentialEncrypter();
+            $encrypter = new CalendarCredentialEncrypter;
             $encrypter->encrypt('test');
         })->throws(RuntimeException::class, 'CALENDAR_ENCRYPTION_KEY1 is not configured.');
 
         it('throws when key1 is not 44 characters', function (): void {
             config(['calendar.encryption_key1' => 'too-short']);
 
-            $encrypter = new CalendarCredentialEncrypter();
+            $encrypter = new CalendarCredentialEncrypter;
             $encrypter->encrypt('test');
         })->throws(RuntimeException::class, 'CALENDAR_ENCRYPTION_KEY1 must be a base64-encoded 32-byte key (44 characters).');
 
         it('throws when key1 is not valid base64', function (): void {
             config(['calendar.encryption_key1' => str_repeat('!', 44)]);
 
-            $encrypter = new CalendarCredentialEncrypter();
+            $encrypter = new CalendarCredentialEncrypter;
             $encrypter->encrypt('test');
         })->throws(RuntimeException::class, 'CALENDAR_ENCRYPTION_KEY1 must be a valid base64-encoded 32-byte key.');
 
@@ -127,14 +127,14 @@ describe('CalendarCredentialEncrypter', function (): void {
                 'calendar.encryption_key2' => null,
             ]);
 
-            $differentEncrypter = new CalendarCredentialEncrypter();
+            $differentEncrypter = new CalendarCredentialEncrypter;
             $differentEncrypter->decrypt($encrypted);
         })->throws(RuntimeException::class, 'Calendar credential decryption failed: no key could decrypt the payload.');
 
         it('throws when payload format is invalid', function (): void {
             config(['calendar.encryption_key2' => null]);
 
-            $encrypter = new CalendarCredentialEncrypter();
+            $encrypter = new CalendarCredentialEncrypter;
             $encrypter->decrypt('invalid-payload-no-colon');
         })->throws(RuntimeException::class, 'Calendar credential decryption failed: no key could decrypt the payload.');
     });

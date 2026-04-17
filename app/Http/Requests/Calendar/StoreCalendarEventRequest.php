@@ -7,7 +7,6 @@ namespace App\Http\Requests\Calendar;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Services\Calendar\CheckBookingSlotService;
-use App\Services\Calendar\CheckTimeSlotReservedService;
 use App\Traits\Calendar\CalendarEventRequestRules;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -55,7 +54,7 @@ class StoreCalendarEventRequest extends FormRequest
                     $timezone
                 );
 
-                $sessionDuration = (int) ($this->integer('selectedDuration') ?: $mentorProgram->session_duration);
+                $sessionDuration = ($this->integer('selectedDuration') ?: $mentorProgram->session_duration);
 
                 $isValidSlot = new CheckBookingSlotService(
                     $startDate,
@@ -66,18 +65,6 @@ class StoreCalendarEventRequest extends FormRequest
 
                 if (! $isValidSlot) {
                     $validator->errors()->add('fromTime', 'The selected time must be one of the available time slots.');
-                }
-
-                $isWithinAvailableSlots = new CheckTimeSlotReservedService(
-                    $startDate,
-                    $endDate,
-                    $timezone,
-                    auth()->user(),
-                    $mentorProgram,
-                )->isSlotAvailable();
-
-                if (! $isWithinAvailableSlots) {
-                    $validator->errors()->add('fromDate', 'there are another events on this time');
                 }
             }
         });

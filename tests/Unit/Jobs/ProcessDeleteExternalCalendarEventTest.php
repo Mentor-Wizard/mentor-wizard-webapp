@@ -55,11 +55,8 @@ describe('ProcessDeleteExternalCalendarEvent job', function (): void {
 
         new ProcessDeleteExternalCalendarEvent($this->event->getKey())->handle();
 
-        Bus::assertDispatched(
-            DeleteExternalCalendarEvent::class,
-            fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
-                && $job->integration?->getKey() === $this->integration->getKey(),
-        );
+        Bus::assertDispatched(fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
+            && $job->integration?->getKey() === $this->integration->getKey());
     });
 
     it('passes null integration when no matching integration exists', function (): void {
@@ -69,11 +66,8 @@ describe('ProcessDeleteExternalCalendarEvent job', function (): void {
 
         new ProcessDeleteExternalCalendarEvent($this->event->getKey())->handle();
 
-        Bus::assertDispatched(
-            DeleteExternalCalendarEvent::class,
-            fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
-                && $job->integration === null,
-        );
+        Bus::assertDispatched(fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
+            && ! $job->integration instanceof UserCalendarIntegration);
     });
 
     it('dispatches one job per external event with correct integrations', function (): void {
@@ -96,16 +90,10 @@ describe('ProcessDeleteExternalCalendarEvent job', function (): void {
         new ProcessDeleteExternalCalendarEvent($this->event->getKey())->handle();
 
         Bus::assertDispatchedTimes(DeleteExternalCalendarEvent::class, 2);
-        Bus::assertDispatched(
-            DeleteExternalCalendarEvent::class,
-            fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
-                && $job->integration?->getKey() === $this->integration->getKey(),
-        );
-        Bus::assertDispatched(
-            DeleteExternalCalendarEvent::class,
-            fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $secondExternalEvent->getKey()
-                && $job->integration?->getKey() === $secondIntegration->getKey(),
-        );
+        Bus::assertDispatched(fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $this->externalEvent->getKey()
+            && $job->integration?->getKey() === $this->integration->getKey());
+        Bus::assertDispatched(fn (DeleteExternalCalendarEvent $job): bool => $job->externalEvent->getKey() === $secondExternalEvent->getKey()
+            && $job->integration?->getKey() === $secondIntegration->getKey());
     });
 
     it('does nothing when no external events exist', function (): void {

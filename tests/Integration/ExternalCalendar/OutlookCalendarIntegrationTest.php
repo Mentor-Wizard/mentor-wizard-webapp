@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Services\ExternalCalendar\FetchedCalendarEventData;
+use App\DTO\ExternalCalendar\ExternalCalendarEventData;
+use App\Enums\CalendarEventTypeEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\OutlookExternalCalendarService;
-use Carbon\Carbon;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 
 /**
  * Microsoft Outlook / Graph API integration tests.
@@ -30,11 +32,13 @@ use Database\Seeders\RoleSeeder;
  */
 describe('Outlook Calendar Integration', function (): void {
     beforeEach(function (): void {
-        if (! env('TEST_OUTLOOK_ACCESS_TOKEN')) {
+        $this->createdEventIds = [];
+
+        if (! config('calendar.testing.outlook.access_token')) {
             $this->markTestSkipped('Outlook Calendar credentials not configured. Set TEST_OUTLOOK_ACCESS_TOKEN.');
         }
 
-        config(['calendar.encryption_key1' => env('CALENDAR_ENCRYPTION_KEY1', base64_encode(random_bytes(32)))]);
+        config(['calendar.encryption_key1' => config('calendar.encryption_key1') ?: base64_encode(random_bytes(32))]);
 
         $this->seed(RoleSeeder::class);
 
@@ -47,17 +51,16 @@ describe('Outlook Calendar Integration', function (): void {
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'          => $this->user->getKey(),
             'provider'         => CalendarProviderEnum::Outlook,
-            'access_token'     => env('TEST_OUTLOOK_ACCESS_TOKEN'),
-            'refresh_token'    => env('TEST_OUTLOOK_REFRESH_TOKEN'),
+            'access_token'     => config('calendar.testing.outlook.access_token'),
+            'refresh_token'    => config('calendar.testing.outlook.refresh_token'),
             'client_id'        => null,
             'client_secret'    => null,
-            'calendar_id'      => env('TEST_OUTLOOK_CALENDAR_ID', 'me'),
+            'calendar_id'      => config('calendar.testing.outlook.calendar_id'),
             'sync_status'      => CalendarSyncStatusEnum::Active,
-            'token_expires_at' => now()->addHour(),
+            'token_expires_at' => now()->subMinute(),
         ]);
 
-        $this->service = app(OutlookExternalCalendarService::class);
-        $this->createdEventIds = [];
+        $this->service = resolve(OutlookExternalCalendarService::class);
     });
 
     afterEach(function (): void {
@@ -75,14 +78,16 @@ describe('Outlook Calendar Integration', function (): void {
     // ──────────────────────────────────────────────────────────────────────────
 
     it('creates and fetches back an event with correct UTC times', function (): void {
-        $start = Carbon::create(2026, 6, 15, 14, 0, 0, 'UTC');
-        $end   = Carbon::create(2026, 6, 15, 15, 0, 0, 'UTC');
+        $start = Date::create(2026, 6, 15, 14, 0, 0, 'UTC');
+        $end = Date::create(2026, 6, 15, 15, 0, 0, 'UTC');
 
         $calEvent = CalendarEvent::factory()->create([
-            'title'            => 'Integration Test Event – Outlook UTC roundtrip',
-            'description'      => 'Created by automated test',
-            'start_date_time'  => $start,
-            'end_date_time'    => $end,
+            'title'             => 'Integration Test Event – Outlook UTC roundtrip',
+            'description'       => 'Created by automated test',
+            'start_date_time'   => $start,
+            'end_date_time'     => $end,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -103,14 +108,16 @@ describe('Outlook Calendar Integration', function (): void {
             ->and($match->endUtc->toIso8601String())->toBe($end->toIso8601String());
     });
 
-    it('returns FetchedCalendarEventData instances', function (): void {
-        $start = Carbon::create(2026, 8, 10, 10, 0, 0, 'UTC');
-        $end   = $start->copy()->addHour();
+    it('returns ExternalCalendarEventData instances', function (): void {
+        $start = Date::create(2026, 8, 10, 10, 0, 0, 'UTC');
+        $end = $start->copy()->addHour();
 
         $calEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook DTO type check',
-            'start_date_time'  => $start,
-            'end_date_time'    => $end,
+            'title'             => 'Outlook DTO type check',
+            'start_date_time'   => $start,
+            'end_date_time'     => $end,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -125,7 +132,7 @@ describe('Outlook Calendar Integration', function (): void {
 
         $match = collect($fetched)->firstWhere('externalId', $externalId);
 
-        expect($match)->toBeInstanceOf(FetchedCalendarEventData::class);
+        expect($match)->toBeInstanceOf(ExternalCalendarEventData::class);
     });
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -133,13 +140,15 @@ describe('Outlook Calendar Integration', function (): void {
     // ──────────────────────────────────────────────────────────────────────────
 
     it('correctly roundtrips an event at UTC midnight', function (): void {
-        $start = Carbon::create(2026, 9, 1, 0, 0, 0, 'UTC');
-        $end   = Carbon::create(2026, 9, 1, 1, 0, 0, 'UTC');
+        $start = Date::create(2026, 9, 1, 0, 0, 0, 'UTC');
+        $end = Date::create(2026, 9, 1, 1, 0, 0, 'UTC');
 
         $calEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook – midnight UTC event',
-            'start_date_time'  => $start,
-            'end_date_time'    => $end,
+            'title'             => 'Outlook – midnight UTC event',
+            'start_date_time'   => $start,
+            'end_date_time'     => $end,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -161,13 +170,15 @@ describe('Outlook Calendar Integration', function (): void {
 
     it('correctly roundtrips an event just before US spring-forward (2026-03-08)', function (): void {
         // 01:30 EST = 06:30 UTC
-        $start = Carbon::create(2026, 3, 8, 6, 30, 0, 'UTC');
-        $end   = Carbon::create(2026, 3, 8, 7, 0, 0, 'UTC');
+        $start = Date::create(2026, 3, 8, 6, 30, 0, 'UTC');
+        $end = Date::create(2026, 3, 8, 7, 0, 0, 'UTC');
 
         $calEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook – US DST spring-forward before',
-            'start_date_time'  => $start,
-            'end_date_time'    => $end,
+            'title'             => 'Outlook – US DST spring-forward before',
+            'start_date_time'   => $start,
+            'end_date_time'     => $end,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -189,13 +200,15 @@ describe('Outlook Calendar Integration', function (): void {
 
     it('correctly roundtrips an event just after US spring-forward (2026-03-08)', function (): void {
         // 03:30 EDT = 07:30 UTC
-        $start = Carbon::create(2026, 3, 8, 7, 30, 0, 'UTC');
-        $end   = Carbon::create(2026, 3, 8, 8, 0, 0, 'UTC');
+        $start = Date::create(2026, 3, 8, 7, 30, 0, 'UTC');
+        $end = Date::create(2026, 3, 8, 8, 0, 0, 'UTC');
 
         $calEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook – US DST spring-forward after',
-            'start_date_time'  => $start,
-            'end_date_time'    => $end,
+            'title'             => 'Outlook – US DST spring-forward after',
+            'start_date_time'   => $start,
+            'end_date_time'     => $end,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -217,13 +230,15 @@ describe('Outlook Calendar Integration', function (): void {
 
     it('correctly roundtrips an event during US fall-back (2026-11-01)', function (): void {
         // 05:00–06:00 UTC = 01:00–02:00 EDT (before the clocks fall back at 06:00 UTC)
-        $start = Carbon::create(2026, 11, 1, 5, 0, 0, 'UTC');
-        $end   = Carbon::create(2026, 11, 1, 6, 0, 0, 'UTC');
+        $start = Date::create(2026, 11, 1, 5, 0, 0, 'UTC');
+        $end = Date::create(2026, 11, 1, 6, 0, 0, 'UTC');
 
         $calEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook – US DST fall-back',
-            'start_date_time'  => $start,
-            'end_date_time'    => $end,
+            'title'             => 'Outlook – US DST fall-back',
+            'start_date_time'   => $start,
+            'end_date_time'     => $end,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -244,13 +259,15 @@ describe('Outlook Calendar Integration', function (): void {
     });
 
     it('correctly handles a cross-midnight UTC event', function (): void {
-        $start = Carbon::create(2026, 6, 15, 23, 0, 0, 'UTC');
-        $end   = Carbon::create(2026, 6, 16, 1, 0, 0, 'UTC');
+        $start = Date::create(2026, 6, 15, 23, 0, 0, 'UTC');
+        $end = Date::create(2026, 6, 16, 1, 0, 0, 'UTC');
 
         $calEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook – cross-midnight event',
-            'start_date_time'  => $start,
-            'end_date_time'    => $end,
+            'title'             => 'Outlook – cross-midnight event',
+            'start_date_time'   => $start,
+            'end_date_time'     => $end,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
@@ -272,23 +289,27 @@ describe('Outlook Calendar Integration', function (): void {
     });
 
     it('does not include events outside the requested range', function (): void {
-        $inRange    = Carbon::create(2026, 10, 5, 10, 0, 0, 'UTC');
-        $outOfRange = Carbon::create(2026, 10, 5, 20, 0, 0, 'UTC');
+        $inRange = Date::create(2026, 10, 5, 10, 0, 0, 'UTC');
+        $outOfRange = Date::create(2026, 10, 5, 20, 0, 0, 'UTC');
 
         $inCalEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook – in-range event',
-            'start_date_time'  => $inRange,
-            'end_date_time'    => $inRange->copy()->addHour(),
+            'title'             => 'Outlook – in-range event',
+            'start_date_time'   => $inRange,
+            'end_date_time'     => $inRange->copy()->addHour(),
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         $outCalEvent = CalendarEvent::factory()->create([
-            'title'            => 'Outlook – out-of-range event',
-            'start_date_time'  => $outOfRange,
-            'end_date_time'    => $outOfRange->copy()->addHour(),
+            'title'             => 'Outlook – out-of-range event',
+            'start_date_time'   => $outOfRange,
+            'end_date_time'     => $outOfRange->copy()->addHour(),
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $inId  = $this->service->createEvent($inCalEvent, $this->integration);
+        $inId = $this->service->createEvent($inCalEvent, $this->integration);
         $outId = $this->service->createEvent($outCalEvent, $this->integration);
         $this->createdEventIds[] = $inId;
         $this->createdEventIds[] = $outId;

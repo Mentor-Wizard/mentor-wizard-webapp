@@ -38,7 +38,7 @@ class ShowCalendarEventPage
             ->where('sync_status', CalendarSyncStatusEnum::Active)
             ->whereNotIn('provider', $syncedProviders)
             ->get()
-            ->map(fn (UserCalendarIntegration $integration) => [
+            ->map(fn (UserCalendarIntegration $integration): array => [
                 'key'   => $integration->provider->value,
                 'label' => $this->providerLabel($integration->provider->value),
             ])
@@ -58,7 +58,7 @@ class ShowCalendarEventPage
                 $timezone,
                 $user
             )->toArray(),
-            'externalIntegrations'  => Inertia::lazy(fn () => $this->loadExternalIntegrations($calendarEvent)),
+            'externalIntegrations'  => Inertia::lazy(fn (): array => $this->loadExternalIntegrations($calendarEvent)),
         ]);
     }
 

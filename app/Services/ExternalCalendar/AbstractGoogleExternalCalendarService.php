@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services\ExternalCalendar;
 
+use App\DTO\ExternalCalendar\ExternalCalendarEventData;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use Carbon\Carbon;
 use DateTimeInterface;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -125,7 +126,7 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
     }
 
     /**
-     * @return list<FetchedCalendarEventData>
+     * @return list<ExternalCalendarEventData>
      */
     public function fetchEvents(UserCalendarIntegration $integration, DateTimeInterface $from, DateTimeInterface $to): array
     {
@@ -135,8 +136,8 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
         $url = str_replace('{calendarId}', urlencode($calendarId), self::CALENDAR_EVENTS_URL);
 
         $response = Http::withToken((string) $integration->access_token)->get($url, [
-            'timeMin'      => Carbon::instance($from)->utc()->toRfc3339String(),
-            'timeMax'      => Carbon::instance($to)->utc()->toRfc3339String(),
+            'timeMin'      => Date::instance($from)->timezone(config('app.timezone'))->toRfc3339String(),
+            'timeMax'      => Date::instance($to)->timezone(config('app.timezone'))->toRfc3339String(),
             'singleEvents' => 'true',
             'orderBy'      => 'startTime',
         ]);
@@ -148,7 +149,7 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
         }
 
         return array_values(array_map(
-            fn (array $item): FetchedCalendarEventData => $this->mapGoogleEvent($item),
+            $this->mapGoogleEvent(...),
             $response->json('items', [])
         ));
     }
@@ -166,11 +167,11 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
             'description' => $event->description,
             'start'       => [
                 'dateTime' => $event->start_date_time->toRfc3339String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
             'end'         => [
                 'dateTime' => $event->end_date_time->toRfc3339String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
         ]);
 
@@ -200,11 +201,11 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
             'description' => $event->description,
             'start'       => [
                 'dateTime' => $event->start_date_time->toRfc3339String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
             'end'         => [
                 'dateTime' => $event->end_date_time->toRfc3339String(),
-                'timeZone' => 'UTC',
+                'timeZone' => config('app.timezone'),
             ],
         ]);
 
@@ -240,23 +241,23 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
     /**
      * @param  array<string, mixed>  $item
      */
-    private function mapGoogleEvent(array $item): FetchedCalendarEventData
+    private function mapGoogleEvent(array $item): ExternalCalendarEventData
     {
         $startData = $item['start'] ?? [];
         $endData = $item['end'] ?? [];
 
-        $providerTimezone = (string) ($startData['timeZone'] ?? $endData['timeZone'] ?? 'UTC');
+        $providerTimezone = (string) ($startData['timeZone'] ?? $endData['timeZone'] ?? config('app.timezone'));
 
         // Google may return all-day events with `date` instead of `dateTime`
         $startUtc = isset($startData['dateTime'])
-            ? Carbon::parse($startData['dateTime'])->utc()
-            : Carbon::parse((string) $startData['date'], $providerTimezone)->startOfDay()->utc();
+            ? Date::parse($startData['dateTime'])->timezone(config('app.timezone'))
+            : Date::parse((string) $startData['date'], $providerTimezone)->startOfDay()->timezone(config('app.timezone'));
 
         $endUtc = isset($endData['dateTime'])
-            ? Carbon::parse($endData['dateTime'])->utc()
-            : Carbon::parse((string) $endData['date'], $providerTimezone)->endOfDay()->utc();
+            ? Date::parse($endData['dateTime'])->timezone(config('app.timezone'))
+            : Date::parse((string) $endData['date'], $providerTimezone)->endOfDay()->timezone(config('app.timezone'));
 
-        return new FetchedCalendarEventData(
+        return new ExternalCalendarEventData(
             externalId: (string) $item['id'],
             title: (string) ($item['summary'] ?? ''),
             startUtc: $startUtc,
@@ -293,7 +294,8 @@ abstract class AbstractGoogleExternalCalendarService implements ExternalCalendar
             $integration->update([
                 'needs_reauth'       => true,
                 'sync_status'        => CalendarSyncStatusEnum::Error,
-                'last_error_message' => 'Token refresh failed: '.($response->json('error_description') ?? $response->json('error') ?? 'Unknown error'),
+                'last_error_message' => 'Token refresh failed: '.($response->json('error_description')
+                        ?? $response->json('error') ?? 'Unknown error'),
             ]);
 
             throw new RuntimeException('Google Calendar token refresh failed.');

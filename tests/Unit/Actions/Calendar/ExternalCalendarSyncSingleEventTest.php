@@ -42,6 +42,7 @@ describe('ExternalCalendarSyncSingleEvent', function (): void {
             ]));
 
         $response->assertRedirect();
+
         expect(session('success'))->toBe('Event sync has been queued.');
         Queue::assertPushed(CreateExternalCalendarEvent::class);
     });
@@ -56,6 +57,7 @@ describe('ExternalCalendarSyncSingleEvent', function (): void {
             ]));
 
         $response->assertRedirect();
+
         expect(session('error'))->not->toBeEmpty();
         Queue::assertNothingPushed();
     });
@@ -82,6 +84,7 @@ describe('ExternalCalendarSyncSingleEvent', function (): void {
             ]));
 
         $response->assertRedirect();
+
         expect(session('error'))->not->toBeEmpty();
         Queue::assertNothingPushed();
     });
@@ -96,6 +99,7 @@ describe('ExternalCalendarSyncSingleEvent', function (): void {
             ]));
 
         $response->assertRedirect();
+
         expect(session('error'))->not->toBeEmpty();
         Queue::assertNothingPushed();
     });
@@ -116,6 +120,7 @@ describe('ExternalCalendarSyncSingleEvent', function (): void {
             ]));
 
         $response->assertRedirect();
+
         expect(session('error'))->not->toBeEmpty();
         Queue::assertNothingPushed();
     });
@@ -143,6 +148,7 @@ describe('ExternalCalendarSyncSingleEvent', function (): void {
             ]));
 
         $response->assertRedirect();
+
         expect(session('error'))->not->toBeEmpty();
         Queue::assertNothingPushed();
     });

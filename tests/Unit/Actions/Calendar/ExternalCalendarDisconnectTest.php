@@ -37,6 +37,7 @@ describe('ExternalCalendarDisconnect', function (): void {
             ->delete(route('external-calendar.disconnect', ['provider' => 'google']));
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('success'))->toBe('Calendar disconnected successfully.');
     });
 
@@ -45,6 +46,7 @@ describe('ExternalCalendarDisconnect', function (): void {
             ->delete(route('external-calendar.disconnect', ['provider' => 'invalid-provider']));
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 

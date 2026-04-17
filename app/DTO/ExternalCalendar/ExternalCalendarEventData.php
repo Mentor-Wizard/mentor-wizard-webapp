@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Services\ExternalCalendar;
+namespace App\DTO\ExternalCalendar;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 
 /**
  * Represents a calendar event fetched from an external calendar provider.
  * All times are normalised to UTC regardless of the provider's native storage format.
  */
-readonly class FetchedCalendarEventData
+readonly class ExternalCalendarEventData
 {
     public function __construct(
         /** Provider-specific event identifier (string ID, CalDAV URL, etc.) */
@@ -20,10 +20,10 @@ readonly class FetchedCalendarEventData
         public string $title,
 
         /** Start time in UTC */
-        public Carbon $startUtc,
+        public CarbonImmutable $startUtc,
 
         /** End time in UTC */
-        public Carbon $endUtc,
+        public CarbonImmutable $endUtc,
 
         /** Optional plain-text description */
         public ?string $description,

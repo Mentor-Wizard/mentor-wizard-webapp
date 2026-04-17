@@ -26,6 +26,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -37,6 +38,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -47,6 +49,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -58,6 +61,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -68,6 +72,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -79,6 +84,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->not->toBeEmpty();
     });
 
@@ -190,6 +196,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
+
         expect(session('error'))->toBe('No calendars found. Check your Apple ID and App-Specific Password.');
     });
 

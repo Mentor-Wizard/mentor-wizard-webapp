@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Calendar;
 
-use Illuminate\Validation\Validator as ValidatorImpl;
+use App\Enums\CalendarProviderEnum;
+use Illuminate\Contracts\Validation\Validator;
 
 class ExternalCalendarSelectCalendarRequest extends ExternalCalendarRequest
 {
+    /**
+     * @return array<string, array<int, string>>
+     */
     public function rules(): array
     {
         return [
@@ -16,10 +20,10 @@ class ExternalCalendarSelectCalendarRequest extends ExternalCalendarRequest
         ];
     }
 
-    public function withValidator(ValidatorImpl $validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function (ValidatorImpl $validator): void {
-            if ($this->resolveProvider() === null) {
+        $validator->after(function (Validator $validator): void {
+            if (! $this->resolveProvider() instanceof CalendarProviderEnum) {
                 $validator->errors()->add('provider', 'Invalid calendar provider.');
             }
         });

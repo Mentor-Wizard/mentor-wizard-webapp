@@ -8,8 +8,6 @@ use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use App\Models\UserProfile;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,12 +29,12 @@ class ExternalCalendarSettingsPage
             ->keyBy(fn (UserCalendarIntegration $i): string => $i->provider->value)
             ->all();
 
-        $calendarProviders = [];
+        $calendarIntegrations = [];
 
         foreach (CalendarProviderEnum::cases() as $provider) {
             $integration = $integrations[$provider->value] ?? null;
 
-            $calendarProviders[] = [
+            $calendarIntegrations[] = [
                 'key'                  => $provider->value,
                 'connected'            => $integration !== null,
                 'needs_reauth'         => $integration !== null && $integration->needs_reauth,
@@ -50,11 +48,8 @@ class ExternalCalendarSettingsPage
             ];
         }
 
-        return Inertia::render('Profile/EditPage', [
-            'mustVerifyEmail'   => $user instanceof MustVerifyEmail, // @pest-mutate-ignore @phpstan-ignore instanceof.alwaysTrue
-            'status'            => session('status'),
-            'avatar'            => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
-            'calendarProviders' => $calendarProviders,
+        return Inertia::render('Settings/ExternalCalendarPage', [
+            'calendarIntegrations' => $calendarIntegrations,
         ]);
     }
 }
