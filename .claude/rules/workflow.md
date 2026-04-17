@@ -116,7 +116,7 @@ Same resolution rule: Critical/Important → back to phase 2.
 
 ## CI/CD Pipeline
 
-Replace `developer` with `devops` (infra) or `ci-cd-engineer` (GitHub Actions).
+Replace `developer` with `devops` (covers both infra and GitHub Actions pipelines).
 Quality gate reduces to `reviewer` + `security-scanner` (no tester/qa for infra changes).
 
 ## Team Conventions
