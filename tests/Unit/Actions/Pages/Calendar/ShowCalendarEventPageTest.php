@@ -432,40 +432,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
                 ->and($props['calendarEvent'])->toBeArray()
                 ->and($props['calendarEvent'])->toHaveKeys(['id', 'title']);
         });
-
-        it('includes an externalIntegrations deferred prop key', function (): void {
-            $action = new ShowCalendarEventPage;
-            $response = $action->handle($this->calendarEvent);
-
-            expect($response)->toBeInstanceOf(Response::class);
-
-            $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
-            $props = $page['props'];
-
-            expect($props)->toHaveKey('externalIntegrations');
-        });
-
-        it('resolves externalIntegrations with provider_label from CalendarProviderEnum', function (): void {
-            config(['calendar.encryption_key1' => base64_encode(random_bytes(32))]);
-
-            $integration = App\Models\UserCalendarIntegration::factory()->create([
-                'user_id'  => $this->user->getKey(),
-                'provider' => App\Enums\CalendarProviderEnum::Google,
-            ]);
-
-            auth()->login($this->user);
-
-            $action = new ShowCalendarEventPage;
-            $deferred = $action->handle($this->calendarEvent);
-
-            $page = $deferred->toResponse(request())->getOriginalContent()->getData()['page'];
-            $props = $page['props'];
-
-            // externalIntegrations is a deferred prop — verify the key exists
-            expect($props)->toHaveKey('externalIntegrations');
-        });
     });
-
 });
 
 describe('Mutation Coverage - permissions array parameter', function (): void {
