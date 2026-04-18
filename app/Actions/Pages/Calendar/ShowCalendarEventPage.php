@@ -79,7 +79,7 @@ class ShowCalendarEventPage
                     'user_id'        => $user->getKey(),
                     'user_name'      => $user->username,
                     'provider'       => $integration->provider->value,
-                    'provider_label' => $this->providerLabel($integration->provider->value),
+                    'provider_label' => $integration->provider->label(),
                     'external_event' => $externalEvent ? [
                         'id'          => $externalEvent->getKey(),
                         'sync_status' => $externalEvent->sync_status?->value,
@@ -94,16 +94,5 @@ class ShowCalendarEventPage
             })
             ->values()
             ->all();
-    }
-
-    private function providerLabel(string $provider): string
-    {
-        return match ($provider) {
-            'google'              => 'Google Calendar',
-            'google_personal_app' => 'Google Calendar (personal)',
-            'outlook'             => 'Outlook Calendar',
-            'apple'               => 'Apple Calendar',
-            default               => ucfirst($provider),
-        };
     }
 }

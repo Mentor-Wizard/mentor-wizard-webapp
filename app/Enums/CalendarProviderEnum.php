@@ -68,4 +68,14 @@ enum CalendarProviderEnum: string
     {
         return $this === self::Apple;
     }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Google            => 'Google Calendar',
+            self::GooglePersonalApp => 'Google Calendar (personal)',
+            self::Outlook           => 'Outlook Calendar',
+            self::Apple             => 'Apple Calendar',
+        };
+    }
 }

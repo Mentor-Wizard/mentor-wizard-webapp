@@ -81,8 +81,14 @@ describe('ExternalCalendarRetrySync', function (): void {
             'sync_status' => CalendarSyncStatusEnum::Error,
         ]);
 
-        $event = CalendarEvent::factory()->create(['status' => CalendarEventStatusEnum::CONFIRMED]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event = CalendarEvent::factory()->create([
+            'status'          => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time' => Date::tomorrow()->setTime(10, 0),
+            'end_date_time'   => Date::tomorrow()->setTime(11, 0),
+        ]);
+        $event->calendarEventUsers()->attach($this->user->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         Queue::fake();
 
