@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\ExternalCalendarSyncSingleEvent;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSyncSingleEvent;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;

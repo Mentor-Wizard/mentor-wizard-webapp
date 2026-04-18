@@ -10,12 +10,13 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use App\Services\ExternalCalendar\Contracts\OAuthCalendarServiceInterface;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
-class OutlookExternalCalendarService implements ExternalCalendarServiceInterface
+class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
 {
     private const string AUTH_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
 

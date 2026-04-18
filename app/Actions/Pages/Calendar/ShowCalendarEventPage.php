@@ -10,6 +10,7 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
+use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\Calendar\AvailableSlotOptionsForMentorProgram;
 use Inertia\Inertia;
@@ -26,25 +27,6 @@ class ShowCalendarEventPage
         $profile = $user->profile;
         $timezone = $profile->timezone;
 
-        $syncedProviders = ExternalCalendarEvent::query()
-            ->where('calendar_event_id', $calendarEvent->getKey())
-            ->where('user_id', $user->getKey())
-            ->pluck('provider')
-            ->map(fn ($p) => $p->value)
-            ->all();
-
-        $unsyncedProviders = UserCalendarIntegration::query()
-            ->where('user_id', $user->getKey())
-            ->where('sync_status', CalendarSyncStatusEnum::Active)
-            ->whereNotIn('provider', $syncedProviders)
-            ->get()
-            ->map(fn (UserCalendarIntegration $integration): array => [
-                'key'   => $integration->provider->value,
-                'label' => $this->providerLabel($integration->provider->value),
-            ])
-            ->values()
-            ->all();
-
         /** @var CalendarEvent $calendarEvent */
         return Inertia::render('Calendar/ShowEditCalendarEvent', [
             'locale'                => app()->getLocale(),
@@ -52,44 +34,50 @@ class ShowCalendarEventPage
             'permissions'           => $user->can('update', $calendarEvent) ? 'edit' : 'view',
             'mentorProgramDuration' => $calendarEvent->mentorProgram->first()->session_duration,
             'availableSlots'        => new AvailableSlotOptionsForMentorProgram($calendarEvent)->getAvailableSlots(),
-            'unsyncedProviders'     => $unsyncedProviders,
             'calendarEvent'         => CalendarUIEventData::fromModel(
                 $calendarEvent->load('calendarEventUsers'),
                 $timezone,
                 $user
             )->toArray(),
-            'externalIntegrations'  => Inertia::lazy(fn (): array => $this->loadExternalIntegrations($calendarEvent)),
+            'externalIntegrations'  => Inertia::defer(fn (): array => $this->loadExternalIntegrations($calendarEvent)),
         ]);
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return array<int, array{
+     *     integration_id: mixed,
+     *      user_id: mixed,
+     *      user_name: string,
+     *      provider: string,
+     *      provider_label: string,
+     *      external_event: array{id: mixed, sync_status: string|null,
+     *      logs: array<int, array{id: mixed, type: string, message: string, created_at: string|null}>}|null}>
      */
     private function loadExternalIntegrations(CalendarEvent $calendarEvent): array
     {
-        $userIds = $calendarEvent->calendarEventUsers()->pluck('users.id');
+        /** @var User $user */
+        $user = auth()->user();
 
         $integrations = UserCalendarIntegration::query()
-            ->whereIn('user_id', $userIds)
+            ->where('user_id', $user->getKey())
             ->where('sync_status', CalendarSyncStatusEnum::Active)
-            ->with('user:id,username')
             ->get();
 
         $externalEvents = ExternalCalendarEvent::query()
             ->where('calendar_event_id', $calendarEvent->getKey())
+            ->where('user_id', $user->getKey())
             ->with(['logs' => fn ($q) => $q->latest()->limit(20)])
             ->get()
-            ->keyBy(fn (ExternalCalendarEvent $e): string => $e->user_id.'_'.$e->provider->value);
+            ->keyBy(fn (ExternalCalendarEvent $e): string => $e->provider->value);
 
         return $integrations
-            ->map(function (UserCalendarIntegration $integration) use ($externalEvents): array {
-                $key = $integration->user_id.'_'.$integration->provider->value;
-                $externalEvent = $externalEvents->get($key);
+            ->map(function (UserCalendarIntegration $integration) use ($externalEvents, $user): array {
+                $externalEvent = $externalEvents->get($integration->provider->value);
 
                 return [
                     'integration_id' => $integration->getKey(),
-                    'user_id'        => $integration->user_id,
-                    'user_name'      => $integration->user->username,
+                    'user_id'        => $user->getKey(),
+                    'user_name'      => $user->username,
                     'provider'       => $integration->provider->value,
                     'provider_label' => $this->providerLabel($integration->provider->value),
                     'external_event' => $externalEvent ? [

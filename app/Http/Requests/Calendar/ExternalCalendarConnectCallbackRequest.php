@@ -15,6 +15,7 @@ class ExternalCalendarConnectCallbackRequest extends ExternalCalendarRequest
         return true;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         if ($this->has('error')) {

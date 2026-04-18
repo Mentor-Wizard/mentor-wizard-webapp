@@ -10,6 +10,7 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
 use App\Services\XmlTools\ExternalCalendar\CalDavCalendarListParser;
 use App\Services\XmlTools\ExternalCalendar\CalDavPropfindParser;
 use App\Services\XmlTools\ExternalCalendar\CalDavReportParser;
@@ -19,7 +20,6 @@ use DateTimeInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use LogicException;
 use RuntimeException;
 
 class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInterface
@@ -55,18 +55,6 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
                 'last_error_message' => null,
             ]
         );
-    }
-
-    /** @throws LogicException — CalDAV does not use OAuth. */
-    public function buildOAuthUrl(?string $clientId, string $state): string
-    {
-        throw new LogicException('Apple CalDAV does not support OAuth. Use the direct connect flow.');
-    }
-
-    /** @throws LogicException — CalDAV does not use OAuth callbacks. */
-    public function handleCallback(User $user, string $code): UserCalendarIntegration
-    {
-        throw new LogicException('Apple CalDAV does not support OAuth callbacks. Use the direct connect flow.');
     }
 
     public function selectCalendar(User $user, string $calendarId, string $calendarName): UserCalendarIntegration
@@ -132,7 +120,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             throw new RuntimeException('Apple CalDAV fetch events failed: HTTP '.$response->status());
         }
 
-        return new CalDavReportParser(self::CALDAV_ROOT)->parseReport($response->body());
+        return new CalDavReportParser(self::CALDAV_ROOT)->getParsedReport($response->body());
     }
 
     public function createEvent(CalendarEvent $event, UserCalendarIntegration $integration): string
@@ -235,10 +223,18 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             ->send('PROPFIND', $calendarHomeUrl);
 
         if (! $response->successful()) {
-            return ['success' => false, 'calendars' => [], 'error' => 'Unable to list calendars: HTTP '.$response->status()];
+            return [
+                'success'   => false,
+                'calendars' => [],
+                'error'     => 'Unable to list calendars: HTTP '.$response->status(),
+            ];
         }
 
-        return ['success' => true, 'calendars' => new CalDavCalendarListParser(self::CALDAV_ROOT)->parseCalendarList($response->body()), 'error' => null];
+        return [
+            'success'   => true,
+            'calendars' => new CalDavCalendarListParser(self::CALDAV_ROOT)
+                ->getParsedCalendarList($response->body()), 'error' => null,
+        ];
     }
 
     private function absoluteUrl(string $path): string

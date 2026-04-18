@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\ExternalCalendarRetrySync;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarRetrySync;
+use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
@@ -12,6 +13,7 @@ use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Queue;
 
 mutates(ExternalCalendarRetrySync::class);
@@ -162,9 +164,15 @@ describe('ExternalCalendarRetrySync', function (): void {
             'sync_status' => CalendarSyncStatusEnum::Error,
         ]);
 
-        $events = CalendarEvent::factory(3)->create(['status' => CalendarEventStatusEnum::CONFIRMED]);
+        $events = CalendarEvent::factory(3)->create([
+            'status'          => CalendarEventStatusEnum::CONFIRMED,
+            'start_date_time' => Date::tomorrow()->setTime(10, 0),
+            'end_date_time'   => Date::tomorrow()->setTime(11, 0),
+        ]);
         foreach ($events as $event) {
-            $event->calendarEventUsers()->attach($this->user->getKey());
+            $event->calendarEventUsers()->attach($this->user->getKey(), [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]);
         }
 
         Queue::fake();

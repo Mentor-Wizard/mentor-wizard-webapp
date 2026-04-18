@@ -5,7 +5,8 @@ declare(strict_types=1);
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\Contracts\OAuthCalendarServiceInterface;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,7 +22,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
 
     describe('saveCredentialsAndBuildOAuthUrl', function (): void {
         it('saves credentials and returns an OAuth URL', function (): void {
-            $mockService = Mockery::mock(ExternalCalendarServiceInterface::class);
+            $mockService = Mockery::mock(OAuthCalendarServiceInterface::class);
             $mockService->shouldReceive('saveCredentials')
                 ->once()
                 ->with(
@@ -76,7 +77,7 @@ describe('ExternalCalendarSynchronizationService', function (): void {
                 'provider' => CalendarProviderEnum::Google,
             ]);
 
-            $mockService = Mockery::mock(ExternalCalendarServiceInterface::class);
+            $mockService = Mockery::mock(OAuthCalendarServiceInterface::class);
             $mockService->shouldReceive('handleCallback')
                 ->once()
                 ->with(

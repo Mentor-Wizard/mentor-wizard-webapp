@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\DeleteCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\DeleteCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;

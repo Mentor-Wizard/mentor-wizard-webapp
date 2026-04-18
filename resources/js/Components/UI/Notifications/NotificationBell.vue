@@ -13,7 +13,10 @@ const userId = computed(() => page.props.auth?.user?.id);
 const fetchNotifications = async () => {
   try {
     const res = await fetch(route('notifications.index'), {
-      headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      headers: {
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
     });
     const data = await res.json();
     notifications.value = data;
@@ -27,7 +30,8 @@ const markAsRead = async (id) => {
   await fetch(route('notifications.read', { id }), {
     method: 'POST',
     headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+      'X-CSRF-TOKEN':
+        document.querySelector('meta[name="csrf-token"]')?.content ?? '',
       'X-Requested-With': 'XMLHttpRequest',
     },
   });
@@ -42,7 +46,8 @@ const markAllRead = async () => {
   await fetch(route('notifications.read-all'), {
     method: 'POST',
     headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+      'X-CSRF-TOKEN':
+        document.querySelector('meta[name="csrf-token"]')?.content ?? '',
       'X-Requested-With': 'XMLHttpRequest',
     },
   });
@@ -68,7 +73,9 @@ const closeOnOutsideClick = (e) => {
 };
 
 const formatDate = (iso) => {
-  if (!iso) { return ''; }
+  if (!iso) {
+    return '';
+  }
   return new Date(iso).toLocaleString('en-GB', {
     day: 'numeric',
     month: 'short',
@@ -83,7 +90,9 @@ const navigateToEvent = async (notification) => {
   }
   open.value = false;
   if (notification.data?.calendar_event_id) {
-    router.visit(route('pages.calendar.show', { id: notification.data.calendar_event_id }));
+    router.visit(
+      route('pages.calendar.show', { id: notification.data.calendar_event_id }),
+    );
   }
 };
 
@@ -109,16 +118,15 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', closeOnOutsideClick);
   if (echoChannel) {
-    echoChannel.stopListening('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated');
+    echoChannel.stopListening(
+      '.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated',
+    );
   }
 });
 </script>
 
 <template>
-  <div
-    class="relative"
-    data-notification-bell
-  >
+  <div class="relative" data-notification-bell>
     <button
       type="button"
       class="relative shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
@@ -147,7 +155,9 @@ onUnmounted(() => {
         v-if="open"
         class="absolute right-0 z-20 mt-2 w-80 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
       >
-        <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+        <div
+          class="flex items-center justify-between border-b border-gray-100 px-4 py-3"
+        >
           <span class="text-sm font-semibold text-gray-900">Notifications</span>
           <button
             v-if="unreadCount > 0"

@@ -7,6 +7,9 @@ namespace App\Services\ExternalCalendar;
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\Contracts\OAuthCalendarServiceInterface;
+use LogicException;
 
 class ExternalCalendarSynchronizationService
 {
@@ -16,7 +19,7 @@ class ExternalCalendarSynchronizationService
         ?string $clientId,
         ?string $clientSecret,
     ): string {
-        $service = $this->resolveService($provider);
+        $service = $this->resolveOAuthService($provider);
         $service->saveCredentials($user, $clientId, $clientSecret);
 
         $state = encrypt(json_encode(['user_id' => $user->getKey(), 'provider' => $provider->value]));
@@ -35,7 +38,7 @@ class ExternalCalendarSynchronizationService
 
     public function handleCallback(User $user, CalendarProviderEnum $provider, string $code): UserCalendarIntegration
     {
-        return $this->resolveService($provider)->handleCallback($user, $code);
+        return $this->resolveOAuthService($provider)->handleCallback($user, $code);
     }
 
     /**
@@ -62,6 +65,17 @@ class ExternalCalendarSynchronizationService
             ->where('user_id', $user->getKey())
             ->where('provider', $provider)
             ->delete();
+    }
+
+    private function resolveOAuthService(CalendarProviderEnum $provider): OAuthCalendarServiceInterface
+    {
+        $service = $this->resolveService($provider);
+
+        if (! $service instanceof OAuthCalendarServiceInterface) {
+            throw new LogicException('Provider ['.$provider->value.'] does not support OAuth.');
+        }
+
+        return $service;
     }
 
     private function resolveService(CalendarProviderEnum $provider): ExternalCalendarServiceInterface

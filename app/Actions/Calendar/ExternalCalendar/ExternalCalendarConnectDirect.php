@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar;
+namespace App\Actions\Calendar\ExternalCalendar;
 
 use App\Http\Requests\Calendar\ExternalCalendarConnectDirectRequest;
 use App\Models\User;

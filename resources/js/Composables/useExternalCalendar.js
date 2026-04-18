@@ -10,18 +10,24 @@ export function useExternalCalendar(providers) {
 
   function showNotification(success, message) {
     notification.value = { show: true, success, message };
-    setTimeout(() => { notification.value.show = false; }, 5000);
+    setTimeout(() => {
+      notification.value.show = false;
+    }, 5000);
   }
 
   watch(
     () => page.props.flash?.success,
-    (value) => { if (value) showNotification(true, value); },
+    (value) => {
+      if (value) showNotification(true, value);
+    },
     { immediate: true },
   );
 
   watch(
     () => page.props.flash?.error,
-    (value) => { if (value) showNotification(false, value); },
+    (value) => {
+      if (value) showNotification(false, value);
+    },
     { immediate: true },
   );
 
@@ -40,18 +46,26 @@ export function useExternalCalendar(providers) {
 
   watch(
     () => page.props.flash?.calendar_provider,
-    (value) => { if (value) calendarProviderForSelection.value = value; },
+    (value) => {
+      if (value) calendarProviderForSelection.value = value;
+    },
     { immediate: true },
   );
 
   // Form for entering client_id + client_secret per provider
   const credentialForms = Object.fromEntries(
-    providers.map((p) => [p.key, useForm({ client_id: '', client_secret: '' })]),
+    providers.map((p) => [
+      p.key,
+      useForm({ client_id: '', client_secret: '' }),
+    ]),
   );
 
   // Form for selecting a calendar
   const selectForms = Object.fromEntries(
-    providers.map((p) => [p.key, useForm({ calendar_id: '', calendar_name: '' })]),
+    providers.map((p) => [
+      p.key,
+      useForm({ calendar_id: '', calendar_name: '' }),
+    ]),
   );
 
   function authorize(providerKey) {
@@ -81,11 +95,16 @@ export function useExternalCalendar(providers) {
   }
 
   function disconnect(providerKey) {
-    useForm({}).delete(route('external-calendar.disconnect', { provider: providerKey }));
+    useForm({}).delete(
+      route('external-calendar.disconnect', { provider: providerKey }),
+    );
   }
+  retrySync;
 
   function retrySync(providerKey) {
-    useForm({}).post(route('external-calendar.retry', { provider: providerKey }));
+    useForm({}).post(
+      route('external-calendar.retry', { provider: providerKey }),
+    );
   }
 
   return {

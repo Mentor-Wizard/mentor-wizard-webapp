@@ -146,12 +146,6 @@ const selectSlot = (slot) => {
   form.toTime = formatTime(endTime);
 };
 
-const onCustomEdit = () => {
-  // switch to custom mode, clear selected slot
-  usingSlotsMode.value = false;
-  activeSelectedSlot.value = null;
-};
-
 onMounted(() => {
   const now = new Date();
   const today = now.toISOString().split('T')[0];
@@ -767,7 +761,9 @@ watch(
                       v-if="availableSlots && availableSlots.length"
                       class="rounded-md border border-gray-200 bg-gray-50 p-3"
                     >
-                      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-700">
+                      <div
+                        class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-700"
+                      >
                         <span class="flex items-center gap-1">
                           <CalendarIcon class="h-4 w-4 text-gray-400" />
                           <span class="font-medium">Date:</span>

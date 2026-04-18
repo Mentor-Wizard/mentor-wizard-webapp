@@ -1,6 +1,10 @@
 <script setup>
 import { DialogTitle } from '@headlessui/vue';
-import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  XMarkIcon,
+} from '@heroicons/vue/20/solid';
 import { ref } from 'vue';
 
 import AppModal from '@/Components/AppModal.vue';
@@ -38,10 +42,7 @@ defineExpose({ open });
 </script>
 
 <template>
-  <AppModal
-    v-model="isOpen"
-    panel-class="sm:max-w-3xl"
-  >
+  <AppModal v-model="isOpen" panel-class="sm:max-w-3xl">
     <div>
       <div class="flex items-start justify-between">
         <DialogTitle class="text-base font-semibold text-gray-900">
@@ -57,7 +58,9 @@ defineExpose({ open });
       </div>
 
       <div class="mt-4">
-        <div class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+        <div
+          class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+        >
           <img
             :src="steps[currentStep].image"
             :alt="`Step ${currentStep + 1}`"
@@ -66,7 +69,9 @@ defineExpose({ open });
         </div>
 
         <p class="mt-3 text-sm text-gray-600">
-          <span class="font-medium">Step {{ currentStep + 1 }} of {{ steps.length }}:</span>
+          <span class="font-medium"
+            >Step {{ currentStep + 1 }} of {{ steps.length }}:</span
+          >
           {{ steps[currentStep].caption }}
         </p>
       </div>

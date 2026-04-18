@@ -286,13 +286,14 @@ describe('CalendarEventObserver', function (): void {
                 'date'              => Date::tomorrow()->format('Y-m-d'),
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
+                'web_link'          => null,
             ]);
 
             Queue::clearResolvedInstances();
             Queue::fake();
 
-            $event->update(['web_link' => null]); // no actual change in content
-            $event->update(['type' => CalendarEventTypeEnum::GROUP->value]);
+            $event->update(['web_link' => null]); // no actual change — already null
+            $event->update(['type' => CalendarEventTypeEnum::GROUP->value]); // type is not a CONTENT_FIELD
 
             Queue::assertNotPushed(ProcessUpdateExternalCalendarEvent::class);
         });

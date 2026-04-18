@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\ExternalCalendarSelectCalendar;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSelectCalendar;
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
 use Database\Seeders\RoleSeeder;
 
 mutates(ExternalCalendarSelectCalendar::class);

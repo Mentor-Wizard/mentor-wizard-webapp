@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar;
+namespace App\Actions\Calendar\CalendarEvent;
 
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Pages\Profile\GetProfilePage;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Response;
 
 mutates(GetProfilePage::class);
@@ -17,7 +16,7 @@ describe('User Page', function (): void {
 
     it('returns mustVerifyEmail as true for any user type', function (mixed $user): void {
         if ($user instanceof User) {
-            Auth::login($user);
+            $this->actingAs($user);
         } else {
             Auth::shouldReceive('user')->andReturn($user);
             Auth::shouldReceive('id')->andReturn(1);
@@ -25,7 +24,7 @@ describe('User Page', function (): void {
 
         session(['status' => 'test-status']);
         $action = new GetProfilePage;
-        $result = $action->handle(request());
+        $result = $action->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
@@ -43,12 +42,12 @@ describe('User Page', function (): void {
 
     it('returns mustVerifyEmail as true with different session statuses', function (?string $status): void {
         $user = User::factory()->create();
-        Auth::login($user);
+        $this->actingAs($user);
 
         session(['status' => $status]);
 
         $action = new GetProfilePage;
-        $result = $action->handle(request());
+        $result = $action->handle();
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\ExternalCalendar;
+namespace App\Services\ExternalCalendar\Contracts;
 
 use App\DTO\ExternalCalendar\ExternalCalendarEventData;
 use App\Models\CalendarEvent;
@@ -13,10 +13,6 @@ use DateTimeInterface;
 interface ExternalCalendarServiceInterface
 {
     public function saveCredentials(User $user, ?string $clientId, ?string $clientSecret): UserCalendarIntegration;
-
-    public function buildOAuthUrl(?string $clientId, string $state): string;
-
-    public function handleCallback(User $user, string $code): UserCalendarIntegration;
 
     public function selectCalendar(User $user, string $calendarId, string $calendarName): UserCalendarIntegration;
 

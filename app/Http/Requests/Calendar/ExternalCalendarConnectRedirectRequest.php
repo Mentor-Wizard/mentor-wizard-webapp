@@ -10,6 +10,7 @@ use Override;
 
 class ExternalCalendarConnectRedirectRequest extends ExternalCalendarRequest
 {
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         $provider = $this->resolveProvider();

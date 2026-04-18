@@ -12,7 +12,7 @@ describe('CalDavCalendarListParser', function (): void {
         $this->parser = new CalDavCalendarListParser($this->caldavRoot);
     });
 
-    describe('parseCalendarList', function (): void {
+    describe('getParsedCalendarList', function (): void {
         it('parses a single calendar response with display name', function (): void {
             $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -32,7 +32,7 @@ describe('CalDavCalendarListParser', function (): void {
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result)->toHaveCount(1)
                 ->and($result[0]['id'])->toBe('https://caldav.example.com/calendars/alice/work/')
@@ -70,7 +70,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result)->toHaveCount(1)
                 ->and($result[0]['name'])->toBe('Work');
@@ -95,7 +95,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result[0]['id'])->toBe('https://caldav.example.com/calendars/alice/work/');
         });
@@ -119,7 +119,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result[0]['id'])->toBe('https://other.example.com/calendars/alice/work/');
         });
@@ -143,7 +143,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result[0]['primary'])->toBeTrue();
         });
@@ -167,7 +167,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result[0]['primary'])->toBeTrue();
         });
@@ -191,7 +191,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result[0]['name'])->toBe('work');
         });
@@ -214,13 +214,13 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result[0]['name'])->toBe('personal');
         });
 
         it('returns an empty array for invalid xml', function (): void {
-            $result = $this->parser->parseCalendarList('not-xml<<<');
+            $result = $this->parser->getParsedCalendarList('not-xml<<<');
 
             expect($result)->toBe([]);
         });
@@ -256,7 +256,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result)->toHaveCount(2)
                 ->and($result[0]['name'])->toBe('Personal')
@@ -284,7 +284,7 @@ XML;
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseCalendarList($xml);
+            $result = $this->parser->getParsedCalendarList($xml);
 
             expect($result[0]['primary'])->toBeFalse();
         });

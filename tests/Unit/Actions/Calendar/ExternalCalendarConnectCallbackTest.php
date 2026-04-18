@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\ExternalCalendarConnectCallback;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectCallback;
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
@@ -23,7 +23,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             route('external-calendar.connect.callback', ['provider' => 'google']).'?error=access_denied',
         );
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
 
         expect(session('error'))->toBe('Authorization was denied or cancelled.');
     });
@@ -36,7 +36,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             route('external-calendar.connect.callback', ['provider' => 'google']).'?code=auth-code',
         );
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
 
         expect(session('error'))->toBe('Authorization session expired or invalid. Please try again.');
     });
@@ -78,7 +78,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             .'?code=auth-code-123&state='.urlencode($state),
         );
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
         expect(session('calendar_provider'))->toBe(CalendarProviderEnum::Google->value)
             ->and(session('calendars'))->toHaveCount(1);
     });
@@ -113,7 +113,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             route('external-calendar.connect.callback', ['provider' => 'outlook']).'?code=auth-code-xyz',
         );
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
 
         expect(session('calendar_provider'))->toBe(CalendarProviderEnum::Outlook->value);
     });
@@ -143,7 +143,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             .'?code=code&state='.urlencode($state),
         );
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
 
         expect(session('error'))->toBe('No calendars found on this account.');
     });
@@ -173,7 +173,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             .'?code=code&state='.urlencode($state),
         );
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
 
         expect(session('error'))->toBe('Token exchange failed.');
     });
@@ -187,7 +187,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             .'?code=code&state=not-a-valid-encrypted-payload',
         );
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
 
         expect(session('error'))->toBe('Authorization session expired or invalid. Please try again.');
     });

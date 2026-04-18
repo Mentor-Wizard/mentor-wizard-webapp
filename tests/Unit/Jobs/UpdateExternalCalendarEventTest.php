@@ -6,13 +6,15 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
+use App\Enums\ExternalCalendarEventLogTypeEnum;
 use App\Jobs\UpdateExternalCalendarEvent;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
+use App\Models\ExternalCalendarEventLog;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
@@ -64,17 +66,38 @@ describe('UpdateExternalCalendarEvent job', function (): void {
         new UpdateExternalCalendarEvent($this->event, $this->externalEvent, $this->integration)->handle();
     });
 
-    it('marks integration as error when update fails', function (): void {
+    it('creates a success ExternalCalendarEventLog when update succeeds', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldReceive('updateEvent')
-            ->once()
-            ->andThrow(new RuntimeException('Google API error'));
+        $service->shouldReceive('updateEvent')->once();
 
         app()->instance($this->integration->provider->getService(), $service);
 
         new UpdateExternalCalendarEvent($this->event, $this->externalEvent, $this->integration)->handle();
 
-        expect($this->integration->refresh()->sync_status)->toBe(CalendarSyncStatusEnum::Error)
-            ->and($this->integration->refresh()->last_error_message)->toBe('Google API error');
+        $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
+            'external_calendar_event_id' => $this->externalEvent->getKey(),
+            'calendar_event_id'          => $this->event->getKey(),
+            'user_id'                    => $this->user->getKey(),
+            'type'                       => ExternalCalendarEventLogTypeEnum::Success->value,
+        ]);
+    });
+
+    it('creates an error ExternalCalendarEventLog when update fails', function (): void {
+        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
+        $service->shouldReceive('updateEvent')
+            ->once()
+            ->andThrow(new RuntimeException('Connection timeout'));
+
+        app()->instance($this->integration->provider->getService(), $service);
+
+        new UpdateExternalCalendarEvent($this->event, $this->externalEvent, $this->integration)->handle();
+
+        $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
+            'external_calendar_event_id' => $this->externalEvent->getKey(),
+            'calendar_event_id'          => $this->event->getKey(),
+            'user_id'                    => $this->user->getKey(),
+            'type'                       => ExternalCalendarEventLogTypeEnum::Error->value,
+            'message'                    => 'Connection timeout',
+        ]);
     });
 });

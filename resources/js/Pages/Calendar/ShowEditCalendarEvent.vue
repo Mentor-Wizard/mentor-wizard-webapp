@@ -11,7 +11,6 @@ import {
   TransitionRoot,
 } from '@headlessui/vue';
 import {
-  ArrowPathIcon,
   CalendarIcon,
   CheckIcon,
   ChevronUpDownIcon,
@@ -24,7 +23,6 @@ import { router, useForm } from '@inertiajs/vue3';
 import { onMounted, ref, watch } from 'vue';
 
 import ExternalIntegrationsTab from '@/Components/Calendar/ExternalIntegrationsTab.vue';
-
 import {
   capitalize,
   errors,
@@ -48,10 +46,6 @@ const props = defineProps({
   calendarEvent: {
     type: Object,
     default: () => {},
-  },
-  unsyncedProviders: {
-    type: Array,
-    default: () => [],
   },
   externalIntegrations: {
     type: Array,
@@ -162,7 +156,6 @@ const handleClose = () => {
   router.visit(route('pages.calendar.index'), {});
 };
 
-const syncingProvider = ref(null);
 const activeTab = ref('details');
 const integrationsLoaded = ref(false);
 
@@ -172,25 +165,6 @@ const loadIntegrationsTab = () => {
     integrationsLoaded.value = true;
     router.reload({ only: ['externalIntegrations'] });
   }
-};
-
-const syncToProvider = (providerKey) => {
-  syncingProvider.value = providerKey;
-  useForm({}).post(
-    route('external-calendar.sync-event', {
-      calendarEvent: event.value.id,
-      provider: providerKey,
-    }),
-    {
-      preserveScroll: true,
-      onSuccess: () => {
-        router.reload({ only: ['unsyncedProviders'] });
-      },
-      onFinish: () => {
-        syncingProvider.value = null;
-      },
-    },
-  );
 };
 
 watch(
@@ -561,10 +535,10 @@ watch(
                       <button
                         type="button"
                         :class="[
-                          'pb-3 text-sm font-medium border-b-2 transition-colors',
-                          activeTab === 'details'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                          'border-b-2 pb-3 text-sm font-medium transition-colors',
+                          activeTab === 'details' ?
+                            'border-indigo-600 text-indigo-600'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                         ]"
                         @click="activeTab = 'details'"
                       >
@@ -573,10 +547,10 @@ watch(
                       <button
                         type="button"
                         :class="[
-                          'pb-3 text-sm font-medium border-b-2 transition-colors',
-                          activeTab === 'integrations'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                          'border-b-2 pb-3 text-sm font-medium transition-colors',
+                          activeTab === 'integrations' ?
+                            'border-indigo-600 text-indigo-600'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
                         ]"
                         @click="loadIntegrationsTab"
                       >
@@ -588,7 +562,9 @@ watch(
                   <!-- Integrations tab -->
                   <div v-if="activeTab === 'integrations'">
                     <div
-                      v-if="!integrationsLoaded || externalIntegrations === null"
+                      v-if="
+                        !integrationsLoaded || externalIntegrations === null
+                      "
                       class="space-y-3 py-4"
                     >
                       <div
@@ -863,33 +839,6 @@ watch(
                         </svg>
                         Join Event
                       </a>
-                    </div>
-
-                    <!-- Sync to external calendar -->
-                    <div
-                      v-if="unsyncedProviders.length > 0"
-                      class="border-t border-gray-200 pt-4"
-                    >
-                      <h4 class="mb-2 flex items-center gap-1.5 text-sm font-medium text-gray-700">
-                        <ArrowPathIcon class="h-4 w-4 text-gray-400" />
-                        Sync to calendar
-                      </h4>
-                      <div class="flex flex-wrap gap-2">
-                        <button
-                          v-for="provider in unsyncedProviders"
-                          :key="provider.key"
-                          type="button"
-                          :disabled="syncingProvider === provider.key"
-                          class="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                          @click="syncToProvider(provider.key)"
-                        >
-                          <ArrowPathIcon
-                            class="h-3.5 w-3.5"
-                            :class="{ 'animate-spin': syncingProvider === provider.key }"
-                          />
-                          {{ provider.label }}
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>

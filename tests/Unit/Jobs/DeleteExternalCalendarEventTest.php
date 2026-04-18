@@ -6,13 +6,15 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
+use App\Enums\ExternalCalendarEventLogTypeEnum;
 use App\Jobs\DeleteExternalCalendarEvent;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
+use App\Models\ExternalCalendarEventLog;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
-use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
@@ -65,25 +67,54 @@ describe('DeleteExternalCalendarEvent job', function (): void {
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
 
+    it('creates a success ExternalCalendarEventLog when delete succeeds', function (): void {
+        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
+        $service->shouldReceive('deleteEvent')->once();
+
+        app()->instance($this->integration->provider->getService(), $service);
+
+        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
+
+        $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
+            'calendar_event_id' => $this->event->getKey(),
+            'user_id'           => $this->user->getKey(),
+            'type'              => ExternalCalendarEventLogTypeEnum::Success->value,
+        ]);
+    });
+
+    it('creates an error ExternalCalendarEventLog when delete fails', function (): void {
+        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
+        $service->shouldReceive('deleteEvent')
+            ->once()
+            ->andThrow(new RuntimeException('API rate limit exceeded'));
+
+        app()->instance($this->integration->provider->getService(), $service);
+
+        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
+
+        $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
+            'external_calendar_event_id' => $this->externalEvent->getKey(),
+            'calendar_event_id'          => $this->event->getKey(),
+            'user_id'                    => $this->user->getKey(),
+            'type'                       => ExternalCalendarEventLogTypeEnum::Error->value,
+            'message'                    => 'API rate limit exceeded',
+        ]);
+    });
+
     it('deletes the ExternalCalendarEvent record when integration is null', function (): void {
         new DeleteExternalCalendarEvent($this->externalEvent, null)->handle();
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
 
-    it('marks integration as error when deletion fails and keeps the record', function (): void {
-        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldReceive('deleteEvent')
-            ->once()
-            ->andThrow(new RuntimeException('Google API error'));
+    it('creates an info ExternalCalendarEventLog when integration is null', function (): void {
+        new DeleteExternalCalendarEvent($this->externalEvent, null)->handle();
 
-        app()->instance($this->integration->provider->getService(), $service);
-
-        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
-
-        expect($this->integration->refresh()->sync_status)->toBe(CalendarSyncStatusEnum::Error)
-            ->and($this->integration->refresh()->last_error_message)->toBe('Google API error');
-
-        expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->not->toBeNull();
+        $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
+            'calendar_event_id' => $this->event->getKey(),
+            'user_id'           => $this->user->getKey(),
+            'type'              => ExternalCalendarEventLogTypeEnum::Info->value,
+            'message'           => 'No active integration found. Local record removed.',
+        ]);
     });
 });

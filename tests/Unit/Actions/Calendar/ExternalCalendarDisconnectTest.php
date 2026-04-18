@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\ExternalCalendarDisconnect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarDisconnect;
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;

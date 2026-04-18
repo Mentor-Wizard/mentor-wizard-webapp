@@ -10,12 +10,13 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use App\Services\ExternalCalendar\Contracts\OAuthCalendarServiceInterface;
 use DateTimeInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
-abstract class AbstractGoogleExternalCalendarService implements ExternalCalendarServiceInterface
+abstract class AbstractGoogleExternalCalendarService implements OAuthCalendarServiceInterface
 {
     private const string AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 

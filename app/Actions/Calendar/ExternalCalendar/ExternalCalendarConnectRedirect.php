@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar;
+namespace App\Actions\Calendar\ExternalCalendar;
 
 use App\Http\Requests\Calendar\ExternalCalendarConnectRedirectRequest;
 use App\Models\User;
@@ -18,6 +18,10 @@ class ExternalCalendarConnectRedirect
     use AsController;
     use HandlesCalendarIntegrationCleanup;
 
+    protected ?string $clientId = null;
+
+    private ?string $clientSecret = null;
+
     public function __construct(
         private readonly ExternalCalendarSynchronizationService $synchronizationService,
     ) {}
@@ -26,12 +30,9 @@ class ExternalCalendarConnectRedirect
     {
         $calendarProvider = $request->resolveProvider();
 
-        $clientId = null;
-        $clientSecret = null;
-
         if (! $calendarProvider->usesAppCredentials()) {
-            $clientId = $request->string('client_id')->toString();
-            $clientSecret = $request->string('client_secret')->toString();
+            $this->clientId = $request->string('client_id')->toString();
+            $this->clientSecret = $request->string('client_secret')->toString();
         }
 
         /** @var User $user */
@@ -40,8 +41,8 @@ class ExternalCalendarConnectRedirect
         $oauthUrl = $this->synchronizationService->saveCredentialsAndBuildOAuthUrl(
             $user,
             $calendarProvider,
-            $clientId,
-            $clientSecret,
+            $this->clientId,
+            $this->clientSecret,
         );
 
         $request->session()->put('calendar_oauth_pending', [

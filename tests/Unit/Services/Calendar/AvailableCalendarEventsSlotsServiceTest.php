@@ -68,7 +68,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
                 'status'            => CalendarEventStatusEnum::CONFIRMED->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
-            $this->user->calendarEvents()->attach($currentCalendarEvent->getKey());
+            $this->user->calendarEvents()->attach($currentCalendarEvent->getKey(), [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]);
         }
 
         $tz = 'UTC';
@@ -92,8 +94,8 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         // Create two future events in UTC
         $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
         $event1EndUtc = (clone $event1StartUtc)->addHour()->setTime(14, 0, 0);
-        $event2StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
-        $event2EndUtc = (clone $event2StartUtc)->setTime(14, 0, 0);
+        $event2StartUtc = Date::now($tz)->addDay()->setTime(15, 0, 0);
+        $event2EndUtc = (clone $event2StartUtc)->setTime(17, 0, 0);
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'E1',
@@ -263,9 +265,13 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
         // Attach to user so it is considered
-        $this->user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
         // Attach mentor as well to ensure event is included for either participant
-        $this->mentorProgram->mentor->calendarEvents()->attach($event->getKey());
+        $this->mentorProgram->mentor->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
@@ -281,17 +287,27 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
     });
 
     it('includes slots equal to session duration', function (): void {
-        Date::setTestNow('2026-01-10 10:00:00');
-        // Create an event that leaves exactly 30 minute gap (equal to session)
-        CalendarEvent::factory()->create([
-            'start_date_time'   => Date::parse('2026-01-10 10:30:00'),
-            'end_date_time'     => Date::parse('2026-01-10 12:00:00'),
+        Date::setTestNow(Date::create(2026, 1, 10, 10, 0, 0, 'UTC'));
+        // Create an event that leaves exactly 1 hour 30 minutes gap (equal to session)
+        $event = CalendarEvent::factory()->create([
+            'start_date_time'   => Date::parse('2026-01-10 11:30:00'),
+            'end_date_time'     => Date::parse('2026-01-10 13:00:00'),
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'date'              => Date::parse('2026-01-10'),
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->id,
-        ])->calendarEventUsers()->attach([$this->user->id, $this->mentorProgram
-            ->mentor->id]);
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(),
+            [
+                'role'          => CalendarEventRoleEnum::PARTICIPANT->value,
+                'colour'        => CalendarEventColoursEnum::BLUE->value]);
+
+        $event->calendarEventUsers()->attach($this->mentorProgram
+            ->mentor->id,
+            [
+                'role'          => CalendarEventRoleEnum::HOST->value,
+                'colour'        => CalendarEventColoursEnum::BLUE->value]);
 
         $service = new AvailableCalendarEventsSlotsService(
             $this->user,
@@ -306,7 +322,7 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         // Should have a slot from 11:00 to 11:30 (30 minutes exactly)
         $targetSlot = collect($slots)->first(
             fn ($slot): bool => $slot['start']->format('H:i') === '10:00'
-                && $slot['end']->format('H:i') === '10:30'
+                && $slot['end']->format('H:i') === '11:30'
         );
 
         expect($targetSlot)->not->toBeNull();
@@ -386,7 +402,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $this->user->calendarEvents()->attach($event->getKey());
+        $this->user->calendarEvents()->attach($event->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
@@ -419,8 +437,8 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $e2Start = $e1End->copy(); // back-to-back
-        $e2End = (clone $e2Start)->addMinutes(30);
+        $e2Start = $e1End->copy()->addHour(); // back-to-back
+        $e2End = (clone $e2Start)->addMinutes(90);
         $e2 = CalendarEvent::query()->create([
             'title'             => 'E2',
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
@@ -432,7 +450,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
 
-        $this->user->calendarEvents()->attach([$e1->getKey(), $e2->getKey()]);
+        $this->user->calendarEvents()->attach([$e1->getKey(), $e2->getKey()], [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
@@ -466,7 +486,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $this->mentorProgram->mentor->calendarEvents()->attach($eventA->getKey());
+        $this->mentorProgram->mentor->calendarEvents()->attach($eventA->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         // Event B attached only to the user
         $bStart = (clone $aEnd)->addHour();
@@ -481,7 +503,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $this->user->calendarEvents()->attach($eventB->getKey());
+        $this->user->calendarEvents()->attach($eventB->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
@@ -582,7 +606,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $this->user->calendarEvents()->attach($eventA->getKey());
+        $this->user->calendarEvents()->attach($eventA->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         // Event B is attached ONLY to the mentor
         $mentor = $this->mentorProgram->mentor;
@@ -598,7 +624,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $mentor->calendarEvents()->attach($eventB->getKey());
+        $mentor->calendarEvents()->attach($eventB->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
@@ -621,7 +649,7 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         // Create 205 back-to-back, non-overlapping events in the future
         for ($i = 1; $i <= 205; $i++) {
-            $start = Date::now()->addHours($i * 12)->setTime(9, 0);
+            $start = Date::now()->setTime(9, 0)->addHours($i * 12);
             $end = (clone $start)->addHour();
             $event = CalendarEvent::query()->create([
                 'start_date_time'   => $start,
@@ -633,7 +661,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
                 'status'            => CalendarEventStatusEnum::CONFIRMED->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
-            $this->user->calendarEvents()->attach($event->getKey());
+            $this->user->calendarEvents()->attach($event->getKey(), [
+                'role' => CalendarEventRoleEnum::HOST->value,
+            ]);
         }
 
         $slots = new AvailableCalendarEventsSlotsService(
@@ -681,7 +711,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $this->user->calendarEvents()->attach([$beforeStart->getKey(), $afterEnd->getKey()]);
+        $this->user->calendarEvents()->attach([$beforeStart->getKey(), $afterEnd->getKey()], [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         // Also create one event inside to create a middle break
         $insideStart = Date::now()->addDays(5)->setTime(10, 0);
@@ -696,7 +728,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $this->user->calendarEvents()->attach($inside->getKey());
+        $this->user->calendarEvents()->attach($inside->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         $result = new AvailableCalendarEventsSlotsService(
             $this->user,
@@ -734,7 +768,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $this->user->calendarEvents()->attach($e1->getKey());
+        $this->user->calendarEvents()->attach($e1->getKey(), [
+            'role' => CalendarEventRoleEnum::HOST->value,
+        ]);
 
         // Next event begins 30 minutes after E1 end -> gap=30 (<60) should be skipped
         $e2Start = (clone $e1End)->addMinutes(30);

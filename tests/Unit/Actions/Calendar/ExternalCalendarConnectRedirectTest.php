@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\ExternalCalendarConnectRedirect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectRedirect;
 use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;

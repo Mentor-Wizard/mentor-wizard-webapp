@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
-use App\Actions\Calendar\CreateMentorSessionForCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\CreateMentorSessionForCalendarEvent;
 use App\Enums\CalendarEventStatusEnum;
 use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
 use App\Jobs\ProcessDeleteExternalCalendarEvent;

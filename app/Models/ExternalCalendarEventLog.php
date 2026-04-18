@@ -6,15 +6,19 @@ namespace App\Models;
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\ExternalCalendarEventLogTypeEnum;
+use Database\Factories\ExternalCalendarEventLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property ExternalCalendarEventLogTypeEnum $type
+ *
  * @mixin IdeHelperExternalCalendarEventLog
  */
 class ExternalCalendarEventLog extends Model
 {
+    /** @use HasFactory<ExternalCalendarEventLogFactory> */
     use HasFactory;
 
     protected $fillable = [

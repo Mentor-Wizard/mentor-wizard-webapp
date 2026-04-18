@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar;
+namespace App\Actions\Calendar\ExternalCalendarLog;
 
 use App\Enums\ExternalCalendarEventLogTypeEnum;
 use App\Models\ExternalCalendarEventLog;

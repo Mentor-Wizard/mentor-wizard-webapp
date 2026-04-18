@@ -23,7 +23,8 @@ class CalendarCredentialEncrypter
 
         $encrypted = openssl_encrypt($value, self::CIPHER, $key, OPENSSL_RAW_DATA, $iv);
 
-        throw_if($encrypted === false, RuntimeException::class, 'Calendar credential encryption failed.');
+        throw_if($encrypted === false,
+            RuntimeException::class, 'Calendar credential encryption failed.');
 
         return base64_encode($iv).':'.base64_encode($encrypted);
     }
@@ -89,15 +90,18 @@ class CalendarCredentialEncrypter
     {
         $raw = config($configKey);
 
-        throw_if(! is_string($raw) || $raw === '', RuntimeException::class, $envName.' is not configured.');
+        throw_if(! is_string($raw) || $raw === '', RuntimeException::class,
+            $envName.' is not configured.');
 
         // A base64-encoded 32-byte key is always 44 ASCII characters (with padding).
         // Checking the encoded length avoids binary mb_strlen issues on the decoded value.
-        throw_if(mb_strlen($raw) !== 44, RuntimeException::class, $envName.' must be a base64-encoded 32-byte key (44 characters).');
+        throw_if(mb_strlen($raw) !== 44, RuntimeException::class,
+            $envName.' must be a base64-encoded 32-byte key (44 characters).');
 
         $decoded = base64_decode($raw, strict: true);
 
-        throw_if($decoded === false, RuntimeException::class, $envName.' must be a valid base64-encoded 32-byte key.');
+        throw_if($decoded === false, RuntimeException::class,
+            $envName.' must be a valid base64-encoded 32-byte key.');
 
         return $decoded;
     }

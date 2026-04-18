@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Date;
 use App\Models\CalendarEvent;
 use App\Services\XmlTools\ExternalCalendar\IcsBuilder;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Date;
 
 mutates(IcsBuilder::class);
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Enums;
 
 use App\Services\ExternalCalendar\AppleCalDavExternalCalendarService;
-use App\Services\ExternalCalendar\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
 use App\Services\ExternalCalendar\GoogleAppExternalCalendarService;
 use App\Services\ExternalCalendar\GoogleExternalCalendarService;
 use App\Services\ExternalCalendar\OutlookExternalCalendarService;
@@ -19,6 +19,7 @@ enum CalendarProviderEnum: string
     case GooglePersonalApp = 'google_personal_app';
 
     case Outlook = 'outlook';
+
     case Apple = 'apple';
 
     /**

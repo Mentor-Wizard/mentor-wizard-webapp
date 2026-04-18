@@ -175,12 +175,17 @@ const selectedDay = computed(() => {
           class="group flex items-center gap-x-3 px-4 py-2 focus-within:bg-gray-50 hover:bg-gray-50"
         >
           <div class="min-w-0 flex-auto">
-            <p class="truncate text-sm font-semibold text-gray-900">{{ event.name }}</p>
+            <p class="truncate text-sm font-semibold text-gray-900">
+              {{ event.name }}
+            </p>
             <time
               :datetime="event.datetime"
               class="flex items-center gap-1 text-xs text-gray-500"
             >
-              <ClockIcon class="size-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+              <ClockIcon
+                class="size-3.5 shrink-0 text-gray-400"
+                aria-hidden="true"
+              />
               {{ event.time }}
             </time>
           </div>

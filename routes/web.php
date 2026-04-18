@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\AcknowledgeExternalCalendarEventLog;
-use App\Actions\Calendar\ConfirmCalendarEvent;
-use App\Actions\Calendar\DeleteCalendarEvent;
-use App\Actions\Calendar\EditCalendarEvent;
-use App\Actions\Calendar\ExternalCalendarConnectCallback;
-use App\Actions\Calendar\ExternalCalendarConnectDirect;
-use App\Actions\Calendar\ExternalCalendarConnectRedirect;
-use App\Actions\Calendar\ExternalCalendarDisconnect;
-use App\Actions\Calendar\ExternalCalendarRetrySync;
-use App\Actions\Calendar\ExternalCalendarSelectCalendar;
-use App\Actions\Calendar\ExternalCalendarSyncSingleEvent;
-use App\Actions\Calendar\RerunExternalCalendarEventSync;
-use App\Actions\Calendar\StoreCalendarEvent;
-use App\Actions\Calendar\SyncCalendarEventToIntegration;
+use App\Actions\Calendar\CalendarEvent\ConfirmCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\DeleteCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\EditCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\StoreCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\SyncCalendarEventToIntegration;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectCallback;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectDirect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectRedirect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarDisconnect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarRetrySync;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSelectCalendar;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSyncSingleEvent;
+use App\Actions\Calendar\ExternalCalendar\RerunExternalCalendarEventSync;
+use App\Actions\Calendar\ExternalCalendarLog\AcknowledgeExternalCalendarEventLog;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\SetMainMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;

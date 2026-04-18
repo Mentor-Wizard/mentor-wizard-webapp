@@ -1,5 +1,11 @@
 <script setup>
-import { ArrowPathIcon, CheckIcon, ExclamationCircleIcon, InformationCircleIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import {
+  ArrowPathIcon,
+  CheckIcon,
+  ExclamationCircleIcon,
+  InformationCircleIcon,
+  PlusIcon,
+} from '@heroicons/vue/24/outline';
 import { router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -45,8 +51,7 @@ const syncStatusConfig = {
   error: { label: 'Error', class: 'bg-red-100 text-red-700' },
 };
 
-const syncKey = (integration) =>
-  integration.integration_id;
+const syncKey = (integration) => integration.integration_id;
 
 const sync = (integration) => {
   pendingId.value = syncKey(integration);
@@ -113,7 +118,9 @@ const toggleLogs = (integrationId) => {
 };
 
 const formatDate = (iso) => {
-  if (!iso) { return '—'; }
+  if (!iso) {
+    return '—';
+  }
   return new Date(iso).toLocaleString();
 };
 </script>
@@ -127,10 +134,7 @@ const formatDate = (iso) => {
       No active calendar integrations found for participants of this event.
     </div>
 
-    <div
-      v-else
-      class="divide-y divide-gray-100"
-    >
+    <div v-else class="divide-y divide-gray-100">
       <div
         v-for="integration in integrations"
         :key="integration.integration_id"
@@ -153,10 +157,14 @@ const formatDate = (iso) => {
               v-if="integration.external_event?.sync_status"
               :class="[
                 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
-                syncStatusConfig[integration.external_event.sync_status]?.class ?? 'bg-gray-100 text-gray-600',
+                syncStatusConfig[integration.external_event.sync_status]?.class
+                  ?? 'bg-gray-100 text-gray-600',
               ]"
             >
-              {{ syncStatusConfig[integration.external_event.sync_status]?.label ?? integration.external_event.sync_status }}
+              {{
+                syncStatusConfig[integration.external_event.sync_status]?.label
+                ?? integration.external_event.sync_status
+              }}
             </span>
 
             <span
@@ -182,7 +190,11 @@ const formatDate = (iso) => {
               class="text-xs text-indigo-600 hover:text-indigo-800"
               @click="toggleLogs(integration.integration_id)"
             >
-              {{ expandedRows.has(integration.integration_id) ? 'Hide logs' : `Logs (${integration.external_event.logs.length})` }}
+              {{
+                expandedRows.has(integration.integration_id) ? 'Hide logs' : (
+                  `Logs (${integration.external_event.logs.length})`
+                )
+              }}
             </button>
 
             <!-- Sync (first time) -->
@@ -219,21 +231,30 @@ const formatDate = (iso) => {
 
         <!-- Logs -->
         <div
-          v-if="expandedRows.has(integration.integration_id) && integration.external_event?.logs?.length > 0"
+          v-if="
+            expandedRows.has(integration.integration_id)
+            && integration.external_event?.logs?.length > 0
+          "
           class="mt-3 space-y-1.5 rounded-md bg-gray-50 p-3"
         >
           <div
             v-for="log in integration.external_event.logs"
             :key="log.id"
-            :class="['flex items-start gap-2 rounded p-2', typeConfig[log.type]?.bg ?? 'bg-white']"
+            :class="[
+              'flex items-start gap-2 rounded p-2',
+              typeConfig[log.type]?.bg ?? 'bg-white',
+            ]"
           >
             <component
               :is="typeConfig[log.type]?.icon ?? InformationCircleIcon"
-              :class="['mt-0.5 h-4 w-4 shrink-0', typeConfig[log.type]?.class ?? 'text-gray-400']"
+              :class="[
+                'mt-0.5 h-4 w-4 shrink-0',
+                typeConfig[log.type]?.class ?? 'text-gray-400',
+              ]"
             />
 
             <div class="min-w-0 flex-1">
-              <p class="break-words text-xs text-gray-700">
+              <p class="text-xs break-words text-gray-700">
                 {{ log.message }}
               </p>
               <p class="mt-0.5 text-xs text-gray-400">

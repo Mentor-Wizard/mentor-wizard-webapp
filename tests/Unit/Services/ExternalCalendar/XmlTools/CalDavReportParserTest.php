@@ -14,7 +14,7 @@ describe('CalDavReportParser', function (): void {
         $this->parser = new CalDavReportParser($this->caldavRoot);
     });
 
-    describe('parseReport', function (): void {
+    describe('getParsedReport', function (): void {
         it('parses a single event with UTC DTSTART/DTEND', function (): void {
             $ics = "BEGIN:VCALENDAR\r\n"
                 ."VERSION:2.0\r\n"
@@ -31,7 +31,7 @@ describe('CalDavReportParser', function (): void {
                 ['href' => '/calendars/alice/work/event-1.ics', 'ics' => $ics],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result)->toHaveCount(1)
                 ->and($result[0])->toBeInstanceOf(ExternalCalendarEventData::class)
@@ -61,7 +61,7 @@ describe('CalDavReportParser', function (): void {
                 ['href' => '/calendars/alice/work/event-2.ics', 'ics' => $ics],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result)->toHaveCount(1)
                 ->and($result[0]->title)->toBe('Kyiv Session')
@@ -86,7 +86,7 @@ describe('CalDavReportParser', function (): void {
                 ['href' => '/calendars/alice/work/event-3.ics', 'ics' => $ics],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result)->toHaveCount(1)
                 ->and($result[0]->providerTimezone)->toBe(config('app.timezone'))
@@ -107,7 +107,7 @@ describe('CalDavReportParser', function (): void {
                 ['href' => '/event.ics', 'ics' => $ics],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result[0]->description)->toBe("Line 1\nLine 2, with comma; and semicolon\\ backslash");
         });
@@ -124,7 +124,7 @@ describe('CalDavReportParser', function (): void {
                 ['href' => '/event.ics', 'ics' => $ics],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result[0]->title)->toBe('')
                 ->and($result[0]->description)->toBeNull();
@@ -159,7 +159,7 @@ describe('CalDavReportParser', function (): void {
                 ['href' => '/c.ics', 'ics' => $valid],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result)->toHaveCount(1)
                 ->and($result[0]->title)->toBe('Valid');
@@ -180,13 +180,13 @@ describe('CalDavReportParser', function (): void {
 </D:multistatus>
 XML;
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result)->toBe([]);
         });
 
         it('returns empty array for invalid xml', function (): void {
-            $result = $this->parser->parseReport('not-xml<<<');
+            $result = $this->parser->getParsedReport('not-xml<<<');
 
             expect($result)->toBe([]);
         });
@@ -204,7 +204,7 @@ XML;
                 ['href' => 'https://other.example.com/calendars/remote.ics', 'ics' => $ics],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result[0]->externalId)->toBe('https://other.example.com/calendars/remote.ics');
         });
@@ -231,7 +231,7 @@ XML;
                 ['href' => '/b.ics', 'ics' => $ics2],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result)->toHaveCount(2)
                 ->and($result[0]->title)->toBe('First')
@@ -251,7 +251,7 @@ XML;
                 ['href' => '/mixed.ics', 'ics' => $ics],
             ]);
 
-            $result = $this->parser->parseReport($xml);
+            $result = $this->parser->getParsedReport($xml);
 
             expect($result[0]->providerTimezone)->toBe('Europe/Kyiv');
         });

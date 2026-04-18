@@ -6,7 +6,7 @@ namespace App\Services\XmlTools\ExternalCalendar;
 
 use XMLReader;
 
-class CalDavPropfindParser
+class CalDavPropfindParser extends AbstractCalDavParser
 {
     protected bool $inTarget = false;
 
@@ -14,20 +14,31 @@ class CalDavPropfindParser
 
     protected ?string $value = null;
 
+    private bool $found = false;
+
+    private string $currentElementName = '';
+
+    private string $currentChildElement = '';
+
     /**
      * Extracts the text content of the first matching <childElement> inside
      * any element with the given local name, using XMLReader streaming.
      */
     public function extractValue(string $xml, string $elementName, string $childElement): ?string
     {
-        $reader = new XMLReader;
+        $this->currentElementName = $elementName;
+        $this->currentChildElement = $childElement;
 
-        if (! $reader->XML($xml, null, LIBXML_NOERROR | LIBXML_NOWARNING)) {
+        $reader = XMLReader::XML($xml, null, LIBXML_NOERROR | LIBXML_NOWARNING);
+
+        if (! $reader instanceof XMLReader) {
             return null;
         }
 
         while ($reader->read()) {
-            if ($this->processNode($reader, $elementName, $childElement)) {
+            $this->processNode($reader);
+
+            if ($this->found) {
                 break;
             }
         }
@@ -37,48 +48,33 @@ class CalDavPropfindParser
         return $this->value !== null ? mb_trim($this->value) : null;
     }
 
-    private function processNode(XMLReader $reader, string $elementName, string $childElement): bool
+    protected function elementNodeProcessing(XMLReader $reader): void
     {
-        if ($reader->nodeType === XMLReader::ELEMENT) {
-            $this->elementNodeProcessing($reader, $elementName, $childElement);
-        } elseif ($reader->nodeType === XMLReader::TEXT || $reader->nodeType === XMLReader::CDATA) {
-            $this->TextCDATAnodeProcessings($reader);
-        } elseif ($reader->nodeType === XMLReader::END_ELEMENT) {
-            return $this->endNodeProcessing($reader, $elementName, $childElement);
-        }
-
-        return false;
-    }
-
-    private function elementNodeProcessing(XMLReader $reader, string $elementName, string $childElement): void
-    {
-        if ($reader->localName === $elementName) {
+        if ($reader->localName === $this->currentElementName) {
             $this->inTarget = true;
-        } elseif ($this->inTarget && $reader->localName === $childElement) {
+        } elseif ($this->inTarget && $reader->localName === $this->currentChildElement) {
             $this->inChild = true;
             $this->value = null;
         }
     }
 
-    private function TextCDATAnodeProcessings(XMLReader $reader): void
+    protected function textNodeProcessing(XMLReader $reader): void
     {
         if ($this->inChild) {
-            $this->value = ((string) $this->value).$reader->value;
+            $this->value .= $reader->value;
         }
     }
 
-    private function endNodeProcessing(XMLReader $reader, string $elementName, string $childElement): bool
+    protected function endNodeProcessing(XMLReader $reader): void
     {
-        if ($reader->localName === $childElement && $this->inChild) {
+        if ($reader->localName === $this->currentChildElement && $this->inChild) {
             $this->inChild = false;
 
             if ($this->value !== null) {
-                return true;
+                $this->found = true;
             }
-        } elseif ($reader->localName === $elementName) {
+        } elseif ($reader->localName === $this->currentElementName) {
             $this->inTarget = false;
         }
-
-        return false;
     }
 }

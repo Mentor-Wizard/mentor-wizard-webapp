@@ -58,7 +58,7 @@ PENDING_MENTOR_CONFIRMATION -> CONFIRMED -> FINISHED
 **Restrictions:**
 
 - `FINISHED` events cannot be edited or deleted
-- `CANCELLED` events cannot be edited or deleted
+- `CANCELLED` events cannot be edited but can be deleted
 - Only `CONFIRMED` and `PENDING_MENTOR_CONFIRMATION` events can be modified
 
 ### 4.4 Session Duration
@@ -226,9 +226,9 @@ CALENDAR_ENCRYPTION_KEY1=<generated-key>
 CALENDAR_ENCRYPTION_KEY_PREVIOUS=   # leave empty on first setup
 ```
 
-`KEY1` encrypts new data. `CALENDAR_ENCRYPTION_KEY_PREVIOUS` is only used
-when rotating keys — populate it with the old `KEY1` value during rotation,
-then re-encrypt all stored credentials before clearing it.
+`KEY1` encrypts new data. `CALENDAR_ENCRYPTION_KEY_PREVIOUS` is only used when
+rotating keys — populate it with the old `KEY1` value during rotation, then
+re-encrypt all stored credentials before clearing it.
 
 ---
 
@@ -236,15 +236,15 @@ then re-encrypt all stored credentials before clearing it.
 
 The application supports two Google flows that cannot be active simultaneously:
 
-| Flow | Provider enum | When to use |
-|---|---|---|
-| **App-level OAuth** (`google`) | `CalendarProviderEnum::Google` | You register one OAuth app; all users authenticate via it |
+| Flow                                       | Provider enum                             | When to use                                                |
+| ------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------- |
+| **App-level OAuth** (`google`)             | `CalendarProviderEnum::Google`            | You register one OAuth app; all users authenticate via it  |
 | **Per-user OAuth** (`google_personal_app`) | `CalendarProviderEnum::GooglePersonalApp` | Each user supplies their own `client_id` / `client_secret` |
 
 #### Setting up the app-level flow (recommended)
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/) and create
-   or select a project.
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) and create or
+   select a project.
 
    ![Google Cloud Console — create or select project](images/google-calendar/step-1.png)
 
@@ -269,7 +269,8 @@ The application supports two Google flows that cannot be active simultaneously:
    ![OAuth consent screen — scopes and domain](images/google-calendar/step-5.png)
 
 4. Create OAuth 2.0 credentials:
-   - Go to **APIs & Services → Credentials → Create Credentials → OAuth client ID**
+   - Go to **APIs & Services → Credentials → Create Credentials → OAuth client
+     ID**
    - Application type: **Web application**
    - Add an **Authorized redirect URI**:
      ```
@@ -282,6 +283,7 @@ The application supports two Google flows that cannot be active simultaneously:
    ![Copy Client ID and Client Secret](images/google-calendar/step-7.png)
 
 5. Add to `.env`:
+
    ```env
    GOOGLE_CALENDAR_CLIENT_ID=<client-id>
    GOOGLE_CALENDAR_CLIENT_SECRET=<client-secret>
@@ -294,8 +296,8 @@ The application supports two Google flows that cannot be active simultaneously:
 
 No developer credentials required. Users navigate to **Settings → External
 Calendars**, enter their own Google OAuth `client_id` and `client_secret`, and
-authorize access. They must create their own Google Cloud project and enable
-the Calendar API themselves.
+authorize access. They must create their own Google Cloud project and enable the
+Calendar API themselves.
 
 ---
 
@@ -307,8 +309,8 @@ connect without any per-user configuration.
 
 #### 1. Create an Azure account and subscription
 
-Go to [portal.azure.com](https://portal.azure.com) and sign in or create a
-free account. A free tier is sufficient for development.
+Go to [portal.azure.com](https://portal.azure.com) and sign in or create a free
+account. A free tier is sufficient for development.
 
 #### 2. Register an application in Azure AD
 
@@ -317,8 +319,10 @@ free account. A free tier is sufficient for development.
 3. Fill in:
    - **Name**: e.g. `MentorWizard Calendar`
    - **Supported account types**: select  
-     **Accounts in any organizational directory (Any Microsoft Entra ID tenant – Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)**  
-     This allows both work/school Entra ID accounts and personal Outlook/Hotmail accounts.
+     **Accounts in any organizational directory (Any Microsoft Entra ID tenant –
+     Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)**  
+     This allows both work/school Entra ID accounts and personal Outlook/Hotmail
+     accounts.
    - **Redirect URI**: leave empty for now — you will add it in the next step.
 4. Click **Register**.
 5. Copy the **Application (client) ID** — this is `MICROSOFT_CLIENT_ID`.
@@ -336,8 +340,8 @@ free account. A free tier is sufficient for development.
 4. Click **Save**.
 
 > If you don't have an MPN ID yet, enroll at
-> [partner.microsoft.com](https://partner.microsoft.com). A free membership
-> tier is sufficient.
+> [partner.microsoft.com](https://partner.microsoft.com). A free membership tier
+> is sufficient.
 
 ![Azure — Branding & properties with MPN ID](images/azure-calendar-app/azure_outlook_4-branding.png)
 
@@ -346,7 +350,8 @@ free account. A free tier is sufficient for development.
 After registration you are taken to the app overview page.
 
 1. In the left sidebar click **Authentication**.
-2. Under **Platform configurations** click **Add a platform** and choose **Web**.
+2. Under **Platform configurations** click **Add a platform** and choose
+   **Web**.
 3. Enter the redirect URI:
    ```
    https://your-domain.com/settings/external-calendar/callback/outlook
@@ -354,15 +359,18 @@ After registration you are taken to the app overview page.
 4. Click **Configure**, then **Save**.
 
 > You can add additional redirect URIs here later (e.g. a localhost URI for
-> local development: `http://localhost:8080/settings/external-calendar/callback/outlook`).
+> local development:
+> `http://localhost:8080/settings/external-calendar/callback/outlook`).
 
 ![Azure — Authentication tab with redirect URI](images/azure-calendar-app/azure_outlook_2_redirect.png)
 
 #### 5. Create a client secret
 
-1. Inside the app registration, go to **Certificates & secrets → New client secret**.
+1. Inside the app registration, go to **Certificates & secrets → New client
+   secret**.
 2. Set a description and expiry (choose 24 months for convenience).
-3. Copy the **Value** immediately — it is only shown once. This is `MICROSOFT_CLIENT_SECRET`.
+3. Copy the **Value** immediately — it is only shown once. This is
+   `MICROSOFT_CLIENT_SECRET`.
 
 ![Azure — Certificates & secrets](images/azure-calendar-app/azure_outlook_5_client_secret.png)
 
@@ -387,19 +395,19 @@ MICROSOFT_CLIENT_ID=<application-client-id>
 MICROSOFT_CLIENT_SECRET=<client-secret-value>
 ```
 
-> **No API Management Service is needed.** Azure API Management is an
-> enterprise gateway product for publishing your own APIs. The Outlook
-> integration calls Microsoft Graph directly; no APIM instance is required.
-> Similarly, deploying the Laravel application to Azure App Service is
-> optional — the integration works from any host as long as the redirect URI
-> is reachable from the internet.
+> **No API Management Service is needed.** Azure API Management is an enterprise
+> gateway product for publishing your own APIs. The Outlook integration calls
+> Microsoft Graph directly; no APIM instance is required. Similarly, deploying
+> the Laravel application to Azure App Service is optional — the integration
+> works from any host as long as the redirect URI is reachable from the
+> internet.
 
 ---
 
 ### Apple Calendar (CalDAV)
 
-Apple Calendar uses the **CalDAV** protocol. There is no OAuth flow and no
-app registration required on the developer side — the integration is entirely
+Apple Calendar uses the **CalDAV** protocol. There is no OAuth flow and no app
+registration required on the developer side — the integration is entirely
 user-arranged.
 
 **What the user must do:**
@@ -423,14 +431,13 @@ user-arranged.
 
    ![Enter credentials in the app](images/apple-calendar/step-4.png)
 
-4. The CalDAV server URL used internally is
-   `https://caldav.icloud.com` — this is hardcoded in the service and does
-   not need to be configured.
+4. The CalDAV server URL used internally is `https://caldav.icloud.com` — this
+   is hardcoded in the service and does not need to be configured.
 
 **Developer note:** No environment variables are required for Apple Calendar.
 The `AppleCalDavExternalCalendarService` authenticates directly with
-`caldav.icloud.com` using the user-supplied credentials, which are encrypted
-and stored via `CalendarCredentialEncrypter`.
+`caldav.icloud.com` using the user-supplied credentials, which are encrypted and
+stored via `CalendarCredentialEncrypter`.
 
 ---
 

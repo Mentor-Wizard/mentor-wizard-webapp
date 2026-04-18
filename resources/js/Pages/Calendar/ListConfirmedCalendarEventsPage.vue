@@ -12,7 +12,9 @@ const notification = ref({ show: false, success: false, message: '' });
 
 const showNotification = (success, message) => {
   notification.value = { show: true, success, message };
-  setTimeout(() => { notification.value.show = false; }, 5000);
+  setTimeout(() => {
+    notification.value.show = false;
+  }, 5000);
 };
 
 onMounted(() => {
@@ -46,14 +48,24 @@ const formatDateTime = (datetimeStr) => {
   if (!datetimeStr) return '—';
   const d = new Date(datetimeStr);
   return (
-    d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    d.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
     + ' '
-    + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+    + d.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
   );
 };
 
-const hasPastEvents = () => Object.keys(props.pastCalendarEvents ?? {}).length > 0;
-const hasUpcomingEvents = () => Object.keys(props.upcomingCalendarEvents ?? {}).length > 0;
+const hasPastEvents = () =>
+  Object.keys(props.pastCalendarEvents ?? {}).length > 0;
+const hasUpcomingEvents = () =>
+  Object.keys(props.upcomingCalendarEvents ?? {}).length > 0;
 </script>
 
 <template>
@@ -66,8 +78,12 @@ const hasUpcomingEvents = () => Object.keys(props.upcomingCalendarEvents ?? {}).
       />
 
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Confirmed & Upcoming Events</h1>
-        <p class="mt-2 text-sm text-gray-600">All confirmed sessions scheduled for today or later.</p>
+        <h1 class="text-3xl font-bold text-gray-900">
+          Confirmed & Upcoming Events
+        </h1>
+        <p class="mt-2 text-sm text-gray-600">
+          All confirmed sessions scheduled for today or later.
+        </p>
       </div>
 
       <!-- Upcoming events -->
@@ -77,14 +93,18 @@ const hasUpcomingEvents = () => Object.keys(props.upcomingCalendarEvents ?? {}).
           :key="programId"
           class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
         >
-          <h2 class="mb-4 text-lg font-semibold text-gray-900">{{ group.name }}</h2>
+          <h2 class="mb-4 text-lg font-semibold text-gray-900">
+            {{ group.name }}
+          </h2>
           <div
             v-for="event in group.events"
             :key="event.id"
-            class="mb-3 last:mb-0 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            class="mb-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm last:mb-0"
           >
             <div class="mb-2 flex items-center justify-between">
-              <h3 class="text-base font-semibold text-gray-900">{{ event.title }}</h3>
+              <h3 class="text-base font-semibold text-gray-900">
+                {{ event.title }}
+              </h3>
               <button
                 type="button"
                 class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
@@ -99,7 +119,8 @@ const hasUpcomingEvents = () => Object.keys(props.upcomingCalendarEvents ?? {}).
             </p>
             <p class="text-sm text-gray-600">
               <span class="font-medium">When:</span>
-              {{ formatDateTime(event.start_date_time) }} — {{ formatDateTime(event.end_date_time) }}
+              {{ formatDateTime(event.start_date_time) }} —
+              {{ formatDateTime(event.end_date_time) }}
             </p>
           </div>
         </div>
@@ -132,14 +153,18 @@ const hasUpcomingEvents = () => Object.keys(props.upcomingCalendarEvents ?? {}).
             :key="programId"
             class="rounded-lg border border-gray-200 bg-white p-4 opacity-75 shadow-sm"
           >
-            <h2 class="mb-4 text-lg font-semibold text-gray-700">{{ group.name }}</h2>
+            <h2 class="mb-4 text-lg font-semibold text-gray-700">
+              {{ group.name }}
+            </h2>
             <div
               v-for="event in group.events"
               :key="event.id"
-              class="mb-3 last:mb-0 rounded-lg border border-gray-200 bg-gray-50 p-4"
+              class="mb-3 rounded-lg border border-gray-200 bg-gray-50 p-4 last:mb-0"
             >
               <div class="mb-2 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-700">{{ event.title }}</h3>
+                <h3 class="text-base font-semibold text-gray-700">
+                  {{ event.title }}
+                </h3>
                 <button
                   type="button"
                   class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
@@ -154,7 +179,8 @@ const hasUpcomingEvents = () => Object.keys(props.upcomingCalendarEvents ?? {}).
               </p>
               <p class="text-sm text-gray-500">
                 <span class="font-medium">When:</span>
-                {{ formatDateTime(event.start_date_time) }} — {{ formatDateTime(event.end_date_time) }}
+                {{ formatDateTime(event.start_date_time) }} —
+                {{ formatDateTime(event.end_date_time) }}
               </p>
             </div>
           </div>

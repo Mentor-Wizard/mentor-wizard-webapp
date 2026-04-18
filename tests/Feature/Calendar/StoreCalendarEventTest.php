@@ -497,7 +497,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $response = $this->withSession(['_token' => 'test-token'])->post(route('pages.calendar.store'), $payload);
 
         $response->assertSessionHasErrors([
-            'fromTime' => 'The selected time must be one of the available time slots.',
+            'fromTime' => 'This slot is busy',
         ]);
     });
 });

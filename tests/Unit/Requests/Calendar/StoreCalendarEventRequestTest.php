@@ -377,7 +377,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         } catch (ValidationException $validationException) {
             expect($validationException->errors())->toHaveKey('fromDate')
                 ->and($validationException->errors()['fromDate'])
-                ->toContain('there are another events on this time');
+                ->toContain('This slot is busy');
         }
     });
     it('rejects when title is missing', function (): void {
@@ -661,7 +661,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             expect(false)->toBeTrue('Should have failed validation due to slot conflict');
         } catch (ValidationException $validationException) {
             expect($validationException->errors())->toHaveKey('fromDate')
-                ->and($validationException->errors()['fromDate'])->toContain('there are another events on this time');
+                ->and($validationException->errors()['fromDate'])->toContain('This slot is busy');
         }
     });
 
@@ -822,7 +822,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         } catch (ValidationException $validationException) {
             expect($validationException->errors())->toHaveKey('fromDate')
                 ->and($validationException->errors()['fromDate'])
-                ->toContain('there are another events on this time');
+                ->toContain('This slot is busy');
         }
     });
 
@@ -916,7 +916,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             $fromDateErrors = $errors['fromDate'];
             $hasSlotError = false;
             foreach ($fromDateErrors as $error) {
-                if (str_contains($error, 'there are another events on this time')) {
+                if (str_contains($error, 'This slot is busy')) {
                     $hasSlotError = true;
                     break;
                 }
@@ -971,7 +971,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             // If the guard is removed, this could try to check slots with bad data
             if (isset($errors['fromDate'])) {
                 foreach ($errors['fromDate'] as $error) {
-                    expect($error)->not->toContain('there are another events on this time');
+                    expect($error)->not->toContain('This slot is busy');
                 }
             }
         }
@@ -1310,7 +1310,7 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
             expect($validator1->fails())->toBeTrue()
                 ->and($validator1->errors()->has('fromDate'))->toBeTrue()
                 ->and(($validator1->errors()->get('fromDate')))
-                ->toContain('there are another events on this time');
+                ->toContain('This slot is busy');
 
             // 2) Second run: Leading space makes concatenation parseable, but rule invalidates fromTime
             $invalidFromTime = [

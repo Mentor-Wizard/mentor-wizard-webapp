@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar;
+namespace App\Actions\Calendar\ExternalCalendar;
 
 use App\Http\Requests\Calendar\ExternalCalendarSelectCalendarRequest;
 use App\Models\User;

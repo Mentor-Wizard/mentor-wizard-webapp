@@ -6,16 +6,21 @@ namespace App\Models;
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\ExternalCalendarEventSyncStatusEnum;
+use Database\Factories\ExternalCalendarEventFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property CalendarProviderEnum $provider
+ * @property ExternalCalendarEventSyncStatusEnum|null $sync_status
+ *
  * @mixin IdeHelperExternalCalendarEvent
  */
 class ExternalCalendarEvent extends Model
 {
+    /** @use HasFactory<ExternalCalendarEventFactory> */
     use HasFactory;
 
     protected $fillable = [

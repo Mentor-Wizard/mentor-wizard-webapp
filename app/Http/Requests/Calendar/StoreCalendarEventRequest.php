@@ -39,7 +39,9 @@ class StoreCalendarEventRequest extends FormRequest
             $user = auth()->user();
             $timezone = $user->profile->timezone;
 
-            if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime', 'mentor_program_id'])) {
+            $isMultiDay = $this->input('fromDate') !== $this->input('toDate');
+
+            if (! $isMultiDay && ! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime', 'mentor_program_id'])) {
                 /** @var MentorProgram $mentorProgram */
                 $mentorProgram = MentorProgram::query()->findOrFail($this->input('mentor_program_id'));
                 $startDate = Date::createFromFormat(
@@ -64,7 +66,7 @@ class StoreCalendarEventRequest extends FormRequest
                 )->isValidSlot();
 
                 if (! $isValidSlot) {
-                    $validator->errors()->add('fromTime', 'The selected time must be one of the available time slots.');
+                    $validator->errors()->add('fromDate', 'This slot is busy');
                 }
             }
         });
