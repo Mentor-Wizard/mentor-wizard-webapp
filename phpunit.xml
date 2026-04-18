@@ -36,7 +36,7 @@
         <env name="TELESCOPE_ENABLED" value="true"/>
         <env name="LOG_CHANNEL" value="stderr"/>
         <env name="CALENDAR_ENCRYPTION_KEY1" value="RDwBS4UT3qxKoKqTMoULbaD5coVKhL+NXSXb0lW47wU="/>
-        <ini name="memory_limit" value="512M"/>
+        <ini name="memory_limit" value="2G"/>
     </php>
      <coverage>
         <report>
