@@ -78,7 +78,7 @@ describe('RerunExternalCalendarEventSync', function (): void {
         Queue::assertPushed(
             UpdateExternalCalendarEvent::class,
             fn (UpdateExternalCalendarEvent $job): bool => $job->calendarEvent->getKey() === $this->calendarEvent->getKey()
-                && $job->externalCalendarEvent->getKey() === $externalEvent->getKey()
+                && $job->externalEvent->getKey() === $externalEvent->getKey()
                 && $job->integration->getKey() === $this->integration->getKey()
         );
         Queue::assertNotPushed(CreateExternalCalendarEvent::class);
