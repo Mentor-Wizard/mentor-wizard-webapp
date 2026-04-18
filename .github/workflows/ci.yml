@@ -126,7 +126,7 @@ jobs:
         command:
           - { name: '🔬 Unit',     command: 'php artisan test --testsuite=Unit --parallel',                                        report: false }
           - { name: '🧬 Feature',  command: 'php artisan test --testsuite=Feature --parallel',                                     report: false }
-          - { name: '☂️ Coverage', command: 'php artisan test --coverage --compact --coverage-clover coverage/coverage-clover.xml', report: true  }
+          - { name: '☂️ Coverage', command: 'php -d memory_limit=2G artisan test --coverage --compact --coverage-clover coverage/coverage-clover.xml', report: true  }
           - { name: '🦠 Mutation', command: 'php artisan test --mutate --covered-only --min=100 --parallel',                       report: false }
 
     steps:
