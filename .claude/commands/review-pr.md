@@ -1,13 +1,8 @@
 ---
-model: sonnet
+model: opus
 ---
 
-You are performing a comprehensive code review of a Pull Request in the Mentor-Wizard GitHub organization.
-
-CRITICAL RULES:
-- NEVER use emojis anywhere in comments or output
-- NEVER mention AI, Claude, LLM, or automation — write as a human engineer
-- Post comments as INLINE review comments on specific diff lines, NOT as a single summary comment
+Review a Pull Request in the Mentor-Wizard GitHub organization by dispatching the `reviewer` agent. The agent fetches, analyzes, and posts the review itself — the orchestrator only parses the input and summarizes the agent's return.
 
 ## Input
 
@@ -15,7 +10,7 @@ The user provided: `$ARGUMENTS`
 
 ## Step 1: Parse the PR reference
 
-Parse the input to determine the repository and PR number. Supported formats:
+Supported formats:
 - `123` or `#123` — PR in current repo (detect via `git remote`)
 - `repo#123` — PR in `Mentor-Wizard/repo`
 - `Mentor-Wizard/repo#123` — full org/repo path
@@ -23,111 +18,45 @@ Parse the input to determine the repository and PR number. Supported formats:
 
 If the input is empty or cannot be parsed, ask the user for the PR reference.
 
-## Step 2: Fetch PR data
+## Step 2: Dispatch the reviewer agent
 
-**Primary — `github-mw` MCP (run in parallel):**
+Launch the `reviewer` agent (`subagent_type: "reviewer"`) with the prompt below. These instructions override the agent's defaults for Mentor-Wizard PR conventions.
 
-1. PR metadata via `mcp__github-mw__pull_request_read`:
-   ```json
-   {"owner": "Mentor-Wizard", "repo": "<REPO>", "pullNumber": <NUMBER>}
-   ```
-   This returns title, body, author, labels, state, base/head refs, files, and commits.
+> Review PR #<NUMBER> in `Mentor-Wizard/<REPO>`. Fetch data, analyze, post the review yourself. Return only the final summary — do not stream findings back to the orchestrator.
+>
+> **Fetch in parallel:**
+> - Metadata: `GH_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh api repos/Mentor-Wizard/<REPO>/pulls/<NUMBER>`
+> - Diff: `GITHUB_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh pr diff <NUMBER> --repo Mentor-Wizard/<REPO>`
+> - CI checks: `GITHUB_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh pr checks <NUMBER> --repo Mentor-Wizard/<REPO>`
+> - Existing comments: `GH_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh api repos/Mentor-Wizard/<REPO>/pulls/<NUMBER>/comments`
+>
+> **Context:** Read the actual changed files from the local codebase (not just the diff). Consult `CLAUDE.md` and `.claude/rules/{architecture,code-style,testing,git-operations}.md`.
+>
+> **PR comment conventions (override defaults):**
+> - Comment bodies posted to GitHub must use plain-text severity labels: `Critical:`, `Important:`, `Suggestion:` — no emojis
+> - NEVER mention AI, Claude, LLM, automation, or that this is an automated review
+> - All comments in English, in natural human engineer tone
+> - Inline (line-level) comments only — never a single summary comment
+> - Do not duplicate existing comments on the same line
+>
+> **Post the review in one API call:**
+> ```bash
+> SHA=$(GH_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh api repos/Mentor-Wizard/<REPO>/pulls/<NUMBER> --jq '.head.sha')
+>
+> GH_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh api repos/Mentor-Wizard/<REPO>/pulls/<NUMBER>/reviews \
+>   --method POST \
+>   --field commit_id="$SHA" \
+>   --field event="<COMMENT|REQUEST_CHANGES>" \
+>   --field body="<one concise sentence — no emojis, no AI mention>" \
+>   --field 'comments=[{"path":"<file>","line":<line>,"side":"RIGHT","body":"<comment>"}]'
+> ```
+> Use `side: "LEFT"` for deleted lines, `side: "RIGHT"` for added lines. Use `start_line` + `line` for multi-line comments. Use `event: "REQUEST_CHANGES"` if any critical findings were posted; otherwise `COMMENT`.
+>
+> **Return:** counts by severity (critical / important / suggestion) and the review event type. Nothing else.
 
-2. PR diff — MCP has no diff endpoint, use `gh` CLI:
-   ```bash
-   GITHUB_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh pr diff <NUMBER> --repo Mentor-Wizard/<REPO>
-   ```
+## Step 3: Present summary to user
 
-3. CI checks status:
-   ```bash
-   GITHUB_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh pr checks <NUMBER> --repo Mentor-Wizard/<REPO>
-   ```
-
-4. Existing review comments:
-   ```bash
-   GH_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh api repos/Mentor-Wizard/<REPO>/pulls/<NUMBER>/comments --paginate
-   ```
-
-## Step 3: Dispatch the review
-
-Launch the `reviewer` agent with `subagent_type: "reviewer"` passing:
-1. Full PR metadata (title, author, description, labels)
-2. Complete diff content
-3. CI status
-4. Existing review comments
-5. The list of changed files
-
-The agent prompt MUST include these rules:
-- NEVER use emojis in any output
-- NEVER mention AI, Claude, LLM, automation, or that this is an automated review
-- Write all comments in English, in natural human engineer tone
-- For each finding, return: file path, line number (from the diff), severity (critical/important/suggestion), and the comment text
-- Use skills: `code-reviewer`, `security-audit`, `laravel-architecture`, `verification-before-completion`
-- Read relevant project docs when applicable: `CLAUDE.md`, `.claude/rules/architecture.md`, `.claude/rules/code-style.md`, `.claude/rules/testing.md`, `.claude/rules/git-operations.md`
-- Read the actual changed files from the local codebase (not just the diff) for full context
-- Return findings as a structured list with: file, line, severity, comment
-
-**Project-specific patterns to check:**
-- `declare(strict_types=1)` present in all PHP files
-- `getKey()` used instead of `->id` for model primary keys
-- `query()` used for model queries (not static `Model::where(...)`)
-- Laravel Actions pattern (lorisleiva/laravel-actions) — not traditional controllers
-- Form Requests used for all input validation
-- PHP 8.4+ features used where appropriate
-- PHPStan level 7 compatibility (no type errors, no unresolved calls)
-- Inertia.js props design — only necessary data passed to frontend
-- Vue 3 Composition API used (not Options API)
-- Pest BDD syntax: `describe()` + `it()` + `expect()`
-- Eager loading to prevent N+1 queries
-
-## Step 4: Post inline review comments
-
-**Primary — `github-mw` MCP (three-step workflow):**
-
-1. Create a pending review via `mcp__github-mw__pull_request_review_write`:
-   ```json
-   {"method": "create", "owner": "Mentor-Wizard", "repo": "<REPO>", "pullNumber": <NUMBER>, "body": "<short summary — no emojis, no AI mention>"}
-   ```
-
-2. Add each finding as an inline comment via `mcp__github-mw__add_comment_to_pending_review`:
-   ```json
-   {"owner": "Mentor-Wizard", "repo": "<REPO>", "pullNumber": <NUMBER>, "path": "<file>", "line": <line>, "body": "<comment>", "side": "RIGHT"}
-   ```
-   Use `side: "LEFT"` for deleted lines, `side: "RIGHT"` for added lines.
-
-3. Submit the pending review via `mcp__github-mw__pull_request_review_write`:
-   ```json
-   {"method": "submit_pending", "owner": "Mentor-Wizard", "repo": "<REPO>", "pullNumber": <NUMBER>, "event": "<COMMENT|REQUEST_CHANGES>"}
-   ```
-   Use `REQUEST_CHANGES` if any critical findings were posted; otherwise use `COMMENT`.
-
-**Fallback — `gh` CLI (only if MCP fails):**
-
-Get the latest commit SHA:
-```bash
-GH_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh api repos/Mentor-Wizard/<REPO>/pulls/<NUMBER> --jq '.head.sha'
-```
-
-Create review with inline comments:
-```bash
-GH_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh api repos/Mentor-Wizard/<REPO>/pulls/<NUMBER>/reviews \
-  --method POST \
-  --field commit_id="<COMMIT_SHA>" \
-  --field event="COMMENT" \
-  --field body="<short summary sentence — no emojis, no AI mention>" \
-  --field 'comments=[{"path":"<file>","line":<line>,"side":"RIGHT","body":"<comment>"}]'
-```
-
-Rules for posting:
-- Each comment must reference the exact file path and diff line number
-- Use `start_line` + `line` for multi-line comments
-- The review body should be a single concise sentence (e.g., "A few issues to address before merge" or "Looks good overall, minor suggestions inline")
-- For critical issues, use `event: "REQUEST_CHANGES"`
-- For clean PRs with only suggestions, use `event: "COMMENT"`
-
-## Step 5: Present summary to user
-
-After posting, show a brief local summary:
-- How many comments were posted (by severity: critical / important / suggestion)
-- The review event type (COMMENT or REQUEST_CHANGES)
-- Link to the PR: `https://github.com/Mentor-Wizard/<REPO>/pull/<NUMBER>`
+Based on the agent's return, show:
+- Comment counts by severity (critical / important / suggestion)
+- Review event type (COMMENT or REQUEST_CHANGES)
+- PR link: `https://github.com/Mentor-Wizard/<REPO>/pull/<NUMBER>`
