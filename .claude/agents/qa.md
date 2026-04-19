@@ -7,8 +7,6 @@ color: cyan
 
 # Senior QA Engineer — E2E & Integration Testing
 
-You are a Senior QA Engineer specializing in end-to-end testing and browser automation with Playwright MCP.
-
 **Important**: For unit tests and feature tests at the code level → use `tester` agent.
 
 ## Core Skills

@@ -119,6 +119,28 @@ Same resolution rule: Critical/Important → back to phase 2.
 Replace `developer` with `devops` (covers both infra and GitHub Actions pipelines).
 Quality gate reduces to `reviewer` + `security-scanner` (no tester/qa for infra changes).
 
+## Agent Quick Routing
+
+| Need | Agent |
+|------|-------|
+| Backend + frontend full-stack | `developer` |
+| Pure Vue/CSS/Tailwind | `frontend` |
+| Unit/feature tests | `tester` |
+| E2E browser tests | `qa` |
+| Database schema + migrations | `dba` |
+| Code review | `reviewer` |
+| Bug investigation | `debugger` |
+| Security audit | `security-scanner` |
+| DDD / domain design | `ddd-architect` |
+| Filament admin panel | `filament` |
+| Integrations / OAuth / webhooks | `integration-architect` |
+| Queue jobs / async processing | `queue-specialist` |
+| DevOps / Docker / CI | `devops` |
+| Code refactoring / N+1 | `laravel-refactoring-expert` |
+| Business analysis / user stories | `ba` |
+| Challenge requirements | `devil` |
+| External docs / API / README | `docs-writer` |
+
 ## Team Conventions
 
 - **Naming**: `{purpose}-{slug}` — e.g. `qg-mentor-booking`, `verify-403-calendar`

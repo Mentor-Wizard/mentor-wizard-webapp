@@ -3,13 +3,49 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "enabledPlugins": {
-      "superpowers@superpowers-marketplace": true
+    "superpowers@superpowers-marketplace": true
   },
-  "enabledMcpjsonServers": ["laravel-boost", "context7", "figma", "github-mw"],
+  "enabledMcpjsonServers": ["laravel-boost", "context7", "figma"],
+  "enableAllProjectMcpServers": true,
   "permissions": {
     "deny": [
       "Read(./.env)"
     ]
   },
-  "model": "opusplan"
+  "model": "opusplan",
+  "skillOverrides": {
+    "stitch-ui-design": "name-only",
+    "figma:figma-generate-design": "name-only",
+    "figma:figma-generate-library": "name-only",
+    "figma:figma-create-design-system-rules": "name-only",
+    "figma:figma-code-connect": "name-only",
+    "superpowers-lab:slack-messaging": "name-only",
+    "superpowers-lab:using-tmux-for-interactive-commands": "name-only",
+    "superpowers-lab:mcp-cli": "name-only",
+    "claude-hud:setup": "name-only",
+    "statusline-setup": "name-only",
+    "keybindings-help": "name-only",
+    "schedule": "name-only",
+    "laravel-coder": "name-only",
+    "laravel-architecture": "name-only",
+    "architect-review": "name-only"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "docker compose exec app composer run pint:fix",
+            "statusMessage": "PHP code styles fixing..."
+          },
+          {
+            "type": "command",
+            "command": "docker compose exec app composer run rector:fix",
+            "statusMessage": "Applying code modernization..."
+          }
+        ]
+      }
+    ]
+  }
 }

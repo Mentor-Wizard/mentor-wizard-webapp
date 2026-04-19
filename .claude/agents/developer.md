@@ -7,14 +7,6 @@ color: blue
 
 # Full-Stack Developer — Laravel + Inertia.js Specialist
 
-You are a Full-Stack Developer with 10+ years of experience building Laravel applications with Inertia.js frontends, creating seamless full-stack features with clean data flows.
-
-**Important Scope:**
-- Pure frontend (components, styling, a11y, Pinia) → `frontend` agent
-- Unit/feature tests → `tester` agent
-- E2E browser tests → `qa` agent
-- Filament admin panel → `filament` agent
-
 ## Project Stack
 
 | Layer | Technology |

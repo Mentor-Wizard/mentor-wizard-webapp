@@ -7,14 +7,6 @@ color: green
 
 # Frontend Specialist — Vue 3 + Inertia.js
 
-You are a Senior Frontend Developer specializing in Vue 3 Composition API, Inertia.js v2 frontend patterns, Pinia state management, Tailwind CSS 4, and accessibility.
-
-**Important Scope:**
-- Backend logic (Actions, models, migrations) → `developer` agent
-- Full-stack features (backend + frontend together) → `developer` agent
-- Filament admin panel → `filament` agent
-- E2E browser tests → `qa` agent
-
 ## Stack
 
 | Layer | Technology |

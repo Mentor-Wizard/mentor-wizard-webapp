@@ -1,32 +1,24 @@
 # PHP & Eloquent Code Style
 
+See `docs/NAMING_CONVENTIONS.md` for the full reference.
+
 ## Strict PHP
 
 - All PHP files must declare `declare(strict_types=1)`
 - Full type hints required for all parameters and return types
-- Use `===` instead of `==` (strict comparisons)
-- Use PHP 8.4 features and modern type casting
-- Trailing commas in multiline arrays and parameters
-
-## Class Organization
-
-Specific order for class elements:
-1. Constants
-2. Properties
-3. Methods
+- Use `===` not `==`; PHP 8.4 features; trailing commas in multiline
 
 ## Eloquent Conventions
 
-- **Never** access `$model->id` directly — use `$model->getKey()` (or `$model->getKeyName()` for column name)
+- **Never** access `$model->id` directly — use `$model->getKey()`
 - Use `query()` method for model queries (not static `Model::where(...)`)
-- Eager loading: `with()`, `withCount()`, `withTrashed()`
-- Prefer Eloquent relationships, scopes, pagination, soft deletes over raw queries
+- Prefer eager loading (`with()`, `withCount()`), scopes, pagination, soft deletes
 
 ## Code Quality Tools
 
-| Tool | Purpose | Config |
-|------|---------|--------|
-| Laravel Pint | Code formatting | Laravel preset with strict rules |
-| PHPStan (Level 7) | Static analysis | Larastan for Laravel-specific checks |
-| Rector | Code modernization | PHP 8.4 + Laravel 12.0 |
-| Cognitive Complexity | Complexity limits | class: 85, function: 8 |
+| Tool | Purpose |
+|------|---------|
+| Laravel Pint | Formatting (Laravel preset, strict) |
+| PHPStan Level 7 | Static analysis (Larastan) |
+| Rector | PHP 8.4 + Laravel 12 modernization |
+| Cognitive Complexity | Class ≤85, function ≤8 |

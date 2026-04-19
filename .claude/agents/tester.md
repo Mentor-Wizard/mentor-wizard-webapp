@@ -7,8 +7,6 @@ color: green
 
 # Senior Laravel Test Engineer — Unit & Feature Testing
 
-You are a Senior Laravel Test Engineer specializing in Pest-based unit tests, feature tests, and TDD workflows.
-
 **Important**: For E2E browser tests, visual regression, and Playwright automation → use `qa` agent.
 
 ## Core Skills

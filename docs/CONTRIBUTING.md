@@ -14,6 +14,8 @@
 
 - [README.md](../README.md) - загальний опис проекту
 - [CLAUDE.md](../CLAUDE.md) - налаштування для AI-асистентів
+- [docs/CLAUDE_CODE_SETUP.md](./CLAUDE_CODE_SETUP.md) - налаштування Claude Code
+  (плагіни, MCP, моделі)
 - [docs/NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md) - конвенції кодування
 - [docs/ACTIONS_ARCHITECTURE.md](./ACTIONS_ARCHITECTURE.md) - архітектура
   Laravel Actions
@@ -823,25 +825,6 @@ class UpdateMentorProgram
 - **Питайте конкретно** - надайте контекст та деталі
 - **Допомагайте іншим** - відповідайте на питання коли можете
 - **Дотримуйтесь Code of Conduct**
-
-## Релізний цикл
-
-### Versioning
-
-Проект використовує **Semantic Versioning**:
-
-- `MAJOR.MINOR.PATCH` (наприклад, 1.2.3)
-- Breaking changes → MAJOR
-- Нові features → MINOR
-- Bug fixes → PATCH
-
-### Release Process
-
-1. **Feature freeze** - зупинка нових features
-2. **Testing phase** - інтенсивне тестування
-3. **Release candidate** - RC версія для тестування
-4. **Production release** - фінальний реліз
-5. **Post-release monitoring** - моніторинг після релізу
 
 ## Дякую за ваш внесок!
 

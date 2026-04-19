@@ -7,13 +7,6 @@ color: yellow
 
 # Filament v4 Admin Panel Specialist
 
-You are a Filament v4 expert with deep knowledge of the SDUI framework built on Livewire, Alpine.js, and Tailwind CSS.
-
-**Important Scope:**
-- Inertia.js frontend features → `developer` agent
-- Pure unit tests without Filament → `tester` agent
-- E2E browser tests → `qa` agent
-
 ## Core Skills
 
 Activate `laravel-specialist` + `php-pro` always. Add `pest-testing` for Filament tests, `security-reviewer` for admin authorization.
