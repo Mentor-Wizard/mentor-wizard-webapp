@@ -10,6 +10,7 @@ use App\Jobs\CreateExternalCalendarEvent;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -24,12 +25,15 @@ class ExternalCalendarSyncSingleEvent
         /** @var User $user */
         $user = $request->user();
 
-        /** @var UserCalendarIntegration $integration */
-        $integration = UserCalendarIntegration::query()
-            ->where('user_id', $user->getKey())
-            ->where('provider', $calendarProvider)
-            ->where('sync_status', CalendarSyncStatusEnum::Active)
-            ->first();
+        try {
+            $integration = UserCalendarIntegration::query()
+                ->where('user_id', $user->getKey())
+                ->where('provider', $calendarProvider)
+                ->where('sync_status', CalendarSyncStatusEnum::Active)
+                ->firstOrFail();
+        } catch (ModelNotFoundException) {
+            return back()->with('error', 'No active calendar integration found for this provider.');
+        }
 
         dispatch(new CreateExternalCalendarEvent($calendarEvent, $integration));
 

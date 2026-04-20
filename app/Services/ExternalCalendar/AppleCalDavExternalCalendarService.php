@@ -177,11 +177,29 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
      */
     private function discoverCalendarHome(string $appleId, string $password): ?string
     {
-        // Step 1: follow .well-known redirect to the principal URL
+        // Step 1: resolve the well-known URL — Apple returns a 301 redirect.
+        // Guzzle converts non-GET redirects to GET, so we disable auto-redirect
+        // and re-issue the PROPFIND manually to the Location URL.
+        $wellKnownUrl = self::CALDAV_ROOT.self::WELL_KNOWN_PATH;
+
         $response = Http::withBasicAuth($appleId, $password)
+            ->withoutRedirecting()
             ->withHeaders(['Depth' => '0', 'Content-Type' => 'text/xml'])
             ->withBody($this->propfindCurrentUserPrincipal(), 'text/xml')
-            ->send('PROPFIND', self::CALDAV_ROOT.self::WELL_KNOWN_PATH);
+            ->send('PROPFIND', $wellKnownUrl);
+
+        if ($response->redirect()) {
+            $redirectUrl = $response->header('Location');
+
+            if ($redirectUrl === '') {
+                return null;
+            }
+
+            $response = Http::withBasicAuth($appleId, $password)
+                ->withHeaders(['Depth' => '0', 'Content-Type' => 'text/xml'])
+                ->withBody($this->propfindCurrentUserPrincipal(), 'text/xml')
+                ->send('PROPFIND', $redirectUrl);
+        }
 
         if (! $response->successful()) {
             return null;

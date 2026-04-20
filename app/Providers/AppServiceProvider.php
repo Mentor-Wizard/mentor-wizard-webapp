@@ -11,11 +11,14 @@ use App\Models\UserSchedule;
 use App\Policies\CalendarEventPolicy;
 use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\ParallelTesting;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -40,14 +43,25 @@ class AppServiceProvider extends ServiceProvider
         $this->configDatabase();
         $this->configTesting();
 
-        if ($this->app->isProduction()) {
-            URL::forceHttps();
-        }
+        //        if ($this->app->isProduction()) {
+        URL::forceHttps();
+        //        }
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
         Gate::policy(CalendarEvent::class, CalendarEventPolicy::class);
         Gate::policy(UserSchedule::class, UserSchedulePolicy::class);
         Vite::prefetch(concurrency: 3);
+
+        $this->configRateLimiters();
+    }
+
+    private function configRateLimiters(): void
+    {
+        RateLimiter::for('calendar-connect', fn (Request $request): Limit => Limit::perMinute(10)->by($request->user()?->getKey()));
+
+        RateLimiter::for('calendar-retry', fn (Request $request): Limit => Limit::perMinute(5)->by($request->user()?->getKey()));
+
+        RateLimiter::for('calendar-sync', fn (Request $request): Limit => Limit::perMinute(20)->by($request->user()?->getKey()));
     }
 
     private function configModels(): void

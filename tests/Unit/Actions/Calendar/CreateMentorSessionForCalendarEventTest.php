@@ -54,7 +54,7 @@ describe('CreateMentorSessionForCalendarEvent', function (): void {
             'colour' => CalendarEventColoursEnum::GREEN->value,
         ]);
 
-        (new CreateMentorSessionForCalendarEvent)->handle($event);
+        CreateMentorSessionForCalendarEvent::run($event);
 
         expect(MentorSession::query()->count())->toBe(1);
 
@@ -86,7 +86,7 @@ describe('CreateMentorSessionForCalendarEvent', function (): void {
             'colour' => CalendarEventColoursEnum::GREEN->value,
         ]);
 
-        (new CreateMentorSessionForCalendarEvent)->handle($event);
+        CreateMentorSessionForCalendarEvent::run($event);
 
         expect(MentorSession::query()->count())->toBe(0);
     });
@@ -106,7 +106,7 @@ describe('CreateMentorSessionForCalendarEvent', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        (new CreateMentorSessionForCalendarEvent)->handle($event);
+        CreateMentorSessionForCalendarEvent::run($event);
 
         expect(MentorSession::query()->count())->toBe(0);
     });
@@ -126,7 +126,7 @@ describe('CreateMentorSessionForCalendarEvent', function (): void {
             'colour' => CalendarEventColoursEnum::GREEN->value,
         ]);
 
-        (new CreateMentorSessionForCalendarEvent)->handle($event);
+        CreateMentorSessionForCalendarEvent::run($event);
 
         expect(MentorSession::query()->count())->toBe(0);
     });
@@ -146,7 +146,7 @@ describe('CreateMentorSessionForCalendarEvent', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        (new CreateMentorSessionForCalendarEvent)->handle($event);
+        CreateMentorSessionForCalendarEvent::run($event);
 
         expect(MentorSession::query()->count())->toBe(0);
     });

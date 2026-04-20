@@ -38,14 +38,14 @@ class StoreCalendarEvent
             'colour' => $data->colour,
         ]);
 
-        if ($data->mentorProgram->mentor_id !== auth()->user()->getKey()) {
-            $calendarEvent->calendarEventUsers()->attach(auth()->user()->getKey(), [
+        if ($data->mentorProgram->mentor_id !== $request->user()->getKey()) {
+            $calendarEvent->calendarEventUsers()->attach($request->user()->getKey(), [
                 'role'   => CalendarEventRoleEnum::PARTICIPANT->value,
                 'colour' => $data->colour,
             ]);
         }
 
-        (new CreateMentorSessionForCalendarEvent)->handle($calendarEvent);
+        CreateMentorSessionForCalendarEvent::run($calendarEvent);
 
         $message = $calendarEvent->status === CalendarEventStatusEnum::CONFIRMED
             ? 'Your session has been booked and confirmed!'

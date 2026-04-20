@@ -9,9 +9,12 @@ use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorSession;
 use BackedEnum;
+use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateMentorSessionForCalendarEvent
 {
+    use AsAction;
+
     public function handle(CalendarEvent $event): void
     {
         // @phpstan-ignore-next-line

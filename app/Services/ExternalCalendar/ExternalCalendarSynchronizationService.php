@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace App\Services\ExternalCalendar;
 
 use App\Enums\CalendarProviderEnum;
+use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
 use App\Services\ExternalCalendar\Contracts\OAuthCalendarServiceInterface;
+use Illuminate\Support\Facades\DB;
 use LogicException;
 
 class ExternalCalendarSynchronizationService
 {
+    public function __construct(
+        private readonly ExternalCalendarServiceFactory $factory,
+    ) {}
+
     public function saveCredentialsAndBuildOAuthUrl(
         User $user,
         CalendarProviderEnum $provider,
@@ -61,10 +67,17 @@ class ExternalCalendarSynchronizationService
 
     public function disconnect(User $user, CalendarProviderEnum $provider): void
     {
-        UserCalendarIntegration::query()
-            ->where('user_id', $user->getKey())
-            ->where('provider', $provider)
-            ->delete();
+        DB::transaction(function () use ($user, $provider): void {
+            ExternalCalendarEvent::query()
+                ->where('user_id', $user->getKey())
+                ->where('provider', $provider)
+                ->delete();
+
+            UserCalendarIntegration::query()
+                ->where('user_id', $user->getKey())
+                ->where('provider', $provider)
+                ->delete();
+        });
     }
 
     private function resolveOAuthService(CalendarProviderEnum $provider): OAuthCalendarServiceInterface
@@ -80,6 +93,6 @@ class ExternalCalendarSynchronizationService
 
     private function resolveService(CalendarProviderEnum $provider): ExternalCalendarServiceInterface
     {
-        return resolve($provider->getService());
+        return $this->factory->for($provider);
     }
 }

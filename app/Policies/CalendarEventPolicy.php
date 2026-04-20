@@ -25,6 +25,17 @@ final class CalendarEventPolicy
         return $mentorProgram->mentor_id === $user->getKey();
     }
 
+    public function confirm(User $user, CalendarEvent $calendarEvent): bool
+    {
+        // Only the mentor of the related mentor program can update events
+        $mentorProgram = $calendarEvent->mentorProgram()->first();
+        if ($mentorProgram === null) {
+            return false;
+        }
+
+        return $mentorProgram->mentor_id === $user->getKey();
+    }
+
     public function delete(User $user, CalendarEvent $calendarEvent): bool
     {
         // Mentor of the program OR any attached participant (mentee/host/cohost) can delete

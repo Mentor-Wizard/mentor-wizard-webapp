@@ -24,8 +24,12 @@ Every calendar event associated with mentor sessions requires a valid
 `mentor_program_id`:
 
 - The `mentor_program_id` links the event to a specific mentorship program
-- Only the mentor who owns the program can create events for it
-- Events without a `mentor_program_id` are treated as personal calendar events
+- **Restriction**: Mentors cannot create events for their own mentor programs.
+  These events are created by mentees when they book a slot.
+- Only the mentor who owns the program can confirm or update existing events
+  associated with it.
+- Events without a `mentor_program_id` are treated as personal calendar events.
+
 
 ### 4.3 Event Status Flow
 
@@ -38,52 +42,70 @@ PENDING_MENTOR_CONFIRMATION -> CONFIRMED -> FINISHED
 
 **Status Definitions:**
 
-| Status                        | Description                                           |
-| ----------------------------- | ----------------------------------------------------- |
-| `PENDING_MENTOR_CONFIRMATION` | Event created by mentee, awaiting mentor confirmation |
-| `PENDING_PAYMENT`             | Event confirmed but payment pending                   |
-| `CONFIRMED`                   | Event confirmed by all parties                        |
-| `FINISHED`                    | Event has been completed                              |
-| `CANCELLED`                   | Event was cancelled                                   |
+| Status                        | Description                                                           |
+| ----------------------------- |-----------------------------------------------------------------------|
+| `PENDING_MENTOR_CONFIRMATION` | Event created by mentee, awaiting mentor confirmation                 |
+| `PENDING_PAYMENT`             | Event confirmed but payment pending (for future logic implementation) |
+| `CONFIRMED`                   | Event confirmed by all parties                                        |
+| `FINISHED`                    | Event has been completed                                              |
+| `CANCELLED`                   | Event was cancelled                                                   |
 
 **Status Transitions:**
 
-1. When a mentee books a slot, the event is created with
-   `PENDING_MENTOR_CONFIRMATION` status
-2. When the mentor confirms, status changes to `CONFIRMED`
-3. A `MentorSession` is automatically created when status changes to `CONFIRMED`
+1. When a mentee books a slot, the initial status depends on the mentor program
+   settings:
+   - If "requires confirmation" is enabled: Status is
+     `PENDING_MENTOR_CONFIRMATION`
+   - If "requires confirmation" is disabled: Status is `CONFIRMED` (until
+     payment logic is implemented)
+2. When a mentor manually confirms a pending event, status changes to
+   `CONFIRMED`
+3. A `MentorSession` is automatically created whenever an event reaches
+   `CONFIRMED` status (either upon creation or via status change)
 4. Completed events are marked as `FINISHED`
-5. Either party can cancel, changing status to `CANCELLED`
+5. Either party can cancel, changing status to `CANCELLED`, but **only if the
+   event is not yet CONFIRMED**.
+   - *Future plan*: Implement logic to propose postponing or handle refunds for
+     confirmed events.
 
 **Restrictions:**
 
 - `FINISHED` events cannot be edited or deleted
 - `CANCELLED` events cannot be edited but can be deleted
 - Only `CONFIRMED` and `PENDING_MENTOR_CONFIRMATION` events can be modified
+- **Cancellation**: Events can only be cancelled while in
+  `PENDING_MENTOR_CONFIRMATION` status. Confirmed events cannot be cancelled
+  directly.
 
 ### 4.4 Session Duration
 
 Each mentor program has a configurable `session_duration` setting (in minutes):
 
-- Default session duration options: 30, 45, 60, 90, 120 minutes
-- Available slots are automatically split based on session duration
-- The `SplitSlotsPerSessionDuration` service handles slot splitting
+- **Default Value**: The system defaults to **60 minutes** if no value is
+  specified.
+- **Enum Constraint**: The `session_duration` must be one of the values defined
+  in `MentorSessionDurationOptionsEnum` (e.g., 15, 30, 45, 60, 90, 120 minutes).
+- Available slots are automatically split based on this duration.
+- The `SplitSlotsPerSessionDuration` service handles slot splitting.
 
 **How it works:**
 
-1. Available time blocks are calculated from mentor's schedule
-2. Existing events are excluded from available time
-3. Remaining time is split into slots matching the program's session duration
+1. Available time blocks are calculated from mentor's schedule.
+2. Existing events are excluded from available time.
+3. Remaining time is split into slots matching the program's `session_duration`.
 
 ### 4.5 Minimum Pre-booking Time
 
-The `minimum_pre_booking_time` setting from mentor profile controls how far in
-advance bookings can be made:
+The `minimum_pre_booking_time` setting controls how far in advance bookings can
+be made.
 
-- Stored in minutes on the mentor's profile
-- Default: 0 (no minimum)
-- Example: Setting to 1440 (24 hours) means mentees must book at least 1 day in
-  advance
+- **Level of Configuration**: This is set on the **mentor's profile**, not per
+  each individual mentor program.
+- **Unit**: Stored in **minutes**. (It is not stored in seconds or "seconds as
+  minutes").
+- **Default**: 0 (no minimum).
+- **Example**: Setting to 1440 (24 hours) means mentees must book at least 1 day
+  in advance.
 
 ## Core Services
 
@@ -134,7 +156,9 @@ Automatically creates `MentorSession` records when events are confirmed:
 
 **Triggers when:**
 
-- Event status changes from any status TO `CONFIRMED`
+- Event status changes TO `CONFIRMED`
+- Event is created directly with `CONFIRMED` status (if mentor program does not
+  require confirmation)
 - Event has a valid `mentor_program_id`
 - Event has both HOST and PARTICIPANT users attached
 
@@ -158,51 +182,108 @@ The system stores all times in UTC and converts for display:
 
 ## Concurrent Booking Prevention
 
-The system prevents double-booking:
+The system prevents double-booking and resolves slot conflicts:
 
-1. When confirming an event, the system checks for overlapping confirmed events
-2. Partial overlaps are blocked (event A: 14:00-15:00, event B: 14:30-15:30)
-3. Adjacent slots are allowed (event A ends at 15:00, event B starts at 15:00)
-4. Events completely inside another are blocked
+1. **Validation**: When confirming an event, the system checks for existing
+   overlapping `CONFIRMED` events.
+2. **Conflict Resolution**: When a mentor confirms a specific event, all other
+   `PENDING_MENTOR_CONFIRMATION` events that overlap with this time slot are
+   **automatically cancelled**.
+   - This applies to all events hosted by the same mentor, across **all of their
+     mentor programs**.
+3. **Overlaps**:
+   - Partial overlaps are blocked (event A: 14:00-15:00, event B: 14:30-15:30)
+   - Adjacent slots are allowed (event A ends at 15:00, event B starts at 15:00)
+   - Events completely inside another are blocked
+
+## Booking Constraints
+
+1. **Exact Slots Only**: Mentees can only book events within the specific time
+   slots provided by the `BookingCalendarEventsService`.
+2. **Validation**: The `CheckBookingSlotService` ensures that the requested
+   `start_date_time` and `end_date_time` exactly match a valid available slot
+   calculated from the mentor's schedule and the program's `session_duration`.
 
 ## Database Schema
 
 ### calendar_events
 
-| Column            | Type     | Description                      |
-| ----------------- | -------- | -------------------------------- |
-| id                | bigint   | Primary key                      |
-| title             | string   | Event title                      |
-| status            | string   | Event status (enum)              |
-| start_date_time   | datetime | Start time (UTC)                 |
-| end_date_time     | datetime | End time (UTC)                   |
-| date              | date     | Event date                       |
-| type              | string   | Event type (individual, group)   |
-| web_link          | string   | Meeting link (optional)          |
-| description       | text     | Event description (optional)     |
-| mentor_program_id | bigint   | FK to mentor_programs (nullable) |
-| mentor_session_id | bigint   | FK to mentor_sessions (nullable) |
+| Column            | Type      | Description                      |
+| ----------------- | --------- | -------------------------------- |
+| id                | bigint    | Primary key                      |
+| title             | string    | Event title                      |
+| status            | string    | Event status (enum)              |
+| start_date_time   | datetime  | Start time (UTC)                 |
+| end_date_time     | datetime  | End time (UTC)                   |
+| date              | date      | Event date                       |
+| type              | string    | Event type (individual, group)   |
+| session_type      | string    | Meeting type (online, offline)   |
+| web_link          | string    | Meeting link (optional)          |
+| description       | text      | Event description (optional)     |
+| mentor_program_id | bigint    | FK to mentor_programs (nullable) |
+| mentor_session_id | bigint    | FK to mentor_sessions (nullable) |
+| created_at        | timestamp | —                                |
+| updated_at        | timestamp | —                                |
 
 ### calendar_event_user (pivot)
 
-| Column            | Type     | Description                           |
-| ----------------- | -------- | ------------------------------------- |
-| calendar_event_id | bigint   | FK to calendar_events                 |
-| user_id           | bigint   | FK to users                           |
-| role              | string   | User's role (Host, Participant, etc.) |
-| colour            | string   | Display colour                        |
-| confirmed_at      | datetime | When user confirmed                   |
+| Column            | Type      | Description                           |
+| ----------------- | --------- | ------------------------------------- |
+| id                | bigint    | Primary key                           |
+| calendar_event_id | bigint    | FK to calendar_events                 |
+| user_id           | bigint    | FK to users                           |
+| role              | string    | User's role (Host, Participant, etc.) |
+| colour            | string    | Display colour                        |
+| confirmed_at      | datetime  | When user confirmed                   |
+| created_at        | timestamp | —                                     |
+| updated_at        | timestamp | —                                     |
 
 ### user_schedules
 
-| Column       | Type   | Description               |
-| ------------ | ------ | ------------------------- |
-| user_id      | bigint | FK to users               |
-| day_of_week  | int    | 1-7 (Monday-Sunday)       |
-| start_time   | time   | Working hours start       |
-| end_time     | time   | Working hours end         |
-| type         | string | WORKING_DAY or DAY_OFF    |
-| day_off_date | date   | Specific date for day off |
+| Column       | Type      | Description               |
+| ------------ | --------- | ------------------------- |
+| id           | bigint    | Primary key               |
+| user_id      | bigint    | FK to users               |
+| day_of_week  | int       | 1-7 (Monday-Sunday)       |
+| start_time   | time      | Working hours start       |
+| end_time     | time      | Working hours end         |
+| type         | string    | WORKING_DAY or DAY_OFF    |
+| day_off_date | date      | Specific date for day off |
+| created_at   | timestamp | —                         |
+| updated_at   | timestamp | —                         |
+
+### mentor_programs
+
+| Column               | Type      | Description                            |
+| -------------------- | --------- | -------------------------------------- |
+| id                   | bigint    | Primary key                            |
+| mentor_id            | bigint    | FK to users                            |
+| name                 | string    | Program name                           |
+| slug                 | text      | SEO slug                               |
+| is_main              | boolean   | Whether it's the main program          |
+| description          | text      | Program description                    |
+| cost                 | decimal   | Program cost                           |
+| currency_id          | bigint    | FK to currencies                       |
+| start_time           | datetime  | Start of program period (optional)     |
+| end_time             | datetime  | End of program period (optional)       |
+| session_duration     | integer   | Duration in minutes (default 60)       |
+| session_type_options | json      | Available meeting types                |
+| need_confirmation    | boolean   | Whether mentor must confirm booking    |
+| created_at           | timestamp | —                                      |
+| updated_at           | timestamp | —                                      |
+
+### user_profiles
+
+| Column                   | Type      | Description                           |
+| ------------------------ | --------- | ------------------------------------- |
+| id                       | bigint    | Primary key                           |
+| user_id                  | bigint    | FK to users                           |
+| name                     | string    | First name                            |
+| last_name                | string    | Last name                             |
+| timezone                 | string    | User's timezone (e.g. UTC)            |
+| minimum_pre_booking_time | integer   | Minutes before booking (default 0)    |
+| created_at               | timestamp | —                                     |
+| updated_at               | timestamp | —                                     |
 
 ## External Calendar Integrations
 
@@ -229,6 +310,74 @@ CALENDAR_ENCRYPTION_KEY_PREVIOUS=   # leave empty on first setup
 `KEY1` encrypts new data. `CALENDAR_ENCRYPTION_KEY_PREVIOUS` is only used when
 rotating keys — populate it with the old `KEY1` value during rotation, then
 re-encrypt all stored credentials before clearing it.
+
+---
+
+### OAuth Authentication Flow (Google / Outlook)
+
+The following describes what happens end-to-end when a user connects an
+external calendar account.
+
+#### Phase 1 — User initiates connection
+
+1. User opens **Settings → External Calendars** and clicks **Connect**.
+2. `ExternalCalendarConnectRedirect` fires. If the provider requires per-user
+   credentials, `client_id` and `client_secret` are read from the form.
+3. `saveCredentials()` creates a `UserCalendarIntegration` row and persists the
+   credentials encrypted at rest via `CalendarCredentialEncrypter`
+   (see [Credential Encryption](#credential-encryption)).
+4. An OAuth `state` token is built — Laravel's own `encrypt()` wraps a JSON
+   payload of `{user_id, provider}` to prevent CSRF.
+5. The user's session also stores `calendar_oauth_pending` as a fallback for
+   providers that do not return `state` in the callback.
+6. The browser is redirected to the provider's OAuth consent screen via
+   `Inertia::location($oauthUrl)`.
+
+#### Phase 2 — Provider callback
+
+7. After the user grants permission the provider redirects back to
+   `/settings/external-calendar/callback/{provider}?code=xxx&state=yyy`.
+8. `ExternalCalendarConnectCallback` resolves the `state` parameter back to a
+   `User` + `CalendarProviderEnum` (falls back to session if `state` is absent).
+9. The `code` is exchanged for tokens via a server-side POST to the provider's
+   token endpoint. The response contains `access_token`, `refresh_token`, and
+   `expires_in`.
+10. Tokens are written back to the `UserCalendarIntegration` row. The
+    `EncryptedCalendarCredential` cast encrypts each value transparently before
+    it reaches the database:
+
+```
+plaintext token
+  → random IV (12 bytes)
+  → AES-256-GCM encrypt  →  ciphertext + authentication tag
+  → base64(iv):base64(tag):base64(ciphertext)
+  → stored in TEXT column
+```
+
+#### Phase 3 — Ongoing API usage
+
+11. Every subsequent API call (fetch calendars, create/update/delete events)
+    reads the token column. The cast decrypts transparently:
+
+```
+base64(iv):base64(tag):base64(ciphertext)
+  → split on ':'
+  → openssl_decrypt with stored iv + tag  →  plaintext token
+  → Authorization: Bearer <token>
+```
+
+12. If the `access_token` is expired, `refreshTokenIfExpired()` uses the
+    decrypted `refresh_token` to obtain a new one from the provider and
+    re-encrypts it back to the database.
+
+#### What is stored where
+
+| Data | Location | Encrypted |
+|---|---|---|
+| `access_token` | `user_calendar_integrations.access_token` (TEXT) | Yes — AES-256-GCM |
+| `refresh_token` | `user_calendar_integrations.refresh_token` (TEXT) | Yes — AES-256-GCM |
+| `client_id` / `client_secret` (per-user flow) | same table | Yes — AES-256-GCM |
+| Encryption key | `.env` / server environment only | — never in DB |
 
 ---
 

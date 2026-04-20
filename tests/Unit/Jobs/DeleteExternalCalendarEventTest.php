@@ -15,6 +15,7 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\ExternalCalendarServiceFactory;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
@@ -60,9 +61,10 @@ describe('DeleteExternalCalendarEvent job', function (): void {
                 'ext-event-456',
             );
 
-        app()->instance($this->integration->provider->getService(), $service);
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+        $factory->shouldReceive('for')->once()->with($this->integration->provider)->andReturn($service);
 
-        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
+        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle($factory);
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
@@ -71,9 +73,10 @@ describe('DeleteExternalCalendarEvent job', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
         $service->shouldReceive('deleteEvent')->once();
 
-        app()->instance($this->integration->provider->getService(), $service);
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+        $factory->shouldReceive('for')->once()->with($this->integration->provider)->andReturn($service);
 
-        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
+        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle($factory);
 
         $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
             'calendar_event_id' => $this->event->getKey(),
@@ -83,14 +86,8 @@ describe('DeleteExternalCalendarEvent job', function (): void {
     });
 
     it('creates an error ExternalCalendarEventLog when delete fails', function (): void {
-        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldReceive('deleteEvent')
-            ->once()
-            ->andThrow(new RuntimeException('API rate limit exceeded'));
-
-        app()->instance($this->integration->provider->getService(), $service);
-
-        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)->handle();
+        new DeleteExternalCalendarEvent($this->externalEvent, $this->integration)
+            ->failed(new RuntimeException('API rate limit exceeded'));
 
         $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
             'external_calendar_event_id' => $this->externalEvent->getKey(),
@@ -102,13 +99,17 @@ describe('DeleteExternalCalendarEvent job', function (): void {
     });
 
     it('deletes the ExternalCalendarEvent record when integration is null', function (): void {
-        new DeleteExternalCalendarEvent($this->externalEvent, null)->handle();
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+
+        new DeleteExternalCalendarEvent($this->externalEvent, null)->handle($factory);
 
         expect(ExternalCalendarEvent::query()->find($this->externalEvent->getKey()))->toBeNull();
     });
 
     it('creates an info ExternalCalendarEventLog when integration is null', function (): void {
-        new DeleteExternalCalendarEvent($this->externalEvent, null)->handle();
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+
+        new DeleteExternalCalendarEvent($this->externalEvent, null)->handle($factory);
 
         $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
             'calendar_event_id' => $this->event->getKey(),

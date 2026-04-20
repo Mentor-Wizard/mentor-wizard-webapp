@@ -10,7 +10,6 @@ use App\Http\Requests\Calendar\ExternalCalendarConnectCallbackRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use App\Traits\ExternalCalendar\HandlesCalendarIntegrationCleanup;
-use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -39,8 +38,8 @@ class ExternalCalendarConnectCallback
 
         try {
             $this->synchronizationService->handleCallback($state->user, $state->enum, (string) $request->query('code'));
-        } catch (Exception $exception) {
-            Log::error('Calendar authorization failed.'.$exception->getMessage());
+        } catch (Throwable $throwable) {
+            Log::error('Calendar authorization failed.'.$throwable->getMessage());
 
             return $this->handleError($state, 'Failed to complete calendar authorization. Please try again.');
         }

@@ -10,7 +10,7 @@ use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\UserCalendarIntegration;
-use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\ExternalCalendarServiceFactory;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -25,7 +25,7 @@ class CreateExternalCalendarEvent implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public int $tries = 3;
+    public int $tries = 2;
 
     public int $backoff = 60;
 
@@ -34,54 +34,54 @@ class CreateExternalCalendarEvent implements ShouldQueue
         public readonly UserCalendarIntegration $integration,
     ) {}
 
-    public function handle(): void
+    public function handle(ExternalCalendarServiceFactory $factory): void
     {
-        try {
-            /** @var ExternalCalendarServiceInterface $service */
-            $service = resolve($this->integration->provider->getService());
+        $service = $factory->for($this->integration->provider);
 
-            $externalEventId = $service->createEvent($this->calendarEvent, $this->integration);
+        $externalEventId = $service->createEvent($this->calendarEvent, $this->integration);
 
-            $externalEvent = ExternalCalendarEvent::query()->updateOrCreate(
-                [
-                    'calendar_event_id' => $this->calendarEvent->getKey(),
-                    'user_id'           => $this->integration->user_id,
-                    'provider'          => $this->integration->provider,
-                ],
-                [
-                    'external_event_id' => $externalEventId,
-                    'sync_status'       => ExternalCalendarEventSyncStatusEnum::Synced,
-                ]
-            );
+        $externalEvent = ExternalCalendarEvent::query()->updateOrCreate(
+            [
+                'calendar_event_id' => $this->calendarEvent->getKey(),
+                'user_id'           => $this->integration->user_id,
+                'provider'          => $this->integration->provider,
+            ],
+            [
+                'external_event_id' => $externalEventId,
+                'sync_status'       => ExternalCalendarEventSyncStatusEnum::Synced,
+            ]
+        );
 
-            ExternalCalendarEventLog::query()->create([
-                'external_calendar_event_id' => $externalEvent->getKey(),
-                'calendar_event_id'          => $this->calendarEvent->getKey(),
-                'user_id'                    => $this->integration->user_id,
-                'provider'                   => $this->integration->provider,
-                'type'                       => ExternalCalendarEventLogTypeEnum::Success,
-                'message'                    => sprintf('Event successfully created in %s.', $this->integration->provider->value),
-            ]);
-        } catch (Throwable $throwable) {
-            $externalEvent = ExternalCalendarEvent::query()->updateOrCreate(
-                [
-                    'calendar_event_id' => $this->calendarEvent->getKey(),
-                    'user_id'           => $this->integration->user_id,
-                    'provider'          => $this->integration->provider,
-                ],
-                [
-                    'sync_status' => ExternalCalendarEventSyncStatusEnum::Error,
-                ]
-            );
+        ExternalCalendarEventLog::query()->create([
+            'external_calendar_event_id' => $externalEvent->getKey(),
+            'calendar_event_id'          => $this->calendarEvent->getKey(),
+            'user_id'                    => $this->integration->user_id,
+            'provider'                   => $this->integration->provider,
+            'type'                       => ExternalCalendarEventLogTypeEnum::Success,
+            'message'                    => sprintf('Event successfully created in %s.', $this->integration->provider->value),
+        ]);
+    }
 
-            ExternalCalendarEventLog::query()->create([
-                'external_calendar_event_id' => $externalEvent->getKey(),
-                'calendar_event_id'          => $this->calendarEvent->getKey(),
-                'user_id'                    => $this->integration->user_id,
-                'provider'                   => $this->integration->provider,
-                'type'                       => ExternalCalendarEventLogTypeEnum::Error,
-                'message'                    => $throwable->getMessage(),
-            ]);
-        }
+    public function failed(Throwable $throwable): void
+    {
+        $externalEvent = ExternalCalendarEvent::query()->updateOrCreate(
+            [
+                'calendar_event_id' => $this->calendarEvent->getKey(),
+                'user_id'           => $this->integration->user_id,
+                'provider'          => $this->integration->provider,
+            ],
+            [
+                'sync_status' => ExternalCalendarEventSyncStatusEnum::Error,
+            ]
+        );
+
+        ExternalCalendarEventLog::query()->create([
+            'external_calendar_event_id' => $externalEvent->getKey(),
+            'calendar_event_id'          => $this->calendarEvent->getKey(),
+            'user_id'                    => $this->integration->user_id,
+            'provider'                   => $this->integration->provider,
+            'type'                       => ExternalCalendarEventLogTypeEnum::Error,
+            'message'                    => $throwable->getMessage(),
+        ]);
     }
 }

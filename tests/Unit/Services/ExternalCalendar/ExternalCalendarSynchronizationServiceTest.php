@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarProviderEnum;
+use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
 use App\Services\ExternalCalendar\Contracts\OAuthCalendarServiceInterface;
+use App\Services\ExternalCalendar\ExternalCalendarServiceFactory;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -17,7 +19,8 @@ describe('ExternalCalendarSynchronizationService', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
-        $this->service = new ExternalCalendarSynchronizationService;
+        $this->factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+        $this->service = new ExternalCalendarSynchronizationService($this->factory);
     });
 
     describe('saveCredentialsAndBuildOAuthUrl', function (): void {
@@ -35,7 +38,10 @@ describe('ExternalCalendarSynchronizationService', function (): void {
                 ->with('client-id', Mockery::type('string'))
                 ->andReturn('https://accounts.google.com/o/oauth2/auth?state=encrypted');
 
-            app()->instance(CalendarProviderEnum::GooglePersonalApp->getService(), $mockService);
+            $this->factory->shouldReceive('for')
+                ->once()
+                ->with(CalendarProviderEnum::GooglePersonalApp)
+                ->andReturn($mockService);
 
             $url = $this->service->saveCredentialsAndBuildOAuthUrl(
                 $this->user,
@@ -59,7 +65,10 @@ describe('ExternalCalendarSynchronizationService', function (): void {
                     'app-password',
                 );
 
-            app()->instance(CalendarProviderEnum::Apple->getService(), $mockService);
+            $this->factory->shouldReceive('for')
+                ->once()
+                ->with(CalendarProviderEnum::Apple)
+                ->andReturn($mockService);
 
             $this->service->saveCredentials(
                 $this->user,
@@ -86,7 +95,10 @@ describe('ExternalCalendarSynchronizationService', function (): void {
                 )
                 ->andReturn($integration);
 
-            app()->instance(CalendarProviderEnum::Google->getService(), $mockService);
+            $this->factory->shouldReceive('for')
+                ->once()
+                ->with(CalendarProviderEnum::Google)
+                ->andReturn($mockService);
 
             $result = $this->service->handleCallback(
                 $this->user,
@@ -117,7 +129,10 @@ describe('ExternalCalendarSynchronizationService', function (): void {
                     'error' => null,
                 ]);
 
-            app()->instance(CalendarProviderEnum::Google->getService(), $mockService);
+            $this->factory->shouldReceive('for')
+                ->once()
+                ->with(CalendarProviderEnum::Google)
+                ->andReturn($mockService);
 
             $result = $this->service->fetchCalendars($this->user, CalendarProviderEnum::Google);
 
@@ -148,7 +163,10 @@ describe('ExternalCalendarSynchronizationService', function (): void {
                 )
                 ->andReturn($integration);
 
-            app()->instance(CalendarProviderEnum::Google->getService(), $mockService);
+            $this->factory->shouldReceive('for')
+                ->once()
+                ->with(CalendarProviderEnum::Google)
+                ->andReturn($mockService);
 
             $result = $this->service->selectCalendar(
                 $this->user,
@@ -207,6 +225,36 @@ describe('ExternalCalendarSynchronizationService', function (): void {
 
             expect(UserCalendarIntegration::query()->find($myIntegration->getKey()))->toBeNull()
                 ->and(UserCalendarIntegration::query()->find($otherIntegration->getKey()))->not->toBeNull();
+        });
+
+        it('deletes ExternalCalendarEvent rows for the disconnected provider', function (): void {
+            UserCalendarIntegration::factory()->create([
+                'user_id'  => $this->user->getKey(),
+                'provider' => CalendarProviderEnum::Google,
+            ]);
+
+            $externalEvent = ExternalCalendarEvent::factory()->google()->create([
+                'user_id' => $this->user->getKey(),
+            ]);
+
+            $this->service->disconnect($this->user, CalendarProviderEnum::Google);
+
+            expect(ExternalCalendarEvent::query()->find($externalEvent->getKey()))->toBeNull();
+        });
+
+        it('does not delete ExternalCalendarEvent rows for other providers on disconnect', function (): void {
+            UserCalendarIntegration::factory()->create([
+                'user_id'  => $this->user->getKey(),
+                'provider' => CalendarProviderEnum::Google,
+            ]);
+
+            $outlookEvent = ExternalCalendarEvent::factory()->outlook()->create([
+                'user_id' => $this->user->getKey(),
+            ]);
+
+            $this->service->disconnect($this->user, CalendarProviderEnum::Google);
+
+            expect(ExternalCalendarEvent::query()->find($outlookEvent->getKey()))->not->toBeNull();
         });
     });
 });

@@ -6,6 +6,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionDurationOptionsEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\Calendar\StoreCalendarEventRequest;
@@ -975,6 +976,64 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
                 }
             }
         }
+    });
+
+    it('accepts null selectedDuration', function (): void {
+        $payload = [
+            'title'             => 'Test Event',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+            'selectedDuration'  => null,
+        ];
+
+        $validator = Validator::make($payload, (new StoreCalendarEventRequest)->rules());
+
+        expect($validator->passes())->toBeTrue();
+    });
+
+    it('accepts a valid enum value for selectedDuration', function (): void {
+        $payload = [
+            'title'             => 'Test Event',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+            'selectedDuration'  => MentorSessionDurationOptionsEnum::HOUR->value,
+        ];
+
+        $validator = Validator::make($payload, (new StoreCalendarEventRequest)->rules());
+
+        expect($validator->passes())->toBeTrue();
+    });
+
+    it('rejects selectedDuration that is not a valid enum value', function (): void {
+        $payload = [
+            'title'             => 'Test Event',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+            'selectedDuration'  => 17,
+        ];
+
+        $validator = Validator::make($payload, (new StoreCalendarEventRequest)->rules());
+
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('selectedDuration'))->toBeTrue();
     });
 
 });

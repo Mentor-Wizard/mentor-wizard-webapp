@@ -32,7 +32,7 @@ class CalendarEventObserver
     public function updated(CalendarEvent $event): void
     {
         if ($event->wasChanged('status')) {
-            (new CreateMentorSessionForCalendarEvent)->handle($event);
+            CreateMentorSessionForCalendarEvent::run($event);
 
             if ($event->status === CalendarEventStatusEnum::CONFIRMED) {
                 dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event));

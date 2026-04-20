@@ -101,7 +101,7 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
         ->name('pages.calendar.edit');
     Route::patch('mentor-programs/{mentorProgram:id}/calendar-events/{calendarEvent:id}/confirm',
         ConfirmCalendarEvent::class)
-        ->can('update', 'calendarEvent')
+        ->can('confirm', 'calendarEvent')
         ->name('calendar.confirm.booking');
     Route::delete('calendar-event/delete/{calendarEvent}', DeleteCalendarEvent::class)
         ->can('delete', 'calendarEvent')
@@ -124,21 +124,29 @@ Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->g
     Route::get('/', ExternalCalendarSettingsPage::class)
         ->name('pages.settings.external-calendar');
     Route::post('connect/{provider}', ExternalCalendarConnectRedirect::class)
+        ->middleware('throttle:calendar-connect')
         ->name('external-calendar.connect.redirect');
     Route::post('connect-direct/{provider}', ExternalCalendarConnectDirect::class)
+        ->middleware('throttle:calendar-connect')
         ->name('external-calendar.connect.direct');
     Route::post('select/{provider}', ExternalCalendarSelectCalendar::class)
+        ->middleware('throttle:calendar-connect')
         ->name('external-calendar.select');
     Route::delete('disconnect/{provider}', ExternalCalendarDisconnect::class)
+        ->middleware('throttle:calendar-connect')
         ->name('external-calendar.disconnect');
     Route::post('retry/{provider}', ExternalCalendarRetrySync::class)
+        ->middleware('throttle:calendar-retry')
         ->name('external-calendar.retry');
     Route::post('sync-event/{calendarEvent}/{provider}', ExternalCalendarSyncSingleEvent::class)
+        ->middleware('throttle:calendar-sync')
         ->name('external-calendar.sync-event');
     Route::post('rerun/{calendarEvent:id}/{externalCalendarEvent:id}', RerunExternalCalendarEventSync::class)
+        ->middleware('throttle:calendar-retry')
         ->name('external-calendar.rerun')
         ->withoutScopedBindings();
     Route::post('sync-integration/{calendarEvent:id}/{integration:id}', SyncCalendarEventToIntegration::class)
+        ->middleware('throttle:calendar-sync')
         ->name('external-calendar.sync-integration')
         ->withoutScopedBindings();
     Route::patch('log/{log:id}/acknowledge', AcknowledgeExternalCalendarEventLog::class)

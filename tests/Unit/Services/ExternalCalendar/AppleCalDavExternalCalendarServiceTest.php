@@ -132,6 +132,30 @@ describe('AppleCalDavExternalCalendarService', function (): void {
                 ->and($result['calendars'][0]['name'])->toBe('My Calendar');
         });
 
+        it('discovers the calendar home when well-known returns a 301 redirect', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'   => $this->user->getKey(),
+                'provider'  => CalendarProviderEnum::Apple,
+                'client_id' => 'user@icloud.com',
+            ]);
+
+            // .well-known/caldav redirects to the CalDAV root.
+            // More-specific patterns (principals/*, calendars/*) take priority over the generic wildcard.
+            Http::fake([
+                'https://caldav.icloud.com/.well-known/caldav'  => Http::response('', 301, ['Location' => 'https://caldav.icloud.com/']),
+                'https://caldav.icloud.com/principals/*'        => Http::response(appleCalendarHomeXml(), 207),
+                'https://caldav.icloud.com/calendars/*'         => Http::response(appleCalendarListXml(), 207),
+                'https://caldav.icloud.com/*'                   => Http::response(applePrincipalXml(), 207),
+            ]);
+
+            $result = $this->service->fetchCalendars($integration);
+
+            expect($result['success'])->toBeTrue()
+                ->and($result['error'])->toBeNull()
+                ->and($result['calendars'])->not->toBeEmpty()
+                ->and($result['calendars'][0]['name'])->toBe('My Calendar');
+        });
+
         it('returns an error when the well-known PROPFIND fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),

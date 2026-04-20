@@ -8,25 +8,29 @@ use RuntimeException;
 
 class CalendarCredentialEncrypter
 {
-    private const string CIPHER = 'aes-256-cbc';
+    private const string CIPHER = 'aes-256-gcm';
 
-    private const int IV_BYTES = 16;
+    private const int IV_BYTES = 12;
+
+    private const int TAG_BYTES = 16;
 
     /**
      * Encrypts a value with the current key.
-     * Payload format: base64(iv) . ':' . base64(ciphertext)
+     * Payload format: base64(iv) . ':' . base64(tag) . ':' . base64(ciphertext)
      */
     public function encrypt(string $value): string
     {
         $key = $this->getCurrentKey();
         $iv = random_bytes(self::IV_BYTES);
+        $tag = '';
 
-        $encrypted = openssl_encrypt($value, self::CIPHER, $key, OPENSSL_RAW_DATA, $iv);
+        $encrypted = openssl_encrypt($value, self::CIPHER, $key,
+            OPENSSL_RAW_DATA, $iv, $tag, '', self::TAG_BYTES);
 
         throw_if($encrypted === false,
             RuntimeException::class, 'Calendar credential encryption failed.');
 
-        return base64_encode($iv).':'.base64_encode($encrypted);
+        return base64_encode($iv).':'.base64_encode($tag).':'.base64_encode($encrypted);
     }
 
     /**
@@ -47,20 +51,21 @@ class CalendarCredentialEncrypter
 
     private function attemptDecrypt(string $payload, string $key): ?string
     {
-        $parts = explode(':', $payload, 2);
+        $parts = explode(':', $payload, 3);
 
-        if (count($parts) !== 2) {
+        if (count($parts) !== 3) {
             return null;
         }
 
         $iv = base64_decode($parts[0], strict: true);
-        $ciphertext = base64_decode($parts[1], strict: true);
+        $tag = base64_decode($parts[1], strict: true);
+        $ciphertext = base64_decode($parts[2], strict: true);
 
-        if ($iv === false || $ciphertext === false) {
+        if ($iv === false || $tag === false || $ciphertext === false) {
             return null;
         }
 
-        $decrypted = openssl_decrypt($ciphertext, self::CIPHER, $key, OPENSSL_RAW_DATA, $iv);
+        $decrypted = openssl_decrypt($ciphertext, self::CIPHER, $key, OPENSSL_RAW_DATA, $iv, $tag);
 
         return $decrypted === false ? null : $decrypted;
     }

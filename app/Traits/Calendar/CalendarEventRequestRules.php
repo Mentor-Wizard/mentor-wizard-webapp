@@ -6,6 +6,7 @@ namespace App\Traits\Calendar;
 
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionDurationOptionsEnum;
 use App\Enums\MentorSessionTypeEnum;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\In;
@@ -30,7 +31,7 @@ trait CalendarEventRequestRules
             'type'                  => ['required', Rule::in(CalendarEventTypeEnum::values())],
             'session_type'          => ['required', Rule::in(MentorSessionTypeEnum::values())],
             'mentor_program_id'     => ['required', 'integer', 'exists:mentor_programs,id'],
-            'selectedDuration'      => ['nullable', 'integer', 'min:1'],
+            'selectedDuration'      => ['nullable', 'integer', Rule::in(MentorSessionDurationOptionsEnum::values())],
         ];
     }
 

@@ -58,7 +58,9 @@ abstract class AbstractGoogleExternalCalendarService implements OAuthCalendarSer
         $integration = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
             ->where('provider', $this->provider())
-            ->firstOrFail();
+            ->first();
+
+        throw_if($integration === null, RuntimeException::class, 'Calendar integration not found. Please start the connection process again.');
 
         $response = Http::asForm()->post(self::TOKEN_URL, [
             'code'          => $code,
@@ -67,6 +69,11 @@ abstract class AbstractGoogleExternalCalendarService implements OAuthCalendarSer
             'redirect_uri'  => $this->callbackUrl(),
             'grant_type'    => 'authorization_code',
         ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('Google Calendar token exchange failed: '.($response->json('error_description')
+                ?? $response->json('error') ?? 'Unknown error'));
+        }
 
         $data = $response->json();
 
@@ -87,7 +94,9 @@ abstract class AbstractGoogleExternalCalendarService implements OAuthCalendarSer
         $integration = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
             ->where('provider', $this->provider())
-            ->firstOrFail();
+            ->first();
+
+        throw_if($integration === null, RuntimeException::class, 'Calendar integration not found. Please start the connection process again.');
 
         $integration->update([
             'calendar_id'        => $calendarId,

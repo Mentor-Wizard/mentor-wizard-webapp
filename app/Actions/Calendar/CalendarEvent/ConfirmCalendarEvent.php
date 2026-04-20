@@ -10,6 +10,7 @@ use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Notifications\CalendarEventConfirmedNotification;
 use Date;
+use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,8 +18,12 @@ class ConfirmCalendarEvent
 {
     use AsController;
 
-    public function handle(MentorProgram $mentorProgram, CalendarEvent $calendarEvent): Response
+    public function handle(Request $request): Response
     {
+        $mentorProgram = $request->route('mentorProgram');
+        $calendarEvent = $request->route('calendarEvent');
+        assert($mentorProgram instanceof MentorProgram);
+        assert($calendarEvent instanceof CalendarEvent);
 
         if ($calendarEvent->start_date_time->lessThan(Date::now())) {
             return to_route('pages.calendar.pending')
@@ -26,7 +31,7 @@ class ConfirmCalendarEvent
         }
 
         if ($mentorProgram->mentor->calendarEvents()
-            ->whereNotIn('calendar_event_id', [$calendarEvent->id])
+            ->whereNotIn('calendar_event_id', [$calendarEvent->getKey()])
             ->where('status', CalendarEventStatusEnum::CONFIRMED->value)
             ->where('start_date_time', '<', $calendarEvent->end_date_time)
             ->where('end_date_time', '>', $calendarEvent->start_date_time)
@@ -37,7 +42,7 @@ class ConfirmCalendarEvent
                 ->with('error', 'There are another confirmed event in this time slot.');
         }
 
-        $this->fillConfirmationDates($calendarEvent);
+        $this->fillConfirmationDates($request, $calendarEvent);
 
         if (! $calendarEvent->calendarEventUsers()
             ->wherePivotIn('role', [
@@ -60,10 +65,10 @@ class ConfirmCalendarEvent
 
     }
 
-    private function fillConfirmationDates(CalendarEvent $calendarEvent): void
+    private function fillConfirmationDates(Request $request, CalendarEvent $calendarEvent): void
     {
         $calendarEvent->calendarEventUsers()
-            ->updateExistingPivot(auth()->id(), [
+            ->updateExistingPivot($request->user()->getKey(), [
                 'confirmed_at' => now(),
             ]);
 

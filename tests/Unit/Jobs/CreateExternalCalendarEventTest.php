@@ -15,6 +15,7 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\ExternalCalendarServiceFactory;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 
@@ -53,18 +54,20 @@ describe('CreateExternalCalendarEvent job', function (): void {
             )
             ->andReturn('ext-created-id');
 
-        app()->instance($this->integration->provider->getService(), $service);
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+        $factory->shouldReceive('for')->once()->with($this->integration->provider)->andReturn($service);
 
-        new CreateExternalCalendarEvent($this->event, $this->integration)->handle();
+        new CreateExternalCalendarEvent($this->event, $this->integration)->handle($factory);
     });
 
     it('creates an ExternalCalendarEvent with Synced status on success', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
         $service->shouldReceive('createEvent')->once()->andReturn('ext-evt-synced');
 
-        app()->instance($this->integration->provider->getService(), $service);
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+        $factory->shouldReceive('for')->once()->with($this->integration->provider)->andReturn($service);
 
-        new CreateExternalCalendarEvent($this->event, $this->integration)->handle();
+        new CreateExternalCalendarEvent($this->event, $this->integration)->handle($factory);
 
         $this->assertDatabaseHas(ExternalCalendarEvent::class, [
             'calendar_event_id' => $this->event->getKey(),
@@ -78,9 +81,10 @@ describe('CreateExternalCalendarEvent job', function (): void {
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
         $service->shouldReceive('createEvent')->once()->andReturn('ext-evt-ok');
 
-        app()->instance($this->integration->provider->getService(), $service);
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+        $factory->shouldReceive('for')->once()->with($this->integration->provider)->andReturn($service);
 
-        new CreateExternalCalendarEvent($this->event, $this->integration)->handle();
+        new CreateExternalCalendarEvent($this->event, $this->integration)->handle($factory);
 
         $externalEvent = ExternalCalendarEvent::query()
             ->where('calendar_event_id', $this->event->getKey())
@@ -95,14 +99,8 @@ describe('CreateExternalCalendarEvent job', function (): void {
     });
 
     it('creates an ExternalCalendarEvent with Error status when service throws', function (): void {
-        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldReceive('createEvent')
-            ->once()
-            ->andThrow(new RuntimeException('Connection timeout'));
-
-        app()->instance($this->integration->provider->getService(), $service);
-
-        new CreateExternalCalendarEvent($this->event, $this->integration)->handle();
+        new CreateExternalCalendarEvent($this->event, $this->integration)
+            ->failed(new RuntimeException('Connection timeout'));
 
         $this->assertDatabaseHas(ExternalCalendarEvent::class, [
             'calendar_event_id' => $this->event->getKey(),
@@ -112,14 +110,8 @@ describe('CreateExternalCalendarEvent job', function (): void {
     });
 
     it('creates an Error log entry with the exception message when service throws', function (): void {
-        $service = Mockery::mock(ExternalCalendarServiceInterface::class);
-        $service->shouldReceive('createEvent')
-            ->once()
-            ->andThrow(new RuntimeException('API quota exceeded'));
-
-        app()->instance($this->integration->provider->getService(), $service);
-
-        new CreateExternalCalendarEvent($this->event, $this->integration)->handle();
+        new CreateExternalCalendarEvent($this->event, $this->integration)
+            ->failed(new RuntimeException('API quota exceeded'));
 
         $externalEvent = ExternalCalendarEvent::query()
             ->where('calendar_event_id', $this->event->getKey())
