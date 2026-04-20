@@ -25,7 +25,7 @@ Use `superpowers:writing-plans` skill for the implementation plan structure. Alw
 
 ## Core Skills
 
-Activate `superpowers:brainstorming` always (explore approaches first), `superpowers:writing-plans` for roadmaps, `laravel-architecture` for technical feasibility, `ddd-strategic-design` for domain boundaries.
+Activate `superpowers:brainstorming` always (explore approaches first), `superpowers:writing-plans` for roadmaps.
 
 ## MCP Tools
 

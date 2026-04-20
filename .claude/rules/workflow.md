@@ -1,5 +1,15 @@
 # Agent Workflow Orchestration
 
+## TL;DR — Which Pipeline to Use
+
+| Situation | Pipeline |
+|-----------|----------|
+| New feature / enhancement | [Standard Feature Pipeline](#standard-feature-pipeline) |
+| Bug investigation & fix | [Bug Fix Pipeline](#bug-fix-pipeline) |
+| Docker / CI/CD / infra changes | [CI/CD Pipeline](#cicd-pipeline) |
+
+---
+
 ## Your Role: ORCHESTRATOR ONLY
 
 **You are the orchestrator. You never write code, migrations, tests, or configs directly.**
@@ -35,7 +45,11 @@ If none apply (e.g. typo fix, config value) — skip the pipeline.
 - **Parallel phase** → TeamCreate + spawn teammates (2+ independent agents, no data dependency between them)
 - Do not create a team for a single agent
 
+---
+
 ## Standard Feature Pipeline
+
+> Use when: adding new functionality or modifying existing features (triggers above).
 
 ```
 ╔════════════════════════════════════╗
@@ -93,7 +107,11 @@ Wait for all 4 to complete, then collect reports.
 - All pass → proceed to phase 5
 - ANY 🔴 Critical or 🟡 Important → shutdown team → route findings to `developer` → re-run quality gate
 
+---
+
 ## Bug Fix Pipeline
+
+> Use when: investigating and fixing reported bugs or regressions.
 
 ```
 debugger → developer ══╗
@@ -114,10 +132,25 @@ debugger → developer ══╗
 
 Same resolution rule: Critical/Important → back to phase 2.
 
+---
+
 ## CI/CD Pipeline
 
-Replace `developer` with `devops` (covers both infra and GitHub Actions pipelines).
-Quality gate reduces to `reviewer` + `security-scanner` (no tester/qa for infra changes).
+> Use when: modifying Docker, GitHub Actions, deployment configs, or infrastructure.
+
+```
+devops ═══╗
+           ║
+╔══════════╩══════════════════╗
+║     Quality Gate Team        ║
+║  reviewer | security-scanner ║
+╚══════════════════════════════╝
+```
+
+| Phase | Mode | Agent(s) | Output |
+|-------|------|----------|--------|
+| 1. Implementation | sequential | `devops` | Infra/CI changes |
+| 2. Quality Gate | **team** `qg-{slug}` | `reviewer`, `security-scanner` | Parallel reports |
 
 ## Agent Quick Routing
 
