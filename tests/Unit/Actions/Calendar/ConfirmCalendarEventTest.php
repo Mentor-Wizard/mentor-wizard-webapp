@@ -8,6 +8,7 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
+use App\Http\Requests\Calendar\ConfirmCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 mutates(ConfirmCalendarEvent::class);
 
-function makeConfirmCalendarEventRequest(User $user, MentorProgram $mentorProgram, CalendarEvent $calendarEvent): Request
+function makeConfirmCalendarEventRequest(User $user, MentorProgram $mentorProgram, CalendarEvent $calendarEvent): ConfirmCalendarEventRequest
 {
     $request = new Request;
     $request->setRouteResolver(function () use ($mentorProgram, $calendarEvent): Route {
@@ -31,9 +32,11 @@ function makeConfirmCalendarEventRequest(User $user, MentorProgram $mentorProgra
 
         return $route;
     });
-    $request->setUserResolver(fn (?string $guard = null): User => $user);
 
-    return $request;
+    $formRequest = ConfirmCalendarEventRequest::createFromBase($request);
+    $formRequest->setUserResolver(fn (?string $guard = null): User => $user);
+
+    return $formRequest;
 }
 
 describe('ConfirmCalendarEvent (Unit)', function (): void {
@@ -87,14 +90,14 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $mentor->load('calendarEvents');
 
         $request = makeConfirmCalendarEventRequest($mentor, $mentorProgram, $calendarEvent);
-        new ConfirmCalendarEvent()->handle($request);
+        new ConfirmCalendarEvent()->handle($request, $mentorProgram, $calendarEvent);
 
         expect(session('error'))->not->toBe('There are another confirmed event in this time slot.');
     });
 
     it('confirms as host: updates pivot and sets event status to CONFIRMED', function (): void {
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        $response = new ConfirmCalendarEvent()->handle($request);
+        $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
@@ -109,7 +112,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
     it('confirms as mentee: only updates pivot and keeps status pending', function (): void {
         $request = makeConfirmCalendarEventRequest($this->mentee, $this->mentorProgram, $this->event);
-        $response = new ConfirmCalendarEvent()->handle($request);
+        $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'));
@@ -129,7 +132,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        $response = new ConfirmCalendarEvent()->handle($request);
+        $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
@@ -154,7 +157,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        $response = new ConfirmCalendarEvent()->handle($request);
+        $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
@@ -166,7 +169,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
     it('excludes current event from overlap check (whereNotIn with event ID)', function (): void {
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        $response = new ConfirmCalendarEvent()->handle($request);
+        $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
@@ -182,7 +185,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        $response = new ConfirmCalendarEvent()->handle($request);
+        $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
@@ -220,7 +223,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        new ConfirmCalendarEvent()->handle($request);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
         expect($overlapping1->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
@@ -242,7 +245,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        new ConfirmCalendarEvent()->handle($request);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
         expect($nonOverlapping->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
@@ -267,7 +270,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        new ConfirmCalendarEvent()->handle($request);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
         expect($overlappingOtherProgram->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
@@ -288,7 +291,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
-        new ConfirmCalendarEvent()->handle($request);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->and($alreadyCancelled->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
@@ -311,7 +314,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         ]);
 
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $newEvent);
-        $response = new ConfirmCalendarEvent()->handle($request);
+        $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $newEvent);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and(session('error'))->toBe('There are another confirmed event in this time slot.');
