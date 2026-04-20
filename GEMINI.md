@@ -121,10 +121,10 @@ docker compose exec app php artisan key:generate
 
 # Run migrations
 docker compose exec app php artisan migrate
-
-# Build frontend assets
-docker compose exec app yarn dev
 ```
+
+> Supervisord автоматично запускає Octane, queue worker та Vite dev server
+> всередині контейнера.
 
 #### Option 2: Local Development
 
