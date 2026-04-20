@@ -371,18 +371,17 @@ describe('ExcludeUserScheduleSchemeService', function (): void {
         // Event slot from 11:00 to 13:00 (fully within working hours)
         $eventsSlots = [
             [
-                'start' => $monday->copy()->setTime(11, 0, 0),
-                'end'   => $monday->copy()->setTime(13, 0, 0),
+                'start' => $monday->copy()->setTime(11, 0),
+                'end'   => $monday->copy()->setTime(13, 0),
             ],
         ];
 
         $result = new ExcludeUserScheduleSchemeService($user, $eventsSlots, $tz);
         $slots = $result->getAvailableSlots();
 
-        expect($slots)->toBeArray()->toHaveCount(1);
-
         // Slot should remain unchanged (11:00-13:00)
-        expect($slots[0]['start']->format('H:i'))->toBe('11:00')
+        expect($slots)->toBeArray()->toHaveCount(1)
+            ->and($slots[0]['start']->format('H:i'))->toBe('11:00')
             ->and($slots[0]['end']->format('H:i'))->toBe('13:00');
     });
 

@@ -1,0 +1,43 @@
+#ddev-generated
+webserver_type: generic
+web_extra_daemons:
+  - name: "frankenphp"
+    command: "php artisan octane:frankenphp --host=0.0.0.0 --port=80 --watch -q"
+    directory: /var/www/html
+web_extra_exposed_ports:
+  - name: "frankenphp"
+    container_port: 80
+    http_port: 80
+    https_port: 443
+# See https://pkg.henderkes.com/84/php-zts/packages?type=debian
+webimage_extra_packages:
+  - frankenphp
+  - php-zts-apcu
+  - php-zts-bcmath
+  - php-zts-bz2
+  - php-zts-cli
+  - php-zts-ffi
+  - php-zts-ftp
+  - php-zts-gd
+  - php-zts-gettext
+  - php-zts-imagick
+  - php-zts-intl
+  - php-zts-ldap
+  - php-zts-memcached
+  - php-zts-mysqli
+  - php-zts-pdo-mysql
+  - php-zts-pdo-pgsql
+  - php-zts-pdo-sqlite
+  - php-zts-pgsql
+  - php-zts-redis
+  - php-zts-shmop
+  - php-zts-soap
+  - php-zts-sqlite3
+  - php-zts-sysvmsg
+  - php-zts-sysvsem
+  - php-zts-sysvshm
+  - php-zts-xdebug
+  - php-zts-xhprof
+  - php-zts-xsl
+  - php-zts-yaml
+  - php-zts-zip
