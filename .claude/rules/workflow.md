@@ -16,22 +16,66 @@
 Every implementation task is delegated to specialized agents via the pipeline below.
 Violation of this rule means the pipeline has failed.
 
+## Orchestrator Tool Policy (HARD LIMITS)
+
+The orchestrator may use ONLY these tools directly:
+- `Agent`, `TeamCreate`, `TeamDelete`, `SendMessage` — dispatch & coordination
+- `AskUserQuestion` — clarify ambiguous requirements
+- `TaskCreate`/`TaskUpdate` — track pipeline progress
+- `Read` — ONLY for @.claude/** config files, plan files, agent reports
+- `Write`/`Edit` — ONLY for plan files in @./docs/plans/
+
+FORBIDDEN for the orchestrator (delegate to agents instead):
+- `Read`/`Grep`/`Glob` on project code (`app/`, `resources/`, `tests/`, `database/`, `routes/`, `config/`)
+- `Bash` for anything beyond `gh` status checks and `git status`/`git log`
+- `Edit`/`Write` on any project file
+
+If you find yourself opening `app/Actions/...` or grepping `resources/js/...` — STOP.
+That work belongs to `ba` (requirements), `developer` (implementation), `debugger` (diagnosis),
+or `Explore` subagent (codebase research). Dispatch first, read agent reports instead.
+
+## First Action: Triage (MANDATORY)
+
+Your first action on ANY user request is classification, not exploration.
+Read ONLY the user's message. Do NOT open project files.
+
+Decision tree:
+1. Trivial? (typo, single config value, obvious one-liner ≤2 files of config) → handle directly.
+2. Bug report? → `debugger` pipeline.
+3. Infra/CI/Docker? → `devops` pipeline.
+4. Feature / code change / "add X" / "change Y"? → feature pipeline, start with `ba`.
+5. Requirements ambiguous? → ONE round of `AskUserQuestion`, then pipeline.
+6. Pure research question ("how does X work in this codebase?") → dispatch `Explore` subagent.
+
+You are NOT allowed to:
+- "Just quickly check" a file before dispatching.
+- Do "a bit of exploration to understand the task".
+- Read `app/`, `resources/`, `database/`, `tests/`, `routes/`, `config/` before an agent has run.
+
+If you feel the urge to look at code — that's the signal to dispatch `ba` or `Explore`.
+
 ## First Action on Every Task
 
-Before doing anything else, evaluate the pipeline trigger conditions below.
-If ANY condition matches → start the pipeline immediately, do not ask for approval first.
-If NONE match → handle directly (typo fix, config value, etc.).
+STOP. Classify the request using the table below before any tool use.
 
-## Pipeline Trigger: REQUIRED When ANY Applies
+## Pipeline Trigger — YES / NO
 
-- Creates or modifies a Laravel Action class
-- Requires a database migration
-- Adds or changes a route, controller, or Form Request
-- Adds or changes a Vue component or Inertia page
-- Involves authorization logic (Policy, Gate, middleware)
-- Touches more than 2 files
+| Request characteristic | Pipeline? |
+|---|---|
+| Creates/modifies any `.php` file in `app/` | **YES** |
+| Creates/modifies any `.vue` file or Inertia page | **YES** |
+| Adds/changes migration, route, Policy, Gate, Form Request | **YES** |
+| Bug investigation + fix | **YES** |
+| Touches >2 files of any kind | **YES** |
+| Single-line typo or comment fix | NO |
+| Single config value (`.env`, one key in `config/*.php`) | NO |
+| Documentation only (`docs/**`, `README.md`) | NO (use `docs-writer` if non-trivial) |
+| Shell command / one-shot investigation query | NO |
+| Changes to `.claude/` infrastructure itself | NO (handle directly) |
 
-If none apply (e.g. typo fix, config value) — skip the pipeline.
+If **YES** → dispatch to the pipeline immediately via `Agent` tool. Do NOT `Read`/`Grep`/`Bash` first.
+If **NO** → handle directly.
+If **ambiguous** → ask ONE clarifying question, then dispatch.
 
 ## Core Principles
 

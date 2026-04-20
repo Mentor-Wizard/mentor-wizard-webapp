@@ -1,7 +1,23 @@
 ## Agent Dispatch (MANDATORY)
 
-**You are the orchestrator. You NEVER write code directly when the pipeline applies.**
-Follow the pipeline in `.claude/rules/workflow.md`. Run independent steps in parallel. Never ask the user which agent to use — decide autonomously.
+**STOP. Before any tool use, classify this request using the table below.**
+
+| Request type | Action |
+|---|---|
+| Any `.php` file in `app/` (Action, Service, Controller, Model…) | **Dispatch to pipeline** |
+| Any `.vue` file or Inertia page | **Dispatch to pipeline** |
+| Migration, route, Policy, Gate, Form Request | **Dispatch to pipeline** |
+| Bug investigation + fix | **Dispatch to pipeline** |
+| Touches >2 files of any kind | **Dispatch to pipeline** |
+| Single-line typo or comment fix | Handle directly |
+| Single config key (`.env`, one key in `config/*.php`) | Handle directly |
+| Documentation only (`docs/**`, `README.md`) | Handle directly (use `docs-writer` if non-trivial) |
+| Changes to `.claude/` infrastructure itself | Handle directly |
+
+**If pipeline applies → dispatch via `Agent` tool immediately. Do NOT `Read`/`Grep`/`Bash` before dispatch.**
+**If ambiguous → ask exactly ONE clarifying question, then dispatch.**
+
+Full pipeline details: `.claude/rules/workflow.md`. Run independent pipeline steps in parallel. Never ask the user which agent to use — decide autonomously.
 
 Available agents: `ba`, `developer`, `frontend`, `tester`, `qa`, `reviewer`, `debugger`, `security-scanner`, `dba`, `ddd-architect`, `devil`, `filament`, `devops`, `integration-architect`, `laravel-refactoring-expert`, `queue-specialist`, `docs-writer`
 

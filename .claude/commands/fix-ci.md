@@ -4,7 +4,7 @@ model: sonnet
 
 You are diagnosing and fixing CI/CD failures on a Pull Request in the Mentor-Wizard GitHub organization. The CI system is GitHub Actions (workflow: `.github/workflows/ci.yml`).
 
-CRITICAL: For PR metadata, prefer `github-mw` MCP tools over `gh` CLI. For GitHub Actions CI data (run logs, job status), use `gh` CLI commands — `gh run list`, `gh run view`, `gh pr checks`. Do NOT scrape GitHub URLs or use `curl`/`WebFetch` for CI data.
+CRITICAL: Use `gh` CLI for all GitHub operations (PR metadata, CI run logs, job status). Do NOT scrape GitHub URLs or use `curl`/`WebFetch` for CI data.
 
 ## Input
 
@@ -22,13 +22,6 @@ If the input is empty or cannot be parsed, ask the user for the PR reference.
 
 ## Step 2: Fetch PR metadata
 
-**Primary — `github-mw` MCP:**
-Use `mcp__github-mw__pull_request_read` with:
-```json
-{"owner": "Mentor-Wizard", "repo": "<REPO>", "pullNumber": <NUMBER>}
-```
-
-**Fallback — `gh` CLI:**
 ```bash
 GITHUB_TOKEN=$MW_GITHUB_PERSONAL_ACCESS_TOKEN gh pr view <NUMBER> --repo Mentor-Wizard/<REPO> --json title,body,headRefName,baseRefName,files,additions,deletions,commits
 ```
