@@ -7,6 +7,7 @@ use App\Enums\CalendarProviderEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
+use App\Services\ExternalCalendar\ExternalCalendarServiceFactory;
 use Database\Seeders\RoleSeeder;
 
 mutates(ExternalCalendarSelectCalendar::class);
@@ -33,7 +34,12 @@ describe('ExternalCalendarSelectCalendar', function (): void {
             )
             ->andReturn($integration);
 
-        app()->instance(CalendarProviderEnum::Google->getService(), $service);
+        $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
+        $factory->shouldReceive('for')
+            ->with(CalendarProviderEnum::Google)
+            ->andReturn($service);
+
+        app()->instance(ExternalCalendarServiceFactory::class, $factory);
 
         $response = $this->actingAs($this->user)
             ->post(route('external-calendar.select', ['provider' => 'google']), [

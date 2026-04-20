@@ -295,7 +295,9 @@ describe('Store Calendar CalendarEvent', function (): void {
         $start = Date::tomorrow()->setTime(9, 0, 0);
         $end = Date::tomorrow()->setTime(10, 0, 0);
 
-        // Mentor is already authenticated and owns the mentor program in beforeEach
+        // Log in as the mentor (beforeEach logs in the menti, not the mentor)
+        Auth::login($this->user);
+
         $eventPayload = [
             'title'             => 'Self Booking',
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
@@ -327,7 +329,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             ->get();
 
         // Should have only 1 user: the mentor as HOST (since mentor_id === auth user)
-        expect($attachedUsers)->toHaveCount(2);
+        expect($attachedUsers)->toHaveCount(1);
 
         $host = $attachedUsers->first();
         expect($host->id)->toBe($this->user->getKey())
