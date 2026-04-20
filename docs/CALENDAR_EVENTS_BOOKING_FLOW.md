@@ -30,7 +30,6 @@ Every calendar event associated with mentor sessions requires a valid
   associated with it.
 - Events without a `mentor_program_id` are treated as personal calendar events.
 
-
 ### 4.3 Event Status Flow
 
 Calendar events follow a specific status workflow:
@@ -43,7 +42,7 @@ PENDING_MENTOR_CONFIRMATION -> CONFIRMED -> FINISHED
 **Status Definitions:**
 
 | Status                        | Description                                                           |
-| ----------------------------- |-----------------------------------------------------------------------|
+| ----------------------------- | --------------------------------------------------------------------- |
 | `PENDING_MENTOR_CONFIRMATION` | Event created by mentee, awaiting mentor confirmation                 |
 | `PENDING_PAYMENT`             | Event confirmed but payment pending (for future logic implementation) |
 | `CONFIRMED`                   | Event confirmed by all parties                                        |
@@ -65,7 +64,7 @@ PENDING_MENTOR_CONFIRMATION -> CONFIRMED -> FINISHED
 4. Completed events are marked as `FINISHED`
 5. Either party can cancel, changing status to `CANCELLED`, but **only if the
    event is not yet CONFIRMED**.
-   - *Future plan*: Implement logic to propose postponing or handle refunds for
+   - _Future plan_: Implement logic to propose postponing or handle refunds for
      confirmed events.
 
 **Restrictions:**
@@ -254,36 +253,36 @@ The system prevents double-booking and resolves slot conflicts:
 
 ### mentor_programs
 
-| Column               | Type      | Description                            |
-| -------------------- | --------- | -------------------------------------- |
-| id                   | bigint    | Primary key                            |
-| mentor_id            | bigint    | FK to users                            |
-| name                 | string    | Program name                           |
-| slug                 | text      | SEO slug                               |
-| is_main              | boolean   | Whether it's the main program          |
-| description          | text      | Program description                    |
-| cost                 | decimal   | Program cost                           |
-| currency_id          | bigint    | FK to currencies                       |
-| start_time           | datetime  | Start of program period (optional)     |
-| end_time             | datetime  | End of program period (optional)       |
-| session_duration     | integer   | Duration in minutes (default 60)       |
-| session_type_options | json      | Available meeting types                |
-| need_confirmation    | boolean   | Whether mentor must confirm booking    |
-| created_at           | timestamp | —                                      |
-| updated_at           | timestamp | —                                      |
+| Column               | Type      | Description                         |
+| -------------------- | --------- | ----------------------------------- |
+| id                   | bigint    | Primary key                         |
+| mentor_id            | bigint    | FK to users                         |
+| name                 | string    | Program name                        |
+| slug                 | text      | SEO slug                            |
+| is_main              | boolean   | Whether it's the main program       |
+| description          | text      | Program description                 |
+| cost                 | decimal   | Program cost                        |
+| currency_id          | bigint    | FK to currencies                    |
+| start_time           | datetime  | Start of program period (optional)  |
+| end_time             | datetime  | End of program period (optional)    |
+| session_duration     | integer   | Duration in minutes (default 60)    |
+| session_type_options | json      | Available meeting types             |
+| need_confirmation    | boolean   | Whether mentor must confirm booking |
+| created_at           | timestamp | —                                   |
+| updated_at           | timestamp | —                                   |
 
 ### user_profiles
 
-| Column                   | Type      | Description                           |
-| ------------------------ | --------- | ------------------------------------- |
-| id                       | bigint    | Primary key                           |
-| user_id                  | bigint    | FK to users                           |
-| name                     | string    | First name                            |
-| last_name                | string    | Last name                             |
-| timezone                 | string    | User's timezone (e.g. UTC)            |
-| minimum_pre_booking_time | integer   | Minutes before booking (default 0)    |
-| created_at               | timestamp | —                                     |
-| updated_at               | timestamp | —                                     |
+| Column                   | Type      | Description                        |
+| ------------------------ | --------- | ---------------------------------- |
+| id                       | bigint    | Primary key                        |
+| user_id                  | bigint    | FK to users                        |
+| name                     | string    | First name                         |
+| last_name                | string    | Last name                          |
+| timezone                 | string    | User's timezone (e.g. UTC)         |
+| minimum_pre_booking_time | integer   | Minutes before booking (default 0) |
+| created_at               | timestamp | —                                  |
+| updated_at               | timestamp | —                                  |
 
 ## External Calendar Integrations
 
@@ -315,8 +314,8 @@ re-encrypt all stored credentials before clearing it.
 
 ### OAuth Authentication Flow (Google / Outlook)
 
-The following describes what happens end-to-end when a user connects an
-external calendar account.
+The following describes what happens end-to-end when a user connects an external
+calendar account.
 
 #### Phase 1 — User initiates connection
 
@@ -324,8 +323,8 @@ external calendar account.
 2. `ExternalCalendarConnectRedirect` fires. If the provider requires per-user
    credentials, `client_id` and `client_secret` are read from the form.
 3. `saveCredentials()` creates a `UserCalendarIntegration` row and persists the
-   credentials encrypted at rest via `CalendarCredentialEncrypter`
-   (see [Credential Encryption](#credential-encryption)).
+   credentials encrypted at rest via `CalendarCredentialEncrypter` (see
+   [Credential Encryption](#credential-encryption)).
 4. An OAuth `state` token is built — Laravel's own `encrypt()` wraps a JSON
    payload of `{user_id, provider}` to prevent CSRF.
 5. The user's session also stores `calendar_oauth_pending` as a fallback for
@@ -372,12 +371,12 @@ base64(iv):base64(tag):base64(ciphertext)
 
 #### What is stored where
 
-| Data | Location | Encrypted |
-|---|---|---|
-| `access_token` | `user_calendar_integrations.access_token` (TEXT) | Yes — AES-256-GCM |
-| `refresh_token` | `user_calendar_integrations.refresh_token` (TEXT) | Yes — AES-256-GCM |
-| `client_id` / `client_secret` (per-user flow) | same table | Yes — AES-256-GCM |
-| Encryption key | `.env` / server environment only | — never in DB |
+| Data                                          | Location                                          | Encrypted         |
+| --------------------------------------------- | ------------------------------------------------- | ----------------- |
+| `access_token`                                | `user_calendar_integrations.access_token` (TEXT)  | Yes — AES-256-GCM |
+| `refresh_token`                               | `user_calendar_integrations.refresh_token` (TEXT) | Yes — AES-256-GCM |
+| `client_id` / `client_secret` (per-user flow) | same table                                        | Yes — AES-256-GCM |
+| Encryption key                                | `.env` / server environment only                  | — never in DB     |
 
 ---
 
