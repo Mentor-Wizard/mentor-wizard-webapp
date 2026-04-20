@@ -30,14 +30,14 @@ services:
       POSTGRES_USER: test_mw_user
       POSTGRES_PASSWORD: test_mw_user_password
     volumes:
-      - ./docker/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+      - ./docker/local/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
     networks:
       - mw-db-network
 
   app: &app
     build:
       context: ./
-      dockerfile: docker/php/Dockerfile-dev
+      dockerfile: docker/local/php/Dockerfile
     restart: unless-stopped
     container_name: mw-app
     environment:
@@ -51,7 +51,7 @@ services:
         condition: service_healthy
     volumes:
       - ./:/var/www
-      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./docker/local/php/caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
       - mw_app_composer_data:/.composer
@@ -86,14 +86,14 @@ services:
     <<: *app
     container_name: mw-schedule
     environment:
-      COMMAND: supercronic -quiet /var/www/docker/php/schedule/schedule
+      COMMAND: supercronic -quiet /var/www/docker/local/schedule/schedule
       PROCESS: schedule
     networks:
       - mw-db-network
       - mw-redis-network
     ports: []
     healthcheck:
-      test: supercronic -test /var/www/docker/php/schedule/schedule | grep -q
+      test: supercronic -test /var/www/docker/local/schedule/schedule | grep -q
         'is valid' # TODO try spatie LARAVEL-HEALTH
       interval: 5s
       timeout: 10s
