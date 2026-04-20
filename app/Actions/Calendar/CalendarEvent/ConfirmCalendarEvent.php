@@ -6,11 +6,11 @@ namespace App\Actions\Calendar\CalendarEvent;
 
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
+use App\Http\Requests\Calendar\ConfirmCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Notifications\CalendarEventConfirmedNotification;
 use Date;
-use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -18,13 +18,8 @@ class ConfirmCalendarEvent
 {
     use AsController;
 
-    public function handle(Request $request): Response
+    public function handle(ConfirmCalendarEventRequest $request, MentorProgram $mentorProgram, CalendarEvent $calendarEvent): Response
     {
-        $mentorProgram = $request->route('mentorProgram');
-        $calendarEvent = $request->route('calendarEvent');
-        assert($mentorProgram instanceof MentorProgram);
-        assert($calendarEvent instanceof CalendarEvent);
-
         if ($calendarEvent->start_date_time->lessThan(Date::now())) {
             return to_route('pages.calendar.pending')
                 ->with('error', 'Start time for this event is already past');
@@ -65,7 +60,7 @@ class ConfirmCalendarEvent
 
     }
 
-    private function fillConfirmationDates(Request $request, CalendarEvent $calendarEvent): void
+    private function fillConfirmationDates(ConfirmCalendarEventRequest $request, CalendarEvent $calendarEvent): void
     {
         $calendarEvent->calendarEventUsers()
             ->updateExistingPivot($request->user()->getKey(), [
