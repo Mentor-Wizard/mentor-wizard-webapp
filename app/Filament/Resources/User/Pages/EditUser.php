@@ -7,6 +7,7 @@ namespace App\Filament\Resources\User\Pages;
 use App\Filament\Resources\User\UserResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditUser extends EditRecord
 {
@@ -15,6 +16,7 @@ class EditUser extends EditRecord
     /**
      * @return DeleteAction[]
      */
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

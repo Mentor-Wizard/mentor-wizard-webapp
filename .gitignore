@@ -65,3 +65,6 @@ frankenphp
 
 # Tasks docs
 /docs/tasks-docs
+
+# Claude Code local settings
+/.claude/settings.local.json
