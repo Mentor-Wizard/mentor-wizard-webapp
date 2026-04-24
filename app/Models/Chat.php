@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Override;
 
 #[UseFactory(ChatFactory::class)]
 #[UsePolicy(ChatPolicy::class)]
@@ -58,5 +59,18 @@ class Chat extends Model implements HasMedia
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    #[Override]
+    protected function casts(): array
+    {
+        return [
+            'mentor_id' => 'int',
+            'menti_id'  => 'int',
+            'coach_id'  => 'int',
+        ];
     }
 }

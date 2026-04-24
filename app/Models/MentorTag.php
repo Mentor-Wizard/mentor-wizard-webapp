@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Override;
 
 /**
  * @mixin IdeHelperMentorTag
@@ -33,6 +34,7 @@ class MentorTag extends Model
         return $this->belongsToMany(MentorProfile::class, 'mentor_profile_mentor_tag');
     }
 
+    #[Override]
     protected function casts(): array
     {
         return [
