@@ -55,6 +55,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
      * @var list<string>
      */
     protected $fillable = [
+        'user_id',
         'username',
         'email',
         'password',
