@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar\ExternalCalendar;
 
-use App\Http\Requests\Calendar\ExternalCalendarConnectRedirectRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarConnectRedirectRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use App\Traits\ExternalCalendar\HandlesCalendarIntegrationCleanup;
@@ -18,7 +18,7 @@ class ExternalCalendarConnectRedirect
     use AsController;
     use HandlesCalendarIntegrationCleanup;
 
-    protected ?string $clientId = null;
+    private ?string $clientId = null;
 
     private ?string $clientSecret = null;
 

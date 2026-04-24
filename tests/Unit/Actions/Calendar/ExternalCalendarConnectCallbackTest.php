@@ -42,11 +42,11 @@ describe('ExternalCalendarConnectCallback', function (): void {
     });
 
     it('processes callback and redirects with calendars when state is valid', function (): void {
-        $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => CalendarProviderEnum::Google->value]));
+        $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => CalendarProviderEnum::GOOGLE->value]));
 
         $integration = UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
@@ -54,7 +54,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::Google,
+                CalendarProviderEnum::GOOGLE,
                 'auth-code-123',
             )
             ->andReturn($integration);
@@ -63,7 +63,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::Google,
+                CalendarProviderEnum::GOOGLE,
             )
             ->andReturn([
                 'success'   => true,
@@ -79,14 +79,14 @@ describe('ExternalCalendarConnectCallback', function (): void {
         );
 
         $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
-        expect(session('calendar_provider'))->toBe(CalendarProviderEnum::Google->value)
+        expect(session('calendar_provider'))->toBe(CalendarProviderEnum::GOOGLE->value)
             ->and(session('calendars'))->toHaveCount(1);
     });
 
     it('falls back to session state when query state is absent', function (): void {
         $integration = UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Outlook,
+            'provider' => CalendarProviderEnum::OUTLOOK,
         ]);
 
         $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
@@ -107,7 +107,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         $response = $this->withSession([
             'calendar_oauth_pending' => [
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook->value,
+                'provider' => CalendarProviderEnum::OUTLOOK->value,
             ],
         ])->get(
             route('external-calendar.connect.callback', ['provider' => 'outlook']).'?code=auth-code-xyz',
@@ -115,15 +115,15 @@ describe('ExternalCalendarConnectCallback', function (): void {
 
         $response->assertRedirect(route('profile.edit', ['tab' => 'calendars']));
 
-        expect(session('calendar_provider'))->toBe(CalendarProviderEnum::Outlook->value);
+        expect(session('calendar_provider'))->toBe(CalendarProviderEnum::OUTLOOK->value);
     });
 
     it('redirects with error when fetchCalendars returns empty calendars', function (): void {
-        $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => CalendarProviderEnum::Google->value]));
+        $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => CalendarProviderEnum::GOOGLE->value]));
 
         $integration = UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
@@ -149,11 +149,11 @@ describe('ExternalCalendarConnectCallback', function (): void {
     });
 
     it('redirects with service error message when fetchCalendars fails', function (): void {
-        $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => CalendarProviderEnum::Google->value]));
+        $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => CalendarProviderEnum::GOOGLE->value]));
 
         $integration = UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);

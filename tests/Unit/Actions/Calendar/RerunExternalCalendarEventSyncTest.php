@@ -34,7 +34,7 @@ describe('RerunExternalCalendarEventSync', function (): void {
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
     });
 
@@ -44,7 +44,7 @@ describe('RerunExternalCalendarEventSync', function (): void {
         $externalEvent = ExternalCalendarEvent::query()->create([
             'calendar_event_id' => $this->calendarEvent->getKey(),
             'user_id'           => $this->user->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'external_event_id' => null,
         ]);
 
@@ -68,7 +68,7 @@ describe('RerunExternalCalendarEventSync', function (): void {
         $externalEvent = ExternalCalendarEvent::query()->create([
             'calendar_event_id' => $this->calendarEvent->getKey(),
             'user_id'           => $this->user->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'external_event_id' => 'existing-ext-id',
         ]);
 

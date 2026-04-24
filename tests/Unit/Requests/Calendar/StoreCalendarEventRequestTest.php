@@ -9,7 +9,7 @@ use App\Enums\CalendarEventTypeEnum;
 use App\Enums\MentorSessionDurationOptionsEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -1014,6 +1014,36 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
         $validator = Validator::make($payload, (new StoreCalendarEventRequest)->rules());
 
         expect($validator->passes())->toBeTrue();
+    });
+
+    it('rejects selectedDuration if it does not match mentor program session duration', function (): void {
+        $this->mentorProgram->update(['session_duration' => 60]);
+
+        $payload = [
+            'title'             => 'Test Event',
+            'fromDate'          => Date::now()->addDays(5)->format('Y-m-d'),
+            'toDate'            => Date::now()->addDays(5)->format('Y-m-d'),
+            'fromTime'          => '10:00',
+            'toTime'            => '11:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+            'selectedDuration'  => 30, // Does not match 60
+        ];
+
+        $request = new StoreCalendarEventRequest;
+        $request->merge($payload);
+        ($this->prepareRequest)($request);
+
+        actingAs($this->mentiUser);
+        try {
+            $request->validateResolved();
+            expect(false)->toBeTrue('Should have failed validation due to mismatched duration');
+        } catch (ValidationException $validationException) {
+            expect($validationException->errors())->toHaveKey('selectedDuration')
+                ->and($validationException->errors()['selectedDuration'][0])->toBe('Selected duration must match the program session duration.');
+        }
     });
 
     it('rejects selectedDuration that is not a valid enum value', function (): void {

@@ -39,7 +39,7 @@ class GetProfilePage
                 'key'                  => $provider->value,
                 'connected'            => $integration !== null,
                 'needs_reauth'         => (bool) ($integration?->needs_reauth),
-                'sync_status'          => $integration?->sync_status->value ?? CalendarSyncStatusEnum::Disconnected->value,
+                'sync_status'          => $integration?->sync_status->value ?? CalendarSyncStatusEnum::DISCONNECTED->value,
                 'calendar_id'          => $integration?->calendar_id,
                 'calendar_name'        => $integration?->calendar_name,
                 'last_synced_at'       => $integration?->last_synced_at?->toIso8601String(),

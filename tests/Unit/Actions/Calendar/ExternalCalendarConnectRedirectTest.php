@@ -32,7 +32,7 @@ describe('ExternalCalendarConnectRedirect', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::Google,
+                CalendarProviderEnum::GOOGLE,
                 null,
                 null,
             )
@@ -59,7 +59,7 @@ describe('ExternalCalendarConnectRedirect', function (): void {
 
         expect(session('calendar_oauth_pending'))->toMatchArray([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google->value,
+            'provider' => CalendarProviderEnum::GOOGLE->value,
         ]);
     });
 
@@ -90,7 +90,7 @@ describe('ExternalCalendarConnectRedirect', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::GooglePersonalApp,
+                CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'my-client-id-value',
                 'my-client-secret-value',
             )
@@ -113,7 +113,7 @@ describe('ExternalCalendarConnectRedirect', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::Outlook,
+                CalendarProviderEnum::OUTLOOK,
                 null,
                 null,
             )

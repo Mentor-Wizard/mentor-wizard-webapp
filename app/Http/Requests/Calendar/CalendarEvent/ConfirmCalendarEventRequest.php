@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Calendar;
+namespace App\Http\Requests\Calendar\CalendarEvent;
 
 use App\Models\CalendarEvent;
 use Illuminate\Foundation\Http\FormRequest;

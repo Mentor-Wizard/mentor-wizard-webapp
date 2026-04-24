@@ -99,7 +99,6 @@ export function useExternalCalendar(providers) {
       route('external-calendar.disconnect', { provider: providerKey }),
     );
   }
-  retrySync;
 
   function retrySync(providerKey) {
     useForm({}).post(

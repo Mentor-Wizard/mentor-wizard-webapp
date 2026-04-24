@@ -32,7 +32,7 @@ describe('SyncCalendarEventToIntegration', function (): void {
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
     });
 

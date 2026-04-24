@@ -21,7 +21,7 @@ describe('ExternalCalendarSelectCalendar', function (): void {
     it('selects a calendar and redirects back with success message', function (): void {
         $integration = UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         $service = Mockery::mock(ExternalCalendarServiceInterface::class);
@@ -36,7 +36,7 @@ describe('ExternalCalendarSelectCalendar', function (): void {
 
         $factory = Mockery::mock(ExternalCalendarServiceFactory::class);
         $factory->shouldReceive('for')
-            ->with(CalendarProviderEnum::Google)
+            ->with(CalendarProviderEnum::GOOGLE)
             ->andReturn($service);
 
         app()->instance(ExternalCalendarServiceFactory::class, $factory);

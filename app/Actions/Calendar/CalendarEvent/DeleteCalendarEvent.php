@@ -28,7 +28,7 @@ class DeleteCalendarEvent
                 $calendarEvent->update(['status' => CalendarEventStatusEnum::CANCELLED]);
 
                 return to_route('pages.calendar.index')
-                    ->with('error', 'Confirmed event cannot be deleted.');
+                    ->with('error', 'Confirmed event was cancelled.');
 
             case CalendarEventStatusEnum::FINISHED->value:
                 return to_route('pages.calendar.index')

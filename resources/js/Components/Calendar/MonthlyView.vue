@@ -82,8 +82,9 @@ const selectedDay = computed(() => {
                 v-for="event in day.calendarEvents.slice(0, 2)"
                 :key="event.id"
               >
-                <a
-                  class="group flex"
+                <button
+                  type="button"
+                  class="group flex w-full text-left"
                   @click.prevent.stop="props.openShowEditEventPage(event.id)"
                 >
                   <p
@@ -97,7 +98,7 @@ const selectedDay = computed(() => {
                   >
                     {{ event.time }}
                   </time>
-                </a>
+                </button>
               </li>
               <li v-if="day.calendarEvents.length > 2" class="text-gray-500">
                 + {{ day.calendarEvents.length - 2 }} more
@@ -189,11 +190,13 @@ const selectedDay = computed(() => {
               {{ event.time }}
             </time>
           </div>
-          <a
+          <button
+            type="button"
             class="flex-none self-center rounded-md bg-white px-2.5 py-1 text-sm font-semibold text-gray-900 opacity-0 shadow-xs ring-1 ring-gray-300 ring-inset group-hover:opacity-100 hover:ring-gray-400 focus:opacity-100"
             @click.prevent.stop="props.openShowEditEventPage(event.id)"
-            >Edit<span class="sr-only"> {{ event.title }}</span></a
           >
+            Edit<span class="sr-only"> {{ event.name }}</span>
+          </button>
         </li>
       </ol>
     </div>

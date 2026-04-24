@@ -20,6 +20,9 @@ use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\SetMainMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
+use App\Actions\Notifications\ListNotifications;
+use App\Actions\Notifications\MarkAllNotificationsAsRead;
+use App\Actions\Notifications\MarkNotificationAsRead;
 use App\Actions\Pages\Calendar\CalendarsListPage;
 use App\Actions\Pages\Calendar\ConfirmedCalendarEventsListPage;
 use App\Actions\Pages\Calendar\MentorProgramEventBookingPage;
@@ -41,6 +44,7 @@ use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
 use App\Actions\UserSchedule\StoreBatchUserSchedule;
+use App\Models\MentorProgram;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
@@ -65,9 +69,13 @@ Route::middleware('auth')->group(function (): void {
 
 Route::prefix('mentor-program')->middleware(['auth', 'role:mentor'])->group(function (): void {
     Route::get('/create', CreateMentorProgramPage::class)
+        ->can('create', MentorProgram::class)
         ->name('mentor-program.create');
-    Route::post('/', StoreMentorProgramPage::class)->name('mentor-program.store');
+    Route::post('/', StoreMentorProgramPage::class)
+        ->can('create', MentorProgram::class)
+        ->name('mentor-program.store');
     Route::get('/{mentorProgram:slug}/edit', EditMentorProgramPage::class)
+        ->can('update', 'mentorProgram')
         ->name('mentor-program.edit');
     Route::patch('/{mentorProgram:slug}', UpdateMentorProgramPage::class)
         ->can('update', 'mentorProgram')
@@ -144,34 +152,25 @@ Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->g
     Route::post('rerun/{calendarEvent:id}/{externalCalendarEvent:id}', RerunExternalCalendarEventSync::class)
         ->middleware('throttle:calendar-retry')
         ->name('external-calendar.rerun')
+        ->can('sync', 'externalCalendarEvent')
         ->withoutScopedBindings();
     Route::post('sync-integration/{calendarEvent:id}/{integration:id}', SyncCalendarEventToIntegration::class)
         ->middleware('throttle:calendar-sync')
         ->name('external-calendar.sync-integration')
+        ->can('sync', 'integration')
         ->withoutScopedBindings();
     Route::patch('log/{log:id}/acknowledge', AcknowledgeExternalCalendarEventLog::class)
-        ->name('external-calendar.log.acknowledge');
+        ->name('external-calendar.log.acknowledge')
+        ->middleware('can:acknowledge,log');
 });
 
 Route::get('settings/external-calendar/callback/{provider}', ExternalCalendarConnectCallback::class)
     ->name('external-calendar.connect.callback');
 
 Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function (): void {
-    Route::get('/', fn () => response()->json(
-        auth()->user()->notifications()->latest()->limit(20)->get()
-    ))->name('notifications.index');
-
-    Route::post('{id}/read', function (string $id) {
-        auth()->user()->notifications()->where('id', $id)->update(['read_at' => now()]);
-
-        return response()->noContent();
-    })->name('notifications.read');
-
-    Route::post('read-all', function () {
-        auth()->user()->unreadNotifications()->update(['read_at' => now()]);
-
-        return response()->noContent();
-    })->name('notifications.read-all');
+    Route::get('/', ListNotifications::class)->name('notifications.index');
+    Route::post('{id}/read', MarkNotificationAsRead::class)->name('notifications.read');
+    Route::post('read-all', MarkAllNotificationsAsRead::class)->name('notifications.read-all');
 });
 
 require __DIR__.'/auth.php';

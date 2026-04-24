@@ -31,8 +31,8 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
             $integration = $this->service->saveCredentials($this->user, 'my-client-id', 'my-client-secret');
 
             expect($integration->user_id)->toBe($this->user->getKey())
-                ->and($integration->provider)->toBe(CalendarProviderEnum::GooglePersonalApp)
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending)
+                ->and($integration->provider)->toBe(CalendarProviderEnum::GOOGLE_PERSONAL_APP)
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING)
                 ->and($integration->needs_reauth)->toBeFalse()
                 ->and($integration->access_token)->toBeNull();
         });
@@ -40,13 +40,13 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('updates an existing integration with new credentials', function (): void {
             $existing = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             $integration = $this->service->saveCredentials($this->user, 'new-client-id', 'new-secret');
 
             expect($integration->getKey())->toBe($existing->getKey())
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending);
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING);
         });
     });
 
@@ -75,7 +75,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('exchanges the authorization code and updates the integration', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             Http::fake([
@@ -89,14 +89,14 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
             $result = $this->service->handleCallback($this->user, 'google-auth-code');
 
             expect($result->getKey())->toBe($integration->getKey())
-                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::Pending)
+                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::PENDING)
                 ->and($result->token_expires_at)->not->toBeNull();
         });
 
         it('stores null token_expires_at when expires_in is absent', function (): void {
             UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             Http::fake([
@@ -113,7 +113,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('updates the integration with the selected calendar and sets Active status', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             $result = $this->service->selectCalendar($this->user, 'google-cal-id', 'My Google Calendar');
@@ -121,7 +121,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
             expect($result->getKey())->toBe($integration->getKey())
                 ->and($result->calendar_id)->toBe('google-cal-id')
                 ->and($result->calendar_name)->toBe('My Google Calendar')
-                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::Active)
+                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::ACTIVE)
                 ->and($result->needs_reauth)->toBeFalse()
                 ->and($result->last_error_message)->toBeNull();
         });
@@ -131,7 +131,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('returns mapped calendar list on success using the summary field', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             Http::fake([
@@ -155,7 +155,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('falls back to the id when summary is absent', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             Http::fake([
@@ -172,7 +172,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('returns the API error message on failure', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             Http::fake([
@@ -192,7 +192,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('falls back to a default error message when the API gives none', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GooglePersonalApp,
+                'provider' => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             ]);
 
             Http::fake(['https://www.googleapis.com/*' => Http::response([], 500)]);
@@ -207,7 +207,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('returns mapped events when the token is valid', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'calendar_id'      => 'primary',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -241,7 +241,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('maps all-day events that use the date field instead of dateTime', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -273,7 +273,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('uses null description when description field is absent', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -302,7 +302,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('throws RuntimeException when the Google API returns an error', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -323,7 +323,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('throws and marks needs_reauth when the token is expired with no refresh token', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->subMinute(),
                 'refresh_token'    => null,
             ]);
@@ -343,7 +343,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('throws and marks needs_reauth when the token refresh request fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->subMinute(),
             ]);
 
@@ -366,7 +366,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('refreshes the token and fetches events when the token is expired but refresh succeeds', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->subMinute(),
             ]);
 
@@ -401,7 +401,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('returns the external event id on success', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'calendar_id'      => 'primary',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -418,7 +418,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('throws RuntimeException when event creation fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -447,7 +447,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('sends a PATCH request to the correct event URL', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'calendar_id'      => 'primary',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -463,7 +463,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('throws RuntimeException when event update fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -483,7 +483,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('sends a DELETE request and succeeds on 200', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'calendar_id'      => 'primary',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -499,7 +499,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('does not throw when event is already deleted externally (404)', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -513,7 +513,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('throws RuntimeException on non-404 failure', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GooglePersonalApp,
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
                 'token_expires_at' => now()->addHour(),
             ]);
 

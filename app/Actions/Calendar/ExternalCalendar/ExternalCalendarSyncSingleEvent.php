@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Calendar\ExternalCalendar;
 
 use App\Enums\CalendarSyncStatusEnum;
-use App\Http\Requests\Calendar\ExternalCalendarSyncSingleEventRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarSyncSingleEventRequest;
 use App\Jobs\CreateExternalCalendarEvent;
 use App\Models\CalendarEvent;
 use App\Models\User;
@@ -29,7 +29,7 @@ class ExternalCalendarSyncSingleEvent
             $integration = UserCalendarIntegration::query()
                 ->where('user_id', $user->getKey())
                 ->where('provider', $calendarProvider)
-                ->where('sync_status', CalendarSyncStatusEnum::Active)
+                ->where('sync_status', CalendarSyncStatusEnum::ACTIVE)
                 ->firstOrFail();
         } catch (ModelNotFoundException) {
             return back()->with('error', 'No active calendar integration found for this provider.');

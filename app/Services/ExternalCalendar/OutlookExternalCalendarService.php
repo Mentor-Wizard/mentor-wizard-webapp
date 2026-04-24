@@ -39,7 +39,7 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
         return UserCalendarIntegration::query()->updateOrCreate(
             [
                 'user_id'  => $user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ],
             [
                 'client_id'          => null,
@@ -50,7 +50,7 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
                 'calendar_id'        => null,
                 'calendar_name'      => null,
                 'needs_reauth'       => false,
-                'sync_status'        => CalendarSyncStatusEnum::Pending,
+                'sync_status'        => CalendarSyncStatusEnum::PENDING,
                 'last_error_message' => null,
             ]
         );
@@ -72,7 +72,7 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
     {
         $integration = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
-            ->where('provider', CalendarProviderEnum::Outlook)
+            ->where('provider', CalendarProviderEnum::OUTLOOK)
             ->firstOrFail();
 
         $response = Http::asForm()->post(self::TOKEN_URL, [
@@ -90,7 +90,7 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
             'token_expires_at' => isset($data['expires_in'])
                 ? now()->addSeconds((int) $data['expires_in'])
                 : null,
-            'sync_status'      => CalendarSyncStatusEnum::Pending,
+            'sync_status'      => CalendarSyncStatusEnum::PENDING,
         ]);
 
         return $integration->refresh();
@@ -100,13 +100,13 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
     {
         $integration = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
-            ->where('provider', CalendarProviderEnum::Outlook)
+            ->where('provider', CalendarProviderEnum::OUTLOOK)
             ->firstOrFail();
 
         $integration->update([
             'calendar_id'        => $calendarId,
             'calendar_name'      => $calendarName,
-            'sync_status'        => CalendarSyncStatusEnum::Active,
+            'sync_status'        => CalendarSyncStatusEnum::ACTIVE,
             'needs_reauth'       => false,
             'last_error_message' => null,
         ]);
@@ -268,7 +268,7 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
 
     public function callbackUrl(): string
     {
-        return route('external-calendar.connect.callback', ['provider' => CalendarProviderEnum::Outlook->value]);
+        return route('external-calendar.connect.callback', ['provider' => CalendarProviderEnum::OUTLOOK->value]);
     }
 
     /**
@@ -320,7 +320,7 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
         if ($integration->refresh_token === null) {
             $integration->update([
                 'needs_reauth'       => true,
-                'sync_status'        => CalendarSyncStatusEnum::Error,
+                'sync_status'        => CalendarSyncStatusEnum::ERROR,
                 'last_error_message' => 'Access token expired and no refresh token is available. Please reconnect.',
             ]);
 
@@ -337,7 +337,7 @@ class OutlookExternalCalendarService implements OAuthCalendarServiceInterface
         if (! $response->successful()) {
             $integration->update([
                 'needs_reauth'       => true,
-                'sync_status'        => CalendarSyncStatusEnum::Error,
+                'sync_status'        => CalendarSyncStatusEnum::ERROR,
                 'last_error_message' => 'Token refresh failed: '.($response->json('error_description') ?? $response->json('error') ?? 'Unknown error'),
             ]);
 

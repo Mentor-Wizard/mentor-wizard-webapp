@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Calendar;
+namespace App\Http\Requests\Calendar\CalendarEvent;
 
 use App\Models\MentorProgram;
 use App\Services\Calendar\CheckTimeSlotReservedService;
 use App\Traits\Calendar\CalendarEventRequestRules;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Date;
 
-class EditCalendarEventRequest extends FormRequest
+class EditCalendarEventRequest extends CalendarEventRequest
 {
     use CalendarEventRequestRules;
 
@@ -30,16 +28,7 @@ class EditCalendarEventRequest extends FormRequest
             if (! $validator->errors()->hasAny(['fromDate', 'fromTime', 'toDate', 'toTime', 'mentor_program_id'])) {
                 /** @var MentorProgram $mentorProgram */
                 $mentorProgram = MentorProgram::query()->findOrFail($this->input('mentor_program_id'));
-                $startDate = Date::createFromFormat(
-                    '!Y-m-d H:i',
-                    $this->input('fromDate').' '.$this->input('fromTime'), // @pest-mutate-ignore ConcatOperandRemoval
-                    $timezone
-                );
-                $endDate = Date::createFromFormat(
-                    '!Y-m-d H:i',
-                    $this->input('toDate').' '.$this->input('toTime'),// @pest-mutate-ignore ConcatOperandRemoval
-                    $timezone
-                );
+                ['startDate' => $startDate, 'endDate' => $endDate] = $this->getFormattedDates($timezone);
 
                 $isWithinAvailableSlots = new CheckTimeSlotReservedService(
                     $startDate,

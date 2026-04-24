@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarProviderEnum;
-use App\Http\Requests\Calendar\ExternalCalendarConnectRedirectRequest;
-use App\Http\Requests\Calendar\ExternalCalendarRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarConnectRedirectRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -46,7 +46,7 @@ describe('ExternalCalendarRequest', function (): void {
             $routeMock->shouldReceive('parameter')->andReturn('google');
             $request->setRouteResolver(fn (): Route => $routeMock);
 
-            expect($request->resolveProvider())->toBe(CalendarProviderEnum::Google);
+            expect($request->resolveProvider())->toBe(CalendarProviderEnum::GOOGLE);
         });
 
         it('returns null for an unrecognized provider value', function (): void {

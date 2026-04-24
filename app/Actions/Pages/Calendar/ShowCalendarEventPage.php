@@ -60,7 +60,7 @@ class ShowCalendarEventPage
 
         $integrations = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
-            ->where('sync_status', CalendarSyncStatusEnum::Active)
+            ->where('sync_status', CalendarSyncStatusEnum::ACTIVE)
             ->get();
 
         $externalEvents = ExternalCalendarEvent::query()

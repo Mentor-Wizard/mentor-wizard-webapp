@@ -34,7 +34,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
         it('cleans up the integration record when error param is present', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
+                'provider' => CalendarProviderEnum::GOOGLE,
             ]);
 
             $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => 'google']));
@@ -79,12 +79,12 @@ describe('ExternalCalendarConnectCallback', function (): void {
                 ->once()
                 ->with(
                     Mockery::on(fn (User $u): bool => $u->getKey() === $this->user->getKey()),
-                    CalendarProviderEnum::Google,
+                    CalendarProviderEnum::GOOGLE,
                     'auth-code',
                 )
                 ->andReturn(UserCalendarIntegration::factory()->create([
                     'user_id'  => $this->user->getKey(),
-                    'provider' => CalendarProviderEnum::Google,
+                    'provider' => CalendarProviderEnum::GOOGLE,
                 ]));
 
             $service->shouldReceive('fetchCalendars')
@@ -129,7 +129,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             $service->shouldReceive('handleCallback')->once()->andReturn(
                 UserCalendarIntegration::factory()->create([
                     'user_id'  => $this->user->getKey(),
-                    'provider' => CalendarProviderEnum::Google,
+                    'provider' => CalendarProviderEnum::GOOGLE,
                 ]),
             );
             $service->shouldReceive('fetchCalendars')
@@ -152,7 +152,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             $service->shouldReceive('handleCallback')->once()->andReturn(
                 UserCalendarIntegration::factory()->create([
                     'user_id'  => $this->user->getKey(),
-                    'provider' => CalendarProviderEnum::Google,
+                    'provider' => CalendarProviderEnum::GOOGLE,
                 ]),
             );
             $service->shouldReceive('fetchCalendars')
@@ -174,7 +174,7 @@ describe('ExternalCalendarConnectCallback', function (): void {
             $service->shouldReceive('handleCallback')->once()->andReturn(
                 UserCalendarIntegration::factory()->create([
                     'user_id'  => $this->user->getKey(),
-                    'provider' => CalendarProviderEnum::Google,
+                    'provider' => CalendarProviderEnum::GOOGLE,
                 ]),
             );
             $service->shouldReceive('fetchCalendars')

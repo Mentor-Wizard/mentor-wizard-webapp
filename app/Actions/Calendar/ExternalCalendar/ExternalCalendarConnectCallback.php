@@ -6,7 +6,7 @@ namespace App\Actions\Calendar\ExternalCalendar;
 
 use App\DTO\ExternalCalendar\OAuthCallbackState;
 use App\Enums\CalendarProviderEnum;
-use App\Http\Requests\Calendar\ExternalCalendarConnectCallbackRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarConnectCallbackRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use App\Traits\ExternalCalendar\HandlesCalendarIntegrationCleanup;

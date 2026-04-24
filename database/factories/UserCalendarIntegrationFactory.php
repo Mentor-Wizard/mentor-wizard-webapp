@@ -29,21 +29,21 @@ class UserCalendarIntegrationFactory extends Factory
             'refresh_token'      => fake()->sha256(),
             'token_expires_at'   => now()->addHour(),
             'needs_reauth'       => false,
-            'sync_status'        => CalendarSyncStatusEnum::Active,
+            'sync_status'        => CalendarSyncStatusEnum::ACTIVE,
             'last_error_message' => null,
-            'last_synced_at'     => now(),
+            'last_synced_at'     => null,
         ];
     }
 
     public function google(): static
     {
-        return $this->state(['provider' => CalendarProviderEnum::Google]);
+        return $this->state(['provider' => CalendarProviderEnum::GOOGLE]);
     }
 
     public function disconnected(): static
     {
         return $this->state([
-            'sync_status'  => CalendarSyncStatusEnum::Disconnected,
+            'sync_status'  => CalendarSyncStatusEnum::DISCONNECTED,
             'access_token' => '',
         ]);
     }
@@ -52,7 +52,7 @@ class UserCalendarIntegrationFactory extends Factory
     {
         return $this->state([
             'needs_reauth' => true,
-            'sync_status'  => CalendarSyncStatusEnum::Error,
+            'sync_status'  => CalendarSyncStatusEnum::ERROR,
         ]);
     }
 }

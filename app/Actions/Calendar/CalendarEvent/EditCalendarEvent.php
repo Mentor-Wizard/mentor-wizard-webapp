@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Calendar\CalendarEvent;
 
 use App\Enums\CalendarEventStatusEnum;
-use App\Http\Requests\Calendar\EditCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Illuminate\Support\Arr;
 use Lorisleiva\Actions\Concerns\AsController;

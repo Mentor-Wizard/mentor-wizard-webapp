@@ -6,7 +6,6 @@ namespace App\Services\Calendar;
 
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
-use Illuminate\Support\Facades\Date;
 
 class SplitSlotsPerSessionDuration
 {
@@ -29,7 +28,7 @@ class SplitSlotsPerSessionDuration
     public function getSplitSlots(): array
     {
         foreach ($this->slots as $slot) {
-            $slotStart = Date::create($slot['start']->ceilHour());
+            $slotStart = $slot['start']->ceilHour();
             $slotDuration = (int) $slotStart->diffInMinutes($slot['end']);
 
             if ($slotDuration > $this->sessionDurationInMinutes) {

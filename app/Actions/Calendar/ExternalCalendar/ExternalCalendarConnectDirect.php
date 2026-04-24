@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar\ExternalCalendar;
 
-use App\Http\Requests\Calendar\ExternalCalendarConnectDirectRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarConnectDirectRequest;
 use App\Models\User;
 use App\Services\ExternalCalendar\ExternalCalendarSynchronizationService;
 use App\Traits\ExternalCalendar\HandlesCalendarIntegrationCleanup;
@@ -39,7 +39,7 @@ class ExternalCalendarConnectDirect
         if (! $result['success'] || empty($result['calendars'])) {
             $this->cleanupIntegration($user, $calendarProvider);
 
-            $error = $result['error'] ?? 'No calendars found. Check your Apple ID and App-Specific Password.';
+            $error = $result['error'] ?? 'No calendars found. Please check your credentials and try again.';
 
             return to_route('profile.edit')->with('error', $error);
         }

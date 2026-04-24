@@ -91,7 +91,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
     it('cleans up integration on validation failure', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Apple,
+            'provider' => CalendarProviderEnum::APPLE,
         ]);
 
         $this->actingAs($this->user)
@@ -102,7 +102,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
 
         expect(UserCalendarIntegration::query()
             ->where('user_id', $this->user->getKey())
-            ->where('provider', CalendarProviderEnum::Apple)
+            ->where('provider', CalendarProviderEnum::APPLE)
             ->exists()
         )->toBeFalse();
     });
@@ -113,7 +113,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::Apple,
+                CalendarProviderEnum::APPLE,
                 'apple@example.com',
                 'app-specific-password-123',
             );
@@ -122,7 +122,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::Apple,
+                CalendarProviderEnum::APPLE,
             )
             ->andReturn([
                 'success'   => true,
@@ -139,14 +139,14 @@ describe('ExternalCalendarConnectDirect', function (): void {
             ]);
 
         $response->assertRedirect(route('profile.edit'));
-        expect(session('calendar_provider'))->toBe(CalendarProviderEnum::Apple->value)
+        expect(session('calendar_provider'))->toBe(CalendarProviderEnum::APPLE->value)
             ->and(session('calendars'))->toHaveCount(1);
     });
 
     it('redirects with error and cleans up integration when no calendars are found', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Apple,
+            'provider' => CalendarProviderEnum::APPLE,
         ]);
 
         $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
@@ -171,7 +171,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
         expect(session('error'))->toBe('Authentication failed. Check your Apple ID and App-Specific Password.')
             ->and(UserCalendarIntegration::query()
                 ->where('user_id', $this->user->getKey())
-                ->where('provider', CalendarProviderEnum::Apple)
+                ->where('provider', CalendarProviderEnum::APPLE)
                 ->exists()
             )->toBeFalse();
     });
@@ -197,7 +197,7 @@ describe('ExternalCalendarConnectDirect', function (): void {
 
         $response->assertRedirect(route('profile.edit'));
 
-        expect(session('error'))->toBe('No calendars found. Check your Apple ID and App-Specific Password.');
+        expect(session('error'))->toBe('No calendars found. Please check your credentials and try again.');
     });
 
     it('requires authentication', function (): void {

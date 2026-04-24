@@ -7,7 +7,7 @@ namespace App\DTO\Calendar;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\MentorSessionTypeEnum;
-use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\StoreCalendarEventRequest;
 use App\Models\MentorProgram;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;

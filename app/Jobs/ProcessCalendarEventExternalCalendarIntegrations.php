@@ -36,7 +36,7 @@ class ProcessCalendarEventExternalCalendarIntegrations implements ShouldQueue
 
         $integrations = UserCalendarIntegration::query()
             ->whereIn('user_id', $userIds)
-            ->where('sync_status', CalendarSyncStatusEnum::Active)
+            ->where('sync_status', CalendarSyncStatusEnum::ACTIVE)
             ->get();
 
         foreach ($integrations as $integration) {

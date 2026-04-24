@@ -48,13 +48,13 @@ describe('Google Calendar Integration', function (): void {
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'          => $this->user->getKey(),
-            'provider'         => CalendarProviderEnum::GooglePersonalApp,
+            'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
             'access_token'     => config('calendar.testing.google.access_token'),
             'refresh_token'    => config('calendar.testing.google.refresh_token'),
             'client_id'        => config('calendar.testing.google.client_id'),
             'client_secret'    => config('calendar.testing.google.client_secret'),
             'calendar_id'      => config('calendar.testing.google.calendar_id'),
-            'sync_status'      => CalendarSyncStatusEnum::Active,
+            'sync_status'      => CalendarSyncStatusEnum::ACTIVE,
             'token_expires_at' => now()->subMinute(),
         ]);
 

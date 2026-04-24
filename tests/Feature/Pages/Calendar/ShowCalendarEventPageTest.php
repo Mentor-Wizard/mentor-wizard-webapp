@@ -152,8 +152,8 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('excludes integrations with non-active sync status', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Disconnected,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::DISCONNECTED,
         ]);
 
         $this->actingAs($this->host)
@@ -167,8 +167,8 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
         $otherUser = User::factory()->create();
         UserCalendarIntegration::factory()->create([
             'user_id'     => $otherUser->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $this->actingAs($this->host)
@@ -181,8 +181,8 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('returns integration with null external_event when no external event exists', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $response = $this->actingAs($this->host)
@@ -193,8 +193,8 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
 
         $integrations = $response->json('props.externalIntegrations');
         expect($integrations)->toHaveCount(1)
-            ->and($integrations[0]['provider'])->toBe(CalendarProviderEnum::Google->value)
-            ->and($integrations[0]['provider_label'])->toBe(CalendarProviderEnum::Google->label())
+            ->and($integrations[0]['provider'])->toBe(CalendarProviderEnum::GOOGLE->value)
+            ->and($integrations[0]['provider_label'])->toBe(CalendarProviderEnum::GOOGLE->label())
             ->and($integrations[0]['user_id'])->toBe($this->host->getKey())
             ->and($integrations[0]['user_name'])->toBe($this->host->username)
             ->and($integrations[0]['external_event'])->toBeNull();
@@ -203,8 +203,8 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('returns correct integration_id from UserCalendarIntegration', function (): void {
         $integration = UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $response = $this->actingAs($this->host)
@@ -220,14 +220,14 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('returns integration with external event when one exists for this calendar event', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $externalEvent = ExternalCalendarEvent::factory()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $this->host->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'sync_status'       => ExternalCalendarEventSyncStatusEnum::Synced,
         ]);
 
@@ -249,8 +249,8 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('excludes external events belonging to other calendar events', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         ExternalCalendarEvent::factory()->create([
@@ -260,7 +260,7 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
                 ])->getKey(),
             ])->getKey(),
             'user_id'  => $this->host->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         $response = $this->actingAs($this->host)
@@ -274,15 +274,15 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('excludes external events belonging to other users', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $otherUser = User::factory()->create();
         ExternalCalendarEvent::factory()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $otherUser->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
         ]);
 
         $response = $this->actingAs($this->host)
@@ -296,21 +296,21 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('returns external event logs with correct structure', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $externalEvent = ExternalCalendarEvent::factory()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $this->host->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
         ]);
 
         $log = ExternalCalendarEventLog::factory()->error()->create([
             'external_calendar_event_id' => $externalEvent->getKey(),
             'calendar_event_id'          => $this->event->getKey(),
             'user_id'                    => $this->host->getKey(),
-            'provider'                   => CalendarProviderEnum::Google,
+            'provider'                   => CalendarProviderEnum::GOOGLE,
             'message'                    => 'Sync failed',
         ]);
 
@@ -329,21 +329,21 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('limits external event logs to 20 most recent', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $externalEvent = ExternalCalendarEvent::factory()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $this->host->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
         ]);
 
         ExternalCalendarEventLog::factory()->count(25)->create([
             'external_calendar_event_id' => $externalEvent->getKey(),
             'calendar_event_id'          => $this->event->getKey(),
             'user_id'                    => $this->host->getKey(),
-            'provider'                   => CalendarProviderEnum::Google,
+            'provider'                   => CalendarProviderEnum::GOOGLE,
         ]);
 
         $response = $this->actingAs($this->host)
@@ -357,14 +357,14 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('returns null sync_status when external event has no sync status', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         ExternalCalendarEvent::factory()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $this->host->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'sync_status'       => null,
         ]);
 
@@ -379,13 +379,13 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     it('returns multiple integrations for different providers', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->host->getKey(),
-            'provider'    => CalendarProviderEnum::Outlook,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::OUTLOOK,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $response = $this->actingAs($this->host)
@@ -395,7 +395,7 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
         $integrations = $response->json('props.externalIntegrations');
         $providers = array_column($integrations, 'provider');
         expect($integrations)->toHaveCount(2)
-            ->and($providers)->toContain(CalendarProviderEnum::Google->value)
-            ->and($providers)->toContain(CalendarProviderEnum::Outlook->value);
+            ->and($providers)->toContain(CalendarProviderEnum::GOOGLE->value)
+            ->and($providers)->toContain(CalendarProviderEnum::OUTLOOK->value);
     });
 });

@@ -61,6 +61,9 @@ const confirmCalendarEvent = (calendarEventId, mentorProgramId) => {
 };
 
 const cancelEvent = (calendarEventId) => {
+  if (!window.confirm('Are you sure you want to cancel this event?')) {
+    return;
+  }
   router.delete(
     route('pages.calendar.delete', { calendarEvent: calendarEventId }),
     {
@@ -82,14 +85,16 @@ const openEvent = (calendarEventId) => {
 const formatDateTime = (datetimeStr) => {
   if (!datetimeStr) return '—';
   const d = new Date(datetimeStr);
+  const locale = props.locale || 'en-GB';
+
   return (
-    d.toLocaleDateString('en-GB', {
+    d.toLocaleDateString(locale, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     })
     + ' '
-    + d.toLocaleTimeString('en-GB', {
+    + d.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,

@@ -32,12 +32,12 @@ class PendingCalendarEventsListPage
 
         $upcomingCalendarEvents = $events
             ->filter(fn (CalendarEvent $event): bool => $event->start_date_time >= today())
-            ->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram->name ?? 'Unknown Program');
+            ->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram?->name);
 
         $pastCalendarEvents = $events
             ->filter(fn (CalendarEvent $event): bool => $event->start_date_time < today())
             ->sortByDesc('start_date_time')
-            ->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram->name ?? 'Unknown Program');
+            ->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram?->name);
 
         return Inertia::render('Calendar/ListPendingCalendarEventsPage', [
             'locale'                 => app()->getLocale(),

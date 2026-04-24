@@ -66,3 +66,6 @@ frankenphp
 # Tasks docs
 /docs/tasks-docs
 /conductor/
+.codex
+coderabbit.md
+FeatureIssue.md

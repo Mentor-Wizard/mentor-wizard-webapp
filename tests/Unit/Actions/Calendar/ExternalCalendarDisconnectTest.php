@@ -20,7 +20,7 @@ describe('ExternalCalendarDisconnect', function (): void {
     it('disconnects and redirects to profile edit with success', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         $syncService = Mockery::mock(ExternalCalendarSynchronizationService::class);
@@ -28,7 +28,7 @@ describe('ExternalCalendarDisconnect', function (): void {
             ->once()
             ->with(
                 Mockery::on(fn ($u): bool => $u->getKey() === $this->user->getKey()),
-                CalendarProviderEnum::Google,
+                CalendarProviderEnum::GOOGLE,
             );
 
         app()->instance(ExternalCalendarSynchronizationService::class, $syncService);
@@ -53,7 +53,7 @@ describe('ExternalCalendarDisconnect', function (): void {
     it('cleans up integration on invalid provider', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'  => $this->user->getKey(),
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         $this->actingAs($this->user)

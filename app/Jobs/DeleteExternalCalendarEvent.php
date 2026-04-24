@@ -69,7 +69,12 @@ class DeleteExternalCalendarEvent implements ShouldQueue
 
     public function failed(Throwable $throwable): void
     {
-        Log::error(sprintf('Failed to delete external event %s for integration %s: %s', $this->externalEvent->external_event_id, $this->integration->getKey(), $throwable->getMessage()));
+        Log::error(sprintf(
+            'Failed to delete external event %s for integration %s: %s',
+            $this->externalEvent->external_event_id,
+            $this->integration?->getKey() ?? 'N/A',
+            $throwable->getMessage()
+        ));
 
         $this->externalEvent->update(['sync_status' => ExternalCalendarEventSyncStatusEnum::Error]);
 

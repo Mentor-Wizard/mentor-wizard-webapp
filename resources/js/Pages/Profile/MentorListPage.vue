@@ -71,7 +71,7 @@ defineProps({
                   >
                     View Profile
                   </Link>
-                  <a
+                  <Link
                     v-if="mentor.mainProgramSlug"
                     :href="
                       route('pages.mentor.program.book', mentor.mainProgramSlug)
@@ -79,7 +79,7 @@ defineProps({
                     class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
                   >
                     Book Consultation
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

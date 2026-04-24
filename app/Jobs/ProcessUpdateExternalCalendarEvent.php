@@ -39,7 +39,7 @@ class ProcessUpdateExternalCalendarEvent implements ShouldQueue
 
         $integrations = UserCalendarIntegration::query()
             ->whereIn('user_id', $externalEvents->pluck('user_id')->unique())
-            ->where('sync_status', CalendarSyncStatusEnum::Active)
+            ->where('sync_status', CalendarSyncStatusEnum::ACTIVE)
             ->get()
             ->keyBy(fn (UserCalendarIntegration $integration): string => $integration->user_id.'_'.$integration->provider->value);
 

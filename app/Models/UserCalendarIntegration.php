@@ -30,7 +30,6 @@ class UserCalendarIntegration extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'provider',
         'client_id',
         'client_secret',

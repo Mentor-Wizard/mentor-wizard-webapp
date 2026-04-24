@@ -6,9 +6,15 @@ namespace App\Providers;
 
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\ExternalCalendarEvent;
+use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
+use App\Models\UserCalendarIntegration;
 use App\Models\UserSchedule;
 use App\Policies\CalendarEventPolicy;
+use App\Policies\ExternalCalendarEventLogPolicy;
+use App\Policies\ExternalCalendarEventPolicy;
+use App\Policies\UserCalendarIntegrationPolicy;
 use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -43,13 +49,16 @@ class AppServiceProvider extends ServiceProvider
         $this->configDatabase();
         $this->configTesting();
 
-        //        if ($this->app->isProduction()) {
-        URL::forceHttps();
-        //        }
+        if ($this->app->isProduction()) {
+            URL::forceHttps();
+        }
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
         Gate::policy(CalendarEvent::class, CalendarEventPolicy::class);
         Gate::policy(UserSchedule::class, UserSchedulePolicy::class);
+        Gate::policy(ExternalCalendarEventLog::class, ExternalCalendarEventLogPolicy::class);
+        Gate::policy(UserCalendarIntegration::class, UserCalendarIntegrationPolicy::class);
+        Gate::policy(ExternalCalendarEvent::class, ExternalCalendarEventPolicy::class);
         Vite::prefetch(concurrency: 3);
 
         $this->configRateLimiters();

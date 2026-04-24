@@ -8,7 +8,7 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
-use App\Http\Requests\Calendar\ConfirmCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\ConfirmCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;

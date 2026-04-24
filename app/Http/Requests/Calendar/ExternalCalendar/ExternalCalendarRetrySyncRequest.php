@@ -2,22 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Calendar;
+namespace App\Http\Requests\Calendar\ExternalCalendar;
 
 use App\Enums\CalendarProviderEnum;
 use Illuminate\Contracts\Validation\Validator;
 
-class ExternalCalendarSelectCalendarRequest extends ExternalCalendarRequest
+class ExternalCalendarRetrySyncRequest extends ExternalCalendarRequest
 {
     /**
-     * @return array<string, array<int, string>>
+     * @return array{}
      */
     public function rules(): array
     {
-        return [
-            'calendar_id'   => ['required', 'string'],
-            'calendar_name' => ['required', 'string'],
-        ];
+        return [];
     }
 
     public function withValidator(Validator $validator): void

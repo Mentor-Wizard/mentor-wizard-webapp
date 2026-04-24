@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarProviderEnum;
-use App\Http\Requests\Calendar\ExternalCalendarConnectCallbackRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarConnectCallbackRequest;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Database\Seeders\RoleSeeder;
@@ -59,7 +59,7 @@ describe('ExternalCalendarConnectCallbackRequest', function (): void {
 
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
+                'provider' => CalendarProviderEnum::GOOGLE,
             ]);
 
             $state = encrypt(json_encode(['user_id' => $this->user->getKey(), 'provider' => 'google']));

@@ -57,8 +57,8 @@ describe('ExternalCalendarRetrySync', function (): void {
     it('resets sync_status to active and clears last_error_message', function (): void {
         $integration = UserCalendarIntegration::factory()->create([
             'user_id'            => $this->user->getKey(),
-            'provider'           => CalendarProviderEnum::Google,
-            'sync_status'        => CalendarSyncStatusEnum::Error,
+            'provider'           => CalendarProviderEnum::GOOGLE,
+            'sync_status'        => CalendarSyncStatusEnum::ERROR,
             'last_error_message' => 'Token expired.',
         ]);
 
@@ -70,15 +70,15 @@ describe('ExternalCalendarRetrySync', function (): void {
             ->assertSessionHas('success');
 
         expect($integration->refresh())
-            ->sync_status->toBe(CalendarSyncStatusEnum::Active)
+            ->sync_status->toBe(CalendarSyncStatusEnum::ACTIVE)
             ->last_error_message->toBeNull();
     });
 
     it('dispatches sync job for a confirmed event without existing external sync', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Error,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ERROR,
         ]);
 
         $event = CalendarEvent::factory()->create([
@@ -104,8 +104,8 @@ describe('ExternalCalendarRetrySync', function (): void {
     it('does not dispatch sync for events already synced for this provider', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Error,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ERROR,
         ]);
 
         $event = CalendarEvent::factory()->create(['status' => CalendarEventStatusEnum::CONFIRMED]);
@@ -114,7 +114,7 @@ describe('ExternalCalendarRetrySync', function (): void {
         ExternalCalendarEvent::query()->create([
             'calendar_event_id' => $event->getKey(),
             'user_id'           => $this->user->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'external_event_id' => 'ext-123',
         ]);
 
@@ -129,8 +129,8 @@ describe('ExternalCalendarRetrySync', function (): void {
     it('does not dispatch sync for non-confirmed events', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Error,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ERROR,
         ]);
 
         $event = CalendarEvent::factory()->create(['status' => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION]);
@@ -147,8 +147,8 @@ describe('ExternalCalendarRetrySync', function (): void {
     it('does not dispatch sync for events the user is not a participant in', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Error,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ERROR,
         ]);
 
         $otherUser = User::factory()->create();
@@ -166,8 +166,8 @@ describe('ExternalCalendarRetrySync', function (): void {
     it('dispatches multiple jobs when multiple unsynced events exist', function (): void {
         UserCalendarIntegration::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Error,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ERROR,
         ]);
 
         $events = CalendarEvent::factory(3)->create([

@@ -7,7 +7,7 @@ namespace App\Actions\Calendar\CalendarEvent;
 use App\DTO\Calendar\CalendarEventData;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
-use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;

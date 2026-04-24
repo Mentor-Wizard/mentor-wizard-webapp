@@ -2,20 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Calendar;
+namespace App\Http\Requests\Calendar\ExternalCalendar;
 
 use App\Enums\CalendarProviderEnum;
 use Illuminate\Contracts\Validation\Validator;
-use Override;
 
-class ExternalCalendarDisconnectRequest extends ExternalCalendarRequest
+class ExternalCalendarSelectCalendarRequest extends ExternalCalendarRequest
 {
     /**
-     * @return array{}
+     * @return array<string, array<int, string>>
      */
     public function rules(): array
     {
-        return [];
+        return [
+            'calendar_id'   => ['required', 'string'],
+            'calendar_name' => ['required', 'string'],
+        ];
     }
 
     public function withValidator(Validator $validator): void
@@ -25,13 +27,5 @@ class ExternalCalendarDisconnectRequest extends ExternalCalendarRequest
                 $validator->errors()->add('provider', 'Invalid calendar provider.');
             }
         });
-    }
-
-    #[Override]
-    protected function failedValidation(Validator $validator): never
-    {
-        $this->cleanupIntegration($this->user(), $this->resolveProvider());
-
-        parent::failedValidation($validator);
     }
 }

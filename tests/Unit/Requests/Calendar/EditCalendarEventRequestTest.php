@@ -1,13 +1,14 @@
 <?php
 
 declare(strict_types=1);
+
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
 use App\Enums\MentorSessionDurationOptionsEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use App\Http\Requests\Calendar\EditCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;

@@ -11,7 +11,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class StoreBatchUserSchedule
@@ -32,7 +31,7 @@ class StoreBatchUserSchedule
             $deleteIds = $request->input('delete_ids', []);
 
             // Added gate here, to check each schedule record, on case of possibility to update it
-            Gate::authorize('upsert', [UserSchedule::class, $schedules, $deleteIds]);
+            abort_if($request->user()->cannot('upsert', [UserSchedule::class, $schedules, $deleteIds]), 403);
 
             if (! empty($deleteIds)) {
                 UserSchedule::query()

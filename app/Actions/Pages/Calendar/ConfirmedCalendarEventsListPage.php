@@ -34,7 +34,7 @@ class ConfirmedCalendarEventsListPage
             ->filter(fn (CalendarEvent $event): bool => $event->start_date_time >= today())
             ->groupBy(fn (CalendarEvent $event): int => $event->mentor_program_id ?? 0)
             ->map(fn (Collection $group): array => [
-                'name'   => $group->first()->mentorProgram->name ?? 'Unknown Program',
+                'name'   => $group->first()->mentorProgram?->name,
                 'events' => $group->values(),
             ]);
 
@@ -43,7 +43,7 @@ class ConfirmedCalendarEventsListPage
             ->sortByDesc('start_date_time')
             ->groupBy(fn (CalendarEvent $event): int => $event->mentor_program_id ?? 0)
             ->map(fn (Collection $group): array => [
-                'name'   => $group->first()->mentorProgram->name ?? 'Unknown Program',
+                'name'   => $group->first()->mentorProgram?->name,
                 'events' => $group->values(),
             ]);
 

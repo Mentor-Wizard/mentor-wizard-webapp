@@ -27,7 +27,7 @@ final class CalendarEventPolicy
 
     public function confirm(User $user, CalendarEvent $calendarEvent): bool
     {
-        // Only the mentor of the related mentor program can update events
+        // Only the mentor of the related mentor program can confirm events
         $mentorProgram = $calendarEvent->mentorProgram()->first();
         if ($mentorProgram === null) {
             return false;

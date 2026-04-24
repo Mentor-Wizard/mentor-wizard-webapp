@@ -223,6 +223,14 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
+     * @return HasMany<UserCalendarIntegration, $this>
+     */
+    public function calendarIntegrations(): HasMany
+    {
+        return $this->hasMany(UserCalendarIntegration::class);
+    }
+
+    /**
      * @return HasMany<UserSchedule, $this>
      */
     public function activeScheduleRecords(): HasMany

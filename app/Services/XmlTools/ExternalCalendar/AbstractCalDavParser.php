@@ -8,9 +8,25 @@ use XMLReader;
 
 abstract class AbstractCalDavParser
 {
-    protected const string NS_DAV = 'DAV:';
+    public const string NS_DAV = 'DAV:';
 
-    protected const string NS_CALDAV = 'urn:ietf:params:xml:ns:caldav';
+    public const string NS_CALDAV = 'urn:ietf:params:xml:ns:caldav';
+
+    public const string EL_RESPONSE = 'response';
+
+    public const string EL_HREF = 'href';
+
+    public const string EL_DISPLAYNAME = 'displayname';
+
+    public const string EL_CALENDAR = 'calendar';
+
+    public const string EL_CALENDAR_DATA = 'calendar-data';
+
+    public const string EL_CURRENT_USER_PRINCIPAL = 'current-user-principal';
+
+    public const string EL_CALENDAR_HOME_SET = 'calendar-home-set';
+
+    public const string STR_HOME = 'home';
 
     public function __construct(protected readonly string $caldavRoot = '') {}
 
@@ -37,6 +53,6 @@ abstract class AbstractCalDavParser
             return $path;
         }
 
-        return $this->caldavRoot.'/'.mb_ltrim($path, '/');
+        return mb_rtrim($this->caldavRoot, '/').'/'.mb_ltrim($path, '/');
     }
 }

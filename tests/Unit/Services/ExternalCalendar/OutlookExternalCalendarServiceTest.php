@@ -33,8 +33,8 @@ describe('OutlookExternalCalendarService', function (): void {
             $integration = $this->service->saveCredentials($this->user, null, null);
 
             expect($integration->user_id)->toBe($this->user->getKey())
-                ->and($integration->provider)->toBe(CalendarProviderEnum::Outlook)
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending)
+                ->and($integration->provider)->toBe(CalendarProviderEnum::OUTLOOK)
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING)
                 ->and($integration->access_token)->toBeNull()
                 ->and($integration->refresh_token)->toBeNull()
                 ->and($integration->needs_reauth)->toBeFalse();
@@ -43,14 +43,14 @@ describe('OutlookExternalCalendarService', function (): void {
         it('updates an existing Outlook integration and resets tokens', function (): void {
             $existing = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             $integration = $this->service->saveCredentials($this->user, null, null);
 
             expect($integration->getKey())->toBe($existing->getKey())
                 ->and($integration->access_token)->toBeNull()
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending);
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING);
         });
     });
 
@@ -70,7 +70,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('exchanges the authorization code for tokens and updates the integration', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             Http::fake([
@@ -84,14 +84,14 @@ describe('OutlookExternalCalendarService', function (): void {
             $result = $this->service->handleCallback($this->user, 'auth-code-xyz');
 
             expect($result->getKey())->toBe($integration->getKey())
-                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::Pending)
+                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::PENDING)
                 ->and($result->token_expires_at)->not->toBeNull();
         });
 
         it('stores null token_expires_at when expires_in is absent', function (): void {
             UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             Http::fake([
@@ -108,7 +108,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('updates the integration with calendar info and sets Active status', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             $result = $this->service->selectCalendar($this->user, 'cal-id-123', 'Outlook Primary');
@@ -116,7 +116,7 @@ describe('OutlookExternalCalendarService', function (): void {
             expect($result->getKey())->toBe($integration->getKey())
                 ->and($result->calendar_id)->toBe('cal-id-123')
                 ->and($result->calendar_name)->toBe('Outlook Primary')
-                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::Active)
+                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::ACTIVE)
                 ->and($result->needs_reauth)->toBeFalse()
                 ->and($result->last_error_message)->toBeNull();
         });
@@ -126,7 +126,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('returns mapped calendar list on success', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             Http::fake([
@@ -150,7 +150,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('falls back to the id when the name field is missing', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             Http::fake([
@@ -167,7 +167,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('returns the API error message on failure', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             Http::fake([
@@ -187,7 +187,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('falls back to a default error message when the API gives none', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Outlook,
+                'provider' => CalendarProviderEnum::OUTLOOK,
             ]);
 
             Http::fake(['https://graph.microsoft.com/*' => Http::response([], 500)]);
@@ -202,7 +202,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('returns mapped events when the token is valid', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'calendar_id'      => 'test-cal',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -237,7 +237,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('maps whitespace-only body content to a null description', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -268,7 +268,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('throws RuntimeException when the Graph API returns an error', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -289,7 +289,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('throws and marks needs_reauth when token is expired with no refresh token', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->subMinute(),
                 'refresh_token'    => null,
             ]);
@@ -309,7 +309,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('throws and marks needs_reauth when the token refresh request fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->subMinute(),
             ]);
 
@@ -332,7 +332,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('refreshes the token and fetches events when the token is expired but refresh succeeds', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->subMinute(),
             ]);
 
@@ -367,7 +367,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('returns the external event id on success', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'calendar_id'      => 'test-cal',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -384,7 +384,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('throws RuntimeException when event creation fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -413,7 +413,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('sends a PATCH request to the correct event URL', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'calendar_id'      => 'test-cal',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -429,7 +429,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('throws RuntimeException when event update fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -449,7 +449,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('sends a DELETE request and succeeds on 200', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'calendar_id'      => 'test-cal',
                 'token_expires_at' => now()->addHour(),
             ]);
@@ -465,7 +465,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('does not throw when event is already deleted externally (404)', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->addHour(),
             ]);
 
@@ -479,7 +479,7 @@ describe('OutlookExternalCalendarService', function (): void {
         it('throws RuntimeException on non-404 failure', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Outlook,
+                'provider'         => CalendarProviderEnum::OUTLOOK,
                 'token_expires_at' => now()->addHour(),
             ]);
 

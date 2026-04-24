@@ -29,7 +29,7 @@ describe('ReEncryptCalendarCredentials job', function (): void {
         $originalRefresh = 'my-refresh-token-'.fake()->sha256();
 
         $integration = UserCalendarIntegration::factory()->create([
-            'provider'      => CalendarProviderEnum::Google,
+            'provider'      => CalendarProviderEnum::GOOGLE,
             'access_token'  => $originalToken,
             'refresh_token' => $originalRefresh,
         ]);
@@ -52,7 +52,7 @@ describe('ReEncryptCalendarCredentials job', function (): void {
 
     it('updates last_encrypted_at timestamp', function (): void {
         $integration = UserCalendarIntegration::factory()->create([
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'last_encrypted_at' => null,
         ]);
 
@@ -64,7 +64,7 @@ describe('ReEncryptCalendarCredentials job', function (): void {
 
     it('skips null and empty credential fields', function (): void {
         $integration = UserCalendarIntegration::factory()->create([
-            'provider'      => CalendarProviderEnum::Google,
+            'provider'      => CalendarProviderEnum::GOOGLE,
             'access_token'  => null,
             'refresh_token' => null,
             'client_id'     => null,
@@ -82,7 +82,7 @@ describe('ReEncryptCalendarCredentials job', function (): void {
         Log::spy();
 
         UserCalendarIntegration::factory()->count(2)->create([
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         new ReEncryptCalendarCredentials()->handle($this->encrypter);
@@ -98,12 +98,12 @@ describe('ReEncryptCalendarCredentials job', function (): void {
         Log::spy();
 
         $goodIntegration = UserCalendarIntegration::factory()->create([
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         // Create an integration with a corrupted raw value that cannot be decrypted
         $badIntegration = UserCalendarIntegration::factory()->create([
-            'provider' => CalendarProviderEnum::Google,
+            'provider' => CalendarProviderEnum::GOOGLE,
         ]);
 
         // Corrupt the raw encrypted value directly in DB

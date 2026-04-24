@@ -108,6 +108,9 @@ class CalendarCredentialEncrypter
         throw_if($decoded === false, RuntimeException::class,
             $envName.' must be a valid base64-encoded 32-byte key.');
 
+        throw_if(mb_strlen($decoded) !== 32, RuntimeException::class,
+            $envName.' must decode to exactly 32 bytes.');
+
         return $decoded;
     }
 }

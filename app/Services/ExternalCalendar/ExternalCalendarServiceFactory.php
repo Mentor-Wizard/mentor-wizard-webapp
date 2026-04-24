@@ -19,10 +19,10 @@ class ExternalCalendarServiceFactory
     public function for(CalendarProviderEnum $provider): ExternalCalendarServiceInterface
     {
         return match ($provider) {
-            CalendarProviderEnum::Google            => $this->googleApp,
-            CalendarProviderEnum::GooglePersonalApp => $this->googlePersonalApp,
-            CalendarProviderEnum::Outlook           => $this->outlook,
-            CalendarProviderEnum::Apple             => $this->apple,
+            CalendarProviderEnum::GOOGLE              => $this->googleApp,
+            CalendarProviderEnum::GOOGLE_PERSONAL_APP => $this->googlePersonalApp,
+            CalendarProviderEnum::OUTLOOK             => $this->outlook,
+            CalendarProviderEnum::APPLE               => $this->apple,
         };
     }
 }

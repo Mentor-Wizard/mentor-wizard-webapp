@@ -384,10 +384,10 @@ base64(iv):base64(tag):base64(ciphertext)
 
 The application supports two Google flows that cannot be active simultaneously:
 
-| Flow                                       | Provider enum                             | When to use                                                |
-| ------------------------------------------ | ----------------------------------------- | ---------------------------------------------------------- |
-| **App-level OAuth** (`google`)             | `CalendarProviderEnum::Google`            | You register one OAuth app; all users authenticate via it  |
-| **Per-user OAuth** (`google_personal_app`) | `CalendarProviderEnum::GooglePersonalApp` | Each user supplies their own `client_id` / `client_secret` |
+| Flow                                       | Provider enum                               | When to use                                                |
+| ------------------------------------------ | ------------------------------------------- | ---------------------------------------------------------- |
+| **App-level OAuth** (`google`)             | `CalendarProviderEnum::GOOGLE`              | You register one OAuth app; all users authenticate via it  |
+| **Per-user OAuth** (`google_personal_app`) | `CalendarProviderEnum::GOOGLE_PERSONAL_APP` | Each user supplies their own `client_id` / `client_secret` |
 
 #### Setting up the app-level flow (recommended)
 

@@ -13,7 +13,7 @@ class GoogleAppExternalCalendarService extends AbstractGoogleExternalCalendarSer
 {
     public function callbackUrl(): string
     {
-        return route('external-calendar.connect.callback', ['provider' => CalendarProviderEnum::Google->value]);
+        return route('external-calendar.connect.callback', ['provider' => CalendarProviderEnum::GOOGLE->value]);
     }
 
     public function saveCredentials(User $user, ?string $clientId, ?string $clientSecret): UserCalendarIntegration
@@ -23,7 +23,7 @@ class GoogleAppExternalCalendarService extends AbstractGoogleExternalCalendarSer
         return UserCalendarIntegration::query()->updateOrCreate(
             [
                 'user_id'  => $user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
+                'provider' => CalendarProviderEnum::GOOGLE,
             ],
             [
                 'client_id'          => null,
@@ -34,7 +34,7 @@ class GoogleAppExternalCalendarService extends AbstractGoogleExternalCalendarSer
                 'calendar_id'        => null,
                 'calendar_name'      => null,
                 'needs_reauth'       => false,
-                'sync_status'        => CalendarSyncStatusEnum::Pending,
+                'sync_status'        => CalendarSyncStatusEnum::PENDING,
                 'last_error_message' => null,
             ]
         );
@@ -42,7 +42,7 @@ class GoogleAppExternalCalendarService extends AbstractGoogleExternalCalendarSer
 
     protected function provider(): CalendarProviderEnum
     {
-        return CalendarProviderEnum::Google;
+        return CalendarProviderEnum::GOOGLE;
     }
 
     protected function clientId(?UserCalendarIntegration $integration = null): ?string

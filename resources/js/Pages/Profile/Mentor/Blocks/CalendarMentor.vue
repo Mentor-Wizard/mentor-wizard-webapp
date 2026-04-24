@@ -215,7 +215,13 @@ const timeClass = (day) => [
         :key="day.date"
         type="button"
         :disabled="!day.slots || day.slots.length === 0"
-        :class="dayClass(day, index, calendarBlock.calendarSlots.length)"
+        :class="
+          dayClass(
+            day,
+            index,
+            calendarBlock ? calendarBlock.calendarSlots.length : 0,
+          )
+        "
         @click="selectDate(day)"
       >
         <time :datetime="day.date" :class="timeClass(day)">

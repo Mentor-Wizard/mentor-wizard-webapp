@@ -2,25 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Calendar;
+namespace App\Http\Requests\Calendar\ExternalCalendar;
 
 use App\Enums\CalendarProviderEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Override;
 
-class ExternalCalendarConnectRedirectRequest extends ExternalCalendarRequest
+class ExternalCalendarConnectDirectRequest extends ExternalCalendarRequest
 {
-    /** @return array<string, mixed> */
+    /**
+     * @return array<string, array<int, string>>
+     */
     public function rules(): array
     {
-        $provider = $this->resolveProvider();
-
-        if (! $provider instanceof CalendarProviderEnum || $provider->usesAppCredentials()) {
-            return [];
-        }
-
         return [
-            'client_id'     => ['required', 'string', 'min:10'],
+            'client_id'     => ['required', 'string', 'email'],
             'client_secret' => ['required', 'string', 'min:10'],
         ];
     }
@@ -36,8 +32,8 @@ class ExternalCalendarConnectRedirectRequest extends ExternalCalendarRequest
                 return;
             }
 
-            if ($provider->isCalDav()) {
-                $validator->errors()->add('provider', 'This provider does not support OAuth redirect.');
+            if (! $provider->isCalDav()) {
+                $validator->errors()->add('provider', 'This provider does not support direct credentials.');
             }
         });
     }

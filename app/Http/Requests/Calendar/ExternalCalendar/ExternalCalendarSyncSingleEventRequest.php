@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Calendar;
+namespace App\Http\Requests\Calendar\ExternalCalendar;
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
@@ -47,7 +47,7 @@ class ExternalCalendarSyncSingleEventRequest extends ExternalCalendarRequest
             $integrationExists = UserCalendarIntegration::query()
                 ->where('user_id', $user->getKey())
                 ->where('provider', $provider)
-                ->where('sync_status', CalendarSyncStatusEnum::Active)
+                ->where('sync_status', CalendarSyncStatusEnum::ACTIVE)
                 ->exists();
 
             if (! $integrationExists) {

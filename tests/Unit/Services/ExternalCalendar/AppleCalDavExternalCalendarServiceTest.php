@@ -70,8 +70,8 @@ describe('AppleCalDavExternalCalendarService', function (): void {
             $integration = $this->service->saveCredentials($this->user, 'user@icloud.com', 'xxxx-yyyy-zzzz');
 
             expect($integration->user_id)->toBe($this->user->getKey())
-                ->and($integration->provider)->toBe(CalendarProviderEnum::Apple)
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending)
+                ->and($integration->provider)->toBe(CalendarProviderEnum::APPLE)
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING)
                 ->and($integration->access_token)->toBeNull()
                 ->and($integration->needs_reauth)->toBeFalse();
         });
@@ -79,13 +79,13 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('updates an existing Apple integration', function (): void {
             $existing = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             $integration = $this->service->saveCredentials($this->user, 'new@icloud.com', 'new-password');
 
             expect($integration->getKey())->toBe($existing->getKey())
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending);
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING);
         });
     });
 
@@ -93,7 +93,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('updates the integration with calendar URL and sets Active status', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             $result = $this->service->selectCalendar(
@@ -105,7 +105,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
             expect($result->getKey())->toBe($integration->getKey())
                 ->and($result->calendar_id)->toBe('https://caldav.icloud.com/calendars/alice/home/')
                 ->and($result->calendar_name)->toBe('My Calendar')
-                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::Active)
+                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::ACTIVE)
                 ->and($result->needs_reauth)->toBeFalse();
         });
     });
@@ -114,7 +114,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('discovers the calendar home and returns the calendar list on success', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'   => $this->user->getKey(),
-                'provider'  => CalendarProviderEnum::Apple,
+                'provider'  => CalendarProviderEnum::APPLE,
                 'client_id' => 'user@icloud.com',
             ]);
 
@@ -135,7 +135,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('discovers the calendar home when well-known returns a 301 redirect', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'   => $this->user->getKey(),
-                'provider'  => CalendarProviderEnum::Apple,
+                'provider'  => CalendarProviderEnum::APPLE,
                 'client_id' => 'user@icloud.com',
             ]);
 
@@ -159,7 +159,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('returns an error when the well-known PROPFIND fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             Http::fake([
@@ -176,7 +176,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('returns an error when the principal URL cannot be parsed from the response', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             // Returns a valid 207 but XML has no current-user-principal element
@@ -193,7 +193,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('returns an error when the calendar home PROPFIND fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             Http::fake([
@@ -210,7 +210,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('returns an error when the calendar list PROPFIND fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             Http::fake([
@@ -230,7 +230,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('returns an empty array when the REPORT response contains no events', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'      => $this->user->getKey(),
-                'provider'     => CalendarProviderEnum::Apple,
+                'provider'     => CalendarProviderEnum::APPLE,
                 'calendar_id'  => 'https://caldav.icloud.com/calendars/alice/home/',
             ]);
 
@@ -250,7 +250,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('throws RuntimeException when the REPORT request fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'     => $this->user->getKey(),
-                'provider'    => CalendarProviderEnum::Apple,
+                'provider'    => CalendarProviderEnum::APPLE,
                 'calendar_id' => 'https://caldav.icloud.com/calendars/alice/home/',
             ]);
 
@@ -279,7 +279,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('creates an ICS file via PUT and returns its URL', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'     => $this->user->getKey(),
-                'provider'    => CalendarProviderEnum::Apple,
+                'provider'    => CalendarProviderEnum::APPLE,
                 'calendar_id' => 'https://caldav.icloud.com/calendars/alice/home/',
             ]);
 
@@ -297,7 +297,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('throws RuntimeException when event creation fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'     => $this->user->getKey(),
-                'provider'    => CalendarProviderEnum::Apple,
+                'provider'    => CalendarProviderEnum::APPLE,
                 'calendar_id' => 'https://caldav.icloud.com/calendars/alice/home/',
             ]);
 
@@ -323,7 +323,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('sends a PUT request to the event ICS URL', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             $eventUrl = 'https://caldav.icloud.com/calendars/alice/home/some-uid.ics';
@@ -339,7 +339,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('throws RuntimeException when event update fails', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             Http::fake(['https://caldav.icloud.com/*' => Http::response('', 500)]);
@@ -356,7 +356,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('sends a DELETE request and succeeds on 200', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             $eventUrl = 'https://caldav.icloud.com/calendars/alice/home/evt-to-del.ics';
@@ -372,7 +372,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('does not throw when event is already deleted externally (404)', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             Http::fake(['https://caldav.icloud.com/*' => Http::response('', 404)]);
@@ -385,7 +385,7 @@ describe('AppleCalDavExternalCalendarService', function (): void {
         it('throws RuntimeException on non-404 failure', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ]);
 
             Http::fake(['https://caldav.icloud.com/*' => Http::response('', 500)]);

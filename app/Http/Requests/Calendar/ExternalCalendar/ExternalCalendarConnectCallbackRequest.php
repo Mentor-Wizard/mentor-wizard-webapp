@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Calendar;
+namespace App\Http\Requests\Calendar\ExternalCalendar;
 
 use Illuminate\Contracts\Validation\Validator;
 use Override;

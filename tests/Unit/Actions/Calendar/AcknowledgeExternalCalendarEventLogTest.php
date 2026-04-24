@@ -44,4 +44,21 @@ describe('AcknowledgeExternalCalendarEventLog', function (): void {
         expect($response)->toBeInstanceOf(RedirectResponse::class)
             ->and($response->getSession()->get('success'))->toBe('Error acknowledged.');
     });
+
+    it('rejects acknowledgement for non-error logs', function (): void {
+        $log = ExternalCalendarEventLog::factory()->create([
+            'type' => ExternalCalendarEventLogTypeEnum::Success,
+        ]);
+
+        $action = new AcknowledgeExternalCalendarEventLog;
+        $response = $action->handle($log);
+
+        expect($response)->toBeInstanceOf(RedirectResponse::class)
+            ->and($response->getSession()->get('error'))->toBe('Only error logs can be acknowledged.');
+
+        $this->assertDatabaseHas(ExternalCalendarEventLog::class, [
+            'id'   => $log->getKey(),
+            'type' => ExternalCalendarEventLogTypeEnum::Success->value,
+        ]);
+    });
 });

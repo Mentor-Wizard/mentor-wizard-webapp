@@ -33,8 +33,8 @@ describe('GoogleAppExternalCalendarService (shared app credentials)', function (
             $integration = $this->service->saveCredentials($this->user, null, null);
 
             expect($integration->user_id)->toBe($this->user->getKey())
-                ->and($integration->provider)->toBe(CalendarProviderEnum::Google)
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending)
+                ->and($integration->provider)->toBe(CalendarProviderEnum::GOOGLE)
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING)
                 ->and($integration->client_id)->toBeNull()
                 ->and($integration->client_secret)->toBeNull()
                 ->and($integration->access_token)->toBeNull();
@@ -43,14 +43,14 @@ describe('GoogleAppExternalCalendarService (shared app credentials)', function (
         it('updates an existing Google integration and resets tokens', function (): void {
             $existing = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
+                'provider' => CalendarProviderEnum::GOOGLE,
             ]);
 
             $integration = $this->service->saveCredentials($this->user, null, null);
 
             expect($integration->getKey())->toBe($existing->getKey())
                 ->and($integration->access_token)->toBeNull()
-                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::Pending);
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING);
         });
     });
 
@@ -68,7 +68,7 @@ describe('GoogleAppExternalCalendarService (shared app credentials)', function (
         it('exchanges code using config credentials and updates the Google integration', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
+                'provider' => CalendarProviderEnum::GOOGLE,
             ]);
 
             Http::fake([
@@ -82,7 +82,7 @@ describe('GoogleAppExternalCalendarService (shared app credentials)', function (
             $result = $this->service->handleCallback($this->user, 'google-auth-code');
 
             expect($result->getKey())->toBe($integration->getKey())
-                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::Pending);
+                ->and($result->sync_status)->toBe(CalendarSyncStatusEnum::PENDING);
 
             Http::assertSent(fn ($req): bool => str_contains((string) $req->body(), 'app-google-client-id'));
         });
@@ -92,7 +92,7 @@ describe('GoogleAppExternalCalendarService (shared app credentials)', function (
         it('fetches calendars successfully using app-level token', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::Google,
+                'provider' => CalendarProviderEnum::GOOGLE,
             ]);
 
             Http::fake([
@@ -122,7 +122,7 @@ describe('GoogleAppExternalCalendarService (shared app credentials)', function (
 
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::Google,
+                'provider'         => CalendarProviderEnum::GOOGLE,
                 'calendar_id'      => 'primary',
                 'token_expires_at' => now()->addHour(),
             ]);

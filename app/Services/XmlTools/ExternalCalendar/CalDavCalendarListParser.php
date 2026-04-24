@@ -47,7 +47,7 @@ class CalDavCalendarListParser extends AbstractCalDavParser
 
     protected function elementNodeProcessing(XMLReader $reader): void
     {
-        if ($reader->localName === 'response' && $reader->namespaceURI === self::NS_DAV) {
+        if ($reader->localName === self::EL_RESPONSE && $reader->namespaceURI === self::NS_DAV) {
             $this->inResponse = true;
             $this->isCalendar = false;
             $this->href = null;
@@ -72,19 +72,19 @@ class CalDavCalendarListParser extends AbstractCalDavParser
 
     protected function endNodeProcessing(XMLReader $reader): void
     {
-        if ($reader->localName === 'href' && $reader->namespaceURI === self::NS_DAV) {
+        if ($reader->localName === self::EL_HREF && $reader->namespaceURI === self::NS_DAV) {
             $this->inHref = false;
 
             return;
         }
 
-        if ($reader->localName === 'displayname' && $reader->namespaceURI === self::NS_DAV) {
+        if ($reader->localName === self::EL_DISPLAYNAME && $reader->namespaceURI === self::NS_DAV) {
             $this->inDisplayName = false;
 
             return;
         }
 
-        if ($reader->localName !== 'response' || $reader->namespaceURI !== self::NS_DAV) {
+        if ($reader->localName !== self::EL_RESPONSE || $reader->namespaceURI !== self::NS_DAV) {
             return;
         }
 
@@ -94,11 +94,11 @@ class CalDavCalendarListParser extends AbstractCalDavParser
 
     private function processResponseElement(XMLReader $reader): void
     {
-        if ($reader->localName === 'href' && $reader->namespaceURI === self::NS_DAV) {
+        if ($reader->localName === self::EL_HREF && $reader->namespaceURI === self::NS_DAV) {
             $this->inHref = true;
-        } elseif ($reader->localName === 'displayname' && $reader->namespaceURI === self::NS_DAV) {
+        } elseif ($reader->localName === self::EL_DISPLAYNAME && $reader->namespaceURI === self::NS_DAV) {
             $this->inDisplayName = true;
-        } elseif ($reader->localName === 'calendar' && $reader->namespaceURI === self::NS_CALDAV) {
+        } elseif ($reader->localName === self::EL_CALENDAR && $reader->namespaceURI === self::NS_CALDAV) {
             $this->isCalendar = true;
         }
     }
@@ -117,7 +117,7 @@ class CalDavCalendarListParser extends AbstractCalDavParser
         $this->calendars[] = [
             'id'      => $absoluteHref,
             'name'    => $name,
-            'primary' => str_contains($absoluteHref, 'home') || str_contains(mb_strtolower($name), 'home'),
+            'primary' => str_contains($absoluteHref, self::STR_HOME) || str_contains(mb_strtolower($name), self::STR_HOME),
         ];
     }
 }

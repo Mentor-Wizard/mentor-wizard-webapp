@@ -18,45 +18,70 @@ const fetchNotifications = async () => {
         'X-Requested-With': 'XMLHttpRequest',
       },
     });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch notifications: ${res.status}`);
+    }
+
     const data = await res.json();
     notifications.value = data;
     unreadCount.value = data.filter((n) => !n.read_at).length;
-  } catch {
-    // ignore
+  } catch (error) {
+    console.error(error);
   }
 };
 
 const markAsRead = async (id) => {
-  await fetch(route('notifications.read', { id }), {
-    method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN':
-        document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-  });
-  const n = notifications.value.find((x) => x.id === id);
-  if (n) {
-    n.read_at = new Date().toISOString();
+  try {
+    const res = await fetch(route('notifications.read', { id }), {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN':
+          document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to mark notification as read: ${res.status}`);
+    }
+
+    const n = notifications.value.find((x) => x.id === id);
+    if (n) {
+      n.read_at = new Date().toISOString();
+    }
+    unreadCount.value = notifications.value.filter((x) => !x.read_at).length;
+  } catch (error) {
+    console.error(error);
   }
-  unreadCount.value = notifications.value.filter((x) => !x.read_at).length;
 };
 
 const markAllRead = async () => {
-  await fetch(route('notifications.read-all'), {
-    method: 'POST',
-    headers: {
-      'X-CSRF-TOKEN':
-        document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-  });
-  notifications.value.forEach((n) => {
-    if (!n.read_at) {
-      n.read_at = new Date().toISOString();
+  try {
+    const res = await fetch(route('notifications.read-all'), {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN':
+          document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(
+        `Failed to mark all notifications as read: ${res.status}`,
+      );
     }
-  });
-  unreadCount.value = 0;
+
+    notifications.value.forEach((n) => {
+      if (!n.read_at) {
+        n.read_at = new Date().toISOString();
+      }
+    });
+    unreadCount.value = 0;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const toggle = () => {

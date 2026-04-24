@@ -6,7 +6,7 @@ namespace App\Actions\Calendar\CalendarEvent;
 
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
-use App\Http\Requests\Calendar\ConfirmCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\ConfirmCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Notifications\CalendarEventConfirmedNotification;
@@ -34,7 +34,7 @@ class ConfirmCalendarEvent
         ) {
 
             return to_route('pages.calendar.pending')
-                ->with('error', 'There are another confirmed event in this time slot.');
+                ->with('error', 'There is another confirmed event in this time slot.');
         }
 
         $this->fillConfirmationDates($request, $calendarEvent);

@@ -40,14 +40,14 @@ describe('DeleteExternalCalendarEvent job', function (): void {
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $this->externalEvent = ExternalCalendarEvent::query()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $this->user->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'external_event_id' => 'ext-event-456',
         ]);
     });

@@ -47,43 +47,43 @@ describe('CalendarProviderEnum', function (): void {
 
     describe('getService()', function (): void {
         it('maps each provider to the correct service class', function (): void {
-            expect(CalendarProviderEnum::Google->getService())->toBe(GoogleAppExternalCalendarService::class)
-                ->and(CalendarProviderEnum::GooglePersonalApp->getService())->toBe(GoogleExternalCalendarService::class)
-                ->and(CalendarProviderEnum::Outlook->getService())->toBe(OutlookExternalCalendarService::class)
-                ->and(CalendarProviderEnum::Apple->getService())->toBe(AppleCalDavExternalCalendarService::class);
+            expect(CalendarProviderEnum::GOOGLE->getService())->toBe(GoogleAppExternalCalendarService::class)
+                ->and(CalendarProviderEnum::GOOGLE_PERSONAL_APP->getService())->toBe(GoogleExternalCalendarService::class)
+                ->and(CalendarProviderEnum::OUTLOOK->getService())->toBe(OutlookExternalCalendarService::class)
+                ->and(CalendarProviderEnum::APPLE->getService())->toBe(AppleCalDavExternalCalendarService::class);
         });
     });
 
     describe('usesAppCredentials()', function (): void {
         it('returns true for providers using shared app credentials', function (): void {
-            expect(CalendarProviderEnum::Google->usesAppCredentials())->toBeTrue()
-                ->and(CalendarProviderEnum::Outlook->usesAppCredentials())->toBeTrue();
+            expect(CalendarProviderEnum::GOOGLE->usesAppCredentials())->toBeTrue()
+                ->and(CalendarProviderEnum::OUTLOOK->usesAppCredentials())->toBeTrue();
         });
 
         it('returns false for providers using per-user credentials', function (): void {
-            expect(CalendarProviderEnum::GooglePersonalApp->usesAppCredentials())->toBeFalse()
-                ->and(CalendarProviderEnum::Apple->usesAppCredentials())->toBeFalse();
+            expect(CalendarProviderEnum::GOOGLE_PERSONAL_APP->usesAppCredentials())->toBeFalse()
+                ->and(CalendarProviderEnum::APPLE->usesAppCredentials())->toBeFalse();
         });
     });
 
     describe('isCalDav()', function (): void {
         it('returns true only for the Apple provider', function (): void {
-            expect(CalendarProviderEnum::Apple->isCalDav())->toBeTrue();
+            expect(CalendarProviderEnum::APPLE->isCalDav())->toBeTrue();
         });
 
         it('returns false for all OAuth providers', function (): void {
-            expect(CalendarProviderEnum::Google->isCalDav())->toBeFalse()
-                ->and(CalendarProviderEnum::GooglePersonalApp->isCalDav())->toBeFalse()
-                ->and(CalendarProviderEnum::Outlook->isCalDav())->toBeFalse();
+            expect(CalendarProviderEnum::GOOGLE->isCalDav())->toBeFalse()
+                ->and(CalendarProviderEnum::GOOGLE_PERSONAL_APP->isCalDav())->toBeFalse()
+                ->and(CalendarProviderEnum::OUTLOOK->isCalDav())->toBeFalse();
         });
     });
 
     describe('label()', function (): void {
         it('returns the human-readable label for each provider', function (): void {
-            expect(CalendarProviderEnum::Google->label())->toBe('Google Calendar')
-                ->and(CalendarProviderEnum::GooglePersonalApp->label())->toBe('Google Calendar (personal)')
-                ->and(CalendarProviderEnum::Outlook->label())->toBe('Outlook Calendar')
-                ->and(CalendarProviderEnum::Apple->label())->toBe('Apple Calendar');
+            expect(CalendarProviderEnum::GOOGLE->label())->toBe('Google Calendar')
+                ->and(CalendarProviderEnum::GOOGLE_PERSONAL_APP->label())->toBe('Google Calendar (personal)')
+                ->and(CalendarProviderEnum::OUTLOOK->label())->toBe('Outlook Calendar')
+                ->and(CalendarProviderEnum::APPLE->label())->toBe('Apple Calendar');
         });
 
         it('returns a non-empty label for every case', function (): void {

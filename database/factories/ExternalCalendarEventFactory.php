@@ -32,16 +32,16 @@ class ExternalCalendarEventFactory extends Factory
 
     public function google(): static
     {
-        return $this->state(['provider' => CalendarProviderEnum::Google]);
+        return $this->state(['provider' => CalendarProviderEnum::GOOGLE]);
     }
 
     public function outlook(): static
     {
-        return $this->state(['provider' => CalendarProviderEnum::Outlook]);
+        return $this->state(['provider' => CalendarProviderEnum::OUTLOOK]);
     }
 
     public function apple(): static
     {
-        return $this->state(['provider' => CalendarProviderEnum::Apple]);
+        return $this->state(['provider' => CalendarProviderEnum::APPLE]);
     }
 }

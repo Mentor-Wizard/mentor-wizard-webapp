@@ -47,11 +47,11 @@ describe('Apple CalDAV Calendar Integration', function (): void {
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'          => $this->user->getKey(),
-            'provider'         => CalendarProviderEnum::Apple,
+            'provider'         => CalendarProviderEnum::APPLE,
             'client_id'        => config('calendar.testing.apple.id'),
             'client_secret'    => config('calendar.testing.apple.app_password'),
             'calendar_id'      => config('calendar.testing.apple.calendar_url'),
-            'sync_status'      => CalendarSyncStatusEnum::Active,
+            'sync_status'      => CalendarSyncStatusEnum::ACTIVE,
             'access_token'     => null,
             'refresh_token'    => null,
             'token_expires_at' => null,

@@ -57,7 +57,7 @@ defineExpose({ open });
         </button>
       </div>
 
-      <div class="mt-4">
+      <div v-if="steps.length > 0" class="mt-4">
         <div
           class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
         >
@@ -76,7 +76,14 @@ defineExpose({ open });
         </p>
       </div>
 
-      <div class="mt-5 flex items-center justify-between">
+      <div v-else class="mt-4 py-12 text-center text-gray-500">
+        No steps provided.
+      </div>
+
+      <div
+        v-if="steps.length > 0"
+        class="mt-5 flex items-center justify-between"
+      >
         <button
           type="button"
           class="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-40"

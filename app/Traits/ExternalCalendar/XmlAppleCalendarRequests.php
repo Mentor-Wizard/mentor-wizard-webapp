@@ -8,6 +8,9 @@ trait XmlAppleCalendarRequests
 {
     private function calendarQueryReport(string $from, string $to): string
     {
+        $from = htmlspecialchars($from, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $to = htmlspecialchars($to, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+
         return '<?xml version="1.0" encoding="UTF-8"?>
 <C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:D="DAV:">
   <D:prop>

@@ -7,7 +7,7 @@ namespace App\Actions\Calendar\ExternalCalendar;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Http\Requests\Calendar\ExternalCalendarRetrySyncRequest;
+use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarRetrySyncRequest;
 use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
@@ -39,8 +39,10 @@ class ExternalCalendarRetrySync
                 ->with('error', 'No calendar integration found for this provider.');
         }
 
+        abort_if($user->cannot('sync', $integration), 403);
+
         $integration->update([
-            'sync_status'        => CalendarSyncStatusEnum::Active,
+            'sync_status'        => CalendarSyncStatusEnum::ACTIVE,
             'last_error_message' => null,
         ]);
 
@@ -65,6 +67,10 @@ class ExternalCalendarRetrySync
             ->get()
             ->map(fn (CalendarEvent $event): ProcessCalendarEventExternalCalendarIntegrations => new ProcessCalendarEventExternalCalendarIntegrations($event))
             ->all();
+
+        if ($jobs === []) {
+            return;
+        }
 
         Bus::batch($jobs)
             ->allowFailures()

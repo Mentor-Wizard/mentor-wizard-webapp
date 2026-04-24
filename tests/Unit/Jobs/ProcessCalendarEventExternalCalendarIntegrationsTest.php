@@ -38,8 +38,8 @@ describe('ProcessCalendarEventExternalCalendarIntegrations job', function (): vo
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'     => $this->mentor->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
     });
 
@@ -57,8 +57,8 @@ describe('ProcessCalendarEventExternalCalendarIntegrations job', function (): vo
 
         $menteeIntegration = UserCalendarIntegration::factory()->create([
             'user_id'     => $this->mentee->getKey(),
-            'provider'    => CalendarProviderEnum::Outlook,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::OUTLOOK,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         new ProcessCalendarEventExternalCalendarIntegrations($this->event)->handle();
@@ -71,7 +71,7 @@ describe('ProcessCalendarEventExternalCalendarIntegrations job', function (): vo
     it('skips integrations that are not active', function (): void {
         Bus::fake();
 
-        $this->integration->update(['sync_status' => CalendarSyncStatusEnum::Error]);
+        $this->integration->update(['sync_status' => CalendarSyncStatusEnum::ERROR]);
 
         new ProcessCalendarEventExternalCalendarIntegrations($this->event)->handle();
 

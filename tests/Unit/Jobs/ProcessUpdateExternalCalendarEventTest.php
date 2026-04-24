@@ -38,14 +38,14 @@ describe('ProcessUpdateExternalCalendarEvent job', function (): void {
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'     => $this->user->getKey(),
-            'provider'    => CalendarProviderEnum::Google,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $this->externalEvent = ExternalCalendarEvent::query()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $this->user->getKey(),
-            'provider'          => CalendarProviderEnum::Google,
+            'provider'          => CalendarProviderEnum::GOOGLE,
             'external_event_id' => 'ext-event-123',
         ]);
     });
@@ -63,7 +63,7 @@ describe('ProcessUpdateExternalCalendarEvent job', function (): void {
     it('skips external events whose integration is not active', function (): void {
         Bus::fake();
 
-        $this->integration->update(['sync_status' => CalendarSyncStatusEnum::Error]);
+        $this->integration->update(['sync_status' => CalendarSyncStatusEnum::ERROR]);
 
         new ProcessUpdateExternalCalendarEvent($this->event)->handle();
 
@@ -76,14 +76,14 @@ describe('ProcessUpdateExternalCalendarEvent job', function (): void {
         $secondUser = User::factory()->create();
         $secondIntegration = UserCalendarIntegration::factory()->create([
             'user_id'     => $secondUser->getKey(),
-            'provider'    => CalendarProviderEnum::Outlook,
-            'sync_status' => CalendarSyncStatusEnum::Active,
+            'provider'    => CalendarProviderEnum::OUTLOOK,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
         ]);
 
         $secondExternalEvent = ExternalCalendarEvent::query()->create([
             'calendar_event_id' => $this->event->getKey(),
             'user_id'           => $secondUser->getKey(),
-            'provider'          => CalendarProviderEnum::Outlook,
+            'provider'          => CalendarProviderEnum::OUTLOOK,
             'external_event_id' => 'ext-event-789',
         ]);
 

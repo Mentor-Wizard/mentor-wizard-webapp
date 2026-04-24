@@ -11,6 +11,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
+use App\Services\XmlTools\ExternalCalendar\AbstractCalDavParser;
 use App\Services\XmlTools\ExternalCalendar\CalDavCalendarListParser;
 use App\Services\XmlTools\ExternalCalendar\CalDavPropfindParser;
 use App\Services\XmlTools\ExternalCalendar\CalDavReportParser;
@@ -40,7 +41,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
         return UserCalendarIntegration::query()->updateOrCreate(
             [
                 'user_id'  => $user->getKey(),
-                'provider' => CalendarProviderEnum::Apple,
+                'provider' => CalendarProviderEnum::APPLE,
             ],
             [
                 'client_id'          => $clientId,
@@ -51,7 +52,7 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
                 'calendar_id'        => null,
                 'calendar_name'      => null,
                 'needs_reauth'       => false,
-                'sync_status'        => CalendarSyncStatusEnum::Pending,
+                'sync_status'        => CalendarSyncStatusEnum::PENDING,
                 'last_error_message' => null,
             ]
         );
@@ -61,13 +62,13 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
     {
         $integration = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
-            ->where('provider', CalendarProviderEnum::Apple)
+            ->where('provider', CalendarProviderEnum::APPLE)
             ->firstOrFail();
 
         $integration->update([
             'calendar_id'        => $calendarId,
             'calendar_name'      => $calendarName,
-            'sync_status'        => CalendarSyncStatusEnum::Active,
+            'sync_status'        => CalendarSyncStatusEnum::ACTIVE,
             'needs_reauth'       => false,
             'last_error_message' => null,
         ]);
@@ -205,7 +206,11 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             return null;
         }
 
-        $principalUrl = new CalDavPropfindParser()->extractValue($response->body(), 'current-user-principal', 'href');
+        $principalUrl = new CalDavPropfindParser()->extractValue(
+            $response->body(),
+            AbstractCalDavParser::EL_CURRENT_USER_PRINCIPAL,
+            AbstractCalDavParser::EL_HREF
+        );
 
         if ($principalUrl === null) {
             return null;
@@ -223,7 +228,11 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
             return null;
         }
 
-        $homeUrl = new CalDavPropfindParser()->extractValue($response->body(), 'calendar-home-set', 'href');
+        $homeUrl = new CalDavPropfindParser()->extractValue(
+            $response->body(),
+            AbstractCalDavParser::EL_CALENDAR_HOME_SET,
+            AbstractCalDavParser::EL_HREF
+        );
 
         return $homeUrl !== null ? $this->absoluteUrl($homeUrl) : null;
     }

@@ -46,8 +46,8 @@ describe('SetMainMentorProgram', function (): void {
             'mentor_id' => $this->mentor->getKey(),
         ]);
 
-        DB::shouldReceive('beginTransaction')->once()->andThrow(new Exception('DB error'));
-        DB::shouldReceive('rollBack')->once();
+        DB::shouldReceive('transaction')->once()->andThrow(new Exception('DB error'));
+        Log::shouldReceive('error')->once();
 
         $response = (new SetMainMentorProgram)->handle($program);
 

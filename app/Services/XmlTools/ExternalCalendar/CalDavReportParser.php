@@ -49,13 +49,13 @@ class CalDavReportParser extends AbstractCalDavParser
 
     protected function elementNodeProcessing(XMLReader $reader): void
     {
-        if ($reader->localName === 'response' && $reader->namespaceURI === self::NS_DAV) {
+        if ($reader->localName === self::EL_RESPONSE && $reader->namespaceURI === self::NS_DAV) {
             $this->inResponse = true;
             $this->href = null;
             $this->calData = null;
-        } elseif ($this->inResponse && $reader->localName === 'href' && $reader->namespaceURI === self::NS_DAV) {
+        } elseif ($this->inResponse && $reader->localName === self::EL_HREF && $reader->namespaceURI === self::NS_DAV) {
             $this->inHref = true;
-        } elseif ($this->inResponse && $reader->localName === 'calendar-data' && $reader->namespaceURI === self::NS_CALDAV) {
+        } elseif ($this->inResponse && $reader->localName === self::EL_CALENDAR_DATA && $reader->namespaceURI === self::NS_CALDAV) {
             $this->inCalData = true;
         }
     }
@@ -71,19 +71,19 @@ class CalDavReportParser extends AbstractCalDavParser
 
     protected function endNodeProcessing(XMLReader $reader): void
     {
-        if ($reader->localName === 'href' && $reader->namespaceURI === self::NS_DAV) {
+        if ($reader->localName === self::EL_HREF && $reader->namespaceURI === self::NS_DAV) {
             $this->inHref = false;
 
             return;
         }
 
-        if ($reader->localName === 'calendar-data' && $reader->namespaceURI === self::NS_CALDAV) {
+        if ($reader->localName === self::EL_CALENDAR_DATA && $reader->namespaceURI === self::NS_CALDAV) {
             $this->inCalData = false;
 
             return;
         }
 
-        if ($reader->localName !== 'response' || $reader->namespaceURI !== self::NS_DAV) {
+        if ($reader->localName !== self::EL_RESPONSE || $reader->namespaceURI !== self::NS_DAV) {
             return;
         }
 

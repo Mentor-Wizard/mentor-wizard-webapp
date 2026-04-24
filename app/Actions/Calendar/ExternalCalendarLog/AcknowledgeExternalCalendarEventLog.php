@@ -15,6 +15,10 @@ class AcknowledgeExternalCalendarEventLog
 
     public function handle(ExternalCalendarEventLog $log): RedirectResponse
     {
+        if ($log->type !== ExternalCalendarEventLogTypeEnum::Error) {
+            return back()->with('error', 'Only error logs can be acknowledged.');
+        }
+
         $log->update(['type' => ExternalCalendarEventLogTypeEnum::ErrorStatusViewed]);
 
         return back()->with('success', 'Error acknowledged.');

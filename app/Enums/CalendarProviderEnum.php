@@ -13,14 +13,14 @@ use App\Services\ExternalCalendar\OutlookExternalCalendarService;
 enum CalendarProviderEnum: string
 {
     /** App-level Google OAuth (shared credentials from env). */
-    case Google = 'google';
+    case GOOGLE = 'google';
 
     /** Per-user Google OAuth (each user supplies their own client_id/secret). */
-    case GooglePersonalApp = 'google_personal_app';
+    case GOOGLE_PERSONAL_APP = 'google_personal_app';
 
-    case Outlook = 'outlook';
+    case OUTLOOK = 'outlook';
 
-    case Apple = 'apple';
+    case APPLE = 'apple';
 
     /**
      * @return list<string>
@@ -41,10 +41,10 @@ enum CalendarProviderEnum: string
     public function getService(): string
     {
         return match ($this) {
-            self::Google            => GoogleAppExternalCalendarService::class,
-            self::GooglePersonalApp => GoogleExternalCalendarService::class,
-            self::Outlook           => OutlookExternalCalendarService::class,
-            self::Apple             => AppleCalDavExternalCalendarService::class,
+            self::GOOGLE              => GoogleAppExternalCalendarService::class,
+            self::GOOGLE_PERSONAL_APP => GoogleExternalCalendarService::class,
+            self::OUTLOOK             => OutlookExternalCalendarService::class,
+            self::APPLE               => AppleCalDavExternalCalendarService::class,
         };
     }
 
@@ -55,7 +55,7 @@ enum CalendarProviderEnum: string
     public function usesAppCredentials(): bool
     {
         return match ($this) {
-            self::Google, self::Outlook => true,
+            self::GOOGLE, self::OUTLOOK => true,
             default                     => false,
         };
     }
@@ -66,16 +66,16 @@ enum CalendarProviderEnum: string
      */
     public function isCalDav(): bool
     {
-        return $this === self::Apple;
+        return $this === self::APPLE;
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::Google            => 'Google Calendar',
-            self::GooglePersonalApp => 'Google Calendar (personal)',
-            self::Outlook           => 'Outlook Calendar',
-            self::Apple             => 'Apple Calendar',
+            self::GOOGLE              => 'Google Calendar',
+            self::GOOGLE_PERSONAL_APP => 'Google Calendar (personal)',
+            self::OUTLOOK             => 'Outlook Calendar',
+            self::APPLE               => 'Apple Calendar',
         };
     }
 }

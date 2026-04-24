@@ -6,10 +6,10 @@ namespace App\Enums;
 
 enum CalendarSyncStatusEnum: string
 {
-    case Active = 'active';
-    case Pending = 'pending';
-    case Error = 'error';
-    case Disconnected = 'disconnected';
+    case ACTIVE = 'active';
+    case PENDING = 'pending';
+    case ERROR = 'error';
+    case DISCONNECTED = 'disconnected';
 
     /**
      * @return list<string>

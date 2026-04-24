@@ -120,6 +120,18 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
             ],
             'errorField' => 'currency_id',
         ],
+        'end_time before start_time' => fn (): array => [
+            [
+                'name'        => 'Valid Name',
+                'slug'        => 'valid-slug',
+                'description' => 'Valid description',
+                'cost'        => 99.99,
+                'currency_id' => array_key_first($this->currencies),
+                'start_time'  => '2026-05-01 10:00',
+                'end_time'    => '2026-05-01 09:00',
+            ],
+            'errorField' => 'end_time',
+        ],
 
     ]);
 

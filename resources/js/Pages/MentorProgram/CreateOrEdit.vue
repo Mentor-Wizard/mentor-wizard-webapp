@@ -57,6 +57,16 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => page.props.flash?.error,
+  (value) => {
+    if (value) {
+      showNotification(false, value);
+    }
+  },
+  { immediate: true },
+);
+
 const toDateInput = (datetimeStr) => {
   if (!datetimeStr) return '';
   return new Date(datetimeStr).toISOString().slice(0, 10);

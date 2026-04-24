@@ -33,6 +33,22 @@ reviews:
     - '!**/ide-helper/**'
     - '!**/_ide_helper*'
     - '!**/storage/**'
+    - '!tests/**'
+    - '!**/*Test.php'
+    - '!**/*Spec.php'
+    - '!**/*TestCase.php'
+    - '!docs/**'
+    - '!public/images/guides/**'
+    - '!docker/**'
+    - '!.ddev/**'
+    - '!.dokploy/**'
+    - '!.github/**'
+    - '!.claude/**'
+    - '!.gitlab-ci.yml'
+    - '!.prettierignore'
+    - '!CLAUDE.md'
+    - '!GEMINI.md'
+    - '!phpunit.xml'
 
   path_instructions:
     - path: 'app/Actions/**'
@@ -51,10 +67,6 @@ reviews:
       instructions:
         'Vue components should use Composition API with script setup. Check for
         proper TypeScript types and Inertia.js patterns.'
-    - path: 'tests/**'
-      instructions:
-        'Tests use Pest PHP. Check for proper use of factories, meaningful
-        assertions, and that test names describe behavior.'
 
   suggested_labels: false
   suggested_reviewers: false

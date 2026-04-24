@@ -50,13 +50,13 @@ describe('Outlook Calendar Integration', function (): void {
 
         $this->integration = UserCalendarIntegration::factory()->create([
             'user_id'          => $this->user->getKey(),
-            'provider'         => CalendarProviderEnum::Outlook,
+            'provider'         => CalendarProviderEnum::OUTLOOK,
             'access_token'     => config('calendar.testing.outlook.access_token'),
             'refresh_token'    => config('calendar.testing.outlook.refresh_token'),
             'client_id'        => null,
             'client_secret'    => null,
             'calendar_id'      => config('calendar.testing.outlook.calendar_id'),
-            'sync_status'      => CalendarSyncStatusEnum::Active,
+            'sync_status'      => CalendarSyncStatusEnum::ACTIVE,
             'token_expires_at' => now()->subMinute(),
         ]);
 
