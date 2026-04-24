@@ -6,6 +6,7 @@ namespace App\Services\XmlTools\ExternalCalendar;
 
 use App\Models\CalendarEvent;
 use App\Traits\ExternalCalendar\EscapesText;
+use Date;
 
 class IcsBuilder
 {
@@ -13,9 +14,9 @@ class IcsBuilder
 
     public function build(string $uid, CalendarEvent $event): string
     {
-        $now = now()->utc()->format('Ymd\THis\Z');
-        $start = $event->start_date_time->utc()->format('Ymd\THis\Z');
-        $end = $event->end_date_time->utc()->format('Ymd\THis\Z');
+        $now = Date::now()->format('Ymd\THis\Z');
+        $start = $event->start_date_time->timezone(config('app.timezone'))->format('Ymd\THis\Z');
+        $end = $event->end_date_time->timezone(config('app.timezone'))->format('Ymd\THis\Z');
 
         $description = $event->description !== null
             ? 'DESCRIPTION:'.$this->escapeText($event->description)."\r\n"

@@ -81,7 +81,7 @@ class CreateExternalCalendarEvent implements ShouldQueue
             'user_id'                    => $this->integration->user_id,
             'provider'                   => $this->integration->provider,
             'type'                       => ExternalCalendarEventLogTypeEnum::Error,
-            'message'                    => 'Failed to create external calendar event.',
+            'message'                    => $throwable->getMessage(),
         ]);
     }
 }

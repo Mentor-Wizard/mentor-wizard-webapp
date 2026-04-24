@@ -92,7 +92,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $request = makeConfirmCalendarEventRequest($mentor, $mentorProgram, $calendarEvent);
         new ConfirmCalendarEvent()->handle($request, $mentorProgram, $calendarEvent);
 
-        expect(session('error'))->not->toBe('There are another confirmed event in this time slot.');
+        expect(session('error'))->not->toBe('There is another confirmed event in this time slot.');
     });
 
     it('confirms as host: updates pivot and sets event status to CONFIRMED', function (): void {
@@ -161,7 +161,7 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
-            ->and(session('error'))->toBe('There are another confirmed event in this time slot.');
+            ->and(session('error'))->toBe('There is another confirmed event in this time slot.');
 
         expect($this->event->fresh()->status)
             ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
@@ -317,6 +317,6 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $newEvent);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
-            ->and(session('error'))->toBe('There are another confirmed event in this time slot.');
+            ->and(session('error'))->toBe('There is another confirmed event in this time slot.');
     });
 });

@@ -55,14 +55,14 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
                 'colour' => CalendarEventColoursEnum::BLUE->value]);
     });
 
-    it('cancels confirmed event and returns redirect response', function (): void {
+    it(' confirmed event cannot be cancelled and returns redirect response', function (): void {
         // Confirmed events should be cancelled, not deleted
         $action = new DeleteCalendarEvent;
         $response = $action->handle($this->event);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
-        expect(session('error'))->toBe('Confirmed event cannot be deleted.');
+        expect(session('error'))->toBe('Confirmed event was cancelled.');
 
         expect(CalendarEvent::query()->find($this->event->getKey()))->not->toBeNull();
         expect(CalendarEvent::query()->find($this->event->getKey())?->status)
