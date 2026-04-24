@@ -99,8 +99,8 @@ class CalendarCredentialEncrypter
             $envName.' is not configured.');
 
         // A base64-encoded 32-byte key is always 44 ASCII characters (with padding).
-        // Checking the encoded length avoids binary mb_strlen issues on the decoded value.
-        throw_if(mb_strlen($raw) !== 44, RuntimeException::class,
+        // '8bit' encoding counts bytes, not multibyte characters — required for binary data.
+        throw_if(mb_strlen($raw, '8bit') !== 44, RuntimeException::class,
             $envName.' must be a base64-encoded 32-byte key (44 characters).');
 
         $decoded = base64_decode($raw, strict: true);
@@ -108,7 +108,7 @@ class CalendarCredentialEncrypter
         throw_if($decoded === false, RuntimeException::class,
             $envName.' must be a valid base64-encoded 32-byte key.');
 
-        throw_if(mb_strlen($decoded) !== 32, RuntimeException::class,
+        throw_if(mb_strlen($decoded, '8bit') !== 32, RuntimeException::class,
             $envName.' must decode to exactly 32 bytes.');
 
         return $decoded;
