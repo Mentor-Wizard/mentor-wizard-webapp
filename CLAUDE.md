@@ -93,57 +93,57 @@ If you are an AI agent:
 ### System Requirements
 
 - **PHP 8.4+** (Critical: The project requires PHP 8.4.0 or higher)
-- **Node.js** with Yarn 4.6.0
+- **Node.js** with Yarn 4.10.3
 - **PostgreSQL 17**
 - **Redis 7.2+**
-- **Docker & Docker Compose** (Recommended for development)
+- **Docker & Docker Compose** (Required for development)
+
+### Docker Structure
+
+```
+docker/
+├── local/          # Local development
+│   ├── php/
+│   │   ├── Dockerfile          # Dev image with Xdebug, PCOV, Yarn
+│   │   ├── caddy/Caddyfile     # Caddy web server config
+│   │   └── caddy/Caddyfile-ssl # Caddy SSL config
+│   ├── postgres/
+│   │   └── init-test-db.sql    # Test database initialization
+│   ├── schedule/
+│   │   └── crontab             # Cron jobs for scheduler
+│   └── supervisord/
+│       └── supervisord.conf    # Process manager (Octane, queue, etc.)
+└── dev/
+    └── php/Dockerfile          # Dev deployment image (CI/Dokploy)
+```
+
+- **`compose.yml`** — local development, uses `docker/local/php/Dockerfile`
+- **`.dokploy/compose.dev.yml`** — dev environment deployment, uses pre-built image from `ghcr.io`
 
 ### Environment Setup
 
-#### Option 1: Docker Development (Recommended)
-
 ```bash
-# Copy environment file
+# 1. Copy environment file
 cp .env.example .env
 
-# Start all services
+# 2. Start all services (Octane, queue worker, scheduler, WebSockets, Redis, PostgreSQL)
 docker compose up -d
 
-# Install PHP dependencies
+# 3. Install PHP dependencies
 docker compose exec app composer install
 
-# Install Node dependencies
+# 4. Install Node dependencies
 docker compose exec app yarn install
 
-# Generate application key
+# 5. Generate application key
 docker compose exec app php artisan key:generate
 
-# Run migrations
+# 6. Run migrations
 docker compose exec app php artisan migrate
-
-# Build frontend assets
-docker compose exec app yarn dev
 ```
 
-#### Option 2: Local Development
-
-Ensure PHP 8.4+ is installed, then:
-
-```bash
-# Install dependencies
-docker compose exec app composer install
-docker compose exec app yarn install
-
-# Setup environment
-docker compose exec app cp .env.example .env
-docker compose exec app php artisan key:generate
-
-# Configure database and run migrations
-docker compose exec app php artisan migrate
-
-# Start development servers
-docker compose exec app composer run dev  # Starts Laravel Octane, queue worker, logs, and Vite
-```
+> The app container runs via **supervisord** which automatically starts Laravel Octane,
+> queue worker, scheduler, and Vite dev server. No manual `yarn dev` needed.
 
 ### Development Scripts
 
