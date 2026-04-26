@@ -76,7 +76,7 @@ describe('SendMessage', function (): void {
                 'message' => [
                     'id',
                     'sender',
-                    'content',
+                    'message',
                     'isRead',
                     'attachments',
                 ],
@@ -84,7 +84,7 @@ describe('SendMessage', function (): void {
 
         $response->assertJson([
             'message' => [
-                'content' => 'Message with files',
+                'message' => 'Message with files',
                 'isRead'  => false,
             ],
         ]);

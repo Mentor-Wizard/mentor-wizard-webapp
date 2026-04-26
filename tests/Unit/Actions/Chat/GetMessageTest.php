@@ -68,7 +68,7 @@ describe('GetMessage', function (): void {
 
         $data = $result->getData(true);
         expect($data)->toHaveKey('message')
-            ->and($data['message']['content'])->toBe('Secret message');
+            ->and($data['message']['message'])->toBe('Secret message');
 
         Event::assertDispatched(fn (UnreadMessagesEvent $event): bool => $event->user->id === $companion->id);
     });

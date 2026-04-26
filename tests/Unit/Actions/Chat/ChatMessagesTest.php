@@ -49,7 +49,7 @@ describe('ChatMessages', function (): void {
         $data = $result->getData(true);
         expect($data)->toHaveKeys(['messages', 'files'])
             ->and($data['messages'])->not->toBeEmpty()
-            ->and($data['messages'][0]['content'])->toBe('Hello!')
+            ->and($data['messages'][0]['message'])->toBe('Hello!')
             ->and(ChatMessage::query()->where('chat_id', $chat->id)->where('is_read', false)->count())
             ->toBe(0);
 

@@ -8,8 +8,8 @@ export function useAlerts() {
   function infoChatMessage(user_id) {
     if (user_id) {
       Echo.private(`Chat.${user_id}`).listen('Chats\\ChatMessageEvent', (e) => {
-        const is_muted = e.is_muted;
-        if (!is_muted) ringBell();
+        const isMuted = e.isMuted;
+        if (!isMuted) ringBell();
       });
       Echo.private(`Chat.${user_id}`).listen(
         'Chats\\UnreadMessagesEvent',

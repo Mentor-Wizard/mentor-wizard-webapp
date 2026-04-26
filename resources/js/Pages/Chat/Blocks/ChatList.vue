@@ -92,7 +92,7 @@ const groupedMessages = computed(() => {
             'rounded-xl p-3 shadow-sm',
           ]"
         >
-          <p v-html="msg.content"></p>
+          <p v-html="msg.message"></p>
           <div
             v-for="attachment in msg.attachments"
             :key="attachment.id"

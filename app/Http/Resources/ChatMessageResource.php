@@ -36,12 +36,15 @@ class ChatMessageResource extends JsonResource
             $this->resource->getMedia('files')
         );
 
+        $currentUser = $request->user();
+
         return [
             'id'            => $this->resource->getKey(),
-            'sender'        => $request->user()->getKey() === $this->resource->user_id ? 'user' : 'other',
+            'user_id'       => $this->resource->user_id,
+            'sender'        => ($currentUser && $currentUser->getKey() === $this->resource->user_id) ? 'user' : 'other',
             'avatar'        => $this->resource->user->profile->avatar,
             'timestamp'     => $this->resource->created_at,
-            'content'       => Purify::clean($this->resource->message ?? ''),
+            'message'       => Purify::clean($this->resource->message ?? ''),
             'isRead'        => $this->resource->is_read,
             'attachments'   => $files,
         ];

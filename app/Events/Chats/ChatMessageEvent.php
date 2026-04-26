@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Events\Chats;
 
+use App\Http\Resources\ChatMessageResource;
 use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
@@ -22,7 +23,25 @@ class ChatMessageEvent implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(public User $user, public ChatMessage $message, public bool $is_muted) {}
+    public function __construct(public User $user, public ChatMessage $message, public bool $isMuted) {}
+
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        $message = new ChatMessageResource($this->message)->resolve();
+
+        // When broadcasting to the recipient, the sender is always 'other'
+        $message['sender'] = 'other';
+
+        return [
+            'message' => $message,
+            'isMuted' => $this->isMuted,
+        ];
+    }
 
     /**
      * Get the channels the event should broadcast on.
