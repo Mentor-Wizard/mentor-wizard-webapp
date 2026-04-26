@@ -13,6 +13,7 @@ use App\Models\MentorProfile;
 use App\Models\MentorTag;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -568,5 +569,21 @@ describe('ChatListUser', function (): void {
         expect($data['users'][0]['message'])->toBe('')
             ->and($data['users'][0]['isRead'])->toBeNull()
             ->and($data['users'][0]['createdAt'])->toBeNull();
+    });
+
+    it('kills null-safe operator mutation for chatUser pivot', function (): void {
+        $user = User::factory()->create();
+        $chat = Chat::factory()->create();
+        // Users collection is empty or doesn't contain $user->id
+        $chat->setRelation('users', new Collection);
+
+        $action = new ChatListUser;
+        $reflection = new ReflectionClass(ChatListUser::class);
+        $method = $reflection->getMethod('buildChatUserItem');
+
+        $result = $method->invoke($action, $chat, $user->id);
+
+        expect($result['isMuted'])->toBeNull()
+            ->and($result['ban'])->toBeFalse();
     });
 });
