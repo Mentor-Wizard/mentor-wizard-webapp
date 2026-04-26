@@ -19,6 +19,7 @@ class ChatMessageRequest extends FormRequest
             'files.*' => [
                 'file',
                 'max:2048',
+                'mimetypes:image/jpeg,image/png,image/webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain',
             ],
         ];
     }

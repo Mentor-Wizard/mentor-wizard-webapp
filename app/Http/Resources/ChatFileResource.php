@@ -38,7 +38,10 @@ class ChatFileResource extends JsonResource
             'mimeType'   => $this->resource->mime_type,
             'size'       => $this->resource->size,
             'createdAt'  => $this->resource->created_at,
-            'url'        => $this->resource->getUrl(),
+            'url'        => route('chat.message.download', [
+                'message' => $this->resource->model_id,
+                'media'   => $this->resource->getKey(),
+            ]),
         ];
     }
 }
