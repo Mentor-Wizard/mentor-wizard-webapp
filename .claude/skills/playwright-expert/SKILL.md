@@ -4,6 +4,8 @@ description:
     Use when writing E2E tests with Playwright, setting up test infrastructure,
     or debugging flaky browser tests. Invoke for browser automation, E2E tests,
     Page Object Model, test flakiness, visual testing.
+
+    Українською: E2E тести, Playwright, браузерне тестування, автоматизація, флакі тести, налагодження тестів, селектори, скріншоти, трейси, тестова інфраструктура, Page Object Model, візуальне тестування, тестування інтерфейсу.
 triggers:
     - Playwright
     - E2E test

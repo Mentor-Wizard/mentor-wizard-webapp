@@ -1,0 +1,50 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '.github/workflows/dotnet-ci.yml'
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - run: dotnet format --verify-no-changes
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [format]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+      - run: dotnet restore
+      - run: dotnet build --no-restore --configuration Release
+      - run: dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: always()

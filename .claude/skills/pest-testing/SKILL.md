@@ -6,6 +6,8 @@ description: >-
     components, browser testing, debugging test failures, working with datasets
     or mocking; or when the user mentions test, spec, TDD, expects, assertion,
     coverage, or needs to verify functionality works.
+
+    Українською: тестування Pest, написати тест, створи тест, юніт тест, фіча тест, assertions, датасет, мок, покриття, мутаційне тестування, TDD, додай тест, перевірка функціональності, тест Livewire
 ---
 
 # Pest Testing 4

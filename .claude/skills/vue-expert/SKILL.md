@@ -4,6 +4,10 @@ description:
     Use when building Vue 3 applications with Composition API, Nuxt 3, or
     Quasar. Invoke for Pinia, TypeScript, PWA, Capacitor mobile apps, Vite
     configuration.
+
+    Українською: Vue 3, Composition API, компонент, Pinia, TypeScript, Nuxt,
+    Quasar, реактивність, composable, стор, створити компонент, налаштувати
+    Vite, реф, обчислюване поле, маршрутизація Vue.
 triggers:
     - Vue 3
     - Composition API

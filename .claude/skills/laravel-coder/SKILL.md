@@ -3,6 +3,8 @@ name: laravel-coder
 description:
     Generates modern maintainable Laravel applications code with a focus on
     performance and security by default and for best code style practices.
+
+    Українською: Laravel код, генерація коду, створити контролер, створи модель, додай міграцію, виправи код, бізнес-логіка, код Laravel, генератор, шаблон коду, стиль коду, створення контролера, рефакторинг коду, PHP клас
 ---
 
 # Laravel Coder

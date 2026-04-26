@@ -3,6 +3,10 @@ name: devops
 description:
     Generates DevOps configurations and scripts for deploying and managing
     Laravel applications. Run local commands to debug and deploy.
+
+    Українською: DevOps, деплой, розгортання, інфраструктура, CI/CD, сервер,
+    конфігурація, моніторинг, налаштувати сервер, автоматизація деплою,
+    керування інфраструктурою, збірка та випуск.
 ---
 
 # Devops
@@ -31,10 +35,9 @@ docker compose exec app php artisan key:generate
 
 # Run migrations
 docker compose exec app php artisan migrate
-
-# Build frontend assets
-docker compose exec app yarn dev
 ```
+
+> Supervisord automatically starts Octane, queue worker, and Vite dev server inside the container.
 
 #### Option 2: Local Development
 
