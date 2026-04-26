@@ -6,28 +6,20 @@ database:
   version: '17'
 php_version: '8.4'
 host_db_port: '33371'
-nodejs_version: '22'
+nodejs_version: '24'
 webserver_type: generic
 xdebug_enabled: false
 corepack_enable: true
-ddev_version_constraint: '>= v1.24.3'
 upload_dirs:
   - ../storage/app/public
 web_extra_daemons:
-  - name: 'frankenphp'
-    command: 'php artisan octane:frankenphp --host=0.0.0.0 --port=80 --watch -q'
-    directory: /var/www/html
   - name: 'reverb'
     command: 'php artisan reverb:start --host=0.0.0.0 --port=8080 --debug'
     directory: /var/www/html
-  - name: 'vite'
-    command: 'yarn install && yarn dev'
-    directory: /var/www/html
+#  - name: 'vite'
+#    command: 'yarn install && yarn dev'
+#    directory: /var/www/html
 web_extra_exposed_ports:
-  - name: 'frankenphp'
-    container_port: 80
-    http_port: 80
-    https_port: 443
   - name: 'reverb'
     container_port: 8080
     http_port: 8080
@@ -38,10 +30,11 @@ web_extra_exposed_ports:
     https_port: 5173
 hooks:
   pre-start:
-    # Add redis, cron and task to ddev if not already installed.
+    # Add cron, redis, frankenphp and task to ddev if not already installed.
     - exec-host: |
         ddev add-on list --installed | grep -q 'ddev/ddev-cron' || ddev add-on get ddev/ddev-cron  > /dev/null
         ddev add-on list --installed | grep -q 'ddev/ddev-redis' || ddev add-on get ddev/ddev-redis > /dev/null
+        ddev add-on list --installed | grep -q 'ddev/ddev-frankenphp' || ddev add-on get ddev/ddev-frankenphp > /dev/null
         ddev add-on list --installed | grep -q 'gebruederheitz/ddev-taskfile' || ddev add-on get gebruederheitz/ddev-taskfile > /dev/null
   post-start:
     - composer: install
