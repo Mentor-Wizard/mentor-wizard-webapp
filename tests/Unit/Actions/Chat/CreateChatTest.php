@@ -167,22 +167,25 @@ describe('CreateChat', function (): void {
             ->assertJson(['status' => 'created_new']);
     });
 
-    it('ensures throw_if stops execution on BANNED status', function (): void {
+    it('ensures throw_if stops execution on BANNED status', function (ChatStatusEnum $ownerStatus, ChatStatusEnum $companionStatus): void {
         $companion = User::factory()->create();
         $chat = Chat::factory()->create();
 
         $chat->users()->attach([
-            $this->owner->id => ['status' => ChatStatusEnum::BANNED->value],
-            $companion->id   => ['status' => ChatStatusEnum::ACTIVE->value],
+            $this->owner->id => ['status' => $ownerStatus->value],
+            $companion->id   => ['status' => $companionStatus->value],
         ]);
 
-        // Правильний виклик мока для перевірки, що метод НЕ буде викликаний
         SendMessage::mock()->shouldNotReceive('handle');
 
         $response = $this->postJson(route('chat.create', $companion), [
-            'message' => 'I am banned',
+            'message' => 'Checking ban status',
         ]);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
-    });
+    })->with([
+        'owner is banned'     => [ChatStatusEnum::BANNED, ChatStatusEnum::ACTIVE],
+        'companion is banned' => [ChatStatusEnum::ACTIVE, ChatStatusEnum::BANNED],
+        'both are banned'     => [ChatStatusEnum::BANNED, ChatStatusEnum::BANNED],
+    ]);
 });

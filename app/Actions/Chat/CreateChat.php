@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsController;
 use Throwable;
 
@@ -41,18 +42,29 @@ class CreateChat
             })
             ->first();
         if ($companionChat) {
-            throw_if($companionChat->pivot->status === ChatStatusEnum::BANNED->value, AuthorizationException::class);
+            $statuses = $companionChat->users()
+                ->whereIn('users.id', [$user->getKey(), $owner->getKey()])
+                ->pluck('status')
+                ->toArray();
+
+            // We check if at least one of them has BANNED status
+            throw_if(
+                in_array(ChatStatusEnum::BANNED->value, $statuses),
+                AuthorizationException::class
+            );
 
             return SendMessage::run($companionChat, $request);
         }
 
-        $chat = Chat::query()->create([
-            'name' => $user->profile->name,
-        ]);
+        return DB::transaction(function () use ($user, $owner, $request) {
+            $chat = Chat::query()->create([
+                'name' => $user->profile->name,
+            ]);
 
-        $chat->users()->attach($user->getKey(), ['status' => ChatStatusEnum::ACTIVE->value]);
-        $chat->users()->attach($owner->getKey(), ['status' => ChatStatusEnum::ACTIVE->value]);
+            $chat->users()->attach($user->getKey(), ['status' => ChatStatusEnum::ACTIVE->value]);
+            $chat->users()->attach($owner->getKey(), ['status' => ChatStatusEnum::ACTIVE->value]);
 
-        return SendMessage::run($chat, $request);
+            return SendMessage::run($chat, $request);
+        });
     }
 }
