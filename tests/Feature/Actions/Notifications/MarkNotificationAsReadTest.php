@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Notifications\MarkNotificationAsRead;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Str;
 
@@ -14,6 +15,7 @@ covers(MarkNotificationAsRead::class);
 
 describe('MarkNotificationAsRead', function (): void {
     beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
         $this->user = User::factory()->create();
     });
 

@@ -26,8 +26,10 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         $this->mentor = User::factory()->create();
         $this->mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->mentor->profile()->create(['timezone' => 'UTC']);
 
         $this->viewer = User::factory()->create();
+        $this->viewer->profile()->create(['timezone' => 'UTC']);
 
         $this->start = Date::parse(Date::today()->addDays(1)->format('Y-m-d').' 09:30:00');
         $this->end = Date::parse(Date::today()->addDays(1)->format('Y-m-d').' 11:00:00');
@@ -350,6 +352,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
             $this->seed(RoleSeeder::class);
             $this->user = User::factory()->create();
             $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+            $this->user->profile()->create(['timezone' => 'UTC']);
 
             auth()->login($this->user);
 
@@ -441,8 +444,10 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
 
         $this->mentor = User::factory()->create();
         $this->mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->mentor->profile()->create(['timezone' => 'UTC']);
 
         $this->nonMentor = User::factory()->create();
+        $this->nonMentor->profile()->create(['timezone' => 'UTC']);
     });
 
     it('permissions check uses calendarEvent from array (kills ArrayItemRemoval mutation)', function (): void {
@@ -451,6 +456,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
             'mentor_id' => $this->mentor->getKey(),
         ]);
 
+        /** @var CalendarEvent $event */
         $event = CalendarEvent::factory()->create([
             'mentor_program_id' => $mentorProgram->getKey(),
             'start_date_time'   => Date::now()->addDay(),
@@ -478,6 +484,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
             'mentor_id' => $this->mentor->getKey(),
         ]);
 
+        /** @var CalendarEvent $event */
         $event = CalendarEvent::factory()->create([
             'mentor_program_id' => $mentorProgram->getKey(),
             'start_date_time'   => Date::now()->addDay(),
@@ -518,6 +525,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         ]);
 
         // Event 1 belongs to mentor's program
+        /** @var CalendarEvent $event1 */
         $event1 = CalendarEvent::factory()->create([
             'mentor_program_id' => $mentorProgram1->getKey(),
             'start_date_time'   => Date::now()->addDay(),
@@ -526,6 +534,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         $event1->calendarEventUsers()->attach($this->mentor->getKey());
 
         // Event 2 belongs to other mentor's program
+        /** @var CalendarEvent $event2 */
         $event2 = CalendarEvent::factory()->create([
             'mentor_program_id' => $mentorProgram2->getKey(),
             'start_date_time'   => Date::now()->addDays(2),

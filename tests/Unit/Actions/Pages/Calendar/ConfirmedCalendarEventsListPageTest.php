@@ -53,6 +53,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
         ]);
 
         auth()->login($this->mentor);
+        request()->setUserResolver(fn () => auth()->user());
     });
 
     it('returns inertia response with correct component and props', function (): void {
