@@ -43,6 +43,7 @@ class UserResource extends Resource
     /**
      * @return array<string, PageRegistration>
      */
+    #[Override]
     public static function getPages(): array
     {
         return [
