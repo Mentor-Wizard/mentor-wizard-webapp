@@ -64,6 +64,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => auth()->user());
+
         $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
@@ -91,6 +93,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->viewer);
 
         $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => auth()->user());
+
         $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
@@ -105,6 +109,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => auth()->user());
+
         $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
@@ -119,6 +125,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => auth()->user());
+
         $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
@@ -248,6 +256,8 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         );
 
         $request = new Request(['timezone' => 'UTC']);
+        $request->setUserResolver(fn () => auth()->user());
+
         $response = (new ShowCalendarEventPage)->handle(request(), $event);
 
         expect($response)->toBeInstanceOf(Response::class);

@@ -124,6 +124,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
 
             $request = new Request($requestData);
 
+            $request->setUserResolver(fn () => auth()->user());
+
             $response = $action->handle($request);
             $resultData = $response->toResponse(request())->getOriginalContent();
             $result = $resultData->getData()['page'];
@@ -167,6 +169,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ];
 
             $request = new Request($requestData);
+
+            $request->setUserResolver(fn () => auth()->user());
 
             $response = $action->handle($request);
             $resultData = $response->toResponse(request())->getOriginalContent();
@@ -227,6 +231,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ];
 
             $request = new Request($requestData);
+
+            $request->setUserResolver(fn () => auth()->user());
 
             $response = $action->handle($request);
             $resultData = $response->toResponse(request())->getOriginalContent();
@@ -292,6 +298,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
         ];
 
         $request = new Request($requestData);
+
+        $request->setUserResolver(fn () => auth()->user());
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -364,6 +372,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
 
         $request = new Request($requestData);
 
+        $request->setUserResolver(fn () => auth()->user());
+
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $result = $resultData->getData()['page'];
@@ -430,6 +440,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
             ];
 
             $request = new Request($requestData);
+
+            $request->setUserResolver(fn () => auth()->user());
 
             $response = $action->handle($request);
             $resultData = $response->toResponse(request())->getOriginalContent();
@@ -501,6 +513,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
 
             $request = new Request($requestData);
 
+            $request->setUserResolver(fn () => auth()->user());
+
             $response = $action->handle($request);
             $resultData = $response->toResponse(request())->getOriginalContent();
             $result = $resultData->getData()['page'];
@@ -562,6 +576,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
         ];
 
         $request = new Request($requestData);
+
+        $request->setUserResolver(fn () => auth()->user());
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -638,6 +654,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
 
         $request = new Request($requestData);
 
+        $request->setUserResolver(fn () => auth()->user());
+
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $result = $resultData->getData()['page'];
@@ -713,6 +731,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
         ];
 
         $request = new Request($requestData);
+
+        $request->setUserResolver(fn () => auth()->user());
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -815,6 +835,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
         ];
 
         $request = new Request($requestData);
+
+        $request->setUserResolver(fn () => auth()->user());
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -920,6 +942,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
         ];
 
         $request = new Request($requestData);
+
+        $request->setUserResolver(fn () => auth()->user());
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();
@@ -1027,6 +1051,8 @@ describe('List Calendar CalendarEvent Page', function (): void {
         ];
 
         $request = new Request($requestData);
+
+        $request->setUserResolver(fn () => auth()->user());
 
         $response = $action->handle($request);
         $resultData = $response->toResponse(request())->getOriginalContent();

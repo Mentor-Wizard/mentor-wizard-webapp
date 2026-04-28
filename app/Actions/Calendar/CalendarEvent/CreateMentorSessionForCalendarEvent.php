@@ -16,7 +16,6 @@ class CreateMentorSessionForCalendarEvent
 
     public function handle(CalendarEvent $event): void
     {
-        // @phpstan-ignore-next-line
         $statusValue = $event->status->value;
 
         if ($statusValue !== CalendarEventStatusEnum::CONFIRMED->value || ! $event->mentor_program_id) {
