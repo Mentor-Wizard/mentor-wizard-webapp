@@ -49,6 +49,8 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     public const int DEFAULT_MENTOR_PAGE_PAGINATION = 10;
 
+    public const int NOTIFICATIONS_PER_PAGE = 20;
+
     /**
      * The attributes that are mass assignable.
      *

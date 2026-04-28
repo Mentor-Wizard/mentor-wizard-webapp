@@ -19,7 +19,7 @@ class MentorProgramEventBookingPage
 
     public function handle(Request $request, MentorProgram $mentorProgram): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
         $timezone = $user->profile->timezone;
         $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
 

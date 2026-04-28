@@ -10,7 +10,7 @@ use App\Http\Requests\Calendar\CalendarEvent\ConfirmCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Notifications\CalendarEventConfirmedNotification;
-use Date;
+use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
 use Symfony\Component\HttpFoundation\Response;
 

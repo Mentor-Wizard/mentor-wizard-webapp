@@ -6,7 +6,6 @@
     "github-mw"
   ],
   "enabledPlugins": {
-    "superpowers@superpowers-marketplace": true,
-    "telegram@claude-plugins-official": true
+    "superpowers@superpowers-marketplace": true
   }
 }

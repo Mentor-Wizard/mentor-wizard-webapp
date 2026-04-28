@@ -8,7 +8,6 @@ use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorSession;
-use BackedEnum;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateMentorSessionForCalendarEvent
@@ -18,9 +17,7 @@ class CreateMentorSessionForCalendarEvent
     public function handle(CalendarEvent $event): void
     {
         // @phpstan-ignore-next-line
-        $statusValue = $event->status instanceof BackedEnum
-            ? $event->status->value
-            : $event->status;
+        $statusValue = $event->status->value;
 
         if ($statusValue !== CalendarEventStatusEnum::CONFIRMED->value || ! $event->mentor_program_id) {
             return;

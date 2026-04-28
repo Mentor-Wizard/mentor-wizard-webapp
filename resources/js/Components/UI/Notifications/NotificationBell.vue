@@ -24,8 +24,8 @@ const fetchNotifications = async () => {
     }
 
     const data = await res.json();
-    notifications.value = data;
-    unreadCount.value = data.filter((n) => !n.read_at).length;
+    notifications.value = data.data;
+    unreadCount.value = data.data.filter((n) => !n.read_at).length;
   } catch (error) {
     console.error(error);
   }

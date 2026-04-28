@@ -13,6 +13,7 @@ use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\Calendar\AvailableSlotOptionsForMentorProgram;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -21,9 +22,10 @@ class ShowCalendarEventPage
 {
     use AsController;
 
-    public function handle(CalendarEvent $calendarEvent): Response
+    public function handle(Request $request, CalendarEvent $calendarEvent): Response
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = $request->user();
         $profile = $user->profile;
         $timezone = $profile->timezone;
 
@@ -39,7 +41,7 @@ class ShowCalendarEventPage
                 $timezone,
                 $user
             )->toArray(),
-            'externalIntegrations'  => Inertia::defer(fn (): array => $this->loadExternalIntegrations($calendarEvent)),
+            'externalIntegrations'  => Inertia::defer(fn (): array => $this->loadExternalIntegrations($calendarEvent, $user)),
         ]);
     }
 
@@ -53,11 +55,8 @@ class ShowCalendarEventPage
      *      external_event: array{id: mixed, sync_status: string|null,
      *      logs: array<int, array{id: mixed, type: string, message: string, created_at: string|null}>}|null}>
      */
-    private function loadExternalIntegrations(CalendarEvent $calendarEvent): array
+    private function loadExternalIntegrations(CalendarEvent $calendarEvent, User $user): array
     {
-        /** @var User $user */
-        $user = auth()->user();
-
         $integrations = UserCalendarIntegration::query()
             ->where('user_id', $user->getKey())
             ->where('sync_status', CalendarSyncStatusEnum::ACTIVE)

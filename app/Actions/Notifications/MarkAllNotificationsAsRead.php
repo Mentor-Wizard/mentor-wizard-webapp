@@ -6,6 +6,7 @@ namespace App\Actions\Notifications;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class MarkAllNotificationsAsRead
@@ -14,7 +15,7 @@ class MarkAllNotificationsAsRead
 
     public function handle(Request $request): Response
     {
-        $request->user()?->unreadNotifications()->update(['read_at' => now()]);
+        $request->user()?->unreadNotifications()->update(['read_at' => Date::now()]);
 
         return response()->noContent();
     }

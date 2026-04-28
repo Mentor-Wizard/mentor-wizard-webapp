@@ -81,7 +81,7 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
 
             // Pass null (not an instance of MentorProgram)
             $action = new PendingCalendarEventsListPage;
-            $response = $action->handle();
+            $response = $action->handle(request());
             expect($response)->toBeInstanceOf(Response::class);
 
             $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
@@ -118,7 +118,7 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
 
         // Request with mentorProgram1
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle($this->mentorProgram1);
+        $response = $action->handle(request(), $this->mentorProgram1);
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -149,7 +149,7 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
         ]);
 
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle();
+        $response = $action->handle(request());
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -179,7 +179,7 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
         ]);
 
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle();
+        $response = $action->handle(request());
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -219,7 +219,7 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
         ]);
 
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle();
+        $response = $action->handle(request());
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -237,7 +237,7 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
     });
 
     it('returns inertia response with grouped pending events', function (): void {
-        $response = new PendingCalendarEventsListPage()->handle();
+        $response = new PendingCalendarEventsListPage()->handle(request());
         expect($response)->toBeInstanceOf(Response::class);
 
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
@@ -247,7 +247,7 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
     });
 
     it('filters by mentor program when provided', function (): void {
-        $response = new PendingCalendarEventsListPage()->handle($this->program);
+        $response = new PendingCalendarEventsListPage()->handle(request(), $this->program);
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         expect($page['props']['upcomingCalendarEvents'])->toHaveKey('Program X');
     });

@@ -56,7 +56,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
     });
 
     it('returns inertia response with correct component and props', function (): void {
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         expect($response)->toBeInstanceOf(Response::class);
 
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
@@ -66,7 +66,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
     });
 
     it('places confirmed future events in upcomingCalendarEvents', function (): void {
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -91,7 +91,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -114,7 +114,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -153,7 +153,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -191,7 +191,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -229,7 +229,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle($this->mentorProgram1);
+        $response = new ConfirmedCalendarEventsListPage()->handle(request(), $this->mentorProgram1);
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -261,7 +261,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle($this->mentorProgram1);
+        $response = new ConfirmedCalendarEventsListPage()->handle(request(), $this->mentorProgram1);
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -293,7 +293,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -327,7 +327,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 
@@ -360,7 +360,7 @@ describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
             'colour' => CalendarEventColoursEnum::BLUE->value,
         ]);
 
-        $response = new ConfirmedCalendarEventsListPage()->handle();
+        $response = new ConfirmedCalendarEventsListPage()->handle(request());
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         $props = $page['props'];
 

@@ -62,7 +62,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
-        $response = new ShowCalendarEventPage()->handle($this->event);
+        $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -89,7 +89,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->viewer);
 
         $request = new Request(['timezone' => config('app.timezone')]);
-        $response = new ShowCalendarEventPage()->handle($this->event);
+        $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -103,7 +103,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
-        $response = new ShowCalendarEventPage()->handle($this->event);
+        $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -117,7 +117,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($this->mentor);
 
         $request = new Request(['timezone' => config('app.timezone')]);
-        $response = new ShowCalendarEventPage()->handle($this->event);
+        $response = new ShowCalendarEventPage()->handle(request(), $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -155,7 +155,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $this->mentor->profile->timezone = 'Asia/Tokyo';
         $this->mentor->profile->save();
 
-        $responseTokyo = new ShowCalendarEventPage()->handle($eventAtNight);
+        $responseTokyo = new ShowCalendarEventPage()->handle(request(), $eventAtNight);
         $resultDataTokyo = $responseTokyo->toResponse(request())->getOriginalContent();
         $pageTokyo = $resultDataTokyo->getData()['page'];
 
@@ -223,7 +223,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $this->mentor->profile->timezone = 'Asia/Tokyo';
         $this->mentor->profile->save();
 
-        $responseTokyo = new ShowCalendarEventPage()->handle($event1);
+        $responseTokyo = new ShowCalendarEventPage()->handle(request(), $event1);
         $resultDataTokyo = $responseTokyo->toResponse(request())->getOriginalContent();
         $pageTokyo = $resultDataTokyo->getData()['page'];
 
@@ -246,7 +246,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         );
 
         $request = new Request(['timezone' => 'UTC']);
-        $response = (new ShowCalendarEventPage)->handle($event);
+        $response = (new ShowCalendarEventPage)->handle(request(), $event);
 
         expect($response)->toBeInstanceOf(Response::class);
         $props = inertiaProps($response);
@@ -273,7 +273,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         auth()->login($host);
 
-        $response = (new ShowCalendarEventPage)($calendarEvent);
+        $response = (new ShowCalendarEventPage)->handle(request(), $calendarEvent);
         $props = inertiaProps($response);
 
         expect($props['permissions'])->toBe('view');
@@ -301,7 +301,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         auth()->login($participant);
 
-        $response = (new ShowCalendarEventPage)($calendarEvent);
+        $response = (new ShowCalendarEventPage)->handle(request(), $calendarEvent);
         $props = inertiaProps($response);
 
         expect($props['permissions'])->toBe('view');
@@ -335,12 +335,12 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         auth()->login($user);
 
         // Can edit event where user is host
-        $responseHost = (new ShowCalendarEventPage)($hostEvent);
+        $responseHost = (new ShowCalendarEventPage)->handle(request(), $hostEvent);
         $propsHost = inertiaProps($responseHost);
         expect($propsHost['permissions'])->toBe('view');
 
         // Cannot edit event where user is only participant
-        $responseParticipant = (new ShowCalendarEventPage)($participantEvent);
+        $responseParticipant = (new ShowCalendarEventPage)->handle(request(), $participantEvent);
         $propsParticipant = inertiaProps($responseParticipant);
         expect($propsParticipant['permissions'])->toBe('view');
     });
@@ -369,7 +369,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         it('includes available colours in response', function (): void {
             $action = new ShowCalendarEventPage;
-            $response = $action->handle($this->calendarEvent);
+            $response = $action->handle(request(), $this->calendarEvent);
 
             expect($response)->toBeInstanceOf(Response::class);
 
@@ -382,7 +382,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         it('includes permissions in response based on user authorization', function (): void {
             $action = new ShowCalendarEventPage;
-            $response = $action->handle($this->calendarEvent);
+            $response = $action->handle(request(), $this->calendarEvent);
 
             expect($response)->toBeInstanceOf(Response::class);
 
@@ -395,7 +395,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         it('includes mentor program duration in response', function (): void {
             $action = new ShowCalendarEventPage;
-            $response = $action->handle($this->calendarEvent);
+            $response = $action->handle(request(), $this->calendarEvent);
 
             expect($response)->toBeInstanceOf(Response::class);
 
@@ -408,7 +408,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         it('includes available slots in response', function (): void {
             $action = new ShowCalendarEventPage;
-            $response = $action->handle($this->calendarEvent);
+            $response = $action->handle(request(), $this->calendarEvent);
 
             expect($response)->toBeInstanceOf(Response::class);
 
@@ -421,7 +421,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
 
         it('includes calendar event data in response', function (): void {
             $action = new ShowCalendarEventPage;
-            $response = $action->handle($this->calendarEvent);
+            $response = $action->handle(request(), $this->calendarEvent);
 
             expect($response)->toBeInstanceOf(Response::class);
 
@@ -463,7 +463,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         // Login as mentor who owns the program
         auth()->login($this->mentor);
 
-        $response = (new ShowCalendarEventPage)->handle($event);
+        $response = (new ShowCalendarEventPage)->handle(request(), $event);
         $props = inertiaProps($response);
 
         // Mentor of the program should have 'edit' permission
@@ -495,7 +495,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         // Login as non-mentor
         auth()->login($this->nonMentor);
 
-        $response = (new ShowCalendarEventPage)->handle($event);
+        $response = (new ShowCalendarEventPage)->handle(request(), $event);
         $props = inertiaProps($response);
 
         // Non-mentor should have 'view' permission (not 'edit')
@@ -537,12 +537,12 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         auth()->login($this->mentor);
 
         // For event1 (their own program) - should be 'edit'
-        $response1 = (new ShowCalendarEventPage)->handle($event1);
+        $response1 = (new ShowCalendarEventPage)->handle(request(), $event1);
         $props1 = inertiaProps($response1);
         expect($props1['permissions'])->toBe('edit');
 
         // For event2 (other mentor's program) - should be 'view'
-        $response2 = (new ShowCalendarEventPage)->handle($event2);
+        $response2 = (new ShowCalendarEventPage)->handle(request(), $event2);
         $props2 = inertiaProps($response2);
         expect($props2['permissions'])->toBe('view');
 

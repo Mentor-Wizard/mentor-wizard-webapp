@@ -6,6 +6,7 @@ namespace App\Actions\Notifications;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class MarkNotificationAsRead
@@ -17,7 +18,7 @@ class MarkNotificationAsRead
         $request->user()
             ?->notifications()
             ->where('id', $id)
-            ->update(['read_at' => now()]);
+            ->update(['read_at' => Date::now()]);
 
         return response()->noContent();
     }

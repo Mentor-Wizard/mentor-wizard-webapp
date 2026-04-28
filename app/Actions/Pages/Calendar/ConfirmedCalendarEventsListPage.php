@@ -7,6 +7,7 @@ namespace App\Actions\Pages\Calendar;
 use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,9 +17,9 @@ class ConfirmedCalendarEventsListPage
 {
     use AsController;
 
-    public function handle(?MentorProgram $mentorProgram = null): Response
+    public function handle(Request $request, ?MentorProgram $mentorProgram = null): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
 
         $query = $user->calendarEvents()
             ->where('status', CalendarEventStatusEnum::CONFIRMED->value)

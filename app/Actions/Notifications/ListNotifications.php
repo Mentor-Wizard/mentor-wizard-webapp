@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Notifications;
 
-use Illuminate\Http\JsonResponse;
+use App\Http\Resources\NotificationResource;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Lorisleiva\Actions\Concerns\AsController;
 
 class ListNotifications
 {
     use AsController;
 
-    public function handle(Request $request): JsonResponse
+    public function handle(Request $request): AnonymousResourceCollection
     {
-        $notifications = $request->user()
-            ?->notifications()
-            ->latest()
-            ->limit(20)
-            ->get() ?? collect();
+        /** @var User $user */
+        $user = $request->user();
 
-        return response()->json($notifications);
+        $notifications = $user->notifications()
+            ->latest()
+            ->paginate(User::NOTIFICATIONS_PER_PAGE);
+
+        return NotificationResource::collection($notifications);
     }
 }
