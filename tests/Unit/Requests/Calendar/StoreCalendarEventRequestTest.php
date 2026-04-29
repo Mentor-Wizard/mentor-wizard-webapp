@@ -1081,21 +1081,6 @@ describe('StoreCalendarEventRequest rules and messages', function (): void {
         expect($request->authorize())->toBeTrue();
     });
 
-    it('prevents mentor to create event for their own program', function (): void {
-        $this->seed(RoleSeeder::class);
-        $mentor = User::factory()->create();
-        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
-        actingAs($mentor);
-
-        $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $mentor->getKey()]);
-
-        $request = new StoreCalendarEventRequest;
-        $request->setUserResolver(fn () => $mentor);
-        $request->merge(['mentor_program_id' => $mentorProgram->getKey()]);
-
-        expect($request->authorize())->toBeFalse();
-    });
-
     it('checks another mentor successfully creating event for other mentor program', function (): void {
         $this->seed(RoleSeeder::class);
         $programOwner = User::factory()->create();

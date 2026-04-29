@@ -18,7 +18,7 @@ class PendingCalendarEventsListPage
 
     public function handle(Request $request, ?MentorProgram $mentorProgram = null): Response
     {
-        $user = $request->user();
+        $user = $request->user()->load('calendarEvents');
 
         $query = $user->calendarEvents()
             ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value)

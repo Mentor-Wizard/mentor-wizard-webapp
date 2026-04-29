@@ -33,8 +33,8 @@ final readonly class CalendarUIEventData
     {
         $user ??= auth()->user();
 
-        $startDateTime = $event->start_date_time->copy()->tz($timezone);
-        $endDateTime = $event->end_date_time->copy()->tz($timezone);
+        $startDateTime = $event->start_date_time->copy()->timezone($timezone);
+        $endDateTime = $event->end_date_time->copy()->timezone($timezone);
 
         $userPivot = $event->calendarEventUsers
             ->firstWhere('id', $user?->getKey())

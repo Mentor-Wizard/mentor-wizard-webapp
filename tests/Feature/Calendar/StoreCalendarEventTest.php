@@ -58,7 +58,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $eventData);
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $eventData);
 
         $response->assertRedirect(route('pages.calendar.index'));
 
@@ -110,7 +110,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         ];
 
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['title']);
     });
 
@@ -129,7 +129,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['title']);
     });
 
@@ -147,7 +147,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromDate']);
     });
 
@@ -166,7 +166,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromDate']);
     });
 
@@ -185,7 +185,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromDate']);
     });
 
@@ -203,7 +203,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toDate']);
     });
 
@@ -222,7 +222,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toDate']);
     });
 
@@ -241,7 +241,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toDate']);
     });
 
@@ -259,7 +259,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromTime']);
     });
 
@@ -278,7 +278,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromTime']);
     });
 
@@ -296,7 +296,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toTime']);
     });
 
@@ -315,7 +315,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toTime']);
     });
 
@@ -334,7 +334,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toTime']);
     });
 
@@ -352,7 +352,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['session_type']);
     });
 
@@ -370,7 +370,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['type']);
     });
 
@@ -389,7 +389,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['type']);
     });
 
@@ -407,7 +407,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['colour']);
     });
 
@@ -427,7 +427,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['description']);
     });
 
@@ -447,7 +447,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['webLink']);
     });
 
@@ -493,7 +493,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
-        $response = $this->withSession(['_token' => 'test-token'])->post(route('pages.calendar.store'), $payload);
+        $response = $this->withSession(['_token' => 'test-token'])->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $payload);
 
         $response->assertSessionHasErrors([
             'fromDate' => 'This slot is busy',
@@ -536,7 +536,8 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
 
@@ -567,7 +568,7 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
         // Should redirect to verification notice or return 403
         expect($response->status())->toBeIn([302, 403, 409]);
@@ -591,7 +592,8 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
         $response->assertStatus(302);
     });
@@ -614,7 +616,7 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $eventData);
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $eventData);
 
         $response->assertRedirect(route('pages.calendar.index'));
     });
@@ -655,7 +657,9 @@ describe('Calendar CalendarEvent Store Page - Edge Cases', function (): void {
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
+
         $response->assertStatus(302); // web request
         $response->assertSessionHasErrors([
             'mentor_program_id' => 'CalendarEvent should be related to mentor program.',
@@ -679,7 +683,8 @@ describe('Calendar CalendarEvent Store Page - Edge Cases', function (): void {
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
         // Should fail validation
         expect($response->status())->toBeIn([302, 403, 422]);

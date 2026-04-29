@@ -25,7 +25,7 @@ class ShowCalendarEventPage
     public function handle(Request $request, CalendarEvent $calendarEvent): Response
     {
         /** @var User $user */
-        $user = $request->user();
+        $user = $request->user()->load('profile');
         $profile = $user->profile;
         $timezone = $profile->timezone;
 
