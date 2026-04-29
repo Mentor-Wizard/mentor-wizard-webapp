@@ -15,6 +15,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
+use Illuminate\Http\Request;
 
 mutates(PendingCalendarEventsListPage::class);
 
@@ -81,7 +82,10 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
 
             // Pass null (not an instance of MentorProgram)
             $action = new PendingCalendarEventsListPage;
-            $response = $action->handle(request());
+
+            $request = new Request(['timezone' => config('app.timezone')]);
+            $request->setUserResolver(fn () => $this->mentor);
+            $response = $action->handle($request);
             expect($response)->toBeInstanceOf(Response::class);
 
             $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
@@ -118,7 +122,9 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
 
         // Request with mentorProgram1
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle(request(), $this->mentorProgram1);
+        $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => $this->mentor);
+        $response = $action->handle($request, $this->mentorProgram1);
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -149,7 +155,9 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
         ]);
 
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle(request());
+        $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => $this->mentor);
+        $response = $action->handle($request);
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -179,7 +187,9 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
         ]);
 
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle(request());
+        $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => $this->mentor);
+        $response = $action->handle($request);
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -219,7 +229,9 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
         ]);
 
         $action = new PendingCalendarEventsListPage;
-        $response = $action->handle(request());
+        $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => $this->mentor);
+        $response = $action->handle($request);
 
         expect($response)->toBeInstanceOf(Response::class);
 
@@ -237,7 +249,9 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
     });
 
     it('returns inertia response with grouped pending events', function (): void {
-        $response = new PendingCalendarEventsListPage()->handle(request());
+        $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => $this->mentor);
+        $response = new PendingCalendarEventsListPage()->handle($request);
         expect($response)->toBeInstanceOf(Response::class);
 
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
@@ -247,7 +261,9 @@ describe('PendingCalendarEventsListPage (Unit)', function (): void {
     });
 
     it('filters by mentor program when provided', function (): void {
-        $response = new PendingCalendarEventsListPage()->handle(request(), $this->program);
+        $request = new Request(['timezone' => config('app.timezone')]);
+        $request->setUserResolver(fn () => $this->mentor);
+        $response = new PendingCalendarEventsListPage()->handle($request, $this->program);
         $page = $response->toResponse(request())->getOriginalContent()->getData()['page'];
         expect($page['props']['upcomingCalendarEvents'])->toHaveKey('Program X');
     });
