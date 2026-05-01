@@ -77,6 +77,14 @@ class MentorProgram extends Model
     }
 
     /**
+     * @return BelongsToMany<Category, $this>
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_mentor_program');
+    }
+
+    /**
      * @return HasMany<MentorSession, $this>
      */
     public function mentorSession(): HasMany

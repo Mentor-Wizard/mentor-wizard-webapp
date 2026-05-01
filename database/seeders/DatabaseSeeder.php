@@ -13,6 +13,7 @@ final class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             CurrencySeeder::class,
+            CategorySeeder::class,
             UserSeeder::class,
             AdminSeeder::class,
             MentiSeeder::class,
