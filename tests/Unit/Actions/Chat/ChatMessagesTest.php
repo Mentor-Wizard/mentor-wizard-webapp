@@ -41,7 +41,7 @@ describe('ChatMessages', function (): void {
 
         /** @var ChatMessages $action */
         $action = resolve(ChatMessages::class);
-        $result = $action->handle($chat);
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user), $chat);
 
         expect($result)->toBeInstanceOf(JsonResponse::class)
             ->and($result->getStatusCode())->toBe(Response::HTTP_OK);
@@ -77,7 +77,7 @@ describe('ChatMessages', function (): void {
 
         /** @var ChatMessages $action */
         $action = resolve(ChatMessages::class);
-        $result = $action->handle($chat);
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user), $chat);
 
         $data = $result->getData(true);
         expect($data['files'])->not->toBeEmpty();
@@ -89,7 +89,7 @@ describe('ChatMessages', function (): void {
         $chat = Chat::factory()->create();
 
         $action = resolve(ChatMessages::class);
-        $result = $action->handle($chat);
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user), $chat);
 
         expect($result->getData(true))->toBe([
             'messages' => [],

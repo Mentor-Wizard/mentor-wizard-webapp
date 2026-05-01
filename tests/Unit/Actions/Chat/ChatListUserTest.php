@@ -32,7 +32,7 @@ describe('ChatListUser', function (): void {
         Auth::login($user);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result)->toBeInstanceOf(JsonResponse::class)
             ->and($result->getStatusCode())->toBe(Response::HTTP_OK)
@@ -79,7 +79,7 @@ describe('ChatListUser', function (): void {
         ]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result)
             ->toBeInstanceOf(JsonResponse::class)
@@ -152,7 +152,7 @@ describe('ChatListUser', function (): void {
         ]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result)
             ->toBeInstanceOf(JsonResponse::class)
@@ -208,7 +208,7 @@ describe('ChatListUser', function (): void {
         $chat->users()->attach($companion->id, ['status' => ChatStatusEnum::BANNED->value, 'is_muted' => false]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result)
             ->toBeInstanceOf(JsonResponse::class)
@@ -300,7 +300,7 @@ describe('ChatListUser', function (): void {
         ]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         $resultData = $result->getData(true);
 
@@ -350,7 +350,7 @@ describe('ChatListUser', function (): void {
         ]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         $resultData = $result->getData(true);
 
@@ -377,7 +377,7 @@ describe('ChatListUser', function (): void {
         $chat->users()->attach($companion->id, ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         $resultData = $result->getData(true);
 
@@ -413,7 +413,7 @@ describe('ChatListUser', function (): void {
         ]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         $resultData = $result->getData(true);
 
@@ -449,7 +449,7 @@ describe('ChatListUser', function (): void {
 
         Illuminate\Support\Facades\DB::enableQueryLog();
 
-        (new ChatListUser)->handle();
+        (new ChatListUser)->handle(request()->setUserResolver(fn (): object => clone $user));
 
         $queries = Illuminate\Support\Facades\DB::getQueryLog();
 
@@ -473,10 +473,10 @@ describe('ChatListUser', function (): void {
 
         $action = new ChatListUser;
 
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         DB::enableQueryLog();
-        (new ChatListUser)->handle();
+        (new ChatListUser)->handle(request()->setUserResolver(fn (): object => clone $user));
         $log = DB::getQueryLog();
 
         $messageQuery = collect($log)->first(fn ($q): bool => str_contains((string) $q['query'], 'chat_messages'));
@@ -497,7 +497,7 @@ describe('ChatListUser', function (): void {
 
         $action = new ChatListUser;
 
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result->getStatusCode())->toBe(Response::HTTP_OK);
 
@@ -517,7 +517,7 @@ describe('ChatListUser', function (): void {
         ]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result->getStatusCode())->toBe(Response::HTTP_OK);
 
@@ -537,7 +537,7 @@ describe('ChatListUser', function (): void {
         ]);
 
         $action = new ChatListUser;
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result->getStatusCode())->toBe(Response::HTTP_OK);
 
@@ -560,7 +560,7 @@ describe('ChatListUser', function (): void {
 
         $action = new ChatListUser;
 
-        $result = $action->handle();
+        $result = $action->handle(request()->setUserResolver(fn (): object => clone $user));
 
         expect($result->getStatusCode())->toBe(Response::HTTP_OK);
 

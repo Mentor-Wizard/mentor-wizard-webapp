@@ -169,6 +169,7 @@ describe('SendMessage', function (): void {
 
         $mockRequest = Mockery::mock(ChatMessageRequest::class);
 
+        $mockRequest->shouldReceive('user')->andReturn($this->owner);
         $mockRequest->shouldReceive('validated')->andReturn([
             'message' => 'Manual call with garbage',
             'files'   => ['not-an-uploaded-file-instance'],
