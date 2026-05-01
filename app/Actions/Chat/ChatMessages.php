@@ -10,6 +10,7 @@ use App\Http\Resources\ChatMessageResource;
 use App\Models\Chat;
 use App\Models\ChatMessage;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Lorisleiva\Actions\Concerns\AsController;
 use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
 
@@ -17,9 +18,9 @@ class ChatMessages
 {
     use AsController;
 
-    public function handle(Chat $chat): JsonResponse
+    public function handle(Request $request, Chat $chat): JsonResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
         $this->setReadMessages($chat);
         event(new UnreadMessagesEvent($user, UnreadMessages::run($user)));
 

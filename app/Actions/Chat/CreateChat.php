@@ -27,7 +27,7 @@ class CreateChat
     public function handle(User $user, ChatMessageRequest $request): JsonResponse
     {
         /** @var User $owner */
-        $owner = auth()->user();
+        $owner = $request->user();
         /**
          * @var (Chat&object{
          *     pivot: Pivot&object{

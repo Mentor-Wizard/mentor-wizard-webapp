@@ -15,6 +15,7 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
 use Stevebauman\Purify\Facades\Purify;
@@ -23,9 +24,9 @@ class ChatListUser
 {
     use AsController;
 
-    public function handle(): JsonResponse
+    public function handle(Request $request): JsonResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
         $userId = $user->getKey();
 
         $chats = $this->getChatsWithRelations($user);

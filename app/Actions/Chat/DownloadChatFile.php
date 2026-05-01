@@ -17,7 +17,7 @@ class DownloadChatFile
 
     public function handle(ChatMessage $message, Media $media): BinaryFileResponse
     {
-        abort_if($media->model_id !== $message->id || $media->model_type !== ChatMessage::class, 404);
+        abort_if($media->model_id !== $message->getKey() || $media->model_type !== ChatMessage::class, 404);
 
         return response()->download($media->getPath(), $media->file_name);
     }

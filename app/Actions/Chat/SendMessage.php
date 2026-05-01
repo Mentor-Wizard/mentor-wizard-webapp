@@ -34,7 +34,7 @@ class SendMessage
      */
     public function handle(Chat $chat, ChatMessageRequest $request): JsonResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
         $companion = $chat->companion($user);
         /**
          * @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $companionChat

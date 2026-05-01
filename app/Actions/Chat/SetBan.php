@@ -16,7 +16,7 @@ class SetBan
 
     public function handle(Chat $chat, Request $request): JsonResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
 
         $status = $request->boolean('ban')
             ? ChatStatusEnum::BANNED->value
