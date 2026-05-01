@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\RoleEnum;
+use App\Models\Category;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -40,5 +41,13 @@ class MentorProgramFactory extends Factory
     public function main(): static
     {
         return $this->state(['is_main' => true]);
+    }
+
+    public function withCategories(int $count = 1): static
+    {
+        return $this->afterCreating(function (MentorProgram $program) use ($count): void {
+            $categories = Category::factory()->count($count)->create();
+            $program->categories()->attach($categories->modelKeys());
+        });
     }
 }

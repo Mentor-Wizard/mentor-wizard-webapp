@@ -1,3 +1,4 @@
+M
 <script setup lang="ts">
 import { EnvelopeIcon, UserIcon } from '@heroicons/vue/20/solid';
 import { usePage } from '@inertiajs/vue3';

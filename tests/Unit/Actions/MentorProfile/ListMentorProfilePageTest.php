@@ -9,6 +9,7 @@ use App\Filters\ProgramCostFilter;
 use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
+use App\Http\Requests\MentorProfile\ListMentorProfileRequest;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
@@ -23,7 +24,22 @@ describe('ListMentorProfilePage unit tests', function (): void {
 
         $reflection = new ReflectionMethod($action, 'handle');
         expect($reflection->isPublic())->toBeTrue()
-            ->and($reflection->getNumberOfParameters())->toBe(0);
+            ->and($reflection->getNumberOfParameters())->toBe(1);
+    });
+
+    it('handle method accepts ListMentorProfileRequest as its only parameter', function (): void {
+        $reflection = new ReflectionMethod(ListMentorProfilePage::class, 'handle');
+        $params = $reflection->getParameters();
+
+        expect($params)->toHaveCount(1)
+            ->and($params[0]->getType()->getName())->toBe(ListMentorProfileRequest::class);
+    });
+
+    it('has private applyCategory method with correct signature', function (): void {
+        $reflection = new ReflectionMethod(ListMentorProfilePage::class, 'applyCategory');
+
+        expect($reflection->isPrivate())->toBeTrue()
+            ->and($reflection->getNumberOfParameters())->toBe(2);
     });
 
     it('handle method returns Inertia Response', function (): void {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\User;
@@ -31,5 +32,13 @@ class MentorProfileFactory extends Factory
             'currency_id'           => Currency::query()->inRandomOrder()->value('id') ?? Currency::factory(),
             'experience_started_at' => fake()->dateTimeBetween('-15 year', '-1 year'),
         ];
+    }
+
+    public function withCategories(int $count = 1): static
+    {
+        return $this->afterCreating(function (MentorProfile $profile) use ($count): void {
+            $categories = Category::factory()->count($count)->create();
+            $profile->categories()->attach($categories->modelKeys());
+        });
     }
 }

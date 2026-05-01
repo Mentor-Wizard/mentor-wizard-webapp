@@ -3,14 +3,17 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\Profile\ListMentorProfilePage;
+use App\Console\Commands\CacheCategoryTree;
 use App\Enums\RoleEnum;
 use App\Enums\TagEnum;
+use App\Models\Category;
 use App\Models\MentorProfile;
 use App\Models\MentorProgram;
 use App\Models\MentorReview;
 use App\Models\MentorTag;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
 
 mutates(ListMentorProfilePage::class);
@@ -425,5 +428,102 @@ describe('ListMentorProfilePage filters and includes', function (): void {
             ->has('mentors.data', 1)
             ->where('mentors.data.0.mainProgramSlug', null)
         );
+    });
+});
+
+describe('ListMentorProfilePage category filter', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        Cache::forget(CacheCategoryTree::CACHE_KEY);
+
+        $this->categoryBackend = Category::factory()->create(['name' => 'Backend']);
+        $this->categoryFrontend = Category::factory()->create(['name' => 'Frontend']);
+        $this->categoryPhp = Category::factory()->child($this->categoryBackend)->create(['name' => 'PHP']);
+
+        $this->profileBackend = MentorProfile::factory()->create(['title' => 'Backend Dev']);
+        $this->profilePhp = MentorProfile::factory()->create(['title' => 'PHP Dev']);
+        $this->profileFrontend = MentorProfile::factory()->create(['title' => 'Frontend Dev']);
+        $this->profileUncategorized = MentorProfile::factory()->create(['title' => 'Uncategorized Dev']);
+
+        $this->profileBackend->categories()->attach($this->categoryBackend->getKey());
+        $this->profilePhp->categories()->attach($this->categoryPhp->getKey());
+        $this->profileFrontend->categories()->attach($this->categoryFrontend->getKey());
+    });
+
+    afterEach(function (): void {
+        Cache::forget(CacheCategoryTree::CACHE_KEY);
+    });
+
+    it('returns all profiles and empty categories prop when no category_id is given', function (): void {
+        $this->get(route('page.profile-programs'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('Profile/MentorListPage')
+                ->has('mentors.data', 4)
+                ->where('categories', [])
+                ->where('selectedCategoryId', null)
+            );
+    });
+
+    it('filters profiles by direct category assignment', function (): void {
+        $this->get(route('page.profile-programs', ['category_id' => $this->categoryFrontend->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Frontend Dev')
+                ->where('selectedCategoryId', $this->categoryFrontend->getKey())
+            );
+    });
+
+    it('filters profiles by parent category and includes all descendants', function (): void {
+        // Backend parent has: profileBackend (direct) + profilePhp (via child PHP category)
+        $this->get(route('page.profile-programs', ['category_id' => $this->categoryBackend->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 2)
+            );
+
+        $titles = collect(
+            $this->get(route('page.profile-programs', ['category_id' => $this->categoryBackend->getKey()]))
+                ->assertOk()
+                ->original->getData()['page']['props']['mentors']['data']
+        )->pluck('title')->sort()->values()->toArray();
+
+        expect($titles)->toBe(['Backend Dev', 'PHP Dev']);
+    });
+
+    it('returns empty result when selected category has no assigned profiles', function (): void {
+        $empty = Category::factory()->create(['name' => 'Empty Category']);
+
+        $this->get(route('page.profile-programs', ['category_id' => $empty->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 0)
+            );
+    });
+
+    it('passes the categories tree in props when a category filter is active', function (): void {
+        $this->get(route('page.profile-programs', ['category_id' => $this->categoryPhp->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('categories')
+                ->where('selectedCategoryId', $this->categoryPhp->getKey())
+            );
+    });
+
+    it('returns 422 for a non-existent category_id', function (): void {
+        $this->get(route('page.profile-programs', ['category_id' => 999999]))
+            ->assertUnprocessable();
+    });
+
+    it('returns 422 for a non-integer category_id', function (): void {
+        $this->get(route('page.profile-programs', ['category_id' => 'not-an-integer']))
+            ->assertUnprocessable();
+    });
+
+    it('withCategories factory state attaches the correct number of categories', function (): void {
+        $profile = MentorProfile::factory()->withCategories(3)->create();
+
+        expect($profile->categories()->count())->toBe(3);
     });
 });

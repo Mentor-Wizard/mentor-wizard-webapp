@@ -228,7 +228,6 @@ const deleteProgram = () => {
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <AppModal v-model="showDeleteModal">
       <div class="p-6">
         <h2 class="text-lg font-medium text-gray-900">
