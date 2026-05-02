@@ -6,6 +6,8 @@ namespace App\Console\Commands;
 
 use App\Models\Category;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 
 class CacheCategoryTree extends Command
@@ -13,8 +15,6 @@ class CacheCategoryTree extends Command
     public const string CACHE_KEY = 'categories.tree';
 
     public const int CACHE_TTL = 3600;
-
-    public const int MAX_DEPTH = 3;
 
     protected $signature = 'categories:cache-tree';
 
@@ -80,8 +80,6 @@ class CacheCategoryTree extends Command
     {
         self::refresh();
 
-        $this->info('Category tree cached successfully.');
-
         return self::SUCCESS;
     }
 
@@ -90,25 +88,29 @@ class CacheCategoryTree extends Command
      */
     private static function build(): array
     {
-        return Category::query()
-            ->roots()
-            ->with('children.children.children')
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Category $node): array => self::serializeNode($node))
+        /** @var EloquentCollection<int, Category> $all */
+        $all = Category::query()->orderBy('name')->get();
+
+        return $all
+            ->filter(fn (Category $c): bool => $c->parent_id === null)
+            ->map(fn (Category $root): array => self::serializeNode($root, $all))
+            ->values()
             ->all();
     }
 
     /**
+     * @param  EloquentCollection<int, Category>  $all
      * @return array{id: int, name: string, children: array<mixed>}
      */
-    private static function serializeNode(Category $node): array
+    private static function serializeNode(Category $node, EloquentCollection $all): array
     {
         return [
             'id'       => $node->getKey(),
             'name'     => $node->name,
-            'children' => $node->children
-                ->map(fn (Category $child): array => self::serializeNode($child))
+            'children' => $all
+                ->filter(fn (Category $c): bool => $c->parent_id === $node->getKey())
+                ->map(fn (Category $child): array => self::serializeNode($child, $all))
+                ->values()
                 ->all(),
         ];
     }
@@ -119,12 +121,9 @@ class CacheCategoryTree extends Command
      */
     private static function flattenIds(array $node): array
     {
-        $ids = [$node['id']];
-
-        foreach ($node['children'] as $child) {
-            array_push($ids, ...self::flattenIds($child));
-        }
-
-        return $ids;
+        return Arr::flatten([
+            $node['id'],
+            array_map(self::flattenIds(...), $node['children']),
+        ]);
     }
 }

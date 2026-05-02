@@ -29,6 +29,8 @@ class Category extends Model
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
 
+    public const int MAX_DEPTH = 3;
+
     protected $fillable = [
         'name',
         'slug',

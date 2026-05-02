@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Category\Schemas;
 
 use App\Models\Category;
+use App\Rules\CategoryDepthRule;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -52,7 +53,8 @@ class CategoryForm
                         ->searchable()
                         ->preload()
                         ->nullable()
-                        ->placeholder('No parent (root category)'),
+                        ->placeholder('No parent (root category)')
+                        ->rules([new CategoryDepthRule]),
                 ]),
         ]);
     }
