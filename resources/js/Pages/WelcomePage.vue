@@ -8,7 +8,20 @@ import {
 } from '@heroicons/vue/24/outline';
 import { Head } from '@inertiajs/vue3';
 
+import CategoryTreePanel from '@/Components/Category/CategoryTreePanel.vue';
+import MentorsList from '@/Components/UI/Table/MentorsList.vue';
 import LandingLayout from '@/Layouts/LandingLayout.vue';
+
+defineProps({
+  categories: {
+    type: Array,
+    default: () => [],
+  },
+  selectedCategoryId: {
+    type: Number,
+    default: null,
+  },
+});
 
 const features = [
   {
@@ -192,6 +205,25 @@ const faqs = [
             );
           "
         />
+      </div>
+    </div>
+
+    <!-- Mentor listing -->
+    <div class="bg-gray-100 py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 class="mb-8 text-3xl font-bold text-gray-900">Find a Mentor</h2>
+        <div class="flex flex-col gap-6 lg:flex-row">
+          <aside class="w-full shrink-0 lg:w-64">
+            <CategoryTreePanel
+              :categories="categories"
+              :selected-category-id="selectedCategoryId"
+              route-name="pages.welcome"
+            />
+          </aside>
+          <div class="min-w-0 flex-1">
+            <MentorsList />
+          </div>
+        </div>
       </div>
     </div>
 

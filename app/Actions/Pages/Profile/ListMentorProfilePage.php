@@ -84,10 +84,10 @@ class ListMentorProfilePage
     }
 
     /**
-     * Applies a category + descendant filter to the query and returns the cached tree.
+     * Applies a category + descendant filter to the query.
      *
      * @param  Builder<MentorProfile>  $query
-     * @return array<int, array{id: int, name: string, children: array<mixed>}>
+     * @param  array<int, array{id: int, name: string, children: array<mixed>}>|null  $categories
      */
     private function applyCategory(Builder $query, int $categoryId, ?array $categories): void
     {

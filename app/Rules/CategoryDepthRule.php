@@ -28,7 +28,7 @@ class CategoryDepthRule implements ValidationRule
         $depth = 0;
         $currentId = $parentId;
 
-        while ($currentId !== null && $depth <= Category::MAX_DEPTH) {
+        while ($currentId !== null && $depth < Category::MAX_DEPTH) { // @phpstan-ignore smaller.alwaysTrue
             $depth++;
             $category = Category::query()->select(['id', 'parent_id'])->find($currentId);
             $currentId = $category?->parent_id;

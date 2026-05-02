@@ -20,7 +20,8 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $name = (string) fake()->unique()->words(fake()->numberBetween(1, 3), true);
+        $words = fake()->unique()->words(fake()->numberBetween(1, 3), true);
+        $name = is_array($words) ? implode(' ', $words) : $words;
 
         return [
             'name'      => ucfirst($name),
