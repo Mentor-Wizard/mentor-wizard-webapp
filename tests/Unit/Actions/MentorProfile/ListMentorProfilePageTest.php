@@ -39,7 +39,7 @@ describe('ListMentorProfilePage unit tests', function (): void {
         $reflection = new ReflectionMethod(ListMentorProfilePage::class, 'applyCategory');
 
         expect($reflection->isPrivate())->toBeTrue()
-            ->and($reflection->getNumberOfParameters())->toBe(2);
+            ->and($reflection->getNumberOfParameters())->toBe(3);
     });
 
     it('handle method returns Inertia Response', function (): void {

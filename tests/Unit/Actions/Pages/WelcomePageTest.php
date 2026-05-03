@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Pages\WelcomePage;
 use App\Enums\RoleEnum;
+use App\Http\Requests\WelcomePageRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Application;
@@ -36,7 +37,7 @@ describe('WelcomePage Action', function (): void {
         Route::shouldReceive('getRoutes')->andReturn($mockRouteCollection);
 
         $action = new WelcomePage;
-        $result = $action->handle();
+        $result = $action->handle(new WelcomePageRequest);
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
@@ -94,7 +95,7 @@ describe('WelcomePage Action', function (): void {
 
         expect($welcomePageCode)->toContain("with(['profile'])");
 
-        $result = $welcomePage->handle();
+        $result = $welcomePage->handle(new WelcomePageRequest);
         $resultData = $result->toResponse(request())->getOriginalContent();
         $mentors = Arr::get($resultData->getData(), 'page.props.mentors.data');
 

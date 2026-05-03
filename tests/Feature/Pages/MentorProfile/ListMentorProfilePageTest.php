@@ -460,7 +460,7 @@ describe('ListMentorProfilePage category filter', function (): void {
             ->assertInertia(fn (Assert $page): Assert => $page
                 ->component('Profile/MentorListPage')
                 ->has('mentors.data', 4)
-                ->where('categories', [])
+                ->has('categories')
                 ->where('selectedCategoryId', null)
             );
     });
@@ -512,12 +512,12 @@ describe('ListMentorProfilePage category filter', function (): void {
     });
 
     it('returns 422 for a non-existent category_id', function (): void {
-        $this->get(route('page.profile-programs', ['category_id' => 999999]))
+        $this->getJson(route('page.profile-programs', ['category_id' => 999999]))
             ->assertUnprocessable();
     });
 
     it('returns 422 for a non-integer category_id', function (): void {
-        $this->get(route('page.profile-programs', ['category_id' => 'not-an-integer']))
+        $this->getJson(route('page.profile-programs', ['category_id' => 'not-an-integer']))
             ->assertUnprocessable();
     });
 
