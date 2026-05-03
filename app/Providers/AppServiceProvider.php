@@ -11,11 +11,14 @@ use App\Models\UserSchedule;
 use App\Policies\CalendarEventPolicy;
 use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\ParallelTesting;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -39,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
         $this->configModels();
         $this->configDatabase();
         $this->configTesting();
+
+        RateLimiter::for('chat-send', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->getKey() ?: $request->ip()));
+        RateLimiter::for('chat-create', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->getKey() ?: $request->ip()));
 
         if ($this->app->isProduction()) {
             URL::forceHttps();

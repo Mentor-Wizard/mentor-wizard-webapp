@@ -11,10 +11,12 @@ import {
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import NavbarLogo from '@/Components/Navigation/Navbar/NavbarLogo.vue';
 import { useNavigation } from '@/Stores/navigation.js';
+import { useAlerts } from '@/UseCases/useCaseAlert.js';
+const { isRinging, notificationsCount } = useAlerts();
 
 defineProps({
   transparent: {
@@ -24,6 +26,7 @@ defineProps({
 });
 
 const page = usePage();
+
 const navigationStore = useNavigation();
 const logout = () => {
   router.post(route('logout'));
@@ -32,6 +35,11 @@ const logout = () => {
 const currentUser = computed(() => page.props.auth?.user ?? {});
 const currentUserAvatar = ref(page.props.auth?.avatar ?? null);
 const isLoggedIn = computed(() => !!currentUser.value?.email);
+
+const { infoChatMessage } = useAlerts();
+onMounted(() => {
+  infoChatMessage(page.props.auth?.user.id);
+});
 
 const mainNavigations = computed(() =>
   isLoggedIn.value ?
@@ -126,11 +134,32 @@ const mobileNavLinkClasses = (navItemHref) => {
           <div v-if="isLoggedIn" class="flex items-center">
             <button
               type="button"
-              class="relative shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
+              class="relative shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:ring-0 focus:ring-indigo-500 focus:ring-offset-0 focus:outline-none"
             >
               <span class="absolute -inset-1.5" />
               <span class="sr-only">View notifications</span>
-              <BellIcon class="size-6" aria-hidden="true" />
+              <BellIcon
+                :class="[
+                  'bell size-6 transition-colors',
+                  isRinging ? 'animate-ring text-red-500' : 'text-gray-400',
+                ]"
+                aria-hidden="true"
+              />
+              <Transition
+                enter-active-class="transition ease-out duration-[5000ms]"
+                enter-from-class="opacity-0 scale-75"
+                enter-to-class="opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-[1000ms]"
+                leave-from-class="opacity-100 scale-100"
+                leave-to-class="opacity-0 scale-75"
+              >
+                <span
+                  v-if="notificationsCount > 0"
+                  class="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white ring-2 ring-white"
+                >
+                  {{ notificationsCount > 99 ? '99+' : notificationsCount }}
+                </span>
+              </Transition>
             </button>
 
             <Menu as="div" class="relative ml-4 shrink-0">
@@ -251,7 +280,19 @@ const mobileNavLinkClasses = (navItemHref) => {
           >
             <span class="absolute -inset-1.5" />
             <span class="sr-only">View notifications</span>
-            <BellIcon class="size-6" aria-hidden="true" />
+            <BellIcon
+              :class="[
+                'bell size-6 transition-colors',
+                isRinging ? 'animate-ring text-red-500' : 'text-gray-400',
+              ]"
+              aria-hidden="true"
+            />
+            <span
+              v-if="notificationsCount > 0"
+              class="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white ring-2 ring-white"
+            >
+              {{ notificationsCount > 99 ? '99+' : notificationsCount }}
+            </span>
           </button>
         </div>
         <div class="mt-3 space-y-1">
@@ -274,3 +315,40 @@ const mobileNavLinkClasses = (navItemHref) => {
     </DisclosurePanel>
   </Disclosure>
 </template>
+
+<style scoped>
+.bell {
+  transform-origin: top center;
+}
+
+@keyframes animate-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(15deg);
+  }
+  20% {
+    transform: rotate(-15deg);
+  }
+  30% {
+    transform: rotate(10deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  70% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-ring {
+  animation: animate-ring 2s ease-in-out;
+}
+</style>
