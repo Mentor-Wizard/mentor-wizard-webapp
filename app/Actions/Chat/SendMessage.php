@@ -39,7 +39,7 @@ class SendMessage
             ->wherePivot('chat_id', $chat->getKey())
             ->first();
 
-        throw_if($companionChat->pivot->status !== ChatStatusEnum::ACTIVE->value, AuthorizationException::class);
+        throw_if($companionChat->pivot->status !== ChatStatusEnum::ACTIVE->value, AuthorizationException::class); // @phpstan-ignore property.notFound
 
         $data = $request->validated();
         $message = ChatMessage::query()->create([
@@ -58,7 +58,7 @@ class SendMessage
         $message->refresh();
         /** @var User $companion */
         $companion = $chat->companion($user);
-        event(new ChatMessageEvent($companion, $message, $companionChat->pivot->is_muted));
+        event(new ChatMessageEvent($companion, $message, $companionChat->pivot->is_muted)); // @phpstan-ignore property.notFound
         event(new UnreadMessagesEvent($companion, UnreadMessages::run($companion)));
 
         return response()->json([

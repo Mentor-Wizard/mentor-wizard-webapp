@@ -24,7 +24,6 @@ class ListMentorProfilePage
 
     public function handle(): Response
     {
-        // @phpstan-ignore method.notFound (Larastan's with() return type narrows to Builder, losing QueryBuilder type)
         $mentors = QueryBuilder::for(MentorProfile::class)
             ->with([
                 'user.profile',
@@ -32,6 +31,7 @@ class ListMentorProfilePage
                 'user.mentorPrograms' => fn (mixed $query) => $query
                     ->select(['id', 'mentor_id', 'slug', 'is_main']),
             ])
+            // @phpstan-ignore method.notFound (Larastan narrows with() return to Builder, losing Spatie QueryBuilder type)
             ->allowedFilters([
                 'title',
                 'description',
