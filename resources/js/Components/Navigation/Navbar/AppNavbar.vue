@@ -276,6 +276,9 @@ const mobileNavLinkClasses = (navItemHref) => {
               {{ currentUser.email }}
             </div>
           </div>
+          <div class="ml-auto">
+            <NotificationBell />
+          </div>
           <button
             type="button"
             class="relative ml-auto shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
