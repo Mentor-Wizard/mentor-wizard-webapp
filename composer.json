@@ -28,6 +28,7 @@
     "spatie/laravel-medialibrary": "^11.17.10",
     "spatie/laravel-permission": "^6.24",
     "spatie/laravel-query-builder": "^6.4.1",
+    "stevebauman/purify": "^6.3",
     "tightenco/ziggy": "^2.6",
     "ext-dom": "*",
     "ext-xmlreader": "*",

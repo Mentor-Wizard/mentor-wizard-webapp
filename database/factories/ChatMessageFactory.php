@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,8 +24,10 @@ class ChatMessageFactory extends Factory
     public function definition(): array
     {
         return [
-            'message' => fake()->sentence(10),
-            'is_read' => fake()->boolean(),
+            'chat_id'   => Chat::factory(),
+            'user_id'   => User::factory(),
+            'message'   => fake()->sentence(10),
+            'is_read'   => fake()->boolean(),
         ];
     }
 }
