@@ -49,6 +49,9 @@ class AppServiceProvider extends ServiceProvider
         $this->configDatabase();
         $this->configTesting();
 
+        RateLimiter::for('chat-send', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->getKey() ?: $request->ip()));
+        RateLimiter::for('chat-create', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->getKey() ?: $request->ip()));
+
         if ($this->app->isProduction()) {
             URL::forceHttps();
         }

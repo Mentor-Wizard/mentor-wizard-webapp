@@ -15,45 +15,23 @@ import {
   UserIcon,
   VideoCameraIcon,
 } from '@heroicons/vue/24/solid';
-import { ref } from 'vue';
+
+import AppModal from '@/Components/AppModal.vue';
+import DangerButton from '@/Components/UI/Button/DangerButton.vue';
+import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
+import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import { useCaseFileType } from '../useCaseFileType.js';
+const {
+  chatFiles,
+  currentUser,
+  setMute,
+  setArchive,
+  setBan,
+  showArchiveModal,
+} = useCaseChat();
 
 const { getColorByFileName, getIconByFileName } = useCaseFileType();
-
-// TODO - fake files. After connecting to the backend, you need to delete
-const files = ref([
-  {
-    id: 1,
-    name: 'ReactPatterns.pdf',
-    created_at: '10.10.2025 10:26',
-    url: '#',
-  },
-  {
-    id: 2,
-    name: 'ReactPatterns.vue',
-    created_at: '10.10.2025 10:26',
-    url: '#',
-  },
-  {
-    id: 3,
-    name: 'ReactPatterns.png',
-    created_at: '10.10.2025 10:26',
-    url: '#',
-  },
-  {
-    id: 4,
-    name: 'ReactPatterns.doc',
-    created_at: '10.10.2025 10:26',
-    url: '#',
-  },
-  {
-    id: 4,
-    name: 'ReactPatterns.zip',
-    created_at: '10.10.2025 10:26',
-    url: '#',
-  },
-]);
 </script>
 
 <template>
@@ -61,8 +39,8 @@ const files = ref([
     <div class="flex justify-center">
       <div class="h-32 w-32 overflow-hidden rounded-full border-4 border-white">
         <img
-          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-          alt="David Miller"
+          :src="currentUser?.avatar"
+          :alt="currentUser?.name"
           class="h-full w-full rounded-full object-cover"
         />
       </div>
@@ -70,10 +48,14 @@ const files = ref([
 
     <div class="mt-4 text-center">
       <h2 class="text-xl leading-tight font-bold text-gray-900">
-        David Miller
+        {{ currentUser?.name }}
       </h2>
-      <p class="mt-1 text-base text-gray-600">Front-end Developer</p>
-      <p class="mt-2 text-sm text-gray-500">Member since Oct 2022</p>
+      <p v-if="currentUser?.tags" class="mt-1 text-base text-gray-600">
+        {{ currentUser.tags[0] }}
+      </p>
+      <p class="mt-2 text-sm text-gray-500">
+        Member since {{ currentUser?.createdAt }}
+      </p>
     </div>
 
     <div class="mt-6 flex justify-center space-x-4">
@@ -84,12 +66,15 @@ const files = ref([
         Book Session
       </button>
 
-      <button
+      <a
+        v-if="currentUser?.slug"
+        :href="route('page.mentor', { mentor: currentUser.slug })"
+        target="_blank"
         class="flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition duration-150 ease-in-out hover:bg-gray-50"
       >
         <UserIcon class="me-2 h-4 w-4 text-gray-600" />
         Profile
-      </button>
+      </a>
     </div>
   </div>
   <section>
@@ -128,9 +113,9 @@ const files = ref([
       <h3 class="text-lg">Shared Files</h3>
     </div>
 
-    <div class="space-y-4">
+    <div class="max-h-80 space-y-4 overflow-y-auto">
       <div
-        v-for="file in files"
+        v-for="file in chatFiles"
         :key="file.id"
         class="flex items-center justify-between"
       >
@@ -142,7 +127,7 @@ const files = ref([
           />
           <div>
             <p class="text-sm font-medium text-gray-800">{{ file.name }}</p>
-            <p class="text-xs text-gray-500">{{ file.created_at }}</p>
+            <p class="text-xs text-gray-500">{{ file.createdAt }}</p>
           </div>
         </div>
         <a :href="file.url" download class="text-gray-400 hover:text-gray-600">
@@ -198,32 +183,61 @@ const files = ref([
           class="relative inline-flex cursor-pointer items-center"
         >
           <input
+            v-if="currentUser"
             id="toggle-mute"
+            v-model="currentUser.isMuted"
             type="checkbox"
-            value=""
             class="peer sr-only"
+            @change="setMute()"
           />
           <div
             class="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 peer-focus:ring-4 peer-focus:ring-blue-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"
           ></div>
         </label>
       </div>
-
-      <div class="flex cursor-pointer items-center justify-between">
+      <div class="flex items-center justify-between">
         <p class="text-sm text-gray-700">Archive conversation</p>
         <button class="text-gray-400 hover:text-gray-600">
-          <ArchiveBoxIcon class="h-4 w-4 text-gray-400" />
+          <ArchiveBoxIcon
+            class="h-4 w-4 cursor-pointer text-gray-400"
+            @click="showArchiveModal = true"
+          />
         </button>
       </div>
 
-      <div class="flex cursor-pointer items-center justify-between">
+      <div class="flex items-center justify-between">
         <p class="text-sm text-gray-700">Block user</p>
         <button class="text-gray-400 hover:text-gray-600">
-          <NoSymbolIcon class="h-4 w-4 text-gray-400" />
+          <NoSymbolIcon
+            class="h-4 w-4 cursor-pointer"
+            :class="currentUser?.ban ? 'text-red-400' : 'text-gray-400'"
+            @click="setBan()"
+          />
         </button>
       </div>
     </div>
   </section>
+
+  <AppModal v-model="showArchiveModal">
+    <div class="p-6">
+      <h2 class="text-lg font-medium text-gray-900">
+        Are you sure you want to archive this chat?
+      </h2>
+      <p class="mt-1 text-sm text-gray-600">
+        This chat will be archived, not deleted.<br />
+        At the moment, restoring it from the archive is not planned, but there
+        may come a time when it can be brought back with a single click.<br />
+        All messages and data will remain safely stored, ready to be accessed
+        again when this feature becomes available.
+      </p>
+      <div class="mt-6 flex justify-end space-x-3">
+        <PrimaryButton @click="showArchiveModal = false">
+          Cancel
+        </PrimaryButton>
+        <DangerButton @click="setArchive"> Delete Program </DangerButton>
+      </div>
+    </div>
+  </AppModal>
 </template>
 
 <style scoped></style>

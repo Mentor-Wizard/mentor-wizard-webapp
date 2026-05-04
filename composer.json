@@ -32,6 +32,7 @@
     "ext-dom": "*",
     "ext-xmlreader": "*",
     "ext-libxml": "*"
+    "stevebauman/purify": "^6.3"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^3.6.1",

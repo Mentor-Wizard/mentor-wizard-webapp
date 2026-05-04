@@ -4,7 +4,11 @@ import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid/index.js';
 import { ref } from 'vue';
 
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
+import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
+
+const { sortedUsers, messageSortList, messageSortBy, fetchMessages } =
+  useCaseChat();
 
 const selectedTab = ref(0);
 
@@ -13,45 +17,6 @@ function changeTab(index) {
 }
 
 const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
-
-const messageSortList = ['Resent', 'New', 'Name'];
-const messageSortBy = ref(1);
-
-// TODO - fake files. After connecting to the backend, you need to delete
-const users = ref([
-  {
-    id: 1,
-    name: 'Sara Conor',
-    online: true,
-    active: true,
-    last: '1 day ago',
-    message: "I've completed the assignment you sent yesterday I've completed ",
-  },
-  {
-    id: 2,
-    name: 'John McClane',
-    online: false,
-    active: false,
-    last: '1 day ago',
-    message: "I've completed the assignment you sent yesterday I've completed ",
-  },
-  {
-    id: 3,
-    name: 'Macaulay Carson',
-    online: true,
-    active: false,
-    last: '1 day ago',
-    message: "I've completed the assignment you sent yesterday I've completed ",
-  },
-  {
-    id: 4,
-    name: 'John Wick',
-    online: false,
-    active: false,
-    last: '1 day ago',
-    message: "I've completed the assignment you sent yesterday I've completed ",
-  },
-]);
 </script>
 
 <template>
@@ -104,7 +69,6 @@ const users = ref([
   <div class="mt-2 grid grid-cols-2 gap-4">
     <div class="self-end text-[0.75rem] text-gray-800">Sort by</div>
     <SelectField
-      id="currency_id"
       v-model="messageSortBy"
       :list="messageSortList"
       :placeholder="'Select sorting'"
@@ -113,17 +77,14 @@ const users = ref([
   </div>
 
   <div
-    v-for="user in users"
+    v-for="user in sortedUsers"
     :key="user.id"
-    class="mt-2 flex max-w-md items-start rounded-lg border border-gray-200 p-2 shadow-sm"
+    class="mt-2 flex max-w-md cursor-pointer items-start rounded-lg border border-gray-200 p-2 shadow-sm"
     :class="user.active ? 'bg-gray-100' : 'bg-white'"
+    @click="fetchMessages(user.chatId)"
   >
     <div class="relative">
-      <img
-        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-        alt="Sarah Johnson"
-        class="h-12 w-12 rounded-full"
-      />
+      <img :src="user.avatar" :alt="user.name" class="h-12 w-12 rounded-full" />
       <!-- Status online -->
       <span
         class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white"
@@ -138,9 +99,10 @@ const users = ref([
         </h4>
         <span class="text-[0.75rem] text-gray-500">{{ user.last }}</span>
       </div>
-      <p class="mt-1 line-clamp-2 text-[0.75rem] text-gray-800">
-        {{ user.message }}
-      </p>
+      <p
+        class="mt-1 line-clamp-2 text-[0.75rem] text-gray-800"
+        v-html="user.message"
+      ></p>
     </div>
   </div>
 </template>
