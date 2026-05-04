@@ -6,20 +6,14 @@ namespace App\Jobs;
 
 use App\Models\UserCalendarIntegration;
 use App\Services\Encryption\CalendarCredentialEncrypter;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ReEncryptCalendarCredentials implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
 
     /** @var list<string> */
     private const array ENCRYPTED_FIELDS = [

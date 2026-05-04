@@ -11,20 +11,14 @@ use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceFactory;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class UpdateExternalCalendarEvent implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
     use Queueable;
-    use SerializesModels;
 
     public int $tries = 2;
 

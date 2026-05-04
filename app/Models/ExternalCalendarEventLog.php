@@ -10,6 +10,7 @@ use Database\Factories\ExternalCalendarEventLogFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 /**
  * @property ExternalCalendarEventLogTypeEnum $type
@@ -57,6 +58,7 @@ class ExternalCalendarEventLog extends Model
     /**
      * @return array<string, mixed>
      */
+    #[Override]
     protected function casts(): array
     {
         return [

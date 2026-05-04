@@ -258,8 +258,8 @@ class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInter
         }
 
         return [
-            'success'   => true,
-            'calendars' => new CalDavCalendarListParser(self::CALDAV_ROOT)
+            'success'                                               => true,
+            'calendars'                                             => new CalDavCalendarListParser(self::CALDAV_ROOT)
                 ->getParsedCalendarList($response->body()), 'error' => null,
         ];
     }
