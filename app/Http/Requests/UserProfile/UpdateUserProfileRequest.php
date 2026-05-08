@@ -6,6 +6,7 @@ namespace App\Http\Requests\UserProfile;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class UpdateUserProfileRequest extends FormRequest
 {
@@ -54,6 +55,7 @@ class UpdateUserProfileRequest extends FormRequest
         ];
     }
 
+    #[Override]
     protected function prepareForValidation()
     {
         if (! empty($this->phone)) {

@@ -1,6 +1,7 @@
 .cursor/guidelines.md
 .ddev
 .github
+.dokploy
 .junie/guidelines.md
 .vscode/guidelines.md
 dist

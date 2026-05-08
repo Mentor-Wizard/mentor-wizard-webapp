@@ -35,6 +35,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
     });
 
     it('creates an event successfully', function (): void {
+        Date::setTestNow(Date::create(2026, 1, 15, 10, 0, 0, 'UTC'));
         actingAs($this->user);
 
         $eventData = [
@@ -56,12 +57,11 @@ describe('Calendar CalendarEvent Store Page', function (): void {
 
         $response->assertRedirect(route('pages.calendar.index'));
 
-        // Times are stored in UTC, so 09:00 Europe/Kyiv = 07:00 UTC (2 hour offset)
         $this->assertDatabaseHas('calendar_events', [
             'title'             => 'Default event',
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => Date::today()->addDay()->format('Y-m-d').' 07:00:00',
-            'end_date_time'     => Date::today()->addDay()->format('Y-m-d').' 08:00:00',
+            'start_date_time'   => Date::createFromFormat('Y-m-d H:i', Date::today()->addDay()->format('Y-m-d').' 09:00', 'Europe/Kyiv')->timezone('UTC')->format('Y-m-d H:i:s'),
+            'end_date_time'     => Date::createFromFormat('Y-m-d H:i', Date::today()->addDay()->format('Y-m-d').' 10:00', 'Europe/Kyiv')->timezone('UTC')->format('Y-m-d H:i:s'),
             'date'              => Date::today()->addDay()->format('Y-m-d'),
             'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,

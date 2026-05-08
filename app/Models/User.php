@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -159,19 +160,13 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasMany<Chat, $this>
+     * @return BelongsToMany<Chat, $this>
      */
-    public function mentorChats(): HasMany
+    public function chats(): BelongsToMany
     {
-        return $this->hasMany(Chat::class, 'mentor_id');
-    }
-
-    /**
-     * @return HasMany<Chat, $this>
-     */
-    public function mentiChats(): HasMany
-    {
-        return $this->hasMany(Chat::class, 'menti_id');
+        return $this->belongsToMany(Chat::class, 'chat_users')
+            ->withPivot(['status', 'is_muted'])
+            ->withTimestamps();
     }
 
     /**
@@ -252,6 +247,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
      *
      * @return array<string, string>
      */
+    #[Override]
     protected function casts(): array
     {
         return [
