@@ -2,20 +2,19 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\CalendarEvent\ConfirmCalendarEvent;
-use App\Actions\Calendar\CalendarEvent\DeleteCalendarEvent;
-use App\Actions\Calendar\CalendarEvent\EditCalendarEvent;
-use App\Actions\Calendar\CalendarEvent\StoreCalendarEvent;
-use App\Actions\Calendar\CalendarEvent\SyncCalendarEventToIntegration;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectCallback;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectDirect;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectRedirect;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarDisconnect;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarRetrySync;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSelectCalendar;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSyncSingleEvent;
-use App\Actions\Calendar\ExternalCalendar\RerunExternalCalendarEventSync;
-use App\Actions\Calendar\ExternalCalendarLog\AcknowledgeExternalCalendarEventLog;
+use App\Actions\Calendar\ConfirmCalendarEvent;
+use App\Actions\Calendar\DeleteCalendarEvent;
+use App\Actions\Calendar\EditCalendarEvent;
+use App\Actions\Calendar\StoreCalendarEvent;
+use App\Actions\Chat\ChatListUser;
+use App\Actions\Chat\ChatMessages;
+use App\Actions\Chat\CreateChat;
+use App\Actions\Chat\DownloadChatFile;
+use App\Actions\Chat\GetMessage;
+use App\Actions\Chat\SendMessage;
+use App\Actions\Chat\SetArchive;
+use App\Actions\Chat\SetBan;
+use App\Actions\Chat\SetMute;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\SetMainMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
@@ -120,7 +119,16 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
 Route::middleware('auth')
     ->prefix('chat')
     ->group(function (): void {
-        Route::get('list', GetChatPage::class)->name('page.chat.list');
+        Route::get('list', GetChatPage::class)->name('page.chat');
+        Route::get('users', ChatListUser::class)->name('chat.users');
+        Route::get('messages/{chat}', ChatMessages::class)->name('chat.messages')->can('view,chat');
+        Route::post('message/{chat}', SendMessage::class)->middleware('throttle:chat-send')->name('chat.send-message')->can('update,chat');
+        Route::get('message/{message}', GetMessage::class)->name('chat.get-message')->can('view,message');
+        Route::get('message/{message}/download/{media}', DownloadChatFile::class)->can('view,message')->name('chat.message.download');
+        Route::post('mute/{chat}', SetMute::class)->middleware('throttle:chat-send')->name('chat.set-mute')->can('update,chat');
+        Route::post('create/{user}', CreateChat::class)->middleware('throttle:chat-create')->name('chat.create');
+        Route::post('archive/{chat}', SetArchive::class)->middleware('throttle:chat-send')->name('chat.set-archive')->can('update,chat');
+        Route::post('ban/{chat}', SetBan::class)->middleware('throttle:chat-send')->name('chat.set-ban')->can('update,chat');
     });
 
 Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')->group(function (): void {

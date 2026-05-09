@@ -37,20 +37,13 @@ describe('Chat Page', function (): void {
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $action = new GetChatPage;
-        $result = $action->handle($user);
+        $result = $action->handle();
         $response = $result->toResponse(request());
         $original = $response->getOriginalContent();
 
         expect($result)
             ->toBeInstanceOf(Response::class)
-            ->and(Arr::get($original->getData(), 'page.component'))->toBe('Chat/ChatPage')
-            ->and(Arr::get($original->getData(), 'page.props.user.username'))->toBe('Test User')
-            ->and(Arr::get($original->getData(), 'page.props.user.profile.name'))->toBe('profile name')
-            ->and(Arr::get($original->getData(), 'page.props.user.profile.last_name'))->toBe('profile last_name')
-            ->and(Arr::get($original->getData(), 'page.props.user.profile.linkedin'))->toBe('profile linkedin')
-            ->and(Arr::get($original->getData(), 'page.props.user.profile.telegram'))->toBe('profile telegram')
-            ->and(Arr::get($original->getData(), 'page.props.user.profile.whatsapp'))->toBe('profile whatsapp')
-            ->and(Arr::get($original->getData(), 'page.props.user.profile.phone'))->toBe('profile phone');
+            ->and(Arr::get($original->getData(), 'page.component'))->toBe('Chat/ChatPage');
     });
 
 });
