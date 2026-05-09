@@ -426,15 +426,13 @@ describe('MentorsListPage - Edge Cases', function (): void {
             );
     });
 
-    it('handles malformed rate filter (missing min)', function (): void {
+    it('handles rate filter with max only — redirects due to gte validation', function (): void {
         MentorProfile::factory()->create(['rate' => 50.0]);
         MentorProfile::factory()->create(['rate' => 150.0]);
 
         $this->get(route('pages.mentors', ['filter' => ['rate' => ['max' => 100]]]))
-            ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-                ->has('mentors.data', 1)
-            );
+            ->assertRedirect()
+            ->assertSessionHasErrors('filter.rate.max');
     });
 
     it('handles malformed rate filter (missing max)', function (): void {

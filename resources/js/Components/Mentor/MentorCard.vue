@@ -1,13 +1,18 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-defineProps({
+const props = defineProps({
   mentor: Object,
   view: {
     type: String,
     default: 'grid',
   },
 });
+
+const defaultAvatar = usePage().props.defaultAvatar;
+
+const avatarSrc = computed(() => props.mentor.image || defaultAvatar);
 </script>
 
 <template>
@@ -15,29 +20,6 @@ defineProps({
     class="relative overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:shadow-lg"
     :class="view === 'list' ? 'flex flex-row' : 'flex flex-col'"
   >
-    <div
-      v-if="mentor.availability"
-      class="absolute top-3 z-10 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-      :class="[
-        view === 'list' ? 'left-3' : 'right-3',
-        {
-          'bg-green-100 text-green-800': mentor.availability === 'today',
-          'bg-yellow-100 text-yellow-800': mentor.availability === 'tomorrow',
-          'bg-red-100 text-red-800': mentor.availability === 'booked',
-        },
-      ]"
-    >
-      <span
-        class="h-2 w-2 rounded-full"
-        :class="{
-          'bg-green-500': mentor.availability === 'today',
-          'bg-yellow-500': mentor.availability === 'tomorrow',
-          'bg-red-500': mentor.availability === 'booked',
-        }"
-      ></span>
-      {{ mentor.availabilityLabel }}
-    </div>
-
     <div
       :class="
         view === 'list' ?
@@ -48,7 +30,7 @@ defineProps({
     >
       <img
         class="h-full w-full object-cover"
-        :src="mentor.image"
+        :src="avatarSrc"
         :alt="mentor.name"
       />
     </div>
@@ -98,12 +80,12 @@ defineProps({
             :aria-label="`Rating: ${mentor.rating} out of 5`"
             role="img"
           >
-            &star;&star;&star;&star;&star;
+            &#9733;&#9733;&#9733;&#9733;&#9733;
             <div
               class="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
               :style="{ width: (mentor.rating / 5) * 100 + '%' }"
             >
-              &star;&star;&star;&star;&star;
+              &#9733;&#9733;&#9733;&#9733;&#9733;
             </div>
           </div>
           <span class="ml-2 text-gray-700">
@@ -112,7 +94,10 @@ defineProps({
         </div>
 
         <div class="text-sm text-gray-600">
-          {{ mentor.experience }}+ years experience
+          <template v-if="mentor.experience">
+            {{ mentor.experience }}+ years experience
+          </template>
+          <template v-else>Experience N/A</template>
         </div>
       </div>
 

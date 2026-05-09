@@ -12,10 +12,11 @@ use App\Filters\RateInUsdSort;
 use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
+use App\Http\Requests\Mentor\MentorListRequest;
 use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\MentorTag;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -27,7 +28,7 @@ class MentorsListPage
 {
     use AsController;
 
-    public function handle(Request $request): Response
+    public function handle(MentorListRequest $request): Response
     {
         /** @var QueryBuilder<MentorProfile> $query */
         $query = QueryBuilder::for(MentorProfile::class, $request);
@@ -78,10 +79,8 @@ class MentorsListPage
                     'reviews'    => $user->mentor_reviews_count ?? 0,
                     'experience' => $mentor->experience_started_at
                         ? now()->diff($mentor->experience_started_at)->y
-                        : 0,
-                    'image'             => $profile?->avatar,
-                    'availability'      => 'today',
-                    'availabilityLabel' => 'Available now',
+                        : null,
+                    'image' => $profile?->avatar,
                 ];
             });
 
@@ -117,17 +116,22 @@ class MentorsListPage
      */
     private function getTagOptions(TagEnum $type): array
     {
-        return MentorTag::query()->where('type', $type)
-            ->select('tag')
-            ->distinct()
-            ->orderBy('tag')
-            ->get()
-            ->map(fn (MentorTag $tag): array => [
-                'value' => $tag->tag,
-                'label' => $tag->tag,
-            ])
-            ->values()
-            ->all();
+        /** @var array<int, array{value: string, label: string}> */
+        return Cache::remember(
+            'mentor_tag_options_'.$type->value,
+            now()->addMinutes(10),
+            fn (): array => MentorTag::query()->where('type', $type)
+                ->select('tag')
+                ->distinct()
+                ->orderBy('tag')
+                ->get()
+                ->map(fn (MentorTag $tag): array => [
+                    'value' => $tag->tag,
+                    'label' => $tag->tag,
+                ])
+                ->values()
+                ->all()
+        );
     }
 
     /**
@@ -135,13 +139,18 @@ class MentorsListPage
      */
     private function getCurrencyOptions(): array
     {
-        return Currency::query()->orderBy('name')
-            ->get()
-            ->map(fn (Currency $currency): array => [
-                'value' => $currency->name,
-                'label' => sprintf('%s (%s)', $currency->name, $currency->symbol),
-            ])
-            ->values()
-            ->all();
+        /** @var array<int, array{value: string, label: string}> */
+        return Cache::remember(
+            'mentor_currency_options',
+            now()->addMinutes(10),
+            fn (): array => Currency::query()->orderBy('name')
+                ->get()
+                ->map(fn (Currency $currency): array => [
+                    'value' => $currency->name,
+                    'label' => sprintf('%s (%s)', $currency->name, $currency->symbol),
+                ])
+                ->values()
+                ->all()
+        );
     }
 }

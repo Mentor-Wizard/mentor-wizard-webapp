@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Actions\Pages\Mentor\MentorsListPage;
 use App\Enums\TagEnum;
+use App\Http\Requests\Mentor\MentorListRequest;
 use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\MentorTag;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Http\Request;
 use Inertia\Response;
 
 mutates(MentorsListPage::class);
@@ -27,7 +27,7 @@ describe('MentorsListPage Unit Tests', function (): void {
 
         it('renders the mentor list page successfully', function (): void {
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -36,7 +36,7 @@ describe('MentorsListPage Unit Tests', function (): void {
 
         it('accepts filter parameters from request', function (): void {
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET', [
+            $request = MentorListRequest::create('/mentors', 'GET', [
                 'filter' => [
                     'stacks'     => 'Laravel',
                     'languages'  => 'PHP',
@@ -55,7 +55,7 @@ describe('MentorsListPage Unit Tests', function (): void {
     describe('private method getStackOptions', function (): void {
         it('returns empty array when no stack tags exist', function (): void {
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -67,7 +67,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorTag::factory()->create(['type' => TagEnum::STACK, 'tag' => 'React']);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -79,7 +79,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorTag::factory()->create(['type' => TagEnum::LANGUAGE, 'tag' => 'PHP']);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -90,7 +90,7 @@ describe('MentorsListPage Unit Tests', function (): void {
     describe('private method getLanguageOptions', function (): void {
         it('returns empty array when no language tags exist', function (): void {
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -102,7 +102,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorTag::factory()->create(['type' => TagEnum::LANGUAGE, 'tag' => 'JavaScript']);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -114,7 +114,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorTag::factory()->create(['type' => TagEnum::STACK, 'tag' => 'Laravel']);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -128,7 +128,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             Currency::factory()->create(['name' => 'EUR', 'symbol' => 'E']);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -141,7 +141,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorProfile::factory()->create(['title' => 'Test Mentor']);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -155,7 +155,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             ]);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -169,7 +169,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             ]);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -185,7 +185,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             $mentor->mentorTags()->attach([$stackTag->getKey(), $langTag->getKey()]);
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -198,7 +198,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorProfile::factory()->count(10)->create();
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET');
+            $request = MentorListRequest::create('/mentors', 'GET');
 
             $response = $action->handle($request);
 
@@ -209,7 +209,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorProfile::factory()->count(10)->create();
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET', [
+            $request = MentorListRequest::create('/mentors', 'GET', [
                 'filter' => ['stacks' => 'Laravel'],
             ]);
 
@@ -224,7 +224,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorProfile::factory()->count(3)->create();
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET', ['sort' => 'id']);
+            $request = MentorListRequest::create('/mentors', 'GET', ['sort' => 'id']);
 
             $response = $action->handle($request);
 
@@ -235,7 +235,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorProfile::factory()->count(3)->create();
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET', ['sort' => 'rate']);
+            $request = MentorListRequest::create('/mentors', 'GET', ['sort' => 'rate']);
 
             $response = $action->handle($request);
 
@@ -246,7 +246,7 @@ describe('MentorsListPage Unit Tests', function (): void {
             MentorProfile::factory()->count(3)->create();
 
             $action = new MentorsListPage;
-            $request = Request::create('/mentors', 'GET', ['sort' => 'experience_started_at']);
+            $request = MentorListRequest::create('/mentors', 'GET', ['sort' => 'experience_started_at']);
 
             $response = $action->handle($request);
 

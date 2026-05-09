@@ -18,8 +18,8 @@ class RateInUsdSort implements Sort
         $direction = $descending ? 'desc' : 'asc';
 
         $query
-            ->join('currencies', 'mentor_profiles.currency_id', '=', 'currencies.id')
-            ->orderByRaw('mentor_profiles.rate * currencies.exchange_rate '.$direction)
+            ->leftJoin('currencies', 'mentor_profiles.currency_id', '=', 'currencies.id')
+            ->orderByRaw('COALESCE(mentor_profiles.rate, 0) * COALESCE(currencies.exchange_rate, 1) '.$direction)
             ->select('mentor_profiles.*');
     }
 }

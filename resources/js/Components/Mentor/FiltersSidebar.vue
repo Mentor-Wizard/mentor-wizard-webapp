@@ -109,7 +109,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
         </span>
         <ChevronDownIcon
           class="h-5 w-5 text-gray-400 transition-transform duration-200"
-          :class="{ 'rotate-180': sections.stacks }"
+          :class="{ 'rotate-180': !sections.stacks }"
         />
       </button>
 
@@ -191,7 +191,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
         </span>
         <ChevronDownIcon
           class="h-5 w-5 text-gray-400 transition-transform duration-200"
-          :class="{ 'rotate-180': sections.languages }"
+          :class="{ 'rotate-180': !sections.languages }"
         />
       </button>
 
@@ -275,7 +275,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
         </span>
         <ChevronDownIcon
           class="h-5 w-5 text-gray-400 transition-transform duration-200"
-          :class="{ 'rotate-180': sections.experience }"
+          :class="{ 'rotate-180': !sections.experience }"
         />
       </button>
 
@@ -319,7 +319,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
         </span>
         <ChevronDownIcon
           class="h-5 w-5 text-gray-400 transition-transform duration-200"
-          :class="{ 'rotate-180': sections.price }"
+          :class="{ 'rotate-180': !sections.price }"
         />
       </button>
 
@@ -417,7 +417,7 @@ const clearFilters = () => mentorFilters.clearAllFilters();
         </span>
         <ChevronDownIcon
           class="h-5 w-5 text-gray-400 transition-transform duration-200"
-          :class="{ 'rotate-180': sections.rating }"
+          :class="{ 'rotate-180': !sections.rating }"
         />
       </button>
 

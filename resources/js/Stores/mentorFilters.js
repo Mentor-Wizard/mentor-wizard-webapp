@@ -35,7 +35,8 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
     if (selectedStacks.value.length > 0) count++;
     if (selectedLanguages.value.length > 0) count++;
     if (selectedExperience.value.length > 0) count++;
-    if (minRate.value > 0 || maxRate.value < 200) count++;
+    if (minRate.value > 0) count++;
+    if (maxRate.value < 200) count++;
     if (minRating.value !== null) count++;
     return count;
   });
@@ -109,6 +110,10 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
       params['filter[rating]'] = minRating.value;
     }
 
+    if (selectedCurrency.value && selectedCurrency.value !== 'USD') {
+      params['filter[currency]'] = selectedCurrency.value;
+    }
+
     return params;
   }
 
@@ -151,6 +156,10 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
     if (filter.rating) {
       minRating.value = parseFloat(filter.rating);
     }
+
+    if (filter.currency) {
+      selectedCurrency.value = filter.currency;
+    }
   }
 
   function removeFilter(type, value) {
@@ -187,6 +196,7 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
     minRate.value = 0;
     maxRate.value = 200;
     minRating.value = null;
+    selectedCurrency.value = 'USD';
   }
 
   function setOptions({ stacks, languages, currencies }) {
