@@ -13,6 +13,7 @@ use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -35,6 +36,7 @@ class SendMessage
     {
         $user = $request->user();
         $companion = $chat->companion($user);
+        /** @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $companionChat */
         $companionChat = $companion->chats()
             ->wherePivot('chat_id', $chat->getKey())
             ->first();

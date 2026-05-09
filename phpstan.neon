@@ -14,4 +14,3 @@ parameters:
   tmpDir: ./var/cache/phpstan
   ignoreErrors:
     - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper#'
-    - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder.*::allowedIncludes\(\)#'
