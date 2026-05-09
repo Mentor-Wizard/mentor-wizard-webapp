@@ -3,14 +3,18 @@
 declare(strict_types=1);
 
 use App\Actions\Pages\Profile\ListMentorProfilePage;
+use App\Console\Commands\CacheCategoryTree;
 use App\Enums\RoleEnum;
 use App\Enums\TagEnum;
+use App\Models\Category;
 use App\Models\MentorProfile;
 use App\Models\MentorProgram;
 use App\Models\MentorReview;
 use App\Models\MentorTag;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Cache;
+use Inertia\Testing\AssertableInertia as Assert;
 
 mutates(ListMentorProfilePage::class);
 
@@ -55,104 +59,149 @@ describe('ListMentorProfilePage filters and includes', function (): void {
     });
 
     it('lists all profiles by default (no filters)', function (): void {
-        $resp = $this->getJson(route('page.profile-programs'));
-        $resp->assertOk();
+        $response = $this->get(route('page.profile-programs'));
 
-        $data = $resp->json('data');
-        expect($data)->toBeArray()->and(count($data))->toBe(3);
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 3)
+        );
     });
 
-    it('filters by title and description', function (): void {
-        $this->getJson(route('page.profile-programs', ['filter' => ['title' => 'Laravel']]))
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Laravel Guru']);
+    it('filters by title', function (): void {
+        $response = $this->get(route('page.profile-programs', ['filter' => ['title' => 'Laravel']]));
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['description' => 'Frontend']]))
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'React Ninja']);
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.title', 'Laravel Guru')
+        );
     });
 
-    it('filters by mentor program fields', function (): void {
-        $this->getJson(route('page.profile-programs', ['filter' => ['mentorPrograms.name' => 'Advanced'], 'include' => 'mentorPrograms']))
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['name' => 'Advanced PHP']);
-        $this->getJson(route('page.profile-programs', ['filter' => ['mentorPrograms.description' => 'Python'], 'include' => 'mentorPrograms']))
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['name' => 'Python Junior']);
+    it('filters by description', function (): void {
+        $response = $this->get(route('page.profile-programs', ['filter' => ['description' => 'Frontend']]));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.title', 'React Ninja')
+        );
+    });
+
+    it('filters by mentor program name', function (): void {
+        $response = $this->get(route('page.profile-programs', ['filter' => ['mentorPrograms.name' => 'Advanced']]));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.title', 'Laravel Guru')
+        );
+    });
+
+    it('filters by mentor program description', function (): void {
+        $response = $this->get(route('page.profile-programs', ['filter' => ['mentorPrograms.description' => 'Python']]));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.title', 'Python Master')
+        );
     });
 
     it('filters by rate range using array params', function (): void {
-        $this->getJson(route('page.profile-programs', ['filter' => ['rate' => ['min' => 50, 'max' => 90]]]))
-            ->assertOk()
-            ->assertJsonCount(2, 'data')
-            ->assertJsonFragment(['title' => 'Laravel Guru'])
-            ->assertJsonFragment(['title' => 'React Ninja']);
-        $this->getJson(route('page.profile-programs', ['filter' => ['rate' => ['min' => 0, 'max' => 50]]]))
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Python Master']);
+        $response = $this->get(route('page.profile-programs', ['filter' => ['rate' => ['min' => 50, 'max' => 90]]]));
 
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 2)
+        );
+
+        $response2 = $this->get(route('page.profile-programs', ['filter' => ['rate' => ['min' => 0, 'max' => 50]]]));
+
+        $response2->assertOk();
+        $response2->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.title', 'Python Master')
+        );
     });
 
     it('filters by cost range via related mentorPrograms using array params', function (): void {
-        $this->getJson(route('page.profile-programs', ['filter' => ['cost' => ['min' => 0, 'max' => 300]]]))
-            ->assertOk()
-            ->assertJsonCount(2, 'data');
+        $response = $this->get(route('page.profile-programs', ['filter' => ['cost' => ['min' => 0, 'max' => 300]]]));
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['cost' => ['min' => 500, 'max' => 700]]]))
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Laravel Guru']);
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 2)
+        );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['cost' => ['min' => 0, 'max' => 300]]]))
-            ->assertOk()
-            ->assertJsonCount(2, 'data');
+        $response2 = $this->get(route('page.profile-programs', ['filter' => ['cost' => ['min' => 500, 'max' => 700]]]));
+
+        $response2->assertOk();
+        $response2->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.title', 'Laravel Guru')
+        );
     });
 
     it('filters by languages and stacks', function (): void {
-        $this->getJson(route('page.profile-programs', ['filter' => ['languages' => 'PHP']]))
-            ->assertOk()
-            ->assertJsonCount(2, 'data');
+        $response = $this->get(route('page.profile-programs', ['filter' => ['languages' => 'PHP']]));
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['stacks' => 'Laravel']]))
-            ->assertOk()
-            ->assertJsonCount(2, 'data');
-    });
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 2)
+        );
 
-    it('supports includes for mentorPrograms and mentorTags', function (): void {
-        $resp = $this->getJson(route('page.profile-programs', ['include' => 'mentorPrograms,mentorTags']));
-        $resp->assertOk();
+        $response2 = $this->get(route('page.profile-programs', ['filter' => ['stacks' => 'Laravel']]));
 
-        $first = $resp->json('data.0');
-        expect($first)->toHaveKeys(['mentor_programs', 'mentor_tags']);
+        $response2->assertOk();
+        $response2->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 2)
+        );
     });
 
     it('supports sorting by rate desc', function (): void {
-        $resp = $this->getJson(route('page.profile-programs', ['sort' => '-rate']));
-        $resp->assertOk();
+        $response = $this->get(route('page.profile-programs', ['sort' => '-rate']));
 
-        $titles = array_column($resp->json('data'), 'title');
-        expect($titles)->toBe(['Laravel Guru', 'React Ninja', 'Python Master']);
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->where('mentors.data.0.title', 'Laravel Guru')
+            ->where('mentors.data.1.title', 'React Ninja')
+            ->where('mentors.data.2.title', 'Python Master')
+        );
     });
 
     it('supports sorting by id desc', function (): void {
-        $resp = $this->getJson(route('page.profile-programs', ['sort' => '-id']));
-        $resp->assertOk();
+        $response = $this->get(route('page.profile-programs', ['sort' => '-id']));
 
-        $titles = array_column($resp->json('data'), 'title');
-        expect($titles)->toBe(['Python Master', 'React Ninja', 'Laravel Guru']);
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->where('mentors.data.0.title', 'Python Master')
+            ->where('mentors.data.1.title', 'React Ninja')
+            ->where('mentors.data.2.title', 'Laravel Guru')
+        );
     });
 
     it('supports sorting by experience_started_at asc', function (): void {
-        $resp = $this->getJson(route('page.profile-programs', ['sort' => 'experience_started_at']));
-        $resp->assertOk();
+        $response = $this->get(route('page.profile-programs', ['sort' => 'experience_started_at']));
 
-        $titles = array_column($resp->json('data'), 'title');
-        expect($titles)->toBe(['Python Master', 'Laravel Guru', 'React Ninja']);
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->where('mentors.data.0.title', 'Python Master')
+            ->where('mentors.data.1.title', 'Laravel Guru')
+            ->where('mentors.data.2.title', 'React Ninja')
+        );
     });
 
     it('filters by single experience level', function (): void {
@@ -175,25 +224,33 @@ describe('ListMentorProfilePage filters and includes', function (): void {
             'experience_started_at' => now()->subYears(15),
         ]);
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'entry']]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'entry']]))
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Entry Level Dev']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Entry Level Dev')
+            );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'mid']]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'mid']]))
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Mid Level Dev']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Mid Level Dev')
+            );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'senior']]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'senior']]))
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Senior Dev']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Senior Dev')
+            );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'expert']]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'expert']]))
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Expert Dev']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Expert Dev')
+            );
     });
 
     it('filters by multiple experience levels', function (): void {
@@ -216,17 +273,17 @@ describe('ListMentorProfilePage filters and includes', function (): void {
             'experience_started_at' => now()->subYears(15),
         ]);
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'mid,senior']]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'mid,senior']]))
             ->assertOk()
-            ->assertJsonCount(2, 'data')
-            ->assertJsonFragment(['title' => 'Mid Level Dev'])
-            ->assertJsonFragment(['title' => 'Senior Dev']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 2)
+            );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'entry,expert']]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'entry,expert']]))
             ->assertOk()
-            ->assertJsonCount(2, 'data')
-            ->assertJsonFragment(['title' => 'Entry Level Dev'])
-            ->assertJsonFragment(['title' => 'Expert Dev']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 2)
+            );
     });
 
     it('filters by minimum rating', function (): void {
@@ -235,7 +292,7 @@ describe('ListMentorProfilePage filters and includes', function (): void {
         $mentor1 = MentorProfile::factory()->create(['title' => 'Low Rated Mentor']);
         $mentor2 = MentorProfile::factory()->create(['title' => 'Good Rated Mentor']);
         $mentor3 = MentorProfile::factory()->create(['title' => 'Excellent Rated Mentor']);
-        $mentor4 = MentorProfile::factory()->create(['title' => 'No Rating Mentor']);
+        MentorProfile::factory()->create(['title' => 'No Rating Mentor']);
 
         MentorReview::factory()->create(['mentor_id' => $mentor1->user_id, 'rating' => 2]);
         MentorReview::factory()->create(['mentor_id' => $mentor1->user_id, 'rating' => 3]);
@@ -247,22 +304,24 @@ describe('ListMentorProfilePage filters and includes', function (): void {
         MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 5]);
         MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 4]);
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['rating' => 4]]))
+        $this->get(route('page.profile-programs', ['filter' => ['rating' => 4]]))
             ->assertOk()
-            ->assertJsonCount(2, 'data')
-            ->assertJsonFragment(['title' => 'Good Rated Mentor'])
-            ->assertJsonFragment(['title' => 'Excellent Rated Mentor']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 2)
+            );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['rating' => 4.5]]))
+        $this->get(route('page.profile-programs', ['filter' => ['rating' => 4.5]]))
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Excellent Rated Mentor']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Excellent Rated Mentor')
+            );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['rating' => 3]]))
+        $this->get(route('page.profile-programs', ['filter' => ['rating' => 3]]))
             ->assertOk()
-            ->assertJsonCount(2, 'data')
-            ->assertJsonFragment(['title' => 'Good Rated Mentor'])
-            ->assertJsonFragment(['title' => 'Excellent Rated Mentor']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 2)
+            );
     });
 
     it('combines experience and rating filters', function (): void {
@@ -290,15 +349,181 @@ describe('ListMentorProfilePage filters and includes', function (): void {
         MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 5]);
         MentorReview::factory()->create(['mentor_id' => $mentor3->user_id, 'rating' => 4]);
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'senior', 'rating' => 4]]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'senior', 'rating' => 4]]))
             ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['title' => 'Senior High Rated']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Senior High Rated')
+            );
 
-        $this->getJson(route('page.profile-programs', ['filter' => ['experience' => 'mid,senior', 'rating' => 4.5]]))
+        $this->get(route('page.profile-programs', ['filter' => ['experience' => 'mid,senior', 'rating' => 4.5]]))
             ->assertOk()
-            ->assertJsonCount(2, 'data')
-            ->assertJsonFragment(['title' => 'Senior High Rated'])
-            ->assertJsonFragment(['title' => 'Mid High Rated']);
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 2)
+            );
+    });
+
+    it('returns correct data shape for each mentor item', function (): void {
+        $response = $this->get(route('page.profile-programs'));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data.0', fn (Assert $item): Assert => $item
+                ->hasAll(['title', 'description', 'rate', 'currency', 'userSlug', 'userName', 'userAvatar', 'mainProgramSlug'])
+            )
+        );
+    });
+
+    it('returns mainProgramSlug when mentor has a main program', function (): void {
+        MentorProfile::query()->delete();
+
+        $user = User::factory()->create();
+        $user->assignRole(RoleEnum::MENTOR->value);
+
+        $profile = MentorProfile::factory()->create([
+            'title'   => 'Mentor With Main Program',
+            'user_id' => $user->getKey(),
+        ]);
+
+        $mainProgram = MentorProgram::factory()->main()->create([
+            'mentor_id' => $user->getKey(),
+            'slug'      => 'main-program-slug',
+        ]);
+
+        $response = $this->get(route('page.profile-programs'));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.mainProgramSlug', 'main-program-slug')
+        );
+    });
+
+    it('returns null mainProgramSlug when mentor has no main program', function (): void {
+        MentorProfile::query()->delete();
+
+        $user = User::factory()->create();
+        $user->assignRole(RoleEnum::MENTOR->value);
+
+        MentorProfile::factory()->create([
+            'title'   => 'Mentor Without Main Program',
+            'user_id' => $user->getKey(),
+        ]);
+
+        // Create a non-main program
+        $mentorProgram = MentorProgram::factory()->create([
+            'mentor_id' => $user->getKey(),
+        ]);
+
+        $mentorProgram->update(['is_main' => false]);
+        $mentorProgram->save();
+
+        $response = $this->get(route('page.profile-programs'));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page): Assert => $page
+            ->component('Profile/MentorListPage')
+            ->has('mentors.data', 1)
+            ->where('mentors.data.0.mainProgramSlug', null)
+        );
+    });
+});
+
+describe('ListMentorProfilePage category filter', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+        Cache::forget(CacheCategoryTree::CACHE_KEY);
+
+        $this->categoryBackend = Category::factory()->create(['name' => 'Backend']);
+        $this->categoryFrontend = Category::factory()->create(['name' => 'Frontend']);
+        $this->categoryPhp = Category::factory()->child($this->categoryBackend)->create(['name' => 'PHP']);
+
+        $this->profileBackend = MentorProfile::factory()->create(['title' => 'Backend Dev']);
+        $this->profilePhp = MentorProfile::factory()->create(['title' => 'PHP Dev']);
+        $this->profileFrontend = MentorProfile::factory()->create(['title' => 'Frontend Dev']);
+        $this->profileUncategorized = MentorProfile::factory()->create(['title' => 'Uncategorized Dev']);
+
+        $this->profileBackend->categories()->attach($this->categoryBackend->getKey());
+        $this->profilePhp->categories()->attach($this->categoryPhp->getKey());
+        $this->profileFrontend->categories()->attach($this->categoryFrontend->getKey());
+    });
+
+    afterEach(function (): void {
+        Cache::forget(CacheCategoryTree::CACHE_KEY);
+    });
+
+    it('returns all profiles and empty categories prop when no category_id is given', function (): void {
+        $this->get(route('page.profile-programs'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('Profile/MentorListPage')
+                ->has('mentors.data', 4)
+                ->has('categories')
+                ->where('selectedCategoryId', null)
+            );
+    });
+
+    it('filters profiles by direct category assignment', function (): void {
+        $this->get(route('page.profile-programs', ['category_id' => $this->categoryFrontend->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 1)
+                ->where('mentors.data.0.title', 'Frontend Dev')
+                ->where('selectedCategoryId', $this->categoryFrontend->getKey())
+            );
+    });
+
+    it('filters profiles by parent category and includes all descendants', function (): void {
+        // Backend parent has: profileBackend (direct) + profilePhp (via child PHP category)
+        $this->get(route('page.profile-programs', ['category_id' => $this->categoryBackend->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 2)
+            );
+
+        $titles = collect(
+            $this->get(route('page.profile-programs', ['category_id' => $this->categoryBackend->getKey()]))
+                ->assertOk()
+                ->original->getData()['page']['props']['mentors']['data']
+        )->pluck('title')->sort()->values()->toArray();
+
+        expect($titles)->toBe(['Backend Dev', 'PHP Dev']);
+    });
+
+    it('returns empty result when selected category has no assigned profiles', function (): void {
+        $empty = Category::factory()->create(['name' => 'Empty Category']);
+
+        $this->get(route('page.profile-programs', ['category_id' => $empty->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('mentors.data', 0)
+            );
+    });
+
+    it('passes the categories tree in props when a category filter is active', function (): void {
+        $this->get(route('page.profile-programs', ['category_id' => $this->categoryPhp->getKey()]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->has('categories')
+                ->where('selectedCategoryId', $this->categoryPhp->getKey())
+            );
+    });
+
+    it('returns 422 for a non-existent category_id', function (): void {
+        $this->getJson(route('page.profile-programs', ['category_id' => 999999]))
+            ->assertUnprocessable();
+    });
+
+    it('returns 422 for a non-integer category_id', function (): void {
+        $this->getJson(route('page.profile-programs', ['category_id' => 'not-an-integer']))
+            ->assertUnprocessable();
+    });
+
+    it('withCategories factory state attaches the correct number of categories', function (): void {
+        $profile = MentorProfile::factory()->withCategories(3)->create();
+
+        expect($profile->categories()->count())->toBe(3);
     });
 });

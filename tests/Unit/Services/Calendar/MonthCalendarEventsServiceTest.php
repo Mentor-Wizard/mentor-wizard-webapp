@@ -407,7 +407,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         $eventOnLastDay = CalendarEvent::factory()->create([
             'start_date_time'   => $endOfVisiblePeriod->copy()->setTime(23, 59, 0),
             'end_date_time'     => $endOfVisiblePeriod->copy()->setTime(23, 59, 30),
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'mentor_program_id' => $mentorProgram->getKey(),
         ]);
         $user->calendarEvents()->attach($eventOnLastDay->getKey());
@@ -422,7 +422,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
         $eventAfterPeriod = CalendarEvent::factory()->create([
             'start_date_time'   => $endOfVisiblePeriod->copy()->addDay()->setTime(0, 1, 0),
             'end_date_time'     => $endOfVisiblePeriod->copy()->addDay()->setTime(1, 0, 0),
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'mentor_program_id' => $mentorProgram->getKey(),
         ]);
         $user->calendarEvents()->attach($eventAfterPeriod->getKey());

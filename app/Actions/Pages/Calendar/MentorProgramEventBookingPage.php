@@ -19,7 +19,7 @@ class MentorProgramEventBookingPage
 
     public function handle(Request $request, MentorProgram $mentorProgram): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
         $timezone = $user->profile->timezone;
         $date = $request->get('date') ? Date::parse($request->get('date'), $timezone) : Date::now($timezone);
 
@@ -34,12 +34,14 @@ class MentorProgramEventBookingPage
         $weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
         return Inertia::render('Calendar/MentorProgramEventBookingPage', [
-            'locale'            => app()->getLocale(),
-            'days'              => $calendarData,
-            'weekDays'          => $weekDays,
-            'mentorProgram'     => $mentorProgram,
-            'roundingMinutes'   => CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES,
-            'currentDate'       => $date->toDateString(),
+            'locale'                => app()->getLocale(),
+            'days'                  => $calendarData,
+            'weekDays'              => $weekDays,
+            'mentorProgram'         => $mentorProgram,
+            'mentorSlug'            => $mentorProgram->mentor->slug,
+            'roundingMinutes'       => CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES,
+            'currentDate'           => $date->toDateString(),
+            'isMentorProgramOwner'  => $user->can('update', $mentorProgram),
         ]);
     }
 }

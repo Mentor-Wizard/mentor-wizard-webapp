@@ -6,9 +6,17 @@ namespace App\Providers;
 
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
+use App\Models\Category;
+use App\Models\ExternalCalendarEvent;
+use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
+use App\Models\UserCalendarIntegration;
 use App\Models\UserSchedule;
 use App\Policies\CalendarEventPolicy;
+use App\Policies\CategoryPolicy;
+use App\Policies\ExternalCalendarEventLogPolicy;
+use App\Policies\ExternalCalendarEventPolicy;
+use App\Policies\UserCalendarIntegrationPolicy;
 use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -53,7 +61,22 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
         Gate::policy(CalendarEvent::class, CalendarEventPolicy::class);
         Gate::policy(UserSchedule::class, UserSchedulePolicy::class);
+        Gate::policy(ExternalCalendarEventLog::class, ExternalCalendarEventLogPolicy::class);
+        Gate::policy(UserCalendarIntegration::class, UserCalendarIntegrationPolicy::class);
+        Gate::policy(ExternalCalendarEvent::class, ExternalCalendarEventPolicy::class);
+        Gate::policy(Category::class, CategoryPolicy::class);
         Vite::prefetch(concurrency: 3);
+
+        $this->configRateLimiters();
+    }
+
+    private function configRateLimiters(): void
+    {
+        RateLimiter::for('calendar-connect', fn (Request $request): Limit => Limit::perMinute(10)->by($request->user()?->getKey()));
+
+        RateLimiter::for('calendar-retry', fn (Request $request): Limit => Limit::perMinute(5)->by($request->user()?->getKey()));
+
+        RateLimiter::for('calendar-sync', fn (Request $request): Limit => Limit::perMinute(20)->by($request->user()?->getKey()));
     }
 
     private function configModels(): void

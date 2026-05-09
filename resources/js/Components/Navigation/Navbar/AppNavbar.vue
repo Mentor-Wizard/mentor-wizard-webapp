@@ -9,11 +9,12 @@ import {
   MenuItems,
 } from '@headlessui/vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 
 import NavbarLogo from '@/Components/Navigation/Navbar/NavbarLogo.vue';
+import NotificationBell from '@/Components/UI/Notifications/NotificationBell.vue';
 import { useNavigation } from '@/Stores/navigation.js';
 import { useAlerts } from '@/UseCases/useCaseAlert.js';
 const { isRinging, notificationsCount } = useAlerts();

@@ -11,6 +11,7 @@ use App\Models\UserProfile;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
@@ -50,7 +51,7 @@ describe('Mentor Page', function (): void {
         $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $action = new GetMentorProfilePage;
-        $result = $action->handle($user);
+        $result = $action->handle(Request::create('/'), $user);
         $resultData = $result->toResponse(request())->getOriginalContent();
 
         expect($result)->toBeInstanceOf(Response::class)
@@ -74,7 +75,7 @@ describe('Mentor Page', function (): void {
 
         $action = new GetMentorProfilePage;
 
-        expect(fn (): Response => $action->handle($user))
+        expect(fn (): Response => $action->handle(Request::create('/'), $user))
             ->toThrow(ModelNotFoundException::class);
     });
 });

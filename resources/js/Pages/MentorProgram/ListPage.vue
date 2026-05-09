@@ -1,16 +1,37 @@
 <script setup>
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { EllipsisVerticalIcon } from '@heroicons/vue/20/solid';
-import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
 import AppModal from '@/Components/AppModal.vue';
 import DangerButton from '@/Components/UI/Button/DangerButton.vue';
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
+import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
+const page = usePage();
 const showDeleteModal = ref(false);
 const programToDelete = ref(null);
+
+const notification = ref({ show: false, success: false, message: '' });
+
+const showNotification = (success, message) => {
+  notification.value = { show: true, success, message };
+  setTimeout(() => {
+    notification.value.show = false;
+  }, 5000);
+};
+
+watch(
+  () => page.props.flash?.success,
+  (value) => {
+    if (value) {
+      showNotification(true, value);
+    }
+  },
+  { immediate: true },
+);
 
 defineProps({
   programs: {
@@ -55,14 +76,28 @@ const deleteProgram = () => {
         <h2 class="text-xl leading-tight font-semibold text-gray-800">
           Mentor Programs
         </h2>
-        <a
-          :href="route('pages.calendar.pending')"
-          class="rounded-md bg-yellow-50 px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-yellow-200 ring-inset hover:bg-yellow-100"
-        >
-          All Pending Events
-        </a>
+        <div class="flex items-center gap-x-3">
+          <a
+            :href="route('pages.calendar.pending')"
+            class="rounded-md bg-yellow-50 px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-yellow-200 ring-inset hover:bg-yellow-100"
+          >
+            All Pending Events
+          </a>
+          <Link
+            :href="route('mentor-program.create')"
+            class="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
+          >
+            Create Program
+          </Link>
+        </div>
       </div>
     </template>
+
+    <PopUp
+      :show-status="notification.show"
+      :success="notification.success"
+      :message="notification.message"
+    />
 
     <div class="py-12">
       <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -81,6 +116,12 @@ const deleteProgram = () => {
                         {{ program.name }}
                       </p>
                       <p
+                        v-if="program.is_main"
+                        class="mt-0.5 rounded-md bg-indigo-50 px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-indigo-700 ring-1 ring-indigo-200 ring-inset"
+                      >
+                        Main
+                      </p>
+                      <p
                         class="mt-0.5 rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset"
                       >
                         {{ program.cost }} {{ program.currency.symbol }}
@@ -96,17 +137,9 @@ const deleteProgram = () => {
                   </div>
                   <div class="flex flex-none items-center gap-x-4">
                     <a
-                      href="#"
+                      :href="route('mentor-program.edit', program.slug)"
                       class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block"
                       >View program<span class="sr-only"
-                        >, {{ program.name }}</span
-                      ></a
-                    >
-
-                    <a
-                      :href="route('pages.mentor.program.book', program.slug)"
-                      class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block"
-                      >Book event<span class="sr-only"
                         >, {{ program.name }}</span
                       ></a
                     >
@@ -125,8 +158,8 @@ const deleteProgram = () => {
                     </a>
 
                     <a
-                      :href="route('pages.mentor.program.book', program.slug)"
-                      class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:block"
+                      :href="route('pages.calendar.confirmed', program.slug)"
+                      class="hidden rounded-md bg-blue-50 px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-blue-200 ring-inset hover:bg-blue-100 sm:block"
                     >
                       Confirmed {{ program.confirmed_events_number }}
                     </a>
@@ -178,40 +211,6 @@ const deleteProgram = () => {
                               >
                             </button>
                           </MenuItem>
-
-                          <MenuItem v-slot="{ active }">
-                            <button
-                              type="button"
-                              :class="[
-                                active ? 'bg-gray-50 outline-hidden' : '',
-                                'block w-full px-3 py-1 text-left text-sm/6 text-gray-900',
-                              ]"
-                              @click="
-                                route('pages.mentor.program.book', program.slug)
-                              "
-                            >
-                              Book Event<span class="sr-only"
-                                >, {{ program.name }}</span
-                              >
-                            </button>
-
-                            <button
-                              type="button"
-                              :class="[
-                                program.pending_events_requests_number === 0 ?
-                                  'bg-green-200 outline-hidden'
-                                : 'bg-red-200 outline-hidden',
-                                'block w-full px-3 py-1 text-left text-sm/6 text-gray-900',
-                              ]"
-                              @click="
-                                route('pages.mentor.program.book', program.slug)
-                              "
-                            >
-                              Need confirmation
-                              {{ program.pending_events_requests_number }}
-                              <span class="sr-only bg-red-300"></span>
-                            </button>
-                          </MenuItem>
                         </MenuItems>
                       </transition>
                     </Menu>
@@ -229,7 +228,6 @@ const deleteProgram = () => {
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <AppModal v-model="showDeleteModal">
       <div class="p-6">
         <h2 class="text-lg font-medium text-gray-900">

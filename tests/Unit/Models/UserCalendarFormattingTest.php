@@ -109,7 +109,7 @@ it('builds daily calendar grouped by month and appends days, marking flags corre
 
     $event = CalendarEvent::query()->create([
         'title'             => 'Daily Event',
-        'status'            => 'confirmed',
+        'status'            => CalendarEventStatusEnum::CONFIRMED->value,
         'start_date_time'   => $start,
         'end_date_time'     => $end,
         'date'              => $start?->format('Y-m-d'),

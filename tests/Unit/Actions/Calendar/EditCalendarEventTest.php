@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\EditCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\EditCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
-use App\Http\Requests\Calendar\EditCalendarEventRequest;
+use App\Enums\MentorSessionTypeEnum;
+use App\Http\Requests\Calendar\CalendarEvent\EditCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -71,6 +72,7 @@ describe('EditCalendarEvent', function (): void {
             'toTime'            => '11:00',
             'description'       => 'Updated desc',
             'type'              => 'Individual',
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::RED->value,
             'mentor_program_id' => $mentorProgram->getKey(),
@@ -128,6 +130,7 @@ describe('EditCalendarEvent', function (): void {
             'toTime'            => '15:30',
             'description'       => 'Updated description',
             'type'              => 'Group',
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::PURPLE->value,
             'mentor_program_id' => $mentorProgram->getKey(),
@@ -173,6 +176,7 @@ describe('EditCalendarEvent', function (): void {
             'toTime'            => '15:30',
             'description'       => null,
             'type'              => 'Group',
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::PURPLE->value,
             'mentor_program_id' => $mentorProgram->getKey(),
@@ -216,6 +220,7 @@ describe('EditCalendarEvent', function (): void {
             'fromTime'          => '14:30',
             'toTime'            => '15:30',
             'type'              => 'Group',
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::PURPLE->value,
             'mentor_program_id' => $mentorProgram->getKey(),
@@ -291,6 +296,7 @@ describe('EditCalendarEvent', function (): void {
             'toTime'            => '15:30',
             'description'       => 'Updated description',
             'type'              => 'Individual',
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::PURPLE->value,
             'mentor_program_id' => $mentorProgram->getKey(),
@@ -339,6 +345,7 @@ describe('EditCalendarEvent', function (): void {
             'toTime'            => '15:30',
             'description'       => 'Updated description',
             'type'              => 'Individual',
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'webLink'           => 'https://google.com',
             'colour'            => CalendarEventColoursEnum::PURPLE->value,
             'mentor_program_id' => $mentorProgram->getKey(),
@@ -386,6 +393,7 @@ describe('EditCalendarEvent', function (): void {
             'fromTime'          => '14:30',
             'toTime'            => '15:30',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::CODE_REVIEW->value,
             'colour'            => CalendarEventColoursEnum::PURPLE->value,
             'mentor_program_id' => $mentorProgram->getKey(),
         ];

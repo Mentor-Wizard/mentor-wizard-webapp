@@ -164,16 +164,16 @@ onMounted(() => {
                   }"
                 >
                   <a
-                    :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-${event.colour}-50 p-2 text-xs/5 hover:bg-${event.colour}-100`"
+                    :class="`group absolute inset-1 flex flex-col overflow-hidden rounded-md bg-${event.colour}-50 px-1.5 py-0.5 text-xs leading-tight hover:bg-${event.colour}-100`"
                     @click="openShowEditEventPage(event.id)"
                   >
                     <p
-                      :class="`order-1 font-semibold text-${event.colour}-700`"
+                      :class="`truncate font-semibold text-${event.colour}-700`"
                     >
                       {{ event.title }}
                     </p>
                     <p
-                      :class="`text-${event.colour}-500 group-hover:text-${event.colour}-700`"
+                      :class="`truncate text-${event.colour}-500 group-hover:text-${event.colour}-700`"
                     >
                       <time :datetime="`${event.dateTime}`">{{
                         event.time

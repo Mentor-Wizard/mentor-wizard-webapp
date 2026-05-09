@@ -35,6 +35,39 @@ const props = defineProps({
     default: () => {},
   },
 });
+
+const colorClasses = {
+  blue: {
+    bg: 'bg-blue-50 hover:bg-blue-100',
+    title: 'text-blue-700',
+    time: 'text-blue-500 group-hover:text-blue-700',
+  },
+  indigo: {
+    bg: 'bg-indigo-50 hover:bg-indigo-100',
+    title: 'text-indigo-700',
+    time: 'text-indigo-500 group-hover:text-indigo-700',
+  },
+  emerald: {
+    bg: 'bg-emerald-50 hover:bg-emerald-100',
+    title: 'text-emerald-700',
+    time: 'text-emerald-500 group-hover:text-emerald-700',
+  },
+  amber: {
+    bg: 'bg-amber-50 hover:bg-amber-100',
+    title: 'text-amber-700',
+    time: 'text-amber-500 group-hover:text-amber-700',
+  },
+  rose: {
+    bg: 'bg-rose-50 hover:bg-rose-100',
+    title: 'text-rose-700',
+    time: 'text-rose-500 group-hover:text-rose-700',
+  },
+  gray: {
+    bg: 'bg-gray-50 hover:bg-gray-100',
+    title: 'text-gray-700',
+    time: 'text-gray-500 group-hover:text-gray-700',
+  },
+};
 </script>
 
 <template>
@@ -139,22 +172,36 @@ const props = defineProps({
                 :key="event.id"
               >
                 <li
-                  :class="`relative mt-px flex sm:col-start-${event.dayNumber}`"
+                  :class="[
+                    'relative mt-px flex',
+                    `sm:col-start-${event.dayNumber}`,
+                  ]"
                   :style="{
                     'grid-row': `${event.startIndex} / span ${event.durationIndex}`,
                   }"
                 >
                   <a
-                    :class="`group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-${event.colour}-50 p-2 text-xs/5 hover:bg-${event.colour}-100`"
+                    :class="[
+                      'group absolute inset-1 flex flex-col overflow-hidden rounded-md px-1.5 py-0.5 text-xs leading-tight',
+                      colorClasses[event.colour]?.bg ?? colorClasses.blue.bg,
+                    ]"
                     @click="props.openShowEditEventPage(event.id)"
                   >
                     <p
-                      :class="`order-1 font-semibold text-${event.colour}-700`"
+                      :class="[
+                        'truncate font-semibold',
+                        colorClasses[event.colour]?.title
+                          ?? colorClasses.blue.title,
+                      ]"
                     >
                       {{ event.title }}
                     </p>
                     <p
-                      :class="`text-${event.colour}-500 group-hover:text-${event.colour}-700`"
+                      :class="[
+                        'truncate',
+                        colorClasses[event.colour]?.time
+                          ?? colorClasses.blue.time,
+                      ]"
                     >
                       <time :datetime="`${event.dateTime}`">{{
                         event.time

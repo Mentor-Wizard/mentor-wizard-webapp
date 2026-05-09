@@ -44,6 +44,20 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         expect($this->policy->update($this->mentor, $event))->toBeFalse();
     });
 
+    it('allows confirm for the mentor of the program', function (): void {
+        expect($this->policy->confirm($this->mentor, $this->event))->toBeTrue();
+    });
+
+    it('denies confirm for non-mentor users', function (): void {
+        expect($this->policy->confirm($this->viewer, $this->event))->toBeFalse()
+            ->and($this->policy->confirm($this->otherMentor, $this->event))->toBeFalse();
+    });
+
+    it('denies confirm when event has no program', function (): void {
+        $event = CalendarEvent::factory()->create(['mentor_program_id' => null]);
+        expect($this->policy->confirm($this->mentor, $event))->toBeFalse();
+    });
+
     it('allows delete for program mentor and for attached participant (lazy query path)', function (): void {
         // Mentor can delete
         expect($this->policy->delete($this->mentor, $this->event))->toBeTrue();

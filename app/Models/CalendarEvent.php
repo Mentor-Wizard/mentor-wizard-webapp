@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
 use Database\Factories\CalendarEventFactory;
@@ -24,7 +27,7 @@ use Override;
  * @property Carbon $end_date_time
  * @property string $date
  * @property string $title
- * @property string $status
+ * @property CalendarEventStatusEnum $status
  * @property int $duration
  * @property string $type
  * @property string|null $web_link
@@ -53,6 +56,7 @@ class CalendarEvent extends Model
         'end_date_time',
         'date',
         'type',
+        'session_type',
         'web_link',
         'description',
         'mentor_program_id',
@@ -69,6 +73,16 @@ class CalendarEvent extends Model
             'calendar_event_user', 'calendar_event_id')
             ->withPivot('colour', 'confirmed_at', 'role')
             ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<User, $this>
+     */
+    public function participants(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
+            ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT->value)
+            ->withPivot('role');
     }
 
     /**
@@ -107,8 +121,10 @@ class CalendarEvent extends Model
     protected function casts(): array
     {
         return [
-            'start_date_time'   => 'datetime',
-            'end_date_time'     => 'datetime',
+            'start_date_time' => 'datetime',
+            'end_date_time'   => 'datetime',
+            'session_type'    => MentorSessionTypeEnum::class,
+            'status'          => CalendarEventStatusEnum::class,
         ];
     }
 }

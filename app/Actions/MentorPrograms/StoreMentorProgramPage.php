@@ -6,22 +6,22 @@ namespace App\Actions\MentorPrograms;
 
 use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
 use App\Models\MentorProgram;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 use Lorisleiva\Actions\Concerns\AsController;
-use Symfony\Component\HttpFoundation\Response;
 
 class StoreMentorProgramPage
 {
     use AsController;
 
-    public function handle(StoreMentorProgramRequest $request): Response
+    public function handle(StoreMentorProgramRequest $request): RedirectResponse
     {
         MentorProgram::query()->create([
             ...$request->validated(),
             'mentor_id' => Auth::id(),
         ]);
 
-        return Inertia::location(route('mentor-program.create'));
+        return to_route('mentor-program.list')
+            ->with('success', 'Mentor program created successfully.');
     }
 }

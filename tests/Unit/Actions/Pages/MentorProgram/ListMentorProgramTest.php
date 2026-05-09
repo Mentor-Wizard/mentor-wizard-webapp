@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
 use App\Enums\RoleEnum;
+use App\Models\Category;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -33,6 +34,25 @@ describe('List Mentor Program', function (): void {
             'currency_id' => array_key_first($this->currencies),
         ];
 
+    });
+
+    it('withCategories factory state attaches the correct number of categories to a program', function (): void {
+        $program = MentorProgram::factory()->withCategories(2)->create($this->data);
+
+        expect($program->categories()->count())->toBe(2)
+            ->and($program->categories->first())->toBeInstanceOf(Category::class);
+    });
+
+    it('withCategories factory state defaults to one category', function (): void {
+        $program = MentorProgram::factory()->withCategories()->create($this->data);
+
+        expect($program->categories()->count())->toBe(1);
+    });
+
+    it('program created without withCategories has no categories', function (): void {
+        $program = MentorProgram::factory()->create($this->data);
+
+        expect($program->categories()->count())->toBe(0);
     });
 
     it('renders the mentor program list page', function (): void {

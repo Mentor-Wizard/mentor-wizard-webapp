@@ -73,6 +73,14 @@ class MentorProfile extends Model
     }
 
     /**
+     * @return BelongsToMany<Category, $this>
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_mentor_profile');
+    }
+
+    /**
      * @return Attribute<EloquentCollection<int, MentorTag>, never>
      */
     protected function languages(): Attribute

@@ -6,6 +6,7 @@ use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\MentorProfile;
+use App\Models\MentorProgram;
 use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -93,5 +94,42 @@ describe('Mentor Profile Page', function (): void {
     it('loads the mentor profile page with wrong slug', function (): void {
         $this->get(route('page.mentor', ['mentor' => 'random-slug']))
             ->assertNotFound();
+    });
+
+    it('renders calendarBlock when mentor has a main program and user is a guest', function (): void {
+        $mentor = User::factory()->create();
+        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        MentorProfile::factory()->create(['user_id' => $mentor->getKey()]);
+        MentorProgram::factory()->main()->create(['mentor_id' => $mentor->getKey()]);
+
+        $this->get(route('page.mentor', ['mentor' => $mentor->slug]))
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('Profile/Mentor/ViewPage')
+                ->whereNot('calendarBlock', null)
+                ->whereNot('mainProgramSlug', null)
+                ->whereNot('currentDate', null)
+                ->etc()
+            );
+    });
+
+    it('renders calendarBlock with calendar_date param when user is authenticated', function (): void {
+        $mentor = User::factory()->create();
+        $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        MentorProfile::factory()->create(['user_id' => $mentor->getKey()]);
+        MentorProgram::factory()->main()->create(['mentor_id' => $mentor->getKey()]);
+
+        $menti = User::factory()->create();
+        $menti->assignRole(Role::findByName(RoleEnum::MENTI->value));
+
+        $calendarDate = now()->addMonth()->format('Y-m-d');
+
+        $this->actingAs($menti)
+            ->get(route('page.mentor', ['mentor' => $mentor->slug, 'calendar_date' => $calendarDate]))
+            ->assertInertia(fn (Assert $page): Assert => $page
+                ->component('Profile/Mentor/ViewPage')
+                ->whereNot('calendarBlock', null)
+                ->where('currentDate', $calendarDate)
+                ->etc()
+            );
     });
 });

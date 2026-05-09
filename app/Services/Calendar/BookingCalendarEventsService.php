@@ -174,6 +174,7 @@ class BookingCalendarEventsService
 
     private function hasPreviousSlots(): bool
     {
+
         return $this->date->greaterThan(Date::now()->startOfMonth());
     }
 
