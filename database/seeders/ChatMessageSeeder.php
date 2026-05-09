@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\ChatStatusEnum;
+use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -14,17 +16,25 @@ class ChatMessageSeeder extends Seeder
     {
         $users = User::all();
 
-        foreach ($users as $sender) {
-            // We select all other users to leave replies to in the chat
-            $receivers = $users->where('id', '!=', $sender->id)->shuffle()->take(5);
+        foreach ($users as $user) {
+            $partners = $users->where('id', '!=', $user->id)->shuffle()->take(5);
 
-            foreach ($receivers as $receiver) {
+            foreach ($partners as $partner) {
+                $chat = Chat::query()->create(['name' => sprintf('%s & %s', $user->username, $partner->username)]);
+
+                $chat->users()->attach([
+                    $user->getKey()    => ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false],
+                    $partner->getKey() => ['status' => ChatStatusEnum::ACTIVE->value, 'is_muted' => false],
+                ]);
+
+                $participants = [$user->getKey(), $partner->getKey()];
+
                 for ($i = 0; $i < 5; $i++) {
                     ChatMessage::query()->create([
-                        'sender_id'    => $sender->id,
-                        'receiver_id'  => $receiver->id,
-                        'message'      => fake()->sentence(50),
-                        'is_read'      => fake()->boolean(),
+                        'chat_id' => $chat->getKey(),
+                        'user_id' => $participants[$i % 2],
+                        'message' => fake()->sentence(50),
+                        'is_read' => fake()->boolean(),
                     ]);
                 }
             }

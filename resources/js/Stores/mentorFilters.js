@@ -43,13 +43,24 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
 
   const activeFilters = computed(() => {
     const filters = [];
-    selectedStacks.value.forEach((s) =>
-      filters.push({ type: 'stacks', label: s, value: s }),
-    );
-    selectedLanguages.value.forEach((l) =>
+    const stacks =
+      Array.isArray(selectedStacks.value) ? selectedStacks.value
+      : selectedStacks.value ? [selectedStacks.value]
+      : [];
+    const languages =
+      Array.isArray(selectedLanguages.value) ? selectedLanguages.value
+      : selectedLanguages.value ? [selectedLanguages.value]
+      : [];
+    const experience =
+      Array.isArray(selectedExperience.value) ? selectedExperience.value
+      : selectedExperience.value ? [selectedExperience.value]
+      : [];
+
+    stacks.forEach((s) => filters.push({ type: 'stacks', label: s, value: s }));
+    languages.forEach((l) =>
       filters.push({ type: 'languages', label: l, value: l }),
     );
-    selectedExperience.value.forEach((e) => {
+    experience.forEach((e) => {
       const opt = experienceOptions.find((o) => o.value === e);
       filters.push({ type: 'experience', label: opt?.label || e, value: e });
     });
@@ -80,41 +91,61 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
   // ============ Methods ============
 
   /**
-   * Build query params in Spatie Query Builder format
-   * Example: { 'filter[stacks]': 'Laravel,React', 'filter[experience]': 'senior' }
+   * Build query params in nested object format
+   * Example: { filter: { stacks: 'Laravel,React', experience: 'senior' } }
    */
-  function buildQueryParams() {
+  const queryParams = computed(() => {
     const params = {};
+    const filter = {};
 
-    if (selectedStacks.value.length > 0) {
-      params['filter[stacks]'] = selectedStacks.value.join(',');
+    const stacks =
+      Array.isArray(selectedStacks.value) ? selectedStacks.value
+      : selectedStacks.value ? [selectedStacks.value]
+      : [];
+    const languages =
+      Array.isArray(selectedLanguages.value) ? selectedLanguages.value
+      : selectedLanguages.value ? [selectedLanguages.value]
+      : [];
+    const experience =
+      Array.isArray(selectedExperience.value) ? selectedExperience.value
+      : selectedExperience.value ? [selectedExperience.value]
+      : [];
+
+    if (stacks.length > 0) {
+      filter.stacks = stacks.join(',');
     }
 
-    if (selectedLanguages.value.length > 0) {
-      params['filter[languages]'] = selectedLanguages.value.join(',');
+    if (languages.length > 0) {
+      filter.languages = languages.join(',');
     }
 
-    if (selectedExperience.value.length > 0) {
-      params['filter[experience]'] = selectedExperience.value.join(',');
+    if (experience.length > 0) {
+      filter.experience = experience.join(',');
     }
 
-    if (minRate.value > 0) {
-      params['filter[rate][min]'] = minRate.value;
-    }
-
-    if (maxRate.value < 200) {
-      params['filter[rate][max]'] = maxRate.value;
+    if (minRate.value > 0 || maxRate.value < 200) {
+      filter.rate = {};
+      if (minRate.value > 0) filter.rate.min = minRate.value;
+      if (maxRate.value < 200) filter.rate.max = maxRate.value;
     }
 
     if (minRating.value !== null) {
-      params['filter[rating]'] = minRating.value;
+      filter.rating = minRating.value;
     }
 
     if (selectedCurrency.value && selectedCurrency.value !== 'USD') {
-      params['filter[currency]'] = selectedCurrency.value;
+      filter.currency = selectedCurrency.value;
+    }
+
+    if (Object.keys(filter).length > 0) {
+      params.filter = filter;
     }
 
     return params;
+  });
+
+  function buildQueryParams() {
+    return queryParams.value;
   }
 
   /**
@@ -123,59 +154,82 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
    * Example: parseQueryParams({ filter: { stacks: 'Laravel,React' } })
    */
   function parseQueryParams(query) {
-    if (!query) return;
+    if (!query) {
+      clearAllFilters();
+      return;
+    }
 
     // Laravel passes filters as nested object
     const filter = query.filter || {};
 
     // Parse stacks
-    if (filter.stacks) {
-      selectedStacks.value = filter.stacks.split(',');
+    const newStacks = filter.stacks ? filter.stacks.split(',') : [];
+    if (JSON.stringify(selectedStacks.value) !== JSON.stringify(newStacks)) {
+      selectedStacks.value = newStacks;
     }
 
     // Parse languages
-    if (filter.languages) {
-      selectedLanguages.value = filter.languages.split(',');
+    const newLanguages = filter.languages ? filter.languages.split(',') : [];
+    if (
+      JSON.stringify(selectedLanguages.value) !== JSON.stringify(newLanguages)
+    ) {
+      selectedLanguages.value = newLanguages;
     }
 
     // Parse experience
-    if (filter.experience) {
-      selectedExperience.value = filter.experience.split(',');
+    const newExperience = filter.experience ? filter.experience.split(',') : [];
+    if (
+      JSON.stringify(selectedExperience.value) !== JSON.stringify(newExperience)
+    ) {
+      selectedExperience.value = newExperience;
     }
 
     if (filter.rate) {
-      if (filter.rate.min) {
-        minRate.value = Math.max(0, parseFloat(filter.rate.min));
-      }
-      if (filter.rate.max) {
-        maxRate.value = Math.min(200, parseFloat(filter.rate.max));
-      }
+      const newMin = Math.max(0, parseFloat(filter.rate.min) || 0);
+      const newMax = Math.min(200, parseFloat(filter.rate.max) || 200);
+
+      if (minRate.value !== newMin) minRate.value = newMin;
+      if (maxRate.value !== newMax) maxRate.value = newMax;
+    } else {
+      if (minRate.value !== 0) minRate.value = 0;
+      if (maxRate.value !== 200) maxRate.value = 200;
     }
 
     // Parse rating
-    if (filter.rating) {
-      minRating.value = parseFloat(filter.rating);
+    const newRating = filter.rating ? parseFloat(filter.rating) : null;
+    if (minRating.value !== newRating) {
+      minRating.value = newRating;
     }
 
-    if (filter.currency) {
-      selectedCurrency.value = filter.currency;
+    const newCurrency = filter.currency || 'USD';
+    if (selectedCurrency.value !== newCurrency) {
+      selectedCurrency.value = newCurrency;
     }
   }
 
   function removeFilter(type, value) {
+    const stacks =
+      Array.isArray(selectedStacks.value) ? selectedStacks.value
+      : selectedStacks.value ? [selectedStacks.value]
+      : [];
+    const languages =
+      Array.isArray(selectedLanguages.value) ? selectedLanguages.value
+      : selectedLanguages.value ? [selectedLanguages.value]
+      : [];
+    const experience =
+      Array.isArray(selectedExperience.value) ? selectedExperience.value
+      : selectedExperience.value ? [selectedExperience.value]
+      : [];
+
     switch (type) {
       case 'stacks':
-        selectedStacks.value = selectedStacks.value.filter((s) => s !== value);
+        selectedStacks.value = stacks.filter((s) => s !== value);
         break;
       case 'languages':
-        selectedLanguages.value = selectedLanguages.value.filter(
-          (l) => l !== value,
-        );
+        selectedLanguages.value = languages.filter((l) => l !== value);
         break;
       case 'experience':
-        selectedExperience.value = selectedExperience.value.filter(
-          (e) => e !== value,
-        );
+        selectedExperience.value = experience.filter((e) => e !== value);
         break;
       case 'minRate':
         minRate.value = 0;
@@ -225,6 +279,7 @@ export const useMentorFilters = defineStore('mentorFilters', () => {
     // Computed
     activeFilterCount,
     activeFilters,
+    queryParams,
 
     // Methods
     buildQueryParams,

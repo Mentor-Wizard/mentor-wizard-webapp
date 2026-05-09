@@ -18,9 +18,21 @@ import MentorCard from '@/Components/Mentor/MentorCard.vue';
 import MentorCardSkeleton from '@/Components/Mentor/MentorCardSkeleton.vue';
 import MentorPagination from '@/Components/Mentor/MentorPagination.vue';
 import LandingLayout from '@/Layouts/LandingLayout.vue';
+import { storeToRefs } from 'pinia';
 import { useMentorFilters } from '@/Stores/mentorFilters';
 
 const mentorFilters = useMentorFilters();
+const {
+  activeFilters,
+  activeFilterCount,
+  selectedStacks,
+  selectedLanguages,
+  selectedExperience,
+  minRate,
+  maxRate,
+  minRating,
+  selectedCurrency,
+} = storeToRefs(mentorFilters);
 
 const sortBy = ref('');
 const view = ref('grid');
@@ -46,14 +58,17 @@ const totalMentors = computed(() => mentorsPagination.value.total || 0);
 function debounce(fn, delay) {
   let timer;
   return (...args) => {
+    console.log('[DEBUG] Debounce called');
     clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
+    timer = setTimeout(() => {
+      console.log('[DEBUG] Debounce executed');
+      fn(...args);
+    }, delay);
   };
 }
 
-let lastRequestedParams = '';
-let lastFilterSnapshot = '';
 let initialized = false;
+let isSyncingFromUrl = false;
 
 function buildFullParams() {
   const params = { ...mentorFilters.buildQueryParams() };
@@ -64,12 +79,8 @@ function buildFullParams() {
 
 function applyFilters() {
   const params = buildFullParams();
-  const paramsKey = JSON.stringify(params);
 
-  if (paramsKey === lastRequestedParams) return;
-  lastRequestedParams = paramsKey;
-
-  router.get('/mentors', params, {
+  router.get(route('pages.mentors'), params, {
     preserveScroll: true,
     preserveState: true,
     replace: true,
@@ -87,41 +98,74 @@ onMounted(() => {
 
   mentorFilters.parseQueryParams(query);
 
-  const filtersDataValue = filtersData.value || {};
-  mentorFilters.setOptions({
-    stacks: filtersDataValue.stackOptions || [],
-    languages: filtersDataValue.languageOptions || [],
-    currencies: filtersDataValue.currencyOptions || [],
-  });
-
   if (query.sort) sortBy.value = query.sort;
   if (query.page) page.value = Number(query.page);
 
-  lastRequestedParams = JSON.stringify(buildFullParams());
-  lastFilterSnapshot = JSON.stringify(mentorFilters.buildQueryParams());
   initialized = true;
 });
 
+// Sync store with URL query params (handles Back button and initial load)
+watch(
+  () => inertiaPage.props.queryParams,
+  (newQuery) => {
+    if (!newQuery || !initialized) return;
+
+    isSyncingFromUrl = true;
+    mentorFilters.parseQueryParams(newQuery);
+
+    if (newQuery.sort !== undefined) {
+      sortBy.value = newQuery.sort || '';
+    }
+    if (newQuery.page !== undefined) {
+      page.value = Number(newQuery.page) || 1;
+    }
+
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      isSyncingFromUrl = false;
+    }, 100);
+  },
+  { deep: true },
+);
+
+// Use watch to keep store options in sync with Inertia props
+watch(
+  () => inertiaPage.props.filtersData,
+  (newData) => {
+    if (newData) {
+      mentorFilters.setOptions({
+        stacks: newData.stackOptions || [],
+        languages: newData.languageOptions || [],
+        currencies: newData.currencyOptions || [],
+      });
+    }
+  },
+  { immediate: true },
+);
+
 const debouncedApply = debounce(() => {
-  const currentSnapshot = JSON.stringify(mentorFilters.buildQueryParams());
-  if (currentSnapshot === lastFilterSnapshot) return;
-  lastFilterSnapshot = currentSnapshot;
+  if (isSyncingFromUrl) return;
   page.value = 1;
   applyFilters();
 }, 300);
 
+// Watch for filter changes individually
 watch(
-  () => JSON.stringify(mentorFilters.buildQueryParams()),
+  [
+    selectedStacks,
+    selectedLanguages,
+    selectedExperience,
+    minRate,
+    maxRate,
+    minRating,
+    selectedCurrency,
+    sortBy,
+  ],
   () => {
-    if (initialized) debouncedApply();
+    debouncedApply();
   },
+  { deep: true },
 );
-
-watch(sortBy, () => {
-  if (!initialized) return;
-  page.value = 1;
-  applyFilters();
-});
 
 function goToPage(newPage) {
   page.value = newPage;
@@ -158,10 +202,10 @@ function goToPage(newPage) {
             <AdjustmentsHorizontalIcon class="h-5 w-5" />
             <span>Filters</span>
             <span
-              v-if="mentorFilters.activeFilterCount > 0"
+              v-if="activeFilterCount > 0"
               class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-medium text-white"
             >
-              {{ mentorFilters.activeFilterCount }}
+              {{ activeFilterCount }}
             </span>
           </button>
 
@@ -241,11 +285,11 @@ function goToPage(newPage) {
 
       <!-- Active filter chips -->
       <div
-        v-if="mentorFilters.activeFilters.length > 0"
+        v-if="activeFilters.length > 0"
         class="mb-6 flex flex-wrap items-center gap-2"
       >
         <span
-          v-for="filter in mentorFilters.activeFilters"
+          v-for="filter in activeFilters"
           :key="`${filter.type}-${filter.value}`"
           class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700"
         >
@@ -301,7 +345,7 @@ function goToPage(newPage) {
               Try adjusting your filters to find what you're looking for.
             </p>
             <button
-              v-if="mentorFilters.activeFilterCount > 0"
+              v-if="activeFilterCount > 0"
               class="mt-6 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
               @click="mentorFilters.clearAllFilters()"
             >
