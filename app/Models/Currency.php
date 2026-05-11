@@ -22,5 +22,6 @@ class Currency extends Model
         'name',
         'slug',
         'symbol',
+        'exchange_rate',
     ];
 }

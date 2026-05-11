@@ -36,9 +36,7 @@ class SendMessage
     {
         $user = $request->user();
         $companion = $chat->companion($user);
-        /**
-         * @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $companionChat
-         */
+        /** @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $companionChat */
         $companionChat = $companion->chats()
             ->wherePivot('chat_id', $chat->getKey())
             ->first();

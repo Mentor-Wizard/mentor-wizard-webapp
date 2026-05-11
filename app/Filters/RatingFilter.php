@@ -14,11 +14,9 @@ use Spatie\QueryBuilder\Filters\Filter;
 class RatingFilter implements Filter
 {
     /**
-     * Expected:filter[rating]=4 (minimum rating)
+     * Expected: filter[rating]=4 (minimum average rating)
      *
-     * Filters mentors by their average rating from reviews.
-     *
-     * @param  mixed  $value  Minimum rating value (e.g., 4, 4.5)
+     * @param  mixed  $value  Minimum rating value (e.g., 3, 4, 5)
      * @param  non-empty-string  $property  Filter key (e.g., "rating")
      */
     public function __invoke(Builder $query, mixed $value, string $property): void
@@ -26,10 +24,12 @@ class RatingFilter implements Filter
         $minRating = is_numeric($value) ? (float) $value : 1.0; // @pest-mutate-ignore
 
         $query->whereHas('user', function (Builder $userQuery) use ($minRating): void {
-            $userQuery->whereRaw(
-                '(SELECT AVG(rating) FROM mentor_reviews WHERE mentor_reviews.mentor_id = users.id) >= ?',
-                [$minRating]
-            );
+            $userQuery->whereIn('users.id', function ($sub) use ($minRating): void {
+                $sub->select('mentor_id')
+                    ->from('mentor_reviews')
+                    ->groupBy('mentor_id')
+                    ->havingRaw('AVG(rating) >= ?', [$minRating]);
+            });
         });
     }
 }

@@ -20,10 +20,13 @@ class CurrencyFactory extends Factory
      */
     public function definition(): array
     {
+        $currency = fake()->randomElement(CurrencyEnum::cases());
+
         return [
-            'name'   => fake()->randomElement(CurrencyEnum::names()),
-            'slug'   => fake()->slug(),
-            'symbol' => fake()->randomElement(CurrencyEnum::values()),
+            'name'          => $currency->name,
+            'slug'          => fake()->slug(),
+            'symbol'        => $currency->value,
+            'exchange_rate' => $currency->exchangeRate(),
         ];
     }
 }

@@ -32,4 +32,14 @@ enum CurrencyEnum: string
 
         return $values;
     }
+
+    public function exchangeRate(): float
+    {
+        return match ($this) {
+            self::USD => 1.0,
+            self::EUR => 1.08,
+            self::GBP => 1.27,
+            self::UAH => 0.024,
+        };
+    }
 }

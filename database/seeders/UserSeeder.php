@@ -8,6 +8,7 @@ use App\Models\Currency;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Seeder;
+use Throwable;
 
 class UserSeeder extends Seeder
 {
@@ -31,11 +32,15 @@ class UserSeeder extends Seeder
                     'currency_id'   => Currency::query()->inRandomOrder()->value('id'),
                 ]
                 );
-                $name = urlencode($user->profile->name.' '.$user->profile->last_name);
-                $avatarUrl = sprintf(UserProfile::TEST_AVATAR_URL, $name);
-                $user->profile->addMediaFromUrl($avatarUrl)
-                    ->usingFileName('avatar.png')
-                    ->toMediaCollection('avatar');
+                try {
+                    $name = urlencode($user->profile->name.' '.$user->profile->last_name);
+                    $avatarUrl = sprintf(UserProfile::TEST_AVATAR_URL, $name);
+                    $user->profile->addMediaFromUrl($avatarUrl)
+                        ->usingFileName('avatar.png')
+                        ->toMediaCollection('avatar');
+                } catch (Throwable) {
+                    // Avatar service may be unreachable in Docker
+                }
             });
     }
 }

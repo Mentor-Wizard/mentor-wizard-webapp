@@ -8,6 +8,7 @@ use App\Enums\RoleEnum;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Seeder;
+use Throwable;
 
 class MentiSeeder extends Seeder
 {
@@ -30,11 +31,15 @@ class MentiSeeder extends Seeder
                     'phone'         => fake()->phoneNumber,
                 ]
                 );
-                $name = urlencode($user->profile->name.' '.$user->profile->last_name);
-                $avatarUrl = sprintf(UserProfile::TEST_AVATAR_URL, $name);
-                $user->profile->addMediaFromUrl($avatarUrl)
-                    ->usingFileName('avatar.png')
-                    ->toMediaCollection('avatar');
+                try {
+                    $name = urlencode($user->profile->name.' '.$user->profile->last_name);
+                    $avatarUrl = sprintf(UserProfile::TEST_AVATAR_URL, $name);
+                    $user->profile->addMediaFromUrl($avatarUrl)
+                        ->usingFileName('avatar.png')
+                        ->toMediaCollection('avatar');
+                } catch (Throwable) {
+                    // Avatar service may be unreachable in Docker
+                }
             });
     }
 }

@@ -24,6 +24,7 @@ use App\Actions\Pages\Calendar\PendingCalendarEventsListPage;
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Actions\Pages\Chat\GetChatPage;
 use App\Actions\Pages\DashboardPage;
+use App\Actions\Pages\Mentor\MentorsListPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
@@ -40,6 +41,8 @@ use App\Actions\UserSchedule\StoreBatchUserSchedule;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
+
+Route::get('mentors', MentorsListPage::class)->name('pages.mentors');
 
 Route::get('profile-programs', ListMentorProfilePage::class)->name('page.profile-programs');
 

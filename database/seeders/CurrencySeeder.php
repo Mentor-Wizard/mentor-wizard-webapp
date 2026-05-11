@@ -16,10 +16,13 @@ class CurrencySeeder extends Seeder
     public function run(): void
     {
         foreach (CurrencyEnum::cases() as $currency) {
-            Currency::factory()->create([
-                'name'   => $currency->name,
-                'symbol' => $currency->value,
-            ]);
+            Currency::query()->updateOrCreate(
+                ['name' => $currency->name],
+                [
+                    'symbol'        => $currency->value,
+                    'exchange_rate' => $currency->exchangeRate(),
+                ],
+            );
         }
     }
 }
