@@ -6,6 +6,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -22,20 +23,23 @@ use function Pest\Laravel\actingAs;
 describe('Calendar CalendarEvent Store Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
-        $this->user = User::factory()->create();
-        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
-        $this->user->profile->timezone = 'Europe/Kyiv';
-        $this->user->profile->save();
+        $this->mentor = User::factory()->create();
+        $this->mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->mentor->profile->timezone = 'Europe/Kyiv';
+        $this->mentor->profile->save();
 
         $this->mentorProgram = MentorProgram::factory()->create([
-            'mentor_id' => $this->user->getKey(),
+            'mentor_id' => $this->mentor->getKey(),
         ]);
 
-        $this->nonMentorUser = User::factory()->create();
+        $this->user = User::factory()->create();
+        $this->user->profile->timezone = 'Europe/Kyiv';
+        $this->user->profile->save();
     });
 
     it('creates an event successfully', function (): void {
         Date::setTestNow(Date::create(2026, 1, 15, 10, 0, 0, 'UTC'));
+
         actingAs($this->user);
 
         $eventData = [
@@ -45,6 +49,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'             => Date::today()->addDay()->format('Y-m-d'),
             'toTime'             => '10:00',
             'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'       => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'webLink'            => 'https://google.com',
             'description'        => 'Test description',
             'colour'             => CalendarEventColoursEnum::BLUE->value,
@@ -53,7 +58,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $eventData);
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $eventData);
 
         $response->assertRedirect(route('pages.calendar.index'));
 
@@ -65,6 +70,7 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'date'              => Date::today()->addDay()->format('Y-m-d'),
             'web_link'          => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Test description',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
@@ -72,8 +78,19 @@ describe('Calendar CalendarEvent Store Page', function (): void {
         $eventId = DB::table('calendar_events')->latest()->first()->id;
         $this->assertDatabaseHas('calendar_event_user', [
             'calendar_event_id' => $eventId,
-            'user_id'           => $this->user->getKey(),
+            'user_id'           => $this->mentor->getKey(),
             'role'              => CalendarEventRoleEnum::HOST,
+        ]);
+        $this->assertDatabaseHas('calendar_event_user', [
+            'calendar_event_id' => $eventId,
+            'user_id'           => $this->user->getKey(),
+            'role'              => CalendarEventRoleEnum::PARTICIPANT,
+        ]);
+
+        $this->assertDatabaseHas('mentor_sessions', [
+            'mentor_id'         => $this->mentor->getKey(),
+            'menti_id'          => $this->user->getKey(),
+            'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
     });
 
@@ -86,13 +103,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'             => Date::today()->format('Y-m-d'),
             'toTime'             => '10:00',
             'type'               => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'       => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'             => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id'  => $this->mentorProgram->getKey(),
             '_token'             => 'test-token',
         ];
 
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['title']);
     });
 
@@ -105,12 +123,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['title']);
     });
 
@@ -122,12 +141,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromDate']);
     });
 
@@ -140,12 +160,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromDate']);
     });
 
@@ -158,12 +179,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::yesterday()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromDate']);
     });
 
@@ -175,12 +197,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'fromTime'          => '09:00',
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toDate']);
     });
 
@@ -193,12 +216,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => 'bad-date',
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toDate']);
     });
 
@@ -211,12 +235,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::today()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toDate']);
     });
 
@@ -228,12 +253,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromTime']);
     });
 
@@ -246,12 +272,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['fromTime']);
     });
 
@@ -263,12 +290,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toTime']);
     });
 
@@ -281,12 +309,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10 AM',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toTime']);
     });
 
@@ -299,13 +328,32 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['toTime']);
+    });
+
+    it('fails when session_type is missing', function (): void {
+        actingAs($this->user);
+        $data = [
+            'title'             => 'Event',
+            'fromDate'          => Date::tomorrow()->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toDate'            => Date::tomorrow()->format('Y-m-d'),
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+            '_token'            => 'test-token',
+        ];
+        $this->withSession(['_token' => 'test-token'])
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
+            ->assertSessionHasErrors(['session_type']);
     });
 
     it('fails when type is missing', function (): void {
@@ -316,12 +364,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'fromTime'          => '09:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['type']);
     });
 
@@ -334,12 +383,13 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => 'invalid_type',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['type']);
     });
 
@@ -352,11 +402,12 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['colour']);
     });
 
@@ -369,13 +420,14 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'description'       => Str::random(2001),
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['description']);
     });
 
@@ -388,23 +440,24 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'webLink'           => 'not-a-url',
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
         $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $data)
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $data)
             ->assertSessionHasErrors(['webLink']);
     });
 
-    // fromDate invalid already covered above
+    //        // fromDate invalid already covered above
 
     it('adds custom error when timeslot overlaps existing event', function (): void {
         actingAs($this->user);
         auth()->login($this->user);
 
-        // Create an existing future event for the user from 10:00 to 15:00 tomorrow
+        // Create an existing future event for the mentor from 10:00 to 15:00 tomorrow
         $tomorrow = Date::tomorrow();
         $event = CalendarEvent::query()->create([
             'title'             => 'Busy block',
@@ -413,10 +466,19 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'end_date_time'     => $tomorrow->copy()->setTime(15, 0),
             'date'              => $tomorrow->format('Y-m-d'),
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Busy',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
-        $event->calendarEventUsers()->attach($this->user->getKey());
+        $event->calendarEventUsers()->attach($this->mentor->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $event->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::PARTICIPANT,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
 
         $payload = [
             'title'             => 'Overlap attempt',
@@ -425,16 +487,16 @@ describe('Calendar CalendarEvent Store Page', function (): void {
             'toDate'            => $tomorrow->format('Y-m-d'),
             'toTime'            => '15:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Should fail due to overlap',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
-
-        $response = $this->withSession(['_token' => 'test-token'])->post(route('pages.calendar.store'), $payload);
+        $response = $this->withSession(['_token' => 'test-token'])->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $payload);
 
         $response->assertSessionHasErrors([
-            'fromDate' => 'there are another events on this time',
+            'fromDate' => 'This slot is busy',
         ]);
     });
 });
@@ -457,7 +519,7 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         ]);
     });
 
-    it('allows mentor to create event for their own program', function (): void {
+    it('denies mentor from creating event for their own program', function (): void {
         actingAs($this->mentor);
         auth()->login($this->mentor);
 
@@ -468,16 +530,18 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
-        $response->assertRedirect(route('pages.calendar.index'));
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
 
-        $this->assertDatabaseHas('calendar_events', [
+        $this->assertDatabaseMissing('calendar_events', [
             'title'             => 'My event',
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ]);
@@ -498,18 +562,19 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
         // Should redirect to verification notice or return 403
         expect($response->status())->toBeIn([302, 403, 409]);
     });
 
-    it('throws 403 when another mentor tries to create event for other mentor program', function (): void {
+    it('Allows another mentor to create event for other mentor program', function (): void {
         actingAs($this->anotherMentor);
         auth()->login($this->anotherMentor);
 
@@ -520,14 +585,17 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
+            '_token'            => 'test-token',
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
-        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertStatus(302);
     });
 
     it('allows non-mentor user to book calendar event with mentor', function (): void {
@@ -537,17 +605,18 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
         $eventData = [
             'title'             => 'Booking event',
             'fromDate'          => Date::tomorrow()->format('Y-m-d'),
-            'fromTime'          => '09:00',
+            'fromTime'          => '14:00',
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
-            'toTime'            => '10:00',
+            'toTime'            => '15:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
             '_token'            => 'test-token',
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), $eventData);
+            ->post(route('pages.calendar.store', ['mentorProgram' => $this->mentorProgram->getKey()]), $eventData);
 
         $response->assertRedirect(route('pages.calendar.index'));
     });
@@ -556,13 +625,17 @@ describe('Calendar CalendarEvent Store Page - Permission Tests', function (): vo
 describe('Calendar CalendarEvent Store Page - Edge Cases', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
+        $this->mentor = User::factory()->create();
+        $this->mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->mentor->profile->timezone = 'Europe/Kyiv';
+        $this->mentor->profile->save();
+
         $this->user = User::factory()->create();
-        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
         $this->user->profile->timezone = 'Europe/Kyiv';
         $this->user->profile->save();
 
         $this->mentorProgram = MentorProgram::factory()->create([
-            'mentor_id' => $this->user->getKey(),
+            'mentor_id' => $this->mentor->getKey(),
         ]);
     });
 
@@ -578,12 +651,15 @@ describe('Calendar CalendarEvent Store Page - Edge Cases', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $nonExistentId,
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
+
         $response->assertStatus(302); // web request
         $response->assertSessionHasErrors([
             'mentor_program_id' => 'CalendarEvent should be related to mentor program.',
@@ -601,12 +677,14 @@ describe('Calendar CalendarEvent Store Page - Edge Cases', function (): void {
             'toDate'            => Date::tomorrow()->format('Y-m-d'),
             'toTime'            => '10:00',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => 0,
         ];
 
         $response = $this->withSession(['_token' => 'test-token'])
-            ->post(route('pages.calendar.store'), [...$eventData, '_token' => 'test-token']);
+            ->post(route('pages.calendar.store',
+                ['mentorProgram' => $this->mentorProgram->getKey()]), [...$eventData, '_token' => 'test-token']);
 
         // Should fail validation
         expect($response->status())->toBeIn([302, 403, 422]);

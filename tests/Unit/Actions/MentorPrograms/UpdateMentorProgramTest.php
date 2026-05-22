@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\MentorProgram\UpdateMentorProgramRequest;
 use App\Models\Currency;
@@ -42,18 +43,28 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
         expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
     })->with([
         'full valid data' => fn (): array => [
-            'name'        => 'Valid Program Name',
-            'slug'        => 'valid-program-slug',
-            'description' => 'Valid program description',
-            'cost'        => 99.99,
-            'currency_id' => array_key_first($this->currencies),
+            'name'                  => 'Valid Program Name',
+            'slug'                  => 'valid-program-slug',
+            'description'           => 'Valid program description',
+            'cost'                  => 99.99,
+            'session_duration'      => 60,
+            'session_type_options'  => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
+            'currency_id'           => array_key_first($this->currencies),
         ],
         'minimal valid data' => fn (): array => [
-            'name'        => 'Min Program',
-            'slug'        => 'min-program',
-            'description' => 'Min description',
-            'cost'        => 0,
-            'currency_id' => array_key_first($this->currencies),
+            'name'                  => 'Min Program',
+            'slug'                  => 'min-program',
+            'description'           => 'Min description',
+            'cost'                  => 0,
+            'session_duration'      => 60,
+            'session_type_options'  => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
+            'currency_id'       => array_key_first($this->currencies),
         ],
     ]);
 
@@ -108,6 +119,18 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
                 'currency_id' => 999,
             ],
             'errorField' => 'currency_id',
+        ],
+        'end_time before start_time' => fn (): array => [
+            [
+                'name'        => 'Valid Name',
+                'slug'        => 'valid-slug',
+                'description' => 'Valid description',
+                'cost'        => 99.99,
+                'currency_id' => array_key_first($this->currencies),
+                'start_time'  => '2026-05-01 10:00',
+                'end_time'    => '2026-05-01 09:00',
+            ],
+            'errorField' => 'end_time',
         ],
 
     ]);

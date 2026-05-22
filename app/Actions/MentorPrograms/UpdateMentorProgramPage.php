@@ -6,18 +6,18 @@ namespace App\Actions\MentorPrograms;
 
 use App\Http\Requests\MentorProgram\UpdateMentorProgramRequest;
 use App\Models\MentorProgram;
-use Inertia\Inertia;
+use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
-use Symfony\Component\HttpFoundation\Response;
 
 class UpdateMentorProgramPage
 {
     use AsController;
 
-    public function handle(UpdateMentorProgramRequest $request, MentorProgram $mentorProgram): Response
+    public function handle(UpdateMentorProgramRequest $request, MentorProgram $mentorProgram): RedirectResponse
     {
         $mentorProgram->update($request->validated());
 
-        return Inertia::location(route('mentor-program.edit', $mentorProgram->slug));
+        return to_route('mentor-program.edit', $mentorProgram->slug)
+            ->with('success', 'Mentor program updated successfully.');
     }
 }

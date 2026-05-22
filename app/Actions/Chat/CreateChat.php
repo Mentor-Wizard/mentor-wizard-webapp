@@ -9,7 +9,6 @@ use App\Http\Requests\Chat\ChatMessageRequest;
 use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -28,14 +27,6 @@ class CreateChat
     {
         /** @var User $owner */
         $owner = $request->user();
-        /**
-         * @var (Chat&object{
-         *     pivot: Pivot&object{
-         *         status: string,
-         *         is_muted: bool
-         *     }
-         * })|null $companionChat
-         */
         $companionChat = $owner->chats()
             ->whereHas('users', function ($q) use ($user): void {
                 $q->where('users.id', $user->getKey());

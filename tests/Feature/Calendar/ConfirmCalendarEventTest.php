@@ -59,7 +59,7 @@ describe('ConfirmCalendarEvent (Feature)', function (): void {
         $response->assertRedirect(route('pages.calendar.pending'));
         $response->assertSessionHas('success', 'Event was successfully confirmed.');
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED->value);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
     });
 
     it('mentee tries to  confirm event and receive 403 code due to CalendarEvent policy restrictions', function (): void {
@@ -76,7 +76,7 @@ describe('ConfirmCalendarEvent (Feature)', function (): void {
 
         expect($response->status())->toBe(403);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('unconfirmed user cannot confirm calendar events', function (): void {

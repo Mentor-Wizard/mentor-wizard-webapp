@@ -50,12 +50,15 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     public const int DEFAULT_MENTOR_PAGE_PAGINATION = 10;
 
+    public const int NOTIFICATIONS_PER_PAGE = 20;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
+        'user_id',
         'username',
         'email',
         'password',
@@ -88,6 +91,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     protected $visible = [
         'id',
         'username',
+        'slug',
         'email',
         'created_at',
         'updated_at',
@@ -214,6 +218,14 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function schedules(): HasMany
     {
         return $this->hasMany(UserSchedule::class);
+    }
+
+    /**
+     * @return HasMany<UserCalendarIntegration, $this>
+     */
+    public function calendarIntegrations(): HasMany
+    {
+        return $this->hasMany(UserCalendarIntegration::class);
     }
 
     /**

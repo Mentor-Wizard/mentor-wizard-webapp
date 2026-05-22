@@ -38,7 +38,7 @@ class MentorProfilePageResource extends JsonResource
             'id'             => $user->id,
             'slug'           => $user->slug,
             'titleBlock'     => $this->titleBlock($user),
-            'programsBlock'  => MentorProgramsResource::collection($user->mentorPrograms),
+            'programsBlock'  => MentorProgramsResource::collection($user->mentorPrograms->where('is_main', false)),
             'statisticBlock' => $this->statisticBlock($user),
             'reviewBlock'    => MentorReviewResource::collectionWithMentor($this->reviewBlock($user), $user),
             'similarMentors' => SimilarMentorResource::collection($this->similarMentor($user)),
@@ -54,18 +54,19 @@ class MentorProfilePageResource extends JsonResource
         $years = (int) $user->mentorProfile?->experience_started_at?->diffInYears(now()) ?? 0;
 
         return [
-            'name'        => mb_trim($user->profile->name.' '.$user->profile->last_name),
-            'avatar'      => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
-            'title'       => $user->mentorProfile?->title,
-            'description' => $user->mentorProfile?->description,
-            'rate'        => $user->mentorProfile?->rate,
-            'currency'    => $user->mentorProfile?->currency?->symbol,
-            'languages'   => $user->mentorProfile?->languages->pluck('tag')->toArray(),
-            'stacks'      => $user->mentorProfile?->stacks->pluck('tag')->toArray(),
-            'rating'      => round($user->rating, 1),
-            'reviews'     => $user->mentorReviews->count(),
-            'experience'  => $years.' '.trans_choice('messages.years', $years, ['count' => $years]),
-            'mentiCount'  => $user->mentorSessions->unique('menti_id')->count(),
+            'name'              => mb_trim($user->profile->name.' '.$user->profile->last_name),
+            'avatar'            => $user->profile->avatar ?: UserProfile::DEFAULT_AVATAR_URL,
+            'title'             => $user->mentorProfile?->title,
+            'description'       => $user->mentorProfile?->description,
+            'rate'              => $user->mentorProfile?->rate,
+            'currency'          => $user->mentorProfile?->currency?->symbol,
+            'languages'         => $user->mentorProfile?->languages->pluck('tag')->toArray(),
+            'stacks'            => $user->mentorProfile?->stacks->pluck('tag')->toArray(),
+            'rating'            => round($user->rating, 1),
+            'reviews'           => $user->mentorReviews->count(),
+            'experience'        => $years.' '.trans_choice('messages.years', $years, ['count' => $years]),
+            'mentiCount'        => $user->mentorSessions->unique('menti_id')->count(),
+            'mainProgramSlug'   => $user->mentorPrograms->where('is_main', '=', true)->first()?->slug,
         ];
     }
 
@@ -100,7 +101,7 @@ class MentorProfilePageResource extends JsonResource
     {
         return User::query()->role(RoleEnum::MENTOR)
             ->with('profile')
-            ->where('id', '<>', $user->id)
+            ->where('id', '<>', $user->getKey())
             ->limit(self::MENTOR_PER_PAGE)
             ->get();
     }

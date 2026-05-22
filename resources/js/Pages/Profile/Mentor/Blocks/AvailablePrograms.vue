@@ -1,4 +1,6 @@
 <script setup>
+import { Link } from '@inertiajs/vue3';
+
 defineProps({
   data: {
     type: Object,
@@ -63,11 +65,12 @@ defineProps({
         </div>
       </div>
 
-      <button
-        class="mt-auto w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
+      <Link
+        :href="route('pages.mentor.program.book', program.slug)"
+        class="mt-auto block w-full rounded-lg bg-blue-600 px-4 py-3 text-center font-medium text-white transition-colors duration-200 hover:bg-blue-700"
       >
         Book Session
-      </button>
+      </Link>
     </div>
   </div>
 </template>

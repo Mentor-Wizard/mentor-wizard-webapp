@@ -22,6 +22,7 @@ import {
 import { router, useForm } from '@inertiajs/vue3';
 import { onMounted, ref, watch } from 'vue';
 
+import ExternalIntegrationsTab from '@/Components/Calendar/ExternalIntegrationsTab.vue';
 import {
   capitalize,
   errors,
@@ -45,6 +46,10 @@ const props = defineProps({
   calendarEvent: {
     type: Object,
     default: () => {},
+  },
+  externalIntegrations: {
+    type: Array,
+    default: null,
   },
 });
 const mode = ref('show');
@@ -148,9 +153,18 @@ const handleSubmit = () => {
 };
 
 const handleClose = () => {
-  console.log('close');
-  console.log(props.calendarEvents);
   router.visit(route('pages.calendar.index'), {});
+};
+
+const activeTab = ref('details');
+const integrationsLoaded = ref(false);
+
+const loadIntegrationsTab = () => {
+  activeTab.value = 'integrations';
+  if (!integrationsLoaded.value) {
+    integrationsLoaded.value = true;
+    router.reload({ only: ['externalIntegrations'] });
+  }
 };
 
 watch(
@@ -509,13 +523,65 @@ watch(
                 >
                   <DialogTitle
                     as="h3"
-                    class="mb-6 border-b border-gray-200 pb-2 text-lg leading-6 font-semibold text-gray-900"
+                    class="mb-4 text-lg leading-6 font-semibold text-gray-900"
                   >
                     <CalendarIcon class="mr-2 inline h-5 w-5 text-indigo-600" />
                     Event Details
                   </DialogTitle>
 
-                  <div class="space-y-6">
+                  <!-- Tabs -->
+                  <div class="mb-4 border-b border-gray-200">
+                    <nav class="-mb-px flex gap-4">
+                      <button
+                        type="button"
+                        :class="[
+                          'border-b-2 pb-3 text-sm font-medium transition-colors',
+                          activeTab === 'details' ?
+                            'border-indigo-600 text-indigo-600'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        ]"
+                        @click="activeTab = 'details'"
+                      >
+                        Details
+                      </button>
+                      <button
+                        type="button"
+                        :class="[
+                          'border-b-2 pb-3 text-sm font-medium transition-colors',
+                          activeTab === 'integrations' ?
+                            'border-indigo-600 text-indigo-600'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        ]"
+                        @click="loadIntegrationsTab"
+                      >
+                        External Calendars
+                      </button>
+                    </nav>
+                  </div>
+
+                  <!-- Integrations tab -->
+                  <div v-if="activeTab === 'integrations'">
+                    <div
+                      v-if="
+                        !integrationsLoaded || externalIntegrations === null
+                      "
+                      class="space-y-3 py-4"
+                    >
+                      <div
+                        v-for="i in 3"
+                        :key="i"
+                        class="h-12 animate-pulse rounded-md bg-gray-100"
+                      />
+                    </div>
+
+                    <ExternalIntegrationsTab
+                      v-else
+                      :calendar-event-id="event.id"
+                      :integrations="externalIntegrations"
+                    />
+                  </div>
+
+                  <div v-show="activeTab === 'details'" class="space-y-6">
                     <!-- CalendarEvent Title -->
                     <div
                       class="rounded-lg border border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50 p-4"

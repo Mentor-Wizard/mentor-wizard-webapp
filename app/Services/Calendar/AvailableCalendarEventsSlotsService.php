@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
+use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -109,6 +110,7 @@ class AvailableCalendarEventsSlotsService
         });
 
         $this->events = $calendarEventRequestQuery
+            ->where('status', '=', CalendarEventStatusEnum::CONFIRMED->value)
             ->orderBy('start_date_time')
             ->whereKeyNot($this->excludeEvents)
             ->limit(200)

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\User;
@@ -25,25 +26,31 @@ describe('Mentor Program Store Page', function (): void {
         actingAs($this->user);
 
         $programData = [
-            'name'        => 'New Mentor Program',
-            'description' => 'This is a description for the new mentor program.',
-            'cost'        => 200.0,
-            'currency_id' => array_key_first($this->currencies),
-            'mentor_id'   => $this->user->getKey(),
-            '_token'      => 'test_token',
+            'name'                  => 'New Mentor Program',
+            'description'           => 'This is a description for the new mentor program.',
+            'cost'                  => 200.0,
+            'currency_id'           => array_key_first($this->currencies),
+            'session_duration'      => 60,
+            'session_type_options'  => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
+            'mentor_id'        => $this->user->getKey(),
+            '_token'           => 'test_token',
         ];
 
         $response = $this->withSession(['_token' => 'test_token'])
             ->post(route('mentor-program.store'), $programData);
 
-        $response->assertRedirect(route('mentor-program.create'));
+        $response->assertRedirect(route('mentor-program.list'));
 
         $this->assertDatabaseHas('mentor_programs', [
-            'mentor_id'   => $this->user->getKey(),
-            'name'        => 'New Mentor Program',
-            'description' => 'This is a description for the new mentor program.',
-            'cost'        => 200.0,
-            'currency_id' => array_key_first($this->currencies),
+            'mentor_id'        => $this->user->getKey(),
+            'name'             => 'New Mentor Program',
+            'description'      => 'This is a description for the new mentor program.',
+            'cost'             => 200.0,
+            'session_duration' => 60,
+            'currency_id'      => array_key_first($this->currencies),
         ]);
     });
 

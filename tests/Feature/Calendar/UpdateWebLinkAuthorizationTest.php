@@ -6,6 +6,7 @@ use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -64,6 +65,7 @@ describe('Calendar event web link update authorization (mentor vs mentee)', func
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'webLink'           => 'https://meet.example.com/room-1',
                 'mentor_program_id' => $this->program->getKey(),
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 '_token'            => 'test_token',
             ]);
 

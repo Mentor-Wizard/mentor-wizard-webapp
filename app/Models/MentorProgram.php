@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CalendarEventStatusEnum;
 use App\Observers\MentorProgramObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\MentorProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,18 +33,15 @@ class MentorProgram extends Model
         'mentor_id',
         'name',
         'slug',
+        'is_main',
         'description',
         'cost',
         'currency_id',
         'start_time',
         'end_time',
         'session_duration',
-        'session_duration_options',
-    ];
-
-    protected $appends = [
-        'pending_events_requests_number',
-        'confirmed_events_number',
+        'session_type_options',
+        'need_confirmation',
     ];
 
     /**
@@ -98,34 +93,17 @@ class MentorProgram extends Model
     }
 
     /**
-     * @return Attribute<int, never>
-     */
-    protected function pendingEventsRequestsNumber(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->calendarEvents()
-            ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION)
-            ->count());
-    }
-
-    /**
-     * @return Attribute<int, never>
-     */
-    protected function confirmedEventsNumber(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->calendarEvents()
-            ->where('status', CalendarEventStatusEnum::CONFIRMED)
-            ->count());
-    }
-
-    /**
      * @return array<string, string>
      */
     #[Override]
     protected function casts(): array
     {
         return [
-            'start_time' => 'datetime',
-            'end_time'   => 'datetime',
+            'is_main'              => 'boolean',
+            'need_confirmation'    => 'boolean',
+            'session_type_options' => 'array',
+            'start_time'           => 'datetime',
+            'end_time'             => 'datetime',
         ];
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\MentorProgram;
 
+use App\Enums\MentorSessionDurationOptionsEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
 use Exception;
@@ -21,8 +23,10 @@ class EditMentorProgramPage
         throw_if($currencies->isEmpty(), Exception::class, 'Currencies table is empty');
 
         return Inertia::render('MentorProgram/CreateOrEdit', [
-            'program'    => $mentorProgram,
-            'currencies' => $currencies,
+            'program'                => $mentorProgram,
+            'currencies'             => $currencies,
+            'sessionTypeOptions'     => MentorSessionTypeEnum::values(),
+            'sessionDurationOptions' => MentorSessionDurationOptionsEnum::values(),
         ]);
     }
 }

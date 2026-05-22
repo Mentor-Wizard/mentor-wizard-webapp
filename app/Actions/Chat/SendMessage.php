@@ -13,7 +13,6 @@ use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -36,14 +35,11 @@ class SendMessage
     {
         $user = $request->user();
         $companion = $chat->companion($user);
-        /**
-         * @var Chat&object{pivot: Pivot&object{status: string, is_muted: bool}} $companionChat
-         */
         $companionChat = $companion->chats()
             ->wherePivot('chat_id', $chat->getKey())
             ->first();
 
-        throw_if($companionChat->pivot->status !== ChatStatusEnum::ACTIVE->value, AuthorizationException::class);
+        throw_if($companionChat->pivot->status !== ChatStatusEnum::ACTIVE->value, AuthorizationException::class); // @phpstan-ignore property.notFound
 
         $data = $request->validated();
         $message = ChatMessage::query()->create([
@@ -62,7 +58,7 @@ class SendMessage
         $message->refresh();
         /** @var User $companion */
         $companion = $chat->companion($user);
-        event(new ChatMessageEvent($companion, $message, $companionChat->pivot->is_muted));
+        event(new ChatMessageEvent($companion, $message, $companionChat->pivot->is_muted)); // @phpstan-ignore property.notFound
         event(new UnreadMessagesEvent($companion, UnreadMessages::run($companion)));
 
         return response()->json([

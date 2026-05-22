@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\MentorProgram;
@@ -23,12 +24,17 @@ describe('Mentor Program Update Page', function (): void {
         $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $this->mentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $this->user->getKey(),
-            'name'        => 'Original Program Name',
-            'slug'        => 'original-program',
-            'description' => 'Original Description',
-            'cost'        => 100.0,
-            'currency_id' => array_key_first($this->currencies),
+            'mentor_id'             => $this->user->getKey(),
+            'name'                  => 'Original Program Name',
+            'slug'                  => 'original-program',
+            'description'           => 'Original Description',
+            'session_duration'      => 60,
+            'session_type_options'  => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
+            'cost'                  => 100.0,
+            'currency_id'           => array_key_first($this->currencies),
         ]);
     });
 
@@ -36,25 +42,37 @@ describe('Mentor Program Update Page', function (): void {
         actingAs($this->user);
 
         $updatedData = [
-            'name'        => 'Updated Program Name',
-            'description' => 'Updated Description',
-            'cost'        => 150.0,
-            'currency_id' => array_keys($this->currencies)[1],
-            'slug'        => $this->mentorProgram->slug,
+            'name'                      => 'Updated Program Name',
+            'description'               => 'Updated Description',
+            'cost'                      => 150.0,
+            'session_duration'          => 60,
+            'session_type_options'      => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
+            'currency_id'               => array_keys($this->currencies)[1],
+            'slug'                      => $this->mentorProgram->slug,
         ];
 
-        $response = patch(route('mentor-program.update', $this->mentorProgram->slug), $updatedData);
+        $response = patch(route('mentor-program.update',
+            $this->mentorProgram->slug), $updatedData);
 
         $response->assertRedirect(route('mentor-program.edit', $this->mentorProgram->slug));
 
-        $this->assertDatabaseHas('mentor_programs', [
-            'id'          => $this->mentorProgram->getKey(),
-            'name'        => 'Updated Program Name',
-            'description' => 'Updated Description',
-            'cost'        => 150.0,
-            'currency_id' => array_keys($this->currencies)[1],
-            'slug'        => $this->mentorProgram->slug,
-        ]);
+        $updatedProgram = $this->mentorProgram->fresh();
+
+        expect($updatedProgram)
+            ->id->toBe($this->mentorProgram->getKey())
+            ->name->toBe('Updated Program Name')
+            ->description->toBe('Updated Description')
+            ->cost->toBe('150.00')
+            ->session_duration->toBe(60)
+            ->session_type_options->toBe([
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ])
+            ->currency_id->toBe(array_keys($this->currencies)[1])
+            ->slug->toBe($this->mentorProgram->slug);
     });
 
     it('throws 404 when trying to update a non-existent mentor program', function (): void {
@@ -63,9 +81,14 @@ describe('Mentor Program Update Page', function (): void {
         $nonExistentSlug = 'non-existent-slug';
 
         $response = patch(route('mentor-program.update', $nonExistentSlug), [
-            'name'        => 'Updated Program Name',
-            'description' => 'Updated Description',
-            'cost'        => 150.0,
+            'name'                      => 'Updated Program Name',
+            'description'               => 'Updated Description',
+            'cost'                      => 150.0,
+            'session_duration'          => 60,
+            'session_type_options'      => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
             'currency_id' => array_keys($this->currencies)[1],
         ]);
 
@@ -77,41 +100,62 @@ describe('Mentor Program Update Page', function (): void {
         $anotherUser->assignRole(Role::findByName(RoleEnum::MENTOR->value));
 
         $anotherMentorProgram = MentorProgram::factory()->create([
-            'mentor_id'   => $anotherUser->getKey(),
-            'name'        => 'Another Program',
-            'slug'        => 'another-program',
-            'description' => 'Another Description',
-            'cost'        => 75.0,
+            'mentor_id'                 => $anotherUser->getKey(),
+            'name'                      => 'Another Program',
+            'slug'                      => 'another-program',
+            'description'               => 'Another Description',
+            'cost'                      => 75.0,
+            'session_duration'          => 60,
+            'session_type_options'      => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
             'currency_id' => array_key_first($this->currencies),
         ]);
 
         actingAs($this->user);
 
         $response = patch(route('mentor-program.update', $anotherMentorProgram->slug), [
-            'name'        => 'Updated Program Name',
-            'description' => 'Updated Description',
-            'cost'        => 150.0,
+            'name'                      => 'Updated Program Name',
+            'description'               => 'Updated Description',
+            'cost'                      => 150.0,
+            'session_duration'          => 60,
+            'session_type_options'      => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
             'currency_id' => array_keys($this->currencies)[1],
         ]);
 
         $response->assertForbidden();
 
-        $this->assertDatabaseHas('mentor_programs', [
-            'id'          => $anotherMentorProgram->getKey(),
-            'name'        => 'Another Program',
-            'description' => 'Another Description',
-            'cost'        => 75.0,
-            'currency_id' => array_key_first($this->currencies),
-        ]);
+        $unchangedProgram = $anotherMentorProgram->fresh();
+
+        expect($unchangedProgram)
+            ->id->toBe($anotherMentorProgram->getKey())
+            ->name->toBe('Another Program')
+            ->description->toBe('Another Description')
+            ->cost->toBe('75.00')
+            ->session_duration->toBe(60)
+            ->session_type_options->toBe([
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ])
+            ->currency_id->toBe(array_key_first($this->currencies));
     });
 
     it('validates input when updating mentor program', function (): void {
         actingAs($this->user);
 
         $invalidData = [
-            'name'        => '',
-            'description' => '',
-            'cost'        => -50,
+            'name'                      => '',
+            'description'               => '',
+            'cost'                      => -50,
+            'session_duration'          => 60,
+            'session_type_options'      => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
             'currency_id' => null,
         ];
 

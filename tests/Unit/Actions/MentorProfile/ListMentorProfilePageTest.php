@@ -9,6 +9,7 @@ use App\Filters\ProgramCostFilter;
 use App\Filters\RatingFilter;
 use App\Filters\TagLanguagesFilter;
 use App\Filters\TagStacksFilter;
+use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
 mutates(ListMentorProfilePage::class);
@@ -23,6 +24,14 @@ describe('ListMentorProfilePage unit tests', function (): void {
         $reflection = new ReflectionMethod($action, 'handle');
         expect($reflection->isPublic())->toBeTrue()
             ->and($reflection->getNumberOfParameters())->toBe(0);
+    });
+
+    it('handle method returns Inertia Response', function (): void {
+        $reflection = new ReflectionMethod(ListMentorProfilePage::class, 'handle');
+        $returnType = $reflection->getReturnType();
+
+        expect($returnType)->not->toBeNull()
+            ->and($returnType->getName())->toBe(Response::class);
     });
 
     it('uses AsController trait', function (): void {

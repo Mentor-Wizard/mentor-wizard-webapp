@@ -2,10 +2,20 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\ConfirmCalendarEvent;
-use App\Actions\Calendar\DeleteCalendarEvent;
-use App\Actions\Calendar\EditCalendarEvent;
-use App\Actions\Calendar\StoreCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\ConfirmCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\DeleteCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\EditCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\StoreCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\SyncCalendarEventToIntegration;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectCallback;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectDirect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectRedirect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarDisconnect;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarRetrySync;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSelectCalendar;
+use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSyncSingleEvent;
+use App\Actions\Calendar\ExternalCalendar\RerunExternalCalendarEventSync;
+use App\Actions\Calendar\ExternalCalendarLog\AcknowledgeExternalCalendarEventLog;
 use App\Actions\Chat\ChatListUser;
 use App\Actions\Chat\ChatMessages;
 use App\Actions\Chat\CreateChat;
@@ -16,9 +26,14 @@ use App\Actions\Chat\SetArchive;
 use App\Actions\Chat\SetBan;
 use App\Actions\Chat\SetMute;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
+use App\Actions\MentorPrograms\SetMainMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
 use App\Actions\MentorPrograms\UpdateMentorProgramPage;
+use App\Actions\Notifications\ListNotifications;
+use App\Actions\Notifications\MarkAllNotificationsAsRead;
+use App\Actions\Notifications\MarkNotificationAsRead;
 use App\Actions\Pages\Calendar\CalendarsListPage;
+use App\Actions\Pages\Calendar\ConfirmedCalendarEventsListPage;
 use App\Actions\Pages\Calendar\MentorProgramEventBookingPage;
 use App\Actions\Pages\Calendar\PendingCalendarEventsListPage;
 use App\Actions\Pages\Calendar\ShowCalendarEventPage;
@@ -27,6 +42,7 @@ use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
+use App\Actions\Pages\Profile\ExternalCalendarSettingsPage;
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
@@ -37,6 +53,7 @@ use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
 use App\Actions\UserSchedule\StoreBatchUserSchedule;
+use App\Models\MentorProgram;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
@@ -59,19 +76,26 @@ Route::middleware('auth')->group(function (): void {
     Route::delete('profile', DeleteUserProfile::class)->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'role:mentor'])->group(function (): void {
-    Route::get('mentor-program/create', CreateMentorProgramPage::class)
+Route::prefix('mentor-program')->middleware(['auth', 'role:mentor'])->group(function (): void {
+    Route::get('/create', CreateMentorProgramPage::class)
+        ->can('create', MentorProgram::class)
         ->name('mentor-program.create');
-    Route::post('mentor-program', StoreMentorProgramPage::class)->name('mentor-program.store');
-    Route::get('mentor-program/{mentorProgram:slug}/edit', EditMentorProgramPage::class)
+    Route::post('/', StoreMentorProgramPage::class)
+        ->can('create', MentorProgram::class)
+        ->name('mentor-program.store');
+    Route::get('/{mentorProgram:slug}/edit', EditMentorProgramPage::class)
+        ->can('update', 'mentorProgram')
         ->name('mentor-program.edit');
-    Route::patch('mentor-program/{mentorProgram:slug}', UpdateMentorProgramPage::class)
+    Route::patch('/{mentorProgram:slug}', UpdateMentorProgramPage::class)
         ->can('update', 'mentorProgram')
         ->name('mentor-program.update');
-    Route::delete('mentor-program/{mentorProgram:slug}', DeleteMentorProgram::class)
+    Route::patch('/{mentorProgram:slug}/set-main', SetMainMentorProgram::class)
+        ->can('update', 'mentorProgram')
+        ->name('mentor-program.set-main');
+    Route::delete('/{mentorProgram:slug}', DeleteMentorProgram::class)
         ->can('delete', 'mentorProgram')
         ->name('mentor-program.destroy');
-    Route::get('mentor-program/list', ListMentorProgramPage::class)
+    Route::get('/list', ListMentorProgramPage::class)
         ->name('mentor-program.list');
 });
 
@@ -83,6 +107,8 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
         ->name('pages.calendar.show');
     Route::get('pending-calendar-event/list/{mentorProgram:slug?}', PendingCalendarEventsListPage::class)
         ->name('pages.calendar.pending');
+    Route::get('confirmed-calendar-event/list/{mentorProgram:slug?}', ConfirmedCalendarEventsListPage::class)
+        ->name('pages.calendar.confirmed');
     Route::get('mentor-program/book/{mentorProgram:slug}', MentorProgramEventBookingPage::class)
         ->name('pages.mentor.program.book');
     Route::post('calendar-event/store', StoreCalendarEvent::class)
@@ -90,8 +116,9 @@ Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): 
     Route::patch('calendar-event/edit/{calendarEvent:id}', EditCalendarEvent::class)
         ->can('update', 'calendarEvent')
         ->name('pages.calendar.edit');
-    Route::patch('mentor-programs/{mentorProgram:id}/calendar-events/{calendarEvent:id}/confirm', ConfirmCalendarEvent::class)
-        ->can('update', 'calendarEvent')
+    Route::patch('mentor-programs/{mentorProgram:id}/calendar-events/{calendarEvent:id}/confirm',
+        ConfirmCalendarEvent::class)
+        ->can('confirm', 'calendarEvent')
         ->name('calendar.confirm.booking');
     Route::delete('calendar-event/delete/{calendarEvent}', DeleteCalendarEvent::class)
         ->can('delete', 'calendarEvent')
@@ -117,6 +144,51 @@ Route::middleware('auth')
 Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')->group(function (): void {
     Route::get('/', UserSchedulePage::class)->name('user-schedule.index');
     Route::post('/batch', StoreBatchUserSchedule::class)->name('user-schedule.batch');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->group(function (): void {
+    Route::get('/', ExternalCalendarSettingsPage::class)
+        ->name('pages.settings.external-calendar');
+    Route::post('connect/{provider}', ExternalCalendarConnectRedirect::class)
+        ->middleware('throttle:calendar-connect')
+        ->name('external-calendar.connect.redirect');
+    Route::post('connect-direct/{provider}', ExternalCalendarConnectDirect::class)
+        ->middleware('throttle:calendar-connect')
+        ->name('external-calendar.connect.direct');
+    Route::post('select/{provider}', ExternalCalendarSelectCalendar::class)
+        ->middleware('throttle:calendar-connect')
+        ->name('external-calendar.select');
+    Route::delete('disconnect/{provider}', ExternalCalendarDisconnect::class)
+        ->middleware('throttle:calendar-connect')
+        ->name('external-calendar.disconnect');
+    Route::post('retry/{provider}', ExternalCalendarRetrySync::class)
+        ->middleware('throttle:calendar-retry')
+        ->name('external-calendar.retry');
+    Route::post('sync-event/{calendarEvent}/{provider}', ExternalCalendarSyncSingleEvent::class)
+        ->middleware('throttle:calendar-sync')
+        ->name('external-calendar.sync-event');
+    Route::post('rerun/{calendarEvent:id}/{externalCalendarEvent:id}', RerunExternalCalendarEventSync::class)
+        ->middleware('throttle:calendar-retry')
+        ->name('external-calendar.rerun')
+        ->can('sync', 'externalCalendarEvent')
+        ->withoutScopedBindings();
+    Route::post('sync-integration/{calendarEvent:id}/{integration:id}', SyncCalendarEventToIntegration::class)
+        ->middleware('throttle:calendar-sync')
+        ->name('external-calendar.sync-integration')
+        ->can('sync', 'integration')
+        ->withoutScopedBindings();
+    Route::patch('log/{log:id}/acknowledge', AcknowledgeExternalCalendarEventLog::class)
+        ->name('external-calendar.log.acknowledge')
+        ->middleware('can:acknowledge,log');
+});
+
+Route::get('settings/external-calendar/callback/{provider}', ExternalCalendarConnectCallback::class)
+    ->name('external-calendar.connect.callback');
+
+Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function (): void {
+    Route::get('/', ListNotifications::class)->name('notifications.index');
+    Route::post('{id}/read', MarkNotificationAsRead::class)->name('notifications.read');
+    Route::post('read-all', MarkAllNotificationsAsRead::class)->name('notifications.read-all');
 });
 
 require __DIR__.'/auth.php';

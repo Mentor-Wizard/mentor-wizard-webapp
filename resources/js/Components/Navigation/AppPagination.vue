@@ -1,4 +1,5 @@
 <script setup>
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
 import { Link } from '@inertiajs/vue3';
 
 defineProps({
@@ -21,8 +22,10 @@ defineProps({
         preserve-scroll
         preserve-state
         class="inline-flex items-center border-t-2 border-transparent pt-4 pr-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-        :class="{ 'pointer-events-none text-gray-300': !data.prev_page_url }"
-      />
+      >
+        <ChevronLeftIcon class="mr-1 size-5" aria-hidden="true" />
+        Previous
+      </Link>
     </div>
 
     <div class="hidden md:-mt-px md:flex">
@@ -57,8 +60,10 @@ defineProps({
         preserve-scroll
         preserve-state
         class="inline-flex items-center border-t-2 border-transparent pt-4 pl-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-        :class="{ 'pointer-events-none text-gray-300': !data.next_page_url }"
-      />
+      >
+        Next
+        <ChevronRightIcon class="ml-1 size-5" aria-hidden="true" />
+      </Link>
     </div>
   </div>
   <div
@@ -71,9 +76,9 @@ defineProps({
       preserve-state
       class="text-sm text-gray-700 hover:text-gray-900"
     >
-      &laquo; Previous
+      Previous
     </Link>
-    <span v-else class="text-sm text-gray-400">&laquo; Previous</span>
+    <span v-else class="text-sm text-gray-400">Previous</span>
 
     <Link
       v-if="data.next_page_url"
@@ -82,8 +87,8 @@ defineProps({
       preserve-state
       class="text-sm text-gray-700 hover:text-gray-900"
     >
-      Next &raquo;
+      Next
     </Link>
-    <span v-else class="text-sm text-gray-400">Next &raquo;</span>
+    <span v-else class="text-sm text-gray-400">Next</span>
   </div>
 </template>

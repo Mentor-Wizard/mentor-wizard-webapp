@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\CalendarEventRoleEnum;
+use App\Enums\CalendarEventStatusEnum;
 use App\Enums\RoleEnum;
 use App\Enums\UserScheduleRecordType;
 use App\Models\CalendarEvent;
@@ -63,7 +64,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'E1',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $event1StartUtc,
             'end_date_time'     => $event1EndUtc,
             'date'              => $event1StartUtc?->format('Y-m-d'),
@@ -106,7 +107,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'E1',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $event1StartUtc,
             'end_date_time'     => $event1EndUtc,
             'date'              => $event1StartUtc?->format('Y-m-d'),
@@ -149,7 +150,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'E1',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $event1StartUtc,
             'end_date_time'     => $event1EndUtc,
             'date'              => $event1StartUtc?->format('Y-m-d'),
@@ -158,7 +159,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
         ]);
         $event2 = CalendarEvent::query()->create([
             'title'             => 'E2',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $event2StartUtc,
             'end_date_time'     => $event2EndUtc,
             'date'              => $event2StartUtc?->format('Y-m-d'),
@@ -199,7 +200,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'E1',
-            'status'            => 'confirmed',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
             'start_date_time'   => $event1StartUtc,
             'end_date_time'     => $event1EndUtc,
             'date'              => $event1StartUtc?->format('Y-m-d'),

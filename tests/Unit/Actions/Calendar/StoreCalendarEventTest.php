@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\StoreCalendarEvent;
+use App\Actions\Calendar\CalendarEvent\StoreCalendarEvent;
 use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use App\Http\Requests\Calendar\StoreCalendarEventRequest;
+use App\Http\Requests\Calendar\CalendarEvent\StoreCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
+use App\Models\MentorSession;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -56,6 +58,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
                 'toTime'            => '10:00',
                 'description'       => 'Daily standup',
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::BLUE->value,
                 'mentor_program_id' => $this->mentorProgram->id,
             ];
@@ -72,6 +75,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
                 'toTime'            => '10:00',
                 'description'       => 'Team building',
                 'type'              => CalendarEventTypeEnum::GROUP->value,
+                'session_type'      => MentorSessionTypeEnum::VOICE_SESSION->value,
                 'colour'            => CalendarEventColoursEnum::GREEN->value,
                 'mentor_program_id' => $this->mentorProgram->id,
             ];
@@ -98,6 +102,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '10:00',
             'description'       => 'x',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -110,6 +115,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '10:00',
             'description'       => 'x',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -122,6 +128,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '09:00',
             'description'       => 'x',
             'type'              => CalendarEventTypeEnum::GROUP->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -134,6 +141,7 @@ describe('StoreCalendarEventRequest Validation', function (): void {
             'toTime'            => '10:00',
             'description'       => 'x',
             'type'              => 'Invalid',
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'timezone'          => 'Europe/Kyiv',
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -162,6 +170,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             'toTime'            => '10:00',
             'webLink'           => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Sprint planning',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -182,7 +191,7 @@ describe('Store Calendar CalendarEvent', function (): void {
         $event = CalendarEvent::query()->latest('id')->first();
         expect($event)
             ->title->toBe('Planning')
-            ->status->toBe(CalendarEventStatusEnum::CONFIRMED->value)
+            ->status->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->date->toBe($start->format('Y-m-d'));
 
         $pivot = $event->calendarEventUsers()
@@ -225,6 +234,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             'toTime'            => '10:00',
             'webLink'           => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Sprint planning',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -245,14 +255,15 @@ describe('Store Calendar CalendarEvent', function (): void {
         $event = CalendarEvent::query()->latest('id')->first();
         expect($event)
             ->title->toBe('Planning')
-            ->status->toBe(CalendarEventStatusEnum::CONFIRMED->value)
+            ->status->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->date->toBe($start->format('Y-m-d'));
 
         $attachedUsers = $event->calendarEventUsers()
             ->withPivot(['role', 'colour', 'created_at', 'updated_at'])
             ->get();
 
-        // Should have 2 users: the mentor (HOST) and the non-mentor (MENTI)
+        //  Should have 2 users: the mentor (HOST) and the authenticated menti (PARTICIPANT)
+        // + expect($attachedUsers)->toHaveCount(2);
         expect($attachedUsers)->toHaveCount(2);
 
         $host = $attachedUsers->firstWhere('id', $this->user->getKey());
@@ -265,8 +276,18 @@ describe('Store Calendar CalendarEvent', function (): void {
 
         expect($menti)
             ->not->toBeNull()
-            ->and($menti->pivot->role)->toBe(CalendarEventRoleEnum::MENTI->value)
+            ->and($menti->pivot->role)->toBe(CalendarEventRoleEnum::PARTICIPANT->value)
             ->and($menti->pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
+
+        $mentorSession = MentorSession::query()->latest('id')->first();
+        expect($mentorSession)
+            ->not->toBeNull()
+            ->and($mentorSession->mentor_id)->toBe($this->user->getKey())
+            ->and($mentorSession->menti_id)->toBe($nonMentor->getKey())
+            ->and($mentorSession->mentor_program_id)->toBe($this->mentorProgram->getKey());
+
+        $event = CalendarEvent::query()->latest('id')->first();
+        expect($event->mentor_session_id)->toBe($mentorSession->getKey());
     });
 
     it('stores event when mentor books their own program - attaches only mentor as HOST', function (): void {
@@ -274,7 +295,9 @@ describe('Store Calendar CalendarEvent', function (): void {
         $start = Date::tomorrow()->setTime(9, 0, 0);
         $end = Date::tomorrow()->setTime(10, 0, 0);
 
-        // Mentor is already authenticated and owns the mentor program in beforeEach
+        // Log in as the mentor (beforeEach logs in the menti, not the mentor)
+        Auth::login($this->user);
+
         $eventPayload = [
             'title'             => 'Self Booking',
             'status'            => CalendarEventStatusEnum::CONFIRMED->value,
@@ -284,6 +307,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             'toTime'            => '10:00',
             'webLink'           => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Self planning',
             'colour'            => CalendarEventColoursEnum::RED->value,
             'mentor_program_id' => $this->mentorProgram->getKey(),
@@ -313,6 +337,34 @@ describe('Store Calendar CalendarEvent', function (): void {
             ->and($host->pivot->colour)->toBe(CalendarEventColoursEnum::RED->value);
     });
 
+    it('stores event with GROUP type', function (): void {
+        Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, config('app.timezone')));
+        $start = Date::tomorrow()->setTime(9, 0, 0);
+        $end = Date::tomorrow()->setTime(10, 0, 0);
+
+        $eventPayload = [
+            'title'             => 'Group Session',
+            'fromDate'          => $start->format('Y-m-d'),
+            'toDate'            => $end->format('Y-m-d'),
+            'fromTime'          => '09:00',
+            'toTime'            => '10:00',
+            'type'              => CalendarEventTypeEnum::GROUP->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'description'       => 'Group planning',
+            'colour'            => CalendarEventColoursEnum::BLUE->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ];
+
+        $request = Mockery::mock(StoreCalendarEventRequest::class);
+        $request->shouldReceive('validated')->andReturn($eventPayload);
+        $request->shouldReceive('user')->andReturn(Auth::user());
+
+        (new StoreCalendarEvent)->handle($request);
+
+        $event = CalendarEvent::query()->latest('id')->first();
+        expect($event->type)->toBe(CalendarEventTypeEnum::GROUP->value);
+    });
+
     it('throws exception when user profile has no timezone', function (): void {
         Date::setTestNow(Date::create(2025, 5, 1, 12, 0, 0, config('app.timezone')));
         $start = Date::tomorrow()->setTime(9, 0, 0);
@@ -336,6 +388,7 @@ describe('Store Calendar CalendarEvent', function (): void {
             'toTime'            => '10:00',
             'webLink'           => 'https://google.com',
             'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
             'description'       => 'Test description',
             'colour'            => CalendarEventColoursEnum::BLUE->value,
             'mentor_program_id' => $mentorProgram->getKey(),
@@ -355,7 +408,10 @@ function createAndAuthenticateMentorForCalendar(): User
 {
     $user = User::factory()->create();
     $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
-    Auth::login($user);
+
+    $userMenti = User::factory()->create();
+    $userMenti->assignRole(Role::findByName(RoleEnum::MENTI->value));
+    Auth::login($userMenti);
 
     return $user;
 }

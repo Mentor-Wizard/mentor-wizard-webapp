@@ -7,6 +7,7 @@ namespace App\Actions\Pages\Calendar;
 use App\Enums\CalendarEventStatusEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -15,25 +16,34 @@ class PendingCalendarEventsListPage
 {
     use AsController;
 
-    public function handle(?MentorProgram $mentorProgram = null): Response
+    public function handle(Request $request, ?MentorProgram $mentorProgram = null): Response
     {
-        $user = auth()->user();
+        $user = $request->user()->load('calendarEvents');
 
         $query = $user->calendarEvents()
-            ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value);
+            ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value)
+            ->with(['mentorProgram:id,name', 'participants:id,username'])
+            ->orderBy('start_date_time');
 
         if ($mentorProgram instanceof MentorProgram) {
             $query->where('mentor_program_id', $mentorProgram->id);
         }
 
-        $query->with(['mentorProgram:id,name']);
         $events = $query->get();
-        $grouped = $events->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram->name ?? 'Unknown Program'
-        );
+
+        $upcomingCalendarEvents = $events
+            ->filter(fn (CalendarEvent $event): bool => $event->start_date_time >= today())
+            ->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram?->name);
+
+        $pastCalendarEvents = $events
+            ->filter(fn (CalendarEvent $event): bool => $event->start_date_time < today())
+            ->sortByDesc('start_date_time')
+            ->groupBy(fn (CalendarEvent $event): string => $event->mentorProgram?->name);
 
         return Inertia::render('Calendar/ListPendingCalendarEventsPage', [
-            'locale'            => app()->getLocale(),
-            'calendarEvents'    => $grouped,
+            'locale'                 => app()->getLocale(),
+            'upcomingCalendarEvents' => $upcomingCalendarEvents,
+            'pastCalendarEvents'     => $pastCalendarEvents,
         ]);
     }
 }

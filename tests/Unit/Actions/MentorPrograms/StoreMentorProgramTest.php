@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\MentorProgram\StoreMentorProgramRequest;
 use App\Models\Currency;
@@ -35,9 +36,15 @@ describe('StoreMentorProgramRequest Validation', function (): void {
     it('validates with correct data', function (): void {
         $request = new StoreMentorProgramRequest;
         $request->merge([
-            'name'        => 'Test Program Name',
-            'description' => 'Test Description',
-            'cost'        => 99.99,
+            'name'                  => 'Test Program Name',
+            'description'           => 'Test Description',
+            'slug'                  => 'test-program',
+            'cost'                  => 99.99,
+            'session_duration'      => 60,
+            'session_type_options'  => [
+                MentorSessionTypeEnum::CODE_REVIEW->value,
+                MentorSessionTypeEnum::VIDEO_SESSION->value,
+            ],
             'currency_id' => array_key_first($this->currencies),
         ]);
         ($this->prepareRequest)($request);
@@ -161,7 +168,7 @@ describe('Store Mentor Program', function (): void {
         $response = (new StoreMentorProgramPage)->handle($request);
 
         expect($response)->toBeInstanceOf(Response::class)
-            ->and($response->getTargetUrl())->toBe(route('mentor-program.create'));
+            ->and($response->getTargetUrl())->toBe(route('mentor-program.list'));
     });
 
 });
