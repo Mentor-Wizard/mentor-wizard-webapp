@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use Override;
 use App\Enums\CalendarProviderEnum;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ExternalCalendarEventFactory extends Factory
 {
+    #[Override]
     protected $model = ExternalCalendarEvent::class;
 
     /**

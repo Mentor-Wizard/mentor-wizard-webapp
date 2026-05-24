@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\TagEnum;
 use Database\Factories\MentorProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -24,19 +25,18 @@ use Override;
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]
+#[Fillable([
+    'user_id',
+    'title',
+    'description',
+    'rate',
+    'currency_id',
+    'experience_started_at',
+])]
 class MentorProfile extends Model
 {
     /** @use HasFactory<MentorProfileFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'title',
-        'description',
-        'rate',
-        'currency_id',
-        'experience_started_at',
-    ];
 
     /**
      * @return BelongsTo<User, $this>

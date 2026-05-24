@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Visible;
 use Database\Factories\UserProfileFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -21,6 +24,38 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @mixin IdeHelperUserProfile
  */
 #[UseFactory(UserProfileFactory::class)]
+#[Appends([
+    'avatar',
+])]
+#[Fillable([
+    'user_id',
+    'name',
+    'last_name',
+    'linkedin',
+    'telegram',
+    'whatsapp',
+    'phone',
+    'is_mute',
+    'cost_per_hour',
+    'currency_id',
+    'timezone',
+    'minimum_pre_booking_time',
+])]
+#[Visible([
+    'id',
+    'name',
+    'last_name',
+    'linkedin',
+    'telegram',
+    'whatsapp',
+    'phone',
+    'avatar',
+    'is_mute',
+    'cost_per_hour',
+    'currency_id',
+    'timezone',
+    'minimum_pre_booking_time',
+])]
 class UserProfile extends Model implements HasMedia
 {
     /** @use HasFactory<UserProfileFactory> */
@@ -35,41 +70,6 @@ class UserProfile extends Model implements HasMedia
     public const string DEFAULT_AVATAR_URL = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
     public const string TEST_AVATAR_URL = 'https://ui-avatars.com/api/?name=%s&background=random&size=256&format=png';
-
-    protected $fillable = [
-        'user_id',
-        'name',
-        'last_name',
-        'linkedin',
-        'telegram',
-        'whatsapp',
-        'phone',
-        'is_mute',
-        'cost_per_hour',
-        'currency_id',
-        'timezone',
-        'minimum_pre_booking_time',
-    ];
-
-    protected $visible = [
-        'id',
-        'name',
-        'last_name',
-        'linkedin',
-        'telegram',
-        'whatsapp',
-        'phone',
-        'avatar',
-        'is_mute',
-        'cost_per_hour',
-        'currency_id',
-        'timezone',
-        'minimum_pre_booking_time',
-    ];
-
-    protected $appends = [
-        'avatar',
-    ];
 
     /**
      * @return BelongsTo<User, $this>

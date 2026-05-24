@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use Override;
 use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class MentorProfileFactory extends Factory
 {
+    #[Override]
     protected $model = MentorProfile::class;
 
     /**

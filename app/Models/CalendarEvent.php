@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\MentorSessionTypeEnum;
@@ -39,6 +40,19 @@ use Override;
 #[UsePolicy(CalendarEventPolicy::class)]
 #[UseFactory(CalendarEventFactory::class)]
 #[ObservedBy(CalendarEventObserver::class)]
+#[Fillable([
+    'title',
+    'status',
+    'start_date_time',
+    'end_date_time',
+    'date',
+    'type',
+    'session_type',
+    'web_link',
+    'description',
+    'mentor_program_id',
+    'mentor_session_id',
+])]
 class CalendarEvent extends Model
 {
     /** @use HasFactory<CurrencyFactory> */
@@ -47,20 +61,6 @@ class CalendarEvent extends Model
     const MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET = 6;
 
     const ROUNDING_DISCRECY_TIME_IN_MINUTES = 5;
-
-    protected $fillable = [
-        'title',
-        'status',
-        'start_date_time',
-        'end_date_time',
-        'date',
-        'type',
-        'session_type',
-        'web_link',
-        'description',
-        'mentor_program_id',
-        'mentor_session_id',
-    ];
 
     /**
      * @return BelongsToMany<User, CalendarEvent>

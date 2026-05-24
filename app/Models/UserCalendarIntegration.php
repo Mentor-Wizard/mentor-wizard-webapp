@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Casts\EncryptedCalendarCredential;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
@@ -24,27 +25,26 @@ use Override;
  * @mixin IdeHelperUserCalendarIntegration
  */
 #[UseFactory(UserCalendarIntegrationFactory::class)]
+#[Fillable([
+    'user_id',
+    'provider',
+    'client_id',
+    'client_secret',
+    'access_token',
+    'calendar_id',
+    'calendar_name',
+    'refresh_token',
+    'token_expires_at',
+    'needs_reauth',
+    'sync_status',
+    'last_error_message',
+    'last_synced_at',
+    'last_encrypted_at',
+])]
 class UserCalendarIntegration extends Model
 {
     /** @use HasFactory<UserCalendarIntegrationFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'provider',
-        'client_id',
-        'client_secret',
-        'access_token',
-        'calendar_id',
-        'calendar_name',
-        'refresh_token',
-        'token_expires_at',
-        'needs_reauth',
-        'sync_status',
-        'last_error_message',
-        'last_synced_at',
-        'last_encrypted_at',
-    ];
 
     /**
      * @return BelongsTo<User, $this>

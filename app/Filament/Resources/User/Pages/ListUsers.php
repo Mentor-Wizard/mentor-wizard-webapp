@@ -11,6 +11,7 @@ use Override;
 
 class ListUsers extends ListRecords
 {
+    #[Override]
     protected static string $resource = UserResource::class;
 
     /**

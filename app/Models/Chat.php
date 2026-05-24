@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Policies\ChatPolicy;
 use Database\Factories\ChatFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -17,6 +18,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 #[UseFactory(ChatFactory::class)]
 #[UsePolicy(ChatPolicy::class)]
+#[Fillable([
+    'name',
+])]
 /**
  * @mixin IdeHelperChat
  */
@@ -26,10 +30,6 @@ class Chat extends Model implements HasMedia
     use HasFactory;
 
     use InteractsWithMedia;
-
-    protected $fillable = [
-        'name',
-    ];
 
     /**
      * @return BelongsToMany<User, $this>

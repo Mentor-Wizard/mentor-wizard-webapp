@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use Override;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\ExternalCalendarEventLogTypeEnum;
 use App\Models\CalendarEvent;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ExternalCalendarEventLogFactory extends Factory
 {
+    #[Override]
     protected $model = ExternalCalendarEventLog::class;
 
     /**

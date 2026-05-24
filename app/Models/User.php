@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Visible;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Enums\UserScheduleRecordType;
@@ -36,6 +39,27 @@ use Spatie\Permission\Traits\HasRoles;
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
+#[Fillable([
+    'user_id',
+    'username',
+    'email',
+    'password',
+    'preferences',
+])]
+#[Hidden([
+    'password',
+    'remember_token',
+])]
+#[Visible([
+    'id',
+    'username',
+    'slug',
+    'email',
+    'created_at',
+    'updated_at',
+    'profile',
+    'media',
+])]
 class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
@@ -52,29 +76,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public const int NOTIFICATIONS_PER_PAGE = 20;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'user_id',
-        'username',
-        'email',
-        'password',
-        'preferences',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
      * @var string[]
      */
     protected array $guard_name = [
@@ -85,17 +86,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         RoleGuardEnum::MENTOR->value,
         RoleGuardEnum::MENTI->value,
         RoleGuardEnum::COACH->value,
-    ];
-
-    protected $visible = [
-        'id',
-        'username',
-        'slug',
-        'email',
-        'created_at',
-        'updated_at',
-        'profile',
-        'media',
     ];
 
     /**

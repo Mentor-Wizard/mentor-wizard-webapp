@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use Override;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class UserCalendarIntegrationFactory extends Factory
 {
+    #[Override]
     protected $model = UserCalendarIntegration::class;
 
     /**

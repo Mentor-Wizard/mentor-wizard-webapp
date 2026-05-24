@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\ExternalCalendarEventLogTypeEnum;
 use Database\Factories\ExternalCalendarEventLogFactory;
@@ -16,19 +17,18 @@ use Override;
  * @property ExternalCalendarEventLogTypeEnum $type
  * @mixin IdeHelperExternalCalendarEventLog
  */
+#[Fillable([
+    'external_calendar_event_id',
+    'calendar_event_id',
+    'user_id',
+    'provider',
+    'type',
+    'message',
+])]
 class ExternalCalendarEventLog extends Model
 {
     /** @use HasFactory<ExternalCalendarEventLogFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'external_calendar_event_id',
-        'calendar_event_id',
-        'user_id',
-        'provider',
-        'type',
-        'message',
-    ];
 
     /**
      * @return BelongsTo<ExternalCalendarEvent, $this>

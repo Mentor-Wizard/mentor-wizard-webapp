@@ -21,6 +21,7 @@ class MentorProfilePageResource extends JsonResource
 {
     const int MENTOR_PER_PAGE = 4;
 
+    #[Override]
     public static $wrap;
 
     /**

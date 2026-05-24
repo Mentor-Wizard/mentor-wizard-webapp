@@ -10,6 +10,7 @@ use Override;
 
 class SimilarMentorResource extends JsonResource
 {
+    #[Override]
     public static $wrap;
 
     /**

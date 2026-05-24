@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Database\Factories\MentorProgramBlockProgressFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,18 +17,16 @@ use Override;
  * @mixin IdeHelperMentorProgramBlockProgress
  */
 #[UseFactory(MentorProgramBlockProgressFactory::class)]
+#[Fillable([
+    'mentor_program_block_id',
+    'menti_id',
+    'is_completed',
+])]
+#[Table(name: 'mentor_program_block_progresses')]
 class MentorProgramBlockProgress extends Model
 {
     /** @use HasFactory<MentorProgramBlockProgressFactory> */
     use HasFactory;
-
-    protected $table = 'mentor_program_block_progresses';
-
-    protected $fillable = [
-        'mentor_program_block_id',
-        'menti_id',
-        'is_completed',
-    ];
 
     /**
      * @return BelongsTo<MentorProgramBlock, $this>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Policies\ChatMessagesPolicy;
 use Database\Factories\ChatMessageFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -20,19 +21,18 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  */
 #[UseFactory(ChatMessageFactory::class)]
 #[UsePolicy(ChatMessagesPolicy::class)]
+#[Fillable([
+    'chat_id',
+    'user_id',
+    'message',
+    'is_read',
+])]
 class ChatMessage extends Model implements HasMedia
 {
     /** @use HasFactory<ChatMessageFactory> */
     use HasFactory;
 
     use InteractsWithMedia;
-
-    protected $fillable = [
-        'chat_id',
-        'user_id',
-        'message',
-        'is_read',
-    ];
 
     /**
      * @return BelongsTo<Chat, $this>

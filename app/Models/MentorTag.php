@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\TagEnum;
 use Database\Factories\MentorTagFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -16,15 +17,14 @@ use Override;
  * @mixin IdeHelperMentorTag
  */
 #[UseFactory(MentorTagFactory::class)]
+#[Fillable([
+    'tag',
+    'type',
+])]
 class MentorTag extends Model
 {
     /** @use HasFactory<MentorTagFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'tag',
-        'type',
-    ];
 
     /**
      * @return BelongsToMany<MentorProfile, $this>
