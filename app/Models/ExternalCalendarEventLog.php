@@ -14,7 +14,6 @@ use Override;
 
 /**
  * @property ExternalCalendarEventLogTypeEnum $type
- *
  * @mixin IdeHelperExternalCalendarEventLog
  */
 class ExternalCalendarEventLog extends Model

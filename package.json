@@ -49,9 +49,9 @@
     "vue-eslint-parser": "^10.2.0",
     "vue-tel-input": "^9.5.0"
   },
-  "packageManager": "yarn@4.10.3",
+  "packageManager": "yarn@4.15.0",
   "engines": {
-    "yarn": ">= 4.10.3"
+    "yarn": ">= 4.15.0"
   },
   "dependencies": {
     "@tiptap/extension-link": "^3.10.4",

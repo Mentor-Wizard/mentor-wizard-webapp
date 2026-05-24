@@ -44,9 +44,9 @@ Vue.js та Inertia.js. Система забезпечує повноцінне
 
 ## 📋 Вимоги
 
-- **PHP 8.4+**
+- **PHP 8.5+**
 - **Composer**
-- **Node.js 22+** з **Yarn 4.10+**
+- **Node.js 24+** з **Yarn 4.15+**
 - **Docker & Docker Compose**
 - **PostgreSQL 17**
 - **Redis 7.2+**

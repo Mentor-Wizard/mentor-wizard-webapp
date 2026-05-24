@@ -20,9 +20,7 @@ use Override;
  * @property-read Currency|null $currency
  * @property-read EloquentCollection<int, MentorTag> $languages
  * @property-read EloquentCollection<int, MentorTag> $stacks
- *
  * @TODO : Add visible properties after filters and frontend implementation
- *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]
