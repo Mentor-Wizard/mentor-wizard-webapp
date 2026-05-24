@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Observers\MentorProgramObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\MentorProgramFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +20,7 @@ use Override;
 /**
  * @property CarbonInterface|null $start_time
  * @property CarbonInterface|null $end_time
+ *
  * @mixin IdeHelperMentorProgram
  */
 #[ObservedBy(MentorProgramObserver::class)]

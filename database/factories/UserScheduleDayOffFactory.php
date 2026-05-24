@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use Override;
 use App\Enums\UserScheduleRecordType;
 use App\Models\User;
 use App\Models\UserSchedule;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
+use Override;
 
 /**
  * @extends Factory<UserSchedule>

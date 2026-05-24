@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use Override;
 use App\Models\MentorSession;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<MentorSession>

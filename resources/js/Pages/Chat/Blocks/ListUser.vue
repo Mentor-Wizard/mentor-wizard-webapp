@@ -99,10 +99,12 @@ const navigation = ref([{ name: 'All messages' }, { name: 'Unread' }]);
         </h4>
         <span class="text-[0.75rem] text-gray-500">{{ user.last }}</span>
       </div>
+      <!-- eslint-disable vue/no-v-html -- Tiptap rich-text preview of last message; same source/trust assumption as ChatList.vue. -->
       <p
         class="mt-1 line-clamp-2 text-[0.75rem] text-gray-800"
         v-html="user.message"
       ></p>
+      <!-- eslint-enable vue/no-v-html -->
     </div>
   </div>
 </template>

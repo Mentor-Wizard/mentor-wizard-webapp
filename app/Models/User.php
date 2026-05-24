@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Attributes\Visible;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Enums\UserScheduleRecordType;
@@ -14,8 +11,11 @@ use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Attributes\Visible;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -35,6 +35,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read float $rating
  * @property-read Pivot $pivot
  * @property string $username
+ *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]

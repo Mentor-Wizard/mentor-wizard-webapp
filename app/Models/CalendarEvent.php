@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\MentorSessionTypeEnum;
@@ -12,6 +11,7 @@ use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
 use Database\Factories\CalendarEventFactory;
 use Database\Factories\CurrencyFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
@@ -35,6 +35,7 @@ use Override;
  * @property string|null $description
  * @property int|null $mentor_program_id
  * @property int|null $mentor_session_id
+ *
  * @mixin IdeHelperCalendarEvent
  */
 #[UsePolicy(CalendarEventPolicy::class)]

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use Override;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<UserCalendarIntegration>

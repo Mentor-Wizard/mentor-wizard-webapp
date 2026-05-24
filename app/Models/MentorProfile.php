@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\TagEnum;
 use Database\Factories\MentorProfileFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -21,7 +21,9 @@ use Override;
  * @property-read Currency|null $currency
  * @property-read EloquentCollection<int, MentorTag> $languages
  * @property-read EloquentCollection<int, MentorTag> $stacks
+ *
  * @TODO : Add visible properties after filters and frontend implementation
+ *
  * @mixin IdeHelperMentorProfile
  */
 #[UseFactory(MentorProfileFactory::class)]

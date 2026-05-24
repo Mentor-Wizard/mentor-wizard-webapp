@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\ExternalCalendarEventSyncStatusEnum;
 use Database\Factories\ExternalCalendarEventFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +17,7 @@ use Override;
 /**
  * @property CalendarProviderEnum $provider
  * @property ExternalCalendarEventSyncStatusEnum|null $sync_status
+ *
  * @mixin IdeHelperExternalCalendarEvent
  */
 #[Fillable([

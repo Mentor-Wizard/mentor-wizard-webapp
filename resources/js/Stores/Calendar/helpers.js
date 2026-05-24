@@ -183,12 +183,12 @@ export function isFormValid(form) {
   return computed(() =>
     Boolean(
       form.title?.trim()
-        && form.fromDate
-        && form.toDate
-        && form.fromTime
-        && form.colour
-        && form.toTime
-        && form.session_type,
+      && form.fromDate
+      && form.toDate
+      && form.fromTime
+      && form.colour
+      && form.toTime
+      && form.session_type,
     ),
   );
 }

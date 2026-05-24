@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Casts\EncryptedCalendarCredential;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use Carbon\Carbon;
 use Database\Factories\UserCalendarIntegrationFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +22,7 @@ use Override;
  * @property Carbon|null $token_expires_at
  * @property Carbon|null $last_synced_at
  * @property Carbon|null $last_encrypted_at
+ *
  * @mixin IdeHelperUserCalendarIntegration
  */
 #[UseFactory(UserCalendarIntegrationFactory::class)]
