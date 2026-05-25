@@ -8,15 +8,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
 
 RUN corepack enable && corepack prepare yarn@4.15.0 --activate
 
-RUN install-php-extensions \
-    pdo_pgsql \
-    gd \
-    intl \
-    zip \
-    exif \
-    sockets \
-    pcntl \
-    redis
+RUN install-php-extensions gd intl exif sockets
 
 USER www-data
 

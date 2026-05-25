@@ -1,5 +1,25 @@
 {
   "agents": ["claude_code"],
-  "packages": ["filament/filament"],
-  "skills": ["pest-testing"]
+  "cloud": false,
+  "guidelines": true,
+  "packages": [
+    "filament/filament",
+    "spatie/laravel-medialibrary",
+    "lorisleiva/laravel-actions",
+    "spatie/laravel-permission",
+    "spatie/laravel-query-builder"
+  ],
+  "skills": [
+    "laravel-best-practices",
+    "pulse-development",
+    "socialite-development",
+    "pest-testing",
+    "inertia-vue-development",
+    "echo-development",
+    "tailwindcss-development",
+    "laravel-actions",
+    "medialibrary-development",
+    "laravel-permission-development",
+    "laravel-query-builder"
+  ]
 }
