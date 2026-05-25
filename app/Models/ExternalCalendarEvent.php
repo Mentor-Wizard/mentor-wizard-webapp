@@ -17,7 +17,6 @@ use Override;
 /**
  * @property CalendarProviderEnum $provider
  * @property ExternalCalendarEventSyncStatusEnum|null $sync_status
- *
  * @mixin IdeHelperExternalCalendarEvent
  */
 #[Fillable([

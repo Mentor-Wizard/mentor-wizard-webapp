@@ -15,7 +15,6 @@ use Override;
 
 /**
  * @property ExternalCalendarEventLogTypeEnum $type
- *
  * @mixin IdeHelperExternalCalendarEventLog
  */
 #[Fillable([

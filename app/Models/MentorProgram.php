@@ -20,7 +20,6 @@ use Override;
 /**
  * @property CarbonInterface|null $start_time
  * @property CarbonInterface|null $end_time
- *
  * @mixin IdeHelperMentorProgram
  */
 #[ObservedBy(MentorProgramObserver::class)]
