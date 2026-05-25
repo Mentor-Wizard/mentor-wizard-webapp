@@ -74,9 +74,8 @@ describe('ConfirmCalendarEvent (Feature)', function (): void {
                     '_token' => csrf_token(),
                 ]));
 
-        expect($response->status())->toBe(403);
-
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
+        expect($response->status())->toBe(403)
+            ->and($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('unconfirmed user cannot confirm calendar events', function (): void {

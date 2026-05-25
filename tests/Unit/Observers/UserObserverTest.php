@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 test('success create user test', function (): void {
     Role::create(['name' => RoleEnum::USER]);

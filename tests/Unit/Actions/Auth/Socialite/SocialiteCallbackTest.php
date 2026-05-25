@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertDatabaseHas;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 mutates(SocialiteCallback::class);
 

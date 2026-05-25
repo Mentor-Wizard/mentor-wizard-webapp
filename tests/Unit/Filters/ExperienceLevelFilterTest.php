@@ -25,13 +25,13 @@ describe('ExperienceLevelFilter', function (): void {
     it('has correct __invoke method signature', function (): void {
         $reflection = new ReflectionMethod($this->filter, '__invoke');
 
-        expect($reflection->getNumberOfParameters())->toBe(3);
-        expect($reflection->isPublic())->toBeTrue();
+        expect($reflection->getNumberOfParameters())->toBe(3)
+            ->and($reflection->isPublic())->toBeTrue();
 
         $params = $reflection->getParameters();
-        expect($params[0]->getName())->toBe('query');
-        expect($params[1]->getName())->toBe('value');
-        expect($params[2]->getName())->toBe('property');
+        expect($params[0]->getName())->toBe('query')
+            ->and($params[1]->getName())->toBe('value')
+            ->and($params[2]->getName())->toBe('property');
     });
 
     it('can be instantiated without dependencies', function (): void {
@@ -110,7 +110,7 @@ describe('ExperienceLevelFilter', function (): void {
             $this->filter->__invoke($query, 'entry', 'experience');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($tooNewMentor->id);
         });
 
@@ -123,7 +123,7 @@ describe('ExperienceLevelFilter', function (): void {
             $this->filter->__invoke($query, 'entry', 'experience');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($midMentor->id);
         });
 
@@ -210,7 +210,7 @@ describe('ExperienceLevelFilter', function (): void {
             $this->filter->__invoke($query, 'mid', 'experience');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($entryMentor->id);
         });
 
@@ -223,7 +223,7 @@ describe('ExperienceLevelFilter', function (): void {
             $this->filter->__invoke($query, 'mid', 'experience');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($seniorMentor->id);
         });
     });
@@ -292,7 +292,7 @@ describe('ExperienceLevelFilter', function (): void {
             $this->filter->__invoke($query, 'senior', 'experience');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($midMentor->id);
         });
 
@@ -305,7 +305,7 @@ describe('ExperienceLevelFilter', function (): void {
             $this->filter->__invoke($query, 'senior', 'experience');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($expertMentor->id);
         });
     });
@@ -374,7 +374,7 @@ describe('ExperienceLevelFilter', function (): void {
             $this->filter->__invoke($query, 'expert', 'experience');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($seniorMentor->id);
         });
 

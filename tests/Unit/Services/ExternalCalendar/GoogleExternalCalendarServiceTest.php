@@ -185,7 +185,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
             $result = $this->service->fetchCalendars($integration);
 
             expect($result['success'])->toBeFalse()
-                ->and($result['calendars'])->toBe([])
+                ->and($result['calendars'])->toBeEmpty()
                 ->and($result['error'])->toBe('Invalid credentials');
         });
 

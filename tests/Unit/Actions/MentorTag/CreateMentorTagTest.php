@@ -62,7 +62,7 @@ describe('CreateMentorTag', function (): void {
         $action = new CreateMentorTag;
         $result = $action->handle('   ', TagEnum::STACK);
 
-        expect($result->tag)->toBe('')
+        expect($result->tag)->toBeEmpty()
             ->and($result->type)->toBe(TagEnum::STACK);
     });
 

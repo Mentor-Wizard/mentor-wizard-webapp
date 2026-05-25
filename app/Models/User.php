@@ -35,6 +35,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read float $rating
  * @property-read Pivot $pivot
  * @property string $username
+ *
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]

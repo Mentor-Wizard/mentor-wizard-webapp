@@ -16,8 +16,8 @@ describe('MentorSessionTypeEnum', function (): void {
 
         expect($names)->toEqual($caseNames)
             ->and($values)->toEqual($caseValues)
-            ->and(array_unique($names))->toHaveCount(count($names))
-            ->and(array_unique($values))->toHaveCount(count($values))
+            ->and(array_unique($names))->toHaveSameSize($names)
+            ->and(array_unique($values))->toHaveSameSize($values)
             ->and($names)->each->not->toBeEmpty()
             ->and($values)->each->not->toBeEmpty();
     });

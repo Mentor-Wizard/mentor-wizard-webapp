@@ -72,8 +72,8 @@ describe('GetWeeklyCalendarEventsService Service', function (): void {
 
         $result = $service->getWeeklyCalendarEvents();
 
-        expect($result)->not->toBeEmpty();
-        expect(count($result))->toBeGreaterThan(0);
+        expect($result)->not->toBeEmpty()
+            ->and(count($result))->toBeGreaterThan(0);
 
         $flatEvents = collect($result)->flatten(1);
         expect($flatEvents)->toHaveCount(9);

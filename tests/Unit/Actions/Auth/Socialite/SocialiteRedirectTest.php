@@ -20,8 +20,8 @@ it('redirects to socialite driver if valid driver is provided', function ($drive
 
     $response = (new SocialiteRedirect)->handle($driver->value);
 
-    expect($response)->toBeInstanceOf(RedirectResponse::class);
-    expect($response->getTargetUrl())->toBe('/auth/'.($driver->value).'/redirect');
+    expect($response)->toBeInstanceOf(RedirectResponse::class)
+        ->and($response->getTargetUrl())->toBe('/auth/'.($driver->value).'/redirect');
 })->with(SocialiteDriverEnum::cases());
 
 it('logs an error and aborts if an invalid driver is provided', function (): void {

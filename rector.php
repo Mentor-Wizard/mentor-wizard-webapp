@@ -7,6 +7,8 @@ use Rector\Config\RectorConfig;
 use Rector\ValueObject\PhpVersion;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
+use RectorPest\Set\PestLevelSetList;
+use RectorPest\Set\PestSetList;
 
 if (! class_exists(RectorConfig::class)) {
     return;
@@ -51,6 +53,11 @@ return RectorConfig::configure()
         LaravelSetList::LARAVEL_LEGACY_FACTORIES_TO_CLASSES,
         // LaravelSetList::LARAVEL_STATIC_TO_INJECTION,
         LaravelSetList::LARAVEL_TESTING,
+        PestLevelSetList::UP_TO_PEST_40,
+        PestSetList::PEST_CODE_QUALITY,
+        PestSetList::PEST_CHAIN,
+        PestSetList::PEST_LARAVEL,
+        PestSetList::PEST_BROWSER,
     ])
     ->withParallel()
     ->withCache(

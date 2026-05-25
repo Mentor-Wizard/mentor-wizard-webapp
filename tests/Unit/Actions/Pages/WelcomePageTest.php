@@ -98,8 +98,8 @@ describe('WelcomePage Action', function (): void {
         $resultData = $result->toResponse(request())->getOriginalContent();
         $mentors = Arr::get($resultData->getData(), 'page.props.mentors.data');
 
-        expect($mentors)->toBeArray();
-        expect($mentors[0]['profile'])->toHaveKey('avatar');
+        expect($mentors)->toBeArray()
+            ->and($mentors[0]['profile'])->toHaveKey('avatar');
         // Avatar can be null since we're not creating actual media (performance optimization)
         // The important thing is that the profile relationship is loaded correctly
 

@@ -35,10 +35,9 @@ describe('SetMainMentorProgram', function (): void {
 
         expect($response)
             ->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getSession()->get('success'))->toBe('Main consultation updated successfully.');
-
-        expect($main->fresh()->is_main)->toBeFalse();
-        expect($other->fresh()->is_main)->toBeTrue();
+            ->and($response->getSession()->get('success'))->toBe('Main consultation updated successfully.')
+            ->and($main->fresh()->is_main)->toBeFalse()
+            ->and($other->fresh()->is_main)->toBeTrue();
     });
 
     it('redirects with error when a database exception occurs', function (): void {

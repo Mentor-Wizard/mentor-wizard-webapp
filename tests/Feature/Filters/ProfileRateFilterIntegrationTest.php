@@ -24,8 +24,8 @@ describe('ProfileRateFilter Integration', function (): void {
         $this->filter->__invoke($query, ['min' => '60', 'max' => '40'], 'rate');
         $results = $query->get();
 
-        expect($results)->toHaveCount(1);
-        expect((float) $results->first()->rate)->toBe(50.0);
+        expect($results)->toHaveCount(1)
+            ->and((float) $results->first()->rate)->toBe(50.0);
     });
 
     it('filters with equal min/max values', function (): void {
@@ -33,8 +33,8 @@ describe('ProfileRateFilter Integration', function (): void {
         $this->filter->__invoke($query, ['min' => '50', 'max' => '50'], 'rate');
         $results = $query->get();
 
-        expect($results)->toHaveCount(1);
-        expect((float) $results->first()->rate)->toBe(50.0);
+        expect($results)->toHaveCount(1)
+            ->and((float) $results->first()->rate)->toBe(50.0);
     });
 
     it('filters with range values correctly', function (): void {
@@ -72,10 +72,9 @@ describe('ProfileRateFilter Integration', function (): void {
         $sql = $query->toSql();
         $bindings = $query->getBindings();
 
-        expect($sql)->toContain('between ? and ?');
-        expect($bindings)->toBe([50.0, 50.0]);
-
-        expect($query->get())->toHaveCount(1);
-        expect((float) $query->get()->first()->rate)->toBe(50.0);
+        expect($sql)->toContain('between ? and ?')
+            ->and($bindings)->toBe([50.0, 50.0])
+            ->and($query->get())->toHaveCount(1)
+            ->and((float) $query->get()->first()->rate)->toBe(50.0);
     });
 });

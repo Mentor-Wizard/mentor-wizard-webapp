@@ -79,8 +79,8 @@ describe('AvailableSlotOptionsForMentorProgram (Unit)', function (): void {
 
                 // All slots should be on Monday (1) and between 9-17
                 expect($dayOfWeek)->toBe(1);
-                expect($hour)->toBeGreaterThanOrEqual(9);
-                expect($hour)->toBeLessThan(17);
+                expect($hour)->toBeGreaterThanOrEqual(9)
+                    ->toBeLessThan(17);
             }
         }
     });

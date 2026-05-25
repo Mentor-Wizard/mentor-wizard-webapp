@@ -40,8 +40,8 @@ describe('EditCalendarEventRequest Validation (web link only)', function (): voi
         $request->merge($validData);
         ($this->prepareRequest)($request);
 
-        expect($request->authorize())->toBeTrue();
-        expect($request->rules())->toBeArray();
+        expect($request->authorize())->toBeTrue()
+            ->and($request->rules())->toBeArray();
         try {
             $request->validateResolved();
         } catch (ValidationException $validationException) {

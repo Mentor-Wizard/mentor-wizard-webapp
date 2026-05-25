@@ -9,7 +9,7 @@ use App\Services\UserSchedule\CheckUserScheduleOverlap;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
@@ -101,6 +101,6 @@ describe('CheckUserScheduleOverlap', function (): void {
 
         $errors = new CheckUserScheduleOverlap($schedules, [], $user->getKey())->verifyOverlappingErrors();
 
-        expect($errors)->toBeArray()->toHaveCount(0);
+        expect($errors)->toBeArray()->toBeEmpty();
     });
 });

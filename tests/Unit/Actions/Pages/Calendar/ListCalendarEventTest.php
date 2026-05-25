@@ -1179,7 +1179,7 @@ describe('List Calendar CalendarEvent Page', function (): void {
         $response = $action->handle($request);
 
         $props = inertiaProps($response);
-        expect($props['calendarEvents']['calendarEvents'])->toBe([]);
+        expect($props['calendarEvents']['calendarEvents'])->toBeEmpty();
     });
 
     it('defaults to Month view when mode is not provided', function (): void {

@@ -148,6 +148,6 @@ describe('VerifyEmailRequest Validation', function (): void {
     it('returns empty rules array', function (): void {
         $request = new VerifyEmailRequest;
 
-        expect($request->rules())->toBe([]);
+        expect($request->rules())->toBeEmpty();
     });
 });

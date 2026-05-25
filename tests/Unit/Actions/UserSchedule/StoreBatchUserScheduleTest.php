@@ -59,9 +59,8 @@ describe('StoreBatchUserSchedule', function (): void {
         $response = $action->handle($request);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getTargetUrl())->toBe(route('user-schedule.index'));
-
-        expect(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(2);
+            ->and($response->getTargetUrl())->toBe(route('user-schedule.index'))
+            ->and(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(2);
     });
 
     it('prevents deleting schedules of other users', function (): void {
@@ -157,9 +156,8 @@ describe('StoreBatchUserSchedule', function (): void {
         $action = new StoreBatchUserSchedule;
         $response = $action->handle($request);
 
-        expect($response)->toBeInstanceOf(RedirectResponse::class);
-
-        expect(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(0);
+        expect($response)->toBeInstanceOf(RedirectResponse::class)
+            ->and(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(0);
     });
 
     it('check authorization, when send request to delete schedules from other user', function (): void {
@@ -184,10 +182,9 @@ describe('StoreBatchUserSchedule', function (): void {
         $action = new StoreBatchUserSchedule;
         $response = $action->handle($request);
 
-        expect($response)->toBeInstanceOf(RedirectResponse::class);
-
-        expect(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(1);
-        expect(UserSchedule::query()->where('user_id', $anotherMentor->id)->count())->toBe(1);
+        expect($response)->toBeInstanceOf(RedirectResponse::class)
+            ->and(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(1)
+            ->and(UserSchedule::query()->where('user_id', $anotherMentor->id)->count())->toBe(1);
     });
 
     it('handles mixed create, update, and delete operations', function (): void {
@@ -233,10 +230,9 @@ describe('StoreBatchUserSchedule', function (): void {
         $action = new StoreBatchUserSchedule;
         $response = $action->handle($request);
 
-        expect($response)->toBeInstanceOf(RedirectResponse::class);
-
-        expect(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(2);
-        expect(UserSchedule::query()->find($scheduleToDelete->id))->toBeNull();
+        expect($response)->toBeInstanceOf(RedirectResponse::class)
+            ->and(UserSchedule::query()->where('user_id', $this->user->id)->count())->toBe(2)
+            ->and(UserSchedule::query()->find($scheduleToDelete->id))->toBeNull();
 
         $existingSchedule->refresh();
         expect($existingSchedule->start_time)->toBe('10:00:00');
@@ -499,9 +495,8 @@ describe('StoreBatchUserSchedule', function (): void {
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
             ->and($response->getTargetUrl())->toBe(route('user-schedule.index'))
-            ->and($response->getSession()->get('error'))->toBe('Failed to save schedules. Please try again.');
-
-        expect(UserSchedule::query()->count())->toBe(0);
+            ->and($response->getSession()->get('error'))->toBe('Failed to save schedules. Please try again.')
+            ->and(UserSchedule::query()->count())->toBe(0);
     });
 
     it('commits transaction and persists data after successful operations', function (): void {
@@ -613,9 +608,9 @@ describe('StoreBatchUserSchedule', function (): void {
 
         $response = new StoreBatchUserSchedule()->handle($request);
 
-        expect($response->isRedirect())->toBeTrue();
-        expect(UserSchedule::query()->whereKey($otherUsersSchedule->id)->exists())->toBeTrue();
-        expect(DB::transactionLevel())->toBe(1);
+        expect($response->isRedirect())->toBeTrue()
+            ->and(UserSchedule::query()->whereKey($otherUsersSchedule->id)->exists())->toBeTrue()
+            ->and(DB::transactionLevel())->toBe(1);
     });
 
 });

@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 test('denies access to Pulse for unauthorized users', function (): void {
     Role::create(['name' => RoleEnum::USER]);

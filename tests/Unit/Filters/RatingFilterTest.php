@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Spatie\QueryBuilder\Filters\Filter;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 covers(RatingFilter::class);
 
 describe('RatingFilter', function (): void {
@@ -157,7 +157,7 @@ describe('RatingFilter', function (): void {
             $this->filter->__invoke($query, 4, 'rating');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($profile->id);
         });
 
@@ -203,7 +203,7 @@ describe('RatingFilter', function (): void {
             $this->filter->__invoke($query, 4, 'rating');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($profile->id);
         });
 
@@ -231,7 +231,7 @@ describe('RatingFilter', function (): void {
             $this->filter->__invoke($query, 4, 'rating');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($profile->id);
         });
     });
@@ -318,7 +318,7 @@ describe('RatingFilter', function (): void {
             $this->filter->__invoke($query, 4, 'rating');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0)
+            expect($results)->toBeEmpty()
                 ->and($results->pluck('id')->toArray())->not->toContain($profile->id);
         });
 
@@ -436,7 +436,7 @@ describe('RatingFilter', function (): void {
             $this->filter->__invoke($query, null, 'rating');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0);
+            expect($results)->toBeEmpty();
         });
 
         it('defaults non-numeric string to 1.0 requiring mentors have reviews', function (): void {
@@ -570,7 +570,7 @@ describe('RatingFilter', function (): void {
             $this->filter->__invoke($query, 5, 'rating');
             $results = $query->get();
 
-            expect($results)->toHaveCount(0);
+            expect($results)->toBeEmpty();
         });
 
         it('includes all mentors when all meet threshold', function (): void {

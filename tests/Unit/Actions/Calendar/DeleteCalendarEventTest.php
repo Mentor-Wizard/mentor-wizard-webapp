@@ -61,12 +61,10 @@ describe('Delete Calendar CalendarEvent Page', function (): void {
         $response = $action->handle($this->event);
 
         expect($response)->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
-        expect(session('error'))->toBe('Confirmed event was cancelled.');
-
-        expect(CalendarEvent::query()->find($this->event->getKey()))->not->toBeNull();
-        expect(CalendarEvent::query()->find($this->event->getKey())?->status)
-            ->toBe(CalendarEventStatusEnum::CANCELLED);
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'))
+            ->and(session('error'))->toBe('Confirmed event was cancelled.')
+            ->and(CalendarEvent::query()->find($this->event->getKey()))->not->toBeNull()
+            ->and(CalendarEvent::query()->find($this->event->getKey())?->status)->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('deletes event when status is pending or cancelled', function (): void {
