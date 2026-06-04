@@ -559,7 +559,7 @@ describe('BookingCalendarEventsService', function (): void {
             // The calendar view includes days from adjacent months (padding)
             // Find a January day (previous month) if visible
             $prevMonthEntry = collect($result['calendarSlots'])
-                ->first(fn (array $entry): bool => str_starts_with($entry['date'], '2026-01'));
+                ->first(fn (array $entry): bool => str_starts_with((string) $entry['date'], '2026-01'));
 
             if ($prevMonthEntry) {
                 // Days from previous month should have isCurrentMonth = false
@@ -568,7 +568,7 @@ describe('BookingCalendarEventsService', function (): void {
 
             // Find a March day (next month) if visible
             $nextMonthEntry = collect($result['calendarSlots'])
-                ->first(fn (array $entry): bool => str_starts_with($entry['date'], '2026-03'));
+                ->first(fn (array $entry): bool => str_starts_with((string) $entry['date'], '2026-03'));
 
             if ($nextMonthEntry) {
                 // Days from next month should have isCurrentMonth = false

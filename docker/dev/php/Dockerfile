@@ -6,7 +6,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-RUN corepack enable && corepack prepare yarn@4.15.0 --activate
+RUN corepack enable && corepack prepare yarn@4.16.0 --activate
 
 RUN install-php-extensions gd intl exif sockets
 

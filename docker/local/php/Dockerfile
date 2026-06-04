@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1.10.1-php8.5-alpine
+FROM dunglas/frankenphp:1.12.4-php8.5-alpine
 
 # Copy composer from official image
 COPY --from=composer:2.9.2 /usr/bin/composer /usr/bin/
@@ -76,7 +76,7 @@ RUN echo "pcov.enabled=1" >> /usr/local/etc/php/conf.d/docker-php-ext-pcov.ini &
 
 # Install Node.js tools
 RUN npm install -g corepack
-RUN corepack enable && corepack prepare yarn@4.15.0 --activate
+RUN corepack enable && corepack prepare yarn@4.16.0 --activate
 
 # Copy supervisor configuration
 COPY docker/local/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
