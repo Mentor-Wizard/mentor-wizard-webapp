@@ -11,11 +11,8 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Services\Calendar\DailyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
 use Spatie\Permission\Models\Role;
-
-pest()->use(RefreshDatabase::class);
 
 mutates(DailyCalendarEventsService::class);
 

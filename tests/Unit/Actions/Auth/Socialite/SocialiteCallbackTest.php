@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Auth\Socialite\SocialiteCallback;
 use App\Enums\RoleEnum;
 use App\Enums\SocialiteDriverEnum;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -14,8 +13,6 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertDatabaseHas;
-
-pest()->use(RefreshDatabase::class);
 
 mutates(SocialiteCallback::class);
 

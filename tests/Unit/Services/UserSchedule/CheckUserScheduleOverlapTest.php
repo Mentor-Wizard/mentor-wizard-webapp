@@ -7,9 +7,6 @@ use App\Models\User;
 use App\Models\UserSchedule;
 use App\Services\UserSchedule\CheckUserScheduleOverlap;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);

@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 use App\Enums\RoleEnum;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
-
-pest()->use(RefreshDatabase::class);
 
 test('denies access to Pulse for unauthorized users', function (): void {
     Role::create(['name' => RoleEnum::USER]);

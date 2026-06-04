@@ -7,11 +7,9 @@ use App\Filters\RatingFilter;
 use App\Models\MentorProfile;
 use App\Models\MentorReview;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Spatie\QueryBuilder\Filters\Filter;
 
-pest()->use(RefreshDatabase::class);
 covers(RatingFilter::class);
 
 describe('RatingFilter', function (): void {
