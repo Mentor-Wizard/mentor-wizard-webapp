@@ -126,7 +126,7 @@ describe('CalDavReportParser', function (): void {
 
             $result = $this->parser->getParsedReport($xml);
 
-            expect($result[0]->title)->toBe('')
+            expect($result[0]->title)->toBeEmpty()
                 ->and($result[0]->description)->toBeNull();
         });
 
@@ -182,13 +182,13 @@ XML;
 
             $result = $this->parser->getParsedReport($xml);
 
-            expect($result)->toBe([]);
+            expect($result)->toBeEmpty();
         });
 
         it('returns empty array for invalid xml', function (): void {
             $result = $this->parser->getParsedReport('not-xml<<<');
 
-            expect($result)->toBe([]);
+            expect($result)->toBeEmpty();
         });
 
         it('keeps absolute hrefs unchanged', function (): void {

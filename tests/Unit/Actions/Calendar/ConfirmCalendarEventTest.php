@@ -101,10 +101,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
-            ->and(session('success'))->toBe('Event was successfully confirmed.');
-
-        expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::CONFIRMED);
+            ->and(session('success'))->toBe('Event was successfully confirmed.')
+            ->and($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
 
         $pivot = $this->event->fresh()->calendarEventUsers()->where('user_id', $this->host->getKey())->first()?->pivot;
         expect($pivot?->confirmed_at)->not->toBeNull();
@@ -115,10 +113,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $response = new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'));
-
-        expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
+            ->and($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
 
         $pivot = $this->event->fresh()->calendarEventUsers()->where('user_id', $this->mentee->getKey())->first()?->pivot;
         expect($pivot?->confirmed_at)->not->toBeNull();
@@ -136,10 +132,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
-            ->and(session('success'))->toBe('Event is confirmed on your side, but waiting for confirmation from CO-HOST');
-
-        expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
+            ->and(session('success'))->toBe('Event is confirmed on your side, but waiting for confirmation from CO-HOST')
+            ->and($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('rejects confirmation when exactly ONE overlapping confirmed event exists', function (): void {
@@ -161,10 +155,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
-            ->and(session('error'))->toBe('There is another confirmed event in this time slot.');
-
-        expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
+            ->and(session('error'))->toBe('There is another confirmed event in this time slot.')
+            ->and($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('excludes current event from overlap check (whereNotIn with event ID)', function (): void {
@@ -173,10 +165,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
-            ->and(session('success'))->toBe('Event was successfully confirmed.');
-
-        expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::CONFIRMED);
+            ->and(session('success'))->toBe('Event was successfully confirmed.')
+            ->and($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
     });
 
     it('rejects confirmation with error when start time is in the past', function (): void {
@@ -189,10 +179,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         expect($response->getStatusCode())->toBe(Response::HTTP_FOUND)
             ->and($response->getTargetUrl())->toBe(route('pages.calendar.pending'))
-            ->and(session('error'))->toBe('Start time for this event is already past');
-
-        expect($this->event->fresh()->status)
-            ->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
+            ->and(session('error'))->toBe('Start time for this event is already past')
+            ->and($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('cancels all overlapping pending events after confirming', function (): void {
@@ -225,9 +213,9 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
         new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
-        expect($overlapping1->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
-        expect($overlapping2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
+            ->and($overlapping1->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED)
+            ->and($overlapping2->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('does not cancel pending events in non-overlapping time slots', function (): void {
@@ -247,8 +235,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
         new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
-        expect($nonOverlapping->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
+            ->and($nonOverlapping->fresh()->status)->toBe(CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION);
     });
 
     it('cancels overlapping pending events across different mentor programs of the same mentor', function (): void {
@@ -272,8 +260,8 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
         $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
         new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
 
-        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED);
-        expect($overlappingOtherProgram->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
+            ->and($overlappingOtherProgram->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('does not cancel already cancelled events in overlapping slots', function (): void {

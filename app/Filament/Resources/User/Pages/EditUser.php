@@ -11,6 +11,7 @@ use Override;
 
 class EditUser extends EditRecord
 {
+    #[Override]
     protected static string $resource = UserResource::class;
 
     /**

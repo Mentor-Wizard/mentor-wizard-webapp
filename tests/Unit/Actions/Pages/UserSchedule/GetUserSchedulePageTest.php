@@ -100,12 +100,7 @@ describe('UserSchedulePage', function (): void {
 
         $props = inertiaProps($response);
 
-        expect($props['scheduleTypes'])->toBeArray()->not()->toBeEmpty();
-
-        // Verify structure of schedule types
-        foreach ($props['scheduleTypes'] as $type) {
-            expect($type)->toHaveKeys(['value', 'label']);
-        }
+        expect($props['scheduleTypes'])->toBeArray()->not()->toBeEmpty()->each->toHaveKeys(['value', 'label']);
     });
 
     it('returns new timezone when changed timezone for profile', function (): void {

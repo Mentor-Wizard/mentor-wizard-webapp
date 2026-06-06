@@ -23,8 +23,8 @@ describe('SplitSlotsPerSessionDuration', function (): void {
         // Expect 2 resulting slots: 09:00-09:30 and 09:30-10:00; 10:00-10:30 not created due to excludeEndDate
         // Actually the period points will be 09:30 and 10:00 (excluding 09:00 start and 10:30 end)
         expect($split)->toHaveKey('2026-01-10');
-        expect($split['2026-01-10'])->toHaveCount(2);
-        expect($split['2026-01-10'][0]['start']->format('H:i'))->toBe('09:00')
+        expect($split['2026-01-10'])->toHaveCount(2)
+            ->and($split['2026-01-10'][0]['start']->format('H:i'))->toBe('09:00')
             ->and($split['2026-01-10'][0]['end']->format('H:i'))->toBe('09:30')
             ->and($split['2026-01-10'][1]['start']->format('H:i'))->toBe('09:30')
             ->and($split['2026-01-10'][1]['end']->format('H:i'))->toBe('10:00');
@@ -41,15 +41,13 @@ describe('SplitSlotsPerSessionDuration', function (): void {
 
         $result = $service->getSplitSlots();
 
-        expect($result)->toHaveCount(1);
-        expect($result)->not->toBeEmpty();
+        expect($result)->toHaveCount(1)->not->toBeEmpty();
 
         $firstSlot = $result['2026-01-10'][0];
 
-        expect($firstSlot)->toHaveKey('start');
-        expect($firstSlot)->toHaveKey('end');
-        expect($firstSlot['start']->toDateTimeString())->toBe('2026-01-10 09:00:00');
-        expect($firstSlot['end']->toDateTimeString())->toBe('2026-01-10 09:30:00');
+        expect($firstSlot)->toHaveKeys(['start', 'end'])
+            ->and($firstSlot['start']->toDateTimeString())->toBe('2026-01-10 09:00:00')
+            ->and($firstSlot['end']->toDateTimeString())->toBe('2026-01-10 09:30:00');
     });
 
     it('does not split when slot duration less than session duration', function (): void {
@@ -61,7 +59,7 @@ describe('SplitSlotsPerSessionDuration', function (): void {
             ['start' => $start, 'end' => $end],
         ], 30, $tz);
 
-        expect($service->getSplitSlots())->toBe([]);
+        expect($service->getSplitSlots())->toBeEmpty();
     });
 
     it('splits across midnight and groups by target day will provide only one slot', function (): void {
@@ -77,8 +75,8 @@ describe('SplitSlotsPerSessionDuration', function (): void {
 
         // Period inner points are 2026-01-11 00:00 and 00:30; both belong to 2026-01-11
         expect($split)->toHaveKey('2026-01-11');
-        expect($split['2026-01-11'])->toHaveCount(1);
-        expect($split['2026-01-11'][0]['start']->format('Y-m-d H:i'))->toBe('2026-01-11 00:00')
+        expect($split['2026-01-11'])->toHaveCount(1)
+            ->and($split['2026-01-11'][0]['start']->format('Y-m-d H:i'))->toBe('2026-01-11 00:00')
             ->and($split['2026-01-11'][0]['end']->format('Y-m-d H:i'))->toBe('2026-01-11 00:30');
     });
 
@@ -118,8 +116,8 @@ describe('SplitSlotsPerSessionDuration', function (): void {
 
             // Slot duration equals session duration, so one slot
             expect($split)->toHaveKey('2026-01-10');
-            expect($split['2026-01-10'])->toHaveCount(1);
-            expect($split['2026-01-10'][0]['start']->format('H:i'))->toBe('09:00')
+            expect($split['2026-01-10'])->toHaveCount(1)
+                ->and($split['2026-01-10'][0]['start']->format('H:i'))->toBe('09:00')
                 ->and($split['2026-01-10'][0]['end']->format('H:i'))->toBe('17:00');
         });
     });
@@ -144,7 +142,7 @@ describe('SplitSlotsPerSessionDuration', function (): void {
             $service = new SplitSlotsPerSessionDuration([], 30, $tz);
             $split = $service->getSplitSlots();
 
-            expect($split)->toBe([]);
+            expect($split)->toBeEmpty();
         });
 
         it('handles slot with zero duration', function (): void {
@@ -159,7 +157,7 @@ describe('SplitSlotsPerSessionDuration', function (): void {
             $split = $service->getSplitSlots();
 
             // Zero duration slot should not produce any splits
-            expect($split)->toBe([]);
+            expect($split)->toBeEmpty();
         });
 
         it('handles multiple slots on same day', function (): void {

@@ -14,10 +14,7 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\PageRegistration;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-
-uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed([RoleSeeder::class, CurrencySeeder::class]);

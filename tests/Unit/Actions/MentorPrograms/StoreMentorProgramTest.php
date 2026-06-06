@@ -49,9 +49,9 @@ describe('StoreMentorProgramRequest Validation', function (): void {
         ]);
         ($this->prepareRequest)($request);
 
-        expect($request->authorize())->toBeTrue();
-        expect($request->rules())->toBeArray();
-        expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
+        expect($request->authorize())->toBeTrue()
+            ->and($request->rules())->toBeArray()
+            ->and($request->validateResolved(...))->not->toThrow(ValidationException::class);
     });
 
     it('fails validation with missing required fields', function (): void {
@@ -64,10 +64,7 @@ describe('StoreMentorProgramRequest Validation', function (): void {
             $this->fail('Validation should have failed');
         } catch (ValidationException $validationException) {
             expect($validationException->errors())
-                ->toHaveKey('name')
-                ->toHaveKey('description')
-                ->toHaveKey('cost')
-                ->toHaveKey('currency_id');
+                ->toHaveKeys(['name', 'description', 'cost', 'currency_id']);
         }
     });
 

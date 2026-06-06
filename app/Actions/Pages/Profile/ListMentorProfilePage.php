@@ -32,7 +32,7 @@ class ListMentorProfilePage
                     ->select(['id', 'mentor_id', 'slug', 'is_main']),
             ])
             // @phpstan-ignore method.notFound (Larastan narrows with() return to Builder, losing Spatie QueryBuilder type)
-            ->allowedFilters([
+            ->allowedFilters(
                 'title',
                 'description',
                 'mentorPrograms.name',
@@ -44,12 +44,12 @@ class ListMentorProfilePage
                 AllowedFilter::custom('stacks', new TagStacksFilter),
                 AllowedFilter::custom('experience', new ExperienceLevelFilter),
                 AllowedFilter::custom('rating', new RatingFilter),
-            ])
-            ->allowedSorts([
+            )
+            ->allowedSorts(
                 'id',
                 'rate',
                 'experience_started_at',
-            ])
+            )
             ->paginate(User::DEFAULT_MENTOR_PAGE_PAGINATION)
             ->appends(request()->query())
             ->through(fn (MentorProfile $mentor): array => [

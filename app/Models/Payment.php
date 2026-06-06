@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\PaymentFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,23 +16,22 @@ use Override;
  * @mixin IdeHelperPayment
  */
 #[UseFactory(PaymentFactory::class)]
+#[Fillable([
+    'mentor_session_id',
+    'order_reference',
+    'amount',
+    'currency',
+    'transaction_status',
+    'reason',
+    'reason_code',
+    'payment_system',
+    'card_type',
+    'issue_bank_name',
+])]
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'mentor_session_id',
-        'order_reference',
-        'amount',
-        'currency',
-        'transaction_status',
-        'reason',
-        'reason_code',
-        'payment_system',
-        'card_type',
-        'issue_bank_name',
-    ];
 
     /**
      * @return BelongsTo<MentorSession, $this>

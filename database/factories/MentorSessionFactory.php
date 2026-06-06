@@ -7,12 +7,14 @@ namespace Database\Factories;
 use App\Models\MentorSession;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<MentorSession>
  */
 class MentorSessionFactory extends Factory
 {
+    #[Override]
     protected $model = MentorSession::class;
 
     /**

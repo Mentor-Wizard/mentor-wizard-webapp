@@ -85,8 +85,8 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeTrue();
-        expect($validator->errors())->isEmpty();
+        expect($validator->passes())->toBeTrue()
+            ->and($validator->errors())->isEmpty();
     });
 
     it('rejects when title is missing', function (): void {
@@ -106,8 +106,8 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('title'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('title'))->toBeTrue();
     });
 
     it('rejects when fromDate is wrong format', function (): void {
@@ -126,8 +126,8 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('fromDate'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('fromDate'))->toBeTrue();
     });
 
     it('rejects when fromTime is wrong format', function (): void {
@@ -146,8 +146,8 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('fromTime'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('fromTime'))->toBeTrue();
     });
 
     it('rejects when toDate is wrong format', function (): void {
@@ -166,8 +166,8 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('toDate'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('toDate'))->toBeTrue();
     });
 
     it('rejects when toTime is wrong format', function (): void {
@@ -186,8 +186,8 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('toTime'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('toTime'))->toBeTrue();
     });
 
     it('accepts null selectedDuration', function (): void {
@@ -264,8 +264,8 @@ describe('EditCalendarEventRequest rules and withValidator guards', function ():
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('colour'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('colour'))->toBeTrue();
     });
 
     it('adds fromDate error from withValidator

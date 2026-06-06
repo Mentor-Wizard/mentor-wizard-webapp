@@ -11,12 +11,14 @@ use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<ExternalCalendarEventLog>
  */
 class ExternalCalendarEventLogFactory extends Factory
 {
+    #[Override]
     protected $model = ExternalCalendarEventLog::class;
 
     /**

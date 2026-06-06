@@ -337,7 +337,6 @@ describe('Apple CalDAV Calendar Integration', function (): void {
 
         $fetchedIds = collect($fetched)->pluck('externalId')->all();
 
-        expect($fetchedIds)->toContain($inId);
-        expect($fetchedIds)->not->toContain($outId);
+        expect($fetchedIds)->toContain($inId)->not->toContain($outId);
     });
 });

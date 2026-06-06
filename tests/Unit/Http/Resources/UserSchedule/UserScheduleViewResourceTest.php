@@ -116,12 +116,8 @@ describe('UserScheduleViewResource', function (): void {
         $result = $collection->resolve();
 
         expect($result)->toBeArray()
-            ->toHaveCount(3);
-
-        foreach ($result as $item) {
-            expect($item)->toBeArray()
-                ->toHaveKeys(['id', 'user_id', 'day_of_week', 'start_time', 'end_time', 'type', 'day_off_date']);
-        }
+            ->toHaveCount(3)->each->toBeArray()
+            ->toHaveKeys(['id', 'user_id', 'day_of_week', 'start_time', 'end_time', 'type', 'day_off_date']);
     });
 
     it('handles all day_of_week values correctly', function (): void {

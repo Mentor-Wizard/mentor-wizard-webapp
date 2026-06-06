@@ -16,7 +16,7 @@ describe('ProgramCostFilter Integration Tests', function (): void {
         $this->seed(RoleSeeder::class);
         $this->filter = new ProgramCostFilter;
 
-        $mentors = User::factory(3)->create()->each(fn ($mentor) => $mentor->assignRole(RoleEnum::MENTOR));
+        $mentors = User::factory(3)->create()->each(fn ($mentor): User => $mentor->assignRole(RoleEnum::MENTOR));
 
         $this->profiles = collect([
             MentorProfile::factory()->create(['user_id' => $mentors[0]->id]),
@@ -38,9 +38,8 @@ describe('ProgramCostFilter Integration Tests', function (): void {
         $this->filter->__invoke($query, ['min' => 25, 'max' => 65], 'cost');
         $profiles = $query->get();
 
-        expect($profiles)->toHaveCount(2);
-        expect($profiles->pluck('id')->toArray())->toContain($this->profiles[0]->id, $this->profiles[1]->id);
-        expect($profiles->pluck('id')->toArray())->not->toContain($this->profiles[2]->id);
+        expect($profiles)->toHaveCount(2)
+            ->and($profiles->pluck('id')->toArray())->toContain($this->profiles[0]->id, $this->profiles[1]->id)->not->toContain($this->profiles[2]->id);
     });
 
     it('filters profiles by min and max cost bounds', function (): void {
@@ -48,15 +47,15 @@ describe('ProgramCostFilter Integration Tests', function (): void {
         $this->filter->__invoke($query1, ['min' => 50], 'cost');
         $profiles1 = $query1->get();
 
-        expect($profiles1)->toHaveCount(2);
-        expect($profiles1->pluck('id')->toArray())->toContain($this->profiles[1]->id, $this->profiles[2]->id);
+        expect($profiles1)->toHaveCount(2)
+            ->and($profiles1->pluck('id')->toArray())->toContain($this->profiles[1]->id, $this->profiles[2]->id);
 
         $query2 = MentorProfile::query();
         $this->filter->__invoke($query2, ['max' => 70], 'cost');
         $profiles2 = $query2->get();
 
-        expect($profiles2)->toHaveCount(2);
-        expect($profiles2->pluck('id')->toArray())->toContain($this->profiles[0]->id, $this->profiles[1]->id);
+        expect($profiles2)->toHaveCount(2)
+            ->and($profiles2->pluck('id')->toArray())->toContain($this->profiles[0]->id, $this->profiles[1]->id);
     });
 
     it('handles swapped min/max values correctly', function (): void {
@@ -64,9 +63,8 @@ describe('ProgramCostFilter Integration Tests', function (): void {
         $this->filter->__invoke($query, ['min' => 70, 'max' => 40], 'cost');
         $profiles = $query->get();
 
-        expect($profiles)->toHaveCount(1);
-        expect($profiles->pluck('id')->toArray())->toContain($this->profiles[1]->id);
-        expect($profiles->pluck('id')->toArray())->not->toContain($this->profiles[0]->id, $this->profiles[2]->id);
+        expect($profiles)->toHaveCount(1)
+            ->and($profiles->pluck('id')->toArray())->toContain($this->profiles[1]->id)->not->toContain($this->profiles[0]->id, $this->profiles[2]->id);
     });
 
     it('handles edge cases correctly', function (): void {

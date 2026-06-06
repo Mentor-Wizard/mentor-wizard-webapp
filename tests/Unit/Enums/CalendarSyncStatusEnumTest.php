@@ -22,12 +22,10 @@ describe('CalendarSyncStatusEnum', function (): void {
     it('contains no duplicate values', function (): void {
         $values = CalendarSyncStatusEnum::values();
 
-        expect(array_unique($values))->toHaveCount(count($values));
+        expect(array_unique($values))->toHaveSameSize($values);
     });
 
     it('every value is a non-empty string', function (): void {
-        foreach (CalendarSyncStatusEnum::values() as $value) {
-            expect($value)->toBeString()->not->toBeEmpty();
-        }
+        expect(CalendarSyncStatusEnum::values())->each->toBeString()->not->toBeEmpty();
     });
 });

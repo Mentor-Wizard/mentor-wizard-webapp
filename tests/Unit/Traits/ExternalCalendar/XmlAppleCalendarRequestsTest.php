@@ -39,7 +39,7 @@ describe('XmlAppleCalendarRequests trait', function (): void {
             $xml = $this->instance->callCalendarQueryReport('20260101T000000Z', '20260201T000000Z');
 
             expect($xml)->toBeString()
-                ->and($xml)->not->toBe('')
+                ->and($xml)->not->toBeEmpty()
                 ->and($xml)->toStartWith('<?xml version="1.0" encoding="UTF-8"?>')
                 ->and($xml)->toContain('<C:calendar-query')
                 ->and($xml)->toContain('xmlns:C="urn:ietf:params:xml:ns:caldav"')
@@ -74,7 +74,7 @@ describe('XmlAppleCalendarRequests trait', function (): void {
             $xml = $this->instance->callPropfindCurrentUserPrincipal();
 
             expect($xml)->toBeString()
-                ->and($xml)->not->toBe('')
+                ->and($xml)->not->toBeEmpty()
                 ->and($xml)->toStartWith('<?xml version="1.0" encoding="UTF-8"?>')
                 ->and($xml)->toContain('<D:propfind')
                 ->and($xml)->toContain('xmlns:D="DAV:"')
@@ -97,7 +97,7 @@ describe('XmlAppleCalendarRequests trait', function (): void {
             $xml = $this->instance->callPropfindCalendarHome();
 
             expect($xml)->toBeString()
-                ->and($xml)->not->toBe('')
+                ->and($xml)->not->toBeEmpty()
                 ->and($xml)->toStartWith('<?xml version="1.0" encoding="UTF-8"?>')
                 ->and($xml)->toContain('<D:propfind')
                 ->and($xml)->toContain('xmlns:D="DAV:"')
@@ -121,7 +121,7 @@ describe('XmlAppleCalendarRequests trait', function (): void {
             $xml = $this->instance->callPropfindCalendarList();
 
             expect($xml)->toBeString()
-                ->and($xml)->not->toBe('')
+                ->and($xml)->not->toBeEmpty()
                 ->and($xml)->toStartWith('<?xml version="1.0" encoding="UTF-8"?>')
                 ->and($xml)->toContain('<D:propfind')
                 ->and($xml)->toContain('xmlns:D="DAV:"')

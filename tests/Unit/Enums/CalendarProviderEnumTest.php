@@ -26,7 +26,7 @@ describe('CalendarProviderEnum', function (): void {
         it('contains no duplicate values', function (): void {
             $values = CalendarProviderEnum::values();
 
-            expect(array_unique($values))->toHaveCount(count($values));
+            expect(array_unique($values))->toHaveSameSize($values);
         });
     });
 

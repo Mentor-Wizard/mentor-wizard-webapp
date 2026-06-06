@@ -8,12 +8,14 @@ use App\Models\Currency;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<UserProfile>
  */
 class UserProfileFactory extends Factory
 {
+    #[Override]
     protected $model = UserProfile::class;
 
     /**

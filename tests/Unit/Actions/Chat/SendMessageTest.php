@@ -181,6 +181,6 @@ describe('SendMessage', function (): void {
 
         expect($response->getStatusCode())->toBe(200);
         $message = ChatMessage::query()->where('message', 'Manual call with garbage')->first();
-        expect($message->getMedia('files'))->toHaveCount(0);
+        expect($message->getMedia('files'))->toBeEmpty();
     });
 });

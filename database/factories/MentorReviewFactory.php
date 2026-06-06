@@ -7,12 +7,14 @@ namespace Database\Factories;
 use App\Models\MentorReview;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<MentorReview>
  */
 class MentorReviewFactory extends Factory
 {
+    #[Override]
     protected $model = MentorReview::class;
 
     /**

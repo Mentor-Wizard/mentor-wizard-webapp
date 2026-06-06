@@ -7,6 +7,8 @@ use Rector\Config\RectorConfig;
 use Rector\ValueObject\PhpVersion;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
+use RectorPest\Set\PestLevelSetList;
+use RectorPest\Set\PestSetList;
 
 if (! class_exists(RectorConfig::class)) {
     return;
@@ -19,8 +21,8 @@ return RectorConfig::configure()
         __DIR__.'/routes',
         __DIR__.'/tests',
     ])
-    ->withPhpVersion(PhpVersion::PHP_84)
-    ->withPhpSets(php84: true)
+    ->withPhpVersion(PhpVersion::PHP_85)
+    ->withPhpSets(php85: true)
     ->withComposerBased(
         laravel: true,
     )
@@ -38,7 +40,7 @@ return RectorConfig::configure()
         carbon: true,
     )
     ->withSets([
-        LaravelLevelSetList::UP_TO_LARAVEL_120,
+        LaravelLevelSetList::UP_TO_LARAVEL_130,
         LaravelSetList::LARAVEL_ARRAYACCESS_TO_METHOD_CALL,
         LaravelSetList::LARAVEL_ARRAY_STR_FUNCTION_TO_STATIC_CALL,
         LaravelSetList::LARAVEL_CODE_QUALITY,
@@ -51,6 +53,11 @@ return RectorConfig::configure()
         LaravelSetList::LARAVEL_LEGACY_FACTORIES_TO_CLASSES,
         // LaravelSetList::LARAVEL_STATIC_TO_INJECTION,
         LaravelSetList::LARAVEL_TESTING,
+        PestLevelSetList::UP_TO_PEST_40,
+        PestSetList::PEST_CODE_QUALITY,
+        PestSetList::PEST_CHAIN,
+        PestSetList::PEST_LARAVEL,
+        PestSetList::PEST_BROWSER,
     ])
     ->withParallel()
     ->withCache(
