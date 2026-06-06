@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\Payable;
+use Carbon\CarbonInterface;
 use Database\Factories\MentorSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Override;
 
 /**
+ * @property CarbonInterface $date
+ *
  * @mixin IdeHelperMentorSession
  */
 #[UseFactory(MentorSessionFactory::class)]
-class MentorSession extends Model
+class MentorSession extends Model implements Payable
 {
     /** @use HasFactory<MentorSessionFactory> */
     use HasFactory;
@@ -50,11 +55,26 @@ class MentorSession extends Model
     }
 
     /**
-     * @return HasOne<Payment, $this>
+     * @return MorphOne<Payment, $this>
      */
-    public function payment(): HasOne
+    public function payment(): MorphOne
     {
-        return $this->hasOne(Payment::class);
+        return $this->morphOne(Payment::class, 'payable');
+    }
+
+    public function markPaid(): void
+    {
+        $this->update(['is_paid' => true]);
+    }
+
+    public function markUnpaid(): void
+    {
+        $this->update(['is_paid' => false]);
+    }
+
+    public function getPayableLabel(): string
+    {
+        return $this->date->format('d.m.Y H:i');
     }
 
     /**

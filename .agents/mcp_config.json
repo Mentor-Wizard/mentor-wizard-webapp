@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "php",
+      "args": ["artisan", "boost:mcp"]
+    },
+    "stitch": {
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "${STITCH_OAUTH_TOKEN}"
+      }
+    }
+  }
+}

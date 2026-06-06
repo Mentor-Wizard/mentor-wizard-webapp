@@ -1,0 +1,32 @@
+description = "Perform a code review of a GitHub Pull Request by number"
+
+prompt = """
+# Task: GitHub PR Code Review
+
+You are acting as the **reviewer** agent. Your goal is to conduct a thorough code review of the following Pull Request.
+
+## PR Data
+!{.gemini/scripts/fetch-pr-data.sh {{args}}}
+
+---
+
+## Instructions for Review
+Please follow the review dimensions and output format defined in your core identity as a Senior Code Reviewer.
+
+### Review Dimensions:
+1. **Correctness**: Logic, edge cases, types.
+2. **Security**: OWASP Top 10, auth/authz, secret leaks.
+3. **Performance**: N+1 queries, indexes, memory.
+4. **Convention Compliance**: Laravel Actions, PHP 8.4+, strict types, keyed models.
+5. **Architecture**: SRP, domain separation, data flow.
+6. **Maintainability**: Readability, naming, test coverage.
+
+### Output Format:
+- **Review Summary**
+- **Severity Levels** (🔴, 🟡, 🔵)
+- **Findings** (detailed with file references)
+- **Positive Notes**
+- **Checklist**
+
+Focus on the filtered diff provided above. Ignore files that were excluded by the fetch script.
+"""

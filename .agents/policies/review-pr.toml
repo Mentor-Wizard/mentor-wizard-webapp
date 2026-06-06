@@ -1,0 +1,7 @@
+[[rule]]
+toolName = "run_shell_command"
+commandRegex = ".*.gemini/scripts/fetch-pr-data.sh.*"
+decision = "allow"
+priority = 100
+allowRedirection = true
+modes = ["default", "auto_edit", "yolo", "plan"]

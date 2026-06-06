@@ -49,6 +49,10 @@ use App\Actions\Pages\Profile\GetProfilePage;
 use App\Actions\Pages\Profile\ListMentorProfilePage;
 use App\Actions\Pages\UserSchedule\UserSchedulePage;
 use App\Actions\Pages\WelcomePage;
+use App\Actions\Payments\InitiatePaymentAction;
+use App\Actions\Payments\ListPaymentHistoryAction;
+use App\Actions\Payments\PaymentFailurePage;
+use App\Actions\Payments\PaymentSuccessPage;
 use App\Actions\Profile\DeleteUserProfile;
 use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
@@ -189,6 +193,13 @@ Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function
     Route::get('/', ListNotifications::class)->name('notifications.index');
     Route::post('{id}/read', MarkNotificationAsRead::class)->name('notifications.read');
     Route::post('read-all', MarkAllNotificationsAsRead::class)->name('notifications.read-all');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('payments')->group(function (): void {
+    Route::post('initiate', InitiatePaymentAction::class)->name('payments.initiate');
+    Route::get('success', PaymentSuccessPage::class)->name('payments.success');
+    Route::get('failure', PaymentFailurePage::class)->name('payments.failure');
+    Route::get('history', ListPaymentHistoryAction::class)->name('payments.history');
 });
 
 require __DIR__.'/auth.php';

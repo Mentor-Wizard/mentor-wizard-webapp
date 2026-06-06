@@ -9,7 +9,11 @@
   ],
   "require": {
     "php": "^8.4",
+    "ext-dom": "*",
+    "ext-libxml": "*",
     "ext-openssl": "*",
+    "ext-xmlreader": "*",
+    "aratkruglik/wayforpay-laravel": "^1.2",
     "filament/filament": "4.3.1.0",
     "filament/spatie-laravel-media-library-plugin": "^4.3.1",
     "inertiajs/inertia-laravel": "^2.0.19",
@@ -28,11 +32,8 @@
     "spatie/laravel-medialibrary": "^11.17.10",
     "spatie/laravel-permission": "^6.24",
     "spatie/laravel-query-builder": "^6.4.1",
-    "tightenco/ziggy": "^2.6",
-    "ext-dom": "*",
-    "ext-xmlreader": "*",
-    "ext-libxml": "*",
-    "stevebauman/purify": "^6.3"
+    "stevebauman/purify": "^6.3",
+    "tightenco/ziggy": "^2.6"
   },
   "require-dev": {
     "barryvdh/laravel-ide-helper": "^3.6.1",

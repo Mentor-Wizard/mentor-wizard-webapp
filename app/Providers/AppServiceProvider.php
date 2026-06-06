@@ -5,23 +5,28 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\RoleEnum;
+use App\Listeners\DispatchPaymentWebhookJob;
 use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
+use App\Models\Payment;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Models\UserSchedule;
 use App\Policies\CalendarEventPolicy;
 use App\Policies\ExternalCalendarEventLogPolicy;
 use App\Policies\ExternalCalendarEventPolicy;
+use App\Policies\PaymentPolicy;
 use App\Policies\UserCalendarIntegrationPolicy;
 use App\Policies\UserSchedulePolicy;
+use AratKruglik\WayForPay\Events\WayForPayCallbackReceived;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\RateLimiter;
@@ -57,11 +62,16 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
+        Gate::define('initiate-payment', [PaymentPolicy::class, 'initiate']);
         Gate::policy(CalendarEvent::class, CalendarEventPolicy::class);
         Gate::policy(UserSchedule::class, UserSchedulePolicy::class);
         Gate::policy(ExternalCalendarEventLog::class, ExternalCalendarEventLogPolicy::class);
         Gate::policy(UserCalendarIntegration::class, UserCalendarIntegrationPolicy::class);
         Gate::policy(ExternalCalendarEvent::class, ExternalCalendarEventPolicy::class);
+        Gate::policy(Payment::class, PaymentPolicy::class);
+
+        Event::listen(WayForPayCallbackReceived::class, DispatchPaymentWebhookJob::class);
+
         Vite::prefetch(concurrency: 3);
 
         $this->configRateLimiters();
