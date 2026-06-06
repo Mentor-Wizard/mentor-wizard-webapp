@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Payments;
 
-use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,7 +28,7 @@ class PaymentFailurePage
                 'order_reference'    => $payment->order_reference,
                 'amount'             => $payment->amount,
                 'currency'           => $payment->currency,
-                'transaction_status' => PaymentStatusEnum::tryFrom((string) $payment->transaction_status)?->value,
+                'transaction_status' => $payment->transaction_status?->value,
                 'reason'             => $payment->reason,
                 'reason_code'        => $payment->reason_code,
                 'created_at'         => $payment->created_at?->toIso8601String(),

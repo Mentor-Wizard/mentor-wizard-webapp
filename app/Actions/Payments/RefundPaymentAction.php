@@ -18,7 +18,7 @@ class RefundPaymentAction
 
     public function handle(Payment $payment, string $comment = 'Admin refund'): bool
     {
-        $currentStatus = PaymentStatusEnum::tryFrom((string) $payment->transaction_status);
+        $currentStatus = $payment->transaction_status;
         if ($currentStatus !== PaymentStatusEnum::APPROVED) {
             return false;
         }

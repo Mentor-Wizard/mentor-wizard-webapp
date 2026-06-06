@@ -2,6 +2,7 @@
 import { XCircleIcon } from '@heroicons/vue/24/outline';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
+import axios from 'axios';
 
 import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
@@ -84,6 +85,36 @@ const statusLabel: Record<string, string> = {
   pending: 'Очікується',
   approved: 'Підтверджено',
   refunded: 'Повернено',
+};
+
+const payableTypeSnake = computed<string | null>(() => {
+  if (!props.payable) return null;
+  return props.payable.type === 'MentorSession' ?
+      'mentor_session'
+    : 'mentor_program';
+});
+
+const retryProcessing = ref(false);
+
+const retry = async () => {
+  if (!props.retry_url || !props.payable || !payableTypeSnake.value) return;
+
+  retryProcessing.value = true;
+  try {
+    const response = await axios.post<string>(props.retry_url, {
+      payable_type: payableTypeSnake.value,
+      payable_id: props.payable.id,
+    });
+    const blob = new Blob([response.data], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    window.location.assign(blobUrl);
+  } catch {
+    showNotification(
+      false,
+      'Не вдалося ініціювати повторний платіж. Спробуйте ще раз.',
+    );
+    retryProcessing.value = false;
+  }
 };
 </script>
 
@@ -173,20 +204,26 @@ const statusLabel: Record<string, string> = {
         </div>
 
         <div class="space-y-3 border-t border-gray-200 px-8 py-6">
-          <p v-if="retry_url" class="text-center text-sm text-gray-600">
-            Щоб спробувати ще раз, поверніться до вашого бронювання.
-          </p>
+          <button
+            v-if="retry_url && payable"
+            type="button"
+            :disabled="retryProcessing"
+            class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+            @click="retry"
+          >
+            {{ retryProcessing ? 'Перенаправлення...' : 'Спробувати ще раз' }}
+          </button>
 
           <Link
             :href="route('pages.calendar.pending')"
-            class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
           >
             Повернутись до бронювань
           </Link>
 
           <Link
             :href="route('pages.calendar.confirmed')"
-            class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
+            class="inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-gray-200 ring-inset hover:bg-gray-50"
           >
             Підтверджені сесії
           </Link>

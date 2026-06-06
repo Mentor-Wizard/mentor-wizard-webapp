@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Override;
 
 /**
+ * @property PaymentStatusEnum|null $transaction_status
  * @property CarbonInterface|null $refunded_at
  *
  * @mixin IdeHelperPayment

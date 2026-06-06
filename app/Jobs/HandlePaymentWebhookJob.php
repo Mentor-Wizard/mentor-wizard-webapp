@@ -58,7 +58,7 @@ class HandlePaymentWebhookJob implements ShouldQueue
             return;
         }
 
-        $currentStatus = PaymentStatusEnum::tryFrom((string) $payment->transaction_status);
+        $currentStatus = $payment->transaction_status;
         if ($currentStatus?->isTerminal()) {
             return;
         }

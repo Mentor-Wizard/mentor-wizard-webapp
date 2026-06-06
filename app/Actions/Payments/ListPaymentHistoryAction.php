@@ -85,7 +85,7 @@ class ListPaymentHistoryAction
             'order_reference'    => $payment->order_reference,
             'amount'             => $payment->amount,
             'currency'           => $payment->currency,
-            'transaction_status' => PaymentStatusEnum::tryFrom((string) $payment->transaction_status)?->value,
+            'transaction_status' => $payment->transaction_status?->value,
             'fee_amount'         => $payment->fee_amount,
             'fee_percentage'     => $payment->fee_percentage,
             'net_amount'         => $payment->net_amount,

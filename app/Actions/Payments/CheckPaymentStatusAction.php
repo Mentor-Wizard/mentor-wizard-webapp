@@ -19,7 +19,7 @@ class CheckPaymentStatusAction
 
         $status = PaymentStatusEnum::fromWayForPay($response['transactionStatus'] ?? '');
 
-        $currentStatus = PaymentStatusEnum::tryFrom((string) $payment->transaction_status);
+        $currentStatus = $payment->transaction_status;
         if ($currentStatus !== $status) {
             $payment->fill(['transaction_status' => $status]);
             $payment->save();
