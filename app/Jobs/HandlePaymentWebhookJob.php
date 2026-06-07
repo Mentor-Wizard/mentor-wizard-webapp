@@ -34,7 +34,9 @@ class HandlePaymentWebhookJob implements ShouldQueue
         $orderReference = $this->data['orderReference'] ?? null;
 
         if ($orderReference === null) {
-            Log::warning('WayForPay webhook missing orderReference', ['data' => $this->data]);
+            Log::warning('WayForPay webhook missing orderReference', [
+                'keys' => array_keys($this->data),
+            ]);
 
             return;
         }

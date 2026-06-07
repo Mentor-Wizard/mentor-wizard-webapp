@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Payments;
 
 use App\Enums\PaymentStatusEnum;
+use App\Http\Requests\Payments\ListPaymentHistoryRequest;
 use App\Models\MentorSession;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -17,7 +17,7 @@ class ListPaymentHistoryAction
 {
     use AsController;
 
-    public function handle(Request $request): Response
+    public function handle(ListPaymentHistoryRequest $request): Response
     {
         $user = $request->user();
 
@@ -46,18 +46,14 @@ class ListPaymentHistoryAction
                     'to'           => $payments->lastItem(),
                 ],
             ],
-            'filters' => [
-                'status' => $request->query('status'),
-                'from'   => $request->query('from'),
-                'to'     => $request->query('to'),
-            ],
+            'filters' => $request->safe()->only(['status', 'from', 'to']),
         ]);
     }
 
     /**
      * @param  Builder<Payment>  $query
      */
-    private function applyFilters(Builder $query, Request $request): void
+    private function applyFilters(Builder $query, ListPaymentHistoryRequest $request): void
     {
         if ($request->filled('status')) {
             $status = PaymentStatusEnum::tryFrom($request->string('status')->value());

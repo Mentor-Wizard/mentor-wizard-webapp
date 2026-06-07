@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Payments;
 
+use App\Http\Requests\Payments\PaymentCallbackRequest;
 use App\Models\Payment;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -14,9 +14,9 @@ class PaymentSuccessPage
 {
     use AsController;
 
-    public function handle(Request $request): Response
+    public function handle(PaymentCallbackRequest $request): Response
     {
-        $orderReference = $request->query('orderReference');
+        $orderReference = $request->string('orderReference')->value();
 
         $payment = Payment::query()
             ->where('order_reference', $orderReference)
