@@ -2,40 +2,22 @@
 
 declare(strict_types=1);
 
+$sandbox = (bool) env('WAYFORPAY_SANDBOX', false);
+
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | WayForPay Merchant Credentials
-    |--------------------------------------------------------------------------
-    |
-    | These credentials are used to authenticate with the WayForPay API.
-    | You can find them in your WayForPay merchant cabinet.
-    |
-    */
+    'merchant_account' => $sandbox
+        ? env('WAYFORPAY_SANDBOX_MERCHANT_ACCOUNT', 'test_merch_n1')
+        : env('WAYFORPAY_MERCHANT_ACCOUNT', ''),
 
-    'merchant_account' => env('WAYFORPAY_MERCHANT_ACCOUNT', ''),
-    'secret_key'       => env('WAYFORPAY_SECRET_KEY', ''),
-    'merchant_domain'  => env('WAYFORPAY_MERCHANT_DOMAIN', ''),
+    'secret_key' => $sandbox
+        ? env('WAYFORPAY_SANDBOX_SECRET_KEY', 'flk3409refn54t54t*FNJRET')
+        : env('WAYFORPAY_SECRET_KEY', ''),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Timeout
-    |--------------------------------------------------------------------------
-    |
-    | The timeout for API requests in seconds.
-    |
-    */
+    'merchant_domain' => env('WAYFORPAY_MERCHANT_DOMAIN', ''),
 
     'timeout' => env('WAYFORPAY_TIMEOUT', 30),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Debug Mode
-    |--------------------------------------------------------------------------
-    |
-    | If enabled, the package will log requests and responses.
-    |
-    */
-
     'debug' => env('WAYFORPAY_DEBUG', false),
+
+    'sandbox' => $sandbox,
 ];
