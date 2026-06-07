@@ -58,6 +58,8 @@ use App\Actions\Profile\UpdateUserProfile;
 use App\Actions\User\UpdateUser;
 use App\Actions\UserSchedule\StoreBatchUserSchedule;
 use App\Models\MentorProgram;
+use AratKruglik\WayForPay\Http\Controllers\WebhookController;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
@@ -194,6 +196,10 @@ Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function
     Route::post('{id}/read', MarkNotificationAsRead::class)->name('notifications.read');
     Route::post('read-all', MarkAllNotificationsAsRead::class)->name('notifications.read-all');
 });
+
+Route::post('payments/webhook', WebhookController::class)
+    ->name('payments.webhook')
+    ->withoutMiddleware(ValidateCsrfToken::class);
 
 Route::middleware(['auth', 'verified'])->prefix('payments')->group(function (): void {
     Route::post('initiate', InitiatePaymentAction::class)->name('payments.initiate');
