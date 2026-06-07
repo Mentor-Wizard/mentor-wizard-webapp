@@ -7,6 +7,7 @@ namespace App\Http\Requests\Payments;
 use App\Enums\PaymentStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class ListPaymentHistoryRequest extends FormRequest
 {
@@ -16,7 +17,8 @@ class ListPaymentHistoryRequest extends FormRequest
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, mixed>.
+     * @return array<string, Enum[]|string[]|string[]>
      */
     public function rules(): array
     {
