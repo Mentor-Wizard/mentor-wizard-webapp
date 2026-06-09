@@ -31,17 +31,34 @@
     "architect-review": "name-only"
   },
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); [[ \"$f\" == *.php ]] && docker compose exec -T app ./vendor/bin/pint \"${f#$(pwd)/}\" 2>/dev/null || true",
+            "statusMessage": "Formatting PHP with Pint..."
+          },
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); [[ \"$f\" =~ \\.(vue|js|ts|css|scss)$ ]] && ./node_modules/.bin/prettier --write \"$f\" 2>/dev/null || true",
+            "statusMessage": "Formatting with Prettier..."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "docker compose exec app composer run pint:fix",
+            "command": "docker compose exec -T app composer run pint:fix",
             "statusMessage": "PHP code styles fixing..."
           },
           {
             "type": "command",
-            "command": "docker compose exec app composer run rector:fix",
+            "command": "docker compose exec -T app composer run rector:fix",
             "statusMessage": "Applying code modernization..."
           }
         ]

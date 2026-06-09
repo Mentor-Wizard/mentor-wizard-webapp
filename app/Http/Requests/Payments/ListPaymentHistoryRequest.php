@@ -17,7 +17,6 @@ class ListPaymentHistoryRequest extends FormRequest
     }
 
     /**
-     * @return array<string, mixed>.
      * @return array<string, Enum[]|string[]|string[]>
      */
     public function rules(): array
