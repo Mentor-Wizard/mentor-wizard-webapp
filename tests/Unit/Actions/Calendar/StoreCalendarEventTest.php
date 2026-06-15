@@ -43,9 +43,9 @@ describe('StoreCalendarEventRequest Validation', function (): void {
         $request->merge($validData);
         ($this->prepareRequest)($request);
 
-        expect($request->authorize())->toBeTrue();
-        expect($request->rules())->toBeArray();
-        expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
+        expect($request->authorize())->toBeTrue()
+            ->and($request->rules())->toBeArray()
+            ->and($request->validateResolved(...))->not->toThrow(ValidationException::class);
     })->with([
         'single day event' => function (): array {
             $tomorrow = Date::tomorrow()->format('Y-m-d');
@@ -184,9 +184,8 @@ describe('Store Calendar CalendarEvent', function (): void {
 
         expect($response)
             ->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
-
-        expect(CalendarEvent::query()->count())->toBe(1);
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'))
+            ->and(CalendarEvent::query()->count())->toBe(1);
 
         $event = CalendarEvent::query()->latest('id')->first();
         expect($event)
@@ -210,10 +209,10 @@ describe('Store Calendar CalendarEvent', function (): void {
             ->where('user_id', $this->user->getKey())
             ->first();
 
-        expect($pivotRecord->created_at)->not->toBeNull();
-        expect($pivotRecord->updated_at)->not->toBeNull();
-        expect((string) Date::parse($pivotRecord->created_at))->toBe((string) now());
-        expect((string) Date::parse($pivotRecord->updated_at))->toBe((string) now());
+        expect($pivotRecord->created_at)->not->toBeNull()
+            ->and($pivotRecord->updated_at)->not->toBeNull()
+            ->and((string) Date::parse($pivotRecord->created_at))->toBe((string) now())
+            ->and((string) Date::parse($pivotRecord->updated_at))->toBe((string) now());
     });
 
     it('stores event with several users', function (): void {
@@ -248,9 +247,8 @@ describe('Store Calendar CalendarEvent', function (): void {
 
         expect($response)
             ->toBeInstanceOf(RedirectResponse::class)
-            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'));
-
-        expect(CalendarEvent::query()->count())->toBe(1);
+            ->and($response->getTargetUrl())->toBe(route('pages.calendar.index'))
+            ->and(CalendarEvent::query()->count())->toBe(1);
 
         $event = CalendarEvent::query()->latest('id')->first();
         expect($event)
@@ -272,10 +270,8 @@ describe('Store Calendar CalendarEvent', function (): void {
         expect($host)
             ->not->toBeNull()
             ->and($host->pivot->role)->toBe(CalendarEventRoleEnum::HOST->value)
-            ->and($host->pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
-
-        expect($menti)
-            ->not->toBeNull()
+            ->and($host->pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value)
+            ->and($menti)->not->toBeNull()
             ->and($menti->pivot->role)->toBe(CalendarEventRoleEnum::PARTICIPANT->value)
             ->and($menti->pivot->colour)->toBe(CalendarEventColoursEnum::BLUE->value);
 

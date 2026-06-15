@@ -26,13 +26,13 @@ describe('ProfileRateFilter', function (): void {
     it('has correct __invoke method signature', function (): void {
         $reflection = new ReflectionMethod($this->filter, '__invoke');
 
-        expect($reflection->getNumberOfParameters())->toBe(3);
-        expect($reflection->isPublic())->toBeTrue();
+        expect($reflection->getNumberOfParameters())->toBe(3)
+            ->and($reflection->isPublic())->toBeTrue();
 
         $params = $reflection->getParameters();
-        expect($params[0]->getName())->toBe('query');
-        expect($params[1]->getName())->toBe('value');
-        expect($params[2]->getName())->toBe('property');
+        expect($params[0]->getName())->toBe('query')
+            ->and($params[1]->getName())->toBe('value')
+            ->and($params[2]->getName())->toBe('property');
     });
 
     it('processes various input formats without errors', function (): void {

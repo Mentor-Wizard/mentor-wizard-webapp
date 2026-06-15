@@ -222,7 +222,7 @@ XML;
         it('returns an empty array for invalid xml', function (): void {
             $result = $this->parser->getParsedCalendarList('not-xml<<<');
 
-            expect($result)->toBe([]);
+            expect($result)->toBeEmpty();
         });
 
         it('returns multiple calendars in order', function (): void {

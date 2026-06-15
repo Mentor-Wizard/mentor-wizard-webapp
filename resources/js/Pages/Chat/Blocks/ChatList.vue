@@ -92,6 +92,7 @@ const groupedMessages = computed(() => {
             'rounded-xl p-3 shadow-sm',
           ]"
         >
+          <!-- eslint-disable-next-line vue/no-v-html -- Tiptap rich-text output (bold/italic/links/lists/code) persisted server-side; must be sanitized on backend before storage. -->
           <p v-html="msg.message"></p>
           <div
             v-for="attachment in msg.attachments"

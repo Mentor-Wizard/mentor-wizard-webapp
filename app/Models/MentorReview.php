@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\MentorReviewFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,17 +13,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @mixin IdeHelperMentorReview
  */
+#[Fillable([
+    'mentor_id',
+    'menti_id',
+    'comment',
+    'rating',
+])]
 class MentorReview extends Model
 {
     /** @use HasFactory<MentorReviewFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'mentor_id',
-        'menti_id',
-        'comment',
-        'rating',
-    ];
 
     /**
      * @return BelongsTo<User, $this>

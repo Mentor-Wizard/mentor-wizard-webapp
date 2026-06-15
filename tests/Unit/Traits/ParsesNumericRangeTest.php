@@ -63,12 +63,11 @@ describe('ParsesNumericRange trait', function (): void {
         });
 
         it('preserves order for boundary conditions around equality', function (): void {
-            expect($this->instance->testNormalizeBounds(5.0, 5.0))->toBe([5.0, 5.0]);
-            expect($this->instance->testNormalizeBounds(5.1, 5.0))->toBe([5.0, 5.1]);
-            expect($this->instance->testNormalizeBounds(5.0, 5.1))->toBe([5.0, 5.1]);
-
-            expect($this->instance->testNormalizeBounds(0.0, 0.0))->toBe([0.0, 0.0]);
-            expect($this->instance->testNormalizeBounds(-5.0, -5.0))->toBe([-5.0, -5.0]);
+            expect($this->instance->testNormalizeBounds(5.0, 5.0))->toBe([5.0, 5.0])
+                ->and($this->instance->testNormalizeBounds(5.1, 5.0))->toBe([5.0, 5.1])
+                ->and($this->instance->testNormalizeBounds(5.0, 5.1))->toBe([5.0, 5.1])
+                ->and($this->instance->testNormalizeBounds(0.0, 0.0))->toBe([0.0, 0.0])
+                ->and($this->instance->testNormalizeBounds(-5.0, -5.0))->toBe([-5.0, -5.0]);
         });
 
         it('strictly follows greater-than logic not greater-or-equal', function (float $min, float $max): void {
@@ -91,15 +90,13 @@ describe('ParsesNumericRange trait', function (): void {
                 }
             };
 
-            expect($tester->shouldSwapValues(5.0, 5.0))->toBeFalse();
-            expect($tester->shouldSwapValues(10.0, 10.0))->toBeFalse();
-            expect($tester->shouldSwapValues(0.0, 0.0))->toBeFalse();
-
-            expect($tester->shouldSwapValues(7.0, 3.0))->toBeTrue();
-            expect($tester->shouldSwapValues(15.0, 10.0))->toBeTrue();
-
-            expect($tester->shouldSwapValues(2.0, 8.0))->toBeFalse();
-            expect($tester->shouldSwapValues(1.0, 100.0))->toBeFalse();
+            expect($tester->shouldSwapValues(5.0, 5.0))->toBeFalse()
+                ->and($tester->shouldSwapValues(10.0, 10.0))->toBeFalse()
+                ->and($tester->shouldSwapValues(0.0, 0.0))->toBeFalse()
+                ->and($tester->shouldSwapValues(7.0, 3.0))->toBeTrue()
+                ->and($tester->shouldSwapValues(15.0, 10.0))->toBeTrue()
+                ->and($tester->shouldSwapValues(2.0, 8.0))->toBeFalse()
+                ->and($tester->shouldSwapValues(1.0, 100.0))->toBeFalse();
         });
     });
 
@@ -165,13 +162,13 @@ describe('ParsesNumericRange trait', function (): void {
         });
 
         it('handles zero string values with different behaviors', function (): void {
-            expect($this->instance->testToFloatOrNull('0'))->toBeNull();
-            expect($this->instance->testToFloatOrNull('0.0'))->toBe(0.0);
+            expect($this->instance->testToFloatOrNull('0'))->toBeNull()
+                ->and($this->instance->testToFloatOrNull('0.0'))->toBe(0.0);
         });
 
         it('handles negative values correctly', function (): void {
-            expect($this->instance->testToFloatOrNull(-42.5))->toBe(-42.5);
-            expect($this->instance->testToFloatOrNull('-42.5'))->toBe(-42.5);
+            expect($this->instance->testToFloatOrNull(-42.5))->toBe(-42.5)
+                ->and($this->instance->testToFloatOrNull('-42.5'))->toBe(-42.5);
         });
     });
 });

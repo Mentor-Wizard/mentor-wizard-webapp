@@ -7,7 +7,7 @@ use App\Models\Payment;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 it('returns a PaymentStatusEnum instance from the model cast (not a string)', function (): void {
     $this->seed(RoleSeeder::class);
@@ -15,7 +15,7 @@ it('returns a PaymentStatusEnum instance from the model cast (not a string)', fu
     $payment = Payment::factory()->approved()->create();
     $payment->refresh();
 
-    expect($payment->transaction_status)->toBeInstanceOf(PaymentStatusEnum::class);
-    expect($payment->transaction_status)->toBe(PaymentStatusEnum::APPROVED);
-    expect($payment->transaction_status->value)->toBe('approved');
+    expect($payment->transaction_status)->toBeInstanceOf(PaymentStatusEnum::class)
+        ->toBe(PaymentStatusEnum::APPROVED)
+        ->and($payment->transaction_status->value)->toBe('approved');
 });

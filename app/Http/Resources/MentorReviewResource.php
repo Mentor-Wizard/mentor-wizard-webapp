@@ -15,6 +15,7 @@ use Override;
 
 class MentorReviewResource extends JsonResource
 {
+    #[Override]
     public static $wrap;
 
     public function __construct($resource, protected User $mentor)

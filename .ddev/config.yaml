@@ -4,7 +4,7 @@ docroot: public
 database:
   type: postgres
   version: '17'
-php_version: '8.4'
+php_version: '8.5'
 host_db_port: '33371'
 nodejs_version: '24'
 webserver_type: generic
@@ -16,9 +16,9 @@ web_extra_daemons:
   - name: 'reverb'
     command: 'php artisan reverb:start --host=0.0.0.0 --port=8080 --debug'
     directory: /var/www/html
-#  - name: 'vite'
-#    command: 'yarn install && yarn dev'
-#    directory: /var/www/html
+  - name: 'vite'
+    command: 'yarn install && yarn dev'
+    directory: /var/www/html
 web_extra_exposed_ports:
   - name: 'reverb'
     container_port: 8080

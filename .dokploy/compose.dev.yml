@@ -39,6 +39,9 @@ services:
     command: ['php', 'artisan', 'queue:work', '--sleep=1', '--tries=3', '--max-time=3600']
     environment:
       AUTORUN_ENABLED: 'false'
+    healthcheck:
+      test: ['CMD', 'healthcheck-queue']
+      start_period: 10s
 
   websockets:
     <<: *app-base
@@ -48,7 +51,8 @@ services:
     expose:
       - 8080
     healthcheck:
-      disable: true
+      test: ['CMD', 'healthcheck-reverb']
+      start_period: 10s
 
   db:
     image: postgres:17-alpine3.20

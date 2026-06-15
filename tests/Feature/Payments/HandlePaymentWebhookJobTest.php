@@ -10,7 +10,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
@@ -47,8 +47,8 @@ describe('HandlePaymentWebhookJob', function (): void {
 
         it('retries 3 times with 10s backoff', function (): void {
             $job = new HandlePaymentWebhookJob([]);
-            expect($job->tries)->toBe(3);
-            expect($job->backoff)->toBe(10);
+            expect($job->tries)->toBe(3)
+                ->and($job->backoff)->toBe(10);
         });
     });
 
@@ -69,8 +69,8 @@ describe('HandlePaymentWebhookJob', function (): void {
             ]);
             $job->handle();
 
-            expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::APPROVED);
-            expect($session->fresh()->is_paid)->toBeTrue();
+            expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::APPROVED)
+                ->and($session->fresh()->is_paid)->toBeTrue();
         });
 
         it('transitions PENDING to DECLINED and marks payable as unpaid', function (): void {
@@ -90,8 +90,8 @@ describe('HandlePaymentWebhookJob', function (): void {
             ]);
             $job->handle();
 
-            expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::DECLINED);
-            expect($session->fresh()->is_paid)->toBeFalse();
+            expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::DECLINED)
+                ->and($session->fresh()->is_paid)->toBeFalse();
         });
 
         it('transitions PENDING to REFUNDED', function (): void {

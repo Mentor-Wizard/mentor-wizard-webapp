@@ -59,7 +59,7 @@ use App\Actions\User\UpdateUser;
 use App\Actions\UserSchedule\StoreBatchUserSchedule;
 use App\Models\MentorProgram;
 use AratKruglik\WayForPay\Http\Controllers\WebhookController;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
@@ -199,7 +199,7 @@ Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function
 
 Route::post('payments/webhook', WebhookController::class)
     ->name('payments.webhook')
-    ->withoutMiddleware(ValidateCsrfToken::class);
+    ->withoutMiddleware(PreventRequestForgery::class);
 
 Route::middleware(['auth', 'verified'])->prefix('payments')->group(function (): void {
     Route::post('initiate', InitiatePaymentAction::class)->name('payments.initiate');

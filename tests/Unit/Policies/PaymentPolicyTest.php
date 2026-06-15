@@ -13,7 +13,7 @@ use App\Policies\PaymentPolicy;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 mutates(PaymentPolicy::class);
 

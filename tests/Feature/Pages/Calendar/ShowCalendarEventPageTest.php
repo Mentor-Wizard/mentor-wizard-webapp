@@ -125,20 +125,19 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
     /** @return array<string, string> */
     function deferredHeaders(): array
     {
-        $manifest = public_path('build/manifest.json');
-        $version = file_exists($manifest) ? hash_file('xxh128', $manifest) : null;
+        $version = match (true) {
+            (bool) config('app.asset_url')                         => hash('xxh128', (string) config('app.asset_url')),
+            file_exists(public_path('build/manifest.json'))        => hash_file('xxh128', public_path('build/manifest.json')),
+            file_exists(public_path('mix-manifest.json'))          => hash_file('xxh128', public_path('mix-manifest.json')),
+            default                                                => '',
+        };
 
-        $headers = [
+        return [
             'X-Inertia'                   => 'true',
             'X-Inertia-Partial-Data'      => 'externalIntegrations',
             'X-Inertia-Partial-Component' => 'Calendar/ShowEditCalendarEvent',
+            'X-Inertia-Version'           => $version,
         ];
-
-        if ($version !== null) {
-            $headers['X-Inertia-Version'] = $version;
-        }
-
-        return $headers;
     }
 
     it('returns empty array when user has no active calendar integrations', function (): void {
@@ -243,7 +242,7 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
             ->and($integrations[0]['external_event']['id'])->toBe($externalEvent->getKey())
             ->and($integrations[0]['external_event']['sync_status'])
             ->toBe(ExternalCalendarEventSyncStatusEnum::Synced->value)
-            ->and($integrations[0]['external_event']['logs'])->toBe([]);
+            ->and($integrations[0]['external_event']['logs'])->toBeEmpty();
     });
 
     it('excludes external events belonging to other calendar events', function (): void {

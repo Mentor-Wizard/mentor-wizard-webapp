@@ -45,7 +45,7 @@ describe('CalendarCredentialEncrypter', function (): void {
             $encrypted = $this->encrypter->encrypt('');
             $decrypted = $this->encrypter->decrypt($encrypted);
 
-            expect($decrypted)->toBe('');
+            expect($decrypted)->toBeEmpty();
         });
 
         it('handles long values', function (): void {

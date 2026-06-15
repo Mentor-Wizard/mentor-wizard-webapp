@@ -11,11 +11,8 @@ use App\Models\MentorProgram;
 use App\Models\User;
 use App\Services\Calendar\DailyCalendarEventsService;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
 use Spatie\Permission\Models\Role;
-
-uses(RefreshDatabase::class);
 
 mutates(DailyCalendarEventsService::class);
 
@@ -276,13 +273,11 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         expect($result)->toHaveKeys(['calendarEvents', 'calendarView']);
 
         $calendar = $result['calendarView'];
-
-        expect($calendar)->toHaveKey('2025-02');
-        expect($calendar)->toHaveKey('2025-03');
         //        expect($calendar)->toHaveKey('2025-04');
 
         // Ensure multiple days present to cover both set and append branches
         expect($calendar)->toBeArray()->and(count($calendar))->toBeGreaterThanOrEqual(2);
+        expect($calendar)->toHaveKeys(['2025-02', '2025-03']);
     });
 
     it('builds daily calendar checking start time mutation', function (): void {
@@ -312,11 +307,9 @@ describe('GetDailyCalendarEventsService Service', function (): void {
 
         $calendar = $result['calendarView'];
 
-        expect($calendar)->toHaveKey('2025-02');
-        expect($calendar)->toHaveKey('2025-03');
-
         // Ensure multiple days present to cover both set and append branches
         expect($calendar)->toBeArray()->and(count($calendar))->toBe(2);
+        expect($calendar)->toHaveKeys(['2025-02', '2025-03']);
     });
 
     it('uses first event date for start calendar month when events exist', function (): void {
@@ -511,9 +504,8 @@ describe('GetDailyCalendarEventsService Service', function (): void {
         $result = $service->getDailyCalendarEvents();
 
         expect($result['calendarEvents'][0])->toHaveKey('colour')
-            ->and($result['calendarEvents'][0]['colour'])->toBe(CalendarEventColoursEnum::RED->value);
-
-        expect($result['calendarEvents'])->toHaveKeys([0])
+            ->and($result['calendarEvents'][0]['colour'])->toBe(CalendarEventColoursEnum::RED->value)
+            ->and($result['calendarEvents'])->toHaveKeys([0])
             ->and(array_keys($result['calendarEvents'][0]))->toBe(['id', 'time', 'dateTime',
                 'durationIndex', 'startIndex', 'title', 'webLink', 'colour']);
     });

@@ -1,4 +1,4 @@
-FROM serversideup/php:8.4-frankenphp
+FROM serversideup/php:8.5-frankenphp
 
 USER root
 
@@ -6,17 +6,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-RUN corepack enable && corepack prepare yarn@4.10.3 --activate
+RUN corepack enable && corepack prepare yarn@4.16.0 --activate
 
-RUN install-php-extensions \
-    pdo_pgsql \
-    gd \
-    intl \
-    zip \
-    exif \
-    sockets \
-    pcntl \
-    redis
+RUN install-php-extensions gd intl exif sockets
 
 USER www-data
 

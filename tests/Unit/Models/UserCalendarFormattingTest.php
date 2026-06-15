@@ -96,7 +96,7 @@ and sets flags for event day using service (timezone aware)', function (): void 
 
     expect($emptyDay)
         ->toBeArray()
-        ->and($emptyDay['calendarEvents'])->toBeArray()->toBe([]);
+        ->and($emptyDay['calendarEvents'])->toBeArray()->toBeEmpty();
 });
 
 it('builds daily calendar grouped by month and appends days, marking flags correctly via service', function (): void {

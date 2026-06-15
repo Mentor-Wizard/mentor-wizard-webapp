@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\PaymentStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,29 +21,28 @@ use Override;
  * @mixin IdeHelperPayment
  */
 #[UseFactory(PaymentFactory::class)]
+#[Fillable([
+    'payable_type',
+    'payable_id',
+    'order_reference',
+    'amount',
+    'currency',
+    'transaction_status',
+    'reason',
+    'reason_code',
+    'payment_system',
+    'card_type',
+    'issue_bank_name',
+    'fee_amount',
+    'fee_percentage',
+    'net_amount',
+    'refunded_at',
+    'refund_amount',
+])]
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'payable_type',
-        'payable_id',
-        'order_reference',
-        'amount',
-        'currency',
-        'transaction_status',
-        'reason',
-        'reason_code',
-        'payment_system',
-        'card_type',
-        'issue_bank_name',
-        'fee_amount',
-        'fee_percentage',
-        'net_amount',
-        'refunded_at',
-        'refund_amount',
-    ];
 
     /**
      * @return MorphTo<Model, $this>

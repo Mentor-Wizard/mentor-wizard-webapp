@@ -62,9 +62,8 @@ describe('CreateMentorSessionForCalendarEvent', function (): void {
         expect($session->mentor_id)->toBe($this->mentor->getKey())
             ->and($session->menti_id)->toBe($this->mentee->getKey())
             ->and($session->mentor_program_id)->toBe($this->mentorProgram->getKey())
-            ->and($session->cost)->toBe($this->mentorProgram->cost);
-
-        expect($event->fresh()->mentor_session_id)->toBe($session->getKey());
+            ->and($session->cost)->toBe($this->mentorProgram->cost)
+            ->and($event->fresh()->mentor_session_id)->toBe($session->getKey());
     });
 
     it('does not create MentorSession when status is not CONFIRMED', function (): void {

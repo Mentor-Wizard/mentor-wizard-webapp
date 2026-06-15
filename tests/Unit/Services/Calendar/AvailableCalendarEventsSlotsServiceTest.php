@@ -47,9 +47,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             true
         )->getAvailableSlots();
 
-        expect($slots)->toBeArray()->toHaveCount(1);
-        expect($slots[0]['start'])->toBeInstanceOf(CarbonImmutable::class);
-        expect($slots[0]['end'])->toBeInstanceOf(CarbonImmutable::class);
+        expect($slots)->toBeArray()->toHaveCount(1)
+            ->and($slots[0]['start'])->toBeInstanceOf(CarbonImmutable::class)
+            ->and($slots[0]['end'])->toBeInstanceOf(CarbonImmutable::class);
     });
 
     it('check limit of calendar events', function (): void {
@@ -206,8 +206,8 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         $slots = $service->getAvailableSlots();
 
-        expect($slots)->not->toBeEmpty();
-        expect($slots[0]['start']->format('H:i'))->toBe('10:00');
+        expect($slots)->not->toBeEmpty()
+            ->and($slots[0]['start']->format('H:i'))->toBe('10:00');
     });
 
     // Note: pre-booking time column is non-nullable, behavior with 0 is tested above.
@@ -241,7 +241,7 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             fn ($slot): bool => $slot['end']->lessThanOrEqualTo(Date::parse('2026-01-10 11:20:00'))
         );
 
-        expect($slotsBeforeEvent)->toHaveCount(0);
+        expect($slotsBeforeEvent)->toBeEmpty();
     });
 
     it('includes gaps when session_duration is zero', function (): void {
@@ -519,8 +519,8 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         expect($result)->toHaveCount(3);
         // slot[0] ends at A.start, slot[1] spans A.end..B.start
         expect($result[0]['end']->equalTo($aStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
-        expect($result[1]['start']->equalTo($aEnd->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
-        expect($result[1]['end']->equalTo($bStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
+        expect($result[1]['start']->equalTo($aEnd->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue()
+            ->and($result[1]['end']->equalTo($bStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
     });
 
     it('respects mentor program start and end times', function (): void {
@@ -541,9 +541,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         $slots = $service->getAvailableSlots();
 
-        expect($slots)->not->toBeEmpty();
-        expect($slots[0]['start']->format('Y-m-d'))->toBeGreaterThanOrEqual('2026-02-01');
-        expect(end($slots)['end']->format('Y-m-d'))->toBeLessThanOrEqual('2026-02-28');
+        expect($slots)->not->toBeEmpty()
+            ->and($slots[0]['start']->format('Y-m-d'))->toBeGreaterThanOrEqual('2026-02-01')
+            ->and(end($slots)['end']->format('Y-m-d'))->toBeLessThanOrEqual('2026-02-28');
     });
 
     it('returns single slot when no events exist', function (): void {
@@ -559,8 +559,8 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         $slots = $service->getAvailableSlots();
 
-        expect($slots)->toHaveCount(1);
-        expect($slots[0])->toHaveKeys(['start', 'end']);
+        expect($slots)->toHaveCount(1)
+            ->and($slots[0])->toHaveKeys(['start', 'end']);
     });
 
     it('excludes specific events by id', function (): void {
@@ -638,9 +638,9 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
 
         // We expect three slots: [now..A.start], [A.end..B.start], [B.end..finish]
         expect($result)->toBeArray()->toHaveCount(3);
-        expect($result[0]['end']->equalTo($eventAStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
-        expect($result[1]['start']->equalTo($eventAEnd->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
-        expect($result[1]['end']->equalTo($eventBStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
+        expect($result[0]['end']->equalTo($eventAStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue()
+            ->and($result[1]['start']->equalTo($eventAEnd->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue()
+            ->and($result[1]['end']->equalTo($eventBStart->timezone($tz)->ceilMinutes(CalendarEvent::ROUNDING_DISCRECY_TIME_IN_MINUTES)))->toBeTrue();
     });
 
     it('limits the number of fetched events to 200', function (): void {
@@ -835,13 +835,10 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         expect($result[0]['start']
             ->equalTo(Date::now($tz)->setTime(10, 0, 0)))->toBeTrue()
             ->and($result[0]['end']
-                ->equalTo($eventStartUtc->clone()->timezone($tz)))->toBeTrue();
-
-        expect($result[1]['start']
-            ->equalTo($eventEndUtc->clone()->timezone($tz)))->toBeTrue()
-            ->and($result[1]['end']
-                ->equalTo(Date::now($tz)
-                    ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)))->toBeTrue();
+                ->equalTo($eventStartUtc->clone()->timezone($tz)))->toBeTrue()
+            ->and($result[1]['start']->equalTo($eventEndUtc->clone()->timezone($tz)))->toBeTrue()
+            ->and($result[1]['end']->equalTo(Date::now($tz)
+                ->addMonths(CalendarEvent::MAXIMUM_NUMBER_OF_MONTHS_EVENT_CAN_BE_SET)))->toBeTrue();
     });
 
     it('excludes specified events from available slots calculation', function (): void {
@@ -1072,8 +1069,8 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
             return $slotEndDate === $dayOffdate->format('Y-m-d');
         });
 
-        expect($result)->not->toBeEmpty();
-        expect($slotsOnDayOff)->toBeEmpty();
+        expect($result)->not->toBeEmpty()
+            ->and($slotsOnDayOff)->toBeEmpty();
     });
 
     it('returns slots without schedule filtering when excludeSchedule is false', function (): void {
@@ -1203,8 +1200,10 @@ describe('DST Testing', function (): void {
 
         $slotsAfterDst = $serviceAfter->getAvailableSlots();
 
-        expect($slotsBeforeDst)->toBeArray()->not()->toBeEmpty();
-        expect($slotsAfterDst)->toBeArray()->not()->toBeEmpty();
+        expect($slotsBeforeDst)->toBeArray()->not()->toBeEmpty()
+            ->and($slotsAfterDst)->toBeArray()
+            ->not()
+            ->toBeEmpty();
     });
 
     it('handles Europe/Kyiv DST transition correctly', function (): void {
@@ -2207,8 +2206,8 @@ describe('Mutation Coverage - Continue vs Break in Loop', function (): void {
         $slot2to3 = collect($slots)->first(fn ($slot): bool => $slot['start']->format('H:i') === '13:20'
             && $slot['end']->format('H:i') === '15:00');
 
-        expect($initialSlot)->not->toBeNull('Initial slot should exist');
-        expect($slot2to3)->not->toBeNull('Gap after skipped small gap should exist - loop must CONTINUE not BREAK');
+        expect($initialSlot)->not->toBeNull('Initial slot should exist')
+            ->and($slot2to3)->not->toBeNull('Gap after skipped small gap should exist - loop must CONTINUE not BREAK');
     });
 });
 
@@ -2364,8 +2363,8 @@ describe('Mutation Coverage - Session Duration Exact Values', function (): void 
         $initialSlot = collect($slots)->first(fn ($slot): bool => $slot['start']->format('H:i') === '10:00'
             && $slot['end']->format('H:i') === '10:05');
 
-        expect($initialSlot)->not->toBeNull('5-minute gap should be included when session_duration=0');
-        expect($slots)->toHaveCount(2); // Initial slot + trailing slot
+        expect($initialSlot)->not->toBeNull('5-minute gap should be included when session_duration=0')
+            ->and($slots)->toHaveCount(2); // Initial slot + trailing slot
     });
 });
 
@@ -2424,8 +2423,8 @@ describe('Mutation Coverage - With Clause Eager Loading (Line 105)', function ()
         // The event should block time because mentor is attached (even though booking user isn't)
         // This proves the whereHas in Line 104 works
         expect($slots)->toHaveCount(2);
-        expect($slots[0]['end']->format('H:i'))->toBe('11:00');
-        expect($slots[1]['start']->format('H:i'))->toBe('12:00');
+        expect($slots[0]['end']->format('H:i'))->toBe('11:00')
+            ->and($slots[1]['start']->format('H:i'))->toBe('12:00');
     });
 
     it('events with only booking user attached are considered (verifies both IDs in whereIn)', function (): void {
@@ -2507,8 +2506,8 @@ describe('Mutation Coverage - Session Duration Boundary for First Event (Line 13
 
         // 5-minute slot should be included because sessionDuration=0 means no filtering
         $initialSlot = collect($slots)->first(fn ($slot): bool => $slot['start']->format('H:i') === '10:00');
-        expect($initialSlot)->not->toBeNull();
-        expect($initialSlot['end']->format('H:i'))->toBe('10:05');
+        expect($initialSlot)->not->toBeNull()
+            ->and($initialSlot['end']->format('H:i'))->toBe('10:05');
     });
 
     it('sessionDuration=1 filters slots smaller than 1 minute (proves > 0 check matters)', function (): void {
@@ -2709,8 +2708,8 @@ describe('Mutation Coverage - slotDuration <= 0 vs <= 1 (Line 142)', function ()
         // But that's fine - the point is we need SOME positive-duration slot included
 
         $initialSlot = collect($slots)->first(fn ($slot): bool => $slot['start']->format('H:i') === '10:00');
-        expect($initialSlot)->not->toBeNull('Slot with positive duration should be included');
-        expect($initialSlot['end']->format('H:i'))->toBe('10:05');
+        expect($initialSlot)->not->toBeNull('Slot with positive duration should be included')
+            ->and($initialSlot['end']->format('H:i'))->toBe('10:05');
     });
 
     it('0-minute slot is SKIPPED (boundary for slotDuration <= 0)', function (): void {

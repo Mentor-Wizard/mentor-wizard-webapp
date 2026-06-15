@@ -107,8 +107,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeTrue();
-        expect($validator->errors())->isEmpty();
+        expect($validator->passes())->toBeTrue()
+            ->and($validator->errors())->isEmpty();
     });
 
     it('catches exception when fromDate parsing fails in withValidator', function (): void {
@@ -398,8 +398,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('title'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('title'))->toBeTrue();
     });
 
     it('rejects when fromDate is wrong format', function (): void {
@@ -419,8 +419,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('fromDate'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('fromDate'))->toBeTrue();
     });
     it('rejects when fromDate and fromTime are at wrong format', function (): void {
         $payload = [
@@ -439,9 +439,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('fromDate'))->toBeTrue();
-        expect($validator->errors()->has('fromTime'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('fromDate'))->toBeTrue()
+            ->and($validator->errors()->has('fromTime'))->toBeTrue();
     });
 
     it('rejects when fromTime is wrong format', function (): void {
@@ -461,8 +461,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('fromTime'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('fromTime'))->toBeTrue();
     });
 
     it('rejects when toDate is wrong format', function (): void {
@@ -482,8 +482,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('toDate'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('toDate'))->toBeTrue();
     });
 
     it('does not check slot availability when only fromDate is invalid', function (): void {
@@ -532,9 +532,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('toDate'))->toBeTrue();
-        expect($validator->errors()->has('toTime'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('toDate'))->toBeTrue()
+            ->and($validator->errors()->has('toTime'))->toBeTrue();
     });
 
     it('rejects when fromTime and toTime are at wrong format', function (): void {
@@ -554,9 +554,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('fromTime'))->toBeTrue();
-        expect($validator->errors()->has('toTime'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('fromTime'))->toBeTrue()
+            ->and($validator->errors()->has('toTime'))->toBeTrue();
     });
 
     it('rejects when toDate and fromDate are with wrong format', function (): void {
@@ -576,9 +576,9 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('fromDate'))->toBeTrue();
-        expect($validator->errors()->has('toDate'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('fromDate'))->toBeTrue()
+            ->and($validator->errors()->has('toDate'))->toBeTrue();
     });
 
     it('rejects when toTime is wrong format', function (): void {
@@ -598,8 +598,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('toTime'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('toTime'))->toBeTrue();
     });
 
     it('rejects when colour is not from list', function (): void {
@@ -619,8 +619,8 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
 
         $validator = Validator::make($payload, $request->rules());
 
-        expect($validator->passes())->toBeFalse();
-        expect($validator->errors()->has('colour'))->toBeTrue();
+        expect($validator->passes())->toBeFalse()
+            ->and($validator->errors()->has('colour'))->toBeTrue();
     });
 
     it('verify slots availability with validation from list', function (): void {
@@ -971,9 +971,7 @@ describe('StoreCalendarEventRequest getEventData and validator extras', function
             // Critical: Ensure the slot conflict error is NOT added
             // If the guard is removed, this could try to check slots with bad data
             if (isset($errors['fromDate'])) {
-                foreach ($errors['fromDate'] as $error) {
-                    expect($error)->not->toContain('This slot is busy');
-                }
+                expect($errors['fromDate'])->each->not->toContain('This slot is busy');
             }
         }
     });

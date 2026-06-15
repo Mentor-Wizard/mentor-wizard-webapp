@@ -9,7 +9,7 @@ use AratKruglik\WayForPay\Facades\WayForPay;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
@@ -25,8 +25,8 @@ describe('CheckPaymentStatusAction', function (): void {
 
         $result = CheckPaymentStatusAction::run($payment);
 
-        expect($result)->toBe(PaymentStatusEnum::APPROVED);
-        expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::APPROVED);
+        expect($result)->toBe(PaymentStatusEnum::APPROVED)
+            ->and($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::APPROVED);
     });
 
     it('does not save when status is the same as current', function (): void {
@@ -37,8 +37,8 @@ describe('CheckPaymentStatusAction', function (): void {
 
         $result = CheckPaymentStatusAction::run($payment);
 
-        expect($result)->toBe(PaymentStatusEnum::APPROVED);
-        expect($payment->fresh()->updated_at->toIso8601String())->toBe($updatedAt->toIso8601String());
+        expect($result)->toBe(PaymentStatusEnum::APPROVED)
+            ->and($payment->fresh()->updated_at->toIso8601String())->toBe($updatedAt->toIso8601String());
     });
 
     it('maps unknown WayForPay status to PENDING', function (): void {
@@ -62,7 +62,7 @@ describe('CheckPaymentStatusAction', function (): void {
 
         $result = CheckPaymentStatusAction::run($payment);
 
-        expect($result)->toBe(PaymentStatusEnum::DECLINED);
-        expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::DECLINED);
+        expect($result)->toBe(PaymentStatusEnum::DECLINED)
+            ->and($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::DECLINED);
     });
 });

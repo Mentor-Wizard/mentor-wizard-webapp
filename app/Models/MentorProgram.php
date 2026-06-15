@@ -8,6 +8,7 @@ use App\Contracts\Payable;
 use App\Observers\MentorProgramObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\MentorProgramFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,25 +27,24 @@ use Override;
  */
 #[ObservedBy(MentorProgramObserver::class)]
 #[UseFactory(MentorProgramFactory::class)]
+#[Fillable([
+    'mentor_id',
+    'name',
+    'slug',
+    'is_main',
+    'description',
+    'cost',
+    'currency_id',
+    'start_time',
+    'end_time',
+    'session_duration',
+    'session_type_options',
+    'need_confirmation',
+])]
 class MentorProgram extends Model implements Payable
 {
     /** @use HasFactory<MentorProgramFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'mentor_id',
-        'name',
-        'slug',
-        'is_main',
-        'description',
-        'cost',
-        'currency_id',
-        'start_time',
-        'end_time',
-        'session_duration',
-        'session_type_options',
-        'need_confirmation',
-    ];
 
     /**
      * @return BelongsTo<User, $this>

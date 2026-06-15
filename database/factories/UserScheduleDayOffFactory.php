@@ -10,12 +10,14 @@ use App\Models\UserSchedule;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
+use Override;
 
 /**
  * @extends Factory<UserSchedule>
  */
 class UserScheduleDayOffFactory extends Factory
 {
+    #[Override]
     protected $model = UserSchedule::class;
 
     /**

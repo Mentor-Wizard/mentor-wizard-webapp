@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\MentorSessionNoteFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,15 +16,14 @@ use Override;
  * @mixin IdeHelperMentorSessionNote
  */
 #[UseFactory(MentorSessionNoteFactory::class)]
+#[Fillable([
+    'mentor_session_id',
+    'notes',
+])]
 class MentorSessionNote extends Model
 {
     /** @use HasFactory<MentorSessionNoteFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'mentor_session_id',
-        'notes',
-    ];
 
     /**
      * @return BelongsTo<MentorSession, $this>

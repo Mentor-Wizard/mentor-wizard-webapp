@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\MentorProgramBlockFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,17 +17,16 @@ use Override;
  * @mixin IdeHelperMentorProgramBlock
  */
 #[UseFactory(MentorProgramBlockFactory::class)]
+#[Fillable([
+    'mentor_program_id',
+    'name',
+    'slug',
+    'description',
+])]
 class MentorProgramBlock extends Model
 {
     /** @use HasFactory<MentorProgramBlockFactory> */
     use HasFactory;
-
-    protected $fillable = [
-        'mentor_program_id',
-        'name',
-        'slug',
-        'description',
-    ];
 
     /**
      * @return HasOne<MentorProgramBlockProgress, $this>

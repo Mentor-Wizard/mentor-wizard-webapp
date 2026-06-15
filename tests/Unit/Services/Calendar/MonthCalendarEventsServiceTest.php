@@ -76,7 +76,7 @@ describe('GetMonthCalendarEventsService Service', function (): void {
 
         expect($emptyDay)
             ->toBeArray()
-            ->and($emptyDay['calendarEvents'])->toBeArray()->toBe([]);
+            ->and($emptyDay['calendarEvents'])->toBeArray()->toBeEmpty();
     });
 
     it('sets event date property using timezone via each() method', function (): void {
@@ -215,9 +215,8 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             ->and($eventEntry['date'])->toBe('2025-02-09');
 
         $calendarEvents = $eventEntry['calendarEvents'];
-        expect($calendarEvents[0])->toHaveKey('datetime');
-        expect($calendarEvents[0]['datetime'])->toBe('2025-02-09T21:00');
-        expect($calendarEvents[0]['time'])->toBe('9PM');
+        expect($calendarEvents[0])->toHaveKey('datetime')
+            ->toMatchArray(['datetime' => '2025-02-09T21:00', 'time' => '9PM']);
     });
 
     it('sets event date property using timezone via each() method
@@ -259,9 +258,8 @@ describe('GetMonthCalendarEventsService Service', function (): void {
             ->and($eventEntry['date'])->toBe('2025-02-11');
 
         $calendarEvents = $eventEntry['calendarEvents'];
-        expect($calendarEvents[0])->toHaveKey('datetime');
-        expect($calendarEvents[0]['datetime'])->toBe('2025-02-11T11:00');
-        expect($calendarEvents[0]['time'])->toBe('11AM');
+        expect($calendarEvents[0])->toHaveKey('datetime')
+            ->toMatchArray(['datetime' => '2025-02-11T11:00', 'time' => '11AM']);
     });
 
     it('passes timezone to EventMonthViewResource via additional', function (): void {
@@ -472,8 +470,10 @@ describe('DST Testing - MonthCalendarEventsService', function (): void {
         $service = new MonthCalendarEventsService($this->user, Date::parse('2025-03-09'), $tz);
         $result = $service->getMonthCalendarEvents();
 
-        expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter']);
-        expect($result['calendarView'])->toBeArray()->not()->toBeEmpty();
+        expect($result)->toHaveKeys(['calendarView', 'hasEventsBefore', 'hasEventsAfter'])
+            ->and($result['calendarView'])->toBeArray()
+            ->not()
+            ->toBeEmpty();
     });
 
     it('handles Europe/Kyiv DST transition correctly', function (): void {

@@ -10,7 +10,7 @@ use AratKruglik\WayForPay\Facades\WayForPay;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
@@ -26,8 +26,8 @@ describe('RefundPaymentAction', function (): void {
 
         $result = RefundPaymentAction::run($payment);
 
-        expect($result)->toBeFalse();
-        expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::PENDING);
+        expect($result)->toBeFalse()
+            ->and($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::PENDING);
     });
 
     it('returns false immediately for a DECLINED payment', function (): void {
@@ -57,8 +57,8 @@ describe('RefundPaymentAction', function (): void {
 
         $result = RefundPaymentAction::run($payment);
 
-        expect($result)->toBeFalse();
-        expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::APPROVED);
+        expect($result)->toBeFalse()
+            ->and($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::APPROVED);
     });
 
     it('transitions APPROVED to REFUNDED and marks payable as unpaid when WayForPay returns Refunded', function (): void {
@@ -72,10 +72,10 @@ describe('RefundPaymentAction', function (): void {
 
         $result = RefundPaymentAction::run($payment);
 
-        expect($result)->toBeTrue();
-        expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::REFUNDED);
-        expect($payment->fresh()->refunded_at)->not->toBeNull();
-        expect($session->fresh()->is_paid)->toBeFalse();
+        expect($result)->toBeTrue()
+            ->and($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::REFUNDED)
+            ->and($payment->fresh()->refunded_at)->not->toBeNull()
+            ->and($session->fresh()->is_paid)->toBeFalse();
     });
 
     it('transitions APPROVED to REFUNDED when WayForPay returns status=success', function (): void {
@@ -85,7 +85,7 @@ describe('RefundPaymentAction', function (): void {
 
         $result = RefundPaymentAction::run($payment);
 
-        expect($result)->toBeTrue();
-        expect($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::REFUNDED);
+        expect($result)->toBeTrue()
+            ->and($payment->fresh()->transaction_status)->toBe(PaymentStatusEnum::REFUNDED);
     });
 });

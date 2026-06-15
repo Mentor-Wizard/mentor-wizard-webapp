@@ -9,12 +9,14 @@ use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<ExternalCalendarEvent>
  */
 class ExternalCalendarEventFactory extends Factory
 {
+    #[Override]
     protected $model = ExternalCalendarEvent::class;
 
     /**

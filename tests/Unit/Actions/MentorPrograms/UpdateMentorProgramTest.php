@@ -38,9 +38,9 @@ describe('UpdateMentorProgramRequest Validation', function (): void {
         $request->merge($validData);
         ($this->prepareRequest)($request);
 
-        expect($request->authorize())->toBeTrue();
-        expect($request->rules())->toBeArray();
-        expect($request->validateResolved(...))->not->toThrow(ValidationException::class);
+        expect($request->authorize())->toBeTrue()
+            ->and($request->rules())->toBeArray()
+            ->and($request->validateResolved(...))->not->toThrow(ValidationException::class);
     })->with([
         'full valid data' => fn (): array => [
             'name'                  => 'Valid Program Name',

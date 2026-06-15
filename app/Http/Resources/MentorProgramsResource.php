@@ -10,6 +10,7 @@ use Override;
 
 class MentorProgramsResource extends JsonResource
 {
+    #[Override]
     public static $wrap;
 
     /**

@@ -61,11 +61,11 @@ describe('PaymentStatusEnum', function (): void {
 
     describe('enum values', function (): void {
         it('has correct backing values', function (): void {
-            expect(PaymentStatusEnum::PENDING->value)->toBe('pending');
-            expect(PaymentStatusEnum::APPROVED->value)->toBe('approved');
-            expect(PaymentStatusEnum::DECLINED->value)->toBe('declined');
-            expect(PaymentStatusEnum::REFUNDED->value)->toBe('refunded');
-            expect(PaymentStatusEnum::EXPIRED->value)->toBe('expired');
+            expect(PaymentStatusEnum::PENDING->value)->toBe('pending')
+                ->and(PaymentStatusEnum::APPROVED->value)->toBe('approved')
+                ->and(PaymentStatusEnum::DECLINED->value)->toBe('declined')
+                ->and(PaymentStatusEnum::REFUNDED->value)->toBe('refunded')
+                ->and(PaymentStatusEnum::EXPIRED->value)->toBe('expired');
         });
     });
 });

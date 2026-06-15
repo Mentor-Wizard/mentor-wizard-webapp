@@ -11,8 +11,11 @@ use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Attributes\Visible;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -37,6 +40,27 @@ use Spatie\Permission\Traits\HasRoles;
  */
 #[ObservedBy(UserObserver::class)]
 #[UseFactory(UserFactory::class)]
+#[Fillable([
+    'user_id',
+    'username',
+    'email',
+    'password',
+    'preferences',
+])]
+#[Hidden([
+    'password',
+    'remember_token',
+])]
+#[Visible([
+    'id',
+    'username',
+    'slug',
+    'email',
+    'created_at',
+    'updated_at',
+    'profile',
+    'media',
+])]
 class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
@@ -53,29 +77,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public const int NOTIFICATIONS_PER_PAGE = 20;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'user_id',
-        'username',
-        'email',
-        'password',
-        'preferences',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
      * @var string[]
      */
     protected array $guard_name = [
@@ -86,17 +87,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         RoleGuardEnum::MENTOR->value,
         RoleGuardEnum::MENTI->value,
         RoleGuardEnum::COACH->value,
-    ];
-
-    protected $visible = [
-        'id',
-        'username',
-        'slug',
-        'email',
-        'created_at',
-        'updated_at',
-        'profile',
-        'media',
     ];
 
     /**

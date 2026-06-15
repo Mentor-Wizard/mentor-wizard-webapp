@@ -9,12 +9,14 @@ use App\Enums\CalendarSyncStatusEnum;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<UserCalendarIntegration>
  */
 class UserCalendarIntegrationFactory extends Factory
 {
+    #[Override]
     protected $model = UserCalendarIntegration::class;
 
     /**

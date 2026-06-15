@@ -112,8 +112,8 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         // Don't load the relation - force a fresh instance
         $calendarEvent = CalendarEvent::query()->find($calendarEvent->id);
 
-        expect($calendarEvent->relationLoaded('calendarEventUsers'))->toBeFalse();
-        expect($user->can('view', $calendarEvent))->toBeTrue();
+        expect($calendarEvent->relationLoaded('calendarEventUsers'))->toBeFalse()
+            ->and($user->can('view', $calendarEvent))->toBeTrue();
     });
 
     test('view denies access when user is not attached and relation is eager loaded', function (): void {
@@ -133,8 +133,8 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         // Don't load the relation
         $calendarEvent = CalendarEvent::query()->find($calendarEvent->id);
 
-        expect($calendarEvent->relationLoaded('calendarEventUsers'))->toBeFalse();
-        expect($user->can('view', $calendarEvent))->toBeFalse();
+        expect($calendarEvent->relationLoaded('calendarEventUsers'))->toBeFalse()
+            ->and($user->can('view', $calendarEvent))->toBeFalse();
     });
 
     test('delete uses collection when relation is eager loaded without db query', function (): void {
@@ -149,8 +149,8 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         $queryCount = count(DB::getQueryLog());
         DB::disableQueryLog();
 
-        expect($result)->toBeTrue();
-        expect($queryCount)->toBe(2);
+        expect($result)->toBeTrue()
+            ->and($queryCount)->toBe(2);
     });
 
     test('delete queries database when relation is not loaded', function (): void {
@@ -165,8 +165,8 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         $queryCount = count(DB::getQueryLog());
         DB::disableQueryLog();
 
-        expect($result)->toBeTrue();
-        expect($queryCount)->toBeGreaterThan(0);
+        expect($result)->toBeTrue()
+            ->and($queryCount)->toBeGreaterThan(0);
     });
 
     test('view uses collection when relation is eager loaded without db query', function (): void {
@@ -181,8 +181,8 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         $queryCount = count(DB::getQueryLog());
         DB::disableQueryLog();
 
-        expect($result)->toBeTrue();
-        expect($queryCount)->toBe(1);
+        expect($result)->toBeTrue()
+            ->and($queryCount)->toBe(1);
     });
 
     test('view queries database when relation is not loaded', function (): void {
@@ -197,8 +197,8 @@ describe('CalendarEventPolicy (Unit)', function (): void {
         $queryCount = count(DB::getQueryLog());
         DB::disableQueryLog();
 
-        expect($result)->toBeTrue();
-        expect($queryCount)->toBeGreaterThan(0);
+        expect($result)->toBeTrue()
+            ->and($queryCount)->toBeGreaterThan(0);
     });
 
 });

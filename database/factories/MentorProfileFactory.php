@@ -8,12 +8,14 @@ use App\Models\Currency;
 use App\Models\MentorProfile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<MentorProfile>
  */
 class MentorProfileFactory extends Factory
 {
+    #[Override]
     protected $model = MentorProfile::class;
 
     /**

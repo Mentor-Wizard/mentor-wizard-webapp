@@ -8,12 +8,14 @@ use App\Models\Chat;
 use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Override;
 
 /**
  * @extends Factory<ChatMessage>
  */
 class ChatMessageFactory extends Factory
 {
+    #[Override]
     protected $model = ChatMessage::class;
 
     /**

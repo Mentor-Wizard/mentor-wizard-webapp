@@ -381,11 +381,7 @@ describe('ChatListUser', function (): void {
 
         $resultData = $result->getData(true);
 
-        expect($resultData['users'][0]['message'])->toBe('');
-        expect($resultData['users'][0]['message'])->toBeString();
-        expect($resultData['users'][0]['isRead'])->toBeNull();
-        expect($resultData['users'][0]['createdAt'])->toBeNull();
-        expect($resultData['users'][0]['last'])->toBeNull();
+        expect($resultData['users'][0]['message'])->toBeString()->toBeEmpty()->and($resultData['users'][0]['isRead'])->toBeNull()->and($resultData['users'][0]['createdAt'])->toBeNull()->and($resultData['users'][0]['last'])->toBeNull();
     });
 
     it('handles companion without profile correctly', function (): void {
@@ -417,8 +413,8 @@ describe('ChatListUser', function (): void {
 
         $resultData = $result->getData(true);
 
-        expect($resultData['users'][0]['name'])->toBeNull();
-        expect($resultData['users'][0]['avatar'])->toBeNull();
+        expect($resultData['users'][0]['name'])->toBeNull()
+            ->and($resultData['users'][0]['avatar'])->toBeNull();
     });
 
     it('returns human readable diff', function (): void {
@@ -522,7 +518,7 @@ describe('ChatListUser', function (): void {
         expect($result->getStatusCode())->toBe(Response::HTTP_OK);
 
         $data = $result->getData(true);
-        expect($data['users'][0]['message'])->toBe('');
+        expect($data['users'][0]['message'])->toBeEmpty();
     });
 
     it('kills null-safe mutation for messages in empty chat', function (): void {
@@ -543,7 +539,7 @@ describe('ChatListUser', function (): void {
 
         $data = $result->getData(true);
 
-        expect($data['users'][0]['message'])->toBe('')
+        expect($data['users'][0]['message'])->toBeEmpty()
             ->and($data['users'][0]['isRead'])->toBeNull();
     });
 
@@ -566,7 +562,7 @@ describe('ChatListUser', function (): void {
 
         $data = $result->getData(true);
 
-        expect($data['users'][0]['message'])->toBe('')
+        expect($data['users'][0]['message'])->toBeEmpty()
             ->and($data['users'][0]['isRead'])->toBeNull()
             ->and($data['users'][0]['createdAt'])->toBeNull();
     });

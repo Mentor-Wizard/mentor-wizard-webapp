@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\UserScheduleRecordType;
 use Database\Factories\UserScheduleFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,14 @@ use Override;
  * @mixin IdeHelperUserSchedule
  */
 #[UseFactory(UserScheduleFactory::class)]
+#[Fillable([
+    'user_id',
+    'day_of_week',
+    'start_time',
+    'end_time',
+    'type',
+    'day_off_date',
+])]
 class UserSchedule extends Model
 {
     /** @use HasFactory<UserScheduleFactory> */
@@ -24,20 +33,6 @@ class UserSchedule extends Model
     const int MAX_NUMBER_OF_SCHEDULES_PERIODS_PER_DAY = 4;
 
     const int MAX_NUMBER_OF_ACTIVE_DAY_OFF_EXCLUSIONS = 30;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'user_id',
-        'day_of_week',
-        'start_time',
-        'end_time',
-        'type',
-        'day_off_date',
-    ];
 
     /**
      * @return BelongsTo<User, $this>
