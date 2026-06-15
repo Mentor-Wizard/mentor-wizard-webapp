@@ -7,12 +7,9 @@ use App\Models\MentorSession;
 use App\Models\Payment;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-
-pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);

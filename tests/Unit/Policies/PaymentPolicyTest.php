@@ -11,9 +11,6 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Policies\PaymentPolicy;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-pest()->use(RefreshDatabase::class);
 
 mutates(PaymentPolicy::class);
 

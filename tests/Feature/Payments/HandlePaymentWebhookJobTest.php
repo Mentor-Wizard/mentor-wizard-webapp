@@ -7,10 +7,7 @@ use App\Jobs\HandlePaymentWebhookJob;
 use App\Models\MentorSession;
 use App\Models\Payment;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
-
-pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);

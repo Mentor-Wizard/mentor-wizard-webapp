@@ -7,9 +7,6 @@ use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use AratKruglik\WayForPay\Facades\WayForPay;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-pest()->use(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
