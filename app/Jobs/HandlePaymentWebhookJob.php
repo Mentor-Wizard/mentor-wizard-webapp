@@ -9,6 +9,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +32,7 @@ class HandlePaymentWebhookJob implements ShouldQueue
 
     public function handle(): void
     {
-        $orderReference = $this->data['orderReference'] ?? null;
+        $orderReference = Arr::get($this->data, 'orderReference');
 
         if ($orderReference === null) {
             Log::warning('WayForPay webhook missing orderReference', [
@@ -65,15 +66,15 @@ class HandlePaymentWebhookJob implements ShouldQueue
             return;
         }
 
-        $newStatus = PaymentStatusEnum::fromWayForPay($this->data['transactionStatus'] ?? '');
+        $newStatus = PaymentStatusEnum::fromWayForPay(Arr::get($this->data, 'transactionStatus', ''));
 
         $payment->fill([
             'transaction_status' => $newStatus,
-            'reason'             => $this->data['reason'] ?? null,
-            'reason_code'        => isset($this->data['reasonCode']) ? (string) $this->data['reasonCode'] : null,
-            'payment_system'     => $this->data['paymentSystem'] ?? null,
-            'card_type'          => $this->data['cardType'] ?? null,
-            'issue_bank_name'    => $this->data['issuerBankName'] ?? null,
+            'reason'             => Arr::get($this->data, 'reason'),
+            'reason_code'        => Arr::has($this->data, 'reasonCode') ? (string) Arr::get($this->data, 'reasonCode') : null,
+            'payment_system'     => Arr::get($this->data, 'paymentSystem'),
+            'card_type'          => Arr::get($this->data, 'cardType'),
+            'issue_bank_name'    => Arr::get($this->data, 'issuerBankName'),
         ]);
 
         $payment->save();

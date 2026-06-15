@@ -7,6 +7,7 @@ namespace App\Actions\Payments;
 use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use AratKruglik\WayForPay\Facades\WayForPay;
+use Illuminate\Support\Arr;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class CheckPaymentStatusAction
@@ -17,7 +18,7 @@ class CheckPaymentStatusAction
     {
         $response = WayForPay::checkStatus($payment->order_reference);
 
-        $status = PaymentStatusEnum::fromWayForPay($response['transactionStatus'] ?? '');
+        $status = PaymentStatusEnum::fromWayForPay(Arr::get($response, 'transactionStatus', ''));
 
         $currentStatus = $payment->transaction_status;
         if ($currentStatus !== $status) {

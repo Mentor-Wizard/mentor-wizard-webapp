@@ -9,6 +9,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use App\Support\CurrencyConverter;
 use AratKruglik\WayForPay\Facades\WayForPay;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -33,7 +34,7 @@ class RefundPaymentAction
             $comment,
         );
 
-        if (($response['transactionStatus'] ?? '') !== 'Refunded' && ($response['status'] ?? '') !== 'success') {
+        if (Arr::get($response, 'transactionStatus') !== 'Refunded' && Arr::get($response, 'status') !== 'success') {
             return false;
         }
 
