@@ -7,6 +7,8 @@ use App\Jobs\HandlePaymentWebhookJob;
 use App\Models\MentorSession;
 use App\Models\Payment;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Queue\Attributes\Backoff;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Log;
 
 beforeEach(function (): void {
@@ -43,9 +45,13 @@ describe('HandlePaymentWebhookJob', function (): void {
         });
 
         it('retries 3 times with 10s backoff', function (): void {
-            $job = new HandlePaymentWebhookJob([]);
-            expect($job->tries)->toBe(3)
-                ->and($job->backoff)->toBe(10);
+            $reflection = new ReflectionClass(HandlePaymentWebhookJob::class);
+
+            $tries = $reflection->getAttributes(Tries::class)[0]->newInstance();
+            $backoff = $reflection->getAttributes(Backoff::class)[0]->newInstance();
+
+            expect($tries->tries)->toBe(3)
+                ->and($backoff->backoff)->toBe(10);
         });
     });
 

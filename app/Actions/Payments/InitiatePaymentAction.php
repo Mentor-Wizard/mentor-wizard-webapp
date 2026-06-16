@@ -39,7 +39,7 @@ class InitiatePaymentAction
             'payable_type'       => $payable::class,
             'payable_id'         => $payable->getKey(),
             'order_reference'    => $orderReference,
-            'amount'             => CurrencyConverter::toKopiyky($amount),
+            'amount'             => CurrencyConverter::toCents($amount),
             'currency'           => $currency,
             'transaction_status' => PaymentStatusEnum::PENDING,
             'fee_amount'         => null,

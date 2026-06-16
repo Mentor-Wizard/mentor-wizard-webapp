@@ -16,7 +16,7 @@ class PaymentSuccessPage
 
     public function handle(PaymentCallbackRequest $request): Response
     {
-        $orderReference = $request->string('orderReference')->value();
+        $orderReference = $request->string('order_reference')->value();
 
         $payment = Payment::query()
             ->where('order_reference', $orderReference)

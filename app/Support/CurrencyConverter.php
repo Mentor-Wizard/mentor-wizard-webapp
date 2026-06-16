@@ -6,13 +6,13 @@ namespace App\Support;
 
 final class CurrencyConverter
 {
-    public static function toKopiyky(float $amount): int
+    public static function toCents(float $amount): int
     {
         return (int) round($amount * 100);
     }
 
-    public static function fromKopiyky(int $kopiyky): float
+    public static function fromCents(int $cents): float
     {
-        return $kopiyky / 100;
+        return $cents / 100;
     }
 }

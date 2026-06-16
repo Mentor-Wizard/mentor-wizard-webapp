@@ -2,25 +2,16 @@
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref, watch } from 'vue';
 
-import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import AppPagination from '@/Components/Navigation/AppPagination.vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import PopUp from '@/Components/UI/Notifications/PopUp.vue';
 import { useMoneyFormat } from '@/Composables/useMoneyFormat';
-
-type PayableType = 'MentorSession' | 'MentorProgram';
-type PaymentStatus =
-  | 'pending'
-  | 'approved'
-  | 'declined'
-  | 'refunded'
-  | 'expired';
-type Currency = 'UAH' | 'USD' | 'EUR' | 'GBP';
-
-interface Payable {
-  type: PayableType;
-  id: number;
-  label: string;
-}
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type {
+  Currency,
+  Payable,
+  PayableType,
+  PaymentStatus,
+} from '@/types/payments';
 
 interface PaymentRow {
   id: number;
@@ -71,6 +62,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+defineOptions({ name: 'PaymentHistory' });
 
 const { formatMoney } = useMoneyFormat();
 

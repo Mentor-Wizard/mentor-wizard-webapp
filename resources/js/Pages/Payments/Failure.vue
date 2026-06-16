@@ -1,27 +1,13 @@
 <script setup lang="ts">
 import { XCircleIcon } from '@heroicons/vue/24/outline';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, ref } from 'vue';
 import axios from 'axios';
+import { computed, onMounted, ref } from 'vue';
 
 import PopUp from '@/Components/UI/Notifications/PopUp.vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { useMoneyFormat } from '@/Composables/useMoneyFormat';
-
-type PayableType = 'MentorSession' | 'MentorProgram';
-type PaymentStatus =
-  | 'pending'
-  | 'approved'
-  | 'declined'
-  | 'refunded'
-  | 'expired';
-type Currency = 'UAH' | 'USD' | 'EUR' | 'GBP';
-
-interface Payable {
-  type: PayableType;
-  id: number;
-  label: string;
-}
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { Currency, Payable, PaymentStatus } from '@/types/payments';
 
 interface PaymentFailure {
   order_reference: string;
@@ -36,10 +22,12 @@ interface PaymentFailure {
 interface Props {
   payment: PaymentFailure | null;
   payable: Payable | null;
-  retry_url: string | null;
+  retryUrl: string | null;
 }
 
 const props = defineProps<Props>();
+
+defineOptions({ name: 'PaymentFailure' });
 
 const { formatMoney } = useMoneyFormat();
 
@@ -97,11 +85,11 @@ const payableTypeSnake = computed<string | null>(() => {
 const retryProcessing = ref(false);
 
 const retry = async () => {
-  if (!props.retry_url || !props.payable || !payableTypeSnake.value) return;
+  if (!props.retryUrl || !props.payable || !payableTypeSnake.value) return;
 
   retryProcessing.value = true;
   try {
-    const response = await axios.post<string>(props.retry_url, {
+    const response = await axios.post<string>(props.retryUrl, {
       payable_type: payableTypeSnake.value,
       payable_id: props.payable.id,
     });
@@ -205,7 +193,7 @@ const retry = async () => {
 
         <div class="space-y-3 border-t border-gray-200 px-8 py-6">
           <button
-            v-if="retry_url && payable"
+            v-if="retryUrl && payable"
             type="button"
             :disabled="retryProcessing"
             class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"

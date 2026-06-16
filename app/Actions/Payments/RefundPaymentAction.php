@@ -6,6 +6,7 @@ namespace App\Actions\Payments;
 
 use App\Contracts\Payable;
 use App\Enums\PaymentStatusEnum;
+use App\Enums\WayForPayResponseStatusEnum;
 use App\Models\Payment;
 use App\Support\CurrencyConverter;
 use AratKruglik\WayForPay\Facades\WayForPay;
@@ -24,7 +25,7 @@ class RefundPaymentAction
             return false;
         }
 
-        $amountFloat = CurrencyConverter::fromKopiyky($payment->amount);
+        $amountFloat = CurrencyConverter::fromCents($payment->amount);
         $currency = $payment->currency;
 
         $response = WayForPay::refund(
@@ -34,7 +35,10 @@ class RefundPaymentAction
             $comment,
         );
 
-        if (Arr::get($response, 'transactionStatus') !== 'Refunded' && Arr::get($response, 'status') !== 'success') {
+        $transactionStatus = PaymentStatusEnum::fromWayForPay(Arr::get($response, 'transactionStatus', ''));
+        $responseStatus = WayForPayResponseStatusEnum::tryFrom(Arr::get($response, 'status', ''));
+
+        if ($transactionStatus !== PaymentStatusEnum::REFUNDED && $responseStatus !== WayForPayResponseStatusEnum::SUCCESS) {
             return false;
         }
 

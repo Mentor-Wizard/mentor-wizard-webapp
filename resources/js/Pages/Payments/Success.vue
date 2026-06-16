@@ -4,23 +4,9 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref } from 'vue';
 
 import PopUp from '@/Components/UI/Notifications/PopUp.vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { useMoneyFormat } from '@/Composables/useMoneyFormat';
-
-type PayableType = 'MentorSession' | 'MentorProgram';
-type PaymentStatus =
-  | 'pending'
-  | 'approved'
-  | 'declined'
-  | 'refunded'
-  | 'expired';
-type Currency = 'UAH' | 'USD' | 'EUR' | 'GBP';
-
-interface Payable {
-  type: PayableType;
-  id: number;
-  label: string;
-}
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import type { Currency, Payable, PaymentStatus } from '@/types/payments';
 
 interface PaymentSuccess {
   order_reference: string;
@@ -37,6 +23,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+defineOptions({ name: 'PaymentSuccess' });
 
 const { formatMoney } = useMoneyFormat();
 

@@ -9,17 +9,17 @@ use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\Backoff;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+#[Tries(3)]
+#[Backoff(10)]
 class HandlePaymentWebhookJob implements ShouldQueue
 {
     use Queueable;
-
-    public int $tries = 3;
-
-    public int $backoff = 10;
 
     /**
      * @param  array<string, mixed>  $data

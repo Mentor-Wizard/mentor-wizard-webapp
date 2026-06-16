@@ -91,11 +91,11 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
 
-        // Create two future events in UTC
-        $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
-        $event1EndUtc = (clone $event1StartUtc)->addHour()->setTime(14, 0, 0);
-        $event2StartUtc = Date::now($tz)->addDay()->setTime(15, 0, 0);
-        $event2EndUtc = (clone $event2StartUtc)->setTime(17, 0, 0);
+        // Create two future events in UTC (must be UTC so Eloquent stores and retrieves correctly)
+        $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0)->utc();
+        $event1EndUtc = Date::now($tz)->addDay()->setTime(14, 0, 0)->utc();
+        $event2StartUtc = Date::now($tz)->addDay()->setTime(15, 0, 0)->utc();
+        $event2EndUtc = Date::now($tz)->addDay()->setTime(17, 0, 0)->utc();
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'E1',
@@ -804,8 +804,8 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
     it('creates initial slot when first event starts after current UTC time', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
-        $eventStartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
-        $eventEndUtc = (clone $eventStartUtc)->addHour();
+        $eventStartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0)->utc();
+        $eventEndUtc = Date::now($tz)->addDay()->setTime(13, 0, 0)->utc();
 
         $event = CalendarEvent::query()->create([
             'title'             => 'E-future',
@@ -845,15 +845,15 @@ describe('AvailableCalendarEventsSlotsService', function (): void {
         $tz = 'Europe/Kyiv';
         Date::setTestNow(Date::now($tz)->setTime(10, 0, 0));
 
-        // Create three events
-        $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0);
-        $event1EndUtc = (clone $event1StartUtc)->addHour();
+        // Create three events in UTC so Eloquent stores and retrieves correctly
+        $event1StartUtc = Date::now($tz)->addDay()->setTime(12, 0, 0)->utc();
+        $event1EndUtc = Date::now($tz)->addDay()->setTime(13, 0, 0)->utc();
 
-        $event2StartUtc = Date::now($tz)->addDays(2)->setTime(12, 0, 0);
-        $event2EndUtc = (clone $event2StartUtc)->addHour();
+        $event2StartUtc = Date::now($tz)->addDays(2)->setTime(12, 0, 0)->utc();
+        $event2EndUtc = Date::now($tz)->addDays(2)->setTime(13, 0, 0)->utc();
 
-        $event3StartUtc = Date::now($tz)->addDays(3)->setTime(12, 0, 0);
-        $event3EndUtc = (clone $event3StartUtc)->addHour();
+        $event3StartUtc = Date::now($tz)->addDays(3)->setTime(12, 0, 0)->utc();
+        $event3EndUtc = Date::now($tz)->addDays(3)->setTime(13, 0, 0)->utc();
 
         $event1 = CalendarEvent::query()->create([
             'title'             => 'E1',
