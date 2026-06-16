@@ -238,6 +238,75 @@ XML;
                 ->and($result[1]->title)->toBe('Second');
         });
 
+        it('parses all events when the second response follows a different namespace element', function (): void {
+            $ics1 = "BEGIN:VCALENDAR\r\n"
+                ."BEGIN:VEVENT\r\n"
+                ."SUMMARY:First\r\n"
+                ."DTSTART:20260615T140000Z\r\n"
+                ."DTEND:20260615T150000Z\r\n"
+                ."END:VEVENT\r\n"
+                ."END:VCALENDAR\r\n";
+
+            $ics2 = "BEGIN:VCALENDAR\r\n"
+                ."BEGIN:VEVENT\r\n"
+                ."SUMMARY:Second\r\n"
+                ."DTSTART:20260616T100000Z\r\n"
+                ."DTEND:20260616T110000Z\r\n"
+                ."END:VEVENT\r\n"
+                ."END:VCALENDAR\r\n";
+
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>'
+                .'<D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">'
+                .'<D:response>'
+                .'<D:href>/cal/first.ics</D:href>'
+                .'<D:propstat><D:prop>'
+                .'<C:calendar-data><![CDATA['.$ics1.']]></C:calendar-data>'
+                .'</D:prop></D:propstat>'
+                .'</D:response>'
+                .'<D:response>'
+                .'<D:href>/cal/second.ics</D:href>'
+                .'<D:propstat><D:prop>'
+                .'<C:calendar-data><![CDATA['.$ics2.']]></C:calendar-data>'
+                .'</D:prop></D:propstat>'
+                .'</D:response>'
+                .'</D:multistatus>';
+
+            $result = $this->parser->getParsedReport($xml);
+
+            expect($result)->toHaveCount(2)
+                ->and($result[0]->title)->toBe('First')
+                ->and($result[1]->title)->toBe('Second');
+        });
+
+        it('does not accumulate calendar-data across multiple responses', function (): void {
+            $ics1 = "BEGIN:VCALENDAR\r\n"
+                ."BEGIN:VEVENT\r\n"
+                ."SUMMARY:Event One\r\n"
+                ."DTSTART:20260615T080000Z\r\n"
+                ."DTEND:20260615T090000Z\r\n"
+                ."END:VEVENT\r\n"
+                ."END:VCALENDAR\r\n";
+
+            $ics2 = "BEGIN:VCALENDAR\r\n"
+                ."BEGIN:VEVENT\r\n"
+                ."SUMMARY:Event Two\r\n"
+                ."DTSTART:20260616T080000Z\r\n"
+                ."DTEND:20260616T090000Z\r\n"
+                ."END:VEVENT\r\n"
+                ."END:VCALENDAR\r\n";
+
+            $xml = buildReportXml([
+                ['href' => '/a.ics', 'ics' => $ics1],
+                ['href' => '/b.ics', 'ics' => $ics2],
+            ]);
+
+            $result = $this->parser->getParsedReport($xml);
+
+            expect($result)->toHaveCount(2)
+                ->and($result[0]->title)->toBe('Event One')
+                ->and($result[1]->title)->toBe('Event Two');
+        });
+
         it('falls back to DTEND TZID when DTSTART has no TZID', function (): void {
             $ics = "BEGIN:VCALENDAR\r\n"
                 ."BEGIN:VEVENT\r\n"

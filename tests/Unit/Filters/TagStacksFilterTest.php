@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\TagEnum;
 use App\Filters\TagStacksFilter;
+use App\Models\MentorProfile;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
-covers(TagStacksFilter::class);
+mutates(TagStacksFilter::class);
 
 describe('TagStacksFilter', function (): void {
     beforeEach(function (): void {
@@ -68,6 +69,35 @@ describe('TagStacksFilter', function (): void {
 
         it('uses correct TagEnum value', function (): void {
             expect(TagEnum::STACK->value)->toBe('stack');
+        });
+    });
+
+    describe('SQL generation', function (): void {
+        it('generates whereHas on mentorTags with whereIn for array of tags', function (): void {
+            $query = MentorProfile::query();
+            (new TagStacksFilter)($query, ['Laravel', 'Symfony'], 'stacks');
+
+            expect($query->toSql())->toContain('exists')
+                ->toContain('in (?, ?)')
+                ->and($query->getBindings())->toContain('stack', 'Laravel', 'Symfony');
+        });
+
+        it('generates whereHas with whereIn for comma-separated string', function (): void {
+            $query = MentorProfile::query();
+            (new TagStacksFilter)($query, 'Laravel,Symfony', 'stacks');
+
+            expect($query->toSql())->toContain('exists')
+                ->toContain('in (?, ?)')
+                ->and($query->getBindings())->toContain('stack', 'Laravel', 'Symfony');
+        });
+
+        it('generates whereHas with single whereIn for a single tag', function (): void {
+            $query = MentorProfile::query();
+            (new TagStacksFilter)($query, ['Rust'], 'stacks');
+
+            expect($query->toSql())->toContain('exists')
+                ->toContain('in (?)')
+                ->and($query->getBindings())->toContain('stack', 'Rust');
         });
     });
 });

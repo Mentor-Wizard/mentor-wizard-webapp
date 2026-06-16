@@ -37,6 +37,21 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
                 ->and($integration->access_token)->toBeNull();
         });
 
+        it('stores all required credential fields in updateOrCreate', function (): void {
+            $integration = $this->service->saveCredentials($this->user, 'stored-client-id', 'stored-secret');
+
+            expect($integration->client_id)->toBe('stored-client-id')
+                ->and($integration->client_secret)->toBe('stored-secret')
+                ->and($integration->access_token)->toBeNull()
+                ->and($integration->refresh_token)->toBeNull()
+                ->and($integration->token_expires_at)->toBeNull()
+                ->and($integration->calendar_id)->toBeNull()
+                ->and($integration->calendar_name)->toBeNull()
+                ->and($integration->needs_reauth)->toBeFalse()
+                ->and($integration->sync_status)->toBe(CalendarSyncStatusEnum::PENDING)
+                ->and($integration->last_error_message)->toBeNull();
+        });
+
         it('updates an existing integration with new credentials', function (): void {
             $existing = UserCalendarIntegration::factory()->create([
                 'user_id'  => $this->user->getKey(),
@@ -55,7 +70,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
             $url = $this->service->buildOAuthUrl('override-client-id', 'oauth-state-token');
 
             expect($url)
-                ->toContain('https://accounts.google.com/o/oauth2/v2/auth')
+                ->toStartWith('https://accounts.google.com/o/oauth2/v2/auth?')
                 ->toContain('client_id=override-client-id')
                 ->toContain('response_type=code')
                 ->toContain('state=oauth-state-token')
@@ -66,7 +81,7 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
         it('falls back to the integration client_id when no override is provided', function (): void {
             $url = $this->service->buildOAuthUrl(null, 'state-abc');
 
-            expect($url)->toContain('https://accounts.google.com/o/oauth2/v2/auth')
+            expect($url)->toStartWith('https://accounts.google.com/o/oauth2/v2/auth?')
                 ->toContain('state=state-abc');
         });
     });
@@ -386,6 +401,133 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
 
             expect($events)->toBeArray()->toBeEmpty();
         });
+
+        it('does not refresh the token when it is still valid', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
+                'token_expires_at' => now()->addHour(),
+            ]);
+
+            Http::fake([
+                'https://www.googleapis.com/*' => Http::response(['items' => []]),
+            ]);
+
+            $events = $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            Http::assertNotSent(fn ($req): bool => str_contains((string) $req->url(), 'oauth2.googleapis.com'));
+            expect($events)->toBeArray()->toBeEmpty();
+        });
+
+        it('sets last_error_message with error_description prefix when refresh fails with error_description', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
+                'token_expires_at' => now()->subMinute(),
+            ]);
+
+            Http::fake([
+                'https://oauth2.googleapis.com/*' => Http::response(
+                    ['error' => 'invalid_grant', 'error_description' => 'Token has been expired'],
+                    400
+                ),
+            ]);
+
+            expect(fn () => $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            ))->toThrow(RuntimeException::class);
+
+            $updated = $integration->fresh();
+            expect($updated->last_error_message)->toBe('Token refresh failed: Token has been expired')
+                ->and($updated->sync_status)->toBe(CalendarSyncStatusEnum::ERROR)
+                ->and($updated->needs_reauth)->toBeTrue();
+        });
+
+        it('falls back to error key when error_description is absent in failed refresh response', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
+                'token_expires_at' => now()->subMinute(),
+            ]);
+
+            Http::fake([
+                'https://oauth2.googleapis.com/*' => Http::response(
+                    ['error' => 'invalid_client'],
+                    400
+                ),
+            ]);
+
+            expect(fn () => $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            ))->toThrow(RuntimeException::class);
+
+            $updated = $integration->fresh();
+            expect($updated->last_error_message)->toBe('Token refresh failed: invalid_client');
+        });
+
+        it('persists new access_token and token_expires_at after successful refresh', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
+                'token_expires_at' => now()->subMinute(),
+                'access_token'     => 'old-google-token',
+            ]);
+
+            Http::fake([
+                'https://oauth2.googleapis.com/*' => Http::response([
+                    'access_token' => 'brand-new-google-token',
+                    'expires_in'   => 3600,
+                ]),
+                'https://www.googleapis.com/*' => Http::response(['items' => []]),
+            ]);
+
+            $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            $updated = $integration->fresh();
+            expect($updated->access_token)->toBe('brand-new-google-token')
+                ->and($updated->token_expires_at)->not->toBeNull();
+        });
+
+        it('uses end timezone when start has no timezone', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
+                'token_expires_at' => now()->addHour(),
+            ]);
+
+            Http::fake([
+                'https://www.googleapis.com/*' => Http::response([
+                    'items' => [
+                        [
+                            'id'      => 'tz-fallback-evt',
+                            'summary' => 'TZ Fallback',
+                            'start'   => ['dateTime' => '2026-04-18T10:00:00+02:00'],
+                            'end'     => ['dateTime' => '2026-04-18T11:00:00+02:00', 'timeZone' => 'Europe/Berlin'],
+                        ],
+                    ],
+                ]),
+            ]);
+
+            $events = $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            expect($events[0]->providerTimezone)->toBe('Europe/Berlin');
+        });
     });
 
     describe('createEvent', function (): void {
@@ -494,6 +636,23 @@ describe('GoogleExternalCalendarService (AbstractGoogleExternalCalendarService v
 
             Http::assertSent(fn ($req): bool => $req->method() === 'DELETE'
                 && str_contains((string) $req->url(), 'evt-to-delete'));
+        });
+
+        it('uses calendar_id from integration when it is not primary', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::GOOGLE_PERSONAL_APP,
+                'calendar_id'      => 'custom-cal-id-123',
+                'token_expires_at' => now()->addHour(),
+            ]);
+
+            Http::fake(['https://www.googleapis.com/*' => Http::response([], 200)]);
+
+            $this->service->deleteEvent($integration, 'custom-evt-456');
+
+            Http::assertSent(fn ($req): bool => $req->method() === 'DELETE'
+                && str_contains((string) $req->url(), urlencode('custom-cal-id-123'))
+                && str_contains((string) $req->url(), urlencode('custom-evt-456')));
         });
 
         it('does not throw when event is already deleted externally (404)', function (): void {

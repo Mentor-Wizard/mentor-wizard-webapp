@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 use App\Filters\ProfileRateFilter;
+use App\Models\MentorProfile;
 use App\Traits\ParsesNumericRange;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
-covers(ProfileRateFilter::class);
+mutates(ProfileRateFilter::class);
 
 describe('ProfileRateFilter', function (): void {
     beforeEach(function (): void {
@@ -66,5 +67,46 @@ describe('ProfileRateFilter', function (): void {
         }
 
         expect(new ProfileRateFilter)->toBeInstanceOf(ProfileRateFilter::class);
+    });
+
+    describe('SQL generation', function (): void {
+        it('generates whereBetween SQL for min+max', function (): void {
+            $query = MentorProfile::query();
+            (new ProfileRateFilter)($query, ['min' => '20', 'max' => '100'], 'rate');
+
+            expect($query->toSql())->toContain('between')
+                ->and($query->getBindings())->toContain(20.0, 100.0);
+        });
+
+        it('generates where >= SQL for min only', function (): void {
+            $query = MentorProfile::query();
+            (new ProfileRateFilter)($query, ['min' => '50'], 'rate');
+
+            expect($query->toSql())->toContain('>= ?')
+                ->and($query->getBindings())->toContain(50.0);
+        });
+
+        it('generates where <= SQL for max only', function (): void {
+            $query = MentorProfile::query();
+            (new ProfileRateFilter)($query, ['max' => '80'], 'rate');
+
+            expect($query->toSql())->toContain('<= ?')
+                ->and($query->getBindings())->toContain(80.0);
+        });
+
+        it('swaps bounds when min > max so between uses smaller as lower bound', function (): void {
+            $query = MentorProfile::query();
+            (new ProfileRateFilter)($query, ['min' => '80', 'max' => '30'], 'rate');
+
+            expect($query->toSql())->toContain('between')
+                ->and($query->getBindings())->toEqual([30.0, 80.0]);
+        });
+
+        it('applies no SQL constraint when value is not an array', function (): void {
+            $query = MentorProfile::query();
+            (new ProfileRateFilter)($query, 'invalid', 'rate');
+
+            expect($query->toSql())->toBe(MentorProfile::query()->toSql());
+        });
     });
 });

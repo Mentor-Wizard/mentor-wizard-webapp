@@ -62,6 +62,23 @@ describe('SplitSlotsPerSessionDuration', function (): void {
         expect($service->getSplitSlots())->toBeEmpty();
     });
 
+    it('first slot on a new date key has correct start and end times', function (): void {
+        $tz = 'UTC';
+        $start = Date::parse('2026-01-12 10:00:00', $tz);
+        $end = Date::parse('2026-01-12 11:00:00', $tz);
+
+        $service = new SplitSlotsPerSessionDuration([
+            ['start' => $start, 'end' => $end],
+        ], 60, $tz);
+
+        $split = $service->getSplitSlots();
+
+        expect($split)->toHaveKey('2026-01-12')
+            ->and($split['2026-01-12'])->toHaveCount(1)
+            ->and($split['2026-01-12'][0]['start']->format('H:i'))->toBe('10:00')
+            ->and($split['2026-01-12'][0]['end']->format('H:i'))->toBe('11:00');
+    });
+
     it('splits across midnight and groups by target day will provide only one slot', function (): void {
         $tz = 'UTC';
         $start = Date::parse('2026-01-10 23:30:00', $tz);

@@ -2811,3 +2811,83 @@ describe('Mutation Coverage - Continue inside slotDuration check (Line 145)', fu
         expect($trailingSlot)->not->toBeNull();
     });
 });
+
+describe('Mutation Coverage - Trailing Slot Start Time (Line 181)', function (): void {
+    beforeEach(function (): void {
+        $this->seed(RoleSeeder::class);
+
+        $this->user = User::factory()->create();
+        $this->user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+        $this->user->profile->update(['minimum_pre_booking_time' => 0]);
+
+        $this->mentorProgram = MentorProgram::factory()->create([
+            'mentor_id'        => $this->user->getKey(),
+            'session_duration' => 0,
+        ]);
+
+        $this->timezone = 'UTC';
+    });
+
+    it('trailing slot start comes from previous event end_date_time when events exist (kills NotIdenticalToIdentical)', function (): void {
+        Date::setTestNow(Date::create(2026, 1, 10, 10, 0, 0, $this->timezone));
+
+        $eventStart = Date::parse('2026-01-10 11:00:00', $this->timezone);
+        $eventEnd = Date::parse('2026-01-10 12:00:00', $this->timezone);
+
+        CalendarEvent::factory()->create([
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ])->calendarEventUsers()->attach([$this->user->getKey(), $this->mentorProgram->mentor_id]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        // The trailing slot start must equal the last event's end_date_time (12:00), NOT periodStart (10:00).
+        // Mutation NotIdenticalToIdentical flips `$previousEvent !== null` to `=== null`,
+        // which would make the start fall back to periodStart instead.
+        $trailingSlot = collect($slots)->last();
+
+        expect($trailingSlot['start']->format('H:i'))->toBe('12:00')
+            ->and($trailingSlot['start']->format('H:i'))->not->toBe('10:00');
+    });
+
+    it('trailing slot always has a start key (kills RemoveArrayItem on start)', function (): void {
+        Date::setTestNow(Date::create(2026, 1, 10, 10, 0, 0, $this->timezone));
+
+        $eventStart = Date::parse('2026-01-10 11:00:00', $this->timezone);
+        $eventEnd = Date::parse('2026-01-10 12:00:00', $this->timezone);
+
+        CalendarEvent::factory()->create([
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart->format('Y-m-d'),
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ])->calendarEventUsers()->attach([$this->user->getKey(), $this->mentorProgram->mentor_id]);
+
+        $service = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $this->timezone,
+            $this->mentorProgram,
+            [],
+            false,
+        );
+
+        $slots = $service->getAvailableSlots();
+
+        $trailingSlot = collect($slots)->last();
+
+        expect($trailingSlot)->toHaveKey('start')
+            ->and($trailingSlot)->toHaveKey('end');
+    });
+});
