@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\PaymentStatusEnum;
 
-covers(PaymentStatusEnum::class);
+mutates(PaymentStatusEnum::class);
 
 describe('PaymentStatusEnum', function (): void {
     describe('fromWayForPay', function (): void {

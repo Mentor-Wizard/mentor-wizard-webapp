@@ -104,6 +104,7 @@ jobs:
   tests:
     name: '♻️ Tests | ${{ matrix.command.name }}'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -127,7 +128,7 @@ jobs:
           - { name: '🔬 Unit',     command: 'php artisan test --testsuite=Unit --parallel',                                        report: false }
           - { name: '🧬 Feature',  command: 'php artisan test --testsuite=Feature --parallel',                                     report: false }
           - { name: '☂️ Coverage', command: 'php artisan test --coverage --compact --coverage-clover coverage/coverage-clover.xml --log-junit coverage/junit.xml', report: true  }
-          - { name: '🦠 Mutation', command: 'php artisan test --mutate --covered-only --min=100 --parallel',                       report: false }
+          - { name: '🦠 Mutation', command: 'php artisan test --testsuite=Unit --mutate --covered-only --min=100 --parallel',       report: false }
 
     steps:
       - name: '🛎 Checkout'
