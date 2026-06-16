@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\CurrencyEnum;
 use App\Enums\PaymentStatusEnum;
-use App\Models\Currency;
 use App\Models\MentorSession;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,7 +27,7 @@ class PaymentFactory extends Factory
             'payable_id'         => $session->getKey(),
             'order_reference'    => fake()->uuid(),
             'amount'             => fake()->numberBetween(10000, 500000),
-            'currency'           => Currency::factory(),
+            'currency'           => fake()->randomElement(CurrencyEnum::names()),
             'transaction_status' => PaymentStatusEnum::PENDING,
             'reason'             => null,
             'reason_code'        => null,
