@@ -167,6 +167,30 @@ XML;
             expect($result)->toBe('/principals/users/alice/');
         });
 
+        it('does not return value from a second target element after the first closes', function (): void {
+            $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:propstat>
+      <D:prop>
+        <D:current-user-principal>
+          <D:href>/principals/users/alice/</D:href>
+        </D:current-user-principal>
+        <D:current-user-principal>
+          <D:href>/principals/users/bob/</D:href>
+        </D:current-user-principal>
+      </D:prop>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+XML;
+
+            $result = $this->parser->extractValue($xml, 'current-user-principal', 'href');
+
+            expect($result)->toBe('/principals/users/alice/');
+        });
+
         it('works regardless of namespace prefix', function (): void {
             $xml = <<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>

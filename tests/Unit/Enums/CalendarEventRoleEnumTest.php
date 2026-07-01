@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventRoleEnum;
 
-mutates(CalendarEventRoleEnum::class);
-
 describe('CalendarEventRoleEnum', function (): void {
     it('returns all names and values', function (): void {
         $names = CalendarEventRoleEnum::names();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\Payable;
 use App\Observers\MentorProgramObserver;
 use Carbon\CarbonInterface;
 use Database\Factories\MentorProgramFactory;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Override;
 
 /**
@@ -39,7 +41,7 @@ use Override;
     'session_type_options',
     'need_confirmation',
 ])]
-class MentorProgram extends Model
+class MentorProgram extends Model implements Payable
 {
     /** @use HasFactory<MentorProgramFactory> */
     use HasFactory;
@@ -82,6 +84,29 @@ class MentorProgram extends Model
     public function mentorSession(): HasMany
     {
         return $this->hasMany(MentorSession::class, 'mentor_program_id');
+    }
+
+    /**
+     * @return MorphOne<Payment, $this>
+     */
+    public function payment(): MorphOne
+    {
+        return $this->morphOne(Payment::class, 'payable');
+    }
+
+    public function markPaid(): void
+    {
+        // MentorProgram tracks payment at the session level; no-op intentional
+    }
+
+    public function markUnpaid(): void
+    {
+        // MentorProgram tracks payment at the session level; no-op intentional
+    }
+
+    public function getPayableLabel(): string
+    {
+        return $this->name;
     }
 
     /**

@@ -68,3 +68,7 @@ frankenphp
 
 # Claude Code local settings
 /.claude/settings.local.json
+
+# Local AI tooling
+.agents/
+docs/plans/

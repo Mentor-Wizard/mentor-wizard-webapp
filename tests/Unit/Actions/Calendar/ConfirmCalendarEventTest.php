@@ -12,10 +12,12 @@ use App\Http\Requests\Calendar\CalendarEvent\ConfirmCalendarEventRequest;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
+use App\Notifications\CalendarEventConfirmedNotification;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -283,6 +285,53 @@ describe('ConfirmCalendarEvent (Unit)', function (): void {
 
         expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
             ->and($alreadyCancelled->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
+    });
+
+    it('sends confirmed event notification to mentee participants', function (): void {
+        Notification::fake();
+
+        $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
+
+        Notification::assertSentTo(
+            $this->mentee,
+            CalendarEventConfirmedNotification::class,
+        );
+    });
+
+    it('redirects to pending page with success message when host confirms', function (): void {
+        $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
+
+        expect(session('success'))->toBe('Event was successfully confirmed.');
+    });
+
+    it('does not return co-host waiting message when host is the only attendee', function (): void {
+        $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
+
+        expect(session('success'))->not->toEqual('Event is confirmed on your side, but waiting for confirmation from CO-HOST');
+    });
+
+    it('cancels overlapping pending events but not the confirmed event itself', function (): void {
+        $pending = CalendarEvent::factory()->create([
+            'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+            'start_date_time'   => $this->event->start_date_time,
+            'end_date_time'     => $this->event->end_date_time,
+            'date'              => $this->event->date,
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $pending->calendarEventUsers()->attach($this->host->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::RED->value,
+        ]);
+
+        $request = makeConfirmCalendarEventRequest($this->host, $this->mentorProgram, $this->event);
+        new ConfirmCalendarEvent()->handle($request, $this->mentorProgram, $this->event);
+
+        expect($this->event->fresh()->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
+            ->and($pending->fresh()->status)->toBe(CalendarEventStatusEnum::CANCELLED);
     });
 
     it('whereNotIn must include event ID to exclude self from overlap check (kills RemoveArrayItem)', function (): void {

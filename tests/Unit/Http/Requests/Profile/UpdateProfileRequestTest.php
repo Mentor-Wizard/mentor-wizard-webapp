@@ -134,6 +134,28 @@ describe('User data Validation', function (): void {
             ->toContain('The whatsapp field format is invalid.');
     });
 
+    it('rejects a telegram value that is a valid URL but not a t.me link', function (): void {
+        $request = new UpdateUserProfileRequest;
+
+        $validator = Validator::make([
+            'telegram' => 'https://telegram.org/username',
+        ], $request->rules());
+
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->get('telegram'))
+            ->toContain('The telegram field format is invalid.');
+    });
+
+    it('accepts a valid t.me telegram URL', function (): void {
+        $request = new UpdateUserProfileRequest;
+
+        $validator = Validator::make([
+            'telegram' => 'https://t.me/myhandle',
+        ], $request->rules());
+
+        expect($validator->passes())->toBeTrue();
+    });
+
     it('wrong data length min', function (): void {
         $request = new UpdateUserProfileRequest;
         $validator = Validator::make([

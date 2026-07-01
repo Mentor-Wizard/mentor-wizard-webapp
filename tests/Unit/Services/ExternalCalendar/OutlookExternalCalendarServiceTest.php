@@ -234,6 +234,65 @@ describe('OutlookExternalCalendarService', function (): void {
                 ->and($events[0]->description)->toBe('Agenda notes');
         });
 
+        it('maps empty string body to null description', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->addHour(),
+            ]);
+
+            Http::fake([
+                'https://graph.microsoft.com/*' => Http::response([
+                    'value' => [
+                        [
+                            'id'          => 'evt-empty-body',
+                            'subject'     => 'Empty Body',
+                            'start'       => ['dateTime' => '2026-04-18T10:00:00', 'timeZone' => 'UTC'],
+                            'end'         => ['dateTime' => '2026-04-18T11:00:00', 'timeZone' => 'UTC'],
+                            'body'        => ['content' => ''],
+                            'bodyPreview' => '',
+                        ],
+                    ],
+                ]),
+            ]);
+
+            $events = $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            expect($events[0]->description)->toBeNull();
+        });
+
+        it('maps event without subject to empty string title', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->addHour(),
+            ]);
+
+            Http::fake([
+                'https://graph.microsoft.com/*' => Http::response([
+                    'value' => [
+                        [
+                            'id'    => 'evt-no-subject',
+                            'start' => ['dateTime' => '2026-04-18T10:00:00', 'timeZone' => 'UTC'],
+                            'end'   => ['dateTime' => '2026-04-18T11:00:00', 'timeZone' => 'UTC'],
+                        ],
+                    ],
+                ]),
+            ]);
+
+            $events = $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            expect($events[0]->title)->toBeEmpty();
+        });
+
         it('maps whitespace-only body content to a null description', function (): void {
             $integration = UserCalendarIntegration::factory()->create([
                 'user_id'          => $this->user->getKey(),
@@ -351,6 +410,163 @@ describe('OutlookExternalCalendarService', function (): void {
             );
 
             expect($events)->toBeArray()->toBeEmpty();
+        });
+
+        it('does not refresh the token when it is still valid', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->addHour(),
+            ]);
+
+            Http::fake([
+                'https://graph.microsoft.com/*' => Http::response(['value' => []]),
+            ]);
+
+            $events = $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            Http::assertNotSent(fn ($req): bool => str_contains((string) $req->url(), 'login.microsoftonline.com'));
+            expect($events)->toBeArray()->toBeEmpty();
+        });
+
+        it('marks sync_status as ERROR and sets last_error_message when refresh token is null', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->subMinute(),
+                'refresh_token'    => null,
+            ]);
+
+            expect(fn () => $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            ))->toThrow(RuntimeException::class);
+
+            $this->assertDatabaseHas(UserCalendarIntegration::class, [
+                'id'           => $integration->getKey(),
+                'needs_reauth' => true,
+                'sync_status'  => CalendarSyncStatusEnum::ERROR,
+            ]);
+
+            $updated = $integration->fresh();
+            expect($updated->last_error_message)->not->toBeNull();
+        });
+
+        it('sends all required fields in the token refresh POST request', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->subMinute(),
+            ]);
+
+            Http::fake([
+                'https://login.microsoftonline.com/*' => Http::response([
+                    'access_token' => 'refreshed-access-token',
+                    'expires_in'   => 3600,
+                ]),
+                'https://graph.microsoft.com/*' => Http::response(['value' => []]),
+            ]);
+
+            $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            Http::assertSent(function ($req): bool {
+                if (! str_contains((string) $req->url(), 'login.microsoftonline.com')) {
+                    return false;
+                }
+
+                $body = $req->data();
+
+                return isset($body['client_id'], $body['client_secret'], $body['refresh_token'], $body['grant_type'])
+                    && $body['grant_type'] === 'refresh_token'
+                    && $body['client_id'] === 'test-ms-client-id'
+                    && $body['client_secret'] === 'test-ms-client-secret';
+            });
+        });
+
+        it('sets last_error_message with error_description prefix when refresh fails with error_description', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->subMinute(),
+            ]);
+
+            Http::fake([
+                'https://login.microsoftonline.com/*' => Http::response(
+                    ['error' => 'invalid_grant', 'error_description' => 'Token has been revoked'],
+                    400
+                ),
+            ]);
+
+            expect(fn () => $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            ))->toThrow(RuntimeException::class);
+
+            $updated = $integration->fresh();
+            expect($updated->last_error_message)->toBe('Token refresh failed: Token has been revoked')
+                ->and($updated->sync_status)->toBe(CalendarSyncStatusEnum::ERROR)
+                ->and($updated->needs_reauth)->toBeTrue();
+        });
+
+        it('falls back to error key when error_description is absent in failed refresh response', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->subMinute(),
+            ]);
+
+            Http::fake([
+                'https://login.microsoftonline.com/*' => Http::response(
+                    ['error' => 'invalid_client'],
+                    400
+                ),
+            ]);
+
+            expect(fn () => $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            ))->toThrow(RuntimeException::class);
+
+            $updated = $integration->fresh();
+            expect($updated->last_error_message)->toBe('Token refresh failed: invalid_client');
+        });
+
+        it('persists new access_token and token_expires_at after successful refresh', function (): void {
+            $integration = UserCalendarIntegration::factory()->create([
+                'user_id'          => $this->user->getKey(),
+                'provider'         => CalendarProviderEnum::OUTLOOK,
+                'token_expires_at' => now()->subMinute(),
+                'access_token'     => 'old-access-token',
+            ]);
+
+            Http::fake([
+                'https://login.microsoftonline.com/*' => Http::response([
+                    'access_token' => 'brand-new-access-token',
+                    'expires_in'   => 3600,
+                ]),
+                'https://graph.microsoft.com/*' => Http::response(['value' => []]),
+            ]);
+
+            $this->service->fetchEvents(
+                $integration,
+                Date::parse('2026-04-18'),
+                Date::parse('2026-04-19'),
+            );
+
+            $updated = $integration->fresh();
+            expect($updated->access_token)->toBe('brand-new-access-token')
+                ->and($updated->token_expires_at)->not->toBeNull();
         });
     });
 

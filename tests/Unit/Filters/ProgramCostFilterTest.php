@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 use App\Filters\ProgramCostFilter;
+use App\Models\User;
 use App\Traits\ParsesNumericRange;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
-covers(ProgramCostFilter::class);
+mutates(ProgramCostFilter::class);
 
 describe('ProgramCostFilter', function (): void {
     beforeEach(function (): void {
@@ -66,5 +67,49 @@ describe('ProgramCostFilter', function (): void {
         }
 
         expect(new ProgramCostFilter)->toBeInstanceOf(ProgramCostFilter::class);
+    });
+
+    describe('SQL generation', function (): void {
+        it('generates whereHas with whereBetween SQL for min+max', function (): void {
+            $query = User::query();
+            (new ProgramCostFilter)($query, ['min' => '100', 'max' => '300'], 'cost');
+
+            expect($query->toSql())->toContain('exists')
+                ->toContain('between')
+                ->and($query->getBindings())->toContain(100.0, 300.0);
+        });
+
+        it('generates whereHas with where >= SQL for min only', function (): void {
+            $query = User::query();
+            (new ProgramCostFilter)($query, ['min' => '300'], 'cost');
+
+            expect($query->toSql())->toContain('exists')
+                ->toContain('>= ?')
+                ->and($query->getBindings())->toContain(300.0);
+        });
+
+        it('generates whereHas with where <= SQL for max only', function (): void {
+            $query = User::query();
+            (new ProgramCostFilter)($query, ['max' => '100'], 'cost');
+
+            expect($query->toSql())->toContain('exists')
+                ->toContain('<= ?')
+                ->and($query->getBindings())->toContain(100.0);
+        });
+
+        it('swaps bounds when min > max so between uses smaller as lower bound', function (): void {
+            $query = User::query();
+            (new ProgramCostFilter)($query, ['min' => '400', 'max' => '100'], 'cost');
+
+            expect($query->toSql())->toContain('between')
+                ->and($query->getBindings())->toEqual([100.0, 400.0]);
+        });
+
+        it('applies whereHas even when value is not an array', function (): void {
+            $query = User::query();
+            (new ProgramCostFilter)($query, 'invalid', 'cost');
+
+            expect($query->toSql())->toContain('exists');
+        });
     });
 });

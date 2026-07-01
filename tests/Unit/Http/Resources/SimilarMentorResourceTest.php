@@ -13,7 +13,7 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
-covers(SimilarMentorResource::class);
+mutates(SimilarMentorResource::class);
 
 describe('Similar Mentor Resource', function (): void {
     beforeEach(function (): void {
@@ -119,5 +119,34 @@ describe('Similar Mentor Resource', function (): void {
         $mock->slug = $freshUser->slug;
 
         SimilarMentorResource::make($mock)->resolve();
+    });
+
+    it('concatenates first name then last name with a space', function (): void {
+        $user = User::factory()->create();
+        $user->profile->update(['name' => 'Anna', 'last_name' => 'Bell']);
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $resource = SimilarMentorResource::make($user)->resolve();
+
+        expect($resource['name'])->toBe('Anna Bell');
+    });
+
+    it('returns null title when user has no mentor profile', function (): void {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $resource = SimilarMentorResource::make($user)->resolve();
+
+        expect($resource)->toHaveKey('title')
+            ->and($resource['title'])->toBeNull();
+    });
+
+    it('returns all expected keys in the resource array', function (): void {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $resource = SimilarMentorResource::make($user)->resolve();
+
+        expect($resource)->toHaveKeys(['id', 'name', 'avatar', 'title', 'rate', 'currency', 'rating', 'reviews', 'slug']);
     });
 });

@@ -135,4 +135,61 @@ describe('UserScheduleViewResource', function (): void {
             expect($result['day_of_week'])->toBe($day);
         }
     });
+
+    it('includes day_of_week key with the correct integer value', function (): void {
+        $schedule = UserSchedule::factory()->make(['day_of_week' => 3]);
+        $schedule->id = 1;
+
+        $result = new UserScheduleViewResource($schedule)->toArray(Request::create('/test'));
+
+        expect($result)->toHaveKey('day_of_week')
+            ->and($result['day_of_week'])->toBe(3);
+    });
+
+    it('includes start_time key with the correct value', function (): void {
+        $schedule = UserSchedule::factory()->make(['start_time' => '08:30:00']);
+        $schedule->id = 1;
+
+        $result = new UserScheduleViewResource($schedule)->toArray(Request::create('/test'));
+
+        expect($result)->toHaveKey('start_time')
+            ->and($result['start_time'])->toBe('08:30:00');
+    });
+
+    it('includes type key with the correct enum value', function (): void {
+        $schedule = UserSchedule::factory()->make(['type' => UserScheduleRecordType::WORKING_DAY]);
+        $schedule->id = 1;
+
+        $result = new UserScheduleViewResource($schedule)->toArray(Request::create('/test'));
+
+        expect($result)->toHaveKey('type')
+            ->and($result['type'])->toBe(UserScheduleRecordType::WORKING_DAY);
+    });
+
+    it('includes day_off_date key and formats it as Y-m-d string when not null', function (): void {
+        $date = Date::parse('2026-07-15');
+        $schedule = UserSchedule::factory()->make([
+            'type'         => UserScheduleRecordType::DAY_OFF,
+            'day_off_date' => $date,
+        ]);
+        $schedule->id = 1;
+
+        $result = new UserScheduleViewResource($schedule)->toArray(Request::create('/test'));
+
+        expect($result)->toHaveKey('day_off_date')
+            ->and($result['day_off_date'])->toBe('2026-07-15');
+    });
+
+    it('uses null-safe operator and returns null when day_off_date is null', function (): void {
+        $schedule = UserSchedule::factory()->make([
+            'type'         => UserScheduleRecordType::WORKING_DAY,
+            'day_off_date' => null,
+        ]);
+        $schedule->id = 1;
+
+        $result = new UserScheduleViewResource($schedule)->toArray(Request::create('/test'));
+
+        expect($result)->toHaveKey('day_off_date')
+            ->and($result['day_off_date'])->toBeNull();
+    });
 });

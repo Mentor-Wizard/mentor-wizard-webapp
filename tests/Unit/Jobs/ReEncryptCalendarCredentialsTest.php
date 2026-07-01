@@ -121,4 +121,94 @@ describe('ReEncryptCalendarCredentials job', function (): void {
                 && $context['failed'] === 1)
             ->once();
     });
+
+    it('logs the integration_id in the error context when re-encryption fails', function (): void {
+        Log::spy();
+
+        $badIntegration = UserCalendarIntegration::factory()->create([
+            'provider' => CalendarProviderEnum::GOOGLE,
+        ]);
+
+        $badIntegration->newQuery()
+            ->where('id', $badIntegration->getKey())
+            ->update(['access_token' => 'corrupted:data']);
+
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
+
+        Log::shouldHaveReceived('error')
+            ->withArgs(fn ($message, $context): bool => str_contains($message, 'failed to re-encrypt')
+                && isset($context['integration_id'])
+                && $context['integration_id'] === $badIntegration->getKey())
+            ->once();
+    });
+
+    it('logs the error message in the error context when re-encryption fails', function (): void {
+        Log::spy();
+
+        $badIntegration = UserCalendarIntegration::factory()->create([
+            'provider' => CalendarProviderEnum::GOOGLE,
+        ]);
+
+        $badIntegration->newQuery()
+            ->where('id', $badIntegration->getKey())
+            ->update(['access_token' => 'corrupted:data']);
+
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
+
+        Log::shouldHaveReceived('error')
+            ->withArgs(fn ($message, $context): bool => str_contains($message, 'failed to re-encrypt')
+                && isset($context['error'])
+                && is_string($context['error']))
+            ->once();
+    });
+
+    it('logs processed count in completion context', function (): void {
+        Log::spy();
+
+        UserCalendarIntegration::factory()->count(3)->create([
+            'provider' => CalendarProviderEnum::GOOGLE,
+        ]);
+
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
+
+        Log::shouldHaveReceived('info')
+            ->withArgs(fn ($message, $context): bool => str_contains($message, 'completed')
+                && isset($context['processed'])
+                && $context['processed'] === 3)
+            ->once();
+    });
+
+    it('includes last_encrypted_at in updates for each re-encrypted integration', function (): void {
+        $integration = UserCalendarIntegration::factory()->create([
+            'provider'          => CalendarProviderEnum::GOOGLE,
+            'access_token'      => 'my-token',
+            'last_encrypted_at' => null,
+        ]);
+
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
+
+        $integration->refresh();
+        expect($integration->last_encrypted_at)->not->toBeNull();
+    });
+
+    it('re-encrypts all ENCRYPTED_FIELDS fields when present', function (): void {
+        $integration = UserCalendarIntegration::factory()->create([
+            'provider'      => CalendarProviderEnum::GOOGLE,
+            'access_token'  => 'access-token-value',
+            'refresh_token' => 'refresh-token-value',
+            'client_id'     => 'client-id-value',
+            'client_secret' => 'client-secret-value',
+        ]);
+
+        $rawBefore = $integration->getRawOriginal('access_token');
+
+        new ReEncryptCalendarCredentials()->handle($this->encrypter);
+
+        $integration->refresh();
+        $rawAfter = $integration->getRawOriginal('access_token');
+
+        expect($rawAfter)->not->toBe($rawBefore)
+            ->and($integration->access_token)->toBe('access-token-value')
+            ->and($integration->refresh_token)->toBe('refresh-token-value');
+    });
 });

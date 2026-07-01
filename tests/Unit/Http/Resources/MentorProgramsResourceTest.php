@@ -12,7 +12,7 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
-covers(MentorProgramsResource::class);
+mutates(MentorProgramsResource::class);
 
 describe('Mentor Programs Resource', function (): void {
     beforeEach(function (): void {
@@ -61,5 +61,20 @@ describe('Mentor Programs Resource', function (): void {
                 'name',
                 'description',
             ]));
+    });
+
+    it('returns all expected top-level keys', function (): void {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+
+        $currency = Currency::query()->first();
+        $program = MentorProgram::factory()->create([
+            'mentor_id'   => $user->id,
+            'currency_id' => $currency->id,
+        ]);
+
+        $resource = MentorProgramsResource::make($program)->resolve();
+
+        expect($resource)->toHaveKeys(['id', 'name', 'slug', 'description', 'cost', 'currency', 'blocks']);
     });
 });
