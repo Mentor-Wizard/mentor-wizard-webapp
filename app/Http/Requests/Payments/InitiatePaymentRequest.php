@@ -22,7 +22,7 @@ class InitiatePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payable_type' => ['required', 'string', Rule::in(['mentor_session', 'mentor_program'])],
+            'payable_type' => ['required', Rule::in(['mentor_session', 'mentor_program'])],
             'payable_id'   => ['required', 'integer', 'min:1'],
         ];
     }

@@ -52,10 +52,9 @@ class InitiatePaymentAction
         $user = $request->user();
 
         $client = new Client(
-            nameFirst: $user->name,
+            nameFirst: $user->username,
             nameLast: '',
             email: $user->email,
-            phone: '',
         );
 
         $transaction = new Transaction(
