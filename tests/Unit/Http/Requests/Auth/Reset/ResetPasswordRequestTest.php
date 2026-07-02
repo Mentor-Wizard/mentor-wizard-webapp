@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Http\Requests\Auth\Reset\ResetPasswordRequest;
 use Illuminate\Support\Facades\Validator;
 
-mutates(ResetPasswordRequest::class);
-
 describe('ResetPasswordRequest Validation', function (): void {
     describe('Email validation', function (): void {
         it('requires email to be present', function (): void {

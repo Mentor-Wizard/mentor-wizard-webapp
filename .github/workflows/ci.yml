@@ -37,6 +37,7 @@ jobs:
   lints:
     name: '🪄 Lints | ${{ matrix.command.name }}'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     services:
       postgres:
@@ -104,6 +105,7 @@ jobs:
   tests:
     name: '♻️ Tests | ${{ matrix.command.name }}'
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.command.timeout || 20 }}
 
     services:
       postgres:
@@ -127,7 +129,6 @@ jobs:
           - { name: '🔬 Unit',     command: 'php artisan test --testsuite=Unit --parallel',                                        report: false }
           - { name: '🧬 Feature',  command: 'php artisan test --testsuite=Feature --parallel',                                     report: false }
           - { name: '☂️ Coverage', command: 'php artisan test --coverage --compact --coverage-clover coverage/coverage-clover.xml --log-junit coverage/junit.xml', report: true  }
-          - { name: '🦠 Mutation', command: 'php artisan test --mutate --covered-only --min=100 --parallel',                       report: false }
 
     steps:
       - name: '🛎 Checkout'
@@ -171,3 +172,61 @@ jobs:
           directory: ./coverage
           fail_ci_if_error: true
           report_type: test_results
+
+  # Mutation testing is sharded by app/ subdirectory so shards run concurrently instead of
+  # a single job mutating the whole app/ tree sequentially (was timing out with 73 Action
+  # classes plus ~70 more across Http/Services/Enums/etc. all mutated in one sequential run).
+  # --path accepts a comma-separated list of directories (see
+  # vendor/pestphp/pest-plugin-mutate/src/Support/Configuration/CliConfiguration.php).
+  # --covered-only --min=100 is intentionally preserved per shard: only classes with an
+  # explicit covers()/mutates() declaration are mutated, so shards stay fast as long as that
+  # declared surface stays small. Timeouts below are conservative first estimates sized to
+  # each shard's class count; tune down once real per-shard durations are known.
+  mutation:
+    name: '🦠 Mutation | ${{ matrix.shard.name }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.shard.timeout }}
+
+    services:
+      postgres:
+        image: postgres:17-alpine3.20
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          - { name: 'A · Actions',                 path: 'app/Actions',                                                                                                      timeout: 30 }
+          - { name: 'B · Http + Enums',             path: 'app/Http,app/Enums',                                                                                              timeout: 25 }
+          - { name: 'C · Services + Policies + Jobs + Models', path: 'app/Services,app/Policies,app/Jobs,app/Models',                                                        timeout: 25 }
+          - { name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20 }
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v6
+
+      - name: '⚙️ Prepare environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          use-node: true
+
+      - name: '🗄️ Grant CREATEDB permission'
+        run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
+
+      - name: '${{ matrix.shard.name }} mutation tests'
+        run: php artisan test --testsuite=Unit --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }}
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: testing
+          DB_USERNAME: db
+          DB_PASSWORD: db

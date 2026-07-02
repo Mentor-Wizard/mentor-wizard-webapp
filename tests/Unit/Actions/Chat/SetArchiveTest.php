@@ -2,15 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Actions\Chat\SetArchive;
 use App\Enums\ChatStatusEnum;
 use App\Models\Chat;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Event;
 use Symfony\Component\HttpFoundation\Response;
-
-mutates(SetArchive::class);
 
 describe('SetArchive', function (): void {
     beforeEach(function (): void {

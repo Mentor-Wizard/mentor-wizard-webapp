@@ -8,6 +8,8 @@ use App\Models\UserSchedule;
 use App\Services\UserSchedule\CheckUserScheduleOverlap;
 use Database\Seeders\RoleSeeder;
 
+mutates(CheckUserScheduleOverlap::class);
+
 beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });

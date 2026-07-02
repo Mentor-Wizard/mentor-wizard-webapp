@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Traits\ParsesNumericRange;
 
-covers(ParsesNumericRange::class);
+mutates(ParsesNumericRange::class);
 
 describe('ParsesNumericRange trait', function (): void {
     beforeEach(function (): void {

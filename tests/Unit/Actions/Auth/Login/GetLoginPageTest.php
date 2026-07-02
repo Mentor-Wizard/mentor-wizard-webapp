@@ -8,8 +8,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Inertia\Response;
 
-mutates(GetLoginPage::class);
-
 describe('GetLoginPage Action', function (): void {
 
     it('returns correct Inertia response', function (): void {

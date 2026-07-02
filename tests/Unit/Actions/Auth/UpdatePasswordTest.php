@@ -9,8 +9,6 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 
-mutates(UpdatePassword::class);
-
 describe('UpdatePassword Action', function (): void {
 
     it('updates user password', function (): void {

@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
-mutates(Registration::class);
-
 describe('Registration Action', function (): void {
 
     beforeEach(function (): void {

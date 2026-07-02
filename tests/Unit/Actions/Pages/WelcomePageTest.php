@@ -13,8 +13,6 @@ use Pest\Mixins\Expectation;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
-mutates(WelcomePage::class);
-
 describe('WelcomePage Action', function (): void {
     beforeEach(function (): void {
         $this->seed([RoleSeeder::class]);

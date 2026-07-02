@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Traits\ExternalCalendar\XmlAppleCalendarRequests;
 
-covers(XmlAppleCalendarRequests::class);
-
 describe('XmlAppleCalendarRequests trait', function (): void {
     beforeEach(function (): void {
         $this->instance = new class
@@ -61,6 +59,28 @@ describe('XmlAppleCalendarRequests trait', function (): void {
 
         it('produces well-formed XML', function (): void {
             $xml = $this->instance->callCalendarQueryReport('20260101T000000Z', '20260201T000000Z');
+
+            $doc = new DOMDocument;
+            $loaded = $doc->loadXML($xml);
+
+            expect($loaded)->toBeTrue();
+        });
+
+        it('escapes XML special characters in from and to to prevent injection', function (): void {
+            $malicious = '"/><injected>&';
+
+            $xml = $this->instance->callCalendarQueryReport($malicious, $malicious);
+
+            expect($xml)->toContain('&lt;injected&gt;')
+                ->and($xml)->toContain('&amp;')
+                ->and($xml)->toContain('&quot;')
+                ->and($xml)->not->toContain('<injected>');
+        });
+
+        it('produces well-formed XML even with malicious from and to values', function (): void {
+            $malicious = '"/><injected>&';
+
+            $xml = $this->instance->callCalendarQueryReport($malicious, $malicious);
 
             $doc = new DOMDocument;
             $loaded = $doc->loadXML($xml);

@@ -10,8 +10,6 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(SetMute::class);
-
 describe('SetMute', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

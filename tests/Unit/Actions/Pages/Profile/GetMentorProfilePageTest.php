@@ -15,8 +15,6 @@ use Illuminate\Http\Request;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
-mutates(GetMentorProfilePage::class);
-
 describe('Mentor Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

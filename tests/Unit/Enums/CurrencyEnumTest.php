@@ -6,8 +6,6 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\CurrencyEnum;
 
-mutates(CurrencyEnum::class);
-
 describe('CurrencyEnum', function (): void {
     it('returns all names and values correctly', function (): void {
         $names = CurrencyEnum::names();

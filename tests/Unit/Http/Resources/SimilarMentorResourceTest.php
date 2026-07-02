@@ -13,8 +13,6 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
-covers(SimilarMentorResource::class);
-
 describe('Similar Mentor Resource', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

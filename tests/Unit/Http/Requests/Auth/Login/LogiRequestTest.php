@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
+mutates(LoginRequest::class);
+
 describe('LoginRequest Authentication', function (): void {
     describe('Authentication Scenarios', function (): void {
         it('successfully authorizes request', function (): void {

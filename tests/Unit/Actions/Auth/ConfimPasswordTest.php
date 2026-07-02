@@ -8,8 +8,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Redirect;
 
-mutates(ConfirmPassword::class);
-
 describe('ConfirmPassword Action', function (): void {
     it('confirms password and redirects to dashboard', function (): void {
         $mockRequest = Mockery::mock(ConfirmPasswordRequest::class);

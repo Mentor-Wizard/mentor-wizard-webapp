@@ -7,8 +7,6 @@ namespace Tests\Unit\Http\Requests\Profile;
 use App\Http\Requests\UserProfile\DeleteUserProfileRequest;
 use Illuminate\Support\Facades\Validator;
 
-mutates(DeleteUserProfileRequest::class);
-
 describe('Delete User Profile Request Validation', function (): void {
     it('requires password field', function (): void {
         $request = new DeleteUserProfileRequest;

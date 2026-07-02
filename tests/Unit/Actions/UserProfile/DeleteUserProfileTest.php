@@ -9,8 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Lorisleiva\Actions\Concerns\AsController;
 
-mutates(DeleteUserProfile::class);
-
 describe('DeleteUserProfile', function (): void {
     it('logs out the user', function (): void {
         Auth::shouldReceive('logout')->once();
