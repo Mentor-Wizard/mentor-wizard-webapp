@@ -8,8 +8,6 @@ use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Arr;
 use Inertia\Response;
 
-mutates(GetCreatePasswordPage::class);
-
 describe('GetCreatePasswordPage', function (): void {
     it('renders reset password page with email and token', function (): void {
         $mockRouteCollection = Mockery::mock(RouteCollection::class);

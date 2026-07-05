@@ -7,8 +7,6 @@ use App\Filters\TagLanguagesFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
-covers(TagLanguagesFilter::class);
-
 describe('TagLanguagesFilter', function (): void {
     beforeEach(function (): void {
         $this->filter = new TagLanguagesFilter;

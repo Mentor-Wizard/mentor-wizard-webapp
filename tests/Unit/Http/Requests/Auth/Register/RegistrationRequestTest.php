@@ -7,8 +7,6 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Validator;
 
-mutates(RegistrationRequest::class);
-
 describe('RegistrationRequest Validation', function (): void {
     describe('Positive Scenarios', function (): void {
         it('validates correct registration data', function (): void {

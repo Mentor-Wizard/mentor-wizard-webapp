@@ -14,8 +14,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Event;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(GetMessage::class);
-
 describe('GetMessage', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

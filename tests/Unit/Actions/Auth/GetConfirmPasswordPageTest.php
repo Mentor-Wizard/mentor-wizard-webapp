@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Actions\Auth\GetConfirmPasswordPage;
 use Inertia\Response;
 
-mutates(GetConfirmPasswordPage::class);
-
 describe('GetConfirmPasswordPage Unit Test', function (): void {
     it('should render the ConfirmPassword page', function (): void {
         $result = new GetConfirmPasswordPage;

@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
 
-mutates(UserScheduleViewResource::class);
-
 describe('UserScheduleViewResource', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Traits\ExternalCalendar\XmlAppleCalendarRequests;
 
-covers(XmlAppleCalendarRequests::class);
-
 describe('XmlAppleCalendarRequests trait', function (): void {
     beforeEach(function (): void {
         $this->instance = new class

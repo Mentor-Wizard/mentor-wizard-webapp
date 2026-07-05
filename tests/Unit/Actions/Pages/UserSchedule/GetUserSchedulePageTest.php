@@ -14,8 +14,6 @@ use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 
-mutates(UserSchedulePage::class);
-
 describe('UserSchedulePage', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

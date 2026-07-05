@@ -14,8 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 
-mutates(DeleteMentorProgramPage::class);
-
 describe('Delete Mentor Program Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
