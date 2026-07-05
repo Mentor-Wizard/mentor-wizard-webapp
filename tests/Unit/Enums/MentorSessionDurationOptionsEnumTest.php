@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\MentorSessionDurationOptionsEnum;
 
+mutates(MentorSessionDurationOptionsEnum::class);
+
 describe('MentorSessionDurationOptionsEnum', function (): void {
     it('returns all names and values', function (): void {
         $names = MentorSessionDurationOptionsEnum::names();

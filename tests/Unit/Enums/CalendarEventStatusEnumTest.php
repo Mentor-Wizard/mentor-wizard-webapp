@@ -5,6 +5,9 @@ declare(strict_types=1);
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarViewModeEnum;
 
+mutates(CalendarEventStatusEnum::class);
+mutates(CalendarViewModeEnum::class);
+
 describe('CalendarEventStatusEnum', function (): void {
     it('returns all names and values', function (): void {
         $names = CalendarEventStatusEnum::names();

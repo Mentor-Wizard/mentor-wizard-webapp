@@ -7,7 +7,7 @@ use App\Traits\ParsesNumericRange;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
-mutates(ProgramCostFilter::class);
+covers(ProgramCostFilter::class);
 
 describe('ProgramCostFilter', function (): void {
     beforeEach(function (): void {

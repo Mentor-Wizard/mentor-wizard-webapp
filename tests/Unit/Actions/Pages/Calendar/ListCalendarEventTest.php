@@ -20,6 +20,8 @@ use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 
+mutates(CalendarsListPage::class);
+
 describe('List Calendar CalendarEvent Page', function (): void {
     beforeEach(function (): void {
         Date::setTestNow(Date::create(2026, 1, 15, 10, 0, 0, 'UTC'));

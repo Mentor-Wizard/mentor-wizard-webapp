@@ -7,6 +7,8 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Inertia\Response;
 
+mutates(GetProfilePage::class);
+
 describe('User Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

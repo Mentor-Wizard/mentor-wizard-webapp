@@ -6,6 +6,8 @@ use App\Actions\Pages\DashboardPage;
 use Illuminate\Routing\RouteCollection;
 use Inertia\Response;
 
+mutates(DashboardPage::class);
+
 describe('DashboardPage Action', function (): void {
 
     it('returns correct Inertia response', function (): void {

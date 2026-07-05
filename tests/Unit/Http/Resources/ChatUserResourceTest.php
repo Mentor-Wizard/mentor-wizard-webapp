@@ -9,6 +9,8 @@ use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
+covers(ChatUserResource::class);
+
 describe('Chat User Resource', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

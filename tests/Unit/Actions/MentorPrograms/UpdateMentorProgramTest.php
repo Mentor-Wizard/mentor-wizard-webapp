@@ -17,6 +17,8 @@ use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
+mutates(UpdateMentorProgramPage::class);
+
 describe('UpdateMentorProgramRequest Validation', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

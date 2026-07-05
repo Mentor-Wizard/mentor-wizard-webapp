@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\CalendarSyncStatusEnum;
 
+mutates(CalendarSyncStatusEnum::class);
+
 describe('CalendarSyncStatusEnum', function (): void {
     it('returns all string values via values()', function (): void {
         $values = CalendarSyncStatusEnum::values();

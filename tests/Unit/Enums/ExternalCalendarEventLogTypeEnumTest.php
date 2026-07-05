@@ -6,6 +6,8 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\ExternalCalendarEventLogTypeEnum;
 
+mutates(ExternalCalendarEventLogTypeEnum::class);
+
 describe('ExternalCalendarEventLogTypeEnum', function (): void {
     it('has the expected values', function (): void {
         expect(ExternalCalendarEventLogTypeEnum::Error->value)->toBe('error')

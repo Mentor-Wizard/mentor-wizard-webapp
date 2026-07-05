@@ -6,6 +6,8 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\CalendarEventMinimumBookingTimeInMinutes;
 
+mutates(CalendarEventMinimumBookingTimeInMinutes::class);
+
 describe('CalendarEventMinimumBookingTimeInMinutes', function (): void {
     it('has correct integer values', function (): void {
         expect(CalendarEventMinimumBookingTimeInMinutes::HALF_HOUR->value)->toBe(30)

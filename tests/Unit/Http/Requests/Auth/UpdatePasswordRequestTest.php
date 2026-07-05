@@ -8,6 +8,8 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+mutates(UpdatePasswordRequest::class);
+
 describe('UpdatePasswordRequest Validation', function (): void {
     describe('Current Password Validation', function (): void {
         it('requires current password', function (): void {

@@ -7,6 +7,8 @@ use App\Models\Currency;
 use Database\Seeders\CurrencySeeder;
 use Inertia\Response;
 
+mutates(CreateMentorProgramPage::class);
+
 describe('Create Mentor Program', function (): void {
     beforeEach(function (): void {
         $this->seed(CurrencySeeder::class);

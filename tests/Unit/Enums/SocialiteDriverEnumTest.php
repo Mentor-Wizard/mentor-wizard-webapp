@@ -6,6 +6,8 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\SocialiteDriverEnum;
 
+mutates(SocialiteDriverEnum::class);
+
 describe('SocialiteDriverEnum', function (): void {
     it('returns all values correctly', function (): void {
         $values = SocialiteDriverEnum::values();

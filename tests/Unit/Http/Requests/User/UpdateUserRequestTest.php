@@ -7,6 +7,8 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\UploadedFile;
 
+mutates(UpdateUserRequest::class);
+
 describe('User data Validation', function (): void {
     it('requires correct data', function (): void {
         $user = User::factory()->make(['id' => 1]);

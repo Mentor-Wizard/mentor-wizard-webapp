@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Requests\Auth\Reset\CreatePasswordRequest;
 use Illuminate\Support\Facades\Validator;
 
+mutates(CreatePasswordRequest::class);
+
 describe('CreatePasswordRequest Validation', function (): void {
     describe('Successful Validation Scenarios', function (): void {
         it('passes validation with valid data', function (): void {

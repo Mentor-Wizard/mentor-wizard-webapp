@@ -12,6 +12,8 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
+covers(MentorProgramsResource::class);
+
 describe('Mentor Programs Resource', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\Auth\Register\GetRegistrationPage;
 use Inertia\Response;
 
+mutates(GetRegistrationPage::class);
+
 describe('GetRegistrationPage Action', function (): void {
 
     it('returns correct Inertia response', function (): void {

@@ -14,6 +14,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Queue;
 
+mutates(SyncCalendarEventToIntegration::class);
+
 describe('SyncCalendarEventToIntegration', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

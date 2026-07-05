@@ -8,6 +8,8 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
+mutates(AddAvatar::class);
+
 describe('Add Avatar Action', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

@@ -12,6 +12,8 @@ use Database\Seeders\RoleSeeder;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
+mutates(ListMentorProgramPage::class);
+
 describe('List Mentor Program', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

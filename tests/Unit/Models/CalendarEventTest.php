@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Date;
 use Spatie\Permission\Models\Role;
 
+mutates(CalendarEvent::class);
+
 describe('CalendarEvent model', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

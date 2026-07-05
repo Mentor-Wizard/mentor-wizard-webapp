@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\Auth\Reset\GetResetPasswordPage;
 use Inertia\Response;
 
+mutates(GetResetPasswordPage::class);
+
 describe('GetResetPasswordPage Unit Test', function (): void {
     it('returns Inertia view with session status', function (): void {
         $action = new GetResetPasswordPage;

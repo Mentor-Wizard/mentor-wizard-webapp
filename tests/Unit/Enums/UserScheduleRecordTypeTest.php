@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Enums\UserScheduleRecordType;
 use Illuminate\Support\Collection;
 
+mutates(UserScheduleRecordType::class);
+
 describe('UserScheduleRecordType', function (): void {
     it('has correct enum values', function (): void {
         expect(UserScheduleRecordType::WORKING_DAY->value)->toBe('Working Day')

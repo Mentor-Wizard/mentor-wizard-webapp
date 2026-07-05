@@ -6,6 +6,8 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\RoleGuardEnum;
 
+mutates(RoleGuardEnum::class);
+
 describe('RoleGuardEnum', function (): void {
     it('has the expected values', function (): void {
         expect(RoleGuardEnum::USER->value)->toBe('user')

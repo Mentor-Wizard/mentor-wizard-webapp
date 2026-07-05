@@ -8,6 +8,8 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
+mutates(VerificationEmailPrompt::class);
+
 describe('VerificationEmailPrompt Unit Test', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

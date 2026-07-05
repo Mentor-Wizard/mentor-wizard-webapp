@@ -8,6 +8,8 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Str;
 
+covers(NotificationResource::class);
+
 describe('NotificationResource', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

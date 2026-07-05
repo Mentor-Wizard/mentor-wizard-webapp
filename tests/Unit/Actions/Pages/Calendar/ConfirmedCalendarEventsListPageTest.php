@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Date;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
+mutates(ConfirmedCalendarEventsListPage::class);
+
 describe('ConfirmedCalendarEventsListPage (Unit)', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

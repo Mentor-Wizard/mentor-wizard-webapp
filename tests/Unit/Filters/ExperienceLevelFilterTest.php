@@ -8,7 +8,7 @@ use App\Models\MentorProfile;
 use Spatie\Permission\Models\Role;
 use Spatie\QueryBuilder\Filters\Filter;
 
-mutates(ExperienceLevelFilter::class);
+covers(ExperienceLevelFilter::class);
 
 describe('ExperienceLevelFilter', function (): void {
     beforeEach(function (): void {

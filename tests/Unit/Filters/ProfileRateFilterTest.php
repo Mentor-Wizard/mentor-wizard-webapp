@@ -7,7 +7,7 @@ use App\Traits\ParsesNumericRange;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
-mutates(ProfileRateFilter::class);
+covers(ProfileRateFilter::class);
 
 describe('ProfileRateFilter', function (): void {
     beforeEach(function (): void {

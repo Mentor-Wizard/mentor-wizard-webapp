@@ -6,6 +6,8 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\ExternalCalendarEventSyncStatusEnum;
 
+mutates(ExternalCalendarEventSyncStatusEnum::class);
+
 describe('ExternalCalendarEventSyncStatusEnum', function (): void {
     it('has the expected values', function (): void {
         expect(ExternalCalendarEventSyncStatusEnum::Synced->value)->toBe('synced')

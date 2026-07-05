@@ -12,6 +12,8 @@ use App\Filters\TagStacksFilter;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 
+mutates(ListMentorProfilePage::class);
+
 describe('ListMentorProfilePage unit tests', function (): void {
     it('action class exists and has correct structure', function (): void {
         $action = new ListMentorProfilePage;

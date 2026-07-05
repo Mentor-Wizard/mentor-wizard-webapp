@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Date;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
+mutates(ShowCalendarEventPage::class);
+
 describe('Show Calendar CalendarEvent Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);
