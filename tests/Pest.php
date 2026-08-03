@@ -26,6 +26,29 @@ pest()->extend(TestCase::class)
 
 /*
 |--------------------------------------------------------------------------
+| Test Impact Analysis (TIA)
+|--------------------------------------------------------------------------
+|
+| Deliberately NOT wired up here via pest()->tia()->locally(). That call would make Pest
+| decide "am I local or CI" solely by checking whether `--ci` is absent from argv (see
+| vendor/pestphp/pest/src/Plugins/Tia.php) — not by inspecting $GITHUB_ACTIONS or any other
+| CI signal. Every command in .github/workflows/ci.yml currently passes `--ci`, so today that
+| would be safe, but it would make CI's test/mutation gate depend forever on every future job,
+| script, or composer alias remembering to keep passing `--ci`. A future command that omits it
+| would silently replay cached TIA results instead of running the real tests, with no error —
+| the job would just go green. That is too easy to get wrong for too little upside (TIA only
+| speeds up local runs, never CI).
+|
+| To use TIA locally, opt in per invocation instead — no global config needed:
+|   ./vendor/bin/pest --tia --baselined
+| or export PEST_TIA_BASELINED=1 to make it the default for your shell. Either downloads the
+| shared baseline recorded by .github/workflows/tia-baseline.yml via `gh` (must be installed
+| and authenticated), so your first local TIA run doesn't pay the full graph-recording cost.
+|
+*/
+
+/*
+|--------------------------------------------------------------------------
 | Expectations
 |--------------------------------------------------------------------------
 |

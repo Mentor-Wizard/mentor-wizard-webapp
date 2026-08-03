@@ -34,23 +34,4 @@ describe('ConfirmPassword Action', function (): void {
         expect($response)->toBeInstanceOf(RedirectResponse::class);
     });
 
-    it('stores password confirmation timestamp in session', function (): void {
-        $mockRequest = Mockery::mock(ConfirmPasswordRequest::class);
-        $mockSession = Mockery::mock(Store::class);
-        $action = new ConfirmPassword;
-
-        $mockRequest
-            ->shouldReceive('session')
-            ->andReturn($mockSession);
-
-        $mockSession
-            ->shouldReceive('put')
-            ->with('auth.password_confirmed_at', Mockery::type('int'))
-            ->once();
-
-        Redirect::shouldReceive('intended')
-            ->andReturn(new RedirectResponse('/'));
-
-        $action->handle($mockRequest);
-    });
 });

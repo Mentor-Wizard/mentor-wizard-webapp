@@ -47,8 +47,8 @@
     "mockery/mockery": "^1.6.12",
     "mrpunyapal/rector-pest": "^0.2.15",
     "nunomaduro/collision": "^8.9.4",
-    "pestphp/pest": "^4.7.2",
-    "pestphp/pest-plugin-laravel": "^4.1",
+    "pestphp/pest": "^5.0.3",
+    "pestphp/pest-plugin-laravel": "^5.0.1",
     "tomasvotruba/cognitive-complexity": "^1.1.1",
     "wulfheart/laravel-actions-ide-helper": "^0.11"
   },

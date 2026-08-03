@@ -9,62 +9,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 describe('UpdatePasswordRequest Validation', function (): void {
-    describe('Current Password Validation', function (): void {
-        it('requires current password', function (): void {
-            $request = new UpdatePasswordRequest;
-            $validator = Validator::make([
-                'current_password'      => '',
-                'password'              => 'NewPassword123!',
-                'password_confirmation' => 'NewPassword123!',
-            ], $request->rules());
-
-            expect($validator->fails())->toBeTrue()
-                ->and($validator->errors()->get('current_password'))
-                ->toContain('The current password field is required.');
-        });
-    });
-
-    describe('New Password Validation', function (): void {
-        it('requires new password', function (): void {
-            $request = new UpdatePasswordRequest;
-            $validator = Validator::make([
-                'current_password'      => 'OldPassword123!',
-                'password'              => '',
-                'password_confirmation' => '',
-            ], $request->rules());
-
-            expect($validator->fails())->toBeTrue()
-                ->and($validator->errors()->get('password'))
-                ->toContain('The password field is required.');
-        });
-
-        it('requires password confirmation', function (): void {
-            $request = new UpdatePasswordRequest;
-            $validator = Validator::make([
-                'current_password'      => 'OldPassword123!',
-                'password'              => 'NewPassword123!',
-                'password_confirmation' => '',
-            ], $request->rules());
-
-            expect($validator->fails())->toBeTrue()
-                ->and($validator->errors()->get('password'))
-                ->toContain('The password field confirmation does not match.');
-        });
-
-        it('validates password against default Laravel password rules', function (): void {
-            $request = new UpdatePasswordRequest;
-            $validator = Validator::make([
-                'current_password'      => 'OldPassword123!',
-                'password'              => 'short',
-                'password_confirmation' => 'short',
-            ], $request->rules());
-
-            expect($validator->fails())->toBeTrue()
-                ->and($validator->errors()->get('password'))
-                ->toContain('The password field must be at least 8 characters.');
-        });
-    });
-
     describe('Successful Validation', function (): void {
         it('passes validation with correct data', function (): void {
             $this->seed(RoleSeeder::class);

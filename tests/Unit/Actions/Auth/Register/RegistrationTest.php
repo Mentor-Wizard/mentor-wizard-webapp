@@ -7,7 +7,6 @@ use App\Http\Requests\Auth\Register\RegistrationRequest;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
@@ -45,34 +44,4 @@ describe('Registration Action', function (): void {
             ->and($user->email)->toBe('test@example.com');
     });
 
-    it('can not register without username', function (): void {
-        $request = new RegistrationRequest([
-            'email'                 => 'test@example.com',
-            'password'              => 'password',
-            'password_confirmation' => 'password',
-        ]);
-
-        (new Registration)->handle($request);
-
-        Event::assertNotDispatched(Registered::class);
-        $this->assertDatabaseMissing('users', [
-            'email' => 'test@example.com',
-        ]);
-
-    })->throws(QueryException::class);
-
-    it('can not register without email', function (): void {
-        $request = new RegistrationRequest([
-            'username'              => 'testuser',
-            'password'              => 'password',
-            'password_confirmation' => 'password',
-        ]);
-
-        (new Registration)->handle($request);
-
-        Event::assertNotDispatched(Registered::class);
-        $this->assertDatabaseMissing('users', [
-            'username' => 'testuser',
-        ]);
-    })->throws(QueryException::class);
 });

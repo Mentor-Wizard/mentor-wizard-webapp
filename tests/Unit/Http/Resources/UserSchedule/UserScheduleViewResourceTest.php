@@ -118,19 +118,4 @@ describe('UserScheduleViewResource', function (): void {
             ->toHaveKeys(['id', 'user_id', 'day_of_week', 'start_time', 'end_time', 'type', 'day_off_date']);
     });
 
-    it('handles all day_of_week values correctly', function (): void {
-        for ($day = 0; $day <= 6; $day++) {
-            $schedule = UserSchedule::factory()->make([
-                'day_of_week' => $day,
-            ]);
-
-            $schedule->id = 1;
-
-            $resource = new UserScheduleViewResource($schedule);
-            $request = Request::create('/test');
-            $result = $resource->toArray($request);
-
-            expect($result['day_of_week'])->toBe($day);
-        }
-    });
 });

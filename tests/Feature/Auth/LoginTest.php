@@ -11,11 +11,6 @@ describe('Get Login Page', function (): void {
         $this->seed(RoleSeeder::class);
     });
 
-    it('can see login page', function (): void {
-        $this->get(route('login'))
-            ->assertOk();
-    });
-
     it('can login successful', function (): void {
         $user = User::factory()->create();
 

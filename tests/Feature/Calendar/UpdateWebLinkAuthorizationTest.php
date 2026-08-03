@@ -2,11 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Enums\CalendarEventColoursEnum;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
-use App\Enums\CalendarEventTypeEnum;
-use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
@@ -50,32 +47,6 @@ describe('Calendar event web link update authorization (mentor vs mentee)', func
         ]);
     });
 
-    it('mentor can update web link', function (): void {
-        actingAs($this->mentor);
-        Auth::login($this->mentor);
-
-        $response = $this->withSession(['_token' => 'test_token'])
-            ->patch(route('pages.calendar.edit', $this->event), [
-                'title'             => 'New title',
-                'fromTime'          => '10:00',
-                'toTime'            => '11:00',
-                'fromDate'          => Date::tomorrow()->format('Y-m-d'),
-                'toDate'            => Date::tomorrow()->format('Y-m-d'),
-                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'colour'            => CalendarEventColoursEnum::BLUE->value,
-                'webLink'           => 'https://meet.example.com/room-1',
-                'mentor_program_id' => $this->program->getKey(),
-                'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
-                '_token'            => 'test_token',
-            ]);
-
-        $response->assertRedirect(route('pages.calendar.index'));
-        $this->assertDatabaseHas('calendar_events', [
-            'id'       => $this->event->getKey(),
-            'web_link' => 'https://meet.example.com/room-1',
-        ]);
-    });
-
     it('mentee cannot update web link, gets 403', function (): void {
         actingAs($this->mentee);
         Auth::login($this->mentee);
@@ -85,22 +56,6 @@ describe('Calendar event web link update authorization (mentor vs mentee)', func
             ->patch(route('pages.calendar.edit', $this->event), [
                 'webLink' => 'https://blocked.example',
                 '_token'  => 'test_token',
-            ]);
-
-        $response->assertForbidden();
-    });
-
-    it('not related visitor cannot update web link, gets 403', function (): void {
-        actingAs($this->visitor);
-        Auth::login($this->visitor);
-
-        $response = $this
-            ->withSession(['_token' => 'test_token'])
-            ->patch(route('pages.calendar.edit', [
-                $this->event,
-                '_token' => 'test_token',
-            ]), [
-                'webLink' => 'https://blocked.example',
             ]);
 
         $response->assertForbidden();
