@@ -1,0 +1,81 @@
+name: '🪄 Mentor Wizard | 📐 Update Shards'
+
+# Generates tests/.pest/shards.json, Pest's time-balanced sharding timing data (see
+# docs/optimizing-tests.md#test-sharding and docs/continuous-integration.md#sharding-your-tests).
+# Per that doc, this file must be COMMITTED to the repository — there is no runtime-fetch or
+# artifact-download mechanism for it (unlike tests/.pest/tia/ baselines, which use
+# --baselined + `gh` to pull an uploaded artifact — shards.json is not part of that mechanism
+# and has no equivalent flag). Pest's own recommended pattern for keeping it fresh is exactly
+# this: a separate scheduled/dispatch-only workflow that runs `--update-shards` and commits the
+# result, mirrored here from the docs' own example almost verbatim.
+#
+# When present, `--shard=N/M` in ci.yml's `tests` job automatically switches from Pest's default
+# (split by file count) to time-balanced distribution — no flag change needed on the consuming
+# side, Pest detects the file. When shards.json exists but is stale (test files added/renamed
+# since the last run here), Pest still runs correctly — new files are distributed evenly while
+# known files stay time-balanced — and prints a WARN reminding you to refresh it. That WARN is
+# not currently surfaced as a CI failure; this workflow just needs to run periodically to keep
+# the timing data current, which the weekly schedule below handles.
+
+on:
+  push:
+    branches:
+      - develop
+  schedule:
+    - cron: '0 2 * * 1' # Weekly on Monday
+  workflow_dispatch:
+
+jobs:
+  update-shards:
+    name: '📐 Update tests/.pest/shards.json'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    services:
+      postgres:
+        image: postgres:17-alpine3.20
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v6
+
+      - name: '⚙️ Prepare environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          use-php: true
+
+      - name: '🗄️ Grant CREATEDB permission'
+        run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
+
+      # Deliberately the full suite (Unit + Feature), not --testsuite=Unit: this records timing
+      # data for every test file that ci.yml's `tests` job runs under --shard (currently Unit
+      # only, see the comment there), but keeping this workflow suite-agnostic means it stays
+      # correct if Feature sharding is added later without needing a second update workflow.
+      - name: '📐 Record shard timing data'
+        run: php artisan test --ci --parallel --update-shards
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: testing
+          DB_USERNAME: db
+          DB_PASSWORD: db
+
+      - name: '⬆️ Commit updated shards.json'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/.pest/shards.json
+          git diff --staged --quiet && echo "No shard timing changes to commit." || git commit -m "chore: update tests/.pest/shards.json timing data"
+          git push

@@ -8,11 +8,14 @@ name: '🪄 Mentor Wizard | 🧭 TIA Baseline'
 # developers running `./vendor/bin/pest` (or `php artisan test`) locally can download it via `gh`
 # and start replaying immediately instead of paying the full local record cost themselves.
 #
-# tests/Pest.php already wires this up end-to-end via `pest()->tia()->locally()->baselined()`,
-# so no further setup is needed once this workflow has run at least once. Every command in
-# ci.yml passes `--ci`, which is how Pest's `locally()` check distinguishes "this is CI" from
-# "this is a developer's machine" (it does not look at $GITHUB_ACTIONS or similar — see the
-# comment above the `tests:` job in ci.yml) — so TIA never engages in the PR gate.
+# tests/Pest.php deliberately does NOT call pest()->tia()->locally() — see the comment block at
+# the top of that file for why global wiring was considered and rejected (it would make the CI
+# gate's safety depend on every future command remembering to pass `--ci`, forever, for a
+# feature that only benefits local runs). So there is no automatic wiring here: a developer who
+# wants the speedup opts in per invocation with
+#   ./vendor/bin/pest --tia --baselined
+# or sets `PEST_TIA_BASELINED=1` to make that the default for their shell. Either downloads the
+# baseline this workflow records via `gh` (must be installed and authenticated locally).
 
 on:
   push:
@@ -27,6 +30,8 @@ jobs:
     name: '🧭 Record TIA baseline'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
 
     services:
       postgres:
@@ -68,10 +73,28 @@ jobs:
         id: baseline
         run: echo "path=$(./vendor/bin/pest --baseline)" >> "$GITHUB_OUTPUT"
 
+      # Pest's TIA storage path/layout is marked @internal (see docs/source) and may change on a
+      # minor version bump. Fail loudly here rather than silently uploading an empty or
+      # unexpected directory as the "baseline" artifact that every developer's --baselined run
+      # will later trust.
+      - name: '✅ Validate TIA baseline path'
+        run: |
+          path="${{ steps.baseline.outputs.path }}"
+          case "$path" in
+            "$HOME"/.pest/tia/*) ;;
+            *)
+              echo "Unexpected TIA baseline path (expected under \$HOME/.pest/tia/): $path" >&2
+              exit 1
+              ;;
+          esac
+          if [ ! -f "$path/graph.json" ]; then
+            echo "Expected graph.json not found in TIA baseline path: $path" >&2
+            exit 1
+          fi
+
       - name: '⬆️ Upload TIA baseline'
         uses: actions/upload-artifact@v4
         with:
           name: pest-tia-baseline
           path: ${{ steps.baseline.outputs.path }}
-          include-hidden-files: true
           retention-days: 30
