@@ -1,21 +1,50 @@
 name: '🪄 Mentor Wizard | 📐 Update Shards'
 
 # Generates tests/.pest/shards.json, Pest's time-balanced sharding timing data (see
-# docs/optimizing-tests.md#test-sharding and docs/continuous-integration.md#sharding-your-tests).
-# Per that doc, this file must be COMMITTED to the repository — there is no runtime-fetch or
-# artifact-download mechanism for it (unlike tests/.pest/tia/ baselines, which use
-# --baselined + `gh` to pull an uploaded artifact — shards.json is not part of that mechanism
-# and has no equivalent flag). Pest's own recommended pattern for keeping it fresh is exactly
-# this: a separate scheduled/dispatch-only workflow that runs `--update-shards` and commits the
-# result, mirrored here from the docs' own example almost verbatim.
+# https://pestphp.com/docs/optimizing-tests#test-sharding and
+# https://pestphp.com/docs/continuous-integration#sharding-your-tests). Per those docs, this
+# file must be COMMITTED to the repository — there is no runtime-fetch or artifact-download
+# mechanism for it at test-run time (unlike the TIA baseline stored under $HOME/.pest/tia/,
+# which developers pull on demand via `--baselined` + `gh`, see tia-baseline.yml — shards.json
+# is not part of that mechanism and has no equivalent flag).
 #
-# When present, `--shard=N/M` in ci.yml's `tests` job automatically switches from Pest's default
-# (split by file count) to time-balanced distribution — no flag change needed on the consuming
-# side, Pest detects the file. When shards.json exists but is stale (test files added/renamed
-# since the last run here), Pest still runs correctly — new files are distributed evenly while
-# known files stay time-balanced — and prints a WARN reminding you to refresh it. That WARN is
-# not currently surfaced as a CI failure; this workflow just needs to run periodically to keep
-# the timing data current, which the weekly schedule below handles.
+# `develop` is protected by a ruleset (non_fast_forward, required pull_request with 2 approvals,
+# no bypass actors) that a direct `git push` to `develop` cannot satisfy — confirmed via `gh api`
+# against the live ruleset, not assumed. So this workflow cannot push straight to `develop` the
+# way Pest's own docs example does. It also cannot open a PR itself: this org has
+# `can_approve_pull_request_reviews: false` for Actions, so a `POST /repos/.../pulls` call made
+# with GITHUB_TOKEN — which is what a tool like peter-evans/create-pull-request needs — is
+# rejected outright (confirmed against the live org setting, not assumed). The one toggle that
+# would allow Actions to create PRs also allows Actions to APPROVE PRs, which would partially
+# undermine the 2-approval ruleset this workflow itself relies on as its safety net — flipping
+# it is an org-level decision for a human to make deliberately, not something this workflow
+# should route around by requesting broader permissions than it needs.
+#
+# So the `push-branch` job below does the one thing that's actually possible without either of
+# those: push a plain feature branch (not `develop` itself, so the ruleset doesn't apply) using
+# nothing but `contents: write`. No PR is opened automatically — a human reviews the branch and
+# opens the PR manually when ready. The final step prints that instruction explicitly.
+#
+# Split into two jobs deliberately:
+#   generate:     read-only permissions, runs project test code (the thing being timed), uploads
+#                 the resulting shards.json as a build artifact. No write credential is ever
+#                 present while arbitrary test code executes.
+#   push-branch:  contents: write only (no pull-requests: write — PR creation is not attempted,
+#                 see above), downloads the artifact, commits it to a fresh branch, pushes it.
+#                 Runs no test/application code itself.
+#
+# Uses the default GITHUB_TOKEN throughout, not a PAT or a GitHub App installation token. A PAT
+# or App token would both work for pushing a branch, but both are also known to trigger
+# downstream `on: push`-triggered workflow runs the way GITHUB_TOKEN-authored pushes do not —
+# that's true of App tokens as much as it is of PATs, not just the latter. It mattered more in
+# an earlier design of this workflow that pushed straight to `develop` (a self-triggering loop
+# on this same workflow's `on: push: develop` block was a real risk there). It matters less now
+# that this job only pushes a throwaway feature branch and never attempts PR creation: this
+# workflow's `on: push` trigger only watches `develop`, so even a token capable of re-triggering
+# workflows wouldn't re-trigger THIS one by pushing to `chore/update-pest-shards`. GITHUB_TOKEN
+# is still used regardless, since it needs no extra secret and keeps that non-triggering
+# property true unconditionally rather than as a side effect of which branch happens to be
+# watched today.
 
 on:
   push:
@@ -25,13 +54,25 @@ on:
     - cron: '0 2 * * 1' # Weekly on Monday
   workflow_dispatch:
 
+concurrency:
+  group: update-shards-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  update-shards:
-    name: '📐 Update tests/.pest/shards.json'
+  generate:
+    name: '📐 Record shard timing data'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Sized from real CI job durations, not a round-number guess: the last fully successful run
+    # of the (now-removed) unsharded `Unit` job completed in ~2.3 min of test time, and the most
+    # recent run's unsharded, full-suite `Coverage` job (Unit + Feature + Integration together)
+    # completed in ~5.7 min end-to-end including checkout/setup/DB-grant overhead (see CI run
+    # 27063875342 and 30840398594 via `gh api .../actions/runs/<id>/jobs`). This job runs
+    # --testsuite=Unit only (narrower than that Coverage baseline) plus --update-shards' own
+    # bookkeeping overhead, so 15 min leaves comfortable headroom over the ~6 min baseline
+    # without being a bare guess.
+    timeout-minutes: 15
     permissions:
-      contents: write
+      contents: read
 
     services:
       postgres:
@@ -60,22 +101,104 @@ jobs:
       - name: '🗄️ Grant CREATEDB permission'
         run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
 
-      # Deliberately the full suite (Unit + Feature), not --testsuite=Unit: this records timing
-      # data for every test file that ci.yml's `tests` job runs under --shard (currently Unit
-      # only, see the comment there), but keeping this workflow suite-agnostic means it stays
-      # correct if Feature sharding is added later without needing a second update workflow.
+      # --testsuite=Unit only, not the full suite: Shard.php only writes shards.json when the
+      # ENTIRE invoked run passes (self::$passed) — see vendor/pestphp/pest/src/Plugins/Shard.php.
+      # ci.yml's `tests` job only shards Unit (Feature/Integration run unsharded), and Feature
+      # tests are flakier than Unit in this codebase, so recording the full suite here would risk
+      # a single unrelated Feature flake silently blocking shards.json from updating for an
+      # entire week. Narrowing to Unit removes that risk and matches what actually consumes the
+      # file. If Feature sharding is ever added to ci.yml, widen this to match at the same time.
       - name: '📐 Record shard timing data'
-        run: php artisan test --ci --parallel --update-shards
+        run: php artisan test --ci --testsuite=Unit --parallel --update-shards
         env:
           DB_HOST: 127.0.0.1
           DB_DATABASE: testing
           DB_USERNAME: db
           DB_PASSWORD: db
 
-      - name: '⬆️ Commit updated shards.json'
+      - name: '⬆️ Upload shards.json artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pest-shards-json
+          path: tests/.pest/shards.json
+          retention-days: 7
+
+  push-branch:
+    name: '📤 Push shards.json branch'
+    needs: generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v6
+
+      # Downloaded to a separate path, deliberately NOT tests/.pest/, so the next step can diff
+      # the newly generated file against the old committed one from checkout before either
+      # overwrites the other.
+      - name: '⬇️ Download shards.json artifact'
+        uses: actions/download-artifact@v5
+        with:
+          name: pest-shards-json
+          path: /tmp/new-shards
+
+      # writeTimings() (vendor/pestphp/pest/src/Plugins/Shard.php) always stamps a fresh
+      # `updated_at` and recomputes `checksum` on every run, so a raw file/git diff is never
+      # empty even when the timing data hasn't meaningfully changed — that would make a plain
+      # diff a dead no-op guard, pushing a branch every week regardless. Comparing the wall-clock
+      # `.timings` VALUES doesn't fix this either: confirmed directly from
+      # vendor/pestphp/pest/src/Subscribers/EnsureShardTimingsAreCollected.php:60-62, every
+      # duration is `round($duration->asFloat(), 4)` — real elapsed time recorded to 4 decimal
+      # places, which in practice never matches byte-for-byte between two independent test runs.
+      # A values-based comparison would therefore ALWAYS report "changed", same dead-guard
+      # problem as the raw diff, just for a less obvious reason. What actually makes shards.json
+      # worth re-committing is test classes being added, renamed, or removed — the same drift
+      # Pest itself detects and warns about ("[shards.json] file is out of date") — not small
+      # timing fluctuations run to run. So compare only the SET OF KEYS (test class names) via
+      # `jq -S '.timings | keys'`, ignoring both `updated_at`/`checksum` and the timing values
+      # themselves, and skip the push entirely when the key set is unchanged.
+      - name: '🔍 Check for new/removed/renamed test classes'
+        id: diff
+        run: |
+          if [ ! -f tests/.pest/shards.json ]; then
+            echo "No existing tests/.pest/shards.json committed — this is the first run."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            old_keys=$(jq -S '.timings | keys' tests/.pest/shards.json)
+            new_keys=$(jq -S '.timings | keys' /tmp/new-shards/shards.json)
+            if [ "$old_keys" = "$new_keys" ]; then
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: '📋 Stage updated shards.json'
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          mkdir -p tests/.pest
+          cp /tmp/new-shards/shards.json tests/.pest/shards.json
+
+      # No PR is opened here — see the header comment for why (org setting blocks Actions from
+      # creating PRs, and enabling it would also grant Actions PR-approval rights, undermining
+      # the 2-approval ruleset this workflow relies on). This step only commits and pushes a
+      # plain feature branch; a human opens the PR manually once ready.
+      - name: '📤 Commit and push branch'
+        if: steps.diff.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch --force-create chore/update-pest-shards
           git add tests/.pest/shards.json
-          git diff --staged --quiet && echo "No shard timing changes to commit." || git commit -m "chore: update tests/.pest/shards.json timing data"
-          git push
+          git commit -m "chore: update tests/.pest/shards.json timing data"
+          git push --force origin chore/update-pest-shards
+
+      - name: '📣 Report result'
+        run: |
+          if [ "${{ steps.diff.outputs.changed }}" = "true" ]; then
+            echo "Branch \`chore/update-pest-shards\` pushed with updated timings. Open a PR manually to merge into develop." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No test classes added, removed, or renamed since the last recorded shards.json — nothing to push." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
