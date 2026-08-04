@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b3f79225709d1d7e322d19ba6642e4b9",
+    "content-hash": "22e309f97495e2bf450f1f49725b41ce",
     "packages": [
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -13825,16 +13825,16 @@
         },
         {
             "name": "pestphp/pest-plugin-mutate",
-            "version": "v5.0.0",
+            "version": "dev-fix/coverage-php-14-array-format",
             "source": {
                 "type": "git",
-                "url": "https://github.com/pestphp/pest-plugin-mutate.git",
-                "reference": "fc4a0b3d3bc75bad1148d4c046cf0fa66c508f77"
+                "url": "https://github.com/joshdaugherty/pest-plugin-mutate.git",
+                "reference": "fc1adac527cb48680fe2c3d320457c3755a97700"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest-plugin-mutate/zipball/fc4a0b3d3bc75bad1148d4c046cf0fa66c508f77",
-                "reference": "fc4a0b3d3bc75bad1148d4c046cf0fa66c508f77",
+                "url": "https://api.github.com/repos/joshdaugherty/pest-plugin-mutate/zipball/fc1adac527cb48680fe2c3d320457c3755a97700",
+                "reference": "fc1adac527cb48680fe2c3d320457c3755a97700",
                 "shasum": ""
             },
             "require": {
@@ -13857,7 +13857,42 @@
                     "Pest\\Mutate\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Tests\\": "tests",
+                    "Tests\\Tests\\": "tests/.tests"
+                }
+            },
+            "scripts": {
+                "refacto": [
+                    "rector"
+                ],
+                "lint": [
+                    "pint"
+                ],
+                "test:refacto": [
+                    "rector --dry-run"
+                ],
+                "test:lint": [
+                    "pint --test"
+                ],
+                "test:types": [
+                    "phpstan analyse --ansi"
+                ],
+                "test:type-coverage": [
+                    "pest --type-coverage --min=100"
+                ],
+                "test:unit": [
+                    "pest --colors=always"
+                ],
+                "test": [
+                    "@test:refacto",
+                    "@test:lint",
+                    "@test:types",
+                    "@test:type-coverage",
+                    "@test:unit"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -13884,23 +13919,23 @@
                 "unit"
             ],
             "support": {
-                "source": "https://github.com/pestphp/pest-plugin-mutate/tree/v5.0.0"
+                "source": "https://github.com/joshdaugherty/pest-plugin-mutate/tree/fix/coverage-php-14-array-format"
             },
             "funding": [
                 {
-                    "url": "https://www.paypal.com/paypalme/enunomaduro",
-                    "type": "custom"
+                    "type": "github",
+                    "url": "https://github.com/gehrisandro"
                 },
                 {
-                    "url": "https://github.com/gehrisandro",
-                    "type": "github"
+                    "type": "github",
+                    "url": "https://github.com/nunomaduro"
                 },
                 {
-                    "url": "https://github.com/nunomaduro",
-                    "type": "github"
+                    "type": "custom",
+                    "url": "https://www.paypal.com/paypalme/enunomaduro"
                 }
             ],
-            "time": "2026-07-21T07:48:56+00:00"
+            "time": "2026-07-29T22:29:32+00:00"
         },
         {
             "name": "pestphp/pest-plugin-profanity",
@@ -16615,9 +16650,18 @@
             "time": "2026-05-20T04:12:58+00:00"
         }
     ],
-    "aliases": [],
+    "aliases": [
+        {
+            "package": "pestphp/pest-plugin-mutate",
+            "version": "dev-fix/coverage-php-14-array-format",
+            "alias": "5.0.0",
+            "alias_normalized": "5.0.0.0"
+        }
+    ],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "pestphp/pest-plugin-mutate": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

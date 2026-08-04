@@ -15,6 +15,10 @@ it('Visited an unregistered page', function (): void {
 });
 
 it('Visited site in maintenance mode', function (): void {
+    // 'file' driver writes storage/framework/down, which is shared across
+    // --parallel test workers on the same filesystem and can 503 unrelated
+    // requests in other workers while this test holds the app "down".
+    config(['app.maintenance.driver' => 'array']);
     Artisan::call('down');
 
     $response = $this->get('/');
