@@ -2810,4 +2810,49 @@ describe('Mutation Coverage - Continue inside slotDuration check (Line 145)', fu
         $trailingSlot = collect($slots)->first(fn ($slot): bool => $slot['start']->format('H:i') === '12:00');
         expect($trailingSlot)->not->toBeNull();
     });
+
+    it('normalizes period boundaries to UTC before building calendar event query bindings', function (): void {
+        // Regression test for the query-binding defect described in
+        // docs/known-issues/calendar-event-timezone-cast.md: definePeriodStartAndEnd()
+        // built periodStart/periodFinish in the mentee's local timezone and passed them
+        // straight into ->where('end_date_time', ...)/->where('start_date_time', ...)
+        // without converting to UTC first. Query bindings are formatted using the
+        // Carbon instance's own wall-clock time, so a far-ahead-of-UTC timezone (here,
+        // Pacific/Kiritimati at UTC+14) shifted the period boundaries by the offset and
+        // silently excluded genuinely-future events from the query.
+        Date::setTestNow(Date::create(2025, 4, 1, 10, 0, 0, 'UTC'));
+        $tz = 'Pacific/Kiritimati';
+
+        $this->mentorProgram->mentor->profile->update(['minimum_pre_booking_time' => 0]);
+        $this->mentorProgram->update(['session_duration' => 0]);
+
+        $eventStart = Date::now('UTC')->addHours(2);
+        $eventEnd = $eventStart->copy()->addHour();
+
+        $event = CalendarEvent::query()->create([
+            'title'             => 'Future event in a far-ahead timezone',
+            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+            'start_date_time'   => $eventStart,
+            'end_date_time'     => $eventEnd,
+            'date'              => $eventStart->format('Y-m-d'),
+            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+            'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+            'mentor_program_id' => $this->mentorProgram->getKey(),
+        ]);
+        $event->calendarEventUsers()->attach($this->user->getKey(), [
+            'role'   => CalendarEventRoleEnum::HOST->value,
+            'colour' => CalendarEventColoursEnum::BLUE->value,
+        ]);
+
+        $slots = new AvailableCalendarEventsSlotsService(
+            $this->user,
+            $tz,
+            $this->mentorProgram,
+        )->getAvailableSlots();
+
+        // With correct UTC-normalized bindings, the future event is found and splits
+        // the period into two slots (before and after the event). The buggy version
+        // excludes the event from the query entirely, leaving a single all-day slot.
+        expect($slots)->toHaveCount(2);
+    });
 });
