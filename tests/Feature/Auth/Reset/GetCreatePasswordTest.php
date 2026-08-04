@@ -42,6 +42,8 @@ describe('Password Reset Flow', function (): void {
         ]);
 
         $response->assertSessionHasErrors('email');
+
+        Notification::assertNothingSent();
     });
 
     it('renders reset password page', function (): void {

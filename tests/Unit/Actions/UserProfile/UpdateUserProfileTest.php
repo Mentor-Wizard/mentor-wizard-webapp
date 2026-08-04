@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(UpdateUserProfile::class);
-
 describe('Update Info User', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

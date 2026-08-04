@@ -79,22 +79,6 @@ describe('Unsuccessful Scenarios', function (): void {
         ]);
     });
 
-    it('updates the username and email successfully', function (): void {
-        $user = User::factory()->create();
-
-        $file = UploadedFile::fake()->image('avatar.docx')->size(2000);
-
-        $response = $this->actingAs($user)->patch(route('user.update'), [
-            'username'    => 'change_name',
-            'email'       => 'change_email@email.com',
-            'avatar'      => $file,
-        ]);
-
-        $response->assertSessionHasErrors([
-            'avatar' => 'The avatar field must be a file of type: jpg, jpeg, png, gif.',
-        ]);
-    });
-
     it('file size is wrong', function (): void {
         $user = User::factory()->create();
 

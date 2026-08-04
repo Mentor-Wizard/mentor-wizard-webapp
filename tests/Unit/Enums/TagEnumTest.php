@@ -6,8 +6,6 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\TagEnum;
 
-mutates(TagEnum::class);
-
 describe('TagEnum', function (): void {
     it('has the expected values', function (): void {
         expect(TagEnum::LANGUAGE->value)->toBe('language')

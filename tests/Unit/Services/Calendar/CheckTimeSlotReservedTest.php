@@ -135,7 +135,7 @@ describe('CheckTimeSlotReservedService Service', function (): void {
             mentorProgram: $this->mentorProgram
         );
 
-        expect($service->isSlotAvailable())->toBeTrue();
+        expect($service->isSlotAvailable())->toBeFalse();
     });
 
     it('returns true when requested slot is between two events', function (): void {

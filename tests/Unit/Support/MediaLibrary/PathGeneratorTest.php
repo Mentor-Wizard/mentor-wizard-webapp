@@ -6,8 +6,6 @@ use App\Models\UserProfile;
 use App\Support\MediaLibrary\PathGenerator;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-covers(PathGenerator::class);
-
 describe('MediaLibrary PathGenerator', function (): void {
 
     it('generates correct base path', function (): void {

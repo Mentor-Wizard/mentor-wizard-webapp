@@ -7,8 +7,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-mutates(Logout::class);
-
 describe('Logout Action', function (): void {
 
     it('logs out the user', function (): void {

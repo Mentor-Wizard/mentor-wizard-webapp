@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Policies\ChatMessagesPolicy;
 use Database\Seeders\RoleSeeder;
 
+mutates(ChatMessagesPolicy::class);
+
 describe('ChatMessagesPolicy', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

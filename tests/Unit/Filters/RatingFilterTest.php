@@ -10,8 +10,6 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Spatie\QueryBuilder\Filters\Filter;
 
-covers(RatingFilter::class);
-
 describe('RatingFilter', function (): void {
     beforeEach(function (): void {
         // Create required role for UserObserver

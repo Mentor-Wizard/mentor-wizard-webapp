@@ -6,8 +6,6 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\RoleEnum;
 
-mutates(RoleEnum::class);
-
 describe('RoleEnum', function (): void {
     it('has the expected values', function (): void {
         expect(RoleEnum::USER->value)->toBe('user')

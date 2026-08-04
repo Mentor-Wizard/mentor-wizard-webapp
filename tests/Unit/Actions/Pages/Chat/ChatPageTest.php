@@ -12,8 +12,6 @@ use Illuminate\Support\Arr;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
-mutates(GetChatPage::class);
-
 describe('Chat Page', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

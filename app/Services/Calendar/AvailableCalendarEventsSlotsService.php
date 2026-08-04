@@ -104,9 +104,12 @@ class AvailableCalendarEventsSlotsService
         $calendarEventRequestQuery = CalendarEvent::query()
             ->whereHas('calendarEventUsers', fn ($q) => $q->whereIn('users.id', $ids));
 
-        $calendarEventRequestQuery->where(function ($query): void {
-            $query->where('end_date_time', '>', $this->periodStart)
-                ->where('start_date_time', '<', $this->periodFinish);
+        $periodStartUtc = $this->periodStart->copy()->timezone('UTC');
+        $periodFinishUtc = $this->periodFinish->copy()->timezone('UTC');
+
+        $calendarEventRequestQuery->where(function ($query) use ($periodStartUtc, $periodFinishUtc): void {
+            $query->where('end_date_time', '>', $periodStartUtc)
+                ->where('start_date_time', '<', $periodFinishUtc);
         });
 
         $this->events = $calendarEventRequestQuery

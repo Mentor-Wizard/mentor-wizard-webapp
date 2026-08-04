@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\UtcDateTime;
 use App\Enums\CalendarEventRoleEnum;
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Observers\CalendarEventObserver;
 use App\Policies\CalendarEventPolicy;
+use Carbon\CarbonInterface;
 use Database\Factories\CalendarEventFactory;
 use Database\Factories\CurrencyFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,12 +22,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Carbon;
 use Override;
 
 /**
- * @property Carbon $start_date_time
- * @property Carbon $end_date_time
+ * @property CarbonInterface $start_date_time
+ * @property CarbonInterface $end_date_time
  * @property string $date
  * @property string $title
  * @property CalendarEventStatusEnum $status
@@ -121,8 +122,8 @@ class CalendarEvent extends Model
     protected function casts(): array
     {
         return [
-            'start_date_time' => 'datetime',
-            'end_date_time'   => 'datetime',
+            'start_date_time' => UtcDateTime::class,
+            'end_date_time'   => UtcDateTime::class,
             'session_type'    => MentorSessionTypeEnum::class,
             'status'          => CalendarEventStatusEnum::class,
         ];

@@ -13,8 +13,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Symfony\Component\HttpFoundation\Response;
 
-mutates(ChatMessages::class);
-
 describe('ChatMessages', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

@@ -7,6 +7,12 @@
     "laravel",
     "framework"
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/joshdaugherty/pest-plugin-mutate"
+    }
+  ],
   "require": {
     "php": "^8.5",
     "ext-dom": "*",
@@ -47,8 +53,9 @@
     "mockery/mockery": "^1.6.12",
     "mrpunyapal/rector-pest": "^0.2.15",
     "nunomaduro/collision": "^8.9.4",
-    "pestphp/pest": "^4.7.2",
-    "pestphp/pest-plugin-laravel": "^4.1",
+    "pestphp/pest": "^5.0.3",
+    "pestphp/pest-plugin-laravel": "^5.0.1",
+    "pestphp/pest-plugin-mutate": "dev-fix/coverage-php-14-array-format as 5.0.0",
     "tomasvotruba/cognitive-complexity": "^1.1.1",
     "wulfheart/laravel-actions-ide-helper": "^0.11"
   },

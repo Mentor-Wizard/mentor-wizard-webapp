@@ -62,9 +62,10 @@ frankenphp
 
 # Gemini artifacts
 .gemini/
+.agents/
 
 # Tasks docs
 /docs/tasks-docs
-
+/docs/plans
 # Claude Code local settings
 /.claude/settings.local.json

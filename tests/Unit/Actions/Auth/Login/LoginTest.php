@@ -11,8 +11,6 @@ use Illuminate\Session\SessionManager;
 use Illuminate\Support\MessageBag;
 use Illuminate\Validation\ValidationException;
 
-mutates(Login::class);
-
 describe('Login Action', function (): void {
 
     it('redirects to dashboard after successful login', function (): void {

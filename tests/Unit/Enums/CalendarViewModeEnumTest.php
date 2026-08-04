@@ -6,8 +6,6 @@ namespace Tests\Unit\Enums;
 
 use App\Enums\CalendarViewModeEnum;
 
-mutates(CalendarViewModeEnum::class);
-
 describe('CalendarViewModeEnum', function (): void {
     it('returns all names and values correctly', function (): void {
         $names = CalendarViewModeEnum::names();

@@ -9,6 +9,8 @@ use App\Observers\MentorProgramObserver;
 use Database\Seeders\RoleSeeder;
 use Spatie\Permission\Models\Role;
 
+mutates(MentorProgramObserver::class);
+
 describe('MentorProgramObserver', function (): void {
     beforeEach(function (): void {
         $this->seed(RoleSeeder::class);

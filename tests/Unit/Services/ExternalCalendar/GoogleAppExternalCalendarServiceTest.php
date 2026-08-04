@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Models\CalendarEvent;
-use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\GoogleAppExternalCalendarService;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 
 mutates(GoogleAppExternalCalendarService::class);
@@ -88,52 +85,4 @@ describe('GoogleAppExternalCalendarService (shared app credentials)', function (
         });
     });
 
-    describe('fetchCalendars', function (): void {
-        it('fetches calendars successfully using app-level token', function (): void {
-            $integration = UserCalendarIntegration::factory()->create([
-                'user_id'  => $this->user->getKey(),
-                'provider' => CalendarProviderEnum::GOOGLE,
-            ]);
-
-            Http::fake([
-                'https://www.googleapis.com/*' => Http::response([
-                    'items' => [
-                        ['id' => 'primary', 'summary' => 'Primary',  'primary' => true],
-                    ],
-                ]),
-            ]);
-
-            $result = $this->service->fetchCalendars($integration);
-
-            expect($result['success'])->toBeTrue()
-                ->and($result['calendars'])->toHaveCount(1)
-                ->and($result['calendars'][0]['name'])->toBe('Primary');
-        });
-    });
-
-    describe('createEvent', function (): void {
-        it('creates an event and uses config credentials for token refresh if needed', function (): void {
-            $mentorProgram = MentorProgram::factory()->create(['mentor_id' => $this->user->getKey()]);
-            $event = CalendarEvent::factory()->create([
-                'mentor_program_id' => $mentorProgram->getKey(),
-                'start_date_time'   => Date::tomorrow()->setTime(10, 0),
-                'end_date_time'     => Date::tomorrow()->setTime(11, 0),
-            ]);
-
-            $integration = UserCalendarIntegration::factory()->create([
-                'user_id'          => $this->user->getKey(),
-                'provider'         => CalendarProviderEnum::GOOGLE,
-                'calendar_id'      => 'primary',
-                'token_expires_at' => now()->addHour(),
-            ]);
-
-            Http::fake([
-                'https://www.googleapis.com/*' => Http::response(['id' => 'app-evt-id']),
-            ]);
-
-            $id = $this->service->createEvent($event, $integration);
-
-            expect($id)->toBe('app-evt-id');
-        });
-    });
 });

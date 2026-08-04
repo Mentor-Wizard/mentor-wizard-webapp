@@ -37,6 +37,7 @@ jobs:
   lints:
     name: '🪄 Lints | ${{ matrix.command.name }}'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     services:
       postgres:
@@ -101,9 +102,26 @@ jobs:
           DB_USERNAME: db
           DB_PASSWORD: db
 
+  # Pest 5's Test Impact Analysis (TIA, --tia) is deliberately NOT used anywhere in this job
+  # (or the mutation job below), and tests/Pest.php deliberately does NOT call
+  # pest()->tia()->locally() either — see the comment block at the top of tests/Pest.php for
+  # why that global config was considered and rejected (it would make the CI gate's safety
+  # depend on every future command remembering to pass `--ci`, forever, for a feature that only
+  # benefits local runs). Per Pest's own Continuous Integration docs, `--tia` replays cached
+  # results for unaffected tests instead of running them — the docs explicitly say this belongs
+  # only in a dedicated baseline-recording workflow, never in the pipeline that gates pull
+  # requests. See .github/workflows/tia-baseline.yml for where TIA is applied instead (local
+  # developer speed, opt-in per command, not CI speed).
+  #
+  # `--ci` is still added to every `php artisan test` invocation below (and in the mutation job)
+  # on its own merits: it ignores ->only()/->skip() focus markers, so a test file accidentally
+  # committed with `->only()` can't silently shrink what CI runs. This is also Pest's own
+  # canonical CI example (`./vendor/bin/pest --ci`) — a pre-existing gap in this workflow, closed
+  # here rather than left for later.
   tests:
     name: '♻️ Tests | ${{ matrix.command.name }}'
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.command.timeout || 20 }}
 
     services:
       postgres:
@@ -120,14 +138,44 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    # Unit is split into 2 native Pest shards (--shard=N/2) since it is the larger suite
+    # (139 files / 1130 tests vs Feature's 55 files). --shard+--parallel was verified locally
+    # (no DB needed): `--list-tests` confirmed a complete, non-overlapping split of
+    # --testsuite=Unit (548 + 582 = 1130 tests, zero overlap), and a live run printed
+    # "Shard: 1 of 2 — 70 files ran, out of 139" with no filter-length error, confirming
+    # Shard.php (vendor/pestphp/pest/src/Plugins/Shard.php) filters by class name — compact
+    # enough to stay well under its --filter length cap.
+    #
+    # The `--shard=N/M` command below does not itself choose count-based vs time-balanced
+    # sharding — Pest decides automatically based on whether tests/.pest/shards.json exists in
+    # the checkout (see docs/optimizing-tests.md#test-sharding). That file is generated and
+    # committed by .github/workflows/update-shards.yml (push to develop + weekly schedule +
+    # manual dispatch), following Pest's own documented pattern verbatim: it is NOT something
+    # Pest can fetch at runtime the way the TIA baseline is fetched via `--baselined` — the docs
+    # are explicit that it must be committed to the repo, so this job's `actions/checkout` above
+    # picks it up automatically with no extra step needed here. If shards.json is ever missing
+    # (e.g. before update-shards.yml has run once) or goes stale (new/renamed test files since
+    # the last update), Pest does not fail — it falls back to even count-based distribution for
+    # unknown files while keeping known files time-balanced, and prints a WARN reminding to
+    # re-run --update-shards; that WARN is not currently promoted to a CI failure here.
+    #
+    # 2 shards is a starting point sized on file-count balance (70/69 files), not yet on the
+    # real timing data from update-shards.yml's first run — each shard repeats the full
+    # setup-environment cost, including `yarn build` (see
+    # .github/actions/setup-environment/action.yml), so this is expected to pay back on Unit's
+    # size but should be revisited once shards.json has real data and actual per-shard CI
+    # durations are visible. Feature and Coverage stay unsharded: Feature is small enough that
+    # another shard's fixed overhead would likely outweigh the split, and Coverage produces a
+    # single Clover report consumed by Codecov (see the two upload steps below) — sharding it
+    # would need per-shard flags/report merging, which isn't worth it for one job.
     strategy:
       fail-fast: false
       matrix:
         command:
-          - { name: '🔬 Unit',     command: 'php artisan test --testsuite=Unit --parallel',                                        report: false }
-          - { name: '🧬 Feature',  command: 'php artisan test --testsuite=Feature --parallel',                                     report: false }
-          - { name: '☂️ Coverage', command: 'php artisan test --coverage --compact --coverage-clover coverage/coverage-clover.xml --log-junit coverage/junit.xml', report: true  }
-          - { name: '🦠 Mutation', command: 'php artisan test --mutate --covered-only --min=100 --parallel',                       report: false }
+          - { name: '🔬 Unit (1/2)', command: 'php artisan test --ci --testsuite=Unit --parallel --shard=1/2',                          report: false }
+          - { name: '🔬 Unit (2/2)', command: 'php artisan test --ci --testsuite=Unit --parallel --shard=2/2',                          report: false }
+          - { name: '🧬 Feature',    command: 'php artisan test --ci --testsuite=Feature --parallel',                                   report: false }
+          - { name: '☂️ Coverage',   command: 'php artisan test --ci --coverage --compact --coverage-clover coverage/coverage-clover.xml --log-junit coverage/junit.xml', report: true  }
 
     steps:
       - name: '🛎 Checkout'
@@ -136,6 +184,7 @@ jobs:
       - name: '⚙️ Prepare environment'
         uses: ./.github/actions/setup-environment
         with:
+          use-php: true
           use-node: true
 
       - name: '🗄️ Grant CREATEDB permission'
@@ -171,3 +220,249 @@ jobs:
           directory: ./coverage
           fail_ci_if_error: true
           report_type: test_results
+
+  # Mutation testing is sharded by app/ subdirectory so shards run concurrently instead of
+  # a single job mutating the whole app/ tree sequentially (was timing out with 73 Action
+  # classes plus ~70 more across Http/Services/Enums/etc. all mutated in one sequential run).
+  # --path accepts a comma-separated list of directories (see
+  # vendor/pestphp/pest-plugin-mutate/src/Support/Configuration/CliConfiguration.php).
+  # The five paths below cover every top-level app/ directory (verified against `ls app/`),
+  # so no class is silently excluded from mutation.
+  #
+  # Native Pest 5 `--shard` (including the time-balanced shards.json mechanism used by the
+  # `tests` job above and generated by .github/workflows/update-shards.yml) was evaluated for
+  # this job too and rejected — same conclusion whether shard selection is count-based or
+  # time-balanced. Checked https://pestphp.com/docs/optimizing-tests,
+  # https://pestphp.com/docs/continuous-integration, and https://pestphp.com/docs/mutation-testing
+  # directly at the time this was written: none of them mention `--shard`, `--update-shards`, or
+  # shards.json anywhere in the mutation-testing context — Pest's public docs simply don't
+  # address whether the two are meant to compose (this is not verifiable from anything shipped
+  # in vendor/ — Pest's markdown docs source isn't part of the installed package). Absent an
+  # explicit compatibility statement, the structural reason below (not a documentation gap) is
+  # why they likely don't compose: `--shard` (see
+  # vendor/pestphp/pest/src/Plugins/Shard.php) partitions by which *test files* run, while
+  # `--mutate --covered-only` derives its mutation target classes from the coverage map produced
+  # by whichever tests actually ran (vendor/pestphp/pest-plugin-mutate/src/Support/Configuration/
+  # Configuration.php) — a broader set than just classes with an explicit covers()/mutates()
+  # declaration (see the note further down about the 419-mutations-for-27-files discrepancy).
+  # pest-plugin-mutate's own sources contain no shard-awareness regardless of which sharding
+  # mode produced the test subset. Splitting the *test* set (by count or by time) and then asking
+  # `--covered-only` to mutate whatever ends up in that subset's coverage map risks a shard
+  # passing `--min=100` while covering only a fraction of its classes — a silently weakened gate.
+  # Domain-path sharding avoids this because each shard's scope is defined by production-class
+  # location, not by test timing.
+  # --covered-only --min=100 is intentionally preserved per shard: only classes actually covered
+  # by the Unit suite are mutated, so shards stay fast as long as that covered surface per
+  # `--path` stays small.
+  #
+  # Shard boundaries below were adjusted using real timings pulled from the last 3 CI runs of
+  # this matrix (gh api .../actions/runs/<id>/jobs), not guesswork:
+  #   A · Actions                            ~9-12 min  (success every time)
+  #   B · Http + Enums                       ~16-18 min (success every time)
+  #   C · Services+Policies+Jobs+Models      ~22-25 min (hit its own 25 min timeout twice)
+  #   D · Traits+DTO+Filters+misc            ~10-12 min (failed on a DIFFERENT problem — see below)
+  # This directly contradicts the assumption that A (most files, 73) is the bottleneck — A was
+  # consistently the fastest or second-fastest shard, and C, not A, is the one that needs to
+  # shed load.
+  #
+  # An attempt was made to size *how much* to shed using how many classes per old bucket carry
+  # an explicit covers()/mutates() declaration (on the assumption that --covered-only only
+  # mutates those). That count does not match reality: the actual CI log for old D shows
+  # "419 Mutations for 27 Files created", while grepping tests/Unit for covers()/mutates() on
+  # classes under D's old path finds only 7. --covered-only's real target set is broader than
+  # explicit annotations (most likely: any class touched by the Unit suite's coverage map), so
+  # per-shard annotated-class counts are not a trustworthy cost model and are not used to size
+  # anything below — only the measured durations above are.
+  #   A: unchanged (Actions) — already the fastest, no evidence it needs to change.
+  #   B: unchanged (Http+Enums) — 2nd-slowest for reasons not yet understood; left alone
+  #      because there's no data yet on what to move off it.
+  #   C: narrowed to Services only — isolates the shard that actually hit its 25 min timeout
+  #      twice. This is a pure time-based rebalance and nothing else: Services alone is a
+  #      smaller mutation/covering-test population than Services+Policies+Jobs+Models was, so
+  #      C's job should take proportionally less time. Timeout kept at 25 (not lowered) because
+  #      there is no measured duration yet for the narrowed scope.
+  #   D: left at its ORIGINAL scope and timeout, unchanged — deliberately not touched, see below.
+  #   E (new): Policies+Jobs+Models, carved out of old C so C's load actually drops.
+  #
+  # D's ~10-12 min failure is UNRELATED to shard composition and this change does not fix it.
+  # The real cause, confirmed from the CI log, was
+  # `Error: proc_open(): posix_spawn() failed: Argument list too long` at
+  # vendor/symfony/process/Process.php:411. An earlier draft of this comment claimed that
+  # splitting shards (rather than merging more classes into D) would prevent this crash by
+  # keeping each shard's combined covering-test filter short. That claim was checked against the
+  # actual mutate-plugin source during review and is WRONG: per MutationTest.php:48-70 and
+  # MutationTestRunner.php:116-121, the --filter regex is built separately FOR EACH INDIVIDUAL
+  # MUTATION (one test process per mutation), scoped only to the tests covering that mutation's
+  # exact line range — and `coveredLines` comes from the full `--testsuite=Unit` coverage report,
+  # gathered BEFORE `--path` is ever consulted. So `--path` controls only which mutations get
+  # generated, not the length of any single mutation's covering-test filter — D and E have
+  # exactly the same covering-test population per mutation as the old, larger D did. Neither the
+  # C/E split nor leaving D untouched fixes or worsens this crash either way.
+  # UPDATE: root-caused and fixed. Reproduced locally (the coverage-driver crash noted below
+  # no longer occurs — the custom pest-plugin-mutate fork pulled in by 42465c7 already carries
+  # the coverage-php-14 array-format fix) by running `--testsuite=Unit --coverage
+  # --coverage-php=/tmp/coverage.php --parallel` and then, standalone, replicating
+  # MutationTest.php:52-65's exact filter-building logic (same preg_match, same
+  # __pest_evaluable_ branch, same array_unique at line 65) against every covered line in
+  # app/, to compute the real quantity that can overflow — the BYTE LENGTH of a single
+  # mutation's `--filter="..."` argv string, not a covering-test count. Linux caps a single
+  # argv string at MAX_ARG_STRLEN = 131072 bytes (32 pages), independent of total ARG_MAX —
+  # that's why exactly one file blows up and nothing else does.
+  #
+  # Two files stood out, both in D's scope, both because they're executed at Laravel
+  # bootstrap for virtually every one of the ~1130 Unit tests rather than by tests that
+  # deliberately exercise them:
+  #   - app/Filament/Resources/User/UserResource.php:54 (`getNavigationBadge()`, a one-line
+  #     `static::getModel()::query()->count()`) — 1127 raw covering tests, 1101 filter
+  #     alternations after dedup, 160993 bytes. OVER the limit — this is the confirmed trigger
+  #     for the crash above (matches the crashed run's logged filter almost exactly: 1106
+  #     alternations / 162097 bytes). All 5 other files under app/Filament have zero
+  #     Unit-suite coverage today, so whatever registers this resource at boot (not a
+  #     deliberate Unit test — nothing in tests/Unit exercises Filament) would do the same to
+  #     any future resource with an executable method body, not just this one.
+  #   - app/Observers/UserObserver.php:16 (`created()`, fired by every `User::factory()->create()`
+  #     across the suite) — 807 raw covering tests, 790 alternations, 123904 bytes. UNDER the
+  #     limit today but only by ~5%, and this local measurement undercounts CI's real
+  #     population (7 unrelated local test failures — Pusher config, a timezone-flake —
+  #     shrank the covering set actually collected). Left un-ignored deliberately: unlike the
+  #     Filament badge, `UserObserver::created()` is real business logic (role assignment,
+  #     profile creation, a slug-uniqueness loop) worth mutation testing, and it is not
+  #     causing today's failure. Flagged here as the next file that will reproduce this exact
+  #     crash if the Unit suite keeps growing — re-run the analysis above before adding more
+  #     tests that touch User::factory() broadly, and only then decide whether it also needs
+  #     `--ignore`. No other file anywhere in app/ (all 5 shards, not just D) was within
+  #     100000 bytes of the limit.
+  #
+  # Fix applied: `--ignore=app/Filament` added to D's run command below (not phpunit.xml's
+  # <source><exclude> — that block feeds the `Coverage` job's Codecov upload across
+  # Feature/Integration too, where Filament resources ARE meaningfully covered by Livewire
+  # tests; touching it would silently shrink the project's real coverage metric to fix a
+  # Unit-suite-only mutation-testing problem. `--ignore` is scoped to this one mutation
+  # command, so Codecov is unaffected). Directory-level, not the single file, because the
+  # underlying mechanism — boot-time resource registration executing on every test — isn't
+  # specific to UserResource; it'll hit the next resource added under app/Filament too, and
+  # ignoring the whole (currently near-empty) directory costs nothing today.
+  #
+  # With the crash removed, D will simply complete and run its 432 mutations for the first
+  # time (previously it never got past mutation #1). This will NOT surface as a `--min=100`
+  # failure even if the real mutation score is below 100: Collision's TestCommand strips any
+  # `--min*` option before it reaches pest (`! Str::startsWith($option, '--min')` in both
+  # phpunitArguments() and paratestArguments(), vendor/nunomaduro/collision/src/Adapters/
+  # Laravel/Commands/TestCommand.php), and there is no `min_score`/`mutate()->min()` config
+  # anywhere in phpunit.xml, config/, or tests/Pest.php to compensate. So
+  # MutationTestRunner's minScore stays null and isMinScoreIsReached()
+  # (vendor/pestphp/pest-plugin-mutate/src/Tester/MutationTestRunner.php:207-211)
+  # unconditionally returns true — `--min=100` is currently a no-op on ALL FIVE shards
+  # (A-E), not just D. Pre-existing, unrelated to the ARG_MAX fix above, and out of scope
+  # here (making it enforce for real is a separate, more invasive change) — noted only so a
+  # green D isn't misread as "the mutation gate passed at 100%."
+  #
+  # (1) from the original candidate-next-steps list above turned out right in spirit, wrong in
+  # guess: not a "widely-covered trait or shared helper" but a Filament navigation-badge query.
+  # (2) — an upstream length guard in pest-plugin-mutate equivalent to Pest core's own
+  # vendor/pestphp/pest/src/Plugins/Shard.php:35 (`MAX_FILTER_LENGTH = 32768`) — remains a real
+  # gap (confirmed: no such config exists in AbstractConfiguration/CliConfiguration today) and
+  # a good candidate for the custom fork this project already maintains
+  # (https://github.com/joshdaugherty/pest-plugin-mutate, see composer.json), but out of scope
+  # here: this fix only needed to stop today's crash, not eliminate the class of bug.
+  #
+  # None of the boundary changes above were verified end-to-end locally: mutation testing here
+  # requires a working coverage driver and DB, and reproducing that in a local Docker copy hit
+  # an unrelated, environment-specific crash (`Call to a member function getData() on array` in
+  # pest-plugin-mutate's MutationTestRunner.php:116) that reproduces even on app/Enums — a scope
+  # that reliably passes in real CI — proving it's a local PHP/coverage-driver mismatch, not a
+  # boundary problem. Treat every timeout below as provisional; re-tune from real run data once
+  # this shape has actually run in CI. (This no longer applies to the ARG_MAX crash itself, see
+  # above — but the shard A-E timeout values were never separately re-verified.)
+  #
+  # Each shard also restores/saves pest-plugin-mutate's own on-disk cache of *generated mutant
+  # ASTs* (a content-hash-keyed PSR SimpleCache FileStore — see vendor/pestphp/pest-plugin-mutate/
+  # src/Cache/FileStore.php, src/Plugins/Mutate.php line ~102, and src/Support/MutationCache.php)
+  # across CI runs via actions/cache. This is deliberately NOT a test-result cache: read
+  # src/Support/ResultCache.php and its two call sites in MutationTestCollection.php
+  # (hasLastRunEscapedMutation(), sortByEscapedFirst()) — that cache only reorders which
+  # mutations run first (to fail fast under --retry/--bail, which this project doesn't use); it
+  # never substitutes a cached "tested"/"killed" verdict for actually running the mutation. So
+  # this cache cannot mask a regression (e.g. a covering test deleted after the cache was
+  # written) — every mutation is always tested for real, every run. What it actually saves is
+  # the AST-generation step for files whose content is byte-identical to a previous run — real,
+  # but smaller than "skips re-testing," which is not something this cache does. This lives at
+  # vendor/pestphp/pest-plugin-mutate/.temp/pest-mutate-cache and is wiped every run today
+  # because vendor/ comes from a fresh `composer install` on every checkout — the cache step
+  # below runs after that install, so it restores into a directory the mutate plugin hasn't
+  # created yet on a cold runner; keep it in that order if this is ever refactored. The cache
+  # key is content-hashed (app/** + composer.lock) per shard, so it actually hits across runs
+  # when the relevant source hasn't changed — a run_id-based key would never hit (every run has
+  # a unique run_id), which would silently defeat the point of caching this at all.
+  mutation:
+    name: '🦠 Mutation | ${{ matrix.shard.name }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.shard.timeout }}
+
+    services:
+      postgres:
+        image: postgres:17-alpine3.20
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          - { id: 'A', name: 'A · Actions',                    path: 'app/Actions',                                                                                                      timeout: 30, ignore: '' }
+          - { id: 'B', name: 'B · Http + Enums',                path: 'app/Http,app/Enums',                                                                                              timeout: 25, ignore: '' }
+          - { id: 'C', name: 'C · Services',                    path: 'app/Services',                                                                                                    timeout: 25, ignore: '' }
+          # ignore: app/Filament — see the comment block above this matrix for why: a single
+          # line (UserResource::getNavigationBadge()) produces a --filter argv that exceeds
+          # Linux's MAX_ARG_STRLEN and crashes posix_spawn. Confirmed root cause, not a guess.
+          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament' }
+          - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20, ignore: '' }
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v6
+
+      # No use-node here: the mutation matrix only runs `--testsuite=Unit`, and every test in
+      # this project extends tests/TestCase.php, which calls `$this->withoutVite()` in setUp()
+      # — Laravel's built-in helper that stubs the Vite facade entirely so `@vite()` directives
+      # never touch the manifest. No Unit (or Feature) test needs public/build's compiled
+      # assets, so `yarn install`/`yarn build` in setup-environment/action.yml is pure overhead
+      # here — several minutes per shard, ×5 shards, for output nothing reads. The same is
+      # almost certainly true of the `tests` job's Unit/Feature entries above (they call
+      # setup-environment with use-node: true too), but that wasn't in scope for this change —
+      # flagged as a follow-up rather than changed silently.
+      - name: '⚙️ Prepare environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          use-php: true
+
+      - name: '🗄️ Grant CREATEDB permission'
+        run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
+
+      - name: '💽 Cache mutation testing results'
+        uses: actions/cache@v5
+        with:
+          path: vendor/pestphp/pest-plugin-mutate/.temp/pest-mutate-cache
+          key: "${{ runner.os }}-mutate-${{ matrix.shard.id }}-${{ hashFiles('app/**') }}-${{ hashFiles('composer.lock') }}"
+          restore-keys: '${{ runner.os }}-mutate-${{ matrix.shard.id }}-'
+
+      # matrix.shard.ignore is '' for every shard except D (see the matrix definition above)
+      # — the conditional below must never emit a bare `--ignore=` with no value: pest-plugin-
+      # mutate's FileFinder treats an empty ignore pattern as a prefix match against every
+      # file in --path, which would silently exclude the entire shard's mutation scope.
+      - name: '${{ matrix.shard.name }} mutation tests'
+        run: php artisan test --ci --testsuite=Unit --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }} ${{ matrix.shard.ignore != '' && format('--ignore={0}', matrix.shard.ignore) || '' }}
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: testing
+          DB_USERNAME: db
+          DB_PASSWORD: db

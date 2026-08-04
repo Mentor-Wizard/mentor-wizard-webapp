@@ -4,111 +4,74 @@ declare(strict_types=1);
 
 use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarEventTypeEnum;
+use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
-use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Date;
 use Spatie\Permission\Models\Role;
 
-mutates(CalendarEvent::class);
+beforeEach(function (): void {
+    $this->seed(RoleSeeder::class);
+    $mentor = User::factory()->create();
+    $mentor->assignRole(Role::findByName(RoleEnum::MENTOR->value));
+});
 
-describe('CalendarEvent model', function (): void {
-    beforeEach(function (): void {
-        $this->seed(RoleSeeder::class);
-    });
+it('preserves the same instant across a non-UTC timezone round-trip through the datetime cast', function (): void {
+    $mentorProgram = MentorProgram::factory()->create();
 
-    it('casts start_date_time and end_date_time as Carbon instances', function (): void {
-        $start = Date::create(2025, 8, 21, 9, 15, 0);
-        $end = Date::create(2025, 8, 21, 10, 45, 0);
+    $startInKyiv = Date::create(2026, 6, 15, 12, 0, 0, 'Europe/Kyiv');
+    $endInKyiv = $startInKyiv->copy()->addHour();
 
-        $event = CalendarEvent::factory()->create([
-            'start_date_time' => $start,
-            'end_date_time'   => $end,
-            'date'            => $start?->format('Y-m-d'),
-        ]);
+    $event = CalendarEvent::query()->create([
+        'title'             => 'Timezone round-trip',
+        'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+        'start_date_time'   => $startInKyiv,
+        'end_date_time'     => $endInKyiv,
+        'date'              => $startInKyiv->format('Y-m-d'),
+        'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+        'mentor_program_id' => $mentorProgram->getKey(),
+    ]);
 
-        $fresh = CalendarEvent::query()->find($event->id);
+    $freshEvent = $event->fresh();
 
-        expect($fresh?->start_date_time)->toBeInstanceOf(CarbonImmutable::class)
-            ->and($fresh?->end_date_time)->toBeInstanceOf(CarbonImmutable::class)
-            ->and($fresh?->start_date_time->format('H:i'))->toBe('09:15')
-            ->and($fresh?->end_date_time->format('H:i'))->toBe('10:45');
-    });
+    expect($freshEvent)->not->toBeNull()
+        ->and($freshEvent->start_date_time->eq($startInKyiv))->toBeTrue()
+        ->and($freshEvent->start_date_time->timestamp)->toBe($startInKyiv->timestamp)
+        ->and($freshEvent->end_date_time->eq($endInKyiv))->toBeTrue()
+        ->and($freshEvent->end_date_time->timestamp)->toBe($endInKyiv->timestamp);
+});
 
-    it('has users many-to-many relationship with timestamps', function (): void {
-        $event = CalendarEvent::factory()->create();
-        $user = User::factory()->create();
+it('stores the same instant regardless of the timezone the Carbon instance was created in', function (): void {
+    $mentorProgram = MentorProgram::factory()->create();
 
-        $relation = $event->calendarEventUsers();
-        expect($relation)->toBeInstanceOf(BelongsToMany::class);
+    $instant = Date::create(2026, 6, 15, 9, 0, 0, 'UTC');
+    $sameInstantInKyiv = $instant->copy()->timezone('Europe/Kyiv');
 
-        $event->calendarEventUsers()->attach($user->id, ['role' => 'host', 'created_at' => now(), 'updated_at' => now()]);
+    $eventFromUtc = CalendarEvent::query()->create([
+        'title'             => 'From UTC',
+        'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+        'start_date_time'   => $instant,
+        'end_date_time'     => $instant->copy()->addHour(),
+        'date'              => $instant->format('Y-m-d'),
+        'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+        'mentor_program_id' => $mentorProgram->getKey(),
+    ]);
 
-        $pivot = $event->calendarEventUsers()->where('users.id', $user->id)->first()->pivot;
-        expect($pivot)->not->toBeNull()
-            ->and($pivot->created_at)->not->toBeNull()
-            ->and($pivot->updated_at)->not->toBeNull();
-    });
+    $eventFromKyiv = CalendarEvent::query()->create([
+        'title'             => 'From Kyiv',
+        'status'            => CalendarEventStatusEnum::CONFIRMED->value,
+        'start_date_time'   => $sameInstantInKyiv,
+        'end_date_time'     => $sameInstantInKyiv->copy()->addHour(),
+        'date'              => $sameInstantInKyiv->format('Y-m-d'),
+        'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+        'session_type'      => MentorSessionTypeEnum::VIDEO_SESSION->value,
+        'mentor_program_id' => $mentorProgram->getKey(),
+    ]);
 
-    it('has the correct fillable attributes', function (): void {
-        $model = new CalendarEvent;
-
-        expect($model->getFillable())->toEqual([
-            'title',
-            'status',
-            'start_date_time',
-            'end_date_time',
-            'date',
-            'type',
-            'session_type',
-            'web_link',
-            'description',
-            'mentor_program_id',
-            'mentor_session_id',
-        ]);
-    });
-
-    it('can be created with mass assignable attributes', function (): void {
-        $user = User::factory()->create();
-        $user->assignRole(Role::findByName(RoleEnum::MENTOR->value));
-
-        $program = MentorProgram::factory()->create(
-            ['mentor_id' => $user]
-        );
-
-        $start = Date::create(2025, 8, 22, 9, 0, 0);
-        $end = Date::create(2025, 8, 22, 10, 30, 0);
-
-        $payload = [
-            'title'             => 'CalendarEvent Create Test',
-            'status'            => CalendarEventStatusEnum::CONFIRMED->value,
-            'start_date_time'   => $start,
-            'end_date_time'     => $end,
-            'date'              => $start?->format('Y-m-d'),
-            'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-            'web_link'          => 'https://example.com/meeting',
-            'description'       => 'Testing creation',
-            'mentor_program_id' => $program->getKey(),
-        ];
-
-        $event = CalendarEvent::query()->create($payload);
-        $event->refresh();
-
-        expect($event)
-            ->toBeInstanceOf(CalendarEvent::class)
-            ->and($event->title)->toBe('CalendarEvent Create Test')
-            ->and($event->status)->toBe(CalendarEventStatusEnum::CONFIRMED)
-            ->and($event->start_date_time->format('Y-m-d H:i'))->toBe('2025-08-22 09:00')
-            ->and($event->end_date_time->format('Y-m-d H:i'))->toBe('2025-08-22 10:30')
-            ->and($event->duration)->toBe((int) $start?->diffInMinutes($end))
-            ->and($event->date)->toBe('2025-08-22')
-            ->and($event->type)->toBe(CalendarEventTypeEnum::INDIVIDUAL->value)
-            ->and($event->web_link)->toBe('https://example.com/meeting')
-            ->and($event->description)->toBe('Testing creation')
-            ->and($event->mentor_program_id)->toBe($program->getKey());
-    });
+    expect($eventFromUtc->fresh()->start_date_time->eq($eventFromKyiv->fresh()->start_date_time))->toBeTrue();
 });

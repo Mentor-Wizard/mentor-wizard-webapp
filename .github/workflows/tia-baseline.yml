@@ -1,0 +1,100 @@
+name: '🪄 Mentor Wizard | 🧭 TIA Baseline'
+
+# Records Pest 5's Test Impact Analysis (TIA) baseline and publishes it as a workflow artifact.
+# This does NOT speed up ci.yml — per Pest's Continuous Integration docs, `--tia` must never be
+# used in the pipeline that gates pull requests, since it replays cached results for unaffected
+# tests instead of running them. This workflow is the one documented exception: a dedicated job,
+# separate from the PR gate, that records a fresh baseline after every merge to develop so that
+# developers running `./vendor/bin/pest` (or `php artisan test`) locally can download it via `gh`
+# and start replaying immediately instead of paying the full local record cost themselves.
+#
+# tests/Pest.php deliberately does NOT call pest()->tia()->locally() — see the comment block at
+# the top of that file for why global wiring was considered and rejected (it would make the CI
+# gate's safety depend on every future command remembering to pass `--ci`, forever, for a
+# feature that only benefits local runs). So there is no automatic wiring here: a developer who
+# wants the speedup opts in per invocation with
+#   ./vendor/bin/pest --tia --baselined
+# or sets `PEST_TIA_BASELINED=1` to make that the default for their shell. Either downloads the
+# baseline this workflow records via `gh` (must be installed and authenticated locally).
+
+on:
+  push:
+    branches:
+      - develop
+  schedule:
+    - cron: '0 3 * * 1' # Weekly on Monday
+  workflow_dispatch:
+
+jobs:
+  baseline:
+    name: '🧭 Record TIA baseline'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:17-alpine3.20
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v6
+
+      - name: '⚙️ Prepare environment'
+        uses: ./.github/actions/setup-environment
+        with:
+          use-php: true
+          use-node: true
+
+      - name: '🗄️ Grant CREATEDB permission'
+        run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
+
+      - name: '🧭 Run full suite and record TIA graph'
+        run: ./vendor/bin/pest --parallel --tia --coverage --fresh
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: testing
+          DB_USERNAME: db
+          DB_PASSWORD: db
+
+      - name: '📍 Resolve TIA baseline path'
+        id: baseline
+        run: echo "path=$(./vendor/bin/pest --baseline)" >> "$GITHUB_OUTPUT"
+
+      # Pest's TIA storage path/layout is marked @internal (see docs/source) and may change on a
+      # minor version bump. Fail loudly here rather than silently uploading an empty or
+      # unexpected directory as the "baseline" artifact that every developer's --baselined run
+      # will later trust.
+      - name: '✅ Validate TIA baseline path'
+        run: |
+          path="${{ steps.baseline.outputs.path }}"
+          case "$path" in
+            "$HOME"/.pest/tia/*) ;;
+            *)
+              echo "Unexpected TIA baseline path (expected under \$HOME/.pest/tia/): $path" >&2
+              exit 1
+              ;;
+          esac
+          if [ ! -f "$path/graph.json" ]; then
+            echo "Expected graph.json not found in TIA baseline path: $path" >&2
+            exit 1
+          fi
+
+      - name: '⬆️ Upload TIA baseline'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pest-tia-baseline
+          path: ${{ steps.baseline.outputs.path }}
+          retention-days: 30

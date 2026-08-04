@@ -7,8 +7,6 @@ use App\Filters\TagStacksFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
-covers(TagStacksFilter::class);
-
 describe('TagStacksFilter', function (): void {
     beforeEach(function (): void {
         $this->filter = new TagStacksFilter;
