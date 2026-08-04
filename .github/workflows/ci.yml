@@ -298,13 +298,73 @@ jobs:
   # generated, not the length of any single mutation's covering-test filter — D and E have
   # exactly the same covering-test population per mutation as the old, larger D did. Neither the
   # C/E split nor leaving D untouched fixes or worsens this crash either way.
-  # This is an open problem, not something this change resolves. Candidate next steps for
-  # whoever picks it up: (1) find which specific file/mutation in D's scope produces the
-  # oversized filter (likely a widely-covered trait or shared helper with many covering tests
-  # across the whole suite) and narrow its --path a level deeper; (2) propose or patch an
-  # upstream length guard in pest-plugin-mutate equivalent to Pest core's own
-  # vendor/pestphp/pest/src/Plugins/Shard.php:35 (`MAX_FILTER_LENGTH = 32768`), which
-  # pest-plugin-mutate has no equivalent of today.
+  # UPDATE: root-caused and fixed. Reproduced locally (the coverage-driver crash noted below
+  # no longer occurs — the custom pest-plugin-mutate fork pulled in by 42465c7 already carries
+  # the coverage-php-14 array-format fix) by running `--testsuite=Unit --coverage
+  # --coverage-php=/tmp/coverage.php --parallel` and then, standalone, replicating
+  # MutationTest.php:52-65's exact filter-building logic (same preg_match, same
+  # __pest_evaluable_ branch, same array_unique at line 65) against every covered line in
+  # app/, to compute the real quantity that can overflow — the BYTE LENGTH of a single
+  # mutation's `--filter="..."` argv string, not a covering-test count. Linux caps a single
+  # argv string at MAX_ARG_STRLEN = 131072 bytes (32 pages), independent of total ARG_MAX —
+  # that's why exactly one file blows up and nothing else does.
+  #
+  # Two files stood out, both in D's scope, both because they're executed at Laravel
+  # bootstrap for virtually every one of the ~1130 Unit tests rather than by tests that
+  # deliberately exercise them:
+  #   - app/Filament/Resources/User/UserResource.php:54 (`getNavigationBadge()`, a one-line
+  #     `static::getModel()::query()->count()`) — 1127 raw covering tests, 1101 filter
+  #     alternations after dedup, 160993 bytes. OVER the limit — this is the confirmed trigger
+  #     for the crash above (matches the crashed run's logged filter almost exactly: 1106
+  #     alternations / 162097 bytes). All 5 other files under app/Filament have zero
+  #     Unit-suite coverage today, so whatever registers this resource at boot (not a
+  #     deliberate Unit test — nothing in tests/Unit exercises Filament) would do the same to
+  #     any future resource with an executable method body, not just this one.
+  #   - app/Observers/UserObserver.php:16 (`created()`, fired by every `User::factory()->create()`
+  #     across the suite) — 807 raw covering tests, 790 alternations, 123904 bytes. UNDER the
+  #     limit today but only by ~5%, and this local measurement undercounts CI's real
+  #     population (7 unrelated local test failures — Pusher config, a timezone-flake —
+  #     shrank the covering set actually collected). Left un-ignored deliberately: unlike the
+  #     Filament badge, `UserObserver::created()` is real business logic (role assignment,
+  #     profile creation, a slug-uniqueness loop) worth mutation testing, and it is not
+  #     causing today's failure. Flagged here as the next file that will reproduce this exact
+  #     crash if the Unit suite keeps growing — re-run the analysis above before adding more
+  #     tests that touch User::factory() broadly, and only then decide whether it also needs
+  #     `--ignore`. No other file anywhere in app/ (all 5 shards, not just D) was within
+  #     100000 bytes of the limit.
+  #
+  # Fix applied: `--ignore=app/Filament` added to D's run command below (not phpunit.xml's
+  # <source><exclude> — that block feeds the `Coverage` job's Codecov upload across
+  # Feature/Integration too, where Filament resources ARE meaningfully covered by Livewire
+  # tests; touching it would silently shrink the project's real coverage metric to fix a
+  # Unit-suite-only mutation-testing problem. `--ignore` is scoped to this one mutation
+  # command, so Codecov is unaffected). Directory-level, not the single file, because the
+  # underlying mechanism — boot-time resource registration executing on every test — isn't
+  # specific to UserResource; it'll hit the next resource added under app/Filament too, and
+  # ignoring the whole (currently near-empty) directory costs nothing today.
+  #
+  # With the crash removed, D will simply complete and run its 432 mutations for the first
+  # time (previously it never got past mutation #1). This will NOT surface as a `--min=100`
+  # failure even if the real mutation score is below 100: Collision's TestCommand strips any
+  # `--min*` option before it reaches pest (`! Str::startsWith($option, '--min')` in both
+  # phpunitArguments() and paratestArguments(), vendor/nunomaduro/collision/src/Adapters/
+  # Laravel/Commands/TestCommand.php), and there is no `min_score`/`mutate()->min()` config
+  # anywhere in phpunit.xml, config/, or tests/Pest.php to compensate. So
+  # MutationTestRunner's minScore stays null and isMinScoreIsReached()
+  # (vendor/pestphp/pest-plugin-mutate/src/Tester/MutationTestRunner.php:207-211)
+  # unconditionally returns true — `--min=100` is currently a no-op on ALL FIVE shards
+  # (A-E), not just D. Pre-existing, unrelated to the ARG_MAX fix above, and out of scope
+  # here (making it enforce for real is a separate, more invasive change) — noted only so a
+  # green D isn't misread as "the mutation gate passed at 100%."
+  #
+  # (1) from the original candidate-next-steps list above turned out right in spirit, wrong in
+  # guess: not a "widely-covered trait or shared helper" but a Filament navigation-badge query.
+  # (2) — an upstream length guard in pest-plugin-mutate equivalent to Pest core's own
+  # vendor/pestphp/pest/src/Plugins/Shard.php:35 (`MAX_FILTER_LENGTH = 32768`) — remains a real
+  # gap (confirmed: no such config exists in AbstractConfiguration/CliConfiguration today) and
+  # a good candidate for the custom fork this project already maintains
+  # (https://github.com/joshdaugherty/pest-plugin-mutate, see composer.json), but out of scope
+  # here: this fix only needed to stop today's crash, not eliminate the class of bug.
   #
   # None of the boundary changes above were verified end-to-end locally: mutation testing here
   # requires a working coverage driver and DB, and reproducing that in a local Docker copy hit
@@ -312,7 +372,8 @@ jobs:
   # pest-plugin-mutate's MutationTestRunner.php:116) that reproduces even on app/Enums — a scope
   # that reliably passes in real CI — proving it's a local PHP/coverage-driver mismatch, not a
   # boundary problem. Treat every timeout below as provisional; re-tune from real run data once
-  # this shape has actually run in CI.
+  # this shape has actually run in CI. (This no longer applies to the ARG_MAX crash itself, see
+  # above — but the shard A-E timeout values were never separately re-verified.)
   #
   # Each shard also restores/saves pest-plugin-mutate's own on-disk cache of *generated mutant
   # ASTs* (a content-hash-keyed PSR SimpleCache FileStore — see vendor/pestphp/pest-plugin-mutate/
@@ -357,11 +418,14 @@ jobs:
       fail-fast: false
       matrix:
         shard:
-          - { id: 'A', name: 'A · Actions',                    path: 'app/Actions',                                                                                                      timeout: 30 }
-          - { id: 'B', name: 'B · Http + Enums',                path: 'app/Http,app/Enums',                                                                                              timeout: 25 }
-          - { id: 'C', name: 'C · Services',                    path: 'app/Services',                                                                                                    timeout: 25 }
-          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20 }
-          - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20 }
+          - { id: 'A', name: 'A · Actions',                    path: 'app/Actions',                                                                                                      timeout: 30, ignore: '' }
+          - { id: 'B', name: 'B · Http + Enums',                path: 'app/Http,app/Enums',                                                                                              timeout: 25, ignore: '' }
+          - { id: 'C', name: 'C · Services',                    path: 'app/Services',                                                                                                    timeout: 25, ignore: '' }
+          # ignore: app/Filament — see the comment block above this matrix for why: a single
+          # line (UserResource::getNavigationBadge()) produces a --filter argv that exceeds
+          # Linux's MAX_ARG_STRLEN and crashes posix_spawn. Confirmed root cause, not a guess.
+          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament' }
+          - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20, ignore: '' }
 
     steps:
       - name: '🛎 Checkout'
@@ -391,8 +455,12 @@ jobs:
           key: "${{ runner.os }}-mutate-${{ matrix.shard.id }}-${{ hashFiles('app/**') }}-${{ hashFiles('composer.lock') }}"
           restore-keys: '${{ runner.os }}-mutate-${{ matrix.shard.id }}-'
 
+      # matrix.shard.ignore is '' for every shard except D (see the matrix definition above)
+      # — the conditional below must never emit a bare `--ignore=` with no value: pest-plugin-
+      # mutate's FileFinder treats an empty ignore pattern as a prefix match against every
+      # file in --path, which would silently exclude the entire shard's mutation scope.
       - name: '${{ matrix.shard.name }} mutation tests'
-        run: php artisan test --ci --testsuite=Unit --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }}
+        run: php artisan test --ci --testsuite=Unit --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }} ${{ matrix.shard.ignore != '' && format('--ignore={0}', matrix.shard.ignore) || '' }}
         env:
           DB_HOST: 127.0.0.1
           DB_DATABASE: testing
