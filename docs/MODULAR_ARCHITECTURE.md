@@ -106,14 +106,26 @@ Modules/{Name}/
 - **`'controller' => ['generate' => false]`** — проєкт не використовує
   Controller'и; маршрутизація йде через invokable Actions
   (`lorisleiva/laravel-actions`), як і в `app/`.
-- **`'inertia' => ['generate' => false]`, `'views' => ['generate' => false]`** —
-  Vue/Inertia-сторінки **лишаються поза модулем**, у `resources/js/Pages/`. Це
-  узгоджено з де-факто стандартом «backend-only модуль»: увесь backend-тулінг
-  (Composer autoload, PHPStan, Rector, CI-шарди, `ArchTest.php`, Filament
-  discovery) вказує на `Modules/`, а фронтенд-тулінг (`vite.config.js`,
-  `resources/js/app.js`, `resources/js/ssr.js`) — ні. ⚠ Це узгодження ще не
-  зафіксоване явним рішенням у `docs/FRONTEND_ARCHITECTURE.md` — див. «Відкриті
-  питання» нижче.
+- **`'inertia' => ['generate' => true]`,
+  `'inertia-components' => ['generate' => true]`,
+  `'views' => ['generate' => false]`** — модуль **може** тримати власні
+  Vue/Inertia-сторінки та компоненти в
+  `Modules/{Name}/resources/js/{Pages,Components}/`. Пілот — `Modules/Calendar`.
+  Blade-вʼю лишаються вимкненими (проєкт Inertia-only). Фронтенд-тулінг
+  узгоджено з `Modules/`: alias `@modules` → корінь `Modules/`
+  (`vite.config.js` + `jsconfig.json`), спільний резолвер сторінок
+  `resources/js/resolvePage.js` (використовують і `app.js`, і `ssr.js`),
+  `config/inertia.php` → `pages.paths`, а також скоуп ESLint/Prettier.
+
+  ⚠ **Правило пріоритету (footgun).** Резолвер спершу шукає сторінку в модулях і
+  лише потім у `resources/js/Pages/`: для імені `X/Y` кандидат
+  `Modules/X/resources/js/Pages/X/Y.vue` **мовчки перекриває** однойменну
+  сторінку рівня застосунку `resources/js/Pages/X/Y.vue`. Оскільки генератори
+  `inertia`/`inertia-components` увімкнені, `php artisan module:make X` може
+  заскафолдити сторінку-заглушку, яка непомітно перехопить робочий маршрут
+  застосунку. Перед створенням модуля з іменем, що збігається з наявною текою в
+  `resources/js/Pages/`, перевіряйте перекриття.
+
 - **`'composer' => ['vendor' => env('MODULE_VENDOR', 'mentor-wizard')]`** —
   модулі отримують `"name": "mentor-wizard/{module}"` у власному
   `composer.json`, а не вендорну назву пакета (`nwidart`).
@@ -275,10 +287,10 @@ relation-методи на Core-модель `User`, виносить їх у в
 `docs/temp/ddd-domain-analysis.md` (розділ «Відкриті питання») для повного
 обґрунтування:
 
-1. **«Backend-only модуль» як стандарт** — тулінг де-факто підтверджує це для
-   бекенду, але `docs/FRONTEND_ARCHITECTURE.md` про `Modules/` не згадує.
-   Потрібно або зафіксувати це рішення явно в тому документі, або переглянути
-   його до наступного модуля.
+1. **Модуль із власним фронтендом як стандарт** — пілот `Modules/Calendar`
+   показав, що фронтенд-тулінг це витримує, але `docs/FRONTEND_ARCHITECTURE.md`
+   про `Modules/` ще не згадує. Потрібно зафіксувати рішення явно в тому
+   документі до наступного модуля з фронтендом.
 
 ## Пов'язані документи
 

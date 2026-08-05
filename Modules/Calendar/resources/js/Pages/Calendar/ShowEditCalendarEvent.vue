@@ -20,16 +20,15 @@ import {
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import { router, useForm } from '@inertiajs/vue3';
-import { onMounted, ref, watch } from 'vue';
-
-import ExternalIntegrationsTab from '@/Components/Calendar/ExternalIntegrationsTab.vue';
+import ExternalIntegrationsTab from '@modules/Calendar/resources/js/Components/Calendar/ExternalIntegrationsTab.vue';
 import {
   capitalize,
   errors,
   isFormValid,
   timeZone,
   validateForm,
-} from '@/Stores/Calendar/helpers.js';
+} from '@modules/Calendar/resources/js/Stores/Calendar/helpers.js';
+import { onMounted, ref, watch } from 'vue';
 const props = defineProps({
   locale: {
     type: String,

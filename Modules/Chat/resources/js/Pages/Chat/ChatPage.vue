@@ -1,12 +1,12 @@
 <script setup>
 import { usePage } from '@inertiajs/vue3';
+import InfoList from '@modules/Chat/resources/js/Pages/Chat/Blocks/InfoList.vue';
+import ListUser from '@modules/Chat/resources/js/Pages/Chat/Blocks/ListUser.vue';
+import MainList from '@modules/Chat/resources/js/Pages/Chat/Blocks/MainList.vue';
 import { onMounted, onUnmounted } from 'vue';
 
 import AlertNotification from '@/Components/AlertNotification.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InfoList from '@/Pages/Chat/Blocks/InfoList.vue';
-import ListUser from '@/Pages/Chat/Blocks/ListUser.vue';
-import MainList from '@/Pages/Chat/Blocks/MainList.vue';
 
 import { useCaseChat } from './useCaseChat.js';
 const { unsubscribeUser, fetchUsers, listUser, alertRef } = useCaseChat();

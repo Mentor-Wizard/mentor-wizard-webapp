@@ -18,8 +18,6 @@ import {
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import { useForm } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
-
 import {
   capitalize,
   errors,
@@ -27,7 +25,8 @@ import {
   sessionTypes,
   timeZone,
   validateForm,
-} from '@/Stores/Calendar/helpers.js';
+} from '@modules/Calendar/resources/js/Stores/Calendar/helpers.js';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
   open: {

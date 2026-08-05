@@ -1,10 +1,10 @@
 <script setup>
 import { Tab, TabGroup, TabList } from '@headlessui/vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid/index.js';
+import { useCaseChat } from '@modules/Chat/resources/js/Pages/Chat/useCaseChat.js';
 import { ref } from 'vue';
 
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
 
 const { sortedUsers, messageSortList, messageSortBy, fetchMessages } =

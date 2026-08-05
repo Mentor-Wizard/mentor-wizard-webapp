@@ -1,9 +1,8 @@
 <script setup>
 import { GlobeAltIcon } from '@heroicons/vue/16/solid/index.js';
 import { router, usePage } from '@inertiajs/vue3';
+import CreateCalendarEvent from '@modules/Calendar/resources/js/Pages/Calendar/CreateCalendarEvent.vue';
 import { computed, ref } from 'vue';
-
-import CreateCalendarEvent from '@/Pages/Calendar/CreateCalendarEvent.vue';
 
 const props = defineProps({
   calendarBlock: {

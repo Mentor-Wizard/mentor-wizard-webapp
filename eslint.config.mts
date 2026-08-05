@@ -13,7 +13,10 @@ export default [
   js.configs.recommended,
   prettierConfig,
   {
-    files: ['resources/js/**/*.{js,vue,ts}'],
+    files: [
+      'resources/js/**/*.{js,vue,ts}',
+      'Modules/*/resources/js/**/*.{js,vue,ts}',
+    ],
     plugins: {
       'simple-import-sort': simpleImportSort,
     },

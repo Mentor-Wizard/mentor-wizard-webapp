@@ -1,7 +1,6 @@
 <script setup>
+import { useCaseChat } from '@modules/Chat/resources/js/Pages/Chat/useCaseChat.js';
 import { computed } from 'vue';
-
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import { useCaseFileType } from '../useCaseFileType.js';
 

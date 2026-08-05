@@ -1,12 +1,11 @@
 <script setup>
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
-import { computed, onMounted, ref } from 'vue';
-
 import {
   getFormattedMonth,
   getTitleMonth,
   shownMonth,
-} from '@/Stores/Calendar/helpers.js';
+} from '@modules/Calendar/resources/js/Stores/Calendar/helpers.js';
+import { computed, onMounted, ref } from 'vue';
 
 const container = ref(null);
 const containerNav = ref(null);

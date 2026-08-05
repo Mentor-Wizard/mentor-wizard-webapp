@@ -6,8 +6,8 @@
     "dev": "vite",
     "prettier": "prettier . -c",
     "prettier:fix": "prettier . -wl",
-    "eslint": "eslint --ext .js,.vue resources/js/",
-    "eslint:fix": "eslint --ext .js,.vue resources/js/ --fix"
+    "eslint": "eslint --ext .js,.vue resources/js/ Modules/*/resources/js/",
+    "eslint:fix": "eslint --ext .js,.vue resources/js/ Modules/*/resources/js/ --fix"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^21.0.2",

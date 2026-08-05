@@ -15,11 +15,11 @@ import {
   UserIcon,
   VideoCameraIcon,
 } from '@heroicons/vue/24/solid';
+import { useCaseChat } from '@modules/Chat/resources/js/Pages/Chat/useCaseChat.js';
 
 import AppModal from '@/Components/AppModal.vue';
 import DangerButton from '@/Components/UI/Button/DangerButton.vue';
 import PrimaryButton from '@/Components/UI/Button/PrimaryButton.vue';
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import { useCaseFileType } from '../useCaseFileType.js';
 const {

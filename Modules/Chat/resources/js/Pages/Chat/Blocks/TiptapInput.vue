@@ -8,13 +8,12 @@ import {
   PaperClipIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline';
+import { useCaseChat } from '@modules/Chat/resources/js/Pages/Chat/useCaseChat.js';
 import { Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import emojiList from 'unicode-emoji-json';
 import { onBeforeUnmount, ref } from 'vue';
-
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
 
 import { useCaseFileType } from '../useCaseFileType.js';
 

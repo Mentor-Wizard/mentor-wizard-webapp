@@ -5,10 +5,9 @@ import {
   PhoneIcon,
   VideoCameraIcon,
 } from '@heroicons/vue/20/solid';
-
-import ChatList from '@/Pages/Chat/Blocks/ChatList.vue';
-import TiptapInput from '@/Pages/Chat/Blocks/TiptapInput.vue';
-import { useCaseChat } from '@/Pages/Chat/useCaseChat.js';
+import ChatList from '@modules/Chat/resources/js/Pages/Chat/Blocks/ChatList.vue';
+import TiptapInput from '@modules/Chat/resources/js/Pages/Chat/Blocks/TiptapInput.vue';
+import { useCaseChat } from '@modules/Chat/resources/js/Pages/Chat/useCaseChat.js';
 
 const { currentUser } = useCaseChat();
 </script>

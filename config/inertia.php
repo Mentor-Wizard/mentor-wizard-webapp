@@ -75,6 +75,11 @@ return [
 
             resource_path('js/Pages'),
 
+            // Module-scoped Inertia pages (Modules/{Name}/resources/js/Pages).
+            // Without these the testing-time `assertInertia()->component()` check
+            // cannot locate pages that live inside a module.
+            ...(glob(base_path('Modules/*/resources/js/Pages')) ?: []),
+
         ],
 
         'extensions' => [

@@ -7,15 +7,18 @@ import {
   EllipsisHorizontalIcon,
 } from '@heroicons/vue/20/solid';
 import { router } from '@inertiajs/vue3';
+import DailyView from '@modules/Calendar/resources/js/Components/Calendar/DailyView.vue';
+import MonthlyView from '@modules/Calendar/resources/js/Components/Calendar/MonthlyView.vue';
+import WeeklyView from '@modules/Calendar/resources/js/Components/Calendar/WeeklyView.vue';
+import { useCalendar } from '@modules/Calendar/resources/js/Stores/calendar.js';
+import {
+  adjustDate,
+  formatWeekRange,
+} from '@modules/Calendar/resources/js/Stores/Calendar/helpers.js';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 
-import DailyView from '@/Components/Calendar/DailyView.vue';
-import MonthlyView from '@/Components/Calendar/MonthlyView.vue';
-import WeeklyView from '@/Components/Calendar/WeeklyView.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { useCalendar } from '@/Stores/calendar.js';
-import { adjustDate, formatWeekRange } from '@/Stores/Calendar/helpers.js';
 
 const props = defineProps({
   locale: {
