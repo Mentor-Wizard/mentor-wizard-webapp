@@ -2,16 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Enums\CalendarProviderEnum;
-use App\Enums\CalendarSyncStatusEnum;
-use App\Enums\ExternalCalendarEventSyncStatusEnum;
+use App\Contracts\ExternalCalendar\CalendarEventIntegrationsProvider;
+use App\Contracts\ExternalCalendar\NullCalendarEventIntegrationsProvider;
 use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\ExternalCalendarEvent;
-use App\Models\ExternalCalendarEventLog;
 use App\Models\MentorProgram;
 use App\Models\User;
-use App\Models\UserCalendarIntegration;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -21,6 +17,12 @@ use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\ExternalCalendar\Enums\CalendarProviderEnum;
+use Modules\ExternalCalendar\Enums\CalendarSyncStatusEnum;
+use Modules\ExternalCalendar\Enums\ExternalCalendarEventSyncStatusEnum;
+use Modules\ExternalCalendar\Models\ExternalCalendarEvent;
+use Modules\ExternalCalendar\Models\ExternalCalendarEventLog;
+use Modules\ExternalCalendar\Models\UserCalendarIntegration;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -396,5 +398,21 @@ describe('Calendar Pages - ShowCalendarEvent deferred externalIntegrations', fun
         expect($integrations)->toHaveCount(2)
             ->and($providers)->toContain(CalendarProviderEnum::GOOGLE->value)
             ->and($providers)->toContain(CalendarProviderEnum::OUTLOOK->value);
+    });
+
+    it('falls back to an empty array when the ExternalCalendar contract is not implemented (module disabled)', function (): void {
+        UserCalendarIntegration::factory()->create([
+            'user_id'     => $this->host->getKey(),
+            'provider'    => CalendarProviderEnum::GOOGLE,
+            'sync_status' => CalendarSyncStatusEnum::ACTIVE,
+        ]);
+
+        $this->app->bind(CalendarEventIntegrationsProvider::class, NullCalendarEventIntegrationsProvider::class);
+
+        $this->actingAs($this->host)
+            ->withHeaders(deferredHeaders())
+            ->getJson(route('pages.calendar.show', $this->event->getKey()))
+            ->assertOk()
+            ->assertJsonPath('props.externalIntegrations', []);
     });
 });

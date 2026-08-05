@@ -38,7 +38,10 @@ Available agents: `ba`, `developer`, `frontend`, `tester`, `qa`, `reviewer`, `de
 ## Модулі (nwidart/laravel-modules)
 
 Проєкт мігрує на модульний моноліт: бізнес-домени виносяться з `app/` у
-`Modules/{Name}/`. Повне обґрунтування рішення, конвенції каталогу та статус
+`Modules/{Name}/`. **Модуль DDD-архітектури містить не лише бекенд, а й усі
+Inertia-компоненти цього домену** — Vue-сторінки й компоненти домену йдуть у
+`Modules/{Name}/resources/js/{Pages,Components}/`, а не в `resources/js/Pages/`
+рівня застосунку. Повне обґрунтування рішення, конвенції каталогу та статус
 міграції — `docs/MODULAR_ARCHITECTURE.md`.
 
 ```bash
@@ -62,8 +65,9 @@ php artisan module:seed Blog
 ```
 
 Проєкт не використовує Controller'и (`module:make-controller`) — маршрутизація
-йде через invokable Actions, як і в `app/`. Vue/Inertia-сторінки модуля
-лишаються в `resources/js/Pages/`, а не в `Modules/{Name}/`.
+йде через invokable Actions, як і в `app/`. Vue/Inertia-сторінки та компоненти
+модуля живуть у самому модулі — `Modules/{Name}/resources/js/{Pages,Components}/`,
+а не в `resources/js/Pages/` рівня застосунку.
 
 ## Setup
 

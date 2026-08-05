@@ -5,6 +5,17 @@
 > **Статус коду:** документ **не змінює жодного файлу** в `app/`, `Modules/`,
 > `routes/`, `database/`.
 
+> ⚠ **Застаріло щодо A1/A2 після дати зрізу.** Наступні коміти на цій же гілці
+> (`019b97b` migrate Calendar → `Modules/Calendar`, `1e4ef1f` modularize Inertia
+> pages/resources у `Modules/`) закрили гепи `G-1` (Chat без `resources/`) і
+> винесли Calendar у `Modules/Calendar` разом із фронтендом. Розділи A1/A2 нижче
+> лишені **як історичний запис аналізу**, а не як поточний стан — актуальний
+> стан: `Modules/Chat` і `Modules/Calendar` обидва мають
+> `resources/js/{Pages,Components}` усередині модуля (правило «модуль = бекенд +
+> Inertia-фронтенд домену», `docs/MODULAR_ARCHITECTURE.md`,
+> `docs/plans/migrate-calendar-domain-module/06-frontend-pilot.md`,
+> `07-chat-frontend-pilot.md`).
+
 ---
 
 ## 0. Як читати цей документ

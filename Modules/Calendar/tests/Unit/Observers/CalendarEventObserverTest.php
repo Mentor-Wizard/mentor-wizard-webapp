@@ -3,21 +3,26 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
-use App\Jobs\ProcessDeleteExternalCalendarEvent;
-use App\Jobs\ProcessUpdateExternalCalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\MentorSession;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Modules\Calendar\Enums\CalendarEventColoursEnum;
 use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
+use Modules\Calendar\Events\CalendarEventCancelled;
+use Modules\Calendar\Events\CalendarEventConfirmed;
+use Modules\Calendar\Events\CalendarEventContentChanged;
+use Modules\Calendar\Events\CalendarEventDeleting;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Observers\CalendarEventObserver;
+use Modules\ExternalCalendar\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
+use Modules\ExternalCalendar\Jobs\ProcessDeleteExternalCalendarEvent;
+use Modules\ExternalCalendar\Jobs\ProcessUpdateExternalCalendarEvent;
 use Spatie\Permission\Models\Role;
 
 mutates(CalendarEventObserver::class);
@@ -194,9 +199,9 @@ describe('CalendarEventObserver', function (): void {
         });
     });
 
-    describe('External calendar job dispatch', function (): void {
-        it('dispatches ProcessCalendarEventExternalCalendarIntegrations when created with CONFIRMED status', function (): void {
-            Queue::fake();
+    describe('External calendar domain events', function (): void {
+        it('dispatches CalendarEventConfirmed when created with CONFIRMED status', function (): void {
+            Event::fake([CalendarEventConfirmed::class]);
 
             CalendarEvent::factory()->create([
                 'status'            => CalendarEventStatusEnum::CONFIRMED,
@@ -207,11 +212,11 @@ describe('CalendarEventObserver', function (): void {
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
 
-            Queue::assertPushed(ProcessCalendarEventExternalCalendarIntegrations::class);
+            Event::assertDispatched(CalendarEventConfirmed::class);
         });
 
-        it('does not dispatch sync job when created with non-CONFIRMED status', function (): void {
-            Queue::fake();
+        it('does not dispatch CalendarEventConfirmed when created with non-CONFIRMED status', function (): void {
+            Event::fake([CalendarEventConfirmed::class]);
 
             CalendarEvent::factory()->create([
                 'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
@@ -222,10 +227,101 @@ describe('CalendarEventObserver', function (): void {
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
 
-            Queue::assertNotPushed(ProcessCalendarEventExternalCalendarIntegrations::class);
+            Event::assertNotDispatched(CalendarEventConfirmed::class);
         });
 
-        it('dispatches ProcessCalendarEventExternalCalendarIntegrations when status changes to CONFIRMED', function (): void {
+        it('dispatches CalendarEventConfirmed when status changes to CONFIRMED', function (): void {
+            Event::fake([CalendarEventConfirmed::class]);
+
+            $event = CalendarEvent::factory()->create([
+                'status'            => CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION,
+                'start_date_time'   => Date::tomorrow()->setTime(10, 0),
+                'end_date_time'     => Date::tomorrow()->setTime(11, 0),
+                'date'              => Date::tomorrow()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+            ]);
+
+            $event->update(['status' => CalendarEventStatusEnum::CONFIRMED]);
+
+            Event::assertDispatched(CalendarEventConfirmed::class);
+        });
+
+        it('dispatches CalendarEventCancelled when status changes to CANCELLED', function (): void {
+            Event::fake([CalendarEventCancelled::class]);
+
+            $event = CalendarEvent::factory()->create([
+                'status'            => CalendarEventStatusEnum::CONFIRMED,
+                'start_date_time'   => Date::tomorrow()->setTime(10, 0),
+                'end_date_time'     => Date::tomorrow()->setTime(11, 0),
+                'date'              => Date::tomorrow()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+            ]);
+
+            $event->update(['status' => CalendarEventStatusEnum::CANCELLED]);
+
+            Event::assertDispatched(fn (CalendarEventCancelled $e): bool => $e->calendarEventId === $event->getKey());
+        });
+
+        it('dispatches CalendarEventContentChanged when CONFIRMED event content fields change', function (): void {
+            Event::fake([CalendarEventContentChanged::class]);
+
+            $event = CalendarEvent::factory()->create([
+                'status'            => CalendarEventStatusEnum::CONFIRMED,
+                'start_date_time'   => Date::tomorrow()->setTime(10, 0),
+                'end_date_time'     => Date::tomorrow()->setTime(11, 0),
+                'date'              => Date::tomorrow()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+            ]);
+
+            $event->update(['title' => 'Updated title']);
+
+            Event::assertDispatched(fn (CalendarEventContentChanged $e): bool => $e->calendarEvent->getKey() === $event->getKey());
+        });
+
+        it('does not dispatch CalendarEventContentChanged when non-content fields change', function (): void {
+            $event = CalendarEvent::factory()->create([
+                'status'            => CalendarEventStatusEnum::CONFIRMED,
+                'start_date_time'   => Date::tomorrow()->setTime(10, 0),
+                'end_date_time'     => Date::tomorrow()->setTime(11, 0),
+                'date'              => Date::tomorrow()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+                'web_link'          => null,
+            ]);
+
+            Event::fake([CalendarEventContentChanged::class]);
+
+            $event->update(['web_link' => null]); // no actual change — already null
+            $event->update(['type' => CalendarEventTypeEnum::GROUP->value]); // type is not a CONTENT_FIELD
+
+            Event::assertNotDispatched(CalendarEventContentChanged::class);
+        });
+
+        it('dispatches CalendarEventDeleting when event is being deleted', function (): void {
+            $event = CalendarEvent::factory()->create([
+                'status'            => CalendarEventStatusEnum::CANCELLED,
+                'start_date_time'   => Date::tomorrow()->setTime(10, 0),
+                'end_date_time'     => Date::tomorrow()->setTime(11, 0),
+                'date'              => Date::tomorrow()->format('Y-m-d'),
+                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
+                'mentor_program_id' => $this->mentorProgram->getKey(),
+            ]);
+
+            $eventId = $event->getKey();
+
+            Event::fake([CalendarEventDeleting::class]);
+
+            $event->delete();
+
+            Event::assertDispatched(fn (CalendarEventDeleting $e): bool => $e->calendarEventId === $eventId);
+        });
+    });
+
+    describe('External calendar sync end to end (Observer → Event → Listener → Job)', function (): void {
+        it('queues ProcessCalendarEventExternalCalendarIntegrations when an event is confirmed', function (): void {
             Queue::fake();
 
             $event = CalendarEvent::factory()->create([
@@ -242,7 +338,7 @@ describe('CalendarEventObserver', function (): void {
             Queue::assertPushed(ProcessCalendarEventExternalCalendarIntegrations::class);
         });
 
-        it('dispatches ProcessDeleteExternalCalendarEvent when status changes to CANCELLED', function (): void {
+        it('queues ProcessDeleteExternalCalendarEvent when an event is cancelled', function (): void {
             Queue::fake();
 
             $event = CalendarEvent::factory()->create([
@@ -259,9 +355,7 @@ describe('CalendarEventObserver', function (): void {
             Queue::assertPushed(ProcessDeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $event->getKey());
         });
 
-        it('dispatches ProcessUpdateExternalCalendarEvent when CONFIRMED event content fields change', function (): void {
-            Queue::fake();
-
+        it('queues ProcessUpdateExternalCalendarEvent when a confirmed event content field changes', function (): void {
             $event = CalendarEvent::factory()->create([
                 'status'            => CalendarEventStatusEnum::CONFIRMED,
                 'start_date_time'   => Date::tomorrow()->setTime(10, 0),
@@ -270,37 +364,15 @@ describe('CalendarEventObserver', function (): void {
                 'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
                 'mentor_program_id' => $this->mentorProgram->getKey(),
             ]);
+
+            Queue::fake();
 
             $event->update(['title' => 'Updated title']);
 
             Queue::assertPushed(ProcessUpdateExternalCalendarEvent::class, fn ($job): bool => $job->calendarEvent->getKey() === $event->getKey());
         });
 
-        it('does not dispatch ProcessUpdateExternalCalendarEvent when non-content fields change', function (): void {
-            Queue::fake();
-
-            $event = CalendarEvent::factory()->create([
-                'status'            => CalendarEventStatusEnum::CONFIRMED,
-                'start_date_time'   => Date::tomorrow()->setTime(10, 0),
-                'end_date_time'     => Date::tomorrow()->setTime(11, 0),
-                'date'              => Date::tomorrow()->format('Y-m-d'),
-                'type'              => CalendarEventTypeEnum::INDIVIDUAL->value,
-                'mentor_program_id' => $this->mentorProgram->getKey(),
-                'web_link'          => null,
-            ]);
-
-            Queue::clearResolvedInstances();
-            Queue::fake();
-
-            $event->update(['web_link' => null]); // no actual change — already null
-            $event->update(['type' => CalendarEventTypeEnum::GROUP->value]); // type is not a CONTENT_FIELD
-
-            Queue::assertNotPushed(ProcessUpdateExternalCalendarEvent::class);
-        });
-
-        it('dispatches ProcessDeleteExternalCalendarEvent when event is being deleted', function (): void {
-            Queue::fake();
-
+        it('queues ProcessDeleteExternalCalendarEvent when an event is deleted', function (): void {
             $event = CalendarEvent::factory()->create([
                 'status'            => CalendarEventStatusEnum::CANCELLED,
                 'start_date_time'   => Date::tomorrow()->setTime(10, 0),
@@ -311,6 +383,9 @@ describe('CalendarEventObserver', function (): void {
             ]);
 
             $eventId = $event->getKey();
+
+            Queue::fake();
+
             $event->delete();
 
             Queue::assertPushed(ProcessDeleteExternalCalendarEvent::class, fn ($job): bool => $job->calendarEventId === $eventId);

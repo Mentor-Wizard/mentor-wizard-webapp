@@ -79,6 +79,14 @@ resources/js/
 └── bootstrap.js        # Bootstrap конфігурація
 ```
 
+> ⚠ Ця структура — для доменів, що ще **не** винесені в `Modules/`. Домен, вже
+> мігрований у модульний моноліт (наприклад `Chat`, `Calendar`), тримає власні
+> Vue-сторінки та компоненти в
+> `Modules/{Name}/resources/js/{Pages,Components}/`, а не тут — модуль DDD
+> завжди full-stack (бекенд + Inertia-фронтенд домену). Резолвер сторінок
+> (`resources/js/resolvePage.js`) шукає спершу в модулях, потім тут; повні
+> конвенції — `docs/MODULAR_ARCHITECTURE.md`.
+
 ## Vue.js 3 - Composition API
 
 ### Налаштування додатка

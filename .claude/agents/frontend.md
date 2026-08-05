@@ -34,14 +34,21 @@ Activate `vue-expert-js` always (JS), `vue-expert` for TypeScript files, `securi
 
 ```
 resources/js/
-├── Pages/          # Inertia pages (Auth, Calendar, MentorProgram, Profile, etc.)
+├── Pages/          # Inertia pages for domains still in app/ (Auth, MentorProgram, Profile, etc.)
 ├── Components/
 │   ├── UI/         # Design system: Button, Forms, Icons, Notifications, Table
-│   ├── Calendar/   # Calendar-specific components
 │   └── Navigation/ # Nav components
-├── Stores/         # Pinia stores (calendar.js, navigation.js, footer.js)
+├── Stores/         # Pinia stores for app-level domains (navigation.js, footer.js)
 └── Layouts/        # AuthenticatedLayout, GuestLayout, LandingLayout
+
+Modules/{Name}/resources/js/    # Extracted modules (Chat, Calendar) — own Pages/, Components/, Stores/
 ```
+
+> A domain extracted into `Modules/{Name}/` (e.g. `Calendar`) owns its Vue
+> pages/components/stores entirely under `Modules/{Name}/resources/js/` — a
+> module is backend + Inertia frontend together, never split across
+> `Modules/{Name}/app/` and the app-level `resources/js/`. See
+> `docs/MODULAR_ARCHITECTURE.md`.
 
 ## Inertia v2 Frontend Patterns
 

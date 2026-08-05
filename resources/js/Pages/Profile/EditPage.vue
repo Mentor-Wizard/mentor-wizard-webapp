@@ -6,13 +6,13 @@ import {
   CreditCardIcon,
   UserIcon,
 } from '@heroicons/vue/20/solid';
+import ExternalCalendarTab from '@modules/ExternalCalendar/resources/js/Components/ExternalCalendar/ExternalCalendarTab.vue';
 import { ref, shallowRef } from 'vue';
 
 import MainPageText from '@/Components/MainPageText.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
 import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
-import ExternalCalendarTab from '@/Pages/Profile/Tab/ExternalCalendarTab.vue';
 import MyAccountTab from '@/Pages/Profile/Tab/MyAccountTab.vue';
 import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
 

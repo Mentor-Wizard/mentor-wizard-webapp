@@ -40,6 +40,8 @@ Activate `laravel-specialist` + `vue-expert-js` always. Add `vue-expert` for Typ
 
 > **Never create Controllers.** Canonical examples: `app/Actions/Pages/MentorProgram/`, `app/Actions/MentorTag/CreateMentorTag.php`.
 
+> **Domain already extracted into `Modules/{Name}/`?** (e.g. `Chat`, `Calendar`) Put both the Actions above **and** the Vue pages/components in the module — `Modules/{Name}/app/Actions/...` and `Modules/{Name}/resources/js/{Pages,Components}/`, not in `app/` or the app-level `resources/js/Pages/`. A module is a full vertical slice: backend + its Inertia frontend. See `docs/MODULAR_ARCHITECTURE.md`.
+
 ## Inertia v2 Patterns
 
 **Deferred props** (slow data): `Inertia::defer(fn() => ...)` on backend + `v-if="!prop"` skeleton in Vue.
@@ -56,7 +58,7 @@ Activate `laravel-specialist` + `vue-expert-js` always. Add `vue-expert` for Typ
 
 1. **Understand** — `application-info` for models, `list-routes` for existing routes, read related Actions
 2. **Backend** — migration → model → Form Request → Page Action → Store/Update Action → Business Actions
-3. **Frontend** — Vue page in `resources/js/Pages/` with `useForm`, error handling, loading states
+3. **Frontend** — Vue page in `resources/js/Pages/` (or `Modules/{Name}/resources/js/Pages/` for an already-extracted module domain) with `useForm`, error handling, loading states
 4. **Integrate** — verify data flow: Action props → Inertia → Vue form submission → redirect
 5. **Quality** — `docker compose exec app ./vendor/bin/pint --dirty` + `./vendor/bin/phpstan analyse`
 

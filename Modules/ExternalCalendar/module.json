@@ -1,0 +1,11 @@
+{
+  "name": "ExternalCalendar",
+  "alias": "externalcalendar",
+  "description": "Two-way synchronization of confirmed calendar events with external providers (Google, Outlook, Apple CalDAV): OAuth connections, sync jobs, and settings pages.",
+  "keywords": ["calendar", "external", "google", "outlook", "caldav", "sync"],
+  "priority": 0,
+  "providers": [
+    "Modules\\ExternalCalendar\\Providers\\ExternalCalendarServiceProvider"
+  ],
+  "files": []
+}

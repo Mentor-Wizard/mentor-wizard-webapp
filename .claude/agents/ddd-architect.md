@@ -34,12 +34,23 @@ Activate `ddd-strategic-design` + `architecture-designer` + `laravel-architectur
 
 > **No Controllers, no Repositories, no `app/Domain/` directory.**
 
+> **Modular monolith migration.** Domains already extracted into
+> `Modules/{Name}/` (currently `Chat`, `Calendar`) are full vertical slices:
+> backend (Actions/Models/Policies/…) **and** Inertia frontend
+> (`Modules/{Name}/resources/js/{Pages,Components}/`) both live inside the
+> module — never split backend into the module while leaving Vue pages in
+> `resources/js/Pages/`. Every module boundary/placement decision must also
+> decide where the domain's Vue pages and components go. See
+> `docs/MODULAR_ARCHITECTURE.md` and `docs/temp/ddd-domain-analysis.md` for the
+> boundary catalogue and per-domain migration status.
+
 ## Domain Areas
 
 | Domain | Models | Actions Location | Key Patterns |
 |--------|--------|-----------------|--------------|
 | Auth | User | `app/Actions/Auth/` | Socialite OAuth (Google, GitHub) |
-| Calendar | CalendarEvent | `app/Actions/Calendar/` | CalendarService, Observer |
+| Chat | Chat, Message | `Modules/Chat/app/Actions/` | Extracted module — backend + Inertia frontend both in `Modules/Chat/` |
+| Calendar | CalendarEvent | `Modules/Calendar/app/Actions/` | Extracted module — backend + Inertia frontend both in `Modules/Calendar/`; CalendarService, Observer |
 | MentorPrograms | MentorProgram | `app/Actions/MentorPrograms/` | CRUD Actions, Policies |
 | MentorTag | MentorTag | `app/Actions/MentorTag/` | Tag normalization, TagEnum |
 | Profile | User (profile) | `app/Actions/Profile/` | Avatar (Spatie Media Library) |

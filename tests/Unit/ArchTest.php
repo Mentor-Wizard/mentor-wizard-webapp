@@ -70,3 +70,21 @@ arch('calendar-models-are-eloquent')
 arch('calendar-does-not-reach-into-other-modules')
     ->expect('Modules\Calendar')
     ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);
+
+// DDD-migration Phase 3 (ExternalCalendar extraction, docs/plans/external-calendar-module-migration).
+it('keeps Modules\ExternalCalendar non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/ExternalCalendar/app')))->not->toBeEmpty();
+});
+
+arch('external-calendar-models-are-eloquent')
+    ->expect('Modules\ExternalCalendar\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+// `Modules\Calendar` is deliberately absent from this list: ExternalCalendar owns 2 FKs
+// (`calendar_event_id`, both `cascadeOnDelete`) into CalendarEvent plus direct imports in
+// its Jobs/Services/Policies — a normal Customer/Supplier relationship, not a boundary
+// violation (see docs/plans/external-calendar-module-migration/02-development-plan-backend.md §4.3).
+arch('external-calendar-does-not-reach-into-other-modules')
+    ->expect('Modules\ExternalCalendar')
+    ->not->toUse(['Modules\Chat', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);

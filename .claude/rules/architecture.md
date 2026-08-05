@@ -20,6 +20,12 @@ and `tests/Unit/ArchTest.php`.
   Presence, Admin/Filament) stay supporting capabilities in `app/` (Core), not
   modules. Full boundary catalogue and per-domain migration readiness:
   `docs/temp/ddd-domain-analysis.md`.
+- **A module is full-stack**: `Modules/{Name}/` owns both the backend (Actions,
+  Models, Policies, migrations, …) and the Inertia frontend of that domain —
+  Vue pages and components live in `Modules/{Name}/resources/js/{Pages,Components}/`,
+  not in the app-level `resources/js/Pages/`. Pilot: `Modules/Calendar`. Full
+  frontend tooling wiring (Vite alias, page resolver priority footgun) is in
+  `docs/MODULAR_ARCHITECTURE.md`.
 - **Full decision record, conventions, and artisan command reference**:
   `docs/MODULAR_ARCHITECTURE.md`.
 - **Status**: `Chat` is the extracted pilot module (`Modules/Chat/`); all other
@@ -37,6 +43,9 @@ and `tests/Unit/ArchTest.php`.
 
 - **Inertia.js** with Vue.js — frontend built as SPA via server-driven routing
 - **Domain Organization**: features organized by domain (Auth, MentorPrograms, Calendar, etc.)
+- For domains already extracted into `Modules/{Name}/`, the Inertia pages and
+  components for that domain live inside the module, not under the app-level
+  `resources/js/Pages/` — see [Modular Monolith (DDD)](#modular-monolith-ddd) above.
 
 ## Database
 

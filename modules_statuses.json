@@ -1,4 +1,5 @@
 {
   "Chat": true,
-  "Calendar": true
+  "Calendar": true,
+  "ExternalCalendar": true
 }

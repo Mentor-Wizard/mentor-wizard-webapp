@@ -490,6 +490,11 @@ resources/js/
     └── LandingLayout.vue
 ```
 
+> Ця структура — для доменів рівня застосунку. Домен, винесений у
+> `Modules/{Name}/` (наприклад `Chat`, `Calendar`), тримає власні
+> `Pages/`/`Components/` у `Modules/{Name}/resources/js/` — модуль завжди
+> включає і бекенд, і Inertia-фронтенд домену (`docs/MODULAR_ARCHITECTURE.md`).
+
 ### Іменування Vue компонентів
 
 - **PascalCase** для назв файлів: `SecondaryButton.vue`, `TextInput.vue`

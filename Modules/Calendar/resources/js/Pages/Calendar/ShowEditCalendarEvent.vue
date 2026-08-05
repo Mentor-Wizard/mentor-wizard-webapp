@@ -20,7 +20,6 @@ import {
   XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import { router, useForm } from '@inertiajs/vue3';
-import ExternalIntegrationsTab from '@modules/Calendar/resources/js/Components/Calendar/ExternalIntegrationsTab.vue';
 import {
   capitalize,
   errors,
@@ -28,6 +27,7 @@ import {
   timeZone,
   validateForm,
 } from '@modules/Calendar/resources/js/Stores/Calendar/helpers.js';
+import ExternalIntegrationsTab from '@modules/ExternalCalendar/resources/js/Components/ExternalCalendar/ExternalIntegrationsTab.vue';
 import { onMounted, ref, watch } from 'vue';
 const props = defineProps({
   locale: {

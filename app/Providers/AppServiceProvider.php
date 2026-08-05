@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\ExternalCalendar\CalendarEventIntegrationsProvider;
+use App\Contracts\ExternalCalendar\NullCalendarEventIntegrationsProvider;
 use App\Enums\RoleEnum;
-use App\Models\ExternalCalendarEvent;
-use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
-use App\Models\UserCalendarIntegration;
 use App\Models\UserProfile;
 use App\Models\UserSchedule;
-use App\Policies\ExternalCalendarEventLogPolicy;
-use App\Policies\ExternalCalendarEventPolicy;
-use App\Policies\UserCalendarIntegrationPolicy;
 use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -38,7 +34,10 @@ class AppServiceProvider extends ServiceProvider
      * Register any application services.
      */
     #[Override]
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind(CalendarEventIntegrationsProvider::class, NullCalendarEventIntegrationsProvider::class);
+    }
 
     /**
      * Bootstrap any application services.
@@ -58,9 +57,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
         Gate::policy(UserSchedule::class, UserSchedulePolicy::class);
-        Gate::policy(ExternalCalendarEventLog::class, ExternalCalendarEventLogPolicy::class);
-        Gate::policy(UserCalendarIntegration::class, UserCalendarIntegrationPolicy::class);
-        Gate::policy(ExternalCalendarEvent::class, ExternalCalendarEventPolicy::class);
         Vite::prefetch(concurrency: 3);
 
         $this->configRateLimiters();

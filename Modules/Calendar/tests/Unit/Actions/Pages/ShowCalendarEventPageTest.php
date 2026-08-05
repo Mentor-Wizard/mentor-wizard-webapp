@@ -64,7 +64,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->mentor);
 
-        $response = new ShowCalendarEventPage()->handle($request, $this->event);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -93,7 +93,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->viewer);
 
-        $response = new ShowCalendarEventPage()->handle($request, $this->event);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -109,7 +109,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->mentor);
 
-        $response = new ShowCalendarEventPage()->handle($request, $this->event);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -125,7 +125,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->mentor);
 
-        $response = new ShowCalendarEventPage()->handle($request, $this->event);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $this->event);
         $resultData = $response->toResponse(request())->getOriginalContent();
         $page = $resultData->getData()['page'];
 
@@ -167,7 +167,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone'), 'mentor' => $this->mentor]);
         $request->setUserResolver(fn () => $this->mentor);
 
-        $responseTokyo = new ShowCalendarEventPage()->handle($request, $eventAtNight);
+        $responseTokyo = resolve(ShowCalendarEventPage::class)->handle($request, $eventAtNight);
         $resultDataTokyo = $responseTokyo->toResponse(request())->getOriginalContent();
         $pageTokyo = $resultDataTokyo->getData()['page'];
 
@@ -240,7 +240,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->mentor);
 
-        $responseTokyo = new ShowCalendarEventPage()->handle($request, $event1);
+        $responseTokyo = resolve(ShowCalendarEventPage::class)->handle($request, $event1);
         $resultDataTokyo = $responseTokyo->toResponse(request())->getOriginalContent();
         $pageTokyo = $resultDataTokyo->getData()['page'];
 
@@ -265,7 +265,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->mentor);
 
-        $response = (new ShowCalendarEventPage)->handle($request, $event);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $event);
 
         expect($response)->toBeInstanceOf(Response::class);
         $props = inertiaProps($response);
@@ -294,7 +294,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $host);
 
-        $response = (new ShowCalendarEventPage)->handle($request, $calendarEvent);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $calendarEvent);
         $props = inertiaProps($response);
 
         expect($props['permissions'])->toBe('view');
@@ -324,7 +324,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $participant);
 
-        $response = (new ShowCalendarEventPage)->handle($request, $calendarEvent);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $calendarEvent);
         $props = inertiaProps($response);
 
         expect($props['permissions'])->toBe('view');
@@ -360,12 +360,12 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $user);
         // Can edit event where user is host
-        $responseHost = (new ShowCalendarEventPage)->handle($request, $hostEvent);
+        $responseHost = resolve(ShowCalendarEventPage::class)->handle($request, $hostEvent);
         $propsHost = inertiaProps($responseHost);
         expect($propsHost['permissions'])->toBe('view');
 
         // Cannot edit event where user is only participant
-        $responseParticipant = (new ShowCalendarEventPage)->handle($request, $participantEvent);
+        $responseParticipant = resolve(ShowCalendarEventPage::class)->handle($request, $participantEvent);
         $propsParticipant = inertiaProps($responseParticipant);
         expect($propsParticipant['permissions'])->toBe('view');
     });
@@ -394,7 +394,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         });
 
         it('includes available colours in response', function (): void {
-            $action = new ShowCalendarEventPage;
+            $action = resolve(ShowCalendarEventPage::class);
             $request = new Request(['timezone' => config('app.timezone')]);
             $request->setUserResolver(fn () => $this->user);
 
@@ -410,7 +410,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         });
 
         it('includes permissions in response based on user authorization', function (): void {
-            $action = new ShowCalendarEventPage;
+            $action = resolve(ShowCalendarEventPage::class);
             $request = new Request(['timezone' => config('app.timezone')]);
             $request->setUserResolver(fn () => $this->user);
 
@@ -426,7 +426,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         });
 
         it('includes mentor program duration in response', function (): void {
-            $action = new ShowCalendarEventPage;
+            $action = resolve(ShowCalendarEventPage::class);
             $request = new Request(['timezone' => config('app.timezone')]);
             $request->setUserResolver(fn () => $this->user);
 
@@ -442,7 +442,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         });
 
         it('includes available slots in response', function (): void {
-            $action = new ShowCalendarEventPage;
+            $action = resolve(ShowCalendarEventPage::class);
             $request = new Request(['timezone' => config('app.timezone')]);
             $request->setUserResolver(fn () => $this->user);
 
@@ -458,7 +458,7 @@ describe('Show Calendar CalendarEvent Page', function (): void {
         });
 
         it('includes calendar event data in response', function (): void {
-            $action = new ShowCalendarEventPage;
+            $action = resolve(ShowCalendarEventPage::class);
             $request = new Request(['timezone' => config('app.timezone')]);
             $request->setUserResolver(fn () => $this->user);
 
@@ -510,7 +510,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->mentor);
 
-        $response = (new ShowCalendarEventPage)->handle($request, $event);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $event);
         $props = inertiaProps($response);
 
         // Mentor of the program should have 'edit' permission
@@ -545,7 +545,7 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->nonMentor);
 
-        $response = (new ShowCalendarEventPage)->handle($request, $event);
+        $response = resolve(ShowCalendarEventPage::class)->handle($request, $event);
         $props = inertiaProps($response);
 
         // Non-mentor should have 'view' permission (not 'edit')
@@ -591,12 +591,12 @@ describe('Mutation Coverage - permissions array parameter', function (): void {
         $request = new Request(['timezone' => config('app.timezone')]);
         $request->setUserResolver(fn () => $this->mentor);
         // For event1 (their own program) - should be 'edit'
-        $response1 = (new ShowCalendarEventPage)->handle($request, $event1);
+        $response1 = resolve(ShowCalendarEventPage::class)->handle($request, $event1);
         $props1 = inertiaProps($response1);
         expect($props1['permissions'])->toBe('edit');
 
         // For event2 (other mentor's program) - should be 'view'
-        $response2 = (new ShowCalendarEventPage)->handle($request, $event2);
+        $response2 = resolve(ShowCalendarEventPage::class)->handle($request, $event2);
         $props2 = inertiaProps($response2);
         expect($props2['permissions'])->toBe('view');
 

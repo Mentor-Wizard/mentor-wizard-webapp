@@ -2,16 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\CalendarEvent\SyncCalendarEventToIntegration;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectCallback;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectDirect;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectRedirect;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarDisconnect;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarRetrySync;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSelectCalendar;
-use App\Actions\Calendar\ExternalCalendar\ExternalCalendarSyncSingleEvent;
-use App\Actions\Calendar\ExternalCalendar\RerunExternalCalendarEventSync;
-use App\Actions\Calendar\ExternalCalendarLog\AcknowledgeExternalCalendarEventLog;
 use App\Actions\MentorPrograms\DeleteMentorProgram;
 use App\Actions\MentorPrograms\SetMainMentorProgram;
 use App\Actions\MentorPrograms\StoreMentorProgramPage;
@@ -23,7 +13,6 @@ use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
 use App\Actions\Pages\MentorProgram\ListMentorProgramPage;
-use App\Actions\Pages\Profile\ExternalCalendarSettingsPage;
 use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
@@ -84,47 +73,6 @@ Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')-
     Route::get('/', UserSchedulePage::class)->name('user-schedule.index');
     Route::post('/batch', StoreBatchUserSchedule::class)->name('user-schedule.batch');
 });
-
-Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->group(function (): void {
-    Route::get('/', ExternalCalendarSettingsPage::class)
-        ->name('pages.settings.external-calendar');
-    Route::post('connect/{provider}', ExternalCalendarConnectRedirect::class)
-        ->middleware('throttle:calendar-connect')
-        ->name('external-calendar.connect.redirect');
-    Route::post('connect-direct/{provider}', ExternalCalendarConnectDirect::class)
-        ->middleware('throttle:calendar-connect')
-        ->name('external-calendar.connect.direct');
-    Route::post('select/{provider}', ExternalCalendarSelectCalendar::class)
-        ->middleware('throttle:calendar-connect')
-        ->name('external-calendar.select');
-    Route::delete('disconnect/{provider}', ExternalCalendarDisconnect::class)
-        ->middleware('throttle:calendar-connect')
-        ->name('external-calendar.disconnect');
-    Route::post('retry/{provider}', ExternalCalendarRetrySync::class)
-        ->middleware('throttle:calendar-retry')
-        ->name('external-calendar.retry');
-    Route::post('sync-event/{calendarEvent}/{provider}', ExternalCalendarSyncSingleEvent::class)
-        ->middleware('throttle:calendar-sync')
-        ->name('external-calendar.sync-event');
-    Route::post('rerun/{calendarEvent:id}/{externalCalendarEvent:id}', RerunExternalCalendarEventSync::class)
-        ->middleware('throttle:calendar-retry')
-        ->name('external-calendar.rerun')
-        ->can('sync', 'externalCalendarEvent')
-        ->can('view', 'calendarEvent')
-        ->withoutScopedBindings();
-    Route::post('sync-integration/{calendarEvent:id}/{integration:id}', SyncCalendarEventToIntegration::class)
-        ->middleware('throttle:calendar-sync')
-        ->name('external-calendar.sync-integration')
-        ->can('sync', 'integration')
-        ->can('view', 'calendarEvent')
-        ->withoutScopedBindings();
-    Route::patch('log/{log:id}/acknowledge', AcknowledgeExternalCalendarEventLog::class)
-        ->name('external-calendar.log.acknowledge')
-        ->middleware('can:acknowledge,log');
-});
-
-Route::get('settings/external-calendar/callback/{provider}', ExternalCalendarConnectCallback::class)
-    ->name('external-calendar.connect.callback');
 
 Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function (): void {
     Route::get('/', ListNotifications::class)->name('notifications.index');

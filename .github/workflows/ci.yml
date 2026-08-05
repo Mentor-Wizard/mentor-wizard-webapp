@@ -445,6 +445,14 @@ jobs:
           # same reason as shard F. Timeout is 25 (not 15 like Chat) — Calendar's covered
           # surface is roughly twice the size of Chat's.
           - { id: 'G', name: 'G · Module Calendar',             path: 'Modules/Calendar/app',                                                                                            timeout: 25, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 3 (ExternalCalendar extraction,
+          # docs/plans/external-calendar-module-migration): same rationale as shards F/G —
+          # ExternalCalendar's ~56 Actions/Models/Services/XmlTools/Jobs/Policies/Requests/
+          # Enums/DTO/Traits/Casts physically moved out of app/** into
+          # Modules/ExternalCalendar/app, so a dedicated shard is required to keep those
+          # mutates()-annotated classes in the mutation gate. testsuite is 'Modules' for the
+          # same reason as shards F/G. Timeout is 25 — comparable covered surface to Calendar.
+          - { id: 'H', name: 'H · Module ExternalCalendar',    path: 'Modules/ExternalCalendar/app',                                                                                     timeout: 25, ignore: '', testsuite: 'Modules' }
 
     steps:
       - name: '🛎 Checkout'

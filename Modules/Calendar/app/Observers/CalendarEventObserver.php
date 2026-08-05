@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Modules\Calendar\Observers;
 
 use App\Actions\Calendar\CalendarEvent\CreateMentorSessionForCalendarEvent;
-use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
-use App\Jobs\ProcessDeleteExternalCalendarEvent;
-use App\Jobs\ProcessUpdateExternalCalendarEvent;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Events\CalendarEventCancelled;
+use Modules\Calendar\Events\CalendarEventConfirmed;
+use Modules\Calendar\Events\CalendarEventContentChanged;
+use Modules\Calendar\Events\CalendarEventDeleting;
 use Modules\Calendar\Models\CalendarEvent;
 
 class CalendarEventObserver
@@ -25,7 +26,7 @@ class CalendarEventObserver
     public function created(CalendarEvent $event): void
     {
         if ($event->status === CalendarEventStatusEnum::CONFIRMED) {
-            dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event));
+            event(new CalendarEventConfirmed($event));
         }
     }
 
@@ -35,19 +36,19 @@ class CalendarEventObserver
             CreateMentorSessionForCalendarEvent::run($event);
 
             if ($event->status === CalendarEventStatusEnum::CONFIRMED) {
-                dispatch(new ProcessCalendarEventExternalCalendarIntegrations($event));
+                event(new CalendarEventConfirmed($event));
             }
 
             if ($event->status === CalendarEventStatusEnum::CANCELLED) {
-                dispatch(new ProcessDeleteExternalCalendarEvent($event->getKey()));
+                event(new CalendarEventCancelled($event->getKey()));
             }
         } elseif ($event->status === CalendarEventStatusEnum::CONFIRMED && $event->wasChanged(self::CONTENT_FIELDS)) {
-            dispatch(new ProcessUpdateExternalCalendarEvent($event));
+            event(new CalendarEventContentChanged($event));
         }
     }
 
     public function deleting(CalendarEvent $event): void
     {
-        dispatch(new ProcessDeleteExternalCalendarEvent($event->getKey()));
+        event(new CalendarEventDeleting($event->getKey()));
     }
 }

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\Profile;
 
-use App\Enums\CalendarProviderEnum;
-use App\Enums\CalendarSyncStatusEnum;
 use App\Models\User;
-use App\Models\UserCalendarIntegration;
 use App\Models\UserProfile;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
+use Modules\ExternalCalendar\Enums\CalendarProviderEnum;
+use Modules\ExternalCalendar\Enums\CalendarSyncStatusEnum;
+use Modules\ExternalCalendar\Models\UserCalendarIntegration;
 
 class GetProfilePage
 {

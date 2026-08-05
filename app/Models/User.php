@@ -25,6 +25,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Modules\Calendar\Traits\HasCalendarEvents;
 use Modules\Chat\Models\Chat;
+use Modules\ExternalCalendar\Traits\HasExternalCalendarIntegrations;
 use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -65,6 +66,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 {
     use HasCalendarEvents;
+    use HasExternalCalendarIntegrations;
 
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -172,14 +174,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function schedules(): HasMany
     {
         return $this->hasMany(UserSchedule::class);
-    }
-
-    /**
-     * @return HasMany<UserCalendarIntegration, $this>
-     */
-    public function calendarIntegrations(): HasMany
-    {
-        return $this->hasMany(UserCalendarIntegration::class);
     }
 
     /**
