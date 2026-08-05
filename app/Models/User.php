@@ -68,6 +68,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     /** @use HasFactory<UserFactory> */
     use HasFactory;
+
     use HasRoles;
     use InteractsWithMedia;
     use Notifiable;

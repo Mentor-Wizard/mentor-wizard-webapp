@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
+use App\Enums\MentorSessionTypeEnum;
+use App\Enums\RoleEnum;
+use App\Enums\UserScheduleRecordType;
+use App\Models\MentorProgram;
+use App\Models\User;
+use App\Models\UserSchedule;
+use Carbon\CarbonImmutable;
+use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Facades\Date;
 use Modules\Calendar\Enums\CalendarEventColoursEnum;
 use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
-use App\Enums\MentorSessionTypeEnum;
-use App\Enums\RoleEnum;
-use App\Enums\UserScheduleRecordType;
 use Modules\Calendar\Models\CalendarEvent;
-use App\Models\MentorProgram;
-use App\Models\User;
-use App\Models\UserSchedule;
 use Modules\Calendar\Services\AvailableCalendarEventsSlotsService;
-use Carbon\CarbonImmutable;
-use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Facades\Date;
 use Spatie\Permission\Models\Role;
 
 mutates(AvailableCalendarEventsSlotsService::class);

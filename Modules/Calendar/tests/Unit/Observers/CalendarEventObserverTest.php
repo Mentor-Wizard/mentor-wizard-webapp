@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-use Modules\Calendar\Enums\CalendarEventColoursEnum;
-use Modules\Calendar\Enums\CalendarEventRoleEnum;
-use Modules\Calendar\Enums\CalendarEventStatusEnum;
-use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use App\Enums\RoleEnum;
 use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
 use App\Jobs\ProcessDeleteExternalCalendarEvent;
 use App\Jobs\ProcessUpdateExternalCalendarEvent;
-use Modules\Calendar\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\MentorSession;
 use App\Models\User;
-use Modules\Calendar\Observers\CalendarEventObserver;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Queue;
+use Modules\Calendar\Enums\CalendarEventColoursEnum;
+use Modules\Calendar\Enums\CalendarEventRoleEnum;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Enums\CalendarEventTypeEnum;
+use Modules\Calendar\Models\CalendarEvent;
+use Modules\Calendar\Observers\CalendarEventObserver;
 use Spatie\Permission\Models\Role;
 
 mutates(CalendarEventObserver::class);

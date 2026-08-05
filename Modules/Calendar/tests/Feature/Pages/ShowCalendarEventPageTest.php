@@ -2,16 +2,11 @@
 
 declare(strict_types=1);
 
-use Modules\Calendar\Enums\CalendarEventColoursEnum;
-use Modules\Calendar\Enums\CalendarEventRoleEnum;
-use Modules\Calendar\Enums\CalendarEventStatusEnum;
-use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Enums\ExternalCalendarEventSyncStatusEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use Modules\Calendar\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\MentorProgram;
@@ -21,6 +16,11 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
+use Modules\Calendar\Enums\CalendarEventColoursEnum;
+use Modules\Calendar\Enums\CalendarEventRoleEnum;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Enums\CalendarEventTypeEnum;
+use Modules\Calendar\Models\CalendarEvent;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 

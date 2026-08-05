@@ -97,8 +97,8 @@ Modules/{Name}/
 
 Опційні теки (`Services/`, `DTO/`, `Traits/`, `Casts/`, `Observers/`) не є
 довільним вибором — вони дзеркалять `app/`-теки, для яких `config/modules.php`
-(`paths.generator`) уже має записи з `generate => false`. Модуль створює лише
-ті з них, які реально потрібні домену; порожні теки не створюються про запас.
+(`paths.generator`) уже має записи з `generate => false`. Модуль створює лише ті
+з них, які реально потрібні домену; порожні теки не створюються про запас.
 
 Ключові рішення в `config/modules.php`, які відрізняють цей проєкт від дефолтної
 конфігурації пакета:
@@ -229,23 +229,24 @@ php artisan module:clear-compiled
 
 ### Модель `User` і relation-методи домену → модульний трейт
 
-Ухвалено під час виносу `Calendar` (`docs/plans/migrate-calendar-domain-module`):
-кожен домен, що додає relation-методи на Core-модель `User`, виносить їх у
-власний трейт `Modules\{Name}\Traits\Has{Domain}` і підключає його в `User`
-одним рядком (`use Has{Domain};`). Прецедент —
-`Modules\Calendar\Traits\HasCalendarEvents` (`calendarEvents()`,
-`hostedCalendarEvents()`, `participatingCalendarEvents()`).
+Ухвалено під час виносу `Calendar`
+(`docs/plans/migrate-calendar-domain-module`): кожен домен, що додає
+relation-методи на Core-модель `User`, виносить їх у власний трейт
+`Modules\{Name}\Traits\Has{Domain}` і підключає його в `User` одним рядком
+(`use Has{Domain};`). Прецедент — `Modules\Calendar\Traits\HasCalendarEvents`
+(`calendarEvents()`, `hostedCalendarEvents()`, `participatingCalendarEvents()`).
 
 - Публічний контракт не змінюється: `$user->calendarEvents()` резолвиться
   ідентично — трейт розкривається в тілі класу на етапі компіляції.
-- Залежність стає явною й greppable в `User`: `use Modules\Calendar\Traits\HasCalendarEvents;`
-  замість розмазаних методів, а arch-правило `*-does-not-reach-into-other-modules`
-  продовжує забороняти лише `Module → Module`.
+- Залежність стає явною й greppable в `User`:
+  `use Modules\Calendar\Traits\HasCalendarEvents;` замість розмазаних методів, а
+  arch-правило `*-does-not-reach-into-other-modules` продовжує забороняти лише
+  `Module → Module`.
 - Трейт, що викликає `$this->belongsToMany()`/`hasMany()` тощо, обов'язково
   отримує PHPDoc `@phpstan-require-extends \Illuminate\Database\Eloquent\Model`
   — інакше Larastan (level 7) не знає, що `$this` є моделлю.
-- `Modules\Chat\Traits\HasChats` (ретрофіт `User::chats()` під цей самий
-  патерн) — заведений борг, не зроблений цим PR (не в скоупі Calendar).
+- `Modules\Chat\Traits\HasChats` (ретрофіт `User::chats()` під цей самий патерн)
+  — заведений борг, не зроблений цим PR (не в скоупі Calendar).
 
 ### Розташування історичних міграцій із міжмодульними FK
 
@@ -259,14 +260,14 @@ php artisan module:clear-compiled
 `ALTER TABLE calendar_events` і додає FK на `mentor_sessions` (Core) — власник
 міграції є `Calendar` (бо вона змінює `calendar_events`), а не Core.
 
-Порядок виконання при `migrate:fresh` **не залежить від фізичного шляху
-файлу**: `Nwidart\Modules\Support\ModuleServiceProvider` реєструє шлях модуля
-через `loadMigrationsFrom()`, і Laravel-мігратор збирає файли з усіх
-зареєстрованих шляхів в один список, сортуючи його **глобально за іменем
-файлу**, а не за каталогом. Тому `git mv` міграції в модуль (без зміни імені
-файлу) не змінює порядок виконання відносно міграцій, від яких вона залежить
-через FK — важливо лише, щоб timestamp у імені файлу вже був пізнішим за
-timestamp таблиці, на яку йде посилання.
+Порядок виконання при `migrate:fresh` **не залежить від фізичного шляху файлу**:
+`Nwidart\Modules\Support\ModuleServiceProvider` реєструє шлях модуля через
+`loadMigrationsFrom()`, і Laravel-мігратор збирає файли з усіх зареєстрованих
+шляхів в один список, сортуючи його **глобально за іменем файлу**, а не за
+каталогом. Тому `git mv` міграції в модуль (без зміни імені файлу) не змінює
+порядок виконання відносно міграцій, від яких вона залежить через FK — важливо
+лише, щоб timestamp у імені файлу вже був пізнішим за timestamp таблиці, на яку
+йде посилання.
 
 ## Відкриті питання
 

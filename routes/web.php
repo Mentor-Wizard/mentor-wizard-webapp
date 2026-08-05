@@ -110,11 +110,13 @@ Route::middleware(['auth', 'verified'])->prefix('settings/external-calendar')->g
         ->middleware('throttle:calendar-retry')
         ->name('external-calendar.rerun')
         ->can('sync', 'externalCalendarEvent')
+        ->can('view', 'calendarEvent')
         ->withoutScopedBindings();
     Route::post('sync-integration/{calendarEvent:id}/{integration:id}', SyncCalendarEventToIntegration::class)
         ->middleware('throttle:calendar-sync')
         ->name('external-calendar.sync-integration')
         ->can('sync', 'integration')
+        ->can('view', 'calendarEvent')
         ->withoutScopedBindings();
     Route::patch('log/{log:id}/acknowledge', AcknowledgeExternalCalendarEventLog::class)
         ->name('external-calendar.log.acknowledge')

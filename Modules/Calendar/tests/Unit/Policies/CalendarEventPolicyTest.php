@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Modules\Calendar\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
-use Modules\Calendar\Policies\CalendarEventPolicy;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Modules\Calendar\Models\CalendarEvent;
+use Modules\Calendar\Policies\CalendarEventPolicy;
 
 mutates(CalendarEventPolicy::class);
 

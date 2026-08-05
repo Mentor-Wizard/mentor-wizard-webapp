@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-use Modules\Calendar\Actions\CalendarEvent\EditCalendarEvent;
-use Modules\Calendar\Enums\CalendarEventColoursEnum;
-use Modules\Calendar\Enums\CalendarEventRoleEnum;
-use Modules\Calendar\Enums\CalendarEventStatusEnum;
-use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use App\Enums\MentorSessionTypeEnum;
-use Modules\Calendar\Http\Requests\CalendarEvent\EditCalendarEventRequest;
-use Modules\Calendar\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Date;
+use Modules\Calendar\Actions\CalendarEvent\EditCalendarEvent;
+use Modules\Calendar\Enums\CalendarEventColoursEnum;
+use Modules\Calendar\Enums\CalendarEventRoleEnum;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Enums\CalendarEventTypeEnum;
+use Modules\Calendar\Http\Requests\CalendarEvent\EditCalendarEventRequest;
+use Modules\Calendar\Models\CalendarEvent;
 
 mutates(EditCalendarEvent::class);
 

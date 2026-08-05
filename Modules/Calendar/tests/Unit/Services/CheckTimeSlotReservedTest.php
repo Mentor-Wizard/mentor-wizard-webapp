@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use Modules\Calendar\Enums\CalendarEventRoleEnum;
-use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use App\Enums\RoleEnum;
 use App\Enums\UserScheduleRecordType;
-use Modules\Calendar\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserSchedule;
-use Modules\Calendar\Services\CheckTimeSlotReservedService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Modules\Calendar\Enums\CalendarEventRoleEnum;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Models\CalendarEvent;
+use Modules\Calendar\Services\CheckTimeSlotReservedService;
 use Spatie\Permission\Models\Role;
 
 mutates(CheckTimeSlotReservedService::class);

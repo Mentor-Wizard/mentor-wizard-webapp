@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Models\CalendarEvent;
 
 /**
- * @phpstan-require-extends \Illuminate\Database\Eloquent\Model
+ * @phpstan-require-extends Model
  */
 trait HasCalendarEvents
 {
