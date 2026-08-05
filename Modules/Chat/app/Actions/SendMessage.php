@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Chat\Actions;
+
+use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
+use Lorisleiva\Actions\Concerns\AsAction;
+use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Chat\Enums\ChatStatusEnum;
+use Modules\Chat\Events\ChatMessageEvent;
+use Modules\Chat\Events\UnreadMessagesEvent;
+use Modules\Chat\Http\Requests\ChatMessageRequest;
+use Modules\Chat\Http\Resources\ChatMessageResource;
+use Modules\Chat\Models\Chat;
+use Modules\Chat\Models\ChatMessage;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
+use Throwable;
+
+class SendMessage
+{
+    use AsAction;
+    use AsController;
+
+    /**
+     * @throws Throwable
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
+     */
+    public function handle(Chat $chat, ChatMessageRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $companion = $chat->companion($user);
+        $companionChat = $companion->chats()
+            ->wherePivot('chat_id', $chat->getKey())
+            ->first();
+
+        throw_if($companionChat->pivot->status !== ChatStatusEnum::ACTIVE->value, AuthorizationException::class); // @phpstan-ignore property.notFound
+
+        $data = $request->validated();
+        $message = ChatMessage::query()->create([
+            'chat_id'     => $chat->getKey(),
+            'user_id'     => $user->getKey(),
+            'message'     => $data['message'],
+        ]);
+        if (isset($data['files'])) {
+            foreach ($data['files'] as $file) {
+                if ($file instanceof UploadedFile) {
+                    $message->addMedia($file)->toMediaCollection('files');
+                }
+            }
+        }
+
+        $message->refresh();
+        /** @var User $companion */
+        $companion = $chat->companion($user);
+        event(new ChatMessageEvent($companion, $message, $companionChat->pivot->is_muted)); // @phpstan-ignore property.notFound
+        event(new UnreadMessagesEvent($companion, UnreadMessages::run($companion)));
+
+        return response()->json([
+            'message' => ChatMessageResource::make($message),
+        ]);
+    }
+}

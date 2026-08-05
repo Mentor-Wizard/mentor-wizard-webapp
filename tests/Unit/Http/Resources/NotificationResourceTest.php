@@ -20,7 +20,7 @@ describe('NotificationResource', function (): void {
         $notification = DatabaseNotification::query()->create([
             'id'              => $id,
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => ['title' => 'Hello', 'message' => 'World'],
             'read_at'         => null,
@@ -41,7 +41,7 @@ describe('NotificationResource', function (): void {
         $notification = DatabaseNotification::query()->create([
             'id'              => Str::uuid(),
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => ['title' => 'Read'],
             'read_at'         => $readAt,
@@ -56,7 +56,7 @@ describe('NotificationResource', function (): void {
         $notification = DatabaseNotification::query()->create([
             'id'              => Str::uuid(),
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => ['title' => 'Created'],
             'read_at'         => null,
@@ -71,7 +71,7 @@ describe('NotificationResource', function (): void {
         $notification = DatabaseNotification::query()->create([
             'id'              => Str::uuid(),
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => ['title' => 'Scoped'],
             'read_at'         => null,

@@ -30,7 +30,7 @@ describe('MarkNotificationAsRead', function (): void {
         DatabaseNotification::query()->insert([
             'id'              => $id,
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => $this->user->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => json_encode(['title' => 'Test']),
             'read_at'         => null,
@@ -53,7 +53,7 @@ describe('MarkNotificationAsRead', function (): void {
             [
                 'id'              => $targetId,
                 'type'            => 'App\Notifications\TestNotification',
-                'notifiable_type' => User::class,
+                'notifiable_type' => $this->user->getMorphClass(),
                 'notifiable_id'   => $this->user->getKey(),
                 'data'            => json_encode(['title' => 'Target']),
                 'read_at'         => null,
@@ -63,7 +63,7 @@ describe('MarkNotificationAsRead', function (): void {
             [
                 'id'              => $otherId,
                 'type'            => 'App\Notifications\TestNotification',
-                'notifiable_type' => User::class,
+                'notifiable_type' => $this->user->getMorphClass(),
                 'notifiable_id'   => $this->user->getKey(),
                 'data'            => json_encode(['title' => 'Other']),
                 'read_at'         => null,
@@ -87,7 +87,7 @@ describe('MarkNotificationAsRead', function (): void {
         DatabaseNotification::query()->insert([
             'id'              => $id,
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => $otherUser->getMorphClass(),
             'notifiable_id'   => $otherUser->getKey(),
             'data'            => json_encode(['title' => 'Private']),
             'read_at'         => null,

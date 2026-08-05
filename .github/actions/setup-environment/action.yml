@@ -58,6 +58,17 @@ runs:
       shell: bash
       run: composer i --no-progress --no-scripts -qn --ansi
 
+    # wikimedia/composer-merge-plugin (Modules/*/composer.json → Modules\*\Tests\ autoload-dev)
+    # only re-reads the module list when the autoloader is regenerated, not dynamically at
+    # runtime — so every module added under Modules/* needs this step to be picked up by Pest.
+    # Required today: Modules/Chat/composer.json already exists (DDD migration Phase 1,
+    # docs/plans/ddd-migration-laravel-modules), so this step is what makes the Chat module's
+    # PSR-4 autoloading and test namespace visible to the rest of CI.
+    - name: '🔄 Regenerate autoloader (Modules/* composer merge)'
+      if: ${{ inputs.use-php == 'true' }}
+      shell: bash
+      run: composer dump-autoload
+
     - name: '⚙️ Enable Corepack'
       if: ${{ inputs.use-node == 'true' }}
       shell: bash

@@ -20,12 +20,13 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Nwidart\Modules\Facades\Module;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $panel = $panel
             ->default()
             ->id('supervisor')
             ->path('supervisor')
@@ -42,7 +43,11 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
-            ])
+            ]);
+
+        $panel = $this->discoverModuleResources($panel);
+
+        return $panel
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -57,5 +62,38 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    /**
+     * Adds Filament resource/page/widget discovery for every enabled module that
+     * ships its own `app/Filament/{Resources,Pages,Widgets}` directory, on top of
+     * the legacy `app/Filament` discovery above. Additive only — does not change
+     * discovery/registration order for existing `App\Filament\*` classes.
+     *
+     * `is_dir()` guards are required: Filament throws on `discoverResources()`
+     * for a path that does not exist, it does not silently skip it.
+     */
+    private function discoverModuleResources(Panel $panel): Panel
+    {
+        foreach (Module::allEnabled() as $module) {
+            $resourcesPath = $module->getPath().'/app/Filament/Resources';
+            $pagesPath = $module->getPath().'/app/Filament/Pages';
+            $widgetsPath = $module->getPath().'/app/Filament/Widgets';
+            $namespace = 'Modules\\'.$module->getStudlyName().'\Filament';
+
+            if (is_dir($resourcesPath)) {
+                $panel = $panel->discoverResources(in: $resourcesPath, for: $namespace.'\Resources');
+            }
+
+            if (is_dir($pagesPath)) {
+                $panel = $panel->discoverPages(in: $pagesPath, for: $namespace.'\Pages');
+            }
+
+            if (is_dir($widgetsPath)) {
+                $panel = $panel->discoverWidgets(in: $widgetsPath, for: $namespace.'\Widgets');
+            }
+        }
+
+        return $panel;
     }
 }

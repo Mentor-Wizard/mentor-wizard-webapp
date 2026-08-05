@@ -52,6 +52,17 @@ describe('MediaLibrary PathGenerator', function (): void {
         expect($basePath)->toBe('UserProfile/100/');
     });
 
+    it('resolves an enforced morph map alias back to the FQCN basename', function (): void {
+        $media = createMediaMock(321, 'user_profile');
+
+        config()->set('media-library.prefix', 'uploads');
+
+        $pathGenerator = new PathGenerator;
+        $basePath = $pathGenerator->getPath($media);
+
+        expect($basePath)->toBe('uploads/UserProfile/321/');
+    });
+
     function createMediaMock(int $id, string $modelType): Media
     {
         $media = Mockery::mock(Media::class)

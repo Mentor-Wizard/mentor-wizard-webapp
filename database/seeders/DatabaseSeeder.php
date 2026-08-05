@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\Chat\Database\Seeders\ChatDatabaseSeeder;
 
 final class DatabaseSeeder extends Seeder
 {
@@ -23,7 +24,7 @@ final class DatabaseSeeder extends Seeder
             MentorProgramSeeder::class,
             CalendarEventSeeder::class,
             MentorReviewSeeder::class,
-            ChatMessageSeeder::class,
+            ChatDatabaseSeeder::class,
         ]);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Database\Seeders\MentorTagSeeder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 
 arch()->preset()->php()->ignoring(
     MentorTagSeeder::class, // Include suspicious characters.
@@ -30,3 +31,28 @@ arch('app')
     ->toHaveSuffix('Page')
     ->and('App\Actions\Pages\Profile')
     ->toHaveSuffix('Page');
+
+// Module tooling guard (DDD-migration Phase 0, docs/plans/ddd-migration-laravel-modules).
+arch('modules-strict-types')
+    ->expect('Modules')
+    ->toUseStrictTypes();
+
+// DDD-migration Phase 1 (Chat pilot): closes the AC-19 gap the vacuous Phase-0 guard left
+// open — an arch expression on an empty namespace stays green, so a module that silently
+// lost all its classes (e.g. a botched `git mv`) would not fail this suite without an
+// explicit non-emptiness assertion. `arch()->toHaveCount()` is not available for a class
+// set in this Pest/PHPStan-arch version, so the non-emptiness guard uses `File::allFiles()`
+// directly (not `glob()` — PHP's built-in `glob()` does not support recursive `**` and
+// would silently under-count).
+it('keeps Modules\Chat non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/Chat/app')))->not->toBeEmpty();
+});
+
+arch('modules-models-are-eloquent')
+    ->expect('Modules\Chat\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+arch('chat-does-not-reach-into-other-modules')
+    ->expect('Modules\Chat')
+    ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);

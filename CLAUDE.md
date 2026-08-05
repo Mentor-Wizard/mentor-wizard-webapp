@@ -35,6 +35,36 @@ Available agents: `ba`, `developer`, `frontend`, `tester`, `qa`, `reviewer`, `de
 5. When there's a bug, start by writing a test that reproduces it, then fix it.
 6. Every time I correct you, reflect on what went wrong and plan to prevent it.
 
+## Модулі (nwidart/laravel-modules)
+
+Проєкт мігрує на модульний моноліт: бізнес-домени виносяться з `app/` у
+`Modules/{Name}/`. Повне обґрунтування рішення, конвенції каталогу та статус
+міграції — `docs/MODULAR_ARCHITECTURE.md`.
+
+```bash
+# Створення
+php artisan module:make Blog                # новий модуль
+php artisan module:make Blog --api          # без web-маршрутів/вʼюх
+php artisan module:make Blog --plain        # без скаффолду
+
+# Генерація коду в модулі
+php artisan module:make-model Post Blog --all   # migration, factory, seeder, request, resource, policy
+php artisan module:make-policy PostPolicy Blog
+php artisan module:make-request StorePostRequest Blog
+php artisan module:make-resource PostResource Blog
+
+# Життєвий цикл
+php artisan module:list
+php artisan module:enable Blog
+php artisan module:disable Blog
+php artisan module:migrate Blog
+php artisan module:seed Blog
+```
+
+Проєкт не використовує Controller'и (`module:make-controller`) — маршрутизація
+йде через invokable Actions, як і в `app/`. Vue/Inertia-сторінки модуля
+лишаються в `resources/js/Pages/`, а не в `Modules/{Name}/`.
+
 ## Setup
 
 See `docs/SETUP.md` for system requirements, Docker setup, and common commands.

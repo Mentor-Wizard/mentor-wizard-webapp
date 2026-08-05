@@ -1,5 +1,22 @@
 # Agent Workflow Orchestration
 
+## Marketplace Plugin Override (MANDATORY, HIGHEST PRECEDENCE)
+
+**If the current task is run through the `sdlc` plugin from the `claude-sdlc` marketplace, every orchestration rule in this file is suspended for that task.**
+
+Trigger conditions (any one is enough):
+- The user invokes `/sdlc:start`, `/sdlc:batch`, `/sdlc:doctor`, `/sdlc:list-stacks`, `/sdlc:security-init`, or any other `sdlc:*` slash command.
+- The user explicitly asks to run "the SDLC pipeline", "the sdlc plugin", or names a `sdlc:*` skill/agent directly.
+- A `sdlc:*` skill (e.g. `sdlc:pipeline-orchestrator`, `sdlc:batch-pipeline`) is already driving the task.
+
+When triggered:
+- Do **not** apply the pipeline-selection table, the agent roster, or the team protocols defined below. This file's `ba`/`developer`/`tester`/`reviewer`/`qa`/`security-scanner`/`docs-writer`/etc. agents are NOT to be dispatched for this task.
+- Orchestration authority belongs entirely to the `sdlc` plugin's own orchestrator (`sdlc:pipeline-orchestrator`, or `sdlc:batch-pipeline` for `/sdlc:batch`) and to agents/skills namespaced `sdlc:*` (or a stack-specific plugin it delegates to, e.g. `laravel-plugin:laravel-architect`, `laravel-plugin:artisan-specialist`).
+- Let the `sdlc` plugin decide phase order, team formation, and quality gates on its own terms — do not overlay this file's Standard Feature/Bug Fix/CI-CD pipelines on top of it.
+- The override lasts for the full duration of that task. Once the `sdlc`-driven task concludes, resume following this file's rules for any subsequent, independently-triggered task.
+
+If it is ambiguous whether a task is `sdlc`-plugin-driven, ask ONE clarifying question before choosing between this file's pipelines and the `sdlc` plugin's orchestration.
+
 ## TL;DR — Which Pipeline to Use
 
 | Situation | Pipeline |

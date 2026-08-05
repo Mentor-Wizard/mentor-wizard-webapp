@@ -1,0 +1,29 @@
+{
+  "name": "mentor-wizard/chat",
+  "description": "Real-time chat between mentors and mentees: messages, file attachments, chat status (archive/mute/ban) and unread-message counters.",
+  "keywords": [
+    "chat",
+    "messaging",
+    "mentor",
+    "mentee",
+    "broadcasting"
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\Chat\\": "app/",
+      "Modules\\Chat\\Database\\Factories\\": "database/factories/",
+      "Modules\\Chat\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\Chat\\Tests\\": "tests/"
+    }
+  }
+}

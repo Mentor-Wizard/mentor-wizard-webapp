@@ -20,6 +20,7 @@ return RectorConfig::configure()
         __DIR__.'/database',
         __DIR__.'/routes',
         __DIR__.'/tests',
+        __DIR__.'/Modules',
     ])
     ->withPhpVersion(PhpVersion::PHP_85)
     ->withPhpSets(php85: true)

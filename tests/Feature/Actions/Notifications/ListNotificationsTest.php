@@ -28,7 +28,7 @@ describe('ListNotifications', function (): void {
         DatabaseNotification::query()->insert([
             'id'              => Str::uuid(),
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => json_encode(['title' => 'Hello', 'message' => 'World']),
             'read_at'         => null,
@@ -53,7 +53,7 @@ describe('ListNotifications', function (): void {
         DatabaseNotification::query()->insert([
             'id'              => Str::uuid(),
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $otherUser->getKey(),
             'data'            => json_encode(['title' => 'Private']),
             'read_at'         => null,
@@ -77,7 +77,7 @@ describe('ListNotifications', function (): void {
             DatabaseNotification::query()->insert([
                 'id'              => $id,
                 'type'            => 'App\Notifications\TestNotification',
-                'notifiable_type' => User::class,
+                'notifiable_type' => (new User)->getMorphClass(),
                 'notifiable_id'   => $this->user->getKey(),
                 'data'            => json_encode(['title' => 'Notification '.$i]),
                 'read_at'         => null,
@@ -100,7 +100,7 @@ describe('ListNotifications', function (): void {
         $rows = array_map(fn (): array => [
             'id'              => Str::uuid(),
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => json_encode(['title' => 'N']),
             'read_at'         => null,
@@ -125,7 +125,7 @@ describe('ListNotifications', function (): void {
         DatabaseNotification::query()->insert([
             'id'              => $id,
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => json_encode(['title' => 'Hi', 'message' => 'There']),
             'read_at'         => null,

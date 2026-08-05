@@ -175,6 +175,7 @@ jobs:
           - { name: '🔬 Unit (1/2)', command: 'php artisan test --ci --testsuite=Unit --parallel --shard=1/2',                          report: false }
           - { name: '🔬 Unit (2/2)', command: 'php artisan test --ci --testsuite=Unit --parallel --shard=2/2',                          report: false }
           - { name: '🧬 Feature',    command: 'php artisan test --ci --testsuite=Feature --parallel',                                   report: false }
+          - { name: '🧩 Modules',    command: 'php artisan test --ci --testsuite=Modules --parallel',                                   report: false }
           - { name: '☂️ Coverage',   command: 'php artisan test --ci --coverage --compact --coverage-clover coverage/coverage-clover.xml --log-junit coverage/junit.xml', report: true  }
 
     steps:
@@ -418,14 +419,24 @@ jobs:
       fail-fast: false
       matrix:
         shard:
-          - { id: 'A', name: 'A · Actions',                    path: 'app/Actions',                                                                                                      timeout: 30, ignore: '' }
-          - { id: 'B', name: 'B · Http + Enums',                path: 'app/Http,app/Enums',                                                                                              timeout: 25, ignore: '' }
-          - { id: 'C', name: 'C · Services',                    path: 'app/Services',                                                                                                    timeout: 25, ignore: '' }
+          - { id: 'A', name: 'A · Actions',                    path: 'app/Actions',                                                                                                      timeout: 30, ignore: '', testsuite: 'Unit' }
+          - { id: 'B', name: 'B · Http + Enums',                path: 'app/Http,app/Enums',                                                                                              timeout: 25, ignore: '', testsuite: 'Unit' }
+          - { id: 'C', name: 'C · Services',                    path: 'app/Services',                                                                                                    timeout: 25, ignore: '', testsuite: 'Unit' }
           # ignore: app/Filament — see the comment block above this matrix for why: a single
           # line (UserResource::getNavigationBadge()) produces a --filter argv that exceeds
           # Linux's MAX_ARG_STRLEN and crashes posix_spawn. Confirmed root cause, not a guess.
-          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament' }
-          - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20, ignore: '' }
+          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament', testsuite: 'Unit' }
+          - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20, ignore: '', testsuite: 'Unit' }
+          # DDD-migration Phase 1 (Chat pilot): Chat's Actions/Models/Policies/Events/
+          # Broadcasting/Http physically moved out of app/** into Modules/Chat/app — a shard
+          # covering that path is required, not optional, or ~25 mutates()-annotated Chat
+          # classes silently drop out of the mutation gate entirely (the gate would stay green
+          # with nothing being mutated — the same vacuous-pass failure mode AC-19 exists to
+          # catch). testsuite is 'Modules' (not 'Unit'): Modules/Chat/tests/Unit is registered
+          # under the "Modules" phpunit.xml testsuite (see phpunit.xml), not "Unit" — using the
+          # default 'Unit' testsuite here would find zero covering tests for Modules/Chat/app
+          # and --covered-only would again mutate nothing.
+          - { id: 'F', name: 'F · Module Chat',                 path: 'Modules/Chat/app',                                                                                                timeout: 15, ignore: '', testsuite: 'Modules' }
 
     steps:
       - name: '🛎 Checkout'
@@ -452,7 +463,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: vendor/pestphp/pest-plugin-mutate/.temp/pest-mutate-cache
-          key: "${{ runner.os }}-mutate-${{ matrix.shard.id }}-${{ hashFiles('app/**') }}-${{ hashFiles('composer.lock') }}"
+          key: "${{ runner.os }}-mutate-${{ matrix.shard.id }}-${{ hashFiles('app/**', 'Modules/**') }}-${{ hashFiles('composer.lock') }}"
           restore-keys: '${{ runner.os }}-mutate-${{ matrix.shard.id }}-'
 
       # matrix.shard.ignore is '' for every shard except D (see the matrix definition above)
@@ -460,7 +471,7 @@ jobs:
       # mutate's FileFinder treats an empty ignore pattern as a prefix match against every
       # file in --path, which would silently exclude the entire shard's mutation scope.
       - name: '${{ matrix.shard.name }} mutation tests'
-        run: php artisan test --ci --testsuite=Unit --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }} ${{ matrix.shard.ignore != '' && format('--ignore={0}', matrix.shard.ignore) || '' }}
+        run: php artisan test --ci --testsuite=${{ matrix.shard.testsuite }} --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }} ${{ matrix.shard.ignore != '' && format('--ignore={0}', matrix.shard.ignore) || '' }}
         env:
           DB_HOST: 127.0.0.1
           DB_DATABASE: testing

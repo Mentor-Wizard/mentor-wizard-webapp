@@ -10,6 +10,7 @@ use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
+use App\Models\UserProfile;
 use App\Models\UserSchedule;
 use App\Policies\CalendarEventPolicy;
 use App\Policies\ExternalCalendarEventLogPolicy;
@@ -19,6 +20,7 @@ use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +30,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Modules\Chat\Models\Chat;
+use Modules\Chat\Models\ChatMessage;
 use Override;
 
 class AppServiceProvider extends ServiceProvider
@@ -45,12 +49,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
+        $this->configMorphMap();
         $this->configModels();
         $this->configDatabase();
         $this->configTesting();
-
-        RateLimiter::for('chat-send', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->getKey() ?: $request->ip()));
-        RateLimiter::for('chat-create', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->getKey() ?: $request->ip()));
 
         if ($this->app->isProduction()) {
             URL::forceHttps();
@@ -74,6 +76,27 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('calendar-retry', fn (Request $request): Limit => Limit::perMinute(5)->by($request->user()?->getKey()));
 
         RateLimiter::for('calendar-sync', fn (Request $request): Limit => Limit::perMinute(20)->by($request->user()?->getKey()));
+    }
+
+    /**
+     * Registers a namespace-independent, enforced morph map for every model
+     * that participates in a polymorphic relation (HasMedia via
+     * spatie/laravel-medialibrary, Notifiable via spatie/laravel-permission's
+     * model_has_roles/model_has_permissions, and notifications.notifiable_type).
+     *
+     * `enforceMorphMap()` (not the permissive `morphMap()`) is deliberate: any
+     * future HasMedia/Notifiable/role-bearing model that forgets to register an
+     * alias here fails loudly (ClassMorphViolationException) instead of quietly
+     * storing a long FQCN that breaks the moment the class moves into a module.
+     */
+    private function configMorphMap(): void
+    {
+        Relation::enforceMorphMap([
+            'user'         => User::class,
+            'user_profile' => UserProfile::class,
+            'chat'         => Chat::class,
+            'chat_message' => ChatMessage::class,
+        ]);
     }
 
     private function configModels(): void

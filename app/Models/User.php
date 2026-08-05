@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Chat\Models\Chat;
 use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -195,14 +196,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasMany<Chat, $this>
-     */
-    public function coachChats(): HasMany
-    {
-        return $this->hasMany(Chat::class, 'coach_id');
-    }
-
-    /**
      * @return HasMany<UserSchedule, $this>
      */
     public function schedules(): HasMany
@@ -227,6 +220,18 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
             ->where('type', '!=', UserScheduleRecordType::DAY_OFF->value)
             ->orWhere('type', '=', UserScheduleRecordType::DAY_OFF->value)
             ->where('day_off_date', '>=', now()->format('Y-m-d'));
+    }
+
+    /**
+     * Pins the broadcast notification channel to a legacy, namespace-independent
+     * name so it survives any future move of this class into a module
+     * (`Relation::enforceMorphMap()` does not cover this — see
+     * `Illuminate\Notifications\Events\BroadcastNotificationCreated::channelName()`,
+     * which uses the raw `get_class()`, not `getMorphClass()`).
+     */
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return 'App.Models.User.'.$this->getKey();
     }
 
     public function getFilamentName(): string

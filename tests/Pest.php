@@ -22,7 +22,7 @@ pest()->extend(TestCase::class)
     ->use(LazilyRefreshDatabase::class)
     ->use(WithCachedConfig::class)
     ->use(WithCachedRoutes::class)
-    ->in('Feature', 'Integration', 'Unit');
+    ->in('Feature', 'Integration', 'Unit', '../Modules');
 
 /*
 |--------------------------------------------------------------------------
