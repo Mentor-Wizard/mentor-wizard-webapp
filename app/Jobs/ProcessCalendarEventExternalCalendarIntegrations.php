@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\CalendarSyncStatusEnum;
-use App\Models\CalendarEvent;
 use App\Models\UserCalendarIntegration;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Modules\Calendar\Models\CalendarEvent;
 
 class ProcessCalendarEventExternalCalendarIntegrations implements ShouldQueue
 {

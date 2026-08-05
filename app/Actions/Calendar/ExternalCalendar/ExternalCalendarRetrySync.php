@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar\ExternalCalendar;
 
-use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarRetrySyncRequest;
 use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
@@ -17,6 +15,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Models\CalendarEvent;
 
 class ExternalCalendarRetrySync
 {

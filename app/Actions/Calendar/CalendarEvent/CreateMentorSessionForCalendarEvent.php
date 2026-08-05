@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar\CalendarEvent;
 
-use App\Enums\CalendarEventRoleEnum;
-use App\Enums\CalendarEventStatusEnum;
-use App\Models\CalendarEvent;
 use App\Models\MentorSession;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Calendar\Enums\CalendarEventRoleEnum;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Models\CalendarEvent;
 
 class CreateMentorSessionForCalendarEvent
 {

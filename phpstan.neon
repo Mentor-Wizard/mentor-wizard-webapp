@@ -26,3 +26,4 @@ parameters:
   ignoreErrors:
     - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper#'
     - '#PHPDoc tag @mixin contains unknown class Modules\\Chat\\Models\\IdeHelper#'
+    - '#PHPDoc tag @mixin contains unknown class Modules\\Calendar\\Models\\IdeHelper#'

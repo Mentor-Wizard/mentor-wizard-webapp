@@ -1,0 +1,96 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Calendar\Actions\CalendarEvent;
+
+use App\Models\MentorProgram;
+use App\Notifications\CalendarEventConfirmedNotification;
+use Illuminate\Support\Facades\Date;
+use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Calendar\Enums\CalendarEventRoleEnum;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Http\Requests\CalendarEvent\ConfirmCalendarEventRequest;
+use Modules\Calendar\Models\CalendarEvent;
+use Symfony\Component\HttpFoundation\Response;
+
+class ConfirmCalendarEvent
+{
+    use AsController;
+
+    public function handle(ConfirmCalendarEventRequest $request, MentorProgram $mentorProgram, CalendarEvent $calendarEvent): Response
+    {
+        if ($calendarEvent->start_date_time->lessThan(Date::now())) {
+            return to_route('pages.calendar.pending')
+                ->with('error', 'Start time for this event is already past');
+        }
+
+        if ($mentorProgram->mentor->calendarEvents()
+            ->whereNotIn('calendar_event_id', [$calendarEvent->getKey()])
+            ->where('status', CalendarEventStatusEnum::CONFIRMED->value)
+            ->where('start_date_time', '<', $calendarEvent->end_date_time)
+            ->where('end_date_time', '>', $calendarEvent->start_date_time)
+            ->exists()
+        ) {
+
+            return to_route('pages.calendar.pending')
+                ->with('error', 'There is another confirmed event in this time slot.');
+        }
+
+        $this->fillConfirmationDates($request, $calendarEvent);
+
+        if (! $calendarEvent->calendarEventUsers()
+            ->wherePivotIn('role', [
+                CalendarEventRoleEnum::HOST->value,
+                CalendarEventRoleEnum::COHOST->value,
+            ])
+            ->wherePivotNull('confirmed_at')
+            ->exists()) {
+
+            $calendarEvent->update(['status' => CalendarEventStatusEnum::CONFIRMED->value]);
+            $this->notifyUserAboutConfirmation($calendarEvent);
+            $this->checkEventsForCancellation($mentorProgram, $calendarEvent);
+
+            return to_route('pages.calendar.pending')
+                ->with('success', 'Event was successfully confirmed.');
+        }
+
+        return to_route('pages.calendar.pending')
+            ->with('success', 'Event is confirmed on your side, but waiting for confirmation from CO-HOST');
+
+    }
+
+    private function fillConfirmationDates(ConfirmCalendarEventRequest $request, CalendarEvent $calendarEvent): void
+    {
+        $calendarEvent->calendarEventUsers()
+            ->updateExistingPivot($request->user()->getKey(), [
+                'confirmed_at' => now(),
+            ]);
+
+    }
+
+    private function notifyUserAboutConfirmation(CalendarEvent $calendarEvent): void
+    {
+        $calendarEvent->calendarEventUsers()
+            ->wherePivot('role', CalendarEventRoleEnum::MENTI->value)
+            ->get()
+            ->each(fn ($user) => $user->notify(new CalendarEventConfirmedNotification($calendarEvent)));
+
+    }
+
+    private function checkEventsForCancellation(MentorProgram $mentorProgram, CalendarEvent $calendarEvent): void
+    {
+        $overlappingIds = $mentorProgram->mentor->calendarEvents()
+            ->whereNotIn('calendar_event_id', [$calendarEvent->getKey()])
+            ->where('status', CalendarEventStatusEnum::PENDING_MENTOR_CONFIRMATION->value)
+            ->where('start_date_time', '<', $calendarEvent->end_date_time)
+            ->where('end_date_time', '>', $calendarEvent->start_date_time)
+            ->pluck('calendar_events.id');
+
+        if ($overlappingIds->isNotEmpty()) {
+            CalendarEvent::query()
+                ->whereIn('id', $overlappingIds)
+                ->update(['status' => CalendarEventStatusEnum::CANCELLED->value]);
+        }
+    }
+}

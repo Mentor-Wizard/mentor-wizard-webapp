@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Services\ExternalCalendar\Contracts;
 
 use App\DTO\ExternalCalendar\ExternalCalendarEventData;
-use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use DateTimeInterface;
+use Modules\Calendar\Models\CalendarEvent;
 
 interface ExternalCalendarServiceInterface
 {

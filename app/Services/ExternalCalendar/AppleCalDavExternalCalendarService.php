@@ -7,7 +7,6 @@ namespace App\Services\ExternalCalendar;
 use App\DTO\ExternalCalendar\ExternalCalendarEventData;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\Contracts\ExternalCalendarServiceInterface;
@@ -21,6 +20,7 @@ use DateTimeInterface;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Modules\Calendar\Models\CalendarEvent;
 use RuntimeException;
 
 class AppleCalDavExternalCalendarService implements ExternalCalendarServiceInterface

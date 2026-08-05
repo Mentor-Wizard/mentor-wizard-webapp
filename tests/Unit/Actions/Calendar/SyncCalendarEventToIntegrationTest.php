@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Calendar\CalendarEvent\SyncCalendarEventToIntegration;
 use App\Enums\CalendarProviderEnum;
 use App\Jobs\CreateExternalCalendarEvent;
-use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
@@ -13,6 +12,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Queue;
+use Modules\Calendar\Models\CalendarEvent;
 
 describe('SyncCalendarEventToIntegration', function (): void {
     beforeEach(function (): void {

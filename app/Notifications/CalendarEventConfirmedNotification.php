@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\CalendarEvent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Modules\Calendar\Models\CalendarEvent;
 
 class CalendarEventConfirmedNotification extends Notification implements ShouldQueue
 {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\ExternalCalendarEventLogTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Modules\Calendar\Models\CalendarEvent;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;

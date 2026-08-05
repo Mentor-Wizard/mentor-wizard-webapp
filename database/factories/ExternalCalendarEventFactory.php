@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\CalendarProviderEnum;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Calendar\Models\CalendarEvent;
 use Override;
 
 /**

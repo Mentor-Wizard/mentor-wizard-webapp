@@ -6,11 +6,11 @@ namespace Database\Factories;
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\ExternalCalendarEventLogTypeEnum;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Calendar\Models\CalendarEvent;
 use Override;
 
 /**

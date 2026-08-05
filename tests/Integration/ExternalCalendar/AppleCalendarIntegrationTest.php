@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\DTO\ExternalCalendar\ExternalCalendarEventData;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
@@ -13,6 +12,7 @@ use App\Services\ExternalCalendar\AppleCalDavExternalCalendarService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Sleep;
+use Modules\Calendar\Models\CalendarEvent;
 
 /**
  * Apple iCloud CalDAV integration tests.

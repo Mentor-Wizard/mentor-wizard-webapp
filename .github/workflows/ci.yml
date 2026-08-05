@@ -437,6 +437,14 @@ jobs:
           # default 'Unit' testsuite here would find zero covering tests for Modules/Chat/app
           # and --covered-only would again mutate nothing.
           - { id: 'F', name: 'F · Module Chat',                 path: 'Modules/Chat/app',                                                                                                timeout: 15, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 2 (Calendar extraction, docs/plans/migrate-calendar-domain-module):
+          # same rationale as shard F above — Calendar's Actions/Models/Services/Policies/
+          # Observers/Casts/Traits/DTO/Http physically moved out of app/** into
+          # Modules/Calendar/app, so a dedicated shard is required to keep those
+          # mutates()-annotated classes in the mutation gate. testsuite is 'Modules' for the
+          # same reason as shard F. Timeout is 25 (not 15 like Chat) — Calendar's covered
+          # surface is roughly twice the size of Chat's.
+          - { id: 'G', name: 'G · Module Calendar',             path: 'Modules/Calendar/app',                                                                                            timeout: 25, ignore: '', testsuite: 'Modules' }
 
     steps:
       - name: '🛎 Checkout'

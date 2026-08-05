@@ -6,13 +6,13 @@ namespace App\Jobs;
 
 use App\Enums\ExternalCalendarEventLogTypeEnum;
 use App\Enums\ExternalCalendarEventSyncStatusEnum;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\ExternalCalendarServiceFactory;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Modules\Calendar\Models\CalendarEvent;
 use Throwable;
 
 class CreateExternalCalendarEvent implements ShouldQueue

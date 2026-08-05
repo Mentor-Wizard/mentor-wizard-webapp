@@ -7,12 +7,12 @@ namespace App\Actions\Calendar\ExternalCalendar;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Http\Requests\Calendar\ExternalCalendar\ExternalCalendarSyncSingleEventRequest;
 use App\Jobs\CreateExternalCalendarEvent;
-use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Calendar\Models\CalendarEvent;
 
 class ExternalCalendarSyncSingleEvent
 {

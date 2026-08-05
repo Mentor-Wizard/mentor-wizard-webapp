@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Modules\Calendar\Database\Seeders\CalendarEventSeeder;
 use Modules\Chat\Database\Seeders\ChatDatabaseSeeder;
 
 final class DatabaseSeeder extends Seeder

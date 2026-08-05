@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Pages\MentorProgram;
 
-use App\Enums\CalendarEventStatusEnum;
 use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
 
 class ListMentorProgramPage
 {

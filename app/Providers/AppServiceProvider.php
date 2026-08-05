@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\RoleEnum;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\ExternalCalendarEventLog;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Models\UserProfile;
 use App\Models\UserSchedule;
-use App\Policies\CalendarEventPolicy;
 use App\Policies\ExternalCalendarEventLogPolicy;
 use App\Policies\ExternalCalendarEventPolicy;
 use App\Policies\UserCalendarIntegrationPolicy;
@@ -59,7 +57,6 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
-        Gate::policy(CalendarEvent::class, CalendarEventPolicy::class);
         Gate::policy(UserSchedule::class, UserSchedulePolicy::class);
         Gate::policy(ExternalCalendarEventLog::class, ExternalCalendarEventLogPolicy::class);
         Gate::policy(UserCalendarIntegration::class, UserCalendarIntegrationPolicy::class);

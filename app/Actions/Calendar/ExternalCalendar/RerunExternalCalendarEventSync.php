@@ -6,11 +6,11 @@ namespace App\Actions\Calendar\ExternalCalendar;
 
 use App\Jobs\CreateExternalCalendarEvent;
 use App\Jobs\UpdateExternalCalendarEvent;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\UserCalendarIntegration;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Calendar\Models\CalendarEvent;
 
 class RerunExternalCalendarEventSync
 {

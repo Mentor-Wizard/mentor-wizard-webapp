@@ -3,17 +3,17 @@
 declare(strict_types=1);
 
 use App\DTO\ExternalCalendar\ExternalCalendarEventData;
-use App\Enums\CalendarEventTypeEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Enums\MentorSessionTypeEnum;
-use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use App\Services\ExternalCalendar\OutlookExternalCalendarService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
+use Modules\Calendar\Enums\CalendarEventTypeEnum;
+use Modules\Calendar\Models\CalendarEvent;
 
 /**
  * Microsoft Outlook / Graph API integration tests.

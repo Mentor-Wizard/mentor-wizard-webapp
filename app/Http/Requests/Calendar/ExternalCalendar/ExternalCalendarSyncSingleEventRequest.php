@@ -6,11 +6,11 @@ namespace App\Http\Requests\Calendar\ExternalCalendar;
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\UserCalendarIntegration;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Modules\Calendar\Models\CalendarEvent;
 use Override;
 
 class ExternalCalendarSyncSingleEventRequest extends ExternalCalendarRequest

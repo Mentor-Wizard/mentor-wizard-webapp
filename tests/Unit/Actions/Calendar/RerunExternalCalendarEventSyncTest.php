@@ -6,7 +6,6 @@ use App\Actions\Calendar\ExternalCalendar\RerunExternalCalendarEventSync;
 use App\Enums\CalendarProviderEnum;
 use App\Jobs\CreateExternalCalendarEvent;
 use App\Jobs\UpdateExternalCalendarEvent;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
@@ -15,6 +14,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Queue;
+use Modules\Calendar\Models\CalendarEvent;
 
 mutates(RerunExternalCalendarEventSync::class);
 

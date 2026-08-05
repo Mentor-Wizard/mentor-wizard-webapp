@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\XmlTools\ExternalCalendar;
 
-use App\Models\CalendarEvent;
 use App\Traits\ExternalCalendar\EscapesText;
 use Date;
+use Modules\Calendar\Models\CalendarEvent;
 
 class IcsBuilder
 {

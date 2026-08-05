@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 use App\Actions\Calendar\ExternalCalendar\ExternalCalendarRetrySync;
-use App\Enums\CalendarEventRoleEnum;
-use App\Enums\CalendarEventStatusEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
-use App\Models\CalendarEvent;
 use App\Models\ExternalCalendarEvent;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Queue;
+use Modules\Calendar\Enums\CalendarEventRoleEnum;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Models\CalendarEvent;
 
 mutates(ExternalCalendarRetrySync::class);
 

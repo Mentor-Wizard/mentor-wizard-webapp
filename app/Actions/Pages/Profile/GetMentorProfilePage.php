@@ -8,13 +8,13 @@ use App\Enums\RoleEnum;
 use App\Http\Resources\MentorProfilePageResource;
 use App\Models\MentorProgram;
 use App\Models\User;
-use App\Services\Calendar\BookingCalendarEventsService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Calendar\Services\BookingCalendarEventsService;
 
 class GetMentorProfilePage
 {

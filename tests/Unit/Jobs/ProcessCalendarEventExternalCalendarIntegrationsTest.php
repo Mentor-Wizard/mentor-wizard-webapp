@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-use App\Enums\CalendarEventStatusEnum;
-use App\Enums\CalendarEventTypeEnum;
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
 use App\Jobs\CreateExternalCalendarEvent;
 use App\Jobs\ProcessCalendarEventExternalCalendarIntegrations;
-use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Date;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Enums\CalendarEventTypeEnum;
+use Modules\Calendar\Models\CalendarEvent;
 
 mutates(ProcessCalendarEventExternalCalendarIntegrations::class);
 

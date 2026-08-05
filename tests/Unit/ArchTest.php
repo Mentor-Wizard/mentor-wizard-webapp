@@ -56,3 +56,17 @@ arch('modules-models-are-eloquent')
 arch('chat-does-not-reach-into-other-modules')
     ->expect('Modules\Chat')
     ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);
+
+// DDD-migration Phase 2 (Calendar extraction, docs/plans/migrate-calendar-domain-module).
+it('keeps Modules\Calendar non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/Calendar/app')))->not->toBeEmpty();
+});
+
+arch('calendar-models-are-eloquent')
+    ->expect('Modules\Calendar\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+arch('calendar-does-not-reach-into-other-modules')
+    ->expect('Modules\Calendar')
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);

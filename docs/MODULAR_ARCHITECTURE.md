@@ -52,9 +52,9 @@
 Коротко:
 
 - **Bounded contexts** (кандидати в `Modules/*`) — області з власними бізнес-
-  правилами й моделями: Chat (вже винесено), Calendar, ExternalCalendar,
-  Identity & Access, MentorProgram, Marketplace, UserProfile, UserSchedule,
-  MentorSession, Payments.
+  правилами й моделями: Chat (вже винесено), Calendar (вже винесено),
+  ExternalCalendar, Identity & Access, MentorProgram, Marketplace, UserProfile,
+  UserSchedule, MentorSession, Payments.
 - **Supporting capabilities** (лишаються в `app/` як Core/Shared, **не** стають
   модулями) — Notifications, Media, Presence/realtime, Admin (Filament). Це
   наскрізна інфраструктура без власних бізнес-правил, а не домен.
@@ -78,6 +78,11 @@ Modules/{Name}/
 │   ├── Models/
 │   ├── Enums/
 │   ├── Policies/
+│   ├── Services/         # опційно — якщо домен має сервісний шар (прецедент: Calendar)
+│   ├── DTO/               # опційно — якщо домен передає структуровані дані між шарами (прецедент: Calendar)
+│   ├── Traits/            # опційно — якщо домен ділить поведінку між кількома класами (прецедент: Calendar)
+│   ├── Casts/              # опційно — власні Eloquent-каст-класи домену (прецедент: Calendar)
+│   ├── Observers/          # опційно — Eloquent-обсервери домену (прецедент: Calendar)
 │   ├── Http/Requests/
 │   ├── Http/Resources/
 │   ├── Events/
@@ -89,6 +94,11 @@ Modules/{Name}/
 ├── tests/{Unit,Feature}/
 └── composer.json         # PSR-4: Modules\{Name}\ → app/
 ```
+
+Опційні теки (`Services/`, `DTO/`, `Traits/`, `Casts/`, `Observers/`) не є
+довільним вибором — вони дзеркалять `app/`-теки, для яких `config/modules.php`
+(`paths.generator`) уже має записи з `generate => false`. Модуль створює лише
+ті з них, які реально потрібні домену; порожні теки не створюються про запас.
 
 Ключові рішення в `config/modules.php`, які відрізняють цей проєкт від дефолтної
 конфігурації пакета:
@@ -120,7 +130,8 @@ Modules/{Name}/
 
 - **Namespace**: `Modules\{Name}\...` (`config('modules.namespace')`).
 - **Активація**: файл `modules_statuses.json` у корені репозиторію
-  (`{"Chat": true}`) — вмикає/вимикає модуль без видалення коду.
+  (`{"Chat": true, "Calendar": true}`) — вмикає/вимикає модуль без видалення
+  коду.
 - **Сервіс-провайдер модуля**: успадковує
   `Nwidart\Modules\Support\ModuleServiceProvider` (не базовий
   `Illuminate\Support\ServiceProvider`) — реєструє команди, переклади, конфіг,
@@ -134,7 +145,8 @@ Modules/{Name}/
     `excludePaths: [Modules/*/tests/*]`
   - `rector.php` → `withPaths([..., __DIR__.'/Modules'])`
   - `phpunit.xml` → окремий testsuite `Modules`, `<source>` включає `./Modules`
-  - `.github/workflows/ci.yml` → мутаційний шард на `Modules/Chat/app`
+  - `.github/workflows/ci.yml` → мутаційний шард на `Modules/Chat/app` і
+    `Modules/Calendar/app`
   - `tests/Unit/ArchTest.php` → strict_types, непорожність неймспейсу, заборона
     крос-імпортів між модулями
   - `AdminPanelProvider` (Filament) → цикл по `Module::all()` для discovery
@@ -213,22 +225,59 @@ php artisan module:clear-compiled
 > Повний список і `--help` для кожної команди: `php artisan list module` /
 > `php artisan module:make --help`.
 
+## Вирішені питання
+
+### Модель `User` і relation-методи домену → модульний трейт
+
+Ухвалено під час виносу `Calendar` (`docs/plans/migrate-calendar-domain-module`):
+кожен домен, що додає relation-методи на Core-модель `User`, виносить їх у
+власний трейт `Modules\{Name}\Traits\Has{Domain}` і підключає його в `User`
+одним рядком (`use Has{Domain};`). Прецедент —
+`Modules\Calendar\Traits\HasCalendarEvents` (`calendarEvents()`,
+`hostedCalendarEvents()`, `participatingCalendarEvents()`).
+
+- Публічний контракт не змінюється: `$user->calendarEvents()` резолвиться
+  ідентично — трейт розкривається в тілі класу на етапі компіляції.
+- Залежність стає явною й greppable в `User`: `use Modules\Calendar\Traits\HasCalendarEvents;`
+  замість розмазаних методів, а arch-правило `*-does-not-reach-into-other-modules`
+  продовжує забороняти лише `Module → Module`.
+- Трейт, що викликає `$this->belongsToMany()`/`hasMany()` тощо, обов'язково
+  отримує PHPDoc `@phpstan-require-extends \Illuminate\Database\Eloquent\Model`
+  — інакше Larastan (level 7) не знає, що `$this` є моделлю.
+- `Modules\Chat\Traits\HasChats` (ретрофіт `User::chats()` під цей самий
+  патерн) — заведений борг, не зроблений цим PR (не в скоупі Calendar).
+
+### Розташування історичних міграцій із міжмодульними FK
+
+Ухвалено правило (застосовано при виносі `Calendar`):
+
+> **Міграція належить модулю, що володіє таблицею, яку вона ЗМІНЮЄ
+> (`Schema::table`/`Schema::create`), а не таблицею, на яку вона посилається
+> зовнішнім ключем.**
+
+Приклад: `add_mentor_session_id_column_to_table_calendar_events` робить
+`ALTER TABLE calendar_events` і додає FK на `mentor_sessions` (Core) — власник
+міграції є `Calendar` (бо вона змінює `calendar_events`), а не Core.
+
+Порядок виконання при `migrate:fresh` **не залежить від фізичного шляху
+файлу**: `Nwidart\Modules\Support\ModuleServiceProvider` реєструє шлях модуля
+через `loadMigrationsFrom()`, і Laravel-мігратор збирає файли з усіх
+зареєстрованих шляхів в один список, сортуючи його **глобально за іменем
+файлу**, а не за каталогом. Тому `git mv` міграції в модуль (без зміни імені
+файлу) не змінює порядок виконання відносно міграцій, від яких вона залежить
+через FK — важливо лише, щоб timestamp у імені файлу вже був пізнішим за
+timestamp таблиці, на яку йде посилання.
+
 ## Відкриті питання
 
-Ці рішення ще не зафіксовані ADR і впливають на кожен наступний модуль — дивись
+Це рішення ще не зафіксоване ADR і впливає на кожен наступний модуль — дивись
 `docs/temp/ddd-domain-analysis.md` (розділ «Відкриті питання») для повного
 обґрунтування:
 
-1. **Модель `User`** — Core тримає всі relation-методи доменів («товстий User»),
-   що приховує міжмодульні залежності від arch-тестів. Потрібне явне рішення до
-   виносу наступного модуля.
-2. **«Backend-only модуль» як стандарт** — тулінг де-факто підтверджує це для
+1. **«Backend-only модуль» як стандарт** — тулінг де-факто підтверджує це для
    бекенду, але `docs/FRONTEND_ARCHITECTURE.md` про `Modules/` не згадує.
    Потрібно або зафіксувати це рішення явно в тому документі, або переглянути
-   його до модуля №2.
-3. **Розташування історичних міграцій** — при виносі `Chat` усі міграції
-   переїхали в модуль повністю. Потрібне однозначне правило для модулів із
-   міжмодульними foreign keys, де порядок timestamp-файлів має значення.
+   його до наступного модуля.
 
 ## Пов'язані документи
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CalendarEventRoleEnum;
 use App\Enums\RoleGuardEnum;
 use App\Enums\UserScheduleRecordType;
 use App\Observers\UserObserver;
@@ -24,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Calendar\Traits\HasCalendarEvents;
 use Modules\Chat\Models\Chat;
 use Override;
 use Spatie\MediaLibrary\HasMedia;
@@ -64,9 +64,10 @@ use Spatie\Permission\Traits\HasRoles;
 ])]
 class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 {
+    use HasCalendarEvents;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory;
-
     use HasRoles;
     use InteractsWithMedia;
     use Notifiable;
@@ -162,37 +163,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->belongsToMany(Chat::class, 'chat_users')
             ->withPivot(['status', 'is_muted'])
             ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<CalendarEvent, static>
-     */
-    public function calendarEvents(): BelongsToMany
-    {
-        /** @phpstan-ignore-next-line */
-        return $this->belongsToMany(CalendarEvent::class,
-            'calendar_event_user', 'user_id')
-            ->withPivot('colour')
-            ->withPivot('role')
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<CalendarEvent, static>
-     */
-    public function hostedCalendarEvents(): BelongsToMany
-    {
-        return $this->calendarEvents()
-            ->wherePivot('role', CalendarEventRoleEnum::HOST);
-    }
-
-    /**
-     * @return BelongsToMany<CalendarEvent, static>
-     */
-    public function participatingCalendarEvents(): BelongsToMany
-    {
-        return $this->calendarEvents()
-            ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT);
     }
 
     /**

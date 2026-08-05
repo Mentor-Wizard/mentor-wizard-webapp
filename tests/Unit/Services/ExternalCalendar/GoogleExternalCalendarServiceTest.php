@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
-use App\Models\CalendarEvent;
 use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserCalendarIntegration;
@@ -13,6 +12,7 @@ use App\Services\ExternalCalendar\GoogleExternalCalendarService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
+use Modules\Calendar\Models\CalendarEvent;
 
 mutates(AbstractGoogleExternalCalendarService::class);
 mutates(GoogleExternalCalendarService::class);

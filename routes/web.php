@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\CalendarEvent\ConfirmCalendarEvent;
-use App\Actions\Calendar\CalendarEvent\DeleteCalendarEvent;
-use App\Actions\Calendar\CalendarEvent\EditCalendarEvent;
-use App\Actions\Calendar\CalendarEvent\StoreCalendarEvent;
 use App\Actions\Calendar\CalendarEvent\SyncCalendarEventToIntegration;
 use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectCallback;
 use App\Actions\Calendar\ExternalCalendar\ExternalCalendarConnectDirect;
@@ -23,11 +19,6 @@ use App\Actions\MentorPrograms\UpdateMentorProgramPage;
 use App\Actions\Notifications\ListNotifications;
 use App\Actions\Notifications\MarkAllNotificationsAsRead;
 use App\Actions\Notifications\MarkNotificationAsRead;
-use App\Actions\Pages\Calendar\CalendarsListPage;
-use App\Actions\Pages\Calendar\ConfirmedCalendarEventsListPage;
-use App\Actions\Pages\Calendar\MentorProgramEventBookingPage;
-use App\Actions\Pages\Calendar\PendingCalendarEventsListPage;
-use App\Actions\Pages\Calendar\ShowCalendarEventPage;
 use App\Actions\Pages\DashboardPage;
 use App\Actions\Pages\MentorProgram\CreateMentorProgramPage;
 use App\Actions\Pages\MentorProgram\EditMentorProgramPage;
@@ -87,33 +78,6 @@ Route::prefix('mentor-program')->middleware(['auth', 'role:mentor'])->group(func
         ->name('mentor-program.destroy');
     Route::get('/list', ListMentorProgramPage::class)
         ->name('mentor-program.list');
-});
-
-Route::prefix('calendar')->middleware(['auth', 'verified'])->group(function (): void {
-    Route::get('/', CalendarsListPage::class)
-        ->name('pages.calendar.index');
-    Route::get('calendar-event/{calendarEvent:id}', ShowCalendarEventPage::class)
-        ->can('view', 'calendarEvent')
-        ->name('pages.calendar.show');
-    Route::get('pending-calendar-event/list/{mentorProgram:slug?}', PendingCalendarEventsListPage::class)
-        ->name('pages.calendar.pending');
-    Route::get('confirmed-calendar-event/list/{mentorProgram:slug?}', ConfirmedCalendarEventsListPage::class)
-        ->name('pages.calendar.confirmed');
-    Route::get('mentor-program/book/{mentorProgram:slug}', MentorProgramEventBookingPage::class)
-        ->name('pages.mentor.program.book');
-    Route::post('calendar-event/store', StoreCalendarEvent::class)
-        ->name('pages.calendar.store');
-    Route::patch('calendar-event/edit/{calendarEvent:id}', EditCalendarEvent::class)
-        ->can('update', 'calendarEvent')
-        ->name('pages.calendar.edit');
-    Route::patch('mentor-programs/{mentorProgram:id}/calendar-events/{calendarEvent:id}/confirm',
-        ConfirmCalendarEvent::class)
-        ->can('confirm', 'calendarEvent')
-        ->name('calendar.confirm.booking');
-    Route::delete('calendar-event/delete/{calendarEvent}', DeleteCalendarEvent::class)
-        ->can('delete', 'calendarEvent')
-        ->name('pages.calendar.delete');
-
 });
 
 Route::middleware(['auth', 'verified', 'role:mentor'])->prefix('user-schedule')->group(function (): void {
