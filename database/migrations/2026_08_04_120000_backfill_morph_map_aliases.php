@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use App\Models\UserProfile;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Modules\UserProfile\Models\UserProfile;
 use Spatie\Permission\PermissionRegistrar;
 
 /**

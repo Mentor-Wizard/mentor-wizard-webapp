@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -38,6 +37,8 @@ use Modules\Marketplace\Traits\HasMentorProfile;
 use Modules\MentorProgram\Models\MentorProgram;
 use Modules\MentorProgram\Models\MentorProgramBlockProgress;
 use Modules\MentorProgram\Traits\HasMentorPrograms;
+use Modules\UserProfile\Models\UserProfile;
+use Modules\UserProfile\Traits\HasUserProfile;
 use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -156,6 +157,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     use HasMentorProfile;
     use HasMentorPrograms;
     use HasRoles;
+    use HasUserProfile;
     use InteractsWithMedia;
     use Notifiable;
 
@@ -177,14 +179,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         RoleGuardEnum::MENTI->value,
         RoleGuardEnum::COACH->value,
     ];
-
-    /**
-     * @return HasOne<UserProfile, $this>
-     */
-    public function profile(): HasOne
-    {
-        return $this->hasOne(UserProfile::class);
-    }
 
     /**
      * @return HasMany<MentorSession, $this>

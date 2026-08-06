@@ -5,7 +5,7 @@ import { useCaseChat } from '@modules/Chat/resources/js/Pages/Chat/useCaseChat.j
 import { ref } from 'vue';
 
 import SelectField from '@/Components/UI/Forms/SelectField.vue';
-import MobileTabSelect from '@/Pages/Profile/Partials/Components/MobileTabSelect.vue';
+import MobileTabSelect from '@/Components/UI/Navigation/MobileTabSelect.vue';
 
 const { sortedUsers, messageSortList, messageSortBy, fetchMessages } =
   useCaseChat();

@@ -4,5 +4,6 @@
   "ExternalCalendar": true,
   "Auth": true,
   "MentorProgram": true,
-  "Marketplace": true
+  "Marketplace": true,
+  "UserProfile": true
 }

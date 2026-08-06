@@ -6,13 +6,13 @@ namespace Modules\Marketplace\Http\Resources;
 
 use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Marketplace\Actions\Pages\GetMentorProfilePage;
 use Modules\Marketplace\Models\MentorReview;
 use Modules\MentorProgram\Http\Resources\MentorProgramsResource;
+use Modules\UserProfile\Models\UserProfile;
 use Override;
 
 /**

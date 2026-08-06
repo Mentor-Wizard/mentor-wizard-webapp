@@ -5,12 +5,12 @@ declare(strict_types=1);
 use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\User;
-use App\Models\UserProfile;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Modules\Marketplace\Http\Resources\SimilarMentorResource;
 use Modules\Marketplace\Models\MentorProfile;
 use Modules\Marketplace\Models\MentorReview;
+use Modules\UserProfile\Models\UserProfile;
 use Spatie\Permission\Models\Role;
 
 describe('Similar Mentor Resource', function (): void {

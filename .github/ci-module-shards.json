@@ -3,5 +3,6 @@
   "Calendar": { "timeout": 25 },
   "ExternalCalendar": { "timeout": 25 },
   "Auth": { "timeout": 15 },
-  "MentorProgram": { "timeout": 15 }
+  "MentorProgram": { "timeout": 15 },
+  "UserProfile": { "timeout": 15 }
 }

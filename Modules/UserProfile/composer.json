@@ -1,0 +1,28 @@
+{
+  "name": "mentor-wizard/user-profile",
+  "description": "Private account settings: identity, contacts, avatar, hourly rate, account deletion (GDPR).",
+  "keywords": [
+    "user",
+    "profile",
+    "account",
+    "avatar"
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\UserProfile\\": "app/",
+      "Modules\\UserProfile\\Database\\Factories\\": "database/factories/",
+      "Modules\\UserProfile\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\UserProfile\\Tests\\": "tests/"
+    }
+  }
+}

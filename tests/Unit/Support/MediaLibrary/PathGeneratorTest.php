@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Models\UserProfile;
 use App\Support\MediaLibrary\PathGenerator;
+use Modules\UserProfile\Models\UserProfile;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 describe('MediaLibrary PathGenerator', function (): void {

@@ -8,7 +8,6 @@ use App\Contracts\ExternalCalendar\CalendarEventIntegrationsProvider;
 use App\Contracts\ExternalCalendar\NullCalendarEventIntegrationsProvider;
 use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Models\UserProfile;
 use App\Models\UserSchedule;
 use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
@@ -26,6 +25,7 @@ use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Modules\Chat\Models\Chat;
 use Modules\Chat\Models\ChatMessage;
+use Modules\UserProfile\Models\UserProfile;
 use Override;
 
 class AppServiceProvider extends ServiceProvider

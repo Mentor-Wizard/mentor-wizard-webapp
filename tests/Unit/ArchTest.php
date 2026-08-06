@@ -29,8 +29,6 @@ arch('app')
     ->expect('App\Enums')
     ->toBeEnums()
     ->and('App\Actions\Pages')
-    ->toHaveSuffix('Page')
-    ->and('App\Actions\Pages\Profile')
     ->toHaveSuffix('Page');
 
 // Module tooling guard (DDD-migration Phase 0, docs/plans/ddd-migration-laravel-modules).
@@ -63,7 +61,7 @@ arch('modules-models-are-eloquent')
 // model) is out of scope for a structural move.
 arch('chat-does-not-reach-into-other-modules')
     ->expect('Modules\Chat')
-    ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile']);
 
 // DDD-migration Phase 2 (Calendar extraction, docs/plans/migrate-calendar-domain-module).
 it('keeps Modules\Calendar non-empty', function (): void {
@@ -81,7 +79,7 @@ arch('calendar-models-are-eloquent')
 // not a boundary violation (mirrors the ExternalCalendar → Calendar carve-out above).
 arch('calendar-does-not-reach-into-other-modules')
     ->expect('Modules\Calendar')
-    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile']);
 
 // DDD-migration Phase 3 (ExternalCalendar extraction, docs/plans/external-calendar-module-migration).
 it('keeps Modules\ExternalCalendar non-empty', function (): void {
@@ -99,7 +97,7 @@ arch('external-calendar-models-are-eloquent')
 // violation (see docs/plans/external-calendar-module-migration/02-development-plan-backend.md §4.3).
 arch('external-calendar-does-not-reach-into-other-modules')
     ->expect('Modules\ExternalCalendar')
-    ->not->toUse(['Modules\Chat', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Chat', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile']);
 
 // DDD-migration Phase 4 (Auth extraction, docs/plans/identity-domain-migration).
 it('keeps Modules\Auth non-empty', function (): void {
@@ -131,7 +129,7 @@ it('keeps Modules\Auth free of module config files', function (): void {
 
 arch('auth-does-not-reach-into-other-modules')
     ->expect('Modules\Auth')
-    ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule']);
+    ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\UserProfile']);
 
 // DDD-migration Phase 5 (MentorProgram extraction, docs/plans/mentor-program-ddd-migration).
 it('keeps Modules\MentorProgram non-empty', function (): void {
@@ -162,7 +160,7 @@ arch('mentor-program-models-are-eloquent')
 // docs/plans/ddd-migration-marketplace/02-development-backend.md for the full note.
 arch('mentor-program-does-not-reach-into-other-modules')
     ->expect('Modules\MentorProgram')
-    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile']);
 
 // DDD-migration Phase 6 (Marketplace extraction, docs/plans/ddd-migration-marketplace).
 it('keeps Modules\Marketplace non-empty', function (): void {
@@ -183,9 +181,40 @@ arch('marketplace-models-are-eloquent')
 // booking-slot block — a second, one-directional Customer/Supplier edge (see D-4b in the
 // plan). Calendar's own forbidden list keeps 'Modules\Marketplace' since this edge does
 // not run in reverse.
+// `Modules\UserProfile` is ALSO deliberately absent (DDD-migration Phase 7, OQ-3):
+// MentorReviewResource / MentorProfilePageResource read the constant
+// UserProfile::DEFAULT_AVATAR_URL — a one-directional Customer/Supplier edge, not a
+// boundary violation. UserProfile's own forbidden list keeps 'Modules\Marketplace' since
+// this edge does not run in reverse. Note (V-9): Modules/Marketplace/tests/** are plain
+// Pest scripts without a `namespace` declaration, so `expect('Modules\Marketplace')` does
+// not scan the 2 Marketplace test files that import UserProfile — no phantom failure to
+// chase here.
 arch('marketplace-does-not-reach-into-other-modules')
     ->expect('Modules\Marketplace')
     ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\UserSchedule', 'Modules\Auth']);
+
+// DDD-migration Phase 7 (UserProfile extraction, docs/plans/userprofile-module-migration).
+it('keeps Modules\UserProfile non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/UserProfile/app')))->not->toBeEmpty();
+});
+
+arch('userprofile-models-are-eloquent')
+    ->expect('Modules\UserProfile\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+arch('userprofile-actions-pages-suffix')
+    ->expect('Modules\UserProfile\Actions\Pages')
+    ->toHaveSuffix('Page');
+
+// `Modules\ExternalCalendar` is deliberately absent: GetProfilePage assembles the
+// `calendarIntegrations` prop from Modules\ExternalCalendar\{Enums,Models}
+// (CalendarProviderEnum, CalendarSyncStatusEnum, UserCalendarIntegration) — a
+// one-directional Customer/Supplier edge (UserProfile is the consumer), documented as
+// tech debt (D-3, OQ-2) rather than fixed by an inversion in this structural-move PR.
+arch('userprofile-does-not-reach-into-other-modules')
+    ->expect('Modules\UserProfile')
+    ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // Regression guard for the bidirectional Calendar <-> MentorProgram carve-out (docs/plans/
 // mentor-program-ddd-migration/04-qa-backend.md): the two `not->toUse()` lists above are
@@ -195,13 +224,13 @@ arch('marketplace-does-not-reach-into-other-modules')
 // live cross-import only flows Calendar -> MentorProgram / MentorProgram -> Calendar, not to
 // any other module.
 it('only permits the Calendar <-> MentorProgram carve-out, not a wider cross-import allowance', function (): void {
-    $forbiddenForCalendar = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth'];
+    $forbiddenForCalendar = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile'];
     // `Modules\Marketplace` stays forbidden here (unlike the `arch()` rule above it, which must
     // carve it out for the seeder edge — see the comment on that rule): this regression test only
     // scans `Modules/MentorProgram/app` (confirmed by grep: zero references there), so it correctly
     // stays strict and will fail loudly if a *production* MentorProgram class ever imports
     // Marketplace, keeping the carve-out scoped to exactly the one known seeder edge.
-    $forbiddenForMentorProgram = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth'];
+    $forbiddenForMentorProgram = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile'];
 
     $calendarFiles = File::allFiles(base_path('Modules/Calendar/app'));
     $mentorProgramFiles = File::allFiles(base_path('Modules/MentorProgram/app'));

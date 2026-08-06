@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Modules\Marketplace\Http\Resources;
 
 use App\Models\User;
-use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
 use Modules\Marketplace\Models\MentorReview;
+use Modules\UserProfile\Models\UserProfile;
 use Override;
 
 class MentorReviewResource extends JsonResource

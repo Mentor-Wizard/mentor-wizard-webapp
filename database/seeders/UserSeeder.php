@@ -6,8 +6,8 @@ namespace Database\Seeders;
 
 use App\Models\Currency;
 use App\Models\User;
-use App\Models\UserProfile;
 use Illuminate\Database\Seeder;
+use Modules\UserProfile\Models\UserProfile;
 
 class UserSeeder extends Seeder
 {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Models\UserProfile;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Notification as NotificationBase;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Chat\Models\Chat;
 use Modules\Chat\Models\ChatMessage;
+use Modules\UserProfile\Models\UserProfile;
 use Spatie\Permission\Models\Role;
 
 describe('enforced morph map', function (): void {
