@@ -425,7 +425,7 @@ jobs:
           # ignore: app/Filament — see the comment block above this matrix for why: a single
           # line (UserResource::getNavigationBadge()) produces a --filter argv that exceeds
           # Linux's MAX_ARG_STRLEN and crashes posix_spawn. Confirmed root cause, not a guess.
-          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament', testsuite: 'Unit' }
+          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/DTO,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament', testsuite: 'Unit' }
           - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20, ignore: '', testsuite: 'Unit' }
           # DDD-migration Phase 1 (Chat pilot): Chat's Actions/Models/Policies/Events/
           # Broadcasting/Http physically moved out of app/** into Modules/Chat/app — a shard

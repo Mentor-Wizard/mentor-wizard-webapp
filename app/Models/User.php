@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\RoleGuardEnum;
 use App\Enums\UserScheduleRecordType;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -14,22 +15,36 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\Visible;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Modules\Auth\Observers\UserObserver;
+use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Traits\HasCalendarEvents;
 use Modules\Chat\Models\Chat;
+use Modules\ExternalCalendar\Models\UserCalendarIntegration;
 use Modules\ExternalCalendar\Traits\HasExternalCalendarIntegrations;
+use Modules\Marketplace\Models\MentorProfile;
+use Modules\Marketplace\Models\MentorReview;
+use Modules\Marketplace\Traits\HasMentorProfile;
+use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorProgram\Models\MentorProgramBlockProgress;
 use Modules\MentorProgram\Traits\HasMentorPrograms;
 use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -38,7 +53,73 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read float $rating
  * @property-read Pivot $pivot
  * @property string $username
+ * @property int $id
+ * @property string $email
+ * @property CarbonImmutable|null $email_verified_at
+ * @property string $password
+ * @property string|null $remember_token
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property string|null $slug
+ * @property string|null $preferences
+ * @property-read Collection<int, UserSchedule> $activeScheduleRecords
+ * @property-read int|null $active_schedule_records_count
+ * @property-read Collection<int, CalendarEvent> $calendarEvents
+ * @property-read int|null $calendar_events_count
+ * @property-read Collection<int, UserCalendarIntegration> $calendarIntegrations
+ * @property-read int|null $calendar_integrations_count
+ * @property-read Collection<int, Chat> $chats
+ * @property-read int|null $chats_count
+ * @property-read Collection<int, CalendarEvent> $hostedCalendarEvents
+ * @property-read int|null $hosted_calendar_events_count
+ * @property-read MediaCollection<int, Media> $media
+ * @property-read int|null $media_count
+ * @property-read MentorProgramBlockProgress|null $mentiProgramProgress
+ * @property-read Collection<int, MentorSession> $mentiSessions
+ * @property-read int|null $menti_sessions_count
+ * @property-read Collection<int, MentorProgram> $mentorPrograms
+ * @property-read int|null $mentor_programs_count
+ * @property-read Collection<int, MentorReview> $mentorReviews
+ * @property-read int|null $mentor_reviews_count
+ * @property-read Collection<int, MentorSession> $mentorSessions
+ * @property-read int|null $mentor_sessions_count
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read Collection<int, CalendarEvent> $participatingCalendarEvents
+ * @property-read int|null $participating_calendar_events_count
+ * @property-read Collection<int, Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read Collection<int, MentorReview> $reviewsByMenti
+ * @property-read int|null $reviews_by_menti_count
+ * @property-read Collection<int, Role> $roles
+ * @property-read int|null $roles_count
+ * @property-read Collection<int, UserSchedule> $schedules
+ * @property-read int|null $schedules_count
+ * @property-read Collection<int, Permission> $teams
+ * @property-read int|null $teams_count
  *
+ * @method static UserFactory factory($count = null, $state = [])
+ * @method static Builder<static>|User newModelQuery()
+ * @method static Builder<static>|User newQuery()
+ * @method static Builder<static>|User permission($permissions, bool $without = false)
+ * @method static Builder<static>|User query()
+ * @method static Builder<static>|User role($roles, ?string $guard = null, bool $without = false)
+ * @method static Builder<static>|User team($teams, bool $without = false)
+ * @method static Builder<static>|User whereCreatedAt($value)
+ * @method static Builder<static>|User whereEmail($value)
+ * @method static Builder<static>|User whereEmailVerifiedAt($value)
+ * @method static Builder<static>|User whereId($value)
+ * @method static Builder<static>|User wherePassword($value)
+ * @method static Builder<static>|User wherePreferences($value)
+ * @method static Builder<static>|User whereRememberToken($value)
+ * @method static Builder<static>|User whereSlug($value)
+ * @method static Builder<static>|User whereUpdatedAt($value)
+ * @method static Builder<static>|User whereUsername($value)
+ * @method static Builder<static>|User withoutPermission($permissions)
+ * @method static Builder<static>|User withoutRole($roles, ?string $guard = null)
+ * @method static Builder<static>|User withoutTeam($teams)
+ *
+ * @mixin \Eloquent
  * @mixin IdeHelperUser
  */
 #[ObservedBy(UserObserver::class)]
@@ -72,6 +153,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    use HasMentorProfile;
     use HasMentorPrograms;
     use HasRoles;
     use InteractsWithMedia;
@@ -102,30 +184,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function profile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
-    }
-
-    /**
-     * @return HasOne<MentorProfile, $this>
-     */
-    public function mentorProfile(): HasOne
-    {
-        return $this->hasOne(MentorProfile::class);
-    }
-
-    /**
-     * @return HasMany<MentorReview, $this>
-     */
-    public function mentorReviews(): HasMany
-    {
-        return $this->hasMany(MentorReview::class, 'mentor_id');
-    }
-
-    /**
-     * @return HasMany<MentorReview, $this>
-     */
-    public function reviewsByMenti(): HasMany
-    {
-        return $this->hasMany(MentorReview::class, 'menti_id');
     }
 
     /**
@@ -188,16 +246,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function getFilamentName(): string
     {
         return $this->username ?? '';
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function rating(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => (float) $this->mentorReviews()->avg('rating'),
-        );
     }
 
     /**

@@ -1,0 +1,9 @@
+{
+  "name": "Marketplace",
+  "alias": "marketplace",
+  "description": "Public mentor profile showcase: profile, tags, reviews, rating, search/filtering, similar mentors.",
+  "keywords": ["mentor", "marketplace", "profile", "reviews"],
+  "priority": 0,
+  "providers": ["Modules\\Marketplace\\Providers\\MarketplaceServiceProvider"],
+  "files": []
+}

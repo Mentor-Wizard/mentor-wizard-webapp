@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\TagEnum;
-use App\Models\MentorProfile;
-use App\Models\MentorTag;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Eloquent\Collection;
@@ -15,6 +12,9 @@ use Modules\Chat\Enums\ChatStatusEnum;
 use Modules\Chat\Events\UnreadMessagesEvent;
 use Modules\Chat\Models\Chat;
 use Modules\Chat\Models\ChatMessage;
+use Modules\Marketplace\Enums\TagEnum;
+use Modules\Marketplace\Models\MentorProfile;
+use Modules\Marketplace\Models\MentorTag;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 

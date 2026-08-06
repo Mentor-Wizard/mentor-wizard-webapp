@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Chat\Actions;
 
 use App\Enums\RoleEnum;
-use App\Enums\TagEnum;
 use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,6 +17,7 @@ use Modules\Chat\Enums\ChatStatusEnum;
 use Modules\Chat\Events\UnreadMessagesEvent;
 use Modules\Chat\Models\Chat;
 use Modules\Chat\Models\ChatMessage;
+use Modules\Marketplace\Enums\TagEnum;
 use Stevebauman\Purify\Facades\Purify;
 
 class ChatListUser

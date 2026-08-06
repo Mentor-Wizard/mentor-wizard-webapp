@@ -6,9 +6,9 @@ namespace Modules\MentorProgram\Database\Seeders;
 
 use App\Enums\RoleEnum;
 use App\Models\Currency;
-use App\Models\MentorProfile;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Modules\Marketplace\Models\MentorProfile;
 use Modules\MentorProgram\Models\MentorProgram;
 use Modules\MentorProgram\Models\MentorProgramBlock;
 use Spatie\Permission\Models\Role;

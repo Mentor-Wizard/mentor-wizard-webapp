@@ -1,0 +1,28 @@
+{
+  "name": "mentor-wizard/marketplace",
+  "description": "Public mentor profile showcase: profile, tags, reviews, rating, search/filtering, similar mentors.",
+  "keywords": [
+    "mentor",
+    "marketplace",
+    "profile",
+    "reviews"
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\Marketplace\\": "app/",
+      "Modules\\Marketplace\\Database\\Factories\\": "database/factories/",
+      "Modules\\Marketplace\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\Marketplace\\Tests\\": "tests/"
+    }
+  }
+}

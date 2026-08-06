@@ -6,10 +6,7 @@ use App\Actions\Notifications\ListNotifications;
 use App\Actions\Notifications\MarkAllNotificationsAsRead;
 use App\Actions\Notifications\MarkNotificationAsRead;
 use App\Actions\Pages\DashboardPage;
-use App\Actions\Pages\Profile\GetMentorProfilePage;
-use App\Actions\Pages\Profile\GetMentorReviewPage;
 use App\Actions\Pages\Profile\GetProfilePage;
-use App\Actions\Pages\Profile\ListMentorProfilePage;
 use App\Actions\Pages\UserSchedule\UserSchedulePage;
 use App\Actions\Pages\WelcomePage;
 use App\Actions\Profile\DeleteUserProfile;
@@ -19,11 +16,6 @@ use App\Actions\UserSchedule\StoreBatchUserSchedule;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', WelcomePage::class)->name('pages.welcome');
-
-Route::get('profile-programs', ListMentorProfilePage::class)->name('page.profile-programs');
-
-Route::get('mentor/{mentor:slug}', GetMentorProfilePage::class)->name('page.mentor');
-Route::get('review/{mentor:slug}', GetMentorReviewPage::class)->name('page.mentor-review');
 
 Route::get('dashboard', DashboardPage::class)
     ->middleware(['auth', 'verified'])

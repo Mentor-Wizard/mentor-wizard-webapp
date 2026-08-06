@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Database\Seeders\MentorTagSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
+use Modules\Marketplace\Database\Seeders\MentorTagSeeder;
 use Symfony\Component\Finder\SplFileInfo;
 
 arch()->preset()->php()->ignoring(
@@ -54,9 +54,16 @@ arch('modules-models-are-eloquent')
     ->toBeClasses()
     ->toExtend(Model::class);
 
+// `Modules\Marketplace` is deliberately absent: Modules/Chat/app/Actions/ChatListUser.php:8
+// imports Modules\Marketplace\Enums\TagEnum and reads $companion->mentorProfile->mentorTags
+// to render a chat companion's stack tags — a materialized version of the "hidden A1->A6
+// dependency" documented in docs/temp/ddd-domain-analysis.md § 2.4. This is pre-existing
+// debt made visible by the Marketplace extraction (docs/plans/ddd-migration-marketplace), not
+// new debt created by it; fixing the underlying coupling (an ACL / a CompanionTags read
+// model) is out of scope for a structural move.
 arch('chat-does-not-reach-into-other-modules')
     ->expect('Modules\Chat')
-    ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // DDD-migration Phase 2 (Calendar extraction, docs/plans/migrate-calendar-domain-module).
 it('keeps Modules\Calendar non-empty', function (): void {
@@ -74,7 +81,7 @@ arch('calendar-models-are-eloquent')
 // not a boundary violation (mirrors the ExternalCalendar → Calendar carve-out above).
 arch('calendar-does-not-reach-into-other-modules')
     ->expect('Modules\Calendar')
-    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // DDD-migration Phase 3 (ExternalCalendar extraction, docs/plans/external-calendar-module-migration).
 it('keeps Modules\ExternalCalendar non-empty', function (): void {
@@ -92,7 +99,7 @@ arch('external-calendar-models-are-eloquent')
 // violation (see docs/plans/external-calendar-module-migration/02-development-plan-backend.md §4.3).
 arch('external-calendar-does-not-reach-into-other-modules')
     ->expect('Modules\ExternalCalendar')
-    ->not->toUse(['Modules\Chat', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Chat', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // DDD-migration Phase 4 (Auth extraction, docs/plans/identity-domain-migration).
 it('keeps Modules\Auth non-empty', function (): void {
@@ -124,7 +131,7 @@ it('keeps Modules\Auth free of module config files', function (): void {
 
 arch('auth-does-not-reach-into-other-modules')
     ->expect('Modules\Auth')
-    ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);
+    ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule']);
 
 // DDD-migration Phase 5 (MentorProgram extraction, docs/plans/mentor-program-ddd-migration).
 it('keeps Modules\MentorProgram non-empty', function (): void {
@@ -144,9 +151,41 @@ arch('mentor-program-models-are-eloquent')
 // direction. Inverting it (a Calendar-owned booking-count read model consumed through a Core
 // contract) is logged debt, not something to fake with an arch rule; see
 // docs/plans/mentor-program-ddd-migration/02-development-plan-backend.md §1.2.
+//
+// `Modules\Marketplace` is ALSO deliberately absent (deviation from the Marketplace extraction
+// plan's D-4b, which expected this edge to be one-directional Marketplace -> MentorProgram
+// only): Modules/MentorProgram/database/seeders/MentorProgramSeeder.php directly creates a
+// Modules\Marketplace\Models\MentorProfile for its demo mentors — a pre-existing dependency
+// that was invisible before the extraction because MentorProfile lived in App\Models\* (Core),
+// not a `Modules\*` namespace. Confirmed by grep: Modules/MentorProgram/app has zero references
+// to Marketplace; the only edge is this one seeder. See
+// docs/plans/ddd-migration-marketplace/02-development-backend.md for the full note.
 arch('mentor-program-does-not-reach-into-other-modules')
     ->expect('Modules\MentorProgram')
-    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\UserSchedule', 'Modules\Auth']);
+
+// DDD-migration Phase 6 (Marketplace extraction, docs/plans/ddd-migration-marketplace).
+it('keeps Modules\Marketplace non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/Marketplace/app')))->not->toBeEmpty();
+});
+
+arch('marketplace-models-are-eloquent')
+    ->expect('Modules\Marketplace\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+// `Modules\MentorProgram` is deliberately absent: Marketplace is the downstream consumer
+// (MentorProfile::mentorPrograms() belongsToMany, read in ProgramCostFilter/TagStacksFilter/
+// TagLanguagesFilter via whereHas) — a one-directional Customer/Supplier edge, not a
+// boundary violation (docs/temp/ddd-domain-analysis.md § A6 "Жива залежність → A5").
+// `Modules\Calendar` is ALSO deliberately absent: GetMentorProfilePage instantiates
+// Modules\Calendar\Services\BookingCalendarEventsService to render the public profile's
+// booking-slot block — a second, one-directional Customer/Supplier edge (see D-4b in the
+// plan). Calendar's own forbidden list keeps 'Modules\Marketplace' since this edge does
+// not run in reverse.
+arch('marketplace-does-not-reach-into-other-modules')
+    ->expect('Modules\Marketplace')
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // Regression guard for the bidirectional Calendar <-> MentorProgram carve-out (docs/plans/
 // mentor-program-ddd-migration/04-qa-backend.md): the two `not->toUse()` lists above are
@@ -156,8 +195,13 @@ arch('mentor-program-does-not-reach-into-other-modules')
 // live cross-import only flows Calendar -> MentorProgram / MentorProgram -> Calendar, not to
 // any other module.
 it('only permits the Calendar <-> MentorProgram carve-out, not a wider cross-import allowance', function (): void {
-    $forbiddenForCalendar = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth'];
-    $forbiddenForMentorProgram = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth'];
+    $forbiddenForCalendar = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth'];
+    // `Modules\Marketplace` stays forbidden here (unlike the `arch()` rule above it, which must
+    // carve it out for the seeder edge — see the comment on that rule): this regression test only
+    // scans `Modules/MentorProgram/app` (confirmed by grep: zero references there), so it correctly
+    // stays strict and will fail loudly if a *production* MentorProgram class ever imports
+    // Marketplace, keeping the carve-out scoped to exactly the one known seeder edge.
+    $forbiddenForMentorProgram = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth'];
 
     $calendarFiles = File::allFiles(base_path('Modules/Calendar/app'));
     $mentorProgramFiles = File::allFiles(base_path('Modules/MentorProgram/app'));

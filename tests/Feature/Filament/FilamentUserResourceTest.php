@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-use App\Actions\MentorTag\CreateMentorTag;
-use App\Enums\TagEnum;
 use App\Filament\Resources\User\Pages\EditUser;
 use App\Filament\Resources\User\Pages\ListUsers;
 use App\Filament\Resources\User\UserResource;
 use App\Models\Currency;
-use App\Models\MentorTag;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\PageRegistration;
 use Livewire\Livewire;
+use Modules\Marketplace\Actions\CreateMentorTag;
+use Modules\Marketplace\Enums\TagEnum;
+use Modules\Marketplace\Models\MentorTag;
 
 beforeEach(function (): void {
     $this->seed([RoleSeeder::class, CurrencySeeder::class]);

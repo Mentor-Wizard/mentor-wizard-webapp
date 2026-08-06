@@ -3,5 +3,6 @@
   "Calendar": true,
   "ExternalCalendar": true,
   "Auth": true,
-  "MentorProgram": true
+  "MentorProgram": true,
+  "Marketplace": true
 }
