@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -18,6 +17,7 @@ use Modules\ExternalCalendar\Models\ExternalCalendarEventLog;
 use Modules\ExternalCalendar\Models\UserCalendarIntegration;
 use Modules\ExternalCalendar\Services\Contracts\ExternalCalendarServiceInterface;
 use Modules\ExternalCalendar\Services\ExternalCalendarServiceFactory;
+use Modules\MentorProgram\Models\MentorProgram;
 
 mutates(CreateExternalCalendarEvent::class);
 

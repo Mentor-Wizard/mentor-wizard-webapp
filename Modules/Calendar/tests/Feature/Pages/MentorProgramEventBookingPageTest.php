@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
+use Modules\MentorProgram\Models\MentorProgram;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 

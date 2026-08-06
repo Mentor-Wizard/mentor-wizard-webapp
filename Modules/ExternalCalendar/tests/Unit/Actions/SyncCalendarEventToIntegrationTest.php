@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +12,7 @@ use Modules\ExternalCalendar\Actions\ExternalCalendar\SyncCalendarEventToIntegra
 use Modules\ExternalCalendar\Enums\CalendarProviderEnum;
 use Modules\ExternalCalendar\Jobs\CreateExternalCalendarEvent;
 use Modules\ExternalCalendar\Models\UserCalendarIntegration;
+use Modules\MentorProgram\Models\MentorProgram;
 
 describe('SyncCalendarEventToIntegration', function (): void {
     beforeEach(function (): void {

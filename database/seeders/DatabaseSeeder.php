@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Modules\Calendar\Database\Seeders\CalendarEventSeeder;
 use Modules\Chat\Database\Seeders\ChatDatabaseSeeder;
+use Modules\MentorProgram\Database\Seeders\MentorProgramSeeder;
 
 final class DatabaseSeeder extends Seeder
 {

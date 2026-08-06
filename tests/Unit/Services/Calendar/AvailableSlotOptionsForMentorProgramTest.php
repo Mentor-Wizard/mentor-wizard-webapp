@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\UserScheduleRecordType;
-use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserSchedule;
 use App\Services\Calendar\AvailableSlotOptionsForMentorProgram;
 use Database\Seeders\RoleSeeder;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Services\SplitSlotsPerSessionDuration;
+use Modules\MentorProgram\Models\MentorProgram;
 
 describe('AvailableSlotOptionsForMentorProgram (Unit)', function (): void {
     beforeEach(function (): void {

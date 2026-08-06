@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Enums\RoleEnum;
 use App\Filters\ProgramCostFilter;
 use App\Models\MentorProfile;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
+use Modules\MentorProgram\Models\MentorProgram;
 
 covers(ProgramCostFilter::class);
 

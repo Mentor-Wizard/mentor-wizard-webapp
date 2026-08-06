@@ -461,6 +461,14 @@ jobs:
           # 23 moved Unit tests carry a mutates() call (grep-verified), so the covered surface
           # is smaller than Chat's, not Chat-sized.
           - { id: 'I', name: 'I · Module Auth',                 path: 'Modules/Auth/app',                                                                                                 timeout: 15, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 5 (MentorProgram extraction, docs/plans/mentor-program-ddd-migration):
+          # same rationale as shards F/G/H/I — MentorProgram's 8 Actions / 2 Requests / 1 Resource /
+          # 1 Policy / 1 Observer / 3 Models physically moved out of app/** into
+          # Modules/MentorProgram/app, so a dedicated shard is required to keep those
+          # mutates()-annotated classes in the mutation gate. testsuite is 'Modules' for the same
+          # reason as F/G/H/I. Timeout 15 — only 3 of the 12 moved Unit/Feature tests carry a
+          # mutates() call (grep-verified), so the covered surface is smaller than Auth's.
+          - { id: 'J', name: 'J · Module MentorProgram',        path: 'Modules/MentorProgram/app',                                                                                        timeout: 15, ignore: '', testsuite: 'Modules' }
 
     steps:
       - name: '🛎 Checkout'

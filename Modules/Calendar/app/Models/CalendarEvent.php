@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Calendar\Models;
 
 use App\Enums\MentorSessionTypeEnum;
-use App\Models\MentorProgram;
 use App\Models\MentorSession;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -25,6 +24,7 @@ use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Observers\CalendarEventObserver;
 use Modules\Calendar\Policies\CalendarEventPolicy;
+use Modules\MentorProgram\Models\MentorProgram;
 use Override;
 
 /**

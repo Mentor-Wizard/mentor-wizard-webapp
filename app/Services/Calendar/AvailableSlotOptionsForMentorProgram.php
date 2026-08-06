@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Calendar;
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Services\AvailableCalendarEventsSlotsService;
 use Modules\Calendar\Services\SplitSlotsPerSessionDuration;
+use Modules\MentorProgram\Models\MentorProgram;
 
 class AvailableSlotOptionsForMentorProgram
 {

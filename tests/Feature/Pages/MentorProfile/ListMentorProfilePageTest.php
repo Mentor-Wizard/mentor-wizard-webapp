@@ -6,12 +6,12 @@ use App\Actions\Pages\Profile\ListMentorProfilePage;
 use App\Enums\RoleEnum;
 use App\Enums\TagEnum;
 use App\Models\MentorProfile;
-use App\Models\MentorProgram;
 use App\Models\MentorReview;
 use App\Models\MentorTag;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Inertia\Testing\AssertableInertia as Assert;
+use Modules\MentorProgram\Models\MentorProgram;
 
 mutates(ListMentorProfilePage::class);
 

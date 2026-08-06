@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RoleSeeder;
@@ -13,6 +12,7 @@ use Modules\ExternalCalendar\Enums\CalendarProviderEnum;
 use Modules\ExternalCalendar\Enums\CalendarSyncStatusEnum;
 use Modules\ExternalCalendar\Models\UserCalendarIntegration;
 use Modules\ExternalCalendar\Services\GoogleExternalCalendarService;
+use Modules\MentorProgram\Models\MentorProgram;
 
 /**
  * Google Calendar integration tests.

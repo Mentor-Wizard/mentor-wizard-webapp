@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Actions\CalendarEvent;
 
-use App\Models\MentorProgram;
 use App\Notifications\CalendarEventConfirmedNotification;
 use Illuminate\Support\Facades\Date;
 use Lorisleiva\Actions\Concerns\AsController;
@@ -12,6 +11,7 @@ use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Http\Requests\CalendarEvent\ConfirmCalendarEventRequest;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorProgram\Models\MentorProgram;
 use Symfony\Component\HttpFoundation\Response;
 
 class ConfirmCalendarEvent

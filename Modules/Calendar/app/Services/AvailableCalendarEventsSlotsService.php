@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Services;
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorProgram\Models\MentorProgram;
 
 class AvailableCalendarEventsSlotsService
 {

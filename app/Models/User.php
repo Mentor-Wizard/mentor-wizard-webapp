@@ -26,6 +26,7 @@ use Modules\Auth\Observers\UserObserver;
 use Modules\Calendar\Traits\HasCalendarEvents;
 use Modules\Chat\Models\Chat;
 use Modules\ExternalCalendar\Traits\HasExternalCalendarIntegrations;
+use Modules\MentorProgram\Traits\HasMentorPrograms;
 use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -71,6 +72,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    use HasMentorPrograms;
     use HasRoles;
     use InteractsWithMedia;
     use Notifiable;
@@ -111,14 +113,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     }
 
     /**
-     * @return HasOne<MentorProgramBlockProgress, $this>
-     */
-    public function mentiProgramProgress(): HasOne
-    {
-        return $this->hasOne(MentorProgramBlockProgress::class, 'menti_id');
-    }
-
-    /**
      * @return HasMany<MentorReview, $this>
      */
     public function mentorReviews(): HasMany
@@ -132,14 +126,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     public function reviewsByMenti(): HasMany
     {
         return $this->hasMany(MentorReview::class, 'menti_id');
-    }
-
-    /**
-     * @return HasMany<MentorProgram, $this>
-     */
-    public function mentorPrograms(): HasMany
-    {
-        return $this->hasMany(MentorProgram::class, 'mentor_id');
     }
 
     /**

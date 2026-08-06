@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\ExternalCalendar\Enums\ExternalCalendarEventLogTypeEnum;
 use Modules\ExternalCalendar\Models\ExternalCalendarEventLog;
+use Modules\MentorProgram\Models\MentorProgram;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;

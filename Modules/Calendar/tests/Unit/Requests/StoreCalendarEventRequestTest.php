@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\MentorSessionDurationOptionsEnum;
 use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Routing\Redirector;
@@ -17,6 +16,7 @@ use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Http\Requests\CalendarEvent\StoreCalendarEventRequest;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorProgram\Models\MentorProgram;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;

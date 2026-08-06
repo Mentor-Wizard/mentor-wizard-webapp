@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Http\Requests\CalendarEvent;
 
-use App\Models\MentorProgram;
 use Illuminate\Contracts\Validation\Validator;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Services\CheckBookingSlotService;
 use Modules\Calendar\Traits\CalendarEventRequestRules;
+use Modules\MentorProgram\Models\MentorProgram;
 
 class StoreCalendarEventRequest extends CalendarEventRequest
 {

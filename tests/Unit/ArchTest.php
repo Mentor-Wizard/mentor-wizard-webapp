@@ -68,9 +68,13 @@ arch('calendar-models-are-eloquent')
     ->toBeClasses()
     ->toExtend(Model::class);
 
+// `Modules\MentorProgram` is deliberately absent: Calendar owns the FK
+// calendar_events.mentor_program_id and reads the program's session_duration /
+// need_confirmation in its booking services — a normal Customer/Supplier relationship,
+// not a boundary violation (mirrors the ExternalCalendar → Calendar carve-out above).
 arch('calendar-does-not-reach-into-other-modules')
     ->expect('Modules\Calendar')
-    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // DDD-migration Phase 3 (ExternalCalendar extraction, docs/plans/external-calendar-module-migration).
 it('keeps Modules\ExternalCalendar non-empty', function (): void {
@@ -121,3 +125,61 @@ it('keeps Modules\Auth free of module config files', function (): void {
 arch('auth-does-not-reach-into-other-modules')
     ->expect('Modules\Auth')
     ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);
+
+// DDD-migration Phase 5 (MentorProgram extraction, docs/plans/mentor-program-ddd-migration).
+it('keeps Modules\MentorProgram non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/MentorProgram/app')))->not->toBeEmpty();
+});
+
+arch('mentor-program-models-are-eloquent')
+    ->expect('Modules\MentorProgram\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+// `Modules\Calendar` is deliberately absent from this list. MentorProgram is the upstream
+// supplier (Calendar holds the FK calendar_events.mentor_program_id and reads
+// session_duration / need_confirmation), but ListMentorProgramPage counts a mentor's pending
+// and confirmed bookings via withCount('calendarEvents') filtered by
+// Modules\Calendar\Enums\CalendarEventStatusEnum — a real, live read edge in the opposite
+// direction. Inverting it (a Calendar-owned booking-count read model consumed through a Core
+// contract) is logged debt, not something to fake with an arch rule; see
+// docs/plans/mentor-program-ddd-migration/02-development-plan-backend.md §1.2.
+arch('mentor-program-does-not-reach-into-other-modules')
+    ->expect('Modules\MentorProgram')
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
+
+// Regression guard for the bidirectional Calendar <-> MentorProgram carve-out (docs/plans/
+// mentor-program-ddd-migration/04-qa-backend.md): the two `not->toUse()` lists above are
+// each missing the *other* module by design (a real Customer/Supplier edge), but that
+// omission must stay scoped to exactly this pair. This test fails loudly if either module
+// ever imports one of the modules it is NOT supposed to reach into, and pins down that the
+// live cross-import only flows Calendar -> MentorProgram / MentorProgram -> Calendar, not to
+// any other module.
+it('only permits the Calendar <-> MentorProgram carve-out, not a wider cross-import allowance', function (): void {
+    $forbiddenForCalendar = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth'];
+    $forbiddenForMentorProgram = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth'];
+
+    $calendarFiles = File::allFiles(base_path('Modules/Calendar/app'));
+    $mentorProgramFiles = File::allFiles(base_path('Modules/MentorProgram/app'));
+
+    foreach ($calendarFiles as $file) {
+        $contents = File::get($file->getPathname());
+
+        foreach ($forbiddenForCalendar as $forbiddenNamespace) {
+            expect($contents)->not->toContain(sprintf('use %s\\', $forbiddenNamespace));
+        }
+    }
+
+    foreach ($mentorProgramFiles as $file) {
+        $contents = File::get($file->getPathname());
+
+        foreach ($forbiddenForMentorProgram as $forbiddenNamespace) {
+            expect($contents)->not->toContain(sprintf('use %s\\', $forbiddenNamespace));
+        }
+    }
+
+    $mentorProgramReferencesCalendar = collect($mentorProgramFiles)
+        ->contains(fn (SplFileInfo $file): bool => str_contains(File::get($file->getPathname()), 'use Modules\Calendar\\'));
+
+    expect($mentorProgramReferencesCalendar)->toBeTrue();
+});

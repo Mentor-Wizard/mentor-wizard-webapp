@@ -1,0 +1,27 @@
+{
+  "name": "mentor-wizard/mentorprogram",
+  "description": "Mentor programs: creation, editing, blocks, block progress and program listing for mentors and mentees.",
+  "keywords": [
+    "mentor",
+    "program",
+    "curriculum"
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\MentorProgram\\": "app/",
+      "Modules\\MentorProgram\\Database\\Factories\\": "database/factories/",
+      "Modules\\MentorProgram\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\MentorProgram\\Tests\\": "tests/"
+    }
+  }
+}

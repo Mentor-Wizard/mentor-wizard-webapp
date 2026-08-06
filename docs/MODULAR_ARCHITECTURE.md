@@ -53,8 +53,9 @@
 
 - **Bounded contexts** (кандидати в `Modules/*`) — області з власними бізнес-
   правилами й моделями: Chat (вже винесено), Calendar (вже винесено),
-  ExternalCalendar, Identity & Access, MentorProgram, Marketplace, UserProfile,
-  UserSchedule, MentorSession, Payments.
+  ExternalCalendar (вже винесено), Identity & Access (вже винесено),
+  MentorProgram (вже винесено), Marketplace, UserProfile, UserSchedule,
+  MentorSession, Payments.
 - **Supporting capabilities** (лишаються в `app/` як Core/Shared, **не** стають
   модулями) — Notifications, Media, Presence/realtime, Admin (Filament). Це
   наскрізна інфраструктура без власних бізнес-правил, а не домен.

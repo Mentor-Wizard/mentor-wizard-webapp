@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -18,6 +17,7 @@ use Modules\ExternalCalendar\Jobs\ProcessCalendarEventExternalCalendarIntegratio
 use Modules\ExternalCalendar\Jobs\ProcessDeleteExternalCalendarEvent;
 use Modules\ExternalCalendar\Jobs\ProcessUpdateExternalCalendarEvent;
 use Modules\ExternalCalendar\Listeners\SyncExternalCalendarOnCalendarEventChange;
+use Modules\MentorProgram\Models\MentorProgram;
 
 mutates(SyncExternalCalendarOnCalendarEventChange::class);
 

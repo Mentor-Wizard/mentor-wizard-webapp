@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Bus;
@@ -16,6 +15,7 @@ use Modules\ExternalCalendar\Jobs\ProcessUpdateExternalCalendarEvent;
 use Modules\ExternalCalendar\Jobs\UpdateExternalCalendarEvent;
 use Modules\ExternalCalendar\Models\ExternalCalendarEvent;
 use Modules\ExternalCalendar\Models\UserCalendarIntegration;
+use Modules\MentorProgram\Models\MentorProgram;
 
 mutates(ProcessUpdateExternalCalendarEvent::class);
 

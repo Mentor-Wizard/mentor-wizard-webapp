@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Actions\Pages;
 
-use App\Models\MentorProgram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -12,6 +11,7 @@ use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorProgram\Models\MentorProgram;
 
 class ConfirmedCalendarEventsListPage
 {

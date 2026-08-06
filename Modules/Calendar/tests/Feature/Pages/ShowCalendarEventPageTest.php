@@ -6,7 +6,6 @@ use App\Contracts\ExternalCalendar\CalendarEventIntegrationsProvider;
 use App\Contracts\ExternalCalendar\NullCalendarEventIntegrationsProvider;
 use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -23,6 +22,7 @@ use Modules\ExternalCalendar\Enums\ExternalCalendarEventSyncStatusEnum;
 use Modules\ExternalCalendar\Models\ExternalCalendarEvent;
 use Modules\ExternalCalendar\Models\ExternalCalendarEventLog;
 use Modules\ExternalCalendar\Models\UserCalendarIntegration;
+use Modules\MentorProgram\Models\MentorProgram;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 

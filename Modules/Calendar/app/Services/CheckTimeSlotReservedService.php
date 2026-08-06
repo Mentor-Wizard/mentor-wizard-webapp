@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Services;
 
-use App\Models\MentorProgram;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Modules\MentorProgram\Models\MentorProgram;
 
 readonly class CheckTimeSlotReservedService
 {

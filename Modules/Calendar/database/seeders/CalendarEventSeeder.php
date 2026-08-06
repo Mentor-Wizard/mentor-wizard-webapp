@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Modules\Calendar\Database\Seeders;
 
 use App\Enums\RoleEnum;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Modules\Calendar\Enums\CalendarEventColoursEnum;
 use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorProgram\Models\MentorProgram;
 
 class CalendarEventSeeder extends Seeder
 {

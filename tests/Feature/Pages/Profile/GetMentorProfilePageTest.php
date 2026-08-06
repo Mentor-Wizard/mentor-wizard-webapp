@@ -6,7 +6,6 @@ use App\Actions\Pages\Profile\GetMentorProfilePage;
 use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\MentorProfile;
-use App\Models\MentorProgram;
 use App\Models\MentorReview;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -14,6 +13,7 @@ use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Inertia\Testing\AssertableInertia as Assert;
+use Modules\MentorProgram\Models\MentorProgram;
 use Spatie\Permission\Models\Role;
 
 mutates(GetMentorProfilePage::class);

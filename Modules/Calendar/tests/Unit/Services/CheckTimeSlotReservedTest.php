@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\RoleEnum;
 use App\Enums\UserScheduleRecordType;
-use App\Models\MentorProgram;
 use App\Models\User;
 use App\Models\UserSchedule;
 use Database\Seeders\RoleSeeder;
@@ -13,6 +12,7 @@ use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Services\CheckTimeSlotReservedService;
+use Modules\MentorProgram\Models\MentorProgram;
 use Spatie\Permission\Models\Role;
 
 mutates(CheckTimeSlotReservedService::class);

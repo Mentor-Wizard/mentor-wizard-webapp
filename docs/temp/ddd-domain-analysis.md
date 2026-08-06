@@ -57,18 +57,18 @@
 
 ### Рівень A — bounded contexts (кандидати в `Modules/*`)
 
-| #       | Домен                 | Стан         | Вердикт            | Борг інверсії       | Головний блокер                                 |
-| ------- | --------------------- | ------------ | ------------------ | ------------------- | ----------------------------------------------- |
-| **A1**  | **Chat**              | ✅ винесений | _поза шкалою_      | 1 (матеріалізовано) | — (див. 4.1)                                    |
-| **A2**  | **Calendar**          | `app/`       | 🔴 not-recommended | +2                  | двонаправлений із A3 + Observer пише в A9       |
-| **A3**  | **ExternalCalendar**  | `app/`       | 🔴 not-recommended | +1                  | двонаправлений із A2                            |
-| **A4**  | **Identity & Access** | `app/`       | 🟡 needs-work      | 0                   | `UserObserver` пише в A7 (`R-5`)                |
-| **A5**  | **MentorProgram**     | `app/`       | 🟡 needs-work      | +2                  | 3 **мертві** інверсні аксесори (розділ 3)       |
-| **A6**  | **Marketplace**       | `app/`       | 🟡 needs-work      | +2                  | жива залежність від A5 + `User::rating` (`A-4`) |
-| **A7**  | **UserProfile**       | `app/`       | 🟡 needs-work      | +1                  | `timezone` читає A2                             |
-| **A8**  | **UserSchedule**      | `app/`       | 🟢 **ready**       | +2                  | —                                               |
-| **A9**  | **MentorSession**     | `app/`       | 🔴 not-recommended | +1                  | створюється побічним ефектом A2                 |
-| **A10** | **Payments**          | `app/`       | 🟢 ready\*         | 0                   | \*виносити нема чого (розділ 4.10)              |
+| #       | Домен                 | Стан         | Вердикт            | Борг інверсії                        | Головний блокер                                                                            |
+| ------- | --------------------- | ------------ | ------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------ |
+| **A1**  | **Chat**              | ✅ винесений | _поза шкалою_      | 1 (матеріалізовано)                  | — (див. 4.1)                                                                               |
+| **A2**  | **Calendar**          | `app/`       | 🔴 not-recommended | +2                                   | двонаправлений із A3 + Observer пише в A9                                                  |
+| **A3**  | **ExternalCalendar**  | `app/`       | 🔴 not-recommended | +1                                   | двонаправлений із A2                                                                       |
+| **A4**  | **Identity & Access** | `app/`       | 🟡 needs-work      | 0                                    | `UserObserver` пише в A7 (`R-5`)                                                           |
+| **A5**  | **MentorProgram**     | ✅ винесений | _поза шкалою_      | +2 (задокументовано, не інвертовано) | — (див. `docs/plans/mentor-program-ddd-migration/02-development-plan-backend.md`, F-1…F-5) |
+| **A6**  | **Marketplace**       | `app/`       | 🟡 needs-work      | +2                                   | жива залежність від A5 + `User::rating` (`A-4`)                                            |
+| **A7**  | **UserProfile**       | `app/`       | 🟡 needs-work      | +1                                   | `timezone` читає A2                                                                        |
+| **A8**  | **UserSchedule**      | `app/`       | 🟢 **ready**       | +2                                   | —                                                                                          |
+| **A9**  | **MentorSession**     | `app/`       | 🔴 not-recommended | +1                                   | створюється побічним ефектом A2                                                            |
+| **A10** | **Payments**          | `app/`       | 🟢 ready\*         | 0                                    | \*виносити нема чого (розділ 4.10)                                                         |
 
 ### Рівень B — supporting capabilities (→ Core/Shared, **не** модулі)
 
@@ -86,8 +86,9 @@
 | `app/Actions/Pages` (**16** файлів; було 17 — `GetChatPage` переїхав)             | наскрізний presentation-шар під розчленування |
 | Core / Shared Kernel (`User`, `Currency`, `RoleEnum`, `RoleGuardEnum`, морф-мапа) | спільне ядро; розділ 2                        |
 
-**Готово до виносу вже зараз: рівно один домен — A8 UserSchedule.** Ще два (A5,
-A6) переходять у 🟢 після дешевих правок із розділу 3.
+**Готово до виносу вже зараз: рівно один домен — A8 UserSchedule.** A5
+MentorProgram вже винесено (`docs/plans/mentor-program-ddd-migration/`); A6
+переходить у 🟢 після дешевих правок із розділу 3.
 
 ---
 

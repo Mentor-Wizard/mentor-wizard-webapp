@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Models\MentorProgram;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Services\WeeklyCalendarEventsService;
+use Modules\MentorProgram\Models\MentorProgram;
 use Spatie\Permission\Models\Role;
 
 mutates(WeeklyCalendarEventsService::class);

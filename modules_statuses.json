@@ -2,5 +2,6 @@
   "Chat": true,
   "Calendar": true,
   "ExternalCalendar": true,
-  "Auth": true
+  "Auth": true,
+  "MentorProgram": true
 }
