@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Database\Seeders\MentorTagSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Finder\SplFileInfo;
 
 arch()->preset()->php()->ignoring(
     MentorTagSeeder::class, // Include suspicious characters.
@@ -55,7 +56,7 @@ arch('modules-models-are-eloquent')
 
 arch('chat-does-not-reach-into-other-modules')
     ->expect('Modules\Chat')
-    ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);
+    ->not->toUse(['Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // DDD-migration Phase 2 (Calendar extraction, docs/plans/migrate-calendar-domain-module).
 it('keeps Modules\Calendar non-empty', function (): void {
@@ -69,7 +70,7 @@ arch('calendar-models-are-eloquent')
 
 arch('calendar-does-not-reach-into-other-modules')
     ->expect('Modules\Calendar')
-    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
 
 // DDD-migration Phase 3 (ExternalCalendar extraction, docs/plans/external-calendar-module-migration).
 it('keeps Modules\ExternalCalendar non-empty', function (): void {
@@ -87,4 +88,36 @@ arch('external-calendar-models-are-eloquent')
 // violation (see docs/plans/external-calendar-module-migration/02-development-plan-backend.md §4.3).
 arch('external-calendar-does-not-reach-into-other-modules')
     ->expect('Modules\ExternalCalendar')
-    ->not->toUse(['Modules\Chat', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);
+    ->not->toUse(['Modules\Chat', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule', 'Modules\Auth']);
+
+// DDD-migration Phase 4 (Auth extraction, docs/plans/identity-domain-migration).
+it('keeps Modules\Auth non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/Auth/app')))->not->toBeEmpty();
+});
+
+// A module with nameLower='auth' merges any Modules/Auth/config/*.php into the framework's
+// `auth` config namespace via array_replace_recursive($existing, $moduleConfig) — the module
+// wins on key conflicts — and publishes it to config_path('auth.php'), overwriting
+// config/auth.php. This is a structural guard because a behavioural assertion on
+// config('auth.*') would be vacuous here (see 02-development-plan-backend.md §1, decision D-A).
+//
+// The walk is recursive because ModuleServiceProvider::registerConfig() uses
+// RecursiveIteratorIterator: a nested Modules/Auth/config/providers/users.php merges into the
+// config key `auth.providers.users` and can silently repoint the authentication user provider.
+// A non-recursive glob('config/*.php') would not see it.
+it('keeps Modules\Auth free of module config files', function (): void {
+    $configPath = base_path('Modules/Auth/config');
+
+    $configFiles = File::isDirectory($configPath) ? File::allFiles($configPath) : [];
+
+    $phpConfigFiles = array_filter(
+        $configFiles,
+        static fn (SplFileInfo $file): bool => $file->getExtension() === 'php',
+    );
+
+    expect($phpConfigFiles)->toBeEmpty();
+});
+
+arch('auth-does-not-reach-into-other-modules')
+    ->expect('Modules\Auth')
+    ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\MentorProfile', 'Modules\UserSchedule']);

@@ -453,6 +453,14 @@ jobs:
           # mutates()-annotated classes in the mutation gate. testsuite is 'Modules' for the
           # same reason as shards F/G. Timeout is 25 — comparable covered surface to Calendar.
           - { id: 'H', name: 'H · Module ExternalCalendar',    path: 'Modules/ExternalCalendar/app',                                                                                     timeout: 25, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 4 (Auth extraction, docs/plans/identity-domain-migration):
+          # same rationale as shards F/G/H — Auth's 17 Actions / 7 Requests / 1 Observer /
+          # 1 Enum physically moved out of app/** into Modules/Auth/app, so a dedicated shard
+          # is required to keep those mutates()-annotated classes in the mutation gate.
+          # testsuite is 'Modules' for the same reason as F/G/H. Timeout 15 — only 10 of the
+          # 23 moved Unit tests carry a mutates() call (grep-verified), so the covered surface
+          # is smaller than Chat's, not Chat-sized.
+          - { id: 'I', name: 'I · Module Auth',                 path: 'Modules/Auth/app',                                                                                                 timeout: 15, ignore: '', testsuite: 'Modules' }
 
     steps:
       - name: '🛎 Checkout'

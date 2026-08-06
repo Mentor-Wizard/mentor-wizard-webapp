@@ -239,6 +239,13 @@ php artisan module:clear-compiled
 
 ## Вирішені питання
 
+### Модель `User` лишається в Core (Auth-екстракція)
+
+Ухвалено під час виносу `Auth` (`docs/plans/identity-domain-migration`):
+`App\Models\User` не переноситься в `Modules/Auth` — переїжджає лише поведінка
+домену (Actions, Requests, маршрути, обсервер). Повне обґрунтування й наслідки —
+`docs/adr/0001-user-model-stays-in-core.md`.
+
 ### Модель `User` і relation-методи домену → модульний трейт
 
 Ухвалено під час виносу `Calendar`

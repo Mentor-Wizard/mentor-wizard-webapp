@@ -79,5 +79,3 @@ Route::middleware(['auth', 'verified'])->prefix('notifications')->group(function
     Route::post('{id}/read', MarkNotificationAsRead::class)->name('notifications.read');
     Route::post('read-all', MarkAllNotificationsAsRead::class)->name('notifications.read-all');
 });
-
-require __DIR__.'/auth.php';

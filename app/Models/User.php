@@ -6,7 +6,6 @@ namespace App\Models;
 
 use App\Enums\RoleGuardEnum;
 use App\Enums\UserScheduleRecordType;
-use App\Observers\UserObserver;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -23,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Auth\Observers\UserObserver;
 use Modules\Calendar\Traits\HasCalendarEvents;
 use Modules\Chat\Models\Chat;
 use Modules\ExternalCalendar\Traits\HasExternalCalendarIntegrations;

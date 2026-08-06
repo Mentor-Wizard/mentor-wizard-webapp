@@ -1,0 +1,43 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Contracts\Provider;
+use Laravel\Socialite\Facades\Socialite;
+use Modules\Auth\Actions\Socialite\SocialiteRedirect;
+use Modules\Auth\Enums\SocialiteDriverEnum;
+use Symfony\Component\HttpFoundation\Response;
+
+mutates(SocialiteRedirect::class);
+
+describe('Socialite Redirect', function (): void {
+
+    it('redirects to valid social driver', function ($driver): void {
+        $socialiteMock = Mockery::mock(Provider::class);
+        $socialiteMock
+            ->shouldReceive('redirect')
+            ->once()
+            ->andReturn(redirect('https://oauth.mockprovider.com'));
+
+        Socialite::shouldReceive('driver')
+            ->with($driver->value)
+            ->once()
+            ->andReturn($socialiteMock);
+
+        $this->get(route('auth.socialite.redirect', ['driver' => $driver->value]))
+            ->assertRedirect()
+            ->assertStatus(Response::HTTP_FOUND);
+    })->with(SocialiteDriverEnum::cases());
+
+    it('fails with invalid social driver', function (): void {
+        $invalidDriver = 'invalid_driver';
+
+        Log::shouldReceive('error')
+            ->once()
+            ->with('Invalid socialite driver', ['driver' => $invalidDriver]);
+
+        $this->get(route('auth.socialite.redirect', ['driver' => $invalidDriver]))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    });
+});
