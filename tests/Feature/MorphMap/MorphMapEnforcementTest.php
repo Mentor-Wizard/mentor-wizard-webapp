@@ -56,11 +56,11 @@ describe('morph map backfill migration idempotency', function (): void {
 
         $migration->up();
 
-        DB::table('model_has_roles')->where('model_id', $user->getKey())->assertValue('model_type', 'user');
+        expect(DB::table('model_has_roles')->where('model_id', $user->getKey())->value('model_type'))->toBe('user');
 
         $migration->up();
 
-        DB::table('model_has_roles')->where('model_id', $user->getKey())->assertValue('model_type', 'user');
+        expect(DB::table('model_has_roles')->where('model_id', $user->getKey())->value('model_type'))->toBe('user');
     });
 
     it('is reversible without error and restores the legacy FQCN', function (): void {
@@ -82,10 +82,10 @@ describe('morph map backfill migration idempotency', function (): void {
 
         $migration->down();
 
-        DB::table('notifications')->where('notifiable_id', $user->getKey())->assertValue('notifiable_type', User::class);
+        expect(DB::table('notifications')->where('notifiable_id', $user->getKey())->value('notifiable_type'))->toBe(User::class);
 
         $migration->down();
 
-        DB::table('notifications')->where('notifiable_id', $user->getKey())->assertValue('notifiable_type', User::class);
+        expect(DB::table('notifications')->where('notifiable_id', $user->getKey())->value('notifiable_type'))->toBe(User::class);
     });
 });

@@ -48,7 +48,7 @@ describe('enforced morph map', function (): void {
             }
         });
 
-        DB::table('model_has_roles')->where('model_id', $user->getKey())->assertValue('model_type', 'user');
+        expect(DB::table('model_has_roles')->where('model_id', $user->getKey())->value('model_type'))->toBe('user');
     });
 
     it('resolves roles, media, and notifications after backfilling legacy FQCN rows', function (): void {
@@ -99,7 +99,7 @@ describe('enforced morph map', function (): void {
         $migration = require base_path('database/migrations/2026_08_04_120000_backfill_morph_map_aliases.php');
         $migration->up();
 
-        DB::table('model_has_roles')->where('model_id', $user->getKey())->assertValue('model_type', 'user');
+        expect(DB::table('model_has_roles')->where('model_id', $user->getKey())->value('model_type'))->toBe('user');
     });
 
     it('pins the broadcast notification channel to the legacy name regardless of morph alias', function (): void {
