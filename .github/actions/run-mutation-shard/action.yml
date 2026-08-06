@@ -1,0 +1,73 @@
+name: '🦠 Run mutation shard'
+description: 'Runs one mutation-testing shard: checkout, environment setup, DB grant, mutate-cache, and the mutation test run.'
+
+inputs:
+  shard-id:
+    description: 'Unique shard identifier, used as the mutate-cache key component'
+    required: true
+  shard-name:
+    description: 'Human-readable shard name, used in step labels'
+    required: true
+  path:
+    description: 'Comma-separated path(s) passed to --path'
+    required: true
+  ignore:
+    description: 'Comma-separated path(s) passed to --ignore, or empty for none'
+    required: false
+    default: ''
+  testsuite:
+    description: 'phpunit.xml testsuite name passed to --testsuite'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: '🛎 Checkout'
+      uses: actions/checkout@v6
+
+    # No use-node here: this shard only runs --testsuite=Unit/Modules, and every test extends
+    # tests/TestCase.php, which calls $this->withoutVite() in setUp() — no Unit/Feature test
+    # needs public/build's compiled assets, so yarn install/build in setup-environment/action.yml
+    # is pure overhead here. Mirrors the identical rationale in the `mutation` job above.
+    - name: '⚙️ Prepare environment'
+      uses: ./.github/actions/setup-environment
+      with:
+        use-php: true
+
+    - name: '🗄️ Grant CREATEDB permission'
+      shell: bash
+      run: PGPASSWORD=db psql -h 127.0.0.1 -U db -d testing -c "ALTER USER db CREATEDB;"
+
+    - name: '💽 Cache mutation testing results'
+      uses: actions/cache@v5
+      with:
+        path: vendor/pestphp/pest-plugin-mutate/.temp/pest-mutate-cache
+        key: "${{ runner.os }}-mutate-${{ inputs.shard-id }}-${{ hashFiles('app/**', 'Modules/**') }}-${{ hashFiles('composer.lock') }}"
+        restore-keys: '${{ runner.os }}-mutate-${{ inputs.shard-id }}-'
+
+    # SHARD_IGNORE is '' unless the caller passes one — the conditional below must never emit
+    # a bare --ignore= with no value: pest-plugin-mutate's FileFinder treats an empty ignore
+    # pattern as a prefix match against every file in --path, which would silently exclude the
+    # entire shard's mutation scope. Same guard as the `mutation` job above.
+    #
+    # path/ignore/testsuite are passed through env and quoted rather than interpolated as
+    # ${{ inputs.* }} directly into the run: body. This action's caller (`mutation-modules`)
+    # feeds it a matrix generated from repository content (modules_statuses.json keys,
+    # Modules/*/ directory names, .github/ci-module-shards.json values), so a template
+    # expansion here would splice that content into the shell command itself.
+    - name: '${{ inputs.shard-name }} mutation tests'
+      shell: bash
+      env:
+        SHARD_PATH: ${{ inputs.path }}
+        SHARD_IGNORE: ${{ inputs.ignore }}
+        SHARD_TESTSUITE: ${{ inputs.testsuite }}
+        DB_HOST: 127.0.0.1
+        DB_DATABASE: testing
+        DB_USERNAME: db
+        DB_PASSWORD: db
+      run: |
+        ARGS=(--ci "--testsuite=$SHARD_TESTSUITE" --mutate --covered-only --min=100 --parallel "--path=$SHARD_PATH")
+        if [[ -n "$SHARD_IGNORE" ]]; then
+          ARGS+=("--ignore=$SHARD_IGNORE")
+        fi
+        php artisan test "${ARGS[@]}"
