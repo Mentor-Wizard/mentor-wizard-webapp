@@ -8,8 +8,6 @@ use App\Contracts\ExternalCalendar\CalendarEventIntegrationsProvider;
 use App\Contracts\ExternalCalendar\NullCalendarEventIntegrationsProvider;
 use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Models\UserSchedule;
-use App\Policies\UserSchedulePolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -56,7 +54,6 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::define('viewPulse', fn (User $user): bool => $user->hasAnyRole([RoleEnum::ADMIN, RoleEnum::SUPER_ADMIN]));
-        Gate::policy(UserSchedule::class, UserSchedulePolicy::class);
         Vite::prefetch(concurrency: 3);
 
         $this->configRateLimiters();

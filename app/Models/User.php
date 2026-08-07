@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\RoleGuardEnum;
-use App\Enums\UserScheduleRecordType;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasName;
@@ -39,6 +38,8 @@ use Modules\MentorProgram\Models\MentorProgramBlockProgress;
 use Modules\MentorProgram\Traits\HasMentorPrograms;
 use Modules\UserProfile\Models\UserProfile;
 use Modules\UserProfile\Traits\HasUserProfile;
+use Modules\UserSchedule\Models\UserSchedule;
+use Modules\UserSchedule\Traits\HasUserSchedules;
 use Override;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -158,6 +159,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
     use HasMentorPrograms;
     use HasRoles;
     use HasUserProfile;
+    use HasUserSchedules;
     use InteractsWithMedia;
     use Notifiable;
 
@@ -204,25 +206,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         return $this->belongsToMany(Chat::class, 'chat_users')
             ->withPivot(['status', 'is_muted'])
             ->withTimestamps();
-    }
-
-    /**
-     * @return HasMany<UserSchedule, $this>
-     */
-    public function schedules(): HasMany
-    {
-        return $this->hasMany(UserSchedule::class);
-    }
-
-    /**
-     * @return HasMany<UserSchedule, $this>
-     */
-    public function activeScheduleRecords(): HasMany
-    {
-        return $this->schedules()
-            ->where('type', '!=', UserScheduleRecordType::DAY_OFF->value)
-            ->orWhere('type', '=', UserScheduleRecordType::DAY_OFF->value)
-            ->where('day_off_date', '>=', now()->format('Y-m-d'));
     }
 
     /**

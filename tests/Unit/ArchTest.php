@@ -77,9 +77,18 @@ arch('calendar-models-are-eloquent')
 // calendar_events.mentor_program_id and reads the program's session_duration /
 // need_confirmation in its booking services — a normal Customer/Supplier relationship,
 // not a boundary violation (mirrors the ExternalCalendar → Calendar carve-out above).
+// `Modules\UserSchedule` is ALSO deliberately absent (DDD-migration Phase 8,
+// docs/plans/user-schedule-module-migration/02-development-plan-backend.md, D-1):
+// ExcludeUserScheduleSchemeService consumes `User::activeScheduleRecords()`
+// (`Modules\UserSchedule\Traits\HasUserSchedules`), which returns
+// `HasMany<UserSchedule, $this>` — a live, typed dependency on the UserSchedule model
+// that cannot be expressed without naming the class. This is a one-directional
+// Customer/Supplier edge, not a boundary violation; it is closed off from widening by
+// the positive assertion below (`only permits the Calendar carve-outs…`), which pins
+// it to exactly one file.
 arch('calendar-does-not-reach-into-other-modules')
     ->expect('Modules\Calendar')
-    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile']);
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\Auth', 'Modules\UserProfile']);
 
 // DDD-migration Phase 3 (ExternalCalendar extraction, docs/plans/external-calendar-module-migration).
 it('keeps Modules\ExternalCalendar non-empty', function (): void {
@@ -216,6 +225,27 @@ arch('userprofile-does-not-reach-into-other-modules')
     ->expect('Modules\UserProfile')
     ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth']);
 
+// DDD-migration Phase 8 (UserSchedule extraction, docs/plans/user-schedule-module-migration).
+it('keeps Modules\UserSchedule non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/UserSchedule/app')))->not->toBeEmpty();
+});
+
+arch('userschedule-models-are-eloquent')
+    ->expect('Modules\UserSchedule\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+arch('userschedule-actions-pages-suffix')
+    ->expect('Modules\UserSchedule\Actions\Pages')
+    ->toHaveSuffix('Page');
+
+// UserSchedule has zero outbound cross-module dependencies: its only dependency is the
+// Core `App\Models\User` (via `belongsTo`), which is not a module. The single inbound edge
+// (Calendar -> UserSchedule) is documented and pinned on the Calendar side above (D-1).
+arch('userschedule-does-not-reach-into-other-modules')
+    ->expect('Modules\UserSchedule')
+    ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\Auth', 'Modules\UserProfile']);
+
 // Regression guard for the bidirectional Calendar <-> MentorProgram carve-out (docs/plans/
 // mentor-program-ddd-migration/04-qa-backend.md): the two `not->toUse()` lists above are
 // each missing the *other* module by design (a real Customer/Supplier edge), but that
@@ -223,8 +253,8 @@ arch('userprofile-does-not-reach-into-other-modules')
 // ever imports one of the modules it is NOT supposed to reach into, and pins down that the
 // live cross-import only flows Calendar -> MentorProgram / MentorProgram -> Calendar, not to
 // any other module.
-it('only permits the Calendar <-> MentorProgram carve-out, not a wider cross-import allowance', function (): void {
-    $forbiddenForCalendar = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile'];
+it('only permits the Calendar carve-outs, not a wider cross-import allowance', function (): void {
+    $forbiddenForCalendar = ['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\Auth', 'Modules\UserProfile'];
     // `Modules\Marketplace` stays forbidden here (unlike the `arch()` rule above it, which must
     // carve it out for the seeder edge — see the comment on that rule): this regression test only
     // scans `Modules/MentorProgram/app` (confirmed by grep: zero references there), so it correctly
@@ -255,4 +285,22 @@ it('only permits the Calendar <-> MentorProgram carve-out, not a wider cross-imp
         ->contains(fn (SplFileInfo $file): bool => str_contains(File::get($file->getPathname()), 'use Modules\Calendar\\'));
 
     expect($mentorProgramReferencesCalendar)->toBeTrue();
+});
+
+// Regression guard for the Calendar -> UserSchedule carve-out (DDD-migration Phase 8,
+// docs/plans/user-schedule-module-migration/02-development-plan-backend.md, D-1): the
+// carve-out above is deliberately narrow — it removes `Modules\UserSchedule` from
+// Calendar's forbidden list entirely, rather than expressing the dependency via an
+// unresolvable FQCN-in-PHPDoc workaround. This test pins the edge to exactly one file
+// (`ExcludeUserScheduleSchemeService`), so the carve-out fails loudly the moment a
+// second Calendar class imports UserSchedule.
+it('keeps the Calendar -> UserSchedule carve-out scoped to exactly one file', function (): void {
+    $calendarFiles = File::allFiles(base_path('Modules/Calendar/app'));
+
+    $filesReferencingUserSchedule = collect($calendarFiles)
+        ->filter(fn (SplFileInfo $file): bool => str_contains(File::get($file->getPathname()), 'use Modules\UserSchedule\\'))
+        ->map(fn (SplFileInfo $file): string => $file->getFilename())
+        ->values();
+
+    expect($filesReferencingUserSchedule->all())->toBe(['ExcludeUserScheduleSchemeService.php']);
 });

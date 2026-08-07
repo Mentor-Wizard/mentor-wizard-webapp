@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Enums\UserScheduleRecordType;
 use App\Models\User;
-use App\Models\UserSchedule;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Modules\Calendar\Enums\CalendarEventRoleEnum;
@@ -14,6 +12,8 @@ use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Services\BookingCalendarEventsService;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\UserSchedule\Enums\UserScheduleRecordType;
+use Modules\UserSchedule\Models\UserSchedule;
 use Spatie\Permission\Models\Role;
 
 mutates(BookingCalendarEventsService::class);

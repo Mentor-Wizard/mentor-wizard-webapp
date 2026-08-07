@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Modules\Calendar\Services;
 
 use App\Models\User;
-use App\Models\UserSchedule;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Date;
+use Modules\UserSchedule\Models\UserSchedule;
 
 class ExcludeUserScheduleSchemeService
 {

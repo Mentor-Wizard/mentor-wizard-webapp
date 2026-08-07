@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Enums\UserScheduleRecordType;
 use App\Models\User;
-use App\Models\UserSchedule;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
 use Modules\Calendar\Services\ExcludeUserScheduleSchemeService;
+use Modules\UserSchedule\Enums\UserScheduleRecordType;
+use Modules\UserSchedule\Models\UserSchedule;
 
 mutates(ExcludeUserScheduleSchemeService::class);
 
