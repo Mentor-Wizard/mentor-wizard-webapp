@@ -1,0 +1,9 @@
+{
+  "name": "UserProfile",
+  "alias": "userprofile",
+  "description": "Private account settings: identity, contacts, avatar, hourly rate, account deletion (GDPR).",
+  "keywords": ["user", "profile", "account", "avatar"],
+  "priority": 0,
+  "providers": ["Modules\\UserProfile\\Providers\\UserProfileServiceProvider"],
+  "files": []
+}

@@ -1,0 +1,11 @@
+{
+  "Chat": true,
+  "Calendar": true,
+  "ExternalCalendar": true,
+  "Auth": true,
+  "MentorProgram": true,
+  "Marketplace": true,
+  "UserProfile": true,
+  "UserSchedule": true,
+  "MentorSession": true
+}

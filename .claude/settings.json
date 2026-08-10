@@ -9,7 +9,8 @@
   "enableAllProjectMcpServers": true,
   "permissions": {
     "deny": [
-      "Read(./.env)"
+      "Read(./.env)",
+      "Bash(rm -rf /)"
     ]
   },
   "model": "opusplan",

@@ -38,7 +38,9 @@ Activate `laravel-architecture` + `laravel-coder` + `code-reviewer` always. Add 
 | Observers | `app/Observers/` | Model lifecycle side effects |
 | Policies | `app/Policies/` | Authorization rules |
 
-> No Controllers, no Repositories, no `app/Domain/` directory. Domain areas: Auth, Calendar, MentorPrograms, MentorTag, Profile, User, UserSchedule.
+> No Controllers, no Repositories, no `app/Domain/` directory. Domain areas still in `app/`: Auth, MentorPrograms, MentorTag, Profile, User, UserSchedule.
+
+> **Modules already extracted** (`Chat`, `Calendar`) mirror this table under `Modules/{Name}/app/...`, and additionally own their Inertia frontend in `Modules/{Name}/resources/js/{Pages,Components}/` — a module is backend + frontend together, never refactor one half without the other. See `docs/MODULAR_ARCHITECTURE.md`.
 
 ## Refactoring Methodology
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\MediaLibrary;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator as BasePathGenerator;
 
@@ -39,7 +40,10 @@ class PathGenerator implements BasePathGenerator
     private function getBasePath(Media $media): string
     {
         $prefix = config('media-library.prefix');
-        $className = class_basename($media->model_type);
+        // $media->model_type may be a short, enforced morph alias (e.g. "chat_message")
+        // rather than the FQCN — resolve it back to the real class so storage paths
+        // stay byte-identical to what they were before the morph map was introduced.
+        $className = class_basename(Relation::getMorphedModel($media->model_type) ?? $media->model_type);
 
         return mb_ltrim(sprintf('%s/%s/%s', $prefix, $className, $media->getKey()), '/');
     }

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Models\UserProfile;
 use App\Support\MediaLibrary\PathGenerator;
+use Modules\UserProfile\Models\UserProfile;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 describe('MediaLibrary PathGenerator', function (): void {
@@ -50,6 +50,17 @@ describe('MediaLibrary PathGenerator', function (): void {
         $basePath = $pathGenerator->getPath($media);
 
         expect($basePath)->toBe('UserProfile/100/');
+    });
+
+    it('resolves an enforced morph map alias back to the FQCN basename', function (): void {
+        $media = createMediaMock(321, 'user_profile');
+
+        config()->set('media-library.prefix', 'uploads');
+
+        $pathGenerator = new PathGenerator;
+        $basePath = $pathGenerator->getPath($media);
+
+        expect($basePath)->toBe('uploads/UserProfile/321/');
     });
 
     function createMediaMock(int $id, string $modelType): Media

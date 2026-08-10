@@ -1,0 +1,22 @@
+{
+  "name": "mentor-wizard/externalcalendar",
+  "description": "",
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\ExternalCalendar\\": "app/",
+      "Modules\\ExternalCalendar\\Database\\Factories\\": "database/factories/",
+      "Modules\\ExternalCalendar\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\ExternalCalendar\\Tests\\": "tests/"
+    }
+  }
+}

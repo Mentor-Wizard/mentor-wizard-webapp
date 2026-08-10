@@ -1,0 +1,9 @@
+{
+  "name": "Auth",
+  "alias": "auth",
+  "description": "Identity & Access: registration, login/logout, password reset and change, email verification, OAuth via Socialite, and role assignment on user creation. This module is not disableable — `module:disable Auth` removes all 17 auth routes and makes the application inaccessible.",
+  "keywords": ["auth", "identity", "login", "registration", "socialite"],
+  "priority": 0,
+  "providers": ["Modules\\Auth\\Providers\\AuthServiceProvider"],
+  "files": []
+}

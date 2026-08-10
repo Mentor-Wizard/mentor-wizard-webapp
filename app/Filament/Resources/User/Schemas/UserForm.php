@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User\Schemas;
 
-use App\Actions\User\AddAvatar;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -16,6 +15,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Modules\UserProfile\Actions\AddAvatar;
 
 class UserForm
 {

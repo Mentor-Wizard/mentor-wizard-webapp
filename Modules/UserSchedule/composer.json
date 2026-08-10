@@ -1,0 +1,28 @@
+{
+  "name": "mentor-wizard/user-schedule",
+  "description": "Mentor weekly working-hours schedule and day-off exclusions.",
+  "keywords": [
+    "user",
+    "schedule",
+    "mentor",
+    "availability"
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\UserSchedule\\": "app/",
+      "Modules\\UserSchedule\\Database\\Factories\\": "database/factories/",
+      "Modules\\UserSchedule\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\UserSchedule\\Tests\\": "tests/"
+    }
+  }
+}

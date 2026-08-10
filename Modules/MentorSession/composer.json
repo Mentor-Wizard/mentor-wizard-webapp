@@ -1,0 +1,26 @@
+{
+  "name": "mentor-wizard/mentor-session",
+  "description": "Recorded mentoring session facts (mentor, mentee, program, cost, status flags, note).",
+  "keywords": [
+    "mentor",
+    "session",
+    "booking-fact"
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\MentorSession\\": "app/",
+      "Modules\\MentorSession\\Database\\Factories\\": "database/factories/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\MentorSession\\Tests\\": "tests/"
+    }
+  }
+}

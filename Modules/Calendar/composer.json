@@ -1,0 +1,29 @@
+{
+  "name": "mentor-wizard/calendar",
+  "description": "Booking calendar: calendar events, availability slots, booking flow and calendar list/detail pages for mentors and mentees.",
+  "keywords": [
+    "calendar",
+    "booking",
+    "scheduling",
+    "mentor",
+    "mentee"
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [],
+      "aliases": {}
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\Calendar\\": "app/",
+      "Modules\\Calendar\\Database\\Factories\\": "database/factories/",
+      "Modules\\Calendar\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Modules\\Calendar\\Tests\\": "tests/"
+    }
+  }
+}

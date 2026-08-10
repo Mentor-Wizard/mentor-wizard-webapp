@@ -1,0 +1,9 @@
+{
+  "name": "Calendar",
+  "alias": "calendar",
+  "description": "Booking calendar: calendar events, availability slots, booking flow and calendar list/detail pages for mentors and mentees.",
+  "keywords": ["calendar", "booking", "scheduling", "mentor", "mentee"],
+  "priority": 0,
+  "providers": ["Modules\\Calendar\\Providers\\CalendarServiceProvider"],
+  "files": []
+}

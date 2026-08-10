@@ -6,8 +6,8 @@ namespace Database\Seeders;
 
 use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Models\UserProfile;
 use Illuminate\Database\Seeder;
+use Modules\UserProfile\Models\UserProfile;
 
 class MentiSeeder extends Seeder
 {

@@ -2,6 +2,10 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const devServerUrl =
   process.env.DDEV_PRIMARY_URL ?
@@ -26,6 +30,11 @@ export default defineConfig({
     }),
     tailwindcss(),
   ],
+  resolve: {
+    alias: {
+      '@modules': path.resolve(projectRoot, 'Modules'),
+    },
+  },
   server: {
     https: false,
     host: '0.0.0.0',

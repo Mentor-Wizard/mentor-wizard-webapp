@@ -29,7 +29,7 @@ describe('MarkAllNotificationsAsRead', function (): void {
             [
                 'id'              => Str::uuid(),
                 'type'            => 'App\Notifications\TestNotification',
-                'notifiable_type' => User::class,
+                'notifiable_type' => (new User)->getMorphClass(),
                 'notifiable_id'   => $this->user->getKey(),
                 'data'            => json_encode(['title' => 'First']),
                 'read_at'         => null,
@@ -39,7 +39,7 @@ describe('MarkAllNotificationsAsRead', function (): void {
             [
                 'id'              => Str::uuid(),
                 'type'            => 'App\Notifications\TestNotification',
-                'notifiable_type' => User::class,
+                'notifiable_type' => (new User)->getMorphClass(),
                 'notifiable_id'   => $this->user->getKey(),
                 'data'            => json_encode(['title' => 'Second']),
                 'read_at'         => null,
@@ -63,7 +63,7 @@ describe('MarkAllNotificationsAsRead', function (): void {
         DatabaseNotification::query()->insert([
             'id'              => Str::uuid(),
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $this->user->getKey(),
             'data'            => json_encode(['title' => 'Already read']),
             'read_at'         => $alreadyReadAt,
@@ -88,7 +88,7 @@ describe('MarkAllNotificationsAsRead', function (): void {
         DatabaseNotification::query()->insert([
             'id'              => $id,
             'type'            => 'App\Notifications\TestNotification',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id'   => $otherUser->getKey(),
             'data'            => json_encode(['title' => 'Other user']),
             'read_at'         => null,

@@ -1,0 +1,11 @@
+{
+  "name": "MentorProgram",
+  "alias": "mentorprogram",
+  "description": "Mentor programs: creation, editing, blocks, block progress and program listing for mentors and mentees.",
+  "keywords": ["mentor", "program", "curriculum"],
+  "priority": 0,
+  "providers": [
+    "Modules\\MentorProgram\\Providers\\MentorProgramServiceProvider"
+  ],
+  "files": []
+}

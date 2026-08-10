@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\User;
-use App\Models\UserProfile;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\UserProfile\Models\UserProfile;
 
 /**
  * @extends Factory<UserProfile>

@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Modules\Auth\Actions\VerificationEmailNotification;
+
+mutates(VerificationEmailNotification::class);
+
+describe('VerificationEmailNotification', function (): void {
+    it('redirects to dashboard when email is already verified', function (): void {
+        $user = Mockery::mock('User');
+        $user->shouldReceive('hasVerifiedEmail')->once()->andReturn(true);
+
+        $request = Mockery::mock(Request::class);
+        $request->shouldReceive('user')->once()->andReturn($user);
+
+        $action = new VerificationEmailNotification;
+
+        $response = $action->handle($request);
+
+        expect($response)->toBeInstanceOf(RedirectResponse::class)
+            ->and($response->getTargetUrl())->toBe(route('pages.dashboard'));
+    });
+
+    it('sends email verification notification for unverified user', function (): void {
+        $user = Mockery::mock('User');
+        $user->shouldReceive('hasVerifiedEmail')->once()->andReturn(false);
+        $user->shouldReceive('sendEmailVerificationNotification')->once();
+
+        $request = Mockery::mock(Request::class);
+        $request->shouldReceive('user')->twice()->andReturn($user);
+
+        $action = new VerificationEmailNotification;
+
+        $response = $action->handle($request);
+
+        expect($response)->toBeInstanceOf(RedirectResponse::class)
+            ->and($response->getSession()->get('status'))->toBe('verification-link-sent');
+    });
+});

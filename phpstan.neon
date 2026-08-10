@@ -6,11 +6,23 @@ parameters:
   paths:
     - app
     - database
+    - Modules
+  excludePaths:
+    - Modules/*/tests/*
   level: 7
   cognitive_complexity:
     class: 85
     function: 8
   checkOctaneCompatibility: true
+  # Larastan infers Eloquent model properties by statically parsing migration files.
+  # It defaults to ONLY `database/migrations` (hardcoded in
+  # Larastan\Larastan\Properties\MigrationHelper) — module-owned migrations under
+  # `Modules/*/database/migrations` must be added explicitly or model property
+  # access on those models is flagged as undefined.
+  databaseMigrationsPath:
+    - database/migrations
+    - Modules/*/database/migrations
   tmpDir: ./var/cache/phpstan
   ignoreErrors:
     - '#PHPDoc tag @mixin contains unknown class App\\Models\\IdeHelper#'
+    - '#PHPDoc tag @mixin contains unknown class Modules\\*#'

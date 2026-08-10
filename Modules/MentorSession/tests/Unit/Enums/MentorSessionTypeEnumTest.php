@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
+
+describe('MentorSessionTypeEnum', function (): void {
+    it('returns all names and values', function (): void {
+        $names = MentorSessionTypeEnum::names();
+        $values = MentorSessionTypeEnum::values();
+
+        $caseNames = array_map(fn (MentorSessionTypeEnum $case) => $case->name, MentorSessionTypeEnum::cases());
+        $caseValues = array_map(fn (MentorSessionTypeEnum $case) => $case->value, MentorSessionTypeEnum::cases());
+
+        expect($names)->toEqual($caseNames)
+            ->and($values)->toEqual($caseValues)
+            ->and(array_unique($names))->toHaveSameSize($names)
+            ->and(array_unique($values))->toHaveSameSize($values)
+            ->and($names)->each->not->toBeEmpty()
+            ->and($values)->each->not->toBeEmpty();
+    });
+
+    it('contains required session types', function (): void {
+        expect(MentorSessionTypeEnum::values())
+            ->toContain('Video Session')
+            ->toContain('Voice Session')
+            ->toContain('Code Review');
+    });
+});

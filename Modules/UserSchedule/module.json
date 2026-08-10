@@ -1,0 +1,11 @@
+{
+  "name": "UserSchedule",
+  "alias": "userschedule",
+  "description": "Mentor weekly working-hours schedule and day-off exclusions.",
+  "keywords": ["user", "schedule", "mentor", "availability"],
+  "priority": 0,
+  "providers": [
+    "Modules\\UserSchedule\\Providers\\UserScheduleServiceProvider"
+  ],
+  "files": []
+}

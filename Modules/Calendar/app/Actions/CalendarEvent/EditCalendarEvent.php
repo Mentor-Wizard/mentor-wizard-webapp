@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Calendar\Actions\CalendarEvent;
+
+use Illuminate\Support\Arr;
+use Lorisleiva\Actions\Concerns\AsController;
+use Modules\Calendar\Enums\CalendarEventStatusEnum;
+use Modules\Calendar\Http\Requests\CalendarEvent\EditCalendarEventRequest;
+use Modules\Calendar\Models\CalendarEvent;
+use Symfony\Component\HttpFoundation\Response;
+
+class EditCalendarEvent
+{
+    use AsController;
+
+    public function handle(EditCalendarEventRequest $request, CalendarEvent $calendarEvent): Response
+    {
+        // Only update web_link according to the new business rule
+        $validated = $request->validated();
+
+        if (in_array($calendarEvent->status, [
+            CalendarEventStatusEnum::FINISHED,
+            CalendarEventStatusEnum::CANCELLED])) {
+            return to_route('pages.calendar.index')
+                ->with('error', $calendarEvent->status->value.' calendar event cannot be edited');
+        }
+
+        $webLink = array_key_exists('webLink', $validated) ? $validated['webLink'] : $calendarEvent->web_link;
+        $description = array_key_exists('description', $validated)
+            ? $validated['description']
+            : $calendarEvent->description;
+        $calendarEvent->update([
+            'web_link'    => $webLink,
+            'description' => $description,
+        ]);
+        $colour = Arr::get($validated, 'colour');
+        $calendarEvent->calendarEventUsers()
+            ->syncWithoutDetaching([
+                auth()->id() => ['colour' => $colour],
+            ]);
+
+        return to_route('pages.calendar.index');
+    }
+}

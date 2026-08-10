@@ -1,0 +1,9 @@
+{
+  "name": "Chat",
+  "alias": "chat",
+  "description": "Real-time chat between mentors and mentees: messages, file attachments, chat status (archive/mute/ban) and unread-message counters.",
+  "keywords": ["chat", "messaging", "mentor", "mentee", "broadcasting"],
+  "priority": 0,
+  "providers": ["Modules\\Chat\\Providers\\ChatServiceProvider"],
+  "files": []
+}

@@ -7,6 +7,7 @@ use Rector\Config\RectorConfig;
 use Rector\ValueObject\PhpVersion;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
+use RectorPest\Rules\Browser\UseBrowserValueAssertionsRector;
 use RectorPest\Set\PestLevelSetList;
 use RectorPest\Set\PestSetList;
 
@@ -20,6 +21,7 @@ return RectorConfig::configure()
         __DIR__.'/database',
         __DIR__.'/routes',
         __DIR__.'/tests',
+        __DIR__.'/Modules',
     ])
     ->withPhpVersion(PhpVersion::PHP_85)
     ->withPhpSets(php85: true)
@@ -58,6 +60,13 @@ return RectorConfig::configure()
         PestSetList::PEST_CHAIN,
         PestSetList::PEST_LARAVEL,
         PestSetList::PEST_BROWSER,
+    ])
+    ->withSkip([
+        // The project has no Pest v4 browser tests (no pestphp/pest-plugin-browser
+        // usage), but this rule pattern-matches any `expect($x->value($arg))->toBe($v)`
+        // regardless of $x's type, so it also rewrites plain Query\Builder::value()
+        // assertions into a non-existent Builder::assertValue() call.
+        UseBrowserValueAssertionsRector::class,
     ])
     ->withParallel()
     ->withCache(

@@ -1,0 +1,100 @@
+<script setup>
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue';
+import {
+  BellIcon,
+  CalendarIcon,
+  CreditCardIcon,
+  UserIcon,
+} from '@heroicons/vue/20/solid';
+import ExternalCalendarTab from '@modules/ExternalCalendar/resources/js/Components/ExternalCalendar/ExternalCalendarTab.vue';
+import MyAccountTab from '@modules/UserProfile/resources/js/Components/UserProfile/MyAccountTab.vue';
+import { ref, shallowRef } from 'vue';
+
+import MainPageText from '@/Components/MainPageText.vue';
+import MobileTabSelect from '@/Components/UI/Navigation/MobileTabSelect.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+// BillingTab / NotificationTab belong to other domains (Payments / Notifications)
+// with no dedicated module yet; this Module -> Core import is intentional (see D-5).
+import BillingTab from '@/Pages/Profile/Tab/BillingTab.vue';
+import NotificationTab from '@/Pages/Profile/Tab/NotificationTab.vue';
+
+const CALENDARS_TAB_INDEX = 3;
+
+const tabFromUrl = new URLSearchParams(window.location.search).get('tab');
+const selectedTab = ref(tabFromUrl === 'calendars' ? CALENDARS_TAB_INDEX : 0);
+
+function changeTab(index) {
+  selectedTab.value = index;
+}
+
+const navigation = ref([
+  { name: 'My Account', icon: UserIcon, component: shallowRef(MyAccountTab) },
+  {
+    name: 'Notification',
+    icon: BellIcon,
+    component: shallowRef(NotificationTab),
+  },
+  { name: 'Billing', icon: CreditCardIcon, component: shallowRef(BillingTab) },
+  {
+    name: 'Calendars',
+    icon: CalendarIcon,
+    component: shallowRef(ExternalCalendarTab),
+  },
+]);
+</script>
+
+<template>
+  <AuthenticatedLayout>
+    <template #header>
+      <MainPageText title="Profile" />
+    </template>
+    <div>
+      <main>
+        <div class="py-12">
+          <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="overflow-hidden bg-white p-8 shadow-xs sm:rounded-lg">
+              <TabGroup :selected-index="selectedTab" @change="changeTab">
+                <h1 class="sr-only">Account Settings</h1>
+                <header class="border-b border-white/5">
+                  <MobileTabSelect
+                    v-model="selectedTab"
+                    :options="navigation"
+                  />
+                  <div class="hidden sm:block">
+                    <TabList class="border-b border-gray-200">
+                      <div class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <Tab
+                          v-for="tab in navigation"
+                          :key="tab.name"
+                          v-slot="{ selected }"
+                          class="focus-visible:outline-none"
+                        >
+                          <div
+                            :class="[
+                              selected ?
+                                'border-indigo-500 text-indigo-600'
+                              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                              'group inline-flex items-center border-b-2 px-1 py-4 text-sm font-medium',
+                            ]"
+                            :aria-current="selected ? 'page' : undefined"
+                          >
+                            <span>{{ tab.name }}</span>
+                          </div>
+                        </Tab>
+                      </div>
+                    </TabList>
+                  </div>
+                </header>
+                <TabPanels>
+                  <TabPanel v-for="tab in navigation" :key="tab.name">
+                    <component :is="tab.component" />
+                  </TabPanel>
+                </TabPanels>
+              </TabGroup>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </AuthenticatedLayout>
+</template>

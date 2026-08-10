@@ -175,6 +175,7 @@ jobs:
           - { name: '🔬 Unit (1/2)', command: 'php artisan test --ci --testsuite=Unit --parallel --shard=1/2',                          report: false }
           - { name: '🔬 Unit (2/2)', command: 'php artisan test --ci --testsuite=Unit --parallel --shard=2/2',                          report: false }
           - { name: '🧬 Feature',    command: 'php artisan test --ci --testsuite=Feature --parallel',                                   report: false }
+          - { name: '🧩 Modules',    command: 'php artisan test --ci --testsuite=Modules --parallel',                                   report: false }
           - { name: '☂️ Coverage',   command: 'php artisan test --ci --coverage --compact --coverage-clover coverage/coverage-clover.xml --log-junit coverage/junit.xml', report: true  }
 
     steps:
@@ -418,14 +419,56 @@ jobs:
       fail-fast: false
       matrix:
         shard:
-          - { id: 'A', name: 'A · Actions',                    path: 'app/Actions',                                                                                                      timeout: 30, ignore: '' }
-          - { id: 'B', name: 'B · Http + Enums',                path: 'app/Http,app/Enums',                                                                                              timeout: 25, ignore: '' }
-          - { id: 'C', name: 'C · Services',                    path: 'app/Services',                                                                                                    timeout: 25, ignore: '' }
+          - { id: 'A', name: 'A · Actions',                    path: 'app/Actions',                                                                                                      timeout: 30, ignore: '', testsuite: 'Unit' }
+          - { id: 'B', name: 'B · Http + Enums',                path: 'app/Http,app/Enums',                                                                                              timeout: 25, ignore: '', testsuite: 'Unit' }
+          - { id: 'C', name: 'C · Services',                    path: 'app/Services',                                                                                                    timeout: 25, ignore: '', testsuite: 'Unit' }
           # ignore: app/Filament — see the comment block above this matrix for why: a single
           # line (UserResource::getNavigationBadge()) produces a --filter argv that exceeds
           # Linux's MAX_ARG_STRLEN and crashes posix_spawn. Confirmed root cause, not a guess.
-          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/Traits,app/DTO,app/Filters,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament' }
-          - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20, ignore: '' }
+          - { id: 'D', name: 'D · Traits + DTO + Filters + misc', path: 'app/DTO,app/Filament,app/Providers,app/Observers,app/Support,app/Events,app/Broadcasting,app/Notifications,app/Casts', timeout: 20, ignore: 'app/Filament', testsuite: 'Unit' }
+          - { id: 'E', name: 'E · Policies + Jobs + Models',    path: 'app/Policies,app/Jobs,app/Models',                                                                                timeout: 20, ignore: '', testsuite: 'Unit' }
+          # DDD-migration Phase 1 (Chat pilot): Chat's Actions/Models/Policies/Events/
+          # Broadcasting/Http physically moved out of app/** into Modules/Chat/app — a shard
+          # covering that path is required, not optional, or ~25 mutates()-annotated Chat
+          # classes silently drop out of the mutation gate entirely (the gate would stay green
+          # with nothing being mutated — the same vacuous-pass failure mode AC-19 exists to
+          # catch). testsuite is 'Modules' (not 'Unit'): Modules/Chat/tests/Unit is registered
+          # under the "Modules" phpunit.xml testsuite (see phpunit.xml), not "Unit" — using the
+          # default 'Unit' testsuite here would find zero covering tests for Modules/Chat/app
+          # and --covered-only would again mutate nothing.
+          - { id: 'F', name: 'F · Module Chat',                 path: 'Modules/Chat/app',                                                                                                timeout: 15, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 2 (Calendar extraction, docs/plans/migrate-calendar-domain-module):
+          # same rationale as shard F above — Calendar's Actions/Models/Services/Policies/
+          # Observers/Casts/Traits/DTO/Http physically moved out of app/** into
+          # Modules/Calendar/app, so a dedicated shard is required to keep those
+          # mutates()-annotated classes in the mutation gate. testsuite is 'Modules' for the
+          # same reason as shard F. Timeout is 25 (not 15 like Chat) — Calendar's covered
+          # surface is roughly twice the size of Chat's.
+          - { id: 'G', name: 'G · Module Calendar',             path: 'Modules/Calendar/app',                                                                                            timeout: 25, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 3 (ExternalCalendar extraction,
+          # docs/plans/external-calendar-module-migration): same rationale as shards F/G —
+          # ExternalCalendar's ~56 Actions/Models/Services/XmlTools/Jobs/Policies/Requests/
+          # Enums/DTO/Traits/Casts physically moved out of app/** into
+          # Modules/ExternalCalendar/app, so a dedicated shard is required to keep those
+          # mutates()-annotated classes in the mutation gate. testsuite is 'Modules' for the
+          # same reason as shards F/G. Timeout is 25 — comparable covered surface to Calendar.
+          - { id: 'H', name: 'H · Module ExternalCalendar',    path: 'Modules/ExternalCalendar/app',                                                                                     timeout: 25, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 4 (Auth extraction, docs/plans/identity-domain-migration):
+          # same rationale as shards F/G/H — Auth's 17 Actions / 7 Requests / 1 Observer /
+          # 1 Enum physically moved out of app/** into Modules/Auth/app, so a dedicated shard
+          # is required to keep those mutates()-annotated classes in the mutation gate.
+          # testsuite is 'Modules' for the same reason as F/G/H. Timeout 15 — only 10 of the
+          # 23 moved Unit tests carry a mutates() call (grep-verified), so the covered surface
+          # is smaller than Chat's, not Chat-sized.
+          - { id: 'I', name: 'I · Module Auth',                 path: 'Modules/Auth/app',                                                                                                 timeout: 15, ignore: '', testsuite: 'Modules' }
+          # DDD-migration Phase 5 (MentorProgram extraction, docs/plans/mentor-program-ddd-migration):
+          # same rationale as shards F/G/H/I — MentorProgram's 8 Actions / 2 Requests / 1 Resource /
+          # 1 Policy / 1 Observer / 3 Models physically moved out of app/** into
+          # Modules/MentorProgram/app, so a dedicated shard is required to keep those
+          # mutates()-annotated classes in the mutation gate. testsuite is 'Modules' for the same
+          # reason as F/G/H/I. Timeout 15 — only 3 of the 12 moved Unit/Feature tests carry a
+          # mutates() call (grep-verified), so the covered surface is smaller than Auth's.
+          - { id: 'J', name: 'J · Module MentorProgram',        path: 'Modules/MentorProgram/app',                                                                                        timeout: 15, ignore: '', testsuite: 'Modules' }
 
     steps:
       - name: '🛎 Checkout'
@@ -452,7 +495,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: vendor/pestphp/pest-plugin-mutate/.temp/pest-mutate-cache
-          key: "${{ runner.os }}-mutate-${{ matrix.shard.id }}-${{ hashFiles('app/**') }}-${{ hashFiles('composer.lock') }}"
+          key: "${{ runner.os }}-mutate-${{ matrix.shard.id }}-${{ hashFiles('app/**', 'Modules/**') }}-${{ hashFiles('composer.lock') }}"
           restore-keys: '${{ runner.os }}-mutate-${{ matrix.shard.id }}-'
 
       # matrix.shard.ignore is '' for every shard except D (see the matrix definition above)
@@ -460,9 +503,99 @@ jobs:
       # mutate's FileFinder treats an empty ignore pattern as a prefix match against every
       # file in --path, which would silently exclude the entire shard's mutation scope.
       - name: '${{ matrix.shard.name }} mutation tests'
-        run: php artisan test --ci --testsuite=Unit --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }} ${{ matrix.shard.ignore != '' && format('--ignore={0}', matrix.shard.ignore) || '' }}
+        run: php artisan test --ci --testsuite=${{ matrix.shard.testsuite }} --mutate --covered-only --min=100 --parallel --path=${{ matrix.shard.path }} ${{ matrix.shard.ignore != '' && format('--ignore={0}', matrix.shard.ignore) || '' }}
         env:
           DB_HOST: 127.0.0.1
           DB_DATABASE: testing
           DB_USERNAME: db
           DB_PASSWORD: db
+
+  # Dynamic module-shard generation (docs/plans/dynamic-ci-module-shards/02-development-plan.md).
+  #
+  # Why a separate job, not folded into `mutation`'s matrix above: GitHub Actions'
+  # `strategy.matrix` accepts either a fully literal YAML array or a single `fromJSON(...)`
+  # expression, never a mix of the two under the same key — so a matrix that is part static
+  # (shards A–E) and part dynamic (one entry per enabled Modules/* module) cannot be expressed
+  # in one job without re-typing A–E as JSON too, which would make A–E vanish from the file as
+  # literal YAML and produce a much larger, harder-to-review diff than intended. Instead, the
+  # dynamic module shards get their own job (`mutation-modules` below), fed by this job's
+  # generated matrix, while `mutation` (A–E) stays completely untouched.
+  #
+  # Why `modules_statuses.json` (nwidart/laravel-modules' own enabled/disabled ledger) rather
+  # than a bare `Modules/*/` directory glob: a disabled module has no business getting a
+  # mutation shard — such a shard would run `--covered-only` over code no test suite loads,
+  # "pass" with zero mutations, and mask that the module isn't tested at all. This is the same
+  # vacuous-green failure mode the AC-19 note elsewhere in this file warns about. The script
+  # falls back to a directory glob only if `modules_statuses.json` is missing entirely, and
+  # flags that fallback loudly (`::warning::` + step summary) rather than silently trusting it.
+  #
+  # Why `timeout-minutes` defaults to 20 for a module absent from `.github/ci-module-shards.json`:
+  # 20 is the midpoint of the five known module timeouts (15 for Auth/MentorProgram's smaller
+  # covered surface, 25 for Calendar/ExternalCalendar's larger one) — a deliberately-safe
+  # starting guess for a module with no CI timing data yet, not a measurement.
+  #
+  # Full rationale, alternatives considered, and failure-mode table:
+  # docs/plans/dynamic-ci-module-shards/02-development-plan.md
+  generate-module-shards:
+    name: '🧩 Generate module shards'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v6
+
+      - name: '🧩 Generate matrix'
+        id: generate
+        run: .github/scripts/generate-module-shards.sh
+
+  # Dynamic replacement for shards F–J above: one shard per module enabled in
+  # `modules_statuses.json`, matrix sourced from `generate-module-shards`'s output instead of
+  # being hand-written. `id`/`name` intentionally use the module's own name (e.g. `id: "Chat"`,
+  # `name: 'Module Chat'`) rather than F–J's letter scheme — a generated shard has no natural
+  # "next letter", and a module's name already disambiguates it uniquely and stably. This is a
+  # visible, intentional change to F–J's cache keys and check-run display names on first merge,
+  # not an oversight (see the plan file linked above).
+  #
+  # For this landing, F–J's literal entries in the `mutation` job above are deliberately left in
+  # place alongside this job — both run for one verification window so the dynamic output can be
+  # compared against the known-good hand-written shards in the Actions UI before F–J are removed
+  # in a follow-up change. See "Implementation order" in the plan file for the removal steps and
+  # the branch-protection required-check-name update that must accompany it.
+  mutation-modules:
+    name: '🦠 Mutation | ${{ matrix.shard.name }}'
+    needs: generate-module-shards
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.shard.timeout }}
+
+    services:
+      postgres:
+        image: postgres:17-alpine3.20
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.generate-module-shards.outputs.matrix) }}
+
+    steps:
+      - name: '🛎 Checkout'
+        uses: actions/checkout@v6
+
+      - uses: ./.github/actions/run-mutation-shard
+        with:
+          shard-id: ${{ matrix.shard.id }}
+          shard-name: ${{ matrix.shard.name }}
+          path: ${{ matrix.shard.path }}
+          ignore: ${{ matrix.shard.ignore }}
+          testsuite: ${{ matrix.shard.testsuite }}

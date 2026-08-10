@@ -1,0 +1,11 @@
+{
+  "name": "MentorSession",
+  "alias": "mentorsession",
+  "description": "Recorded mentoring session facts (mentor, mentee, program, cost, status flags, note).",
+  "keywords": ["mentor", "session", "booking-fact"],
+  "priority": 0,
+  "providers": [
+    "Modules\\MentorSession\\Providers\\MentorSessionServiceProvider"
+  ],
+  "files": []
+}

@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
+use Modules\Auth\Actions\Socialite\SocialiteRedirect;
+use Modules\Auth\Enums\SocialiteDriverEnum;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
+mutates(SocialiteRedirect::class);
+
+beforeEach(function (): void {
+    Socialite::shouldReceive('driver')->andReturnSelf();
+});
+
+it('redirects to socialite driver if valid driver is provided', function ($driver): void {
+    Socialite::shouldReceive('redirect')->once()->andReturn(new RedirectResponse('/auth/'.($driver->value).'/redirect'));
+
+    $response = (new SocialiteRedirect)->handle($driver->value);
+
+    expect($response)->toBeInstanceOf(RedirectResponse::class)
+        ->and($response->getTargetUrl())->toBe('/auth/'.($driver->value).'/redirect');
+})->with(SocialiteDriverEnum::cases());
+
+it('logs an error and aborts if an invalid driver is provided', function (): void {
+    $invalidDriver = 'invalid';
+
+    Log::shouldReceive('error')->once()->withArgs(fn (string $message, array $context): bool => $message === 'Invalid socialite driver' && $context['driver'] === $invalidDriver);
+
+    (new SocialiteRedirect)->handle($invalidDriver);
+})->throws(HttpException::class);
