@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\User;
@@ -14,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\MentorProgram\Actions\UpdateMentorProgramPage;
 use Modules\MentorProgram\Http\Requests\UpdateMentorProgramRequest;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 

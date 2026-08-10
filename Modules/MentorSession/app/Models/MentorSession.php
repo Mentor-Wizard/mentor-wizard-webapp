@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Models;
+namespace Modules\MentorSession\Models;
 
-use Database\Factories\MentorSessionFactory;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Modules\Calendar\Models\CalendarEvent;
-use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Database\Factories\MentorSessionFactory;
 use Override;
 
 /**
@@ -52,35 +51,11 @@ class MentorSession extends Model
     }
 
     /**
-     * @return HasOne<Payment, $this>
-     */
-    public function payment(): HasOne
-    {
-        return $this->hasOne(Payment::class);
-    }
-
-    /**
      * @return HasOne<MentorSessionNote, $this>
      */
     public function mentorSessionNote(): HasOne
     {
         return $this->hasOne(MentorSessionNote::class);
-    }
-
-    /**
-     * @return HasOne<CalendarEvent, $this>
-     */
-    public function calendarEvent(): HasOne
-    {
-        return $this->hasOne(CalendarEvent::class);
-    }
-
-    /**
-     * @return BelongsTo<MentorProgram, $this>
-     */
-    public function mentorProgram(): BelongsTo
-    {
-        return $this->belongsTo(MentorProgram::class);
     }
 
     /**

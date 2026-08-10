@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -15,6 +14,7 @@ use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\Calendar\Services\AvailableCalendarEventsSlotsService;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 use Modules\UserSchedule\Enums\UserScheduleRecordType;
 use Modules\UserSchedule\Models\UserSchedule;
 use Spatie\Permission\Models\Role;

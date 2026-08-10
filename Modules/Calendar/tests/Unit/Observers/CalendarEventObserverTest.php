@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\RoleEnum;
-use App\Models\MentorSession;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -23,6 +22,7 @@ use Modules\ExternalCalendar\Jobs\ProcessCalendarEventExternalCalendarIntegratio
 use Modules\ExternalCalendar\Jobs\ProcessDeleteExternalCalendarEvent;
 use Modules\ExternalCalendar\Jobs\ProcessUpdateExternalCalendarEvent;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Models\MentorSession;
 use Spatie\Permission\Models\Role;
 
 mutates(CalendarEventObserver::class);

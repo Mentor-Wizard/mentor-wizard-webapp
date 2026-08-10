@@ -86,6 +86,17 @@ arch('calendar-models-are-eloquent')
 // Customer/Supplier edge, not a boundary violation; it is closed off from widening by
 // the positive assertion below (`only permits the Calendar carve-outs…`), which pins
 // it to exactly one file.
+// `Modules\MentorSession` is ALSO deliberately absent (DDD-migration Phase 9,
+// docs/plans/migrate-mentorsession-domain-to-module/02-development-plan-backend.md):
+// CalendarEvent casts `session_type` to Modules\MentorSession\Enums\MentorSessionTypeEnum,
+// CalendarEventData/CalendarEventRequestRules read the session type/duration enums for
+// booking form validation, CalendarEventObserver::updated() calls
+// Modules\MentorSession\Actions\CreateMentorSessionForCalendarEvent as a side effect of a
+// status change, and StoreCalendarEvent calls the same action directly on creation — the
+// live materialization of A2 -> A9 documented in the domain doc. Scoped to exactly 5 files
+// by the regression guard below (wider than the plan's original estimate of 2 — the plan's
+// own triple-check missed CalendarEventData.php, CalendarEventRequestRules.php and
+// StoreCalendarEvent.php; corrected here after a full grep pass).
 arch('calendar-does-not-reach-into-other-modules')
     ->expect('Modules\Calendar')
     ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\Auth', 'Modules\UserProfile']);
@@ -167,6 +178,11 @@ arch('mentor-program-models-are-eloquent')
 // not a `Modules\*` namespace. Confirmed by grep: Modules/MentorProgram/app has zero references
 // to Marketplace; the only edge is this one seeder. See
 // docs/plans/ddd-migration-marketplace/02-development-backend.md for the full note.
+// `Modules\MentorSession` is ALSO deliberately absent: Store/UpdateMentorProgramRequest
+// and Create/EditMentorProgramPage read MentorSessionTypeEnum::values() /
+// MentorSessionDurationOptionsEnum::values() to populate program-creation form options —
+// a one-directional Customer/Supplier edge (MentorProgram is the consumer), scoped to
+// exactly 4 files by the regression guard below.
 arch('mentor-program-does-not-reach-into-other-modules')
     ->expect('Modules\MentorProgram')
     ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile']);
@@ -246,6 +262,30 @@ arch('userschedule-does-not-reach-into-other-modules')
     ->expect('Modules\UserSchedule')
     ->not->toUse(['Modules\Chat', 'Modules\Calendar', 'Modules\ExternalCalendar', 'Modules\MentorProgram', 'Modules\Marketplace', 'Modules\Auth', 'Modules\UserProfile']);
 
+// DDD-migration Phase 9 (MentorSession extraction,
+// docs/plans/migrate-mentorsession-domain-to-module). Deviates from the
+// doc's 🔴 not-recommended verdict (docs/temp/ddd-domain-analysis.md:632) —
+// see 02-development-plan-backend.md §0 for the documented deviation.
+it('keeps Modules\MentorSession non-empty', function (): void {
+    expect(File::allFiles(base_path('Modules/MentorSession/app')))->not->toBeEmpty();
+});
+
+arch('mentorsession-models-are-eloquent')
+    ->expect('Modules\MentorSession\Models')
+    ->toBeClasses()
+    ->toExtend(Model::class);
+
+// `Modules\Calendar` is deliberately absent: CreateMentorSessionForCalendarEvent
+// accepts a Modules\Calendar\Models\CalendarEvent and reads
+// Modules\Calendar\Enums\{CalendarEventRoleEnum,CalendarEventStatusEnum} — the
+// materialization of the documented "MentorSession is created as a side effect
+// of Calendar" edge (docs/temp/ddd-domain-analysis.md:625-628, :636-637). This
+// is the one edge the domain doc itself flags as the reason for the 🔴
+// verdict; it is not hidden, it is pinned by the regression guard below.
+arch('mentorsession-does-not-reach-into-other-modules')
+    ->expect('Modules\MentorSession')
+    ->not->toUse(['Modules\Chat', 'Modules\ExternalCalendar', 'Modules\Marketplace', 'Modules\UserSchedule', 'Modules\Auth', 'Modules\UserProfile', 'Modules\MentorProgram']);
+
 // Regression guard for the bidirectional Calendar <-> MentorProgram carve-out (docs/plans/
 // mentor-program-ddd-migration/04-qa-backend.md): the two `not->toUse()` lists above are
 // each missing the *other* module by design (a real Customer/Supplier edge), but that
@@ -303,4 +343,45 @@ it('keeps the Calendar -> UserSchedule carve-out scoped to exactly one file', fu
         ->values();
 
     expect($filesReferencingUserSchedule->all())->toBe(['ExcludeUserScheduleSchemeService.php']);
+});
+
+// Regression guard for the Calendar -> MentorSession carve-out (DDD-migration
+// Phase 9): pins the edge to exactly the 5 files that legitimately need it.
+it('keeps the Calendar -> MentorSession carve-out scoped to exactly five files', function (): void {
+    $calendarFiles = File::allFiles(base_path('Modules/Calendar/app'));
+
+    $filesReferencingMentorSession = collect($calendarFiles)
+        ->filter(fn (SplFileInfo $file): bool => str_contains(File::get($file->getPathname()), 'use Modules\MentorSession\\'))
+        ->map(fn (SplFileInfo $file): string => $file->getFilename())
+        ->values()
+        ->sort()
+        ->values();
+
+    expect($filesReferencingMentorSession->all())->toBe([
+        'CalendarEvent.php',
+        'CalendarEventData.php',
+        'CalendarEventObserver.php',
+        'CalendarEventRequestRules.php',
+        'StoreCalendarEvent.php',
+    ]);
+});
+
+// Regression guard for the MentorProgram -> MentorSession carve-out (DDD-migration
+// Phase 9): pins the edge to exactly the 4 files that read the session enums.
+it('keeps the MentorProgram -> MentorSession carve-out scoped to exactly four files', function (): void {
+    $mentorProgramFiles = File::allFiles(base_path('Modules/MentorProgram/app'));
+
+    $filesReferencingMentorSession = collect($mentorProgramFiles)
+        ->filter(fn (SplFileInfo $file): bool => str_contains(File::get($file->getPathname()), 'use Modules\MentorSession\\'))
+        ->map(fn (SplFileInfo $file): string => $file->getFilename())
+        ->values()
+        ->sort()
+        ->values();
+
+    expect($filesReferencingMentorSession->all())->toBe([
+        'CreateMentorProgramPage.php',
+        'EditMentorProgramPage.php',
+        'StoreMentorProgramRequest.php',
+        'UpdateMentorProgramRequest.php',
+    ]);
 });

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Models;
 
-use App\Enums\MentorSessionTypeEnum;
-use App\Models\MentorSession;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Database\Factories\CurrencyFactory;
@@ -25,6 +23,7 @@ use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Observers\CalendarEventObserver;
 use Modules\Calendar\Policies\CalendarEventPolicy;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 use Override;
 
 /**
@@ -87,14 +86,6 @@ class CalendarEvent extends Model
         return $this->belongsToMany(User::class, 'calendar_event_user', 'calendar_event_id')
             ->wherePivot('role', CalendarEventRoleEnum::PARTICIPANT->value)
             ->withPivot('role');
-    }
-
-    /**
-     * @return BelongsTo<MentorSession, $this>
-     */
-    public function mentorSession(): BelongsTo
-    {
-        return $this->belongsTo(MentorSession::class);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MentorSessionTypeEnum;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 
 describe('MentorSessionTypeEnum', function (): void {
     it('returns all names and values', function (): void {

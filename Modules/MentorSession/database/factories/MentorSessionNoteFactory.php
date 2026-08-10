@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Modules\MentorSession\Database\Factories;
 
-use App\Models\MentorSessionNote;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\MentorSession\Models\MentorSessionNote;
+use Override;
 
 /**
  * @extends Factory<MentorSessionNote>
  */
 class MentorSessionNoteFactory extends Factory
 {
+    #[Override]
+    protected $model = MentorSessionNote::class;
+
     /**
      * Define the model's default state.
      *

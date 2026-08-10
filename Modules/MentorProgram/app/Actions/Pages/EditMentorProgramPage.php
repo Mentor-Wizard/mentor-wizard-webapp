@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\MentorProgram\Actions\Pages;
 
-use App\Enums\MentorSessionDurationOptionsEnum;
-use App\Enums\MentorSessionTypeEnum;
 use App\Models\Currency;
 use Exception;
 use Inertia\Inertia;
 use Inertia\Response;
 use Lorisleiva\Actions\Concerns\AsController;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionDurationOptionsEnum;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 
 class EditMentorProgramPage
 {

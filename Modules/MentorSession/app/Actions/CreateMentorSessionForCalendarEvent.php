@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Calendar\CalendarEvent;
+namespace Modules\MentorSession\Actions;
 
-use App\Models\MentorSession;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorSession\Models\MentorSession;
 
 class CreateMentorSessionForCalendarEvent
 {

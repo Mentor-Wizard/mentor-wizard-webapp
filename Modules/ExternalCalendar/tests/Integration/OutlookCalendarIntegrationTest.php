@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\MentorSessionTypeEnum;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -14,6 +13,7 @@ use Modules\ExternalCalendar\Enums\CalendarSyncStatusEnum;
 use Modules\ExternalCalendar\Models\UserCalendarIntegration;
 use Modules\ExternalCalendar\Services\OutlookExternalCalendarService;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 
 /**
  * Microsoft Outlook / Graph API integration tests.

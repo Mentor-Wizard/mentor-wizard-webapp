@@ -6,5 +6,6 @@
   "MentorProgram": true,
   "Marketplace": true,
   "UserProfile": true,
-  "UserSchedule": true
+  "UserSchedule": true,
+  "MentorSession": true
 }

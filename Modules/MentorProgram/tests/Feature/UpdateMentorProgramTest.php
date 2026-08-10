@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
 use App\Models\Currency;
 use App\Models\User;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\RoleSeeder;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;

@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Enums;
+namespace Modules\MentorSession\Enums;
 
-enum MentorSessionDurationOptionsEnum: int
+enum MentorSessionTypeEnum: string
 {
-    case FIFTEEN_MINUTES = 15;
-    case HALF_HOUR = 30;
-    case FORTY_FIVE_MINUTES = 45;
-    case HOUR = 60;
-    case ONE_AND_HALF_HOURS = 90;
-    case TWO_HOURS = 120;
+    case VIDEO_SESSION = 'Video Session';
+    case VOICE_SESSION = 'Voice Session';
+    case CODE_REVIEW = 'Code Review';
 
     /**
      * @return list<string>
@@ -22,7 +19,7 @@ enum MentorSessionDurationOptionsEnum: int
     }
 
     /**
-     * @return list<int>
+     * @return list<string>
      */
     public static function values(): array
     {

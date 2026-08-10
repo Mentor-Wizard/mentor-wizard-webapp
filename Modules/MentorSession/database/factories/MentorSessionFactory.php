@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Modules\MentorSession\Database\Factories;
 
-use App\Models\MentorSession;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\MentorSession\Models\MentorSession;
 use Override;
 
 /**

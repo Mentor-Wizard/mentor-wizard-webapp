@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Database\Factories;
 
-use App\Enums\MentorSessionTypeEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 
 /**
  * @extends Factory<CalendarEvent>

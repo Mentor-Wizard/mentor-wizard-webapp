@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Actions\CalendarEvent;
 
-use App\Actions\Calendar\CalendarEvent\CreateMentorSessionForCalendarEvent;
 use Illuminate\Http\RedirectResponse;
 use Lorisleiva\Actions\Concerns\AsController;
 use Modules\Calendar\DTO\CalendarEventData;
@@ -12,6 +11,7 @@ use Modules\Calendar\Enums\CalendarEventRoleEnum;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Http\Requests\CalendarEvent\StoreCalendarEventRequest;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorSession\Actions\CreateMentorSessionForCalendarEvent;
 
 class StoreCalendarEvent
 {

@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
 /**
@@ -32,14 +31,6 @@ class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
     use HasFactory;
-
-    /**
-     * @return BelongsTo<MentorSession, $this>
-     */
-    public function mentorSession(): BelongsTo
-    {
-        return $this->belongsTo(MentorSession::class, 'mentor_session_id');
-    }
 
     /**
      * @return array<string, string>

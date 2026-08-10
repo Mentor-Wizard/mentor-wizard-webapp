@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\MentorProgram\Http\Requests;
 
-use App\Enums\MentorSessionDurationOptionsEnum;
-use App\Enums\MentorSessionTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\In;
+use Modules\MentorSession\Enums\MentorSessionDurationOptionsEnum;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 
 class StoreMentorProgramRequest extends FormRequest
 {

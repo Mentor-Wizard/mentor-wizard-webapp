@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Calendar\CalendarEvent\CreateMentorSessionForCalendarEvent;
 use App\Enums\RoleEnum;
-use App\Models\MentorSession;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Date;
@@ -14,6 +12,8 @@ use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Actions\CreateMentorSessionForCalendarEvent;
+use Modules\MentorSession\Models\MentorSession;
 use Spatie\Permission\Models\Role;
 
 mutates(CreateMentorSessionForCalendarEvent::class);

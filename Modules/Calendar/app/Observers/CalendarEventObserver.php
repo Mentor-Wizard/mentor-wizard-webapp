@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Observers;
 
-use App\Actions\Calendar\CalendarEvent\CreateMentorSessionForCalendarEvent;
 use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Events\CalendarEventCancelled;
 use Modules\Calendar\Events\CalendarEventConfirmed;
 use Modules\Calendar\Events\CalendarEventContentChanged;
 use Modules\Calendar\Events\CalendarEventDeleting;
 use Modules\Calendar\Models\CalendarEvent;
+use Modules\MentorSession\Actions\CreateMentorSessionForCalendarEvent;
 
 class CalendarEventObserver
 {

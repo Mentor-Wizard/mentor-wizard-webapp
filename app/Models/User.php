@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -36,6 +35,8 @@ use Modules\Marketplace\Traits\HasMentorProfile;
 use Modules\MentorProgram\Models\MentorProgram;
 use Modules\MentorProgram\Models\MentorProgramBlockProgress;
 use Modules\MentorProgram\Traits\HasMentorPrograms;
+use Modules\MentorSession\Models\MentorSession;
+use Modules\MentorSession\Traits\HasMentorSessions;
 use Modules\UserProfile\Models\UserProfile;
 use Modules\UserProfile\Traits\HasUserProfile;
 use Modules\UserSchedule\Models\UserSchedule;
@@ -157,6 +158,7 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
 
     use HasMentorProfile;
     use HasMentorPrograms;
+    use HasMentorSessions;
     use HasRoles;
     use HasUserProfile;
     use HasUserSchedules;
@@ -181,22 +183,6 @@ class User extends Authenticatable implements HasMedia, HasName, MustVerifyEmail
         RoleGuardEnum::MENTI->value,
         RoleGuardEnum::COACH->value,
     ];
-
-    /**
-     * @return HasMany<MentorSession, $this>
-     */
-    public function mentorSessions(): HasMany
-    {
-        return $this->hasMany(MentorSession::class, 'mentor_id');
-    }
-
-    /**
-     * @return HasMany<MentorSession, $this>
-     */
-    public function mentiSessions(): HasMany
-    {
-        return $this->hasMany(MentorSession::class, 'menti_id');
-    }
 
     /**
      * @return BelongsToMany<Chat, $this>

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\Traits;
 
-use App\Enums\MentorSessionDurationOptionsEnum;
-use App\Enums\MentorSessionTypeEnum;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\In;
 use Modules\Calendar\Enums\CalendarEventColoursEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
+use Modules\MentorSession\Enums\MentorSessionDurationOptionsEnum;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 use Override;
 
 trait CalendarEventRequestRules

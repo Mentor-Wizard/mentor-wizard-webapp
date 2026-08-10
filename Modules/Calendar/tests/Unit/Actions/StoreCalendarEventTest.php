@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MentorSessionTypeEnum;
 use App\Enums\RoleEnum;
-use App\Models\MentorSession;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +19,8 @@ use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Http\Requests\CalendarEvent\StoreCalendarEventRequest;
 use Modules\Calendar\Models\CalendarEvent;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
+use Modules\MentorSession\Models\MentorSession;
 use Spatie\Permission\Models\Role;
 
 mutates(StoreCalendarEvent::class);

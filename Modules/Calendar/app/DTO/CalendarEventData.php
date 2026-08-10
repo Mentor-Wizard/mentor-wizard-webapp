@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Calendar\DTO;
 
-use App\Enums\MentorSessionTypeEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
@@ -12,6 +11,7 @@ use Modules\Calendar\Enums\CalendarEventStatusEnum;
 use Modules\Calendar\Enums\CalendarEventTypeEnum;
 use Modules\Calendar\Http\Requests\CalendarEvent\StoreCalendarEventRequest;
 use Modules\MentorProgram\Models\MentorProgram;
+use Modules\MentorSession\Enums\MentorSessionTypeEnum;
 
 readonly class CalendarEventData
 {
